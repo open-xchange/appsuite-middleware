@@ -69,7 +69,6 @@ public abstract class AbstractRequest {
     private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
     private Session session;
-
     private Parameters parameters;
 
     /**
@@ -94,7 +93,7 @@ public abstract class AbstractRequest {
     /**
      * @param body the body to set
      */
-    public void setBody(final String body) {
+    public void setBody(String body) {
         this.body = body;
     }
 
@@ -108,7 +107,7 @@ public abstract class AbstractRequest {
     /**
      * @param parameters the parameters to set
      */
-    public void setParameters(final Parameters parameters) {
+    public void setParameters(Parameters parameters) {
         this.parameters = parameters;
     }
 
@@ -122,7 +121,7 @@ public abstract class AbstractRequest {
     /**
      * @param session the session to set
      */
-    public void setSession(final Session session) {
+    public void setSession(Session session) {
         this.session = session;
     }
 
@@ -130,25 +129,24 @@ public abstract class AbstractRequest {
      * Returns the {@link Credentials} for the user
      * 
      * @return the {@link Credentials} for the user
-     * @throws OXException if an error is occurred
      */
-    public Credentials getCredentials() throws OXException {
+    public Credentials getCredentials() {
         LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
 
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
 
-        final String credentialSource = config.getProperty(userId, contextId, MailFilterProperty.credentialSource);
-        final String loginName = CredentialSource.SESSION_FULL_LOGIN.name.equals(credentialSource) ? session.getLogin() : session.getLoginName();
-        final String password = session.getPassword();
+        String credentialSource = config.getProperty(userId, contextId, MailFilterProperty.credentialSource);
+        String loginName = CredentialSource.SESSION_FULL_LOGIN.name.equals(credentialSource) ? session.getLogin() : session.getLoginName();
+        String password = session.getPassword();
 
-        final Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
-        final String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
+        Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
+        String oauthToken = (String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
 
         try {
-            final String username = getUsername();
+            String username = getUsername();
             return new Credentials(loginName, password, userId, contextId, username, subject, oauthToken);
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             return new Credentials(loginName, password, userId, contextId, null, subject, oauthToken);
         }
     }
@@ -158,15 +156,15 @@ public abstract class AbstractRequest {
      * @throws OXException
      */
     public Action getAction() throws OXException {
-        final Parameter action = Parameter.ACTION;
+        Parameter action = Parameter.ACTION;
         if (null == parameters) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(action.getName());
         }
-        final String value = parameters.getParameter(Parameter.ACTION);
+        String value = parameters.getParameter(Parameter.ACTION);
         if (null == value) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(action.getName());
         }
-        final Action retval = Action.byName(value);
+        Action retval = Action.byName(value);
         if (null == retval) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(value);
         }
@@ -174,8 +172,8 @@ public abstract class AbstractRequest {
     }
 
     private String getUsername() throws OXException {
-        final Parameter pUsername = Parameter.USERNAME;
-        final String username = parameters.getParameter(pUsername);
+        Parameter pUsername = Parameter.USERNAME;
+        String username = parameters.getParameter(pUsername);
         if (username == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(pUsername);
         }

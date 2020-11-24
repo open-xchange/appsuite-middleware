@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.json.actions.AnalyzeAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.BackwardLinkAction;
 import com.openexchange.share.json.actions.GetLinkAction;
 import com.openexchange.share.json.actions.ResubscribeShareAction;
 import com.openexchange.share.json.actions.SendLinkAction;
@@ -93,7 +92,6 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
         actions.put("subscribe", new SubscribeShareAction(services));
         actions.put("unsubscribe", new UnsubscribeShareAction(services));
         actions.put("resubscribe", new ResubscribeShareAction(services));
-        actions.put("backwardLink", new BackwardLinkAction(services));
     }
 
     @Override

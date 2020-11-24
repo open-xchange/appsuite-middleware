@@ -55,7 +55,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -90,7 +90,7 @@ public class FindBasicActivator extends HousekeepingActivator {
     //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
+        return new Class<?>[] { IDBasedContactsAccessFactory.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             ThreadPoolService.class, IDBasedFolderAccessFactory.class, ConfigurationService.class,
             InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class,

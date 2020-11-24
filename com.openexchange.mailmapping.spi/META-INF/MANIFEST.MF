@@ -20,3 +20,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.mailmapping.spi
+Automatic-Module-Name: com.openexchange.mailmapping.spi

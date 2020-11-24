@@ -50,7 +50,6 @@
 package com.openexchange.share.impl.subscription;
 
 import java.util.Iterator;
-import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,15 +129,6 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
             if (iterator.next().unsubscribe(session, shareLink)) {
                 return;
             }
-        }
-        throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
-    }
-
-    @Override
-    public String getBackwardLink(Session session, String shareLink, String folder, String item, Map<String, String> additionals) throws OXException {
-        ShareSubscriptionProvider provider = getProvider(session, shareLink);
-        if (null != provider) {
-            return provider.getBackwardLink(session, shareLink, folder, item, additionals);
         }
         throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
     }

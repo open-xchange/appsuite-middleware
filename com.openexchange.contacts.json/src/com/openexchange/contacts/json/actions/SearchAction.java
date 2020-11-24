@@ -49,26 +49,27 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.ContactsSearchObject;
+import com.openexchange.groupware.search.ContactsSearchObject.Range;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-
 
 /**
  * {@link SearchAction}
@@ -77,12 +78,15 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class SearchAction extends ContactAction {
+public class SearchAction extends IDBasedContactAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
 
     private static final String EXCLUDE_FOLDERS_FIELD = "exclude_folders";
 
     /**
      * Initializes a new {@link SearchAction}.
+     * 
      * @param serviceLookup
      */
     public SearchAction(ServiceLookup serviceLookup) {
@@ -90,46 +94,44 @@ public class SearchAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-    	JSONObject jsonObject = request.getJSONData();
-        ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), contactSearch, fields, request.getSortOptions(true)), excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        } else if (excludeAdmin) {
-            int limit = request.getLimit();
-            if (limit >= 0 && contacts.size() > limit) {
-                contacts = contacts.subList(0, limit);
-            }
-        }
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        JSONObject jsonObject = request.getJSONData();
+        List<Contact> contacts = access.searchContacts(createContactsSearchObject(jsonObject));
+        return new AJAXRequestResult(sortIfNeeded(request, contacts), getLatestTimestamp(contacts), "contact");
     }
 
-    private static ContactSearchObject createContactSearchObject(JSONObject json) throws OXException {
-        ContactSearchObject searchObject = null;
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    /**
+     * Creates a {@link ContactSearchObject} based on the specifed json
+     *
+     * @param json The json object
+     * @return The {@link ContactSearchObject}
+     */
+    @SuppressWarnings("deprecation")
+    private static ContactsSearchObject createContactsSearchObject(JSONObject json) throws OXException {
+        ContactsSearchObject searchObject = null;
         try {
-            searchObject = new ContactSearchObject();
+            searchObject = new ContactsSearchObject();
             if (json.has("folder")) {
                 if (json.get("folder").getClass().equals(JSONArray.class)) {
-                    for (int folder : DataParser.parseJSONIntArray(json, "folder")) {
+                    for (String folder : DataParser.parseJSONStringArray(json, "folder")) {
                         searchObject.addFolder(folder);
                     }
                 } else {
-                    searchObject.addFolder(DataParser.parseInt(json, "folder"));
+                    searchObject.addFolder(DataParser.parseString(json, "folder"));
                 }
             }
             if (json.has(EXCLUDE_FOLDERS_FIELD)) {
                 if (json.get(EXCLUDE_FOLDERS_FIELD).getClass().equals(JSONArray.class)) {
-                    for (int folder : DataParser.parseJSONIntArray(json, EXCLUDE_FOLDERS_FIELD)) {
+                    for (String folder : DataParser.parseJSONStringArray(json, EXCLUDE_FOLDERS_FIELD)) {
                         searchObject.addExcludeFolder(folder);
                     }
                 } else {
-                    searchObject.addExcludeFolder(DataParser.parseInt(json, EXCLUDE_FOLDERS_FIELD));
+                    searchObject.addExcludeFolder(DataParser.parseString(json, EXCLUDE_FOLDERS_FIELD));
                 }
             }
             if (json.has(SearchFields.PATTERN)) {
@@ -160,16 +162,15 @@ public class SearchAction extends ContactAction {
             searchObject.setCityBusiness(DataParser.parseString(json, ContactFields.CITY_BUSINESS));
             searchObject.setDynamicSearchField(DataParser.parseJSONIntArray(json, "dynamicsearchfield"));
             searchObject.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(json, "dynamicsearchfieldvalue"));
-            searchObject.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(json, "privatepostalcoderange"));
-            searchObject.setBusinessPostalCodeRange(DataParser.parseJSONStringArray(json, "businesspostalcoderange"));
-            searchObject.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(json, "privatepostalcoderange"));
-            searchObject.setOtherPostalCodeRange(DataParser.parseJSONStringArray(json, "otherpostalcoderange"));
-            searchObject.setBirthdayRange(DataParser.parseJSONDateArray(json, "birthdayrange"));
-            searchObject.setAnniversaryRange(DataParser.parseJSONDateArray(json, "anniversaryrange"));
-            searchObject.setNumberOfEmployeesRange(DataParser.parseJSONStringArray(json, "numberofemployee"));
-            searchObject.setSalesVolumeRange(DataParser.parseJSONStringArray(json, "salesvolumerange"));
-            searchObject.setCreationDateRange(DataParser.parseJSONDateArray(json, "creationdaterange"));
-            searchObject.setLastModifiedRange(DataParser.parseJSONDateArray(json, "lastmodifiedrange"));
+            searchObject.setRange(Range.PRIVATE_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "privatepostalcoderange"));
+            searchObject.setRange(Range.BUSINESS_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "businesspostalcoderange"));
+            searchObject.setRange(Range.OTHER_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "otherpostalcoderange"));
+            searchObject.setRange(Range.BIRTHDAY_RANGE, DataParser.parseJSONDateArray(json, "birthdayrange"));
+            searchObject.setRange(Range.ANNIVERSARY_RANGE, DataParser.parseJSONDateArray(json, "anniversaryrange"));
+            searchObject.setRange(Range.NUMBER_OF_EMPLOYEE_RANGE, DataParser.parseJSONStringArray(json, "numberofemployee"));
+            searchObject.setRange(Range.SALES_VOLUME_RANGE, DataParser.parseJSONStringArray(json, "salesvolumerange"));
+            searchObject.setRange(Range.CREATION_DATE_RANGE, DataParser.parseJSONDateArray(json, "creationdaterange"));
+            searchObject.setRange(Range.LAST_MODIFIED_RANGE, DataParser.parseJSONDateArray(json, "lastmodifiedrange"));
             searchObject.setCatgories(DataParser.parseString(json, "categories"));
             searchObject.setSubfolderSearch(DataParser.parseBoolean(json, "subfoldersearch"));
             searchObject.setYomiCompany(DataParser.parseString(json, ContactFields.YOMI_COMPANY));

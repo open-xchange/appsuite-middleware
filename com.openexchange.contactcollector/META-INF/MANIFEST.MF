@@ -13,3 +13,4 @@ Import-Package: com.openexchange.exception,
  javax.mail.internet.idn,
  javax.mail.util
 Export-Package: com.openexchange.contactcollector
+Automatic-Module-Name: com.openexchange.contactcollector

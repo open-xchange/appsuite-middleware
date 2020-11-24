@@ -52,7 +52,6 @@ package com.openexchange.file.storage;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.java.Functions.OXFunction;
 import com.openexchange.session.Session;
 
 /**
@@ -65,11 +64,10 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class ErrorStateFolderAccess implements FileStorageFolderAccess {
+public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     private final OXException error;
-    private final OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction;
-    private final OXFunction<String, FileStorageFolder[],OXException> getSubFolderFunction;
+    //private final OXFunction<String, FileStorageFolder[],OXException> getSubFolderFunction;
 
     /**
      * {@link FileStorageFolderStub} represents a folder which is defective and will not be cached
@@ -111,14 +109,28 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
      * @param getFolderFunction A function which will be used to retrieve the last known folder, when loaded
      */
     //@formatter:off
-    public ErrorStateFolderAccess(OXException error,
-        OXFunction<String, FileStorageFolderStub, OXException> getFolderFunction,
-        OXFunction<String, FileStorageFolder[], OXException> getSubFolderFunction) {
+    public ErrorStateFolderAccess(OXException error) {
         this.error = Objects.requireNonNull(error, "error must not be null");
-        this.getFolderFunction = Objects.requireNonNull(getFolderFunction, "getFolderFunction must not be null");
-        this.getSubFolderFunction = Objects.requireNonNull(getSubFolderFunction, "getSubFolderFunction must not be null");
     }
     //@formatter:on
+
+    /**
+     * Gets the last known folder with the given folder ID
+     *
+     * @param folderId The ID of the folder to get
+     * @return The folder with the given ID, or null if no such folder was found
+     * @throws OXException
+     */
+    public abstract FileStorageFolderStub getLastKnownFolder(String folderId) throws OXException;
+
+    /**
+     * Gets the last known sub-folders for the given parent folder ID
+     *
+     * @param folderId The ID of the folder to get the last sub-folders for
+     * @return The last known subfolders for the given ID
+     * @throws OXException
+     */
+    public abstract FileStorageFolderStub[] getLastKnownSubFolders(String folderId) throws OXException;
 
     @Override
     public boolean exists(String folderId) throws OXException {
@@ -127,7 +139,7 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
-        FileStorageFolderStub lastKnownFolder = this.getFolderFunction.apply(folderId);
+        FileStorageFolderStub lastKnownFolder = getLastKnownFolder(folderId);
         if (lastKnownFolder == null) {
             throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
         }
@@ -154,8 +166,7 @@ public class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        FileStorageFolder[] storedSubFolders = getSubFolderFunction.apply(parentIdentifier);
-        return storedSubFolders;
+        return getLastKnownSubFolders(parentIdentifier);
     }
 
     @Override

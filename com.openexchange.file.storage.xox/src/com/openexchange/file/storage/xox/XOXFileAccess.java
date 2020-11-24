@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.xox;
 
+import static com.openexchange.file.storage.xox.XOXStorageConstants.SHARE_URL;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
+import com.openexchange.file.storage.FileStorageBackwardLinkAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -82,9 +84,14 @@ import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Strings;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.subscription.SubscribedHelper;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.tools.iterator.RangeAwareSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -108,6 +115,7 @@ public class XOXFileAccess implements /*@formatter:off*/
                                        FileStoragePersistentIDs,
                                        FileStorageExtendedMetadata,
                                        FileStorageRangeFileAccess,
+                                       FileStorageBackwardLinkAccess,
                                        FileStorageAdvancedSearchFileAccess {
                                        /*@formatter:on*/
 
@@ -480,6 +488,18 @@ public class XOXFileAccess implements /*@formatter:off*/
     @Override
     public List<Field> getSupportedFields() {
         return Arrays.asList(File.Field.values()); // all supported
+    }
+
+    @Override
+    public String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException {
+        String shareUrl = (String) accountAccess.getAccount().getConfiguration().get(SHARE_URL);
+        if (Strings.isEmpty(shareUrl)) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(SHARE_URL, accountAccess.getAccount().getId());
+        }
+        HostData hostData = ShareLinks.extractHostData(shareUrl);
+        String guestToken = ShareLinks.extractBaseToken(shareUrl);
+        ShareTargetPath targetPath = new ShareTargetPath(Module.INFOSTORE.getFolderConstant(), folderId, id, additionals);
+        return ShareLinks.generateExternal(hostData, guestToken, targetPath);
     }
 
 }

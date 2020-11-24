@@ -86,7 +86,7 @@ import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
@@ -191,7 +191,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /** The PIM content types */
-    protected static final Set<String> PIM_CONTENT_TYPES = ImmutableSet.of(CalendarContentType.getInstance().toString(), ContactContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString());
+    protected static final Set<String> PIM_CONTENT_TYPES = ImmutableSet.of(CalendarContentType.getInstance().toString(), ContactsContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString());
 
     /**
      * Checks if denoted folder is a public PIM folder
@@ -220,7 +220,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected static final Set<String> PARENTHESIS_CAPABLE = ImmutableSet.of(
         CalendarContentType.getInstance().toString(),
         TaskContentType.getInstance().toString(),
-        ContactContentType.getInstance().toString(),
+        ContactsContentType.getInstance().toString(),
         InfostoreContentType.getInstance().toString(),
         FileStorageContentType.getInstance().toString());
 
@@ -845,7 +845,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     private static boolean isReadOnlySharing(Folder folder) {
         ContentType contentType = folder.getContentType();
-        return TaskContentType.getInstance().equals(contentType) || ContactContentType.getInstance().equals(contentType);
+        return TaskContentType.getInstance().equals(contentType) || ContactsContentType.getInstance().equals(contentType);
     }
 
     /**

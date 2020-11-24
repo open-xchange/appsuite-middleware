@@ -70,8 +70,8 @@ public class UpdateTest extends VCardTest {
         super();
     }
 
-         @Test
-     public void testSetPropertyInContact() throws Exception {
+    @Test
+    public void testSetPropertyInContact() {
         for (int field : getMappedStringFields()) {
             /*
              * export original, empty contact as vCard
@@ -98,8 +98,8 @@ public class UpdateTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testUpdatePropertyInContact() throws Exception {
+    @Test
+    public void testUpdatePropertyInContact() {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -128,8 +128,8 @@ public class UpdateTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testUpdatePropertyInVCard() throws Exception {
+    @Test
+    public void testUpdatePropertyInVCard() {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -158,8 +158,8 @@ public class UpdateTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testRemovePropertyInContact() throws Exception {
+    @Test
+    public void testRemovePropertyInContact() {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard
@@ -187,8 +187,8 @@ public class UpdateTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testRemovePropertyInVCard() throws Exception {
+    @Test
+    public void testRemovePropertyInVCard() {
         for (int field : getMappedStringFields()) {
             /*
              * export original contact as vCard

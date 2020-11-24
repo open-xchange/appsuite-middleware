@@ -73,8 +73,8 @@ public class MaxSizeTest extends VCardTest {
         super();
     }
 
-         @Test
-     public void testImportTooLargeVCard() throws Exception {
+    @Test
+    public void testImportTooLargeVCard() {
         String vCardString =
             "BEGIN:VCARD\r\n" +
             "VERSION:3.0\r\n" +

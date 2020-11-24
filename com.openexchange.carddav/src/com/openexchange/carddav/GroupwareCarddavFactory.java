@@ -75,7 +75,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -310,7 +310,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         public UserizedFolder getDefaultFolder() throws OXException {
             if (null == defaultFolder) {
                 defaultFolder = factory.getFolderService().getDefaultFolder(
-                    factory.getUser(), getTreeID(), ContactContentType.getInstance(), factory.getSession(), null);
+                    factory.getUser(), getTreeID(), ContactsContentType.getInstance(), factory.getSession(), null);
             }
             return defaultFolder;
         }
@@ -382,7 +382,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         private List<UserizedFolder> getVisibleFolders(Type type) throws OXException {
             List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
             FolderService folderService = factory.getFolderService();
-            FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true, this.factory.getSession(), null);
+            FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactsContentType.getInstance(), type, true, this.factory.getSession(), null);
             UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (UserizedFolder folder : response) {
                 if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() &&
@@ -404,11 +404,11 @@ public class GroupwareCarddavFactory extends DAVFactory {
         public List<UserizedFolder> getDeletedFolders(Date since) throws OXException {
             List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
             FolderService folderService = factory.getFolderService();
-            FolderResponse<UserizedFolder[][]> updatedFoldersResponse = folderService.getUpdates(FolderStorage.REAL_TREE_ID, since, false, new ContentType[] { ContactContentType.getInstance() }, this.factory.getSession(), null);
+            FolderResponse<UserizedFolder[][]> updatedFoldersResponse = folderService.getUpdates(FolderStorage.REAL_TREE_ID, since, false, new ContentType[] { ContactsContentType.getInstance() }, this.factory.getSession(), null);
             UserizedFolder[][] response = updatedFoldersResponse.getResponse();
             if (2 <= response.length && null != response[1] && 0 < response[1].length) {
                 for (UserizedFolder folder : response[1]) {
-                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType()) && folder.getUsedForSync().isUsedForSync()) {
+                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder) && ContactsContentType.getInstance().equals(folder.getContentType()) && folder.getUsedForSync().isUsedForSync()) {
                         folders.add(folder);
                     }
                 }

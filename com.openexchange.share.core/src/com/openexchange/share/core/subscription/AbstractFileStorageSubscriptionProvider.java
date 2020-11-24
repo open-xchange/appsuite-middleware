@@ -73,19 +73,15 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.SharingFileStorageService;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
-import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
@@ -127,19 +123,6 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         super();
         this.fileStorageService = Objects.requireNonNull(fileStorageService);
         this.userPermissionService = Objects.requireNonNull(userPermissionService);
-    }
-
-    @Override
-    public String getBackwardLink(Session session, String shareLink, String folder, String item, Map<String, String> additionals) throws OXException {
-        requireAccess(session);
-        if (Strings.isEmpty(shareLink)) {
-            ShareSubscriptionExceptions.MISSING_LINK.create(shareLink);
-        }
-        FileStorageAccount storageAccount = getStorageAccount(session, shareLink);
-        if (null == storageAccount) {
-            throw ShareSubscriptionExceptions.MISSING_SUBSCRIPTION.create(shareLink);
-        }
-        return getDeepLink(storageAccount, folder, item, additionals);
     }
 
     @Override
@@ -663,20 +646,6 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             }
         }
         return null;
-    }
-
-    private String getDeepLink(FileStorageAccount account, String folder, String item, Map<String, String> additionals) throws OXException {
-        //TODO: cross-check folder belongs to account?
-        String shareUrl = (String) account.getConfiguration().get(URL);
-        HostData hostData = ShareLinks.extractHostData(shareUrl);
-        String guestToken = ShareLinks.extractBaseToken(shareUrl);
-        ShareTargetPath targetPath = new ShareTargetPath(
-            Module.INFOSTORE.getFolderConstant(),
-            null != folder ? new FolderID(folder).getFolderId() : null,
-            null != item ? new FileID(item).getFileId() : null,
-            additionals
-        );
-        return ShareLinks.generateExternal(hostData, guestToken, targetPath);
     }
 
 }

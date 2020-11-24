@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -65,8 +64,6 @@ import com.google.common.cache.RemovalNotification;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
-import com.openexchange.mail.compose.CompositionSpaceService;
-import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -88,22 +85,15 @@ public class AssociationStorage implements IAssociationStorage {
      * Initializes a new {@link AssociationStorage}.
      *
      * @param maxIdleSeconds The max. idle seconds
-     * @param compositionSpaceServiceFactoryReference The reference to composition space service factory
      */
-    public AssociationStorage(long maxIdleSeconds, AtomicReference<CompositionSpaceServiceFactory> compositionSpaceServiceFactoryReference) {
+    public AssociationStorage(long maxIdleSeconds) {
         super();
         associations = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofSeconds(maxIdleSeconds))
             .removalListener((RemovalNotification<UUID, CompositionSpaceToDraftAssociation> notification) -> {
                 if (notification.wasEvicted()) {
-                    CompositionSpaceServiceFactory compositionSpaceServiceFactory = compositionSpaceServiceFactoryReference.get();
-                    if (compositionSpaceServiceFactory == null) {
-                        LoggerHolder.LOG.error("Could not save draft because of absent CompositionSpaceServiceFactory on eviction of space {}", notification.getKey());
-                        return;
-                    }
-
                     CompositionSpaceToDraftAssociation association = notification.getValue();
-                    handleEvictedAssociation(association, compositionSpaceServiceFactory);
+                    handleEvictedAssociation(association);
                 }
             })
             .build();
@@ -113,17 +103,8 @@ public class AssociationStorage implements IAssociationStorage {
      * Handles an evicted association by saving linked composition space as draft mail and cleaning up the cache file behind it.
      *
      * @param association The association that is about being evicted
-     * @param compositionSpaceServiceFactory The factory to use
      */
-    static void handleEvictedAssociation(CompositionSpaceToDraftAssociation association, CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
-        try {
-            CompositionSpaceService compositionSpaceService = compositionSpaceServiceFactory.createServiceFor(association.getSession());
-            compositionSpaceService.saveCompositionSpaceToDraftMail(association.getCompositionSpaceId(), Optional.empty(), false);
-            LoggerHolder.LOG.debug("Saved draft for evicted composition space association: {}", UUIDs.getUnformattedString(association.getCompositionSpaceId()));
-        } catch (Exception e) {
-            LoggerHolder.LOG.error("Error while saving draft on eviction of composition space asociation: {}", UUIDs.getUnformattedString(association.getCompositionSpaceId()), e);
-        }
-
+    static void handleEvictedAssociation(CompositionSpaceToDraftAssociation association) {
         association.getFileCacheReference().ifPresent(r -> {
             if (r.isValid()) {
                 r.cleanUp();
@@ -139,9 +120,9 @@ public class AssociationStorage implements IAssociationStorage {
      *
      * @param compositionSpaceServiceFactory The composition space service factory to use
      */
-    public void signalEviction(CompositionSpaceServiceFactory compositionSpaceServiceFactory) {
+    public void signalEviction() {
         for (CompositionSpaceToDraftAssociation association : associations.asMap().values()) {
-            handleEvictedAssociation(association, compositionSpaceServiceFactory);
+            handleEvictedAssociation(association);
         }
         associations.invalidateAll();
     }

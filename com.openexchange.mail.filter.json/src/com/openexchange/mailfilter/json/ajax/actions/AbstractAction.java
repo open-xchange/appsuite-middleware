@@ -57,8 +57,12 @@ import com.openexchange.mailfilter.json.ajax.Action;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- *
+ * {@link AbstractAction} - The abstract action for all mail filter actions
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @param <T> Response type
+ * @param <U> Request type
  */
 public abstract class AbstractAction<T, U extends AbstractRequest> {
 
@@ -69,83 +73,134 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
         super();
     }
 
-    public Object action(final U request) throws OXException {
-        Object retval;
+    /**
+     * Performs the action
+     *
+     * @param request The request
+     * @return The response
+     * @throws OXException if an error is occurred
+     */
+    public Object action(U request) throws OXException {
         switch (request.getAction()) {
             case CONFIG:
-                retval = actionConfig(request);
-                break;
+                return actionConfig(request);
             case NEW:
-                retval = Integer.valueOf(actionNew(request));
-                break;
+                return Integer.valueOf(actionNew(request));
             case REORDER:
                 actionReorder(request);
-                retval = JSONObject.NULL;
-                break;
+                return JSONObject.NULL;
             case UPDATE:
                 actionUpdate(request);
-                retval = JSONObject.NULL;
-                break;
+                return JSONObject.NULL;
             case DELETE:
                 actionDelete(request);
-                retval = JSONObject.NULL;
-                break;
+                return JSONObject.NULL;
             case LIST:
-                retval = actionList(request);
-                break;
+                return actionList(request);
             case DELETESCRIPT:
                 actionDeleteScript(request);
-                retval = JSONObject.NULL;
-                break;
+                return JSONObject.NULL;
             case GETSCRIPT:
-                retval = actionGetScript(request);
-                break;
+                return actionGetScript(request);
             default:
                 throw MailFilterExceptionCode.PROBLEM.create("Unimplemented action.");
         }
-        return retval;
     }
 
-    protected JSONArray createAllArray(final int[] ids) {
-        final JSONArray array = new JSONArray();
-        for (final int id : ids) {
-            final JSONArray user = new JSONArray();
+    /**
+     * Creates a {@link JSONArray} with the specified ids
+     *
+     * @param ids The ids
+     * @return The {@link JSONArray}
+     */
+    protected JSONArray createAllArray(int[] ids) {
+        JSONArray array = new JSONArray();
+        for (int id : ids) {
+            JSONArray user = new JSONArray();
             user.put(id);
             array.put(user);
         }
         return array;
     }
 
-    protected JSONObject actionConfig(final U request) throws OXException {
+    /**
+     * Performs the {@link Action#CONFIG}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected JSONObject actionConfig(U request) throws OXException {
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.CONFIG.getAjaxName());
     }
 
-    protected int actionNew(final U request) throws OXException {
+    /**
+     * Performs the {@link Action#NEW}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected int actionNew(U request) throws OXException {
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.NEW.getAjaxName());
     }
 
-    protected void actionReorder(final U request) throws OXException {
-        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.NEW.getAjaxName());
+    /**
+     * Performs the {@link Action#NEW}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected void actionReorder(U request) throws OXException {
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.REORDER.getAjaxName());
     }
 
-    protected void actionUpdate(final U request) throws OXException {
+    /**
+     * Performs the {@link Action#UPDATE}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected void actionUpdate(U request) throws OXException {
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.UPDATE.getAjaxName());
     }
 
-    protected void actionDelete(final U request) throws OXException {
+    /**
+     * Performs the {@link Action#DELETE}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected void actionDelete(U request) throws OXException {
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.DELETE.getAjaxName());
     }
 
-    protected JSONArray actionList(final U request) throws OXException {
+    /**
+     * Performs the {@link Action#LIST}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected JSONArray actionList(U request) throws OXException {
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.LIST.getAjaxName());
     }
 
-    protected void actionDeleteScript(final U request) throws OXException {
-        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.NEW.getAjaxName());
+    /**
+     * Performs the {@link Action#DELETESCRIPT}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected void actionDeleteScript(U request) throws OXException {
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.DELETESCRIPT.getAjaxName());
     }
 
-    protected String actionGetScript(final U request) throws OXException {
-        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.NEW.getAjaxName());
+    /**
+     * Performs the {@link Action#GETSCRIPT}
+     * 
+     * @param request The request
+     * @return The response as {@link JSONObject}
+     */
+    protected String actionGetScript(U request) throws OXException {
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(Action.GETSCRIPT.getAjaxName());
     }
 
 }

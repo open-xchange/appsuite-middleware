@@ -90,6 +90,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
+import com.openexchange.file.storage.FileStorageBackwardLinkAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageConstants;
 import com.openexchange.file.storage.FileStorageETagProvider;
@@ -1816,6 +1817,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
 
         return result;
+    }
+
+    @Override
+    public String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        FileID fileID = null != id ? new FileID(id) : null;
+        FileStorageBackwardLinkAccess fileAccess = getFileAccess(folderID, FileStorageBackwardLinkAccess.class);
+        return fileAccess.getBackwardLink(folderID.getFolderId(), null != fileID ? fileID.getFileId() : null, additionals);
     }
 
     /**

@@ -41,3 +41,4 @@ Export-Package: com.googlecode.ipv6,
 Bundle-ClassPath: lib/java-ipv6-0.17-SNAPSHOT.jar,
  .
 Bundle-Activator: com.openexchange.net.osgi.NetSSLActivator
+Automatic-Module-Name: com.openexchange.net

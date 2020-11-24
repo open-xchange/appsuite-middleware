@@ -47,22 +47,18 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.subscription.ShareSubscriptionRegistry;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BackwardLinkAction}
@@ -70,36 +66,36 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class BackwardLinkAction implements AJAXActionService {
-
-    private final ServiceLookup services;
+public class BackwardLinkAction extends AbstractFileAction {
 
     /**
      * Initializes a new {@link BackwardLinkAction}.
-     * 
-     * @param services The service lookup
      */
-    public BackwardLinkAction(ServiceLookup services) {
+    public BackwardLinkAction() {
         super();
-        this.services = services;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        boolean redirect = AJAXRequestDataTools.parseBoolParameter(request.getParameter("redirect"));
+    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
+        boolean redirect = request.getBoolParameter("redirect");
         try {
             /*
              * parse parameters & generate backward link
              */
-            String link = request.checkParameter(AbstractShareSubscriptionAction.LINK);
-            String folder = request.checkParameter("folder");
-            String item = request.getParameter("item");
-            String backwardLink = services.getServiceSafe(ShareSubscriptionRegistry.class).getBackwardLink(session, link, folder, item, null);
+            String folderId = request.getParameter(Param.FOLDER_ID.getName());
+            if (Strings.isEmpty(folderId)) {
+                throw FileStorageExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
+            }
+            String id = request.getParameter(Param.ID.getName());
+            String backwardLink = request.getFileAccess().getBackwardLink(folderId, id, null);
             /*
              * send redirect if requested & possible, otherwise return as api response
              */
             if (redirect) {
-                HttpServletResponse response = request.optHttpServletResponse();
+                if (null == request.getRequestData()) {
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Missing request data");
+                }
+                HttpServletResponse response = request.getRequestData().optHttpServletResponse();
                 try {
                     response.sendRedirect(backwardLink);
                     return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
@@ -110,11 +106,11 @@ public class BackwardLinkAction implements AJAXActionService {
             return new AJAXRequestResult(new JSONObject().putSafe("link", backwardLink), "json");
         } catch (OXException e) {
             if (redirect) {
-                HttpServletResponse response = request.optHttpServletResponse();
+                HttpServletResponse response = null != request.getRequestData() ? request.getRequestData().optHttpServletResponse() : null;
                 if (null != response) {
                     try {
                         Tools.sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
                     } catch (IOException i) {
                         throw AjaxExceptionCodes.IO_ERROR.create(i, i.getMessage());
                     }

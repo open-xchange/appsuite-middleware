@@ -49,6 +49,7 @@
 
 package com.openexchange.api.client.common.calls.folders;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -57,7 +58,9 @@ import java.util.Date;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class ExtendedPermission {
+public class ExtendedPermission implements Serializable {
+
+    private static final long serialVersionUID = -6991115627739795275L;
 
     private String identifier;
     private int entity;
@@ -163,7 +166,9 @@ public class ExtendedPermission {
         this.password = password;
     }
 
-    public static class Contact {
+    public static class Contact implements Serializable {
+
+        private static final long serialVersionUID = 680303197858905082L;
 
         private String email1;
         private String lastName;

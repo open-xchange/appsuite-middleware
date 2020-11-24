@@ -44,15 +44,17 @@ public class Common {
             simConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPassword);
         }
 
-        final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2, 0.9f, 1);
+        final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<>(2, 0.9f, 1);
         services.put(LeanConfigurationService.class, simMailFilterConfigurationService);
         Services.setServiceLookup(new ServiceLookup() {
 
+            @SuppressWarnings("unchecked")
             @Override
             public <S> S getService(Class<? extends S> clazz) {
                 return (S) services.get(clazz);
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public <S> S getOptionalService(Class<? extends S> clazz) {
                 return (S) services.get(clazz);

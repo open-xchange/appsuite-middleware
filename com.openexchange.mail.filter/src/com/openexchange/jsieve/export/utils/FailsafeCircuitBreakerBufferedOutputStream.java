@@ -63,6 +63,7 @@ import net.jodah.failsafe.FailsafeException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
+@SuppressWarnings("synthetic-access")
 public class FailsafeCircuitBreakerBufferedOutputStream extends BufferedOutputStream {
 
     private final CircuitBreakerInfo circuitBreakerInfo;
@@ -110,11 +111,10 @@ public class FailsafeCircuitBreakerBufferedOutputStream extends BufferedOutputSt
                     return null;
                 }
             }).getCheckedResult();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE write access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE write access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {
@@ -138,11 +138,10 @@ public class FailsafeCircuitBreakerBufferedOutputStream extends BufferedOutputSt
                     return null;
                 }
             }).getCheckedResult();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE write access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE write access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {
@@ -166,11 +165,10 @@ public class FailsafeCircuitBreakerBufferedOutputStream extends BufferedOutputSt
                     return null;
                 }
             }).getCheckedResult();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE write access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE write access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {

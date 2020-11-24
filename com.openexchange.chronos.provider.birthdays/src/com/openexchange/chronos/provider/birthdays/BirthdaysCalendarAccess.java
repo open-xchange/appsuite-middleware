@@ -111,7 +111,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -571,7 +571,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     private List<String> getContactFolderIds(Type type) throws OXException {
         List<String> folderIds = new ArrayList<>();
-        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class).getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
+        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class).getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactsContentType.getInstance(), type, false, session, null);
         UserizedFolder[] folders = visibleFolders.getResponse();
         if (null != folders && 0 < folders.length) {
             for (UserizedFolder folder : folders) {

@@ -84,12 +84,13 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         super();
     }
 
+    @SuppressWarnings("unused")
     @Override
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
-        final ArrayList<Object> argList = new ArrayList<Object>();
+        ArrayList<Object> argList = new ArrayList<>();
 
         boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
-        if (copy){
+        if (copy) {
             argList.add(ArgumentUtil.createTagArgument(RedirectActionField.copy.name()));
         }
 
@@ -101,14 +102,14 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
         // And finally check of that forward address is allowed
-        final ConfigurationService service = Services.getService(ConfigurationService.class);
-        final Filter filter;
+        ConfigurationService service = Services.getService(ConfigurationService.class);
+        Filter filter;
         if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
         argList.add(CommandParserJSONUtil.stringToList(stringParam));
-        ActionCommand result =  new ActionCommand(Commands.REDIRECT, argList);
-        if (copy){
+        ActionCommand result = new ActionCommand(Commands.REDIRECT, argList);
+        if (copy) {
             result.addOptionalRequired(RedirectActionField.copy.name());
         }
         return result;
@@ -120,7 +121,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
-        if (arguments.size()==1){
+        if (arguments.size() == 1) {
             jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
         } else {
             String copyCommandString = ArgumentUtil.createTagArgument(RedirectActionField.copy.name()).toString();

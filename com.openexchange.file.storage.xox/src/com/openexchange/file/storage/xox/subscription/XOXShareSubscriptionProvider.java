@@ -178,6 +178,11 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
              */
             if (isPasswordMissing(e)) {
                 builder.state(ADDABLE_WITH_PASSWORD);
+            } else if (matches(e, ApiClientExceptions.MISSING_CREDENTIALS)) {
+                /*
+                 * Only thrown for anonymous guest
+                 */
+                builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
             } else {
                 builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e));
             }
@@ -210,7 +215,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     @Override
     public boolean isPasswordMissing(OXException e) {
-        return matches(e, ApiClientExceptions.MISSING_CREDENTIALS, LoginExceptionCodes.INVALID_CREDENTIALS, LoginExceptionCodes.INVALID_GUEST_PASSWORD);
+        return matches(e, LoginExceptionCodes.INVALID_CREDENTIALS, LoginExceptionCodes.INVALID_GUEST_PASSWORD);
     }
 
     @Override

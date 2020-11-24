@@ -16,3 +16,4 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.contact.vcard.storage

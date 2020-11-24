@@ -73,10 +73,10 @@ import com.openexchange.java.Strings;
 
 /**
  * 
- * {@link OXExceptionParser} - Manily copied from <code>com.openexchange.ajax.parser.ResponseParser</code>
+ * {@link OXExceptionParser} - Mainly copied from <code>com.openexchange.ajax.parser.ResponseParser</code>
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> adjustments and matches mathods
  * @since v7.10.5
  */
 public final class OXExceptionParser {

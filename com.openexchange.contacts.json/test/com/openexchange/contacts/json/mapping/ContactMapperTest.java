@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.contacts.json.actions.ContactAction;
+import com.openexchange.contacts.json.actions.IDBasedContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
@@ -73,7 +73,7 @@ public class ContactMapperTest {
      @Test
      public void testDeserialize_distListWithTwoMembers_markAsDistList() throws OXException, JSONException {
         String json = "{\"distribution_list\":[{\"id\":2345,\"folder_id\":6,\"display_name\":\"Steffen Templin\",\"mail\":\"steffen.templin@premium\",\"mail_field\":1},{\"id\":3,\"folder_id\":6,\"display_name\":\"Marcus Klein\",\"mail\":\"marcus.klein@premium\",\"mail_field\":1}]}";
-        Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+        Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(IDBasedContactAction.VIRTUAL_FIELDS));
         Assert.assertTrue(contact.getMarkAsDistribtuionlist());
         Assert.assertEquals(2, contact.getNumberOfDistributionLists());
     }
@@ -84,7 +84,7 @@ public class ContactMapperTest {
      @Test
      public void testDeserialize_distListWithNoMember_markAsDistList() throws OXException, JSONException {
         String json = "{\"distribution_list\":[]}";
-        Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+        Contact contact = ContactMapper.getInstance().deserialize(new JSONObject(json), ContactMapper.getInstance().getAllFields(IDBasedContactAction.VIRTUAL_FIELDS));
         Assert.assertTrue(contact.getMarkAsDistribtuionlist());
         Assert.assertEquals(0, contact.getNumberOfDistributionLists());
     }

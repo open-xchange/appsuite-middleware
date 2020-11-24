@@ -49,3 +49,4 @@ Import-Package: com.github.mangstadt.vinnie,
  org.xml.sax
 Bundle-SymbolicName: com.openexchange.contact.vcard.impl
 Bundle-Activator: com.openexchange.contact.vcard.impl.osgi.ContactVCardActivator
+Automatic-Module-Name: com.openexchange.contact.vcard.impl

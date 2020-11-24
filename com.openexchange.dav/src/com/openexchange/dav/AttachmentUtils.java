@@ -64,7 +64,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -140,7 +140,7 @@ public class AttachmentUtils {
             if (TaskContentType.getInstance().equals(contentType)) {
                 return com.openexchange.groupware.Types.TASK;
             }
-            if (ContactContentType.getInstance().equals(contentType)) {
+            if (ContactsContentType.getInstance().equals(contentType)) {
                 return com.openexchange.groupware.Types.CONTACT;
             }
         }

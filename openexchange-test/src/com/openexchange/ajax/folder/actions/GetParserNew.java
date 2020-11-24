@@ -61,7 +61,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
@@ -79,7 +79,7 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
 
     static {
         TYPES.put(CalendarContentType.getInstance().toString(), CalendarContentType.getInstance());
-        TYPES.put(ContactContentType.getInstance().toString(), ContactContentType.getInstance());
+        TYPES.put(ContactsContentType.getInstance().toString(), ContactsContentType.getInstance());
         TYPES.put(FileStorageContentType.getInstance().toString(), FileStorageContentType.getInstance());
         TYPES.put(InfostoreContentType.getInstance().toString(), InfostoreContentType.getInstance());
         TYPES.put(MailContentType.getInstance().toString(), MailContentType.getInstance());

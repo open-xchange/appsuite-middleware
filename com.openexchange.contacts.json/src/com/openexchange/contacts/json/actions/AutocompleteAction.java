@@ -49,30 +49,33 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
+import static com.google.common.collect.ImmutableList.of;
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.AutocompleteParameters;
-import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link AutocompleteAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class AutocompleteAction extends ContactAction {
+public class AutocompleteAction extends IDBasedContactAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_COLLATION, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT);
 
     /**
      * Initializes a new {@link AutocompleteAction}.
@@ -84,36 +87,19 @@ public class AutocompleteAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        /*
-         * extract parameters
-         */
-        Boolean requireEmail = Boolean.valueOf(request.isRequireEmail());
-        String query = request.getQuery();
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        String folderID = request.optFolderID();
-        /*
-         * perform search
-         */
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
-        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
-        SearchIterator<Contact> searchIterator;
-        SortOptions sortOptions = request.getSortOptions(false);
-        if (null != folderID) {
-            searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),
-                query, parameters, fields, sortOptions);
-        } else {
-            searchIterator = getContactService().autocompleteContacts(request.getSession(), query, parameters, fields, sortOptions);
-        }
-        /*
-         * construct result
-         */
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, B(request.isRequireEmail()));
+
+        String query = request.getQuery();
+        List<Contact> contacts = (null == request.optFolderID()) ? access.autocompleteContacts(query, parameters) : access.autocompleteContacts(of(request.getFolderID()), query, parameters);
         Collections.sort(contacts, new UseCountComparator(request.getSession().getUser().getLocale()));
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+
+        return new AJAXRequestResult(contacts, getLatestTimestamp(contacts), "contact");
     }
 
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 }

@@ -52,27 +52,29 @@ package com.openexchange.folderstorage.database.contentType;
 import com.openexchange.folderstorage.ContentType;
 
 /**
- * {@link ContactContentType} - The folder storage content type for contacts.
+ * {@link ContactsContentType} - The folder storage content type for contacts.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ContactContentType implements ContentType {
+public final class ContactsContentType implements ContentType {
 
-    private static final ContactContentType instance = new ContactContentType();
+    private static final long serialVersionUID = -3077467647585524338L;
+
+    private static final ContactsContentType instance = new ContactsContentType();
 
     /**
-     * Gets the {@link ContactContentType} instance.
+     * Gets the {@link ContactsContentType} instance.
      *
-     * @return The {@link ContactContentType} instance
+     * @return The {@link ContactsContentType} instance
      */
-    public static ContactContentType getInstance() {
+    public static ContactsContentType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link ContactContentType}.
+     * Initializes a new {@link ContactsContentType}.
      */
-    private ContactContentType() {
+    private ContactsContentType() {
         super();
     }
 

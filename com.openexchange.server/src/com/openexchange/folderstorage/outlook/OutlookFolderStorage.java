@@ -112,7 +112,7 @@ import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionM
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -878,7 +878,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 return FolderStorage.PUBLIC_ID;
             } else if (CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
-            } else if (ContactContentType.getInstance().equals(contentType)) {
+            } else if (ContactsContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
             }
         }

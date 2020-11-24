@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder.actions;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 
@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.mail.contentType.MailContentType;
  */
 public class StaticDiscoveryService implements ContentTypeDiscoveryService {
 
-    static private ContentType[] CONTENT_TYPES = new ContentType[] { CalendarContentType.getInstance(), ContactContentType.getInstance(), FileStorageContentType.getInstance(), MailContentType.getInstance() };
+    static private ContentType[] CONTENT_TYPES = new ContentType[] { CalendarContentType.getInstance(), ContactsContentType.getInstance(), FileStorageContentType.getInstance(), MailContentType.getInstance() };
 
     @Override
     public ContentType getByString(String contentTypeString) {

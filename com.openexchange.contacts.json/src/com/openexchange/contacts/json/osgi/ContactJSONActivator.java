@@ -49,19 +49,23 @@
 
 package com.openexchange.contacts.json.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.common.DataHandlers;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
+import com.openexchange.contacts.json.converters.Json2OXExceptionDataHandler;
+import com.openexchange.contacts.json.converters.Json2XPropertiesDataHandler;
+import com.openexchange.contacts.json.converters.OXException2JsonDataHandler;
+import com.openexchange.contacts.json.converters.XProperties2JsonDataHandler;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
@@ -74,9 +78,11 @@ import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
  */
 public class ContactJSONActivator extends AJAXModuleActivator {
 
+    private static final String IDENTIFIER = "identifier";
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactService.class, VCardService.class, ConfigViewFactory.class };
+        return new Class[] { ContactService.class, VCardService.class, ConfigViewFactory.class, IDBasedContactsAccessFactory.class };
     }
 
     @Override
@@ -89,22 +95,24 @@ public class ContactJSONActivator extends AJAXModuleActivator {
          * register result converter & data handler
          */
         registerService(ResultConverter.class, new ContactJSONResultConverter());
-        Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-        props.put("identifier", "com.openexchange.contact.json");
-        registerService(DataHandler.class, new ContactJSONDataHandler(this), props);
-        props = new Hashtable<String, Object>(1);
-        props.put("identifier", "com.openexchange.contact");
-        registerService(DataHandler.class, new ContactInsertDataHandler(this), props);
+        registerService(DataHandler.class, new ContactJSONDataHandler(this), singletonDictionary(IDENTIFIER, DataHandlers.CONTACT2JSON.getId()));
+        registerService(DataHandler.class, new ContactInsertDataHandler(this), singletonDictionary(IDENTIFIER, DataHandlers.CONTACT.getId()));
+        registerService(DataHandler.class, new XProperties2JsonDataHandler(), singletonDictionary(IDENTIFIER, DataHandlers.XPROPERTIES2JSON.getId()));
+        registerService(DataHandler.class, new Json2XPropertiesDataHandler(), singletonDictionary(IDENTIFIER, DataHandlers.JSON2XPROPERTIES.getId()));
+        registerService(DataHandler.class, new OXException2JsonDataHandler(), singletonDictionary(IDENTIFIER, DataHandlers.OXEXCEPTION2JSON.getId()));
+        registerService(DataHandler.class, new Json2OXExceptionDataHandler(), singletonDictionary(IDENTIFIER, DataHandlers.JSON2OXEXCEPTION.getId()));
         /*
          * define oauth scopes
          */
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {
                 return capabilities.contains(Permission.CONTACTS.getCapabilityName());
             }
         });
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {
                 return capabilities.contains(Permission.CONTACTS.getCapabilityName());
@@ -116,5 +124,4 @@ public class ContactJSONActivator extends AJAXModuleActivator {
         track(VCardStorageFactory.class);
         openTrackers();
     }
-
 }

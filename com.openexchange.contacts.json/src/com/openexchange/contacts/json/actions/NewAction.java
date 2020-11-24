@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
@@ -71,10 +72,11 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
-@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
-public class NewAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
+public class NewAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link NewAction}.
@@ -86,7 +88,7 @@ public class NewAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         boolean containsImage = request.containsImage();
         JSONObject json = request.getContactJSON(containsImage);
 
@@ -110,7 +112,7 @@ public class NewAction extends ContactAction {
 
         Contact contact;
         try {
-            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(IDBasedContactAction.VIRTUAL_FIELDS));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
         }
@@ -130,10 +132,9 @@ public class NewAction extends ContactAction {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-
-        getContactService().createContact(request.getSession(), folderID, contact);
+        access.createContact(folderID, contact);
         try {
-            return new AJAXRequestResult(new JSONObject(1).put("id", contact.getObjectID()), contact.getLastModified(), "json");
+            return new AJAXRequestResult(new JSONObject(1).put("id", contact.getId()), contact.getLastModified(), "json");
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

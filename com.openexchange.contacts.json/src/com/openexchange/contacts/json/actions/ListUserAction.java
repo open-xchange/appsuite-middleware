@@ -71,6 +71,7 @@ public class ListUserAction extends ContactAction {
 
     /**
      * Initializes a new {@link ListUserAction}.
+     * 
      * @param serviceLookup
      */
     public ListUserAction(ServiceLookup serviceLookup) {
@@ -79,10 +80,8 @@ public class ListUserAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        List<Contact> contacts = new LinkedList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().getUsers(
-            request.getSession(), request.getUserIds(), request.getFields()), -1);
+        List<Contact> contacts = new LinkedList<>();
+        Date lastModified = addContacts(contacts, getContactService().getUsers(request.getSession(), request.getUserIds(), request.getFields()), -1);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
-
 }

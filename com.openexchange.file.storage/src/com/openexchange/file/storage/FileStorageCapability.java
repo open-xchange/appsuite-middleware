@@ -173,5 +173,10 @@ public enum FileStorageCapability {
      */
     RESTORE,
 
+    /**
+     * Support for generating a direct link back to a file or folder's in its original client interface.
+     */
+    BACKWARD_LINK,
+
     ;
 }

@@ -269,10 +269,48 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     }
 
     /**
-     * Gets the file access.
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
+     *
+     * @param <T> The required interface for the targeted file storage file access implementation
+     * @param serviceId The identifier of the service to get the file access for
+     * @param accountId The identifier of the account to get the file access for
+     * @param extensionClass The interface to cast the file access reference
+     * @return The file storage file access for the specified account
+     */
+    protected <T extends FileStorageFileAccess> T getFileAccess(String serviceId, String accountId, Class<T> extensionClass) throws OXException {
+        FileStorageFileAccess access = getFileAccess(serviceId, accountId);
+        try {
+            return extensionClass.cast(access);
+        } catch (ClassCastException e) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
+        }
+    }
+
+    /**
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
      *
      * @param folderID The folder identifier to get the file access for
-     * @return The file access
+     * @param extensionClass The interface to cast the file access reference
+     * @return The file storage file access for the specified account
+     */
+    protected <T extends FileStorageFileAccess> T getFileAccess(FolderID folderID, Class<T> extensionClass) throws OXException {
+        return getFileAccess(folderID.getService(), folderID.getAccountId(), extensionClass);
+    }
+
+    /**
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
+     *
+     * @param folderID The folder identifier to get the file access for
+     * @return The file storage file access for the specified account
      */
     protected FileStorageFileAccess getFileAccess(FolderID folderID) throws OXException {
         return getFileAccess(folderID.getService(), folderID.getAccountId());

@@ -826,13 +826,32 @@ public class Contact extends CommonObject {
 
     private final Collection<OXException> warnings;
 
+    /** The new account-aware parentFolderID */
+    private String folderId;
+    /** The new contactId */
+    private String id;
+
+    private boolean b_folder_id;
+    private boolean b_id;
+
     /**
      * Initializes a new {@link Contact}.
      */
     public Contact() {
-        reset();
+        this(true);
+    }
+
+    /**
+     * Initializes a new {@link Contact}.
+     * 
+     * @param reset optionally performs a reset
+     */
+    public Contact(boolean reset) {
+        if (reset) {
+            reset();
+        }
         topic = "ox/common/contact";
-        warnings = new LinkedList<OXException>();
+        warnings = new LinkedList<>();
     }
 
     /**
@@ -857,6 +876,25 @@ public class Contact extends CommonObject {
     }
 
     // GET METHODS
+
+    /**
+     * Gets the contact identifier
+     *
+     * @return the contact identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the folderId
+     *
+     * @return The folderId
+     */
+    public String getFolderId() {
+        return folderId;
+    }
+
     public String getDisplayName() {
         return display_name;
     }
@@ -1294,6 +1332,16 @@ public class Contact extends CommonObject {
     }
 
     // SET METHODS
+
+    public void setId(String id) {
+        this.id = id;
+        b_id = true;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+        b_folder_id = true;
+    }
 
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
@@ -1844,6 +1892,16 @@ public class Contact extends CommonObject {
 
     // REMOVE METHODS
 
+    public void removeId() {
+        id = null;
+        b_id = false;
+    }
+
+    public void removeFolderId() {
+        folderId = null;
+        b_folder_id = false;
+    }
+
     public void removeDisplayName() {
         display_name = null;
         b_display_name = false;
@@ -2389,6 +2447,14 @@ public class Contact extends CommonObject {
     }
 
     // CONTAINS METHODS
+
+    public boolean containsId() {
+        return b_id;
+    }
+
+    public boolean containsFolderId() {
+        return b_folder_id;
+    }
 
     public boolean containsDisplayName() {
         return b_display_name;

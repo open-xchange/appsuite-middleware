@@ -93,7 +93,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -136,7 +136,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private static final Map<Scope, ContentType> S2CT = new HashMap<>();
     static {
-        S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactContentType.getInstance());
+        S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactsContentType.getInstance());
         S2CT.put(Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE), CalendarContentType.getInstance());
         S2CT.put(Scope.newInstance(TaskActionFactory.OAUTH_READ_SCOPE), TaskContentType.getInstance());
 
@@ -168,7 +168,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private int moduleId() {
-        if (contentType == ContactContentType.getInstance()) {
+        if (contentType == ContactsContentType.getInstance()) {
             return FolderObject.CONTACT;
         } else if (contentType == CalendarContentType.getInstance()) {
             return FolderObject.CALENDAR;
@@ -183,7 +183,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private int privateFolderId(AJAXClient client) throws OXException, IOException, JSONException {
-        if (contentType == ContactContentType.getInstance()) {
+        if (contentType == ContactsContentType.getInstance()) {
             return client.getValues().getPrivateContactFolder();
         } else if (contentType == CalendarContentType.getInstance()) {
             return client.getValues().getPrivateAppointmentFolder();

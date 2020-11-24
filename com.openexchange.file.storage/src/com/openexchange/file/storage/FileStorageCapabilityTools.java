@@ -121,6 +121,8 @@ public class FileStorageCapabilityTools {
                 return Boolean.valueOf(FileStorageAutoRenameFoldersAccess.class.isAssignableFrom(fileAccessClass));
             case RESTORE:
                 return Boolean.valueOf(FileStorageRestoringFileAccess.class.isAssignableFrom(fileAccessClass));
+            case BACKWARD_LINK:
+                return Boolean.valueOf(FileStorageBackwardLinkAccess.class.isAssignableFrom(fileAccessClass));
             default:
                 org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
                 return Boolean.FALSE;
@@ -182,6 +184,8 @@ public class FileStorageCapabilityTools {
                 return FileStorageAutoRenameFoldersAccess.class.isInstance(fileAccess);
             case RESTORE:
                 return FileStorageRestoringFileAccess.class.isInstance(fileAccess);
+            case BACKWARD_LINK:
+                return FileStorageBackwardLinkAccess.class.isInstance(fileAccess);
             default:
                 org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
                 return false;

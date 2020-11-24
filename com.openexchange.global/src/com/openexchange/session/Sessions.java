@@ -210,4 +210,13 @@ public final class Sessions {
         return "true".equalsIgnoreCase(obj.toString().trim());
     }
 
+    /**
+     * Checks whether the specified session is from a guest user
+     *
+     * @param session The session to check
+     * @return <code>true</code> if it's a guest user; <code>false</code> otherwise
+     */
+    public static boolean isGuest(Session session) {
+        return null != session && Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
+    }
 }

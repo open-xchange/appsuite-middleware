@@ -68,7 +68,7 @@ import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
@@ -256,7 +256,7 @@ public class DatabaseFolder extends AbstractFolder {
             case FolderObject.CALENDAR:
                 return CalendarContentType.getInstance();
             case FolderObject.CONTACT:
-                return ContactContentType.getInstance();
+                return ContactsContentType.getInstance();
             case FolderObject.TASK:
                 return TaskContentType.getInstance();
             case FolderObject.INFOSTORE:

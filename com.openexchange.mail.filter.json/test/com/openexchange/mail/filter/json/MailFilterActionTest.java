@@ -70,16 +70,16 @@ public class MailFilterActionTest extends MailFilterAction {
     }
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() {
         Common.prepare(null, null);
     }
 
     @After
     @Test
-    public void testGetRightPasswordNothing() throws OXException {
-        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
-        final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
+    public void testGetRightPasswordNothing() {
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
+        String credsPW = "pw2";
+        Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -91,19 +91,19 @@ public class MailFilterActionTest extends MailFilterAction {
     @Test
     public void testGetRightPasswordSession() throws OXException {
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.SESSION.name);
-        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
-        final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
-        final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
+        String credsPW = "pw2";
+        Credentials creds = new Credentials("", credsPW, 0, 0, null);
+        String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
 
     @Test
-    public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
+    public void testGetRightPasswordGlobalNoMasterPW() {
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
-        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
-        final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
+        String credsPW = "pw2";
+        Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -114,13 +114,13 @@ public class MailFilterActionTest extends MailFilterAction {
 
     @Test
     public void testGetRightPasswordGlobal() throws OXException {
-        final String masterPW = "masterPW";
+        String masterPW = "masterPW";
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.passwordSource.getFQPropertyName(), PasswordSource.GLOBAL.name);
         Common.simMailFilterConfigurationService.delegateConfigurationService.stringProperties.put(MailFilterProperty.masterPassword.getFQPropertyName(), masterPW);
-        final LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
-        final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
-        final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
+        LeanConfigurationService config = Services.getService(LeanConfigurationService.class);
+        String credsPW = "pw2";
+        Credentials creds = new Credentials("", credsPW, 0, 0, null);
+        String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + masterPW + "\"", masterPW, rightPassword);
     }
 

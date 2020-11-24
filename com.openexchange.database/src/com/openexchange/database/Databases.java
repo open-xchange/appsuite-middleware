@@ -85,6 +85,15 @@ import com.openexchange.java.Strings;
  */
 public final class Databases {
 
+    /**
+     * {@link ConnectionStatus} - Defines the connection status.
+     */
+    public enum ConnectionStatus {
+        INITIALISED,
+        FAILED,
+        SUCCEEDED;
+    }
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
     private static final Cache<String, String> CHARSETS_BY_SCHEMA = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
 
@@ -96,15 +105,43 @@ public final class Databases {
     }
 
     /**
+     * Decides on how to return the write-able connection
+     * 
+     * @param databaseService The database service
+     * @param writeConnection The write-able connection to return to pool
+     * @param contextId The context identifier
+     * @param connectionStatus The connection status
+     */
+    public static void backWriteable(DatabaseService databaseService, Connection writeConnection, int contextId, ConnectionStatus connectionStatus) {
+        if (null == writeConnection) {
+            return;
+        }
+        switch (connectionStatus) {
+            case INITIALISED:
+                databaseService.backWritableAfterReading(contextId, writeConnection);
+                return;
+            case FAILED:
+                rollback(writeConnection);
+                autocommit(writeConnection);
+                databaseService.backWritableAfterReading(contextId, writeConnection);
+                return;
+            case SUCCEEDED:
+                autocommit(writeConnection);
+                databaseService.backWritable(contextId, writeConnection);
+        }
+    }
+
+    /**
      * Closes the given instances.
      *
      * @param closeables The instances to close.
      */
     public static void closeSQLStuff(AutoCloseable... closeables) {
-        if (closeables != null) {
-            for (AutoCloseable closeable : closeables) {
-                closeSQLStuff(closeable);
-            }
+        if (closeables == null) {
+            return;
+        }
+        for (AutoCloseable closeable : closeables) {
+            closeSQLStuff(closeable);
         }
     }
 
@@ -114,12 +151,13 @@ public final class Databases {
      * @param closeable <code>null</code> or a {@link AutoCloseable} to close.
      */
     public static void closeSQLStuff(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                LOG.error("Failed to close {}", closeable.getClass().getName(), e);
-            }
+        if (closeable == null) {
+            return;
+        }
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            LOG.error("Failed to close {}", closeable.getClass().getName(), e);
         }
     }
 
@@ -129,10 +167,11 @@ public final class Databases {
      * @param results The instances to close.
      */
     public static void closeSQLStuff(ResultSet... results) {
-        if (results != null) {
-            for (ResultSet result : results) {
-                closeSQLStuff(result);
-            }
+        if (results == null) {
+            return;
+        }
+        for (ResultSet result : results) {
+            closeSQLStuff(result);
         }
     }
 
@@ -142,12 +181,13 @@ public final class Databases {
      * @param result <code>null</code> or a {@link ResultSet} to close.
      */
     public static void closeSQLStuff(ResultSet result) {
-        if (result != null) {
-            try {
-                result.close();
-            } catch (SQLException e) {
-                LOG.error("Failed to close result-set", e);
-            }
+        if (result == null) {
+            return;
+        }
+        try {
+            result.close();
+        } catch (SQLException e) {
+            LOG.error("Failed to close result-set", e);
         }
     }
 
@@ -157,10 +197,11 @@ public final class Databases {
      * @param stmts The statements to close.
      */
     public static void closeSQLStuff(Statement... stmts) {
-        if (null != stmts) {
-            for (Statement stmt : stmts) {
-                closeSQLStuff(stmt);
-            }
+        if (null == stmts) {
+            return;
+        }
+        for (Statement stmt : stmts) {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -170,12 +211,13 @@ public final class Databases {
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     public static void closeSQLStuff(Statement stmt) {
-        if (null != stmt) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                LOG.error("Failed to close statement", e);
-            }
+        if (null == stmt) {
+            return;
+        }
+        try {
+            stmt.close();
+        } catch (SQLException e) {
+            LOG.error("Failed to close statement", e);
         }
     }
 
@@ -375,7 +417,7 @@ public final class Databases {
             return new String[0];
         }
 
-        List<String> retval = new ArrayList<String>();
+        List<String> retval = new ArrayList<>();
         do {
             retval.add(matcher.group(1));
         } while (matcher.find());
@@ -459,7 +501,7 @@ public final class Databases {
      * @throws SQLException If something goes wrong
      */
     public static Set<String> existingTables(Connection con, String... tablesToCheck) throws SQLException {
-        Set<String> tables = new HashSet<String>();
+        Set<String> tables = new HashSet<>();
         for (String table : tablesToCheck) {
             if (tableExists(con, table)) {
                 tables.add(table);
@@ -1160,7 +1202,7 @@ public final class Databases {
      * @throws SQLException In case of error
      */
     public static ResultSet executeQuery(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
-        return execute(stmt, (s) -> s.executeQuery(), valueSetters);
+        return execute(stmt, PreparedStatement::executeQuery, valueSetters);
     }
 
     /**
@@ -1172,7 +1214,7 @@ public final class Databases {
      * @throws SQLException In case of error
      */
     public static int executeUpdate(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
-        return i(execute(stmt, (s) -> I(s.executeUpdate()), valueSetters));
+        return i(execute(stmt, s -> I(s.executeUpdate()), valueSetters));
     }
 
     /**

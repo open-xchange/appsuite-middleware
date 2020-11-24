@@ -623,4 +623,17 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      */
     Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException;
 
+    /**
+     * Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a specific target, which can be used
+     * to open the regular, browser-based guest mode on the remote host.
+     * <p/>
+     * Only available if supported by the targeted file storage account.
+     *
+     * @param folderId The targeted folder in the guest account
+     * @param id The targeted item in the guest account, or <code>null</code> when pointing to a folder
+     * @param additionals Additional data to include in the resulting backward link's share target, or <code>null</code> if not set
+     * @return The generated backward link
+     */
+    String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException;
+
 }

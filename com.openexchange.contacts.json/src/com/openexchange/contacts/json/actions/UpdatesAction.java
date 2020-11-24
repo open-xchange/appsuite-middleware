@@ -50,17 +50,17 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -72,8 +72,13 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
-public class UpdatesAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
+public class UpdatesAction extends IDBasedContactAction {
+
+    private static final String MODIFIED = "modified";
+    private static final String DELETED = "deleted";
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY);
 
     /**
      * Initializes a new {@link UpdatesAction}.
@@ -85,30 +90,23 @@ public class UpdatesAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        ContactService contactService = getContactService();
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         Date since = new Date(request.getTimestamp());
-        /*
-         * add modified contacts
-         */
-        List<Contact> modifiedContacts = new LinkedList<Contact>();
-        Date lastModified = addContacts(modifiedContacts, contactService.getModifiedContacts(request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
-        /*
-         * add deleted contacts
-         */
-        List<Contact> deletedContacts = new LinkedList<Contact>();
-        if (false == "deleted".equals(request.getIgnore())) {
-            Date lastModified2 = addContacts(deletedContacts, contactService.getDeletedContacts(request.getSession(), request.getFolderID(), since, fields), excludedAdminID);
+        List<Contact> modifiedContacts = access.getModifiedContacts(request.getFolderID(), since);
+        Date lastModified = getLatestTimestamp(modifiedContacts);
+        List<Contact> deletedContacts = new LinkedList<>();
+        if (false == DELETED.equals(request.getIgnore())) {
+            deletedContacts = access.getDeletedContacts(request.getFolderID(), since);
+            Date lastModified2 = getLatestTimestamp(deletedContacts);
             if (0 < deletedContacts.size() && null != lastModified2 && lastModified2.after(lastModified)) {
                 lastModified = lastModified2;
             }
         }
-        Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
-        responseMap.put("modified", modifiedContacts);
-        responseMap.put("deleted", deletedContacts);
-        return new AJAXRequestResult(responseMap, lastModified, "contact");
+        return new AJAXRequestResult(ImmutableMap.of(MODIFIED, modifiedContacts, DELETED, deletedContacts), lastModified, "contact");
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 }

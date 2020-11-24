@@ -1,3 +1,4 @@
+
 package com.openexchange.find.basic;
 /*
  *
@@ -48,6 +49,7 @@ package com.openexchange.find.basic;
  *
  */
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,20 +57,18 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
+import com.openexchange.contact.common.ContactsParameters;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactSimilarity;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -82,18 +82,14 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     /**
      * The requested contact fields of the autocomplete search results.
      */
-    protected static final ContactField[] CONTACT_FIELDS = {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
-        ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1,
-        ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES,
-        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.DEPARTMENT, ContactField.IMAGE_LAST_MODIFIED
+    protected static final ContactField[] CONTACT_FIELDS = { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.DEPARTMENT, ContactField.IMAGE_LAST_MODIFIED
     };
 
     /**
      * The default sort order used to get pre-sorted results when retrieving contacts for auto-completion.
      */
     private static final SortOrder[] SORT_ORDER = new SortOrder[] { //new SortOrder(ContactField.VALUE, Order.DESCENDING),
-    new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
+        new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
     };
 
     /**
@@ -126,18 +122,12 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @param session The session associated with this auto-complete request
      * @param autocompleteRequest The auto-complete request
      * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
-     *                     otherwise
+     *            otherwise
      * @return The resulting contacts
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteContacts(ServerSession session, AutocompleteRequest autocompleteRequest, AutocompleteParameters parameters) throws OXException {
-        return searchContacts(
-            session,
-            autocompleteRequest.getPrefix(),
-            parameters,
-            null,
-            autocompleteRequest.getLimit(),
-            autocompleteRequest.getOptions().includeContextAdmin());
+        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, null, autocompleteRequest.getLimit(), autocompleteRequest.getOptions().includeContextAdmin());
     }
 
     /**
@@ -149,22 +139,16 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteUsers(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
-    	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
-    	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
-        return searchContacts(
-            session,
-            autocompleteRequest.getPrefix(),
-            parameters,
-            Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)),
-            autocompleteRequest.getLimit(),
-            autocompleteRequest.getOptions().includeContextAdmin());
+        AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
+        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)), autocompleteRequest.getLimit(), autocompleteRequest.getOptions().includeContextAdmin());
     }
 
     /**
      * Returns all mail addresses of a {@link Contact}.
      */
     protected static List<String> extractMailAddessesFrom(final Contact contact) {
-        List<String> addrs = new ArrayList<String>(3);
+        List<String> addrs = new ArrayList<>(3);
         String mailAddress = contact.getEmail1();
         if (Strings.isNotEmpty(mailAddress)) {
             addrs.add(mailAddress);
@@ -205,29 +189,21 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
 
         SortOptions sortOptions = new SortOptions(SORT_ORDER);
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
-        SearchIterator<Contact> searchIterator = null;
-        int excludedAdminID = !includeAdmin ? session.getContext().getMailadmin() : -1;
+
         List<Contact> contacts;
         try {
-            searchIterator = Services.getContactService().autocompleteContacts(session, folderIDs, prefix, parameters, CONTACT_FIELDS, sortOptions);
-            if (0 < excludedAdminID) {
-                contacts = new ArrayList<Contact>();
-                while (searchIterator.hasNext()) {
-                    Contact contact = searchIterator.next();
-                    if (excludedAdminID != contact.getInternalUserId()) {
-                        contacts.add(contact);
-                    }
-                }
-            } else {
-                contacts = SearchIteratorAdapter.toList(searchIterator);
-            }
+            IDBasedContactsAccess access = Services.getIdBasedContactsAccessFactory().createAccess(session);
+            access.set(ContactsParameters.PARAMETER_FIELDS, CONTACT_FIELDS);
+            access.set(ContactsParameters.PARAMETER_ORDER, sortOptions.getOrder()[0].getOrder());
+            access.set(ContactsParameters.PARAMETER_ORDER_BY, sortOptions.getOrder()[0].getBy());
+            access.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(sortOptions.getLimit()));
+
+            contacts = access.autocompleteContacts(folderIDs, prefix, parameters);
         } catch (OXException e) {
             if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
                 return Collections.emptyList();
             }
             throw e;
-        } finally {
-            SearchIterators.close(searchIterator);
         }
         if (null == contacts) {
             return Collections.emptyList();
@@ -240,45 +216,4 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
         }
         return contacts;
     }
-
-    /**
-     * It's possible that a client limits the number of autocomplete items to X, but
-     * X + Y items are found that denote the same person (represented through multiple
-     * different contact objects). In that case the user is never able to search for a
-     * specific contact (resp. its mail address) as it will never appear in the response
-     * list. In that case we ignore the limit parameter and send out at least all contacts
-     * that refer to the same person.
-     *
-     * @param contacts The list of contacts, must have been requested with a limit greater than
-     * the requested limit.
-     * @param limit The requested limit.
-     */
-    private static List<Contact> ensureAllDuplicatesContained(List<Contact> contacts, int limit) {
-        if (contacts.size() <= limit) {
-            return contacts;
-        }
-
-        Contact former = null;
-        int lastEqual = 0;
-        for (int i = 0; i < contacts.size(); i++) {
-            Contact contact = contacts.get(i);
-            if (former == null) {
-                former = contact;
-                continue;
-            }
-
-            if (ContactSimilarity.areSimilar(former, contact)) {
-                lastEqual = i;
-            } else {
-                break;
-            }
-        }
-
-        if (lastEqual > (limit - 1)) {
-            return contacts.subList(0, lastEqual + 1);
-        }
-
-        return contacts.subList(0, limit);
-    }
-
 }

@@ -34,3 +34,4 @@ Import-Package: com.google.api.client.auth.oauth2,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.mail.oauth.google.osgi.GoogleMailOAuthActivator
+Automatic-Module-Name: com.openexchange.mail.oauth.google

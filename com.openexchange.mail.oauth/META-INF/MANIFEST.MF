@@ -19,3 +19,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker
 Export-Package: com.openexchange.mail.oauth
 Bundle-Activator: com.openexchange.mail.oauth.osgi.MailOAuthActivator
+Automatic-Module-Name: com.openexchange.mail.oauth

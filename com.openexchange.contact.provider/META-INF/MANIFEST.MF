@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Contact Provider Definitions Bundle
+Bundle-SymbolicName: com.openexchange.contact.provider
+Bundle-Version: 7.10.5
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.contact.provider
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.collect,
+ com.openexchange.java,
+ com.openexchange.config.lean,
+ com.openexchange.contact,
+ com.openexchange.contact.common,
+ com.openexchange.contact.storage,
+ com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.search,
+ com.openexchange.i18n,
+ com.openexchange.osgi.annotation,
+ com.openexchange.search,
+ com.openexchange.session,
+ org.json
+Export-Package: com.openexchange.contact.provider,
+ com.openexchange.contact.provider.basic,
+ com.openexchange.contact.provider.extensions,
+ com.openexchange.contact.provider.folder,
+ com.openexchange.contact.provider.groupware

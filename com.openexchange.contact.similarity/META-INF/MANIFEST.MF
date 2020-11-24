@@ -10,3 +10,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.groupware.container,
  com.openexchange.session
 Export-Package: com.openexchange.contact.similarity
+Automatic-Module-Name: com.openexchange.contact.similarity

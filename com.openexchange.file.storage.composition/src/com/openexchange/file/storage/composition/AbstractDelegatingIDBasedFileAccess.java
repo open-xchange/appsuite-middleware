@@ -359,4 +359,9 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     public Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException {
         return fileAccess.restore(fileIds, defaultDestFolderId);
     }
+
+    @Override
+    public String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException {
+        return fileAccess.getBackwardLink(folderId, id, additionals);
+    }
 }
