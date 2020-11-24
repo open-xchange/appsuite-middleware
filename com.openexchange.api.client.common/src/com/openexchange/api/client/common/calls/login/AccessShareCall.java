@@ -53,6 +53,7 @@ import static com.openexchange.api.client.common.ApiClientUtils.getHeaderValue;
 import static com.openexchange.api.client.common.ApiClientUtils.getSessionCookie;
 import static com.openexchange.api.client.common.ApiClientUtils.parseParameters;
 import static com.openexchange.api.client.common.Checks.checkSameOrigin;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.rest.client.httpclient.util.HttpContextUtils.getCookieStore;
 import java.net.URL;
 import java.util.Map;
@@ -62,12 +63,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
-import com.openexchange.api.client.common.JSONUtils;
 import com.openexchange.api.client.common.calls.AbstractGetCall;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -138,11 +136,11 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
                  * Check that we got a redirect and that the redirect is set
                  */
                 if (HttpStatus.SC_MOVED_TEMPORARILY != response.getStatusLine().getStatusCode()) {
-                    handleError(response, loginLink);
+                    throw ApiClientExceptions.UNEXPECTED_ERROR.create("The remote server responded with an unexpected HTTP status of {}", I(response.getStatusLine().getStatusCode()));
                 }
                 String location = getHeaderValue(response, HttpHeaders.LOCATION);
                 if (Strings.isEmpty(location)) {
-                    handleError(response, loginLink);
+                    throw ApiClientExceptions.UNEXPECTED_ERROR.create("The remote server didn't send the location of the share");
                 }
 
                 /*
@@ -164,17 +162,5 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
             }
 
         };
-    }
-
-    protected static void handleError(HttpResponse response, URL loginLink) throws OXException {
-        JSONValue jsonValue = JSONUtils.getJSON(response);
-        if (null != jsonValue && jsonValue instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) jsonValue;
-            String status = jsonObject.optString("status");
-            if (Strings.isNotEmpty(status) && status.startsWith("not_found")) {
-                throw ApiClientExceptions.ACCESS_REVOKED.create();
-            }
-        }
-        throw ApiClientExceptions.NO_ACCESS.create(loginLink);
     }
 }
