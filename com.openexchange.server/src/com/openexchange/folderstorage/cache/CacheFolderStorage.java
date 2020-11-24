@@ -83,7 +83,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RestoringFolderStorage;
-import com.openexchange.folderstorage.SearchableFolderNameFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -140,7 +140,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage, SearchableFolderNameFolderStorage {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage, SearchableFileFolderNameFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -1904,16 +1904,16 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     }
 
     @Override
-    public List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+    public List<Folder> searchFileStorageFolders(String treeId, String rootFolderId, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
         FolderStorage folderStorage = registry.getFolderStorage(treeId, rootFolderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, rootFolderId);
         }
-        if (false == SearchableFolderNameFolderStorage.class.isInstance(folderStorage)) {
+        if (false == SearchableFileFolderNameFolderStorage.class.isInstance(folderStorage)) {
             throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
         }
-        SearchableFolderNameFolderStorage searchableFolderStorage = (SearchableFolderNameFolderStorage) folderStorage;
-        return searchableFolderStorage.search(treeId, rootFolderId, contentType, query, date, includeSubfolders, start, end, storageParameters);
+        SearchableFileFolderNameFolderStorage searchableFolderStorage = (SearchableFileFolderNameFolderStorage) folderStorage;
+        return searchableFolderStorage.searchFileStorageFolders(treeId, rootFolderId, query, date, includeSubfolders, start, end, storageParameters);
     }
 
     /*-

@@ -105,7 +105,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         FindQueryResponse response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         FindQueryResponseData data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         FindQueryResponse response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         FindQueryResponseData data = response.getData();
-        assertEquals(2, i(data.getNumFound()));
+        assertEquals(2, i(data.getSize()));
 
         // With date facet, show folders newer than one week
         FindActiveFacet facet = new FindActiveFacet();
@@ -186,7 +186,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
     }
     */
 
@@ -200,14 +200,14 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         FindQueryResponse response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         FindQueryResponseData data = response.getData();
-        assertEquals(2, i(data.getNumFound()));
+        assertEquals(2, i(data.getSize()));
 
         // Search as another user, result in "Public Files" expected
         FindApi findApi2 = new FindApi(apiClient2);
         response = findApi2.doQuery(apiClient2.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
 
         // Search in "My Files" only
         FindActiveFacet facet = new FindActiveFacet();
@@ -218,13 +218,13 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
 
         // Search as another user, no results expected
         response = findApi2.doQuery(apiClient2.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(0, i(data.getNumFound()));
+        assertEquals(0, i(data.getSize()));
 
         // Search in "Public Files" only
         body = new FindQueryBody();
@@ -237,13 +237,13 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         response = findApi.doQuery(apiClient.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
 
         // Search as another user, 1 result expected
         response = findApi2.doQuery(apiClient2.getSession(), Module.FILES.getName(), body, COLUMNS, null);
         assertTrue(Strings.isEmpty(response.getError()));
         data = response.getData();
-        assertEquals(1, i(data.getNumFound()));
+        assertEquals(1, i(data.getSize()));
     }
 
     @Override

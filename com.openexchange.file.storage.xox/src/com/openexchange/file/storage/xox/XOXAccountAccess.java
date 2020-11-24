@@ -378,7 +378,12 @@ public class XOXAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        Boolean supported = FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
+        Boolean supported;
+        if (capability.isFileAccessCapability()) {
+            supported = FileStorageCapabilityTools.supportsByClass(XOXFileAccess.class, capability);
+        } else {
+            supported = FileStorageCapabilityTools.supportsFolderCapabilityByClass(XOXFolderAccess.class, capability);
+        }
         if (supported != null && Boolean.TRUE.equals(supported) && capability == FileStorageCapability.SEARCH_BY_TERM) {
             //The advanced search is only available on the remote side if the version is > 7.10.5
             try {

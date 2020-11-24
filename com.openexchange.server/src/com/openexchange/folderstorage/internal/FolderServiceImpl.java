@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.TrashAwareFolderService;
 import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.ConsistencyPerformer;
@@ -79,7 +80,7 @@ import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
 import com.openexchange.folderstorage.internal.performers.RestorePerformer;
-import com.openexchange.folderstorage.internal.performers.SearchPerformer;
+import com.openexchange.folderstorage.internal.performers.FileStorageSearchPerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
@@ -366,8 +367,13 @@ public final class FolderServiceImpl implements FolderService, TrashAwareFolderS
 
     @Override
     public FolderResponse<List<UserizedFolder>> searchFolderByName(String treeId, String folderId, ContentType contentType, String query, long date, boolean includeSubfolders, boolean all, int start, int end, Session session, FolderServiceDecorator decorator) throws OXException {
-        SearchPerformer performer = new SearchPerformer(ServerSessionAdapter.valueOf(session), decorator);
-        List<UserizedFolder> folders = performer.doSearch(treeId, folderId, contentType, query, date, includeSubfolders, all, start, end);
+        if (false == InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
+            // Folder search by name for non-infostore module
+            throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
+        }
+
+        FileStorageSearchPerformer performer = new FileStorageSearchPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        List<UserizedFolder> folders = performer.doSearch(treeId, folderId, query, date, includeSubfolders, all, start, end);
         return FolderResponseImpl.newFolderResponse(folders, performer.getWarnings());
     }
 

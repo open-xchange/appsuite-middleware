@@ -118,7 +118,7 @@ import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.MoveFolderPermissionMode;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RestoringFolderStorage;
-import com.openexchange.folderstorage.SearchableFolderNameFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -177,7 +177,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -206,7 +205,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage, SearchableFolderNameFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage, SearchableFileFolderNameFolderStorage {
 
     private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
 
@@ -1292,45 +1291,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         return DatabaseFolderType.getInstance();
     }
 
-    /**
-     * Get all user-visible folder in module referred by given content-type below given root folder
-     *
-     * @param rootFolderId The root folder identifier
-     * @param contentType The content-type
-     * @param storageParameters The storage parameters
-     * @return {@link TIntArrayList} containing identifier of all visible folders
-     * @throws OXException On server error
-     */
-    public TIntArrayList getVisibleFolders(String rootFolderId, ContentType contentType, StorageParameters storageParameters) throws OXException {
-        final User user = storageParameters.getUser();
-        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
-
-        try {
-            final Connection con = provider.getConnection();
-            final int userId = user.getId();
-            final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
-            final int iModule = getModuleByContentType(contentType);
-            final List<FolderObject> list;
-            if (Strings.isEmpty(rootFolderId)) {
-                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iModule, ctx, con)).asList();
-            } else {
-                final int iParent = Integer.parseInt(rootFolderId);
-                list = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(iParent, userId, user.getGroups(), ctx, userPermissionBits, null, con)).asList();
-            }
-            TIntArrayList result = new TIntArrayList();
-            for (FolderObject folderObject : list) {
-                result.add(folderObject.getObjectID());
-                if (folderObject.hasSubfolders()) {
-                    result.addAll(getVisibleFolders(String.valueOf(folderObject.getObjectID()), contentType, storageParameters));
-                }
-            }
-            return result;
-        } finally {
-            provider.close();
-        }
-    }
-
     @Override
     public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
@@ -2125,7 +2085,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     /**
      * Gets the identifiers of all users that have access to a specific folder, based on its permissions.
-     * 
+     *
      * @param context The context in which the folder is located
      * @param folder The folder to get the affected users for
      * @return The identifiers of all users that have access to the folder
@@ -3082,42 +3042,81 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private boolean isBelowTrashFolder(int folderId, int trashFolderId, int rootFolderId, StorageParameters storageParameters, Connection con) throws OXException {
-        while (folderId > 0) {
-            if (trashFolderId == folderId) {
+        int fid = folderId;
+        while (fid > 0) {
+            if (trashFolderId == fid) {
                 return true;
             }
-            if (rootFolderId == folderId) {
+            if (rootFolderId == fid) {
                 return false;
             }
-            folderId = getFolderObject(folderId, storageParameters.getContext(), con, storageParameters).getParentFolderID();
+            fid = getFolderObject(fid, storageParameters.getContext(), con, storageParameters).getParentFolderID();
         }
         return false;
     }
 
     @Override
-    public List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+    public List<Folder> searchFileStorageFolders(String treeId, String rootFolderId, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        if (Strings.isEmpty(query)) {
+            return Collections.emptyList();
+        }
+
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
-        List<Folder> result = new ArrayList<Folder>();
         try {
             final Connection con = provider.getConnection();
+
+            // Query non-standard folders by database query
+            int parentId = getUnsignedInteger(rootFolderId);
+            if (parentId < 0) {
+                throw OXFolderExceptionCode.NOT_EXISTS.create(rootFolderId, Integer.valueOf(storageParameters.getContextId()));
+            }
+            Context context = storageParameters.getContext();
+            User user = storageParameters.getUser();
             int[] folderIds;
             if (includeSubfolders) {
-                int[] ids = getVisibleFolders(rootFolderId, contentType, storageParameters).toArray();
-                folderIds = OXFolderSQL.searchByFolderName(query, ids, contentType.getModule(), date, start, end, storageParameters.getContext(), con);
+                int[] ids = getVisibleFolders(parentId, FolderObject.INFOSTORE, storageParameters).toArray();
+                folderIds = OXFolderSQL.searchInfostoreFoldersByName(query, ids, date, start, end, context, con);
             } else {
-                folderIds = OXFolderSQL.searchByFolderName(query, Integer.parseInt(rootFolderId), contentType.getModule(), date, start, end, storageParameters.getContext(), con);
+                folderIds = OXFolderSQL.searchInfostoreFoldersByName(query, parentId, date, start, end, context, con);
             }
+
+            // Load folders by identifiers
+            List<Folder> result = new ArrayList<Folder>(folderIds.length);
+            TIntSet ids = new TIntHashSet(folderIds.length);
             for (int id : folderIds) {
-                DatabaseFolder folder = loadFolder(String.valueOf(id), StorageType.WORKING, storageParameters, con, treeId);
-                if (storageParameters.getUser().isAnonymousGuest()) {
-                    handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
-                }
-                Permission ownPermission = CalculatePermission.calculate(folder, storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator().getAllowedContentTypes());
-                if (ownPermission.isVisible()) {
-                    result.add(folder);
+                if (ids.add(id)) {
+                    DatabaseFolder folder = loadFolder(Integer.toString(id), StorageType.WORKING, storageParameters, con, treeId);
+                    if (user.isAnonymousGuest()) {
+                        handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
+                    }
+                    Permission ownPermission = CalculatePermission.calculate(folder, user, context, storageParameters.getDecorator().getAllowedContentTypes());
+                    if (ownPermission.isVisible()) {
+                        result.add(folder);
+                    }
                 }
             }
-            matchAndAddUsersDefaultMediaFolders(result, query, treeId, contentType, storageParameters, con);
+
+            // Check for special standard folders (personal, trash, documents, music, pictures, videos, ...)
+            if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == parentId) {
+                if (includeSubfolders) {
+                    matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), TYPES_ALL, treeId, storageParameters, con);
+                }
+            } else if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == parentId) {
+                if (includeSubfolders) {
+                    matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), TYPES_ALL_WO_TRASH, treeId, storageParameters, con);
+                } else {
+                    matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), new int[] { FolderObject.PUBLIC, FolderObject.TRASH }, treeId, storageParameters, con);
+                }
+            } else if (OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, con, context) == parentId) {
+                if (includeSubfolders) {
+                    matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), TYPES_ALL_MEDIA, treeId, storageParameters, con);
+                } else {
+                    matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), TYPES_ALL_MEDIA_WO_TEMPLATES, treeId, storageParameters, con);
+                }
+            } else if (OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.DOCUMENTS, con, context) == parentId) {
+                matchAndAddUsersDefaultFolders(result, ids, prepareWildcardSearch(query), TYPES_TEMPLATES, treeId, storageParameters, con);
+            }
+
             return result;
         } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -3126,24 +3125,40 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
+    private static final int[] TYPES_ALL = { FolderObject.PUBLIC, FolderObject.TRASH, FolderObject.PICTURES, FolderObject.DOCUMENTS, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
+
+    private static final int[] TYPES_ALL_WO_TRASH = { FolderObject.PUBLIC, FolderObject.PICTURES, FolderObject.DOCUMENTS, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
+
+    private static final int[] TYPES_ALL_MEDIA = { FolderObject.PICTURES, FolderObject.DOCUMENTS, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
+
+    private static final int[] TYPES_ALL_MEDIA_WO_TEMPLATES = { FolderObject.PICTURES, FolderObject.DOCUMENTS, FolderObject.MUSIC, FolderObject.VIDEOS };
+
+    private static final int[] TYPES_TEMPLATES = { FolderObject.TEMPLATES };
+
     /**
      * Check query against special media folders like 'Pictures' or 'Music' which are translated for the user
      *
      * @param result The result list to add folders to
+     * @param ids The set containing the identifiers of found folders for fast look-up
      * @param query The query to search
+     * @param mediaTypes The types of the media folders to query
      * @param treeId The tree identifier
-     * @param contentType The content type of folders to search
      * @param storageParameters The storage parameters
      * @param con The (readable) database connection
      * @throws OXException On server error
      * @throws SQLException On SQL-error
      */
-    private void matchAndAddUsersDefaultMediaFolders(List<Folder> result, String query, String treeId, ContentType contentType, StorageParameters storageParameters, Connection con) throws OXException, SQLException {
-        int[] defaultFolderIds = OXFolderSQL.getDefaultMediaFoldersForModuleForUser(contentType.getModule(), storageParameters, con);
+    private void matchAndAddUsersDefaultFolders(List<Folder> result, TIntSet ids, String query, int[] mediaTypes, String treeId, StorageParameters storageParameters, Connection con) throws OXException, SQLException {
+        int[] defaultFolderIds = OXFolderSQL.getDefaultFoldersForModuleForUser(FolderObject.INFOSTORE, mediaTypes, storageParameters, con);
+        if (defaultFolderIds.length <= 0) {
+            return;
+        }
+
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(query));
         for (int id : defaultFolderIds) {
-            DatabaseFolder folder = loadFolder(String.valueOf(id), StorageType.WORKING, storageParameters, con, treeId);
-            if (false == result.contains(folder)) {
-                if (localizedNameMatchesQuery(folder, query, storageParameters.getUser().getLocale())) {
+            if (false == ids.contains(id)) {
+                DatabaseFolder folder = loadFolder(Integer.toString(id), StorageType.WORKING, storageParameters, con, treeId);
+                if (localizedNameMatchesQuery(folder, pattern, storageParameters.getUser().getLocale())) {
                     if (storageParameters.getUser().isAnonymousGuest()) {
                         handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
                     }
@@ -3157,53 +3172,76 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     /**
-     * Check if localized folder name matches query, needed for default folders like 'Documents', 'Templates', etc
+     * Ensures that given query starts with and end with a <code>'*'</code> character.
      *
-     * @param folder The folder
-     * @param query The query
-     * @param locale The user's locale
-     * @return <code>true</code> if localized folder name matches query, <code>false</code> if not
+     * @param query The query to examine
+     * @return The prepared query
      */
-    private boolean localizedNameMatchesQuery(DatabaseFolder folder, String query, Locale locale) {
-        if (null == folder || Strings.isEmpty(query)) {
-            return false;
+    private static String prepareWildcardSearch(String query) {
+        StringBuilder sb = null;
+        if (false == query.startsWith("*")) {
+            sb = new StringBuilder(query.length() + 2);
+            sb.append('*').append(query);
         }
-        String localizedName = folder.getLocalizedName(locale);
-        if (Strings.isEmpty(localizedName)) {
-            return false;
+        if (false == query.endsWith("*")) {
+            if (sb == null) {
+                sb = new StringBuilder(query);
+            }
+            sb.append('*');
         }
-        return Pattern.matches(createRegexFromQuery(query), localizedName);
+        return sb == null ? query : sb.toString();
     }
 
     /**
-     * Create a regex from query string with wildcards
+     * Get all user-visible folder in module below given parent folder.
      *
-     * @param query The query to convert
-     * @return The regex
+     * @param parentId The parent folder identifier
+     * @param module The module
+     * @param storageParameters The storage parameters
+     * @return A listing containing identifiers of all visible folders
+     * @throws OXException On server error
      */
-    private static String createRegexFromQuery(String query) {
-        StringBuilder regex = new StringBuilder("^");
-        for (int i = 0; i < query.length(); ++i) {
-            final char c = query.charAt(i);
-            switch (c) {
-                case '*':
-                    regex.append(".*");
-                    break;
-                case '?':
-                    regex.append('.');
-                    break;
-                case '.':
-                    regex.append("\\.");
-                    break;
-                case '\\':
-                    regex.append("\\\\");
-                    break;
-                default:
-                    regex.append(c);
+    private TIntList getVisibleFolders(int parentId, int module, StorageParameters storageParameters) throws OXException {
+        ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        try {
+            Connection con = provider.getConnection();
+            UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+            User user = storageParameters.getUser();
+
+            List<FolderObject> folderList;
+            if (parentId < 0) {
+                folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), module, storageParameters.getContext(), con)).asList();
+            } else {
+                folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, user.getId(), user.getGroups(), storageParameters.getContext(), userPermissionBits, null, con)).asList();
             }
+
+            TIntList result = new TIntArrayList(folderList.size());
+            for (FolderObject folderObject : folderList) {
+                result.add(folderObject.getObjectID());
+                if (folderObject.hasSubfolders()) {
+                    result.addAll(getVisibleFolders(folderObject.getObjectID(), module, storageParameters));
+                }
+            }
+            return result;
+        } finally {
+            provider.close();
         }
-        regex.append('$');
-        return regex.toString();
+    }
+
+    /**
+     * Check if localized folder name matches query, needed for default folders like 'Documents', 'Templates', etc
+     *
+     * @param folder The folder
+     * @param pattern The pattern
+     * @param locale The user's locale
+     * @return <code>true</code> if localized folder name matches query, <code>false</code> if not
+     */
+    private boolean localizedNameMatchesQuery(DatabaseFolder folder, Pattern pattern, Locale locale) {
+        if (null == folder) {
+            return false;
+        }
+        String localizedName = folder.getLocalizedName(locale);
+        return Strings.isEmpty(localizedName) ? false : pattern.matcher(localizedName).matches();
     }
 
 }

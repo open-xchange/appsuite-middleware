@@ -169,7 +169,7 @@ public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess impleme
     public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
         FolderService folderService = getFolderService();
         FolderServiceDecorator decorator = initDecorator();
-        FolderResponse<List<UserizedFolder>> result = folderService.searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, true, start, end, session, decorator);
+        FolderResponse<List<UserizedFolder>> result = folderService.searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, decorator);
         List<UserizedFolder> userizedFolders = result.getResponse();
         return FolderWriter.writeFolders(userizedFolders.toArray(new UserizedFolder[userizedFolders.size()]));
     }

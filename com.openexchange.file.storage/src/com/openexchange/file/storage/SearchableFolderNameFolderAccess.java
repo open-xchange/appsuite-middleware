@@ -52,7 +52,7 @@ package com.openexchange.file.storage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SearchableFolderNameFolderAccess}
+ * {@link SearchableFolderNameFolderAccess} - Extends the folder access by searching folders by name.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5

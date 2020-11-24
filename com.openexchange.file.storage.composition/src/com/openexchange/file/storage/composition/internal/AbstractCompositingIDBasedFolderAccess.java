@@ -633,10 +633,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
         FileStorageFolderAccess folderAccess = getFolderAccess(new FolderID(folderId));
         if (SearchableFolderNameFolderAccess.class.isInstance(folderAccess)) {
-            SearchableFolderNameFolderAccess searchableFolderAccess = (SearchableFolderNameFolderAccess) folderAccess;
-            return searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, start, end);
+            return ((SearchableFolderNameFolderAccess) folderAccess).searchFolderByName(query, folderId, date, includeSubfolders, all, start, end);
         }
-        return null;
+        return new FileStorageFolder[0];
     }
 
     private Map<String,FolderID[]> getFolderPaths(List<String> folderIds, FileStorageFolderAccess folderAccess) throws OXException {

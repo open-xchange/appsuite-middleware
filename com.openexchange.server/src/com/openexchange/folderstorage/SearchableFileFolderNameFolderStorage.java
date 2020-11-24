@@ -53,19 +53,18 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SearchableFolderNameFolderStorage}
+ * {@link SearchableFileFolderNameFolderStorage} - Extends a folder storage to search for file storage folders by name.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5
  */
-public interface SearchableFolderNameFolderStorage extends FolderStorage {
+public interface SearchableFileFolderNameFolderStorage extends FolderStorage {
 
     /**
      * Searches a folder below given folder identifier by folder name
      *
      * @param treeId The tree identifier
      * @param rootFolderId The 'root' folder for search operation
-     * @param contentType The content type of folders to search
      * @param query The query to search
      * @param date The time stamp to limit search result to folders that are newer
      * @param includeSubfolders Include all subfolders below given folder identifier
@@ -75,6 +74,6 @@ public interface SearchableFolderNameFolderStorage extends FolderStorage {
      * @return {@link List} of {@link Folder} sorted by name
      * @throws OXException If search fails
      */
-    List<Folder> search(String treeId, String rootFolderId, ContentType contentType, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException;
+    List<Folder> searchFileStorageFolders(String treeId, String rootFolderId,String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException;
 
 }

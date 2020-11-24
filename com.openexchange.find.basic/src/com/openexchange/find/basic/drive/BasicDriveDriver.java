@@ -726,10 +726,17 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @throws OXException On error
      */
     private static boolean supportsSearchInFolderName(FileStorageAccountAccess accountAccess) throws OXException {
+        if (accountAccess instanceof CapabilityAware) {
+            Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_IN_FOLDER_NAME);
+            if (null != supported) {
+                return supported.booleanValue();
+            }
+        }
+
         accountAccess.connect();
         try {
             FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-            return (SearchableFolderNameFolderAccess.class.isInstance(folderAccess));
+            return FileStorageCapabilityTools.supports(folderAccess, FileStorageCapability.SEARCH_IN_FOLDER_NAME);
         } finally {
             accountAccess.close();
         }

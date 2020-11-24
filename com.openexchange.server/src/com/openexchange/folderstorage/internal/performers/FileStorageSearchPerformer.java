@@ -50,28 +50,28 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.CalculatePermission;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SearchableFolderNameFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SearchPerformer}
+ * {@link FileStorageSearchPerformer}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.5
  */
-public class SearchPerformer extends AbstractUserizedFolderPerformer {
+public class FileStorageSearchPerformer extends AbstractUserizedFolderPerformer {
 
-    public SearchPerformer(ServerSession session, FolderServiceDecorator decorator) throws OXException {
+    public FileStorageSearchPerformer(ServerSession session, FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -80,32 +80,32 @@ public class SearchPerformer extends AbstractUserizedFolderPerformer {
      *
      * @param treeId The tree identifier
      * @param folderId The 'root' folder for search operation
-     * @param module The module identifier
      * @param query The query to search
-     * @param date Timestamp to limit search result to folders that are newer
-     * @param includeSubfolders Include all subfolders below given folder identifier
-     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     * @param date Time stamp to limit search result to folders that are newer
+     * @param includeSubfolders Include all sub-folders below given folder identifier
+     * @param all <code>true</code> to deliver all sub-folders regardless of their subscribed status; <code>false</code> to deliver
      *            subscribed folders only
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @return {@link List} of {@link UserizedFolder} sorted by name
      * @throws OXException If search fails
      */
-    public List<UserizedFolder> doSearch(String treeId, String folderId, ContentType module, String query, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+    public List<UserizedFolder> doSearch(String treeId, String folderId, String query, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
         FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        if (!SearchableFolderNameFolderStorage.class.isInstance(folderStorage)) {
+        if (!SearchableFileFolderNameFolderStorage.class.isInstance(folderStorage)) {
             throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
         }
-        SearchableFolderNameFolderStorage searchableStorage = (SearchableFolderNameFolderStorage) folderStorage;
+
+        SearchableFileFolderNameFolderStorage searchableStorage = (SearchableFileFolderNameFolderStorage) folderStorage;
         List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (searchableStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(searchableStorage);
         }
         try {
-            List<Folder> folders = searchableStorage.search(treeId, folderId, module, query, date, includeSubfolders, start, end, storageParameters);
+            List<Folder> folders = searchableStorage.searchFileStorageFolders(treeId, folderId, query, date, includeSubfolders, start, end, storageParameters);
             List<UserizedFolder> result = new ArrayList<UserizedFolder>(folders.size());
             for (Folder folder : folders) {
                 Permission ownPermission;
@@ -118,20 +118,18 @@ public class SearchPerformer extends AbstractUserizedFolderPerformer {
                     result.add(getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages));
                 }
             }
-            for (final FolderStorage fs : openedStorages) {
+            for (Iterator<FolderStorage> it = openedStorages.iterator(); it.hasNext();) {
+                FolderStorage fs = it.next();
                 fs.commitTransaction(storageParameters);
+                it.remove(); // Successfully committed
             }
             return result;
-        } catch (OXException e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
-            throw e;
-        } catch (Exception e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
+        } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
         }
     }
 

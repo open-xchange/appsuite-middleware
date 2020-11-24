@@ -178,5 +178,38 @@ public enum FileStorageCapability {
      */
     BACKWARD_LINK,
 
+    /**
+     * Support for searching folders by name.
+     */
+    SEARCH_IN_FOLDER_NAME(false),
+
     ;
+
+    private final boolean fileAccessCapability;
+
+    private FileStorageCapability() {
+        this(true);
+    }
+
+    private FileStorageCapability(boolean fileAccessCapability) {
+        this.fileAccessCapability = fileAccessCapability;
+    }
+
+    /**
+     * Checks if this capability is a file access capability.
+     *
+     * @return <code>true</code> for file access capability; otherwise <code>false</code>
+     */
+    public boolean isFileAccessCapability() {
+        return fileAccessCapability;
+    }
+
+    /**
+     * Checks if this capability is a folder access capability.
+     *
+     * @return <code>true</code> folder access capability; otherwise <code>false</code>
+     */
+    public boolean isFolderAccessCapability() {
+        return fileAccessCapability == false;
+    }
 }

@@ -93,7 +93,10 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(DropboxFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(DropboxFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(DropboxFolderAccess.class, capability);
     }
 
     /**
