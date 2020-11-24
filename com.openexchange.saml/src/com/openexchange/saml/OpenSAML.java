@@ -51,7 +51,6 @@ package com.openexchange.saml;
 
 import java.io.StringReader;
 import javax.xml.namespace.QName;
-import org.joda.time.format.DateTimeFormatter;
 import org.opensaml.core.config.Configuration;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
@@ -174,7 +173,7 @@ public final class OpenSAML {
      */
     public String marshall(XMLObject object) throws MarshallingException {
         Element authRequestElement = getMarshallerFactory().getMarshaller(object).marshall(object);
-        return SerializeSupport.prettyPrintXML(authRequestElement);
+        return SerializeSupport.nodeToString(authRequestElement);
     }
 
     @SuppressWarnings("unchecked")
