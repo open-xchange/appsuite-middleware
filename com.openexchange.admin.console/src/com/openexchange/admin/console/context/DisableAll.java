@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -55,22 +56,41 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class DisableAll extends ContextAbstraction {
 
-    public DisableAll(final String[] args2) {
+    /**
+     * Entry point
+     *
+     * @param args command line arguments
+     */
+    public static void main(final String args[]) {
+        new DisableAll().execute(args);
+    }
 
+    /**
+     * Initializes a new {@link DisableAll}.
+     */
+    private DisableAll() {
+        super();
+    }
+
+    /**
+     * Executes the command
+     *
+     * @param args the command line arguments
+     */
+    private void execute(final String[] args) {
         final AdminParser parser = new AdminParser("disableallcontext");
-
         setOptions(parser);
-
         try {
-            parser.ownparse(args2);
-
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            parser.ownparse(args);
+            Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            OXContextInterface oxres = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
 
-            /* final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-            oxres.disableAll(mr, auth); */
+            /*
+             * final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+             * oxres.disableAll(mr, auth);
+             */
             oxres.disableAll(auth);
 
             displayDisabledMessage(null, null, parser);
@@ -78,10 +98,6 @@ public class DisableAll extends ContextAbstraction {
         } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
-    }
-
-    public static void main(final String args[]) {
-        new DisableAll(args);
     }
 
     private void setOptions(final AdminParser parser) {

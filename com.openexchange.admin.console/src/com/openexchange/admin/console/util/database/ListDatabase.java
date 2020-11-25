@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.console.util.database;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
@@ -65,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class ListDatabase extends DatabaseAbstraction {
 
-    public ListDatabase(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("listdatabase");
 
@@ -99,7 +100,7 @@ public class ListDatabase extends DatabaseAbstraction {
     }
 
     private void sysoutOutput(final Database[] databases) throws InvalidDataException, URISyntaxException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final Database database : databases) {
             data.add(makeStandardData(database, false));
         }
@@ -111,7 +112,7 @@ public class ListDatabase extends DatabaseAbstraction {
 
     private void precsvinfos(final Database[] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>(16);
+        final ArrayList<String> columns = new ArrayList<>(16);
         columns.add("id");
         columns.add("display_name");
         columns.add("url");
@@ -128,7 +129,7 @@ public class ListDatabase extends DatabaseAbstraction {
         columns.add("read_id");
         columns.add("scheme");
 
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final Database database : databases) {
             data.add(makeCSVData(database));
@@ -138,7 +139,7 @@ public class ListDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListDatabase(args);
+        new ListDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -190,7 +191,7 @@ public class ListDatabase extends DatabaseAbstraction {
     }
 
     private ArrayList<String> makeStandardData(final Database db, final boolean csv) throws URISyntaxException {
-        final ArrayList<String> rea_data = new ArrayList<String>();
+        final ArrayList<String> rea_data = new ArrayList<>();
 
         rea_data.add(db.getId().toString());
 
@@ -238,7 +239,7 @@ public class ListDatabase extends DatabaseAbstraction {
             if (csv) {
                 rea_data.add(db.getPoolHardLimit().toString());
             } else {
-                rea_data.add(db.getPoolHardLimit() > 0 ? "true" : "false");
+                rea_data.add(i(db.getPoolHardLimit()) > 0 ? "true" : "false");
             }
         } else {
             rea_data.add(null);

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.net.URI;
@@ -66,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class UnblockDatabase extends DatabaseAbstraction {
 
-    public UnblockDatabase(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("unblockdatabase");
 
@@ -114,17 +115,16 @@ public class UnblockDatabase extends DatabaseAbstraction {
     }
 
     private void sysoutOutput(Database[] databases) throws InvalidDataException, URISyntaxException {
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(databases.length);
+        ArrayList<ArrayList<String>> data = new ArrayList<>(databases.length);
         for (Database database : databases) {
             data.add(makeStandardData(database));
         }
 
-        doOutput(new String[] { "r", "l", "l", "l" },
-                 new String[] { "id", "name", "hostname", "scheme" }, data);
+        doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "id", "name", "hostname", "scheme" }, data);
     }
 
     private ArrayList<String> makeStandardData(Database db) throws URISyntaxException {
-        ArrayList<String> rea_data = new ArrayList<String>();
+        ArrayList<String> rea_data = new ArrayList<>();
 
         rea_data.add(db.getId().toString());
 
@@ -171,7 +171,7 @@ public class UnblockDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new UnblockDatabase(args);
+        new UnblockDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

@@ -66,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class CountDatabaseSchema extends DatabaseAbstraction {
 
-    public CountDatabaseSchema(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("countdatabaseschema");
 
@@ -105,7 +105,7 @@ public class CountDatabaseSchema extends DatabaseAbstraction {
     }
 
     private void sysoutOutput(Map<Database, Integer> databases) throws InvalidDataException, URISyntaxException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (Map.Entry<Database, Integer> databaseCount : databases.entrySet()) {
             data.add(makeStandardData(databaseCount, false));
         }
@@ -116,13 +116,13 @@ public class CountDatabaseSchema extends DatabaseAbstraction {
 
     private void precsvinfos(Map<Database, Integer> databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("display_name");
         columns.add("url");
         columns.add("number_of_schemas");
 
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (Map.Entry<Database, Integer> databaseCount : databases.entrySet()) {
             data.add(makeCSVData(databaseCount));
@@ -132,7 +132,7 @@ public class CountDatabaseSchema extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new CountDatabaseSchema(args);
+        new CountDatabaseSchema().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -153,7 +153,7 @@ public class CountDatabaseSchema extends DatabaseAbstraction {
     }
 
     private ArrayList<String> makeStandardData(Map.Entry<Database, Integer> databaseCount, final boolean csv) throws URISyntaxException {
-        final ArrayList<String> rea_data = new ArrayList<String>();
+        final ArrayList<String> rea_data = new ArrayList<>();
 
         Database db = databaseCount.getKey();
         rea_data.add(db.getId().toString());

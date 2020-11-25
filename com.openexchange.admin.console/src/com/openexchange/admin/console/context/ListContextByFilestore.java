@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -64,8 +65,7 @@ public class ListContextByFilestore extends ContextAbstraction {
         setCSVOutputOption(parser);
     }
 
-    public ListContextByFilestore(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("listcontext");
 
         setOptions(parser);
@@ -125,7 +125,7 @@ public class ListContextByFilestore extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListContextByFilestore(args);
+        new ListContextByFilestore().execute(args);
     }
 
     @Override

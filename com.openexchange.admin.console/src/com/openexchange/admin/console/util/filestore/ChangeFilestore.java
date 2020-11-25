@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.filestore;
 
 import java.rmi.Naming;
@@ -62,7 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
  */
 public class ChangeFilestore extends FilestoreAbstraction {
 
-    public ChangeFilestore(final String[] args2) {
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("changefilestore");
 
         setOptions(parser);
@@ -73,15 +74,12 @@ public class ChangeFilestore extends FilestoreAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Filestore fstore = new Filestore();
             parseAndSetFilestoreID(parser, fstore);
-
             parseAndSetFilestorePath(parser, fstore);
-
             parseAndSetFilestoreSize(parser, fstore);
-
             parseAndSetFilestoreMaxCtxs(parser, fstore);
 
             oxutil.changeFilestore(fstore, auth);
@@ -94,18 +92,14 @@ public class ChangeFilestore extends FilestoreAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ChangeFilestore(args);
+        new ChangeFilestore().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
         setFilestoreIDOption(parser, "changed");
-
         setPathOption(parser, NeededQuadState.notneeded);
-
         setSizeOption(parser, null);
-
         setMaxCtxOption(parser, null);
     }
 }

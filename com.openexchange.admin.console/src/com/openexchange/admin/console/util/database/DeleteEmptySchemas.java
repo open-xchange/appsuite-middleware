@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
@@ -62,7 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public class DeleteEmptySchemas extends DatabaseAbstraction {
 
-    public DeleteEmptySchemas(final String[] args2) {
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("deleteemptyschema");
         setOptions(parser);
 
@@ -80,7 +81,6 @@ public class DeleteEmptySchemas extends DatabaseAbstraction {
             parseAndSetDatabasename(parser, db);
             parseAndSetSchema(parser, db);
             parseAndSetSchemasToKeep(parser);
-
 
             boolean noDbGiven = dbid == null && dbname == null;
             if (noDbGiven) {
@@ -112,7 +112,7 @@ public class DeleteEmptySchemas extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new DeleteEmptySchemas(args);
+        new DeleteEmptySchemas().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

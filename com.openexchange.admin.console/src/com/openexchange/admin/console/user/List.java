@@ -67,14 +67,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class List extends ListCoreExtended {
 
     public static void main(final String[] args) {
-        new List(args);
+        new List().execute(args);
     }
 
-    public List(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("listuser");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args) {
+        commonfunctions(new AdminParser("listuser"), args);
     }
 
     @Override
@@ -85,7 +82,7 @@ public class List extends ListCoreExtended {
     @Override
     protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth, includeGuests, excludeUsers) : oxusr.list(ctx, search_pattern, auth, includeGuests, excludeUsers);
-        if ( allusers.length == 0 ) {
+        if (allusers.length == 0) {
             return new User[0];
         }
         return oxusr.getData(ctx, allusers, auth);
@@ -99,11 +96,11 @@ public class List extends ListCoreExtended {
 
     @Override
     protected ArrayList<String> getColumnsOfAllExtensions(final User user) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     @Override
     protected ArrayList<String> getDataOfAllExtensions(final User user) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 }

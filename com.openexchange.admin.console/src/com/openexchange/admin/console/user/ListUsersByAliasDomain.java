@@ -53,8 +53,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -73,16 +73,12 @@ public class ListUsersByAliasDomain extends ListCore {
     private static CLIOption alias_domain_cli_option;
 
     public static void main(final String[] args) {
-        new ListUsersByAliasDomain(args);
+        new ListUsersByAliasDomain().execute(args);
     }
 
-    public ListUsersByAliasDomain(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("listuserbyaliasdomain");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args2) {
+        commonfunctions(new AdminParser("listuserbyaliasdomain"), args2);
     }
-
 
     @Override
     protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -101,11 +97,11 @@ public class ListUsersByAliasDomain extends ListCore {
 
     @Override
     protected ArrayList<String> getColumnsOfAllExtensions(final User user) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     @Override
     protected ArrayList<String> getDataOfAllExtensions(final User user) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 }

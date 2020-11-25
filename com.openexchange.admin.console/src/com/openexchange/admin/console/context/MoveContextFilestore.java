@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -58,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 public class MoveContextFilestore extends ContextAbstraction {
 
-    public MoveContextFilestore(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextfilestore");
         setOptions(parser);
@@ -74,13 +75,15 @@ public class MoveContextFilestore extends ContextAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
             final Filestore fs = parseAndSetFilestoreId(parser);
 
-            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-
-            oxres.moveContextFilestore(ctx, fs, mr, auth);*/
+            /*
+             * final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+             * 
+             * oxres.moveContextFilestore(ctx, fs, mr, auth);
+             */
             final int jobId = oxres.moveContextFilestore(ctx, fs, auth);
 
             displayMovedMessage(successtext, null, "to filestore " + getFilestoreid() + " scheduled as job " + jobId, parser);
@@ -94,7 +97,7 @@ public class MoveContextFilestore extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new MoveContextFilestore(args);
+        new MoveContextFilestore().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

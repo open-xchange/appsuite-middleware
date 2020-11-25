@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.server;
 
 import java.rmi.Naming;
@@ -62,8 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class UnregisterServer extends ServerAbstraction {
 
-    public UnregisterServer(final String[] args2) {
-
+    public void execute(final String[] args2) {
         AdminParser parser = new AdminParser("unregisterserver");
 
         setOptions(parser);
@@ -94,7 +94,7 @@ public class UnregisterServer extends ServerAbstraction {
     }
 
     public static void main(final String args[]) {
-        new UnregisterServer(args);
+        new UnregisterServer().execute(args);
     }
 
     private void setOptions(AdminParser parser) {

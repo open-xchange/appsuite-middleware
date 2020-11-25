@@ -224,7 +224,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         }
     }
 
-    protected void parseAndSetOnlyEmptySchemas(final AdminParser parser) throws InvalidDataException {
+    protected void parseAndSetOnlyEmptySchemas(final AdminParser parser) {
         if (null != parser.getOptionValue(this.onlyEmptySchemasOption)) {
             onlyEmptySchemas = Boolean.TRUE;
         } else {

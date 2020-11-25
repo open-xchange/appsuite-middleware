@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
@@ -62,7 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public class ChangeDatabase extends DatabaseAbstraction {
 
-    public ChangeDatabase(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("changedatabase");
 
@@ -86,7 +87,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
             parseAndSetMandatoryOptions(parser, db);
 
-//            parseAndSetMasterAndID(parser, db);
+            //parseAndSetMasterAndID(parser, db);
 
             oxutil.changeDatabase(db, auth);
 
@@ -98,7 +99,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ChangeDatabase(args);
+        new ChangeDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -112,8 +113,8 @@ public class ChangeDatabase extends DatabaseAbstraction {
         setDatabaseUsernameOption(parser, false);
         setDatabaseDriverOption(parser, null, false);
         setDatabasePasswdOption(parser, false);
-//        setDatabaseIsMasterOption(parser, false);
-//        setDatabaseMasterIDOption(parser, false);
+        //        setDatabaseIsMasterOption(parser, false);
+        //        setDatabaseMasterIDOption(parser, false);
 
         setDatabaseMaxUnitsOption(parser, null, false);
         setDatabasePoolHardlimitOption(parser, null, false);

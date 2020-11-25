@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.net.MalformedURLException;
@@ -62,21 +63,19 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Exists extends ExistsCore {
 
-    public Exists(final String[] args2) {
-        final AdminParser parser = new AdminParser("existscontext");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args) {
+        AdminParser parser = new AdminParser("existscontext");
+        commonfunctions(parser, args);
     }
 
     public static void main(final String args[]) {
-        new Exists(args);
+        new Exists().execute(args);
     }
 
     @Override
     protected boolean maincall(AdminParser parser, Context ctx, boolean inServer, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException {
         // get rmi ref
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-
+        OXContextInterface oxctx = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
         return inServer ? oxctx.existsInServer(ctx, auth) : oxctx.exists(ctx, auth);
     }
 }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -57,7 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class GetAccessCombinationName extends ContextAbstraction {
 
-    public GetAccessCombinationName(final String[] args2) {
+    public void execute(final String[] args) {
 
         final AdminParser parser = new AdminParser("getaccesscombinationnameforcontext");
 
@@ -66,7 +67,7 @@ public class GetAccessCombinationName extends ContextAbstraction {
         String successtext = null;
 
         try {
-            parser.ownparse(args2);
+            parser.ownparse(args);
             final Context ctx = contextparsing(parser);
 
             parseAndSetContextName(parser, ctx);
@@ -76,7 +77,7 @@ public class GetAccessCombinationName extends ContextAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
             // Fetch access combination name and print out
             System.out.println(oxres.getAccessCombinationName(ctx, auth));
@@ -89,8 +90,8 @@ public class GetAccessCombinationName extends ContextAbstraction {
 
     }
 
-	public static void main(final String args[]) {
-        new GetAccessCombinationName(args);
+    public static void main(final String args[]) {
+        new GetAccessCombinationName().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

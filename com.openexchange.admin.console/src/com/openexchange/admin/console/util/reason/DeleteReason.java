@@ -46,12 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.reason;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Naming;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -69,7 +71,7 @@ public class DeleteReason extends ReasonAbstraction {
 
     private CLIOption reasonIDOption = null;
 
-    public DeleteReason(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("deletereason");
 
@@ -82,12 +84,12 @@ public class DeleteReason extends ReasonAbstraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             reason_id = (String) parser.getOptionValue(this.reasonIDOption);
             final MaintenanceReason[] mrs = new MaintenanceReason[1];
             mrs[0] = new MaintenanceReason();
-            mrs[0].setId(Integer.parseInt(reason_id));
+            mrs[0].setId(I(Integer.parseInt(reason_id)));
             oxutil.deleteMaintenanceReason(mrs, auth);
 
             displayDeletedMessage(reason_id, null, parser);
@@ -98,7 +100,7 @@ public class DeleteReason extends ReasonAbstraction {
     }
 
     public static void main(final String args[]) {
-        new DeleteReason(args);
+        new DeleteReason().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

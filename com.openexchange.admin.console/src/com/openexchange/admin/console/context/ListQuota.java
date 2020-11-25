@@ -65,18 +65,18 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class ListQuota extends ListQuotaCore {
 
-    public ListQuota(String[] args2) {
+    public void execute(String[] args2) {
         AdminParser parser = new AdminParser("listquota");
         commonfunctions(parser, args2);
     }
 
     public static void main(final String args[]) {
-        new ListQuota(args);
+        new ListQuota().execute(args);
     }
 
     @Override
-    protected Quota[] maincall(AdminParser parser, Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException, MalformedURLException, NotBoundException {
-        OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+    protected Quota[] maincall(AdminParser parser, Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, MalformedURLException, NotBoundException {
+        OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
         return oxctx.listQuotas(ctx, auth);
     }
 
