@@ -57,6 +57,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Strings;
 
@@ -74,6 +76,15 @@ public class HostList {
      */
     public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "");
 
+    private static final ConcurrentMap<String, HostList> CACHE = new ConcurrentHashMap<>(32, 0.9F, 1);
+
+    /**
+     * Flushes internal cache.
+     */
+    public static void flushCache() {
+        CACHE.clear();
+    }
+
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
      *
@@ -86,6 +97,18 @@ public class HostList {
             return EMPTY;
         }
 
+        HostList instance = CACHE.get(hostList);
+        if (instance == null) {
+            HostList newInstance = valueOf0(hostList);
+            instance = CACHE.putIfAbsent(hostList, newInstance);
+            if (instance == null) {
+                instance = newInstance;
+            }
+        }
+        return instance;
+    }
+
+    private static HostList valueOf0(String hostList) {
         String[] tokens = Strings.splitByComma(hostList);
         Set<String> matchingHostNames = new HashSet<String>(tokens.length);
         Set<String> matchingAppendixHostNames = new HashSet<String>(tokens.length);
