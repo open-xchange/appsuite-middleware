@@ -67,6 +67,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
  * @author cutmasta,d7
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class BasicCommandlineOptions {
 
     private static final char dividechar = ' ';
@@ -627,7 +628,7 @@ public abstract class BasicCommandlineOptions {
             // fill up part
             try {
                 columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 // there's no number, so use longest line as alignment value
                 columnsizes[i] = longestLine(data, columnnames, i);
             }

@@ -65,7 +65,6 @@ import com.openexchange.admin.diff.file.handler.ConfFileHandler;
 import com.openexchange.admin.diff.file.provider.util.FileProviderUtil;
 import com.openexchange.admin.diff.result.DiffResult;
 
-
 /**
  * {@link RecursiveFileProvider}
  *
@@ -83,7 +82,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
         Collection<File> listFiles = FileUtils.listFiles(rootFolder, fileExtension, true);
 
         if (listFiles != null) {
-            return Collections.synchronizedList(new ArrayList<File>(listFiles));
+            return Collections.synchronizedList(new ArrayList<>(listFiles));
         }
         return Collections.synchronizedList(new ArrayList<File>());
     }
@@ -98,9 +97,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
         }
 
         for (File currentFile : filesToAdd) {
-            FileReader fileReader = null;
-            try {
-                fileReader = new FileReader(currentFile);
+            try (FileReader fileReader = new FileReader(currentFile)) {
                 String fileContent = IOUtils.toString(fileReader);
                 ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                 ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
@@ -108,8 +105,6 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
             } catch (IOException e) {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
-            } finally {
-                IOUtils.closeQuietly(fileReader);
             }
         }
     }

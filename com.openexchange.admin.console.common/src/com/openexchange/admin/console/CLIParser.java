@@ -69,6 +69,7 @@ import org.apache.commons.cli.UnrecognizedOptionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public class CLIParser {
 
     private static final String OPT_START = "--";
@@ -99,8 +100,8 @@ public class CLIParser {
         super();
         this.posix = posix;
         cliOptions = posix ? new Options() : null;
-        options = new HashMap<String, CLIOption>(16);
-        values = new HashMap<String, List<Object>>(16);
+        options = new HashMap<>(16);
+        values = new HashMap<>(16);
     }
 
     /**
@@ -289,7 +290,7 @@ public class CLIParser {
      * @return The parsed values of all occurrences of given option
      */
     public final Collection<Object> getOptionValues(final CLIOption option) {
-        final List<Object> result = new ArrayList<Object>(2);
+        final List<Object> result = new ArrayList<>(2);
 
         while (true) {
             final Object o = getOptionValue(option, null, true);
@@ -482,7 +483,7 @@ public class CLIParser {
 
             List<Object> vals = values.get(longForm);
             if (null == vals) {
-                vals = new ArrayList<Object>(2);
+                vals = new ArrayList<>(2);
                 values.put(longForm, vals);
                 if (null != shortForm) {
                     values.put(shortForm, vals);
@@ -497,7 +498,7 @@ public class CLIParser {
     }
 
     private final void manualParse(final String[] args, final Locale locale) throws CLIIllegalOptionValueException, CLIUnknownOptionException {
-        final List<String> otherArgs = new ArrayList<String>(2);
+        final List<String> otherArgs = new ArrayList<>(2);
         int position = 0;
         while (position < args.length) {
             final String argument = args[position];
@@ -591,7 +592,7 @@ public class CLIParser {
 
         List<Object> vals = values.get(longForm);
         if (null == vals) {
-            vals = new ArrayList<Object>(2);
+            vals = new ArrayList<>(2);
             values.put(longForm, vals);
             final String shortForm = opt.shortForm();
             if (null != shortForm) {

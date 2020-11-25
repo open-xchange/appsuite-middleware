@@ -59,7 +59,6 @@ import org.mockito.MockitoAnnotations;
 import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
 
-
 /**
  * {@link PropertyHandlerTest}
  * 
@@ -72,19 +71,19 @@ public class PropertyHandlerTest {
     private PropertyHandler propertyHandler;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-     @Test
-     public void testGetPropertyDiffsPerFile_oneMoreFile_notMarkedForPropertyDiff() {
+    @Test
+    public void testGetPropertyDiffsPerFile_oneMoreFile_notMarkedForPropertyDiff() {
         DiffResult diffResult = new DiffResult();
 
-        List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lOriginalFiles = new ArrayList<>();
         lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
         lOriginalFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile2=valueFile2", true));
 
-        List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lInstalledFiles = new ArrayList<>();
         lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
@@ -94,14 +93,14 @@ public class PropertyHandlerTest {
         Assert.assertEquals(0, diffResult.getMissingProperties().size());
     }
 
-     @Test
-     public void testGetPropertyDiffsPerFile_propertyChanged_markAsChanged() {
+    @Test
+    public void testGetPropertyDiffsPerFile_propertyChanged_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
-        List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lOriginalFiles = new ArrayList<>();
         lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
-        List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lInstalledFiles = new ArrayList<>();
         lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile5", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
@@ -111,14 +110,14 @@ public class PropertyHandlerTest {
         Assert.assertEquals(0, diffResult.getMissingProperties().size());
     }
 
-     @Test
-     public void testGetPropertyDiffsPerFile_propertyMissing_markAsChanged() {
+    @Test
+    public void testGetPropertyDiffsPerFile_propertyMissing_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
-        List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lOriginalFiles = new ArrayList<>();
         lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
-        List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lInstalledFiles = new ArrayList<>();
         lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
@@ -128,14 +127,14 @@ public class PropertyHandlerTest {
         Assert.assertEquals(1, diffResult.getMissingProperties().size());
     }
 
-     @Test
-     public void testGetPropertyDiffsPerFile_valueMissing_markAsChanged() {
+    @Test
+    public void testGetPropertyDiffsPerFile_valueMissing_markAsChanged() {
         DiffResult diffResult = new DiffResult();
 
-        List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lOriginalFiles = new ArrayList<>();
         lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
-        List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
+        List<ConfigurationFile> lInstalledFiles = new ArrayList<>();
         lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1\nkeyFile2=newProperty", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);

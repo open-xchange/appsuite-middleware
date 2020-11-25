@@ -670,7 +670,8 @@ public class DiffMatchPatch {
    *     suffix of text1, the prefix of text2, the suffix of text2 and the
    *     common middle.  Or null if there was no match.
    */
-  protected String[] diff_halfMatch(String text1, String text2) {
+   @SuppressWarnings("null")
+   protected String[] diff_halfMatch(String text1, String text2) {
     if (Diff_Timeout <= 0) {
       // Don't risk returning a non-optimal diff if we have unlimited time.
       return null;
@@ -704,6 +705,7 @@ public class DiffMatchPatch {
       return hm;
       //return new String[]{hm[0], hm[1], hm[2], hm[3], hm[4]};
     }
+    // Huh? 'hm' cannot be 'null' at this point, hence the '@SuppressWarnings("null")'
     return new String[]{hm[2], hm[3], hm[0], hm[1], hm[4]};
   }
 
@@ -840,7 +842,6 @@ public class DiffMatchPatch {
     // Only extract an overlap if it is as big as the edit ahead or behind it.
     pointer = diffs.listIterator();
     Diff prevDiff = null;
-    thisDiff = null;
     if (pointer.hasNext()) {
       prevDiff = pointer.next();
       if (pointer.hasNext()) {
@@ -848,7 +849,7 @@ public class DiffMatchPatch {
       }
     }
     while (thisDiff != null) {
-      if (prevDiff.operation == Operation.DELETE &&
+      if (prevDiff != null && prevDiff.operation == Operation.DELETE &&
           thisDiff.operation == Operation.INSERT) {
         String deletion = prevDiff.text;
         String insertion = thisDiff.text;
@@ -910,7 +911,7 @@ public class DiffMatchPatch {
     Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
     // Intentionally ignore the first and last element (don't need checking).
     while (nextDiff != null) {
-      if (prevDiff.operation == Operation.EQUAL &&
+      if (thisDiff != null && prevDiff != null && prevDiff.operation == Operation.EQUAL &&
           nextDiff.operation == Operation.EQUAL) {
         // This is a single edit surrounded by equalities.
         equality1 = prevDiff.text;
@@ -1252,10 +1253,10 @@ public class DiffMatchPatch {
     Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
     // Intentionally ignore the first and last element (don't need checking).
     while (nextDiff != null) {
-      if (prevDiff.operation == Operation.EQUAL &&
+      if (prevDiff != null && prevDiff.operation == Operation.EQUAL &&
           nextDiff.operation == Operation.EQUAL) {
         // This is a single edit surrounded by equalities.
-        if (thisDiff.text.endsWith(prevDiff.text)) {
+        if (thisDiff != null && thisDiff.text.endsWith(prevDiff.text)) {
           // Shift the edit over the previous equality.
           thisDiff.text = prevDiff.text
               + thisDiff.text.substring(0, thisDiff.text.length()
@@ -1269,7 +1270,7 @@ public class DiffMatchPatch {
           thisDiff = pointer.next(); // Walk past nextDiff.
           nextDiff = pointer.hasNext() ? pointer.next() : null;
           changes = true;
-        } else if (thisDiff.text.startsWith(nextDiff.text)) {
+        } else if (thisDiff != null && thisDiff.text.startsWith(nextDiff.text)) {
           // Shift the edit over the next equality.
           prevDiff.text += nextDiff.text;
           thisDiff.text = thisDiff.text.substring(nextDiff.text.length())
@@ -1801,7 +1802,7 @@ public class DiffMatchPatch {
    * @deprecated Prefer patch_make(String text1, LinkedList<Diff> diffs).
    */
   @Deprecated
-public LinkedList<Patch> patch_make(String text1, @SuppressWarnings("unused") String text2,
+public LinkedList<Patch> patch_make(String text1, String text2,
       LinkedList<Diff> diffs) {
     return patch_make(text1, diffs);
   }
@@ -2260,7 +2261,7 @@ public LinkedList<Patch> patch_make(String text1, @SuppressWarnings("unused") St
       while (!text.isEmpty()) {
         try {
           sign = text.getFirst().charAt(0);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
           // Blank line?  Whatever.
           text.removeFirst();
           continue;
