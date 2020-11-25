@@ -302,7 +302,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
-            
+
             registerService(ObfuscatorService.class, SessionHandler.getObfuscator());
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
@@ -333,6 +333,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
                     @Override
                     public void handleEvent(Event event) {
                         if (event.containsProperty(CommonEvent.REMOTE_MARKER)) {
+                            // Received from remote node
                             int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
                             int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
                             Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");

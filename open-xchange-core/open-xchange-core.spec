@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 55
+%define        ox_release 56
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1275,6 +1275,18 @@ ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
 # SoftwareChange_Request-3934
 ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
 
+# SoftwareChange_Request-77
+PFILE=/opt/open-xchange/etc/cache.ccf
+NAMES=( jcs.region.User.cacheattributes.MaxObjects jcs.region.UserConfiguration.cacheattributes.MaxObjects jcs.region.UserPermissionBits.cacheattributes.MaxObjects jcs.region.UserSettingMail.cacheattributes.MaxObjects jcs.region.Context.cacheattributes.MaxObjects )
+OLDDEFAULTS=( 40000 20000 20000 20000 10000 )
+NEWDEFAULTS=( 4000000 4000000 4000000 4000000 1000000 )
+for I in $(seq 1 ${#NAMES[@]}); do
+  VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
+  if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
+    ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+  fi
+done
+
 # SoftwareChange_Request-175
 ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
@@ -1318,6 +1330,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Nov 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2020-11-23 (5916)
 * Thu Sep 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-09-22 (5867)
 * Wed Jul 01 2020 Marcus Klein <marcus.klein@open-xchange.com>

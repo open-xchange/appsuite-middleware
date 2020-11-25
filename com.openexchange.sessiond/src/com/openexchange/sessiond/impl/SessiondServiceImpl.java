@@ -104,7 +104,13 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean storeSession(String sessionId) throws OXException {
-        return SessionHandler.storeSession(sessionId);
+        // Assume 'addIfAbsent' is false to force update of the session in session storage
+        return SessionHandler.storeSession(sessionId, false);
+    }
+
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
+        return SessionHandler.storeSession(sessionId, addIfAbsent);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean removeSession(final String sessionId) {
-        return SessionHandler.clearSession(sessionId);
+        return (null != SessionHandler.clearSession(sessionId, true));
     }
 
     @Override
@@ -142,17 +148,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         SessionHandler.removeContextSessions(contextId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         SessionHandler.removeContextSessionsGlobal(contextIds);
-    }
-
-    @Override
-    public int getUserSessions(int userId, int contextId) {
-        return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }
 
     @Override
@@ -168,6 +166,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         all.addAll(local);
         all.addAll(remote);
         return all;
+    }
+
+    @Override
+    public int getUserSessions(int userId, int contextId) {
+        return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }
 
     @Override
@@ -199,13 +202,17 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         if (null == sessionId) {
             return null;
         }
-        SessionControl sessionControl = SessionHandler.getSession(sessionId, true);
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
+        /*-
+         *
+        if (!considerSessionStorage && null == sessionControl) {
+            // No local session found. Maybe available in session storage...
+            sessionControl = SessionHandler.getSession(sessionId, false, true);
+        }
+         *
+         */
         if (null == sessionControl) {
-            if ("unset".equalsIgnoreCase(sessionId)) {
-                LOG.debug("Session not found. ID: {}", sessionId);
-            } else {
-                LOG.info("Session not found. ID: {}", sessionId);
-            }
+            LOG.debug("Session not found. ID: {}", sessionId);
             return null;
         }
         return sessionControl.getSession();
@@ -217,6 +224,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             return false;
         }
         return SessionHandler.isActive(sessionId);
+    }
+
+    @Override
+    public List<String> getActiveSessionIDs() {
+        return SessionHandler.getActiveSessionIDs();
     }
 
     @Override
@@ -286,4 +298,10 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         all.addAll(remote);
         return all;
     }
+
+    @Override
+    public boolean isApplicableForSessionStorage(Session session) {
+        return SessionHandler.useSessionStorage(session);
+    }
+
 }

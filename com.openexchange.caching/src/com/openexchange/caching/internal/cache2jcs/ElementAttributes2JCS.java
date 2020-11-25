@@ -50,6 +50,8 @@
 package com.openexchange.caching.internal.cache2jcs;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.apache.jcs.engine.behavior.IElementAttributes;
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 import com.openexchange.caching.ElementAttributes;
@@ -98,13 +100,13 @@ public final class ElementAttributes2JCS implements ElementAttributes {
     }
 
     @Override
-    public ArrayList<ElementEventHandler> getElementEventHandlers() {
-        final ArrayList<?> l = attributes.getElementEventHandlers();
-        final ArrayList<ElementEventHandler> retval;
+    public Queue<ElementEventHandler> getElementEventHandlers() {
+        final Queue<IElementEventHandler> l = attributes.getElementEventHandlers();
+        final Queue<ElementEventHandler> retval;
         if (l == null) {
-            retval = new ArrayList<ElementEventHandler>(0);
+            retval = new LinkedList<ElementEventHandler>();
         } else {
-            retval = new ArrayList<ElementEventHandler>(l.size());
+            retval = new LinkedList<ElementEventHandler>();
             for (final Object object : l) {
                 retval.add(new ElementEventHandler2JCS((IElementEventHandler) object));
             }

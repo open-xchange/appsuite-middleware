@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -61,9 +60,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -73,6 +69,10 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Object handling the multi threaded access to session container. Excessive locking is used to secure container data structures.
@@ -84,28 +84,22 @@ final class SessionData {
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionData.class);
 
     private final int maxSessions;
-
     private final long randomTokenTimeout;
-
     private final boolean autoLogin;
-
-    private final LinkedList<SessionContainer> sessionList;
-
     private final Map<String, String> randoms;
 
-    private final Lock rlock;
+    /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'sessionList' is seldom modified (see rotateShort()) */
+    private final RotatableCopyOnWriteArrayList<SessionContainer> sessionList;
 
-    private final Lock wlock;
-
-    private final LinkedList<SessionMap> longTermList;
-
-    // The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
-    // This is used to guard against potentially slow serial searches of the long term sessions
+    /**
+     * The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
+     * <p>
+     * This is used to guard against potentially slow serial searches of the long term sessions
+     */
     private final UserRefCounter longTermUserGuardian = new UserRefCounter();
 
-    private final Lock wlongTermLock;
-
-    private final Lock rlongTermLock;
+    /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'longTermList' is seldom modified (see rotateLongTerm()) */
+    private final RotatableCopyOnWriteArrayList<SessionMap> longTermList;
 
     /**
      * Map to remember if there is already a task that should move the session to the first container.
@@ -113,12 +107,20 @@ final class SessionData {
     private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
 
     private final AtomicReference<ThreadPoolService> threadPoolService;
-
     private final AtomicReference<TimerService> timerService;
 
-    protected Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
+    protected final Map<String, ScheduledTimerTask> removers = new ConcurrentHashMap<String, ScheduledTimerTask>();
 
-    SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
+    /**
+     * Initializes a new {@link SessionData}.
+     *
+     * @param containerCount The container count for short-term sessions
+     * @param maxSessions The max. number of total sessions
+     * @param randomTokenTimeout The timeout for random tokens
+     * @param longTermContainerCount The container count for long-term sessions
+     * @param autoLogin Whether auto-login is enabled or not
+     */
+    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin) {
         super();
         threadPoolService = new AtomicReference<ThreadPoolService>();
         timerService = new AtomicReference<TimerService>();
@@ -126,39 +128,27 @@ final class SessionData {
         this.randomTokenTimeout = randomTokenTimeout;
         this.autoLogin = autoLogin;
 
-        sessionList = new LinkedList<SessionContainer>();
-        randoms = new ConcurrentHashMap<String, String>();
-        ReadWriteLock shortTermLock = new ReentrantReadWriteLock(true);
-        rlock = shortTermLock.readLock();
-        wlock = shortTermLock.writeLock();
-        ReadWriteLock longTermLock = new ReentrantReadWriteLock(true);
-        wlongTermLock = longTermLock.writeLock();
-        rlongTermLock = longTermLock.readLock();
-        for (int i = 0; i < containerCount; i++) {
-            sessionList.add(0, new SessionContainer());
-        }
+        randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
-        longTermList = new LinkedList<SessionMap>();
-        for (int i = 0; i < longTermContainerCount; i++) {
-            longTermList.add(0, new SessionMap(256));
+        SessionContainer[] shortTermInit = new SessionContainer[containerCount];
+        for (int i = containerCount; i-- > 0;) {
+            shortTermInit[i] = new SessionContainer();
         }
+        sessionList = new RotatableCopyOnWriteArrayList<SessionContainer>(shortTermInit);
+
+        SessionMap[] longTermInit = new SessionMap[longTermContainerCount];
+        for (int i = longTermContainerCount; i-- > 0;) {
+            longTermInit[i] = new SessionMap(256);
+        }
+        longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
 
     void clear() {
-        wlock.lock();
-        try {
-            sessionList.clear();
-            randoms.clear();
-        } finally {
-            wlock.unlock();
-        }
-        wlongTermLock.lock();
-        try {
-            longTermList.clear();
-            longTermUserGuardian.clear();
-        } finally {
-            wlongTermLock.unlock();
-        }
+        sessionList.clear();
+        randoms.clear();
+
+        longTermUserGuardian.clear();
+        longTermList.clear();
     }
 
     /**
@@ -167,62 +157,52 @@ final class SessionData {
      * @return The removed sessions
      */
     List<SessionControl> rotateShort() {
-        // A write access to lists
-        wlock.lock();
-        try {
-            List<SessionControl> removedSessions = new LinkedList<SessionControl>(sessionList.removeLast().getSessionControls());
-            sessionList.addFirst(new SessionContainer());
+        // This is the only location which alters 'sessionList' during runtime
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
 
-            if (autoLogin && false == removedSessions.isEmpty()) {
-                List<SessionControl> transientSessions = null;
+        if (autoLogin && false == removedSessions.isEmpty()) {
+            List<SessionControl> transientSessions = null;
 
-                wlongTermLock.lock();
-                try {
-                    SessionMap first = longTermList.getFirst();
-                    for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
-                        final SessionControl control = it.next();
-                        final SessionImpl session = control.getSession();
-                        if (false == session.isTransient()) {
-                            // A regular, non-transient session
-                            first.putBySessionId(session.getSessionID(), control);
-                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
-                        } else {
-                            // A transient session -- do not move to long-term container
-                            it.remove();
-                            if (null == transientSessions) {
-                                transientSessions = new LinkedList<SessionControl>();
-                            }
-                            transientSessions.add(control);
+            try {
+                SessionMap first = longTermList.get(0);
+                for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
+                    final SessionControl control = it.next();
+                    final SessionImpl session = control.getSession();
+                    if (false == session.isTransient()) {
+                        // A regular, non-transient session
+                        first.putBySessionId(session.getSessionID(), control);
+                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                    } else {
+                        // A transient session -- do not move to long-term container
+                        it.remove();
+                        if (null == transientSessions) {
+                            transientSessions = new LinkedList<SessionControl>();
                         }
+                        transientSessions.add(control);
                     }
-                } finally {
-                    wlongTermLock.unlock();
                 }
-
-                if (null != transientSessions) {
-                    SessionHandler.postContainerRemoval(transientSessions, true);
-                }
+            } catch (IndexOutOfBoundsException e) {
+                // About to shut-down
+                LOG.error("First long-term session container does not exist. Likely SessionD is shutting down...", e);
             }
 
-            return removedSessions;
-        } finally {
-            wlock.unlock();
+            if (null != transientSessions) {
+                SessionHandler.postContainerRemoval(transientSessions, true);
+            }
         }
+
+        return removedSessions;
     }
 
     List<SessionControl> rotateLongTerm() {
-        wlongTermLock.lock();
-        try {
-            longTermList.addFirst(new SessionMap(256));
-            final List<SessionControl> retval = new LinkedList<SessionControl>(longTermList.removeLast().values());
-            for (final SessionControl sessionControl : retval) {
-                final SessionImpl session = sessionControl.getSession();
-                longTermUserGuardian.remove(session.getUserId(), session.getContextId());
-            }
-            return retval;
-        } finally {
-            wlongTermLock.unlock();
+        // This is the only location which alters 'longTermList' during runtime
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(longTermList.rotate(new SessionMap(256)).values());
+
+        for (SessionControl sessionControl : removedSessions) {
+            SessionImpl session = sessionControl.getSession();
+            longTermUserGuardian.remove(session.getUserId(), session.getContextId());
         }
+        return removedSessions;
     }
 
     /**
@@ -235,15 +215,10 @@ final class SessionData {
      */
     boolean isUserActive(int userId, int contextId, boolean includeLongTerm) {
         // A read-only access to session list
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                if (container.containsUser(userId, contextId)) {
-                    return true;
-                }
+        for (final SessionContainer container : sessionList) {
+            if (container.containsUser(userId, contextId)) {
+                return true;
             }
-        } finally {
-            rlock.unlock();
         }
 
         // No need to check long-term container
@@ -252,12 +227,7 @@ final class SessionData {
         }
 
         // Check long-term container, too
-        rlongTermLock.lock();
-        try {
-            return hasLongTermSession(userId, contextId);
-        } finally {
-            rlongTermLock.unlock();
-        }
+        return hasLongTermSession(userId, contextId);
     }
 
     private final boolean hasLongTermSession(final int userId, final int contextId) {
@@ -271,73 +241,52 @@ final class SessionData {
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
         // Removing sessions is a write operation.
         final List<SessionControl> retval = new LinkedList<SessionControl>();
-        wlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                retval.addAll(Arrays.asList(container.removeSessionsByUser(userId, contextId)));
-            }
-            for (final SessionControl control : retval) {
-                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
-            }
-        } finally {
-            wlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            retval.addAll(container.removeSessionsByUser(userId, contextId));
         }
-        wlongTermLock.lock();
-        try {
-            if (!hasLongTermSession(userId, contextId)) {
-                return retval.toArray(new SessionControl[retval.size()]);
-            }
-            for (final SessionMap longTerm : longTermList) {
-                final Iterator<SessionControl> iter = longTerm.values().iterator();
-                while (iter.hasNext()) {
-                    final SessionControl control = iter.next();
-                    final Session session = control.getSession();
-                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
-                        longTerm.removeBySessionId(session.getSessionID());
-                        longTermUserGuardian.remove(userId, contextId);
-                        retval.add(control);
-                    }
+        for (final SessionControl control : retval) {
+            unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
+        }
+
+        if (!hasLongTermSession(userId, contextId)) {
+            return retval.toArray(new SessionControl[retval.size()]);
+        }
+        for (SessionMap longTerm : longTermList) {
+            for (SessionControl control : longTerm.values()) {
+                if (control.equalsUserAndContext(userId, contextId)) {
+                    Session session = control.getSession();
+                    longTerm.removeBySessionId(session.getSessionID());
+                    longTermUserGuardian.remove(userId, contextId);
+                    retval.add(control);
                 }
             }
-        } finally {
-            wlongTermLock.unlock();
         }
+
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
     List<SessionControl> removeContextSessions(final int contextId) {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new LinkedList<SessionControl>();
-        wlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                list.addAll(Arrays.asList(container.removeSessionsByContext(contextId)));
-            }
-            for (final SessionControl control : list) {
-                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
-            }
-        } finally {
-            wlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            list.addAll(container.removeSessionsByContext(contextId));
         }
-        wlongTermLock.lock();
-        try {
-            if (!hasLongTermSession(contextId)) {
-                return list;
-            }
-            for (final SessionMap longTerm : longTermList) {
-                final Iterator<SessionControl> iter = longTerm.values().iterator();
-                while (iter.hasNext()) {
-                    final SessionControl control = iter.next();
-                    final Session session = control.getSession();
-                    if (session.getContextId() == contextId) {
-                        longTerm.removeBySessionId(session.getSessionID());
-                        longTermUserGuardian.remove(session.getUserId(), contextId);
-                        list.add(control);
-                    }
+        for (final SessionControl control : list) {
+            unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
+        }
+
+        if (!hasLongTermSession(contextId)) {
+            return list;
+        }
+        for (SessionMap longTerm : longTermList) {
+            for (SessionControl control : longTerm.values()) {
+                if (control.equalsContext(contextId)) {
+                    Session session = control.getSession();
+                    longTerm.removeBySessionId(session.getSessionID());
+                    longTermUserGuardian.remove(session.getUserId(), contextId);
+                    list.add(control);
                 }
             }
-        } finally {
-            wlongTermLock.unlock();
         }
         return list;
     }
@@ -351,51 +300,39 @@ final class SessionData {
     List<SessionControl> removeContextSessions(final Set<Integer> contextIds) {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new ArrayList<SessionControl>();
-        wlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                list.addAll(container.removeSessionsByContexts(contextIds));
-            }
-            for (final SessionControl control : list) {
-                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
-            }
-        } finally {
-            wlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            list.addAll(container.removeSessionsByContexts(contextIds));
+        }
+        for (final SessionControl control : list) {
+            unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
 
-        wlongTermLock.lock();
+        TIntSet contextIdsToCheck = new TIntHashSet(contextIds.size());
         for (int contextId : contextIds) {
-            if (!hasLongTermSession(contextId)) {
-                continue;
+            if (hasLongTermSession(contextId)) {
+                contextIdsToCheck.add(contextId);
             }
-            for (final SessionMap longTerm : longTermList) {
-                final Iterator<SessionControl> iter = longTerm.values().iterator();
-                while (iter.hasNext()) {
-                    final SessionControl control = iter.next();
-                    final Session session = control.getSession();
-                    if (session.getContextId() == contextId) {
-                        longTerm.removeBySessionId(session.getSessionID());
-                        longTermUserGuardian.remove(session.getUserId(), contextId);
-                        list.add(control);
-                    }
+        }
+
+        for (final SessionMap longTerm : longTermList) {
+            for (SessionControl control : longTerm.values()) {
+                Session session = control.getSession();
+                int contextId = session.getContextId();
+                if (contextIdsToCheck.contains(contextId)) {
+                    longTerm.removeBySessionId(session.getSessionID());
+                    longTermUserGuardian.remove(session.getUserId(), contextId);
+                    list.add(control);
                 }
             }
         }
-        wlongTermLock.unlock();
-
         return list;
     }
 
     boolean hasForContext(final int contextId) {
-        wlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                if (container.hasForContext(contextId)) {
-                    return true;
-                }
+        for (final SessionContainer container : sessionList) {
+            if (container.hasForContext(contextId)) {
+                return true;
             }
-        } finally {
-            wlock.unlock();
         }
         return false;
     }
@@ -409,33 +346,23 @@ final class SessionData {
      * @return The first matching session or <code>null</code>
      */
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if (control != null) {
-                    return control;
-                }
+        for (final SessionContainer container : sessionList) {
+            final SessionControl control = container.getAnySessionByUser(userId, contextId);
+            if (control != null) {
+                return control;
             }
-        } finally {
-            rlock.unlock();
         }
+
         if (includeLongTerm) {
-            rlongTermLock.lock();
-            try {
-                if (!hasLongTermSession(userId, contextId)) {
-                    return null;
-                }
-                for (final SessionMap longTermMap : longTermList) {
-                    for (final SessionControl control : longTermMap.values()) {
-                        final Session session = control.getSession();
-                        if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
-                            return control;
-                        }
+            if (!hasLongTermSession(userId, contextId)) {
+                return null;
+            }
+            for (SessionMap longTermMap : longTermList) {
+                for (SessionControl control : longTermMap.values()) {
+                    if (control.equalsUserAndContext(userId, contextId)) {
+                        return control;
                     }
                 }
-            } finally {
-                rlongTermLock.unlock();
             }
         }
         return null;
@@ -451,33 +378,23 @@ final class SessionData {
      * @return The first matching session or <code>null</code>
      */
     public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreLongTerm) {
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if ((control != null) && matcher.accepts(control.getSession())) {
-                    return control.getSession();
-                }
+        for (SessionContainer container : sessionList) {
+            SessionControl control = container.getAnySessionByUser(userId, contextId);
+            if ((control != null) && matcher.accepts(control.getSession())) {
+                return control.getSession();
             }
-        } finally {
-            rlock.unlock();
         }
+
         if (false == ignoreLongTerm) {
-            rlongTermLock.lock();
-            try {
-                if (!hasLongTermSession(userId, contextId)) {
-                    return null;
-                }
-                for (final SessionMap longTermMap : longTermList) {
-                    for (final SessionControl control : longTermMap.values()) {
-                        final Session session = control.getSession();
-                        if (session.getContextId() == contextId && session.getUserId() == userId && matcher.accepts(control.getSession())) {
-                            return control.getSession();
-                        }
+            if (!hasLongTermSession(userId, contextId)) {
+                return null;
+            }
+            for (SessionMap longTermMap : longTermList) {
+                for (SessionControl control : longTermMap.values()) {
+                    if (control.equalsUserAndContext(userId, contextId) && matcher.accepts(control.getSession())) {
+                        return control.getSession();
                     }
                 }
-            } finally {
-                rlongTermLock.unlock();
             }
         }
         return null;
@@ -485,24 +402,13 @@ final class SessionData {
 
     public List<Session> filterSessions(SessionFilter filter) {
         List<Session> sessions = new LinkedList<Session>();
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                collectSessions(filter, container.getSessionControls(), sessions);
-            }
-        } finally {
-            rlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            collectSessions(filter, container.getSessionControls(), sessions);
         }
 
-        rlongTermLock.lock();
-        try {
-            for (final SessionMap longTermMap : longTermList) {
-                collectSessions(filter, longTermMap.values(), sessions);
-            }
-        } finally {
-            rlongTermLock.unlock();
+        for (final SessionMap longTermMap : longTermList) {
+            collectSessions(filter, longTermMap.values(), sessions);
         }
-
         return sessions;
     }
 
@@ -527,33 +433,22 @@ final class SessionData {
         List<SessionControl> retval = new LinkedList<SessionControl>();
 
         // Short term ones
-        rlock.lock();
-        try {
-            for (SessionContainer container : sessionList) {
-                retval.addAll(Arrays.asList(container.getSessionsByUser(userId, contextId)));
-            }
-        } finally {
-            rlock.unlock();
+        for (SessionContainer container : sessionList) {
+            retval.addAll(container.getSessionsByUser(userId, contextId));
         }
 
         // Long term ones
-        rlongTermLock.lock();
-        try {
-            if (!hasLongTermSession(userId, contextId)) {
-                return retval;
-            }
-            for (SessionMap longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
-                        retval.add(control);
-                    }
-                }
-            }
-        } finally {
-            rlongTermLock.unlock();
+        if (!hasLongTermSession(userId, contextId)) {
+            return retval;
         }
 
+        for (SessionMap longTermMap : longTermList) {
+            for (SessionControl control : longTermMap.values()) {
+                if (control.equalsUserAndContext(userId, contextId)) {
+                    retval.add(control);
+                }
+            }
+        }
         return retval;
     }
 
@@ -562,34 +457,27 @@ final class SessionData {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param considerLongTerm <code>true</code> to also consider long-term sessions; otherwise <code>false</code>
      * @return The number of sessions
      */
-    int getNumOfUserSessions(int userId, int contextId) {
+    int getNumOfUserSessions(int userId, int contextId, boolean considerLongTerm) {
         // A read-only access to session list
         int count = 0;
-        rlock.lock();
-        try {
-            for (SessionContainer container : sessionList) {
-                count += container.numOfUserSessions(userId, contextId);
-            }
-        } finally {
-            rlock.unlock();
+        for (SessionContainer container : sessionList) {
+            count += container.numOfUserSessions(userId, contextId);
         }
-        rlongTermLock.lock();
-        try {
+
+        if (considerLongTerm) {
             if (!hasLongTermSession(userId, contextId)) {
                 return count;
             }
             for (SessionMap longTermMap : longTermList) {
                 for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if (control.equalsUserAndContext(userId, contextId)) {
                         count++;
                     }
                 }
             }
-        } finally {
-            rlongTermLock.unlock();
         }
         return count;
     }
@@ -603,30 +491,21 @@ final class SessionData {
      */
     void checkAuthId(String login, String authId) throws OXException {
         if (null != authId) {
-            rlock.lock();
-            try {
-                for (SessionContainer container : sessionList) {
-                    for (SessionControl sc : container.getSessionControls()) {
-                        if (authId.equals(sc.getSession().getAuthId())) {
-                            throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
-                        }
+            for (SessionContainer container : sessionList) {
+                for (SessionControl sc : container.getSessionControls()) {
+                    if (authId.equals(sc.getSession().getAuthId())) {
+                        throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
                     }
                 }
-            } finally {
-                rlock.unlock();
             }
-        }
-        rlongTermLock.lock();
-        try {
+
             for (SessionMap longTermMap : longTermList) {
                 for (SessionControl control : longTermMap.values()) {
-                    if (null != authId && authId.equals(control.getSession().getAuthId())) {
+                    if (authId.equals(control.getSession().getAuthId())) {
                         throw SessionExceptionCodes.DUPLICATE_AUTHID.create(control.getSession().getLogin(), login);
                     }
                 }
             }
-        } finally {
-            rlongTermLock.unlock();
         }
     }
 
@@ -655,271 +534,235 @@ final class SessionData {
         if (!noLimit && countSessions() > maxSessions) {
             throw SessionExceptionCodes.MAX_SESSION_EXCEPTION.create();
         }
-        final SessionControl control;
-        // Adding a session is a writing operation. Other threads requesting a session should be blocked.
-        wlock.lock();
+
+        // Add session
         try {
-            control = sessionList.getFirst().put(session, addIfAbsent);
+            SessionControl control = sessionList.get(0).put(session, addIfAbsent);
             randoms.put(session.getRandomToken(), session.getSessionID());
-        } finally {
-            wlock.unlock();
+
+            scheduleRandomTokenRemover(session.getRandomToken());
+            return control;
+        } catch (IndexOutOfBoundsException e) {
+            // About to shut-down
+            throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
-        scheduleRandomTokenRemover(session.getRandomToken());
-        return control;
     }
 
     int countSessions() {
         // A read-only access to session list
         int count = 0;
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                count += container.size();
-            }
-        } finally {
-            rlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            count += container.size();
         }
-        rlongTermLock.lock();
-        try {
-            for (final SessionMap longTermMap : longTermList) {
-                count += longTermMap.size();
-            }
-        } finally {
-            rlongTermLock.unlock();
+
+        for (final SessionMap longTermMap : longTermList) {
+            count += longTermMap.size();
         }
         return count;
     }
 
     int[] getShortTermSessionsPerContainer() {
         // read-only access to short term sessions.
-        final int[] retval;
-        rlock.lock();
-        try {
-            retval = new int[sessionList.size()];
-            int i = 0;
-            for (final SessionContainer container : sessionList) {
-                retval[i++] = container.size();
-            }
-        } finally {
-            rlock.unlock();
+        TIntList counts = new TIntArrayList(10);
+        for (final SessionContainer container : sessionList) {
+            counts.add(container.size());
         }
-        return retval;
+        return counts.toArray();
     }
 
     int[] getLongTermSessionsPerContainer() {
         // read-only access to long term sessions.
-        final int[] retval;
-        rlongTermLock.lock();
-        try {
-            retval = new int[longTermList.size()];
-            int i = 0;
-            for (final SessionMap longTermMap : longTermList) {
-                retval[i++] = longTermMap.size();
-            }
-        } finally {
-            rlongTermLock.unlock();
+        TIntList counts = new TIntArrayList(10);
+        for (final SessionMap longTermMap : longTermList) {
+            counts.add(longTermMap.size());
         }
-        return retval;
+        return counts.toArray();
     }
 
     SessionControl getSessionByAlternativeId(final String altId) {
         SessionControl control = null;
-        int i = 0;
-        // Read-only access
-        rlock.lock();
-        try {
-            for (i = 0; i < sessionList.size(); i++) {
-                final SessionContainer container = sessionList.get(i);
-                if (container.containsAlternativeId(altId)) {
-                    control = container.getSessionByAlternativeId(altId);
-                    if (i > 0) {
-                        // Schedule task to put session into first container and remove from latter one. This requires a write lock.
-                        // See bug 16158.
-                        scheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), false);
-                    }
-                    break;
+
+        boolean first = true;
+        for (SessionContainer container : sessionList) {
+            control = container.getSessionByAlternativeId(altId);
+            if (null != control) {
+                if (false == first) {
+                    // Schedule task to put session into first container and remove from latter one.
+                    scheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), false);
                 }
+                return control;
             }
-        } finally {
-            rlock.unlock();
+            first = false;
         }
-        if (null != control) {
-            return control;
-        }
-        rlongTermLock.lock();
-        try {
-            for (final SessionMap longTermMap : longTermList) {
-                if (longTermMap.containsByAlternativeId(altId)) {
-                    control = longTermMap.getByAlternativeId(altId);
-                    scheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
-                }
+
+        for (Iterator<SessionMap> iterator = longTermList.iterator(); null == control && iterator.hasNext();) {
+            control = iterator.next().getByAlternativeId(altId);
+            if (null != control) {
+                scheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
             }
-        } finally {
-            rlongTermLock.unlock();
         }
         return control;
     }
 
     SessionControl getSession(final String sessionId) {
         SessionControl control = null;
-        // Read-only access
-        rlock.lock();
-        try {
-            final int size = sessionList.size();
-            for (int i = 0; i < size; i++) {
-                if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
-                    if (i > 0) {
-                        // Schedule task to put session into first container and remove from latter one. This requires a write lock.
-                        // See bug 16158.
-                        scheduleTask2MoveSession2FirstContainer(sessionId, false);
-                    }
-                    return control;
+        boolean first = true;
+        for (SessionContainer container : sessionList) {
+            control = container.getSessionById(sessionId);
+            if (control != null) {
+                if (false == first) {
+                    // Schedule task to put session into first container and remove from latter one.
+                    scheduleTask2MoveSession2FirstContainer(sessionId, false);
                 }
+                return control;
             }
-        } catch (final IndexOutOfBoundsException e) {
-            // For safety
-        } finally {
-            rlock.unlock();
+            first = false;
         }
-        // Check long-term container, too
-        rlongTermLock.lock();
-        try {
-            for (final SessionMap longTermMap : longTermList) {
-                if (longTermMap.containsBySessionId(sessionId)) {
-                    control = longTermMap.getBySessionId(sessionId);
-                    scheduleTask2MoveSession2FirstContainer(sessionId, true);
-                }
+
+        for (Iterator<SessionMap> iterator = longTermList.iterator(); null == control && iterator.hasNext();) {
+            control = iterator.next().getBySessionId(sessionId);
+            if (null != control) {
+                scheduleTask2MoveSession2FirstContainer(sessionId, true);
             }
-        } finally {
-            rlongTermLock.unlock();
         }
         return control;
     }
 
     SessionControl optShortTermSession(final String sessionId) {
         SessionControl control = null;
-        // Read-only access
-        rlock.lock();
-        try {
-            final int size = sessionList.size();
-            for (int i = 0; i < size; i++) {
-                if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
-                    return control;
-                }
+        for (SessionContainer container : sessionList) {
+            if ((control = container.getSessionById(sessionId)) != null) {
+                return control;
             }
-        } catch (final IndexOutOfBoundsException e) {
-            // For safety
-        } finally {
-            rlock.unlock();
         }
+
         return control;
     }
 
     SessionControl getSessionByRandomToken(final String randomToken) {
         // A read-only access to session and a write access to random list
-        final String sessionId;
-        wlock.lock();
-        try {
-            sessionId = randoms.remove(randomToken);
-        } finally {
-            wlock.unlock();
-        }
+        final String sessionId = randoms.remove(randomToken);
         if (null == sessionId) {
             return null;
         }
+
         final SessionControl sessionControl = getSession(sessionId);
+        if (null == sessionControl) {
+            LOG.error("Unable to get session for sessionId: {}.", sessionId);
+            SessionHandler.clearSession(sessionId, true);
+            return null;
+        }
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
             LOG.error("", e);
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         session.removeRandomToken();
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
-            SessionHandler.clearSession(sessionId);
+            SessionHandler.clearSession(sessionId, true);
             return null;
         }
         return sessionControl;
     }
 
     SessionControl clearSession(final String sessionId) {
-        // A write access
-        wlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                if (container.containsSessionId(sessionId)) {
-                    final SessionControl sessionControl = container.removeSessionById(sessionId);
-                    final Session session = sessionControl.getSession();
-                    final String random = session.getRandomToken();
-                    if (null != random) {
-                        // If session is accessed through random token, random token is removed in the session.
-                        randoms.remove(random);
-                    }
-                    unscheduleTask2MoveSession2FirstContainer(sessionId);
-                    return sessionControl;
+        // Look-up in short-term list
+        for (SessionContainer container : sessionList) {
+            SessionControl sessionControl = container.removeSessionById(sessionId);
+            if (null != sessionControl) {
+                Session session = sessionControl.getSession();
+
+                String random = session.getRandomToken();
+                if (null != random) {
+                    // If session is accessed through random token, random token is removed in the session.
+                    randoms.remove(random);
                 }
+
+                unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                return sessionControl;
             }
-        } finally {
-            wlock.unlock();
         }
+
+        // Look-up in long-term list
+        for (SessionMap longTermMap : longTermList) {
+            SessionControl sessionControl = longTermMap.removeBySessionId(sessionId);
+            if (null != sessionControl) {
+                Session session = sessionControl.getSession();
+
+                String random = session.getRandomToken();
+                if (null != random) {
+                    // If session is accessed through random token, random token is removed in the session.
+                    randoms.remove(random);
+                }
+
+                unscheduleTask2MoveSession2FirstContainer(sessionId, true);
+                return sessionControl;
+            }
+        }
+
+        // No such session...
         return null;
     }
 
     List<SessionControl> getShortTermSessions() {
-        // A read.only access
+        // A read-only access
         final List<SessionControl> retval = new LinkedList<SessionControl>();
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                retval.addAll(container.getSessionControls());
-            }
-        } finally {
-            rlock.unlock();
+        for (final SessionContainer container : sessionList) {
+            retval.addAll(container.getSessionControls());
+        }
+        return retval;
+    }
+
+    List<String> getShortTermSessionIDs() {
+        // A read-only access
+        List<String> retval = new LinkedList<String>();
+        for (SessionContainer container : sessionList) {
+            retval.addAll(container.getSessionIDs());
         }
         return retval;
     }
 
     List<SessionControl> getLongTermSessions() {
-        final List<SessionControl> retval = new LinkedList<SessionControl>();
-        rlongTermLock.lock();
-        try {
-            for (final SessionMap longTermMap : longTermList) {
-                retval.addAll(longTermMap.values());
-            }
-        } finally {
-            rlongTermLock.unlock();
+        // A read-only access
+        List<SessionControl> retval = new LinkedList<SessionControl>();
+        for (final SessionMap longTermMap : longTermList) {
+            retval.addAll(longTermMap.values());
         }
         return retval;
     }
 
     void move2FirstContainer(final String sessionId) {
+        Iterator<SessionContainer> iterator = sessionList.iterator();
+        SessionContainer firstContainer = iterator.next(); // Skip first container
+
+        // Look for associated session in successor containers
         SessionControl control = null;
-        wlock.lock();
         try {
-            for (int i = 1; i < sessionList.size() && null == control; i++) {
-                final SessionContainer container = sessionList.get(i);
-                if (container.containsSessionId(sessionId)) {
-                    // Remove from current container & put into first one
-                    control = container.removeSessionById(sessionId);
-                    if (null != control) {
-                        sessionList.getFirst().putSessionControl(control);
-                    }
+            while (null == control && iterator.hasNext()) {
+                // Remove from current container & put into first one
+                control = iterator.next().removeSessionById(sessionId);
+                if (null != control) {
+                    firstContainer.putSessionControl(control);
                 }
             }
+
             if (null == control) {
-                if (sessionList.getFirst().containsSessionId(sessionId)) {
+                if (firstContainer.containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most up-to-date container.");
                 } else {
                     LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
-        } finally {
-            wlock.unlock();
+        } catch (IndexOutOfBoundsException e) {
+            // About to shut-down
+            LOG.error("First session container does not exist. Likely SessionD is shutting down...", e);
         }
-        unscheduleTask2MoveSession2FirstContainer(sessionId);
+
+        unscheduleTask2MoveSession2FirstContainer(sessionId, false);
         if (null != control) {
             SessionHandler.postSessionTouched(control.getSession());
         }
@@ -927,24 +770,22 @@ final class SessionData {
 
     void move2FirstContainerLongTerm(final String sessionId) {
         SessionControl control = null;
-        wlock.lock();
-        wlongTermLock.lock();
         try {
+            SessionContainer firstContainer = sessionList.get(0);
             boolean movedSession = false;
-            for (int i = 0; i < longTermList.size() && !movedSession; i++) {
-                final SessionMap longTermMap = longTermList.get(i);
+            for (Iterator<SessionMap> iterator = longTermList.iterator(); !movedSession && iterator.hasNext();) {
+                SessionMap longTermMap = iterator.next();
                 control = longTermMap.removeBySessionId(sessionId);
-                if (null == control) {
-                    continue;
+                if (null != control) {
+                    firstContainer.putSessionControl(control);
+                    final SessionImpl session = control.getSession();
+                    longTermUserGuardian.remove(session.getUserId(), session.getContextId());
+                    LOG.trace("Moved from long term container to first one.");
+                    movedSession = true;
                 }
-                sessionList.getFirst().putSessionControl(control);
-                final SessionImpl session = control.getSession();
-                longTermUserGuardian.remove(session.getUserId(), session.getContextId());
-                LOG.trace("Moved from long term container {} to first one.", i);
-                movedSession = true;
             }
             if (!movedSession) {
-                if (sessionList.getFirst().containsSessionId(sessionId)) {
+                if (firstContainer.containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most actual container.");
                 } else {
                     LOG.warn("Was not able to move the session into the most actual container.");
@@ -952,23 +793,19 @@ final class SessionData {
             }
         } catch (final OXException e) {
             LOG.error("", e);
-        } finally {
-            wlongTermLock.unlock();
-            wlock.unlock();
+        } catch (IndexOutOfBoundsException e) {
+            // About to shut-down
+            LOG.error("First session container does not exist. Likely SessionD is shutting down...", e);
         }
-        unscheduleTask2MoveSession2FirstContainer(sessionId);
+
+        unscheduleTask2MoveSession2FirstContainer(sessionId, false);
         if (null != control) {
             SessionHandler.postSessionReactivation(control.getSession());
         }
     }
 
     void removeRandomToken(final String randomToken) {
-        wlock.lock();
-        try {
-            randoms.remove(randomToken);
-        } finally {
-            wlock.unlock();
-        }
+        randoms.remove(randomToken);
     }
 
     public void addThreadPoolService(final ThreadPoolService service) {
@@ -1013,9 +850,9 @@ final class SessionData {
         }
     }
 
-    private void unscheduleTask2MoveSession2FirstContainer(final String sessionId) {
+    private void unscheduleTask2MoveSession2FirstContainer(String sessionId, boolean deactivateIfPresent) {
         final Move2FirstContainerTask task = tasks.remove(sessionId);
-        if (null != task) {
+        if (deactivateIfPresent && null != task) {
             task.deactivate();
         }
     }
@@ -1023,10 +860,8 @@ final class SessionData {
     private class Move2FirstContainerTask extends AbstractTask<Void> {
 
         private final String sessionId;
-
         private final boolean longTerm;
-
-        private boolean deactivated = false;
+        private volatile boolean deactivated = false;
 
         Move2FirstContainerTask(final String sessionId, final boolean longTerm) {
             super();

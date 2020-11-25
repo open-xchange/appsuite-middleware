@@ -47,54 +47,102 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.session;
 
 /**
- * 
- * {@link SessiondConfigInterface}
+ * {@link UserAndContext} - An immutable pair of user and context identifier.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface SessiondConfigInterface {
-
-    long getSessionContainerTimeout();
-
-    long getLongTermSessionContainerTimeout();
-
-    int getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerUser();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    int getNumberOfLongTermSessionContainers();
+public class UserAndContext {
 
     /**
-     * @return <code>true</code> if autologin is enabled.
-     */
-    boolean isAutoLogin();
-
-    /**
-     * Whether to enforce putting sessions into session storage asynchronously.
+     * Creates a new instance
      *
-     * @return <code>true</code> for async put; otherwise <code>false</code>
+     * @param session The session providing user data
+     * @return The new instance
      */
-    boolean isAsyncPutToSessionStorage();
+    public static UserAndContext newInstance(Session session) {
+        return newInstance(session.getUserId(), session.getContextId());
+    }
 
     /**
-     * Gets a key to encrypt passwords when putting session into storage.
+     * Creates a new instance
      *
-     * @return The obfuscation key
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The new instance
      */
-    String getObfuscationKey();
+    public static UserAndContext newInstance(int userId, int contextId) {
+        return new UserAndContext(userId, contextId);
+    }
+
+    // ---------------------------------------------------------------
+
+    private final int contextId;
+    private final int userId;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link UserAndContext}.
+     */
+    private UserAndContext(int userId, int contextId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        int prime = 31;
+        int result = prime * 1 + contextId;
+        result = prime * result + userId;
+        this.hash = result;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UserAndContext)) {
+            return false;
+        }
+        UserAndContext other = (UserAndContext) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append("}");
+        return builder.toString();
+    }
 
 }
