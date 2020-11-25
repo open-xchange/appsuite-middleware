@@ -99,7 +99,7 @@ public final class NetSSLActivator extends HousekeepingActivator {
     }
 
     @Override
-    public synchronized void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         setServiceLookup(this);
         trackService(SocketLoggerRegistryService.class);
         openTrackers();
@@ -111,5 +111,11 @@ public final class NetSSLActivator extends HousekeepingActivator {
                 HostList.flushCache();
             }
         });
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        super.stopBundle();
+        setServiceLookup(null);
     }
 }
