@@ -47,18 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.xox;
+package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
-import com.openexchange.java.Strings;
+import java.util.Iterator;
+import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.models.FileAccountData;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.testing.httpclient.modules.ShareManagementApi;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderBodyNotification;
-import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailData;
@@ -66,39 +72,111 @@ import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
-import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import static com.openexchange.java.Autoboxing.*;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
- * {@link XOXNamedGuestTest}
+ * {@link FederatedSharingFileStorageAccountTests}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public class XOXNamedGuestTest extends AbstractXOXTest {
+@RunWith(Parameterized.class)
+public class FederatedSharingFileStorageAccountTests extends AbstractFileStorageAccountTest {
 
-    private TestContext context2;
 
+    protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Federated Sharing test storage";
+
+    protected ShareManagementApi shareApi;
+
+    private FileAccountData account;
     private String sharedFolderId;
     private ApiClient sharingClient;
     private FoldersApi sharingFoldersApi;
+    private TestContext context2;
+    private final String fileStorageServiceId;
 
-    private FileAccountData account;
+    public static class XOXFileAccountConfiguration {
+
+        private final String shareLink;
+        private final String password;
+
+        /**
+         * Initializes a new {@link XOXFileAccountConfiguration}.
+         *
+         * @param shareLink The share link to use
+         * @param password The, optional, password
+         */
+        public XOXFileAccountConfiguration(String shareLink, String password) {
+            super();
+            this.shareLink = shareLink;
+            this.password = password;
+        }
+
+        /**
+         * Gets the shareLink
+         *
+         * @return The shareLink
+         */
+        @JsonProperty("url")
+        public String getShareLink() {
+            return shareLink;
+        }
+
+        /**
+         * Gets the optional password
+         *
+         * @return The optional password
+         */
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Parameterized.Parameters(name = "{0} filestorage provider")
+    public static Collection getFileStorageServicesToTest() {
+        //@formatter:off
+        return Arrays.asList(new Object[] {
+            "xctx8",
+            "xox8",
+        });
+        //@formatter:on
+    }
+
+
+    /**
+     * Initializes a new {@link FederatedSharingFileStorageAccountTests}.
+     *
+     * @param fileStorageService The ID of the service to test
+     */
+    public FederatedSharingFileStorageAccountTests(String fileStorageServiceId) {
+        this.fileStorageServiceId = fileStorageServiceId;
+    }
+
+    protected String toXOXId(FileAccountData account, String folderId) {
+        return String.format("%s://%s/%s", fileStorageServiceId, account.getId(), folderId);
+    }
+
+    protected String toXOXId(FileAccountData account, String folderId, String fileId) {
+        return String.format("%s://%s/%s/%s", fileStorageServiceId, account.getId(), folderId, fileId.replace("/", "=2F"));
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        this.shareApi = new ShareManagementApi(getApiClient());
 
         //Acquire a user who shares a folder
         context2 = TestContextPool.acquireContext(this.getClass().getSimpleName());
@@ -118,23 +196,16 @@ public class XOXNamedGuestTest extends AbstractXOXTest {
 
         //Register an XOX account which integrates the share
         XOXFileAccountConfiguration configuration = new XOXFileAccountConfiguration(shareLink, null);
-        account = createAccount(XOX_FILE_STORAGE_SERVICE, XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
+        account = createAccount(fileStorageServiceId, XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
     }
+
 
     @Override
     public void tearDown() throws Exception {
-        try {
-            deleteFolder(sharingFoldersApi, sharedFolderId, true);
-            if (sharingClient != null) {
-                logoutClient(sharingClient);
-            }
-            if (context2 != null) {
-                TestContextPool.backContext(context2);
-            }
-        } finally {
-            super.tearDown();
-        }
+        TestContextPool.backContext(context2);
+        super.tearDown();
     }
+
 
     /**
      * Extracts a share link related to the given folder from the notification email received.

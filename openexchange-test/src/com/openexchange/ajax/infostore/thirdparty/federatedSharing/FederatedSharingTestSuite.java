@@ -47,75 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.infostore.thirdparty.xox;
+package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
-import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.modules.ShareManagementApi;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * {@link AbstractXOXTest}
+ * {@link FederatedSharingTestSuite} - Test for the XOX (Cross OX sharing) file storage integration
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-public abstract class AbstractXOXTest extends AbstractFileStorageAccountTest {
-
-
-    protected static final String XOX_FILE_STORAGE_SERVICE = "xox8";
-    protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Cross OX test storage";
-
-    protected ShareManagementApi shareApi;
-
-    public static class XOXFileAccountConfiguration {
-
-        private final String shareLink;
-        private final String password;
-
-        /**
-         * Initializes a new {@link XOXFileAccountConfiguration}.
-         *
-         * @param shareLink The share link to use
-         * @param password The, optional, password
-         */
-        public XOXFileAccountConfiguration(String shareLink, String password) {
-            super();
-            this.shareLink = shareLink;
-            this.password = password;
-        }
-
-        /**
-         * Gets the shareLink
-         *
-         * @return The shareLink
-         */
-        @JsonProperty("url")
-        public String getShareLink() {
-            return shareLink;
-        }
-
-        /**
-         * Gets the optional password
-         *
-         * @return The optional password
-         */
-        public String getPassword() {
-            return password;
-        }
-    }
-
-    protected String toXOXId(FileAccountData account, String folderId) {
-        return String.format("%s://%s/%s", XOX_FILE_STORAGE_SERVICE, account.getId(), folderId);
-    }
-
-    protected String toXOXId(FileAccountData account, String folderId, String fileId) {
-        return String.format("%s://%s/%s/%s", XOX_FILE_STORAGE_SERVICE, account.getId(), folderId, fileId.replace("/", "=2F"));
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        this.shareApi = new ShareManagementApi(getApiClient());
-    }
-}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    FederatedSharingFileStorageAccountTests.class
+})
+public class FederatedSharingTestSuite { /** empty **/ }
