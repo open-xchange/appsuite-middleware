@@ -69,9 +69,15 @@ public class DelegatingContact extends Contact {
 
     /**
      * Initializes a new {@link DelegatingContact}.
+     * 
+     * @param delegate The contact delegate
+     * @throws IllegalArgumentException if the delegate is <code>null</code>
      */
     public DelegatingContact(Contact delegate) {
         super(false);
+        if (null == delegate) {
+            throw new IllegalArgumentException("The contact delegate cannot be 'null'");
+        }
         this.delegate = delegate;
     }
 
