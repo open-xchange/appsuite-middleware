@@ -70,7 +70,6 @@ import com.openexchange.config.rmi.RemoteConfigurationService;
 import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
-import com.openexchange.net.HostList;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -145,14 +144,6 @@ public final class ConfigActivator extends HousekeepingActivator {
             track(ManagementService.class, new HousekeepingManagementTracker(context, ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN, new ConfigReloadMBeanImpl(ConfigReloadMBean.class, configService)));
             track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();
-            
-            registerService(ForcedReloadable.class, new ForcedReloadable() {
-
-                @Override
-                public void reloadConfiguration(ConfigurationService configService) {
-                    HostList.flushCache();
-                }
-            });
         } catch (Throwable t) {
             logger.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
