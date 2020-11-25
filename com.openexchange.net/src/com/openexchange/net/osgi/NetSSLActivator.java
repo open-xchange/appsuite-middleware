@@ -51,7 +51,10 @@ package com.openexchange.net.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.monitoring.sockets.SocketLoggerRegistryService;
+import com.openexchange.net.HostList;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
 
@@ -100,5 +103,13 @@ public final class NetSSLActivator extends HousekeepingActivator {
         setServiceLookup(this);
         trackService(SocketLoggerRegistryService.class);
         openTrackers();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                HostList.flushCache();
+            }
+        });
     }
 }
