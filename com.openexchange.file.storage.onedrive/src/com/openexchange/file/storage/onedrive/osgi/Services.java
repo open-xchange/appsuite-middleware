@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.onedrive.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class Services {
 
-    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<>();
 
     /**
      * Initializes a new {@link Services}.
@@ -99,6 +100,22 @@ public final class Services {
             throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
         }
         return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException if the service is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getServiceSafe(clazz);
     }
 
     /**

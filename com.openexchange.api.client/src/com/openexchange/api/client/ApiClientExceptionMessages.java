@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,27 @@
  *
  */
 
+package com.openexchange.api.client;
 
-package com.openexchange.admin.plugin.hosting.tools;
+import com.openexchange.i18n.LocalizableStrings;
 
-import java.util.concurrent.Callable;
-import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+/**
+ * {@link ApiClientExceptionMessages}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
+ */
+public class ApiClientExceptionMessages implements LocalizableStrings {
 
-public class DatabaseDataMover implements Callable<Void> {
+    /** Unable to access the link %1$s */
+    public static final String NO_ACCESS_MSG = "Unable to access the link %1$s";
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatabaseDataMover.class);
+    /** To access the link credentials are required. */
+    public static final String MISSING_CREDENTIALS_MSG = "To access the link credentials are required.";
 
-    private Context ctx = null;
+    /** The access to the share was revoked. Please contact the owner of the share */
+    public static final String ACCESS_REVOKED_MSG = "The access to the share was revoked. Please contact the owner of the share";
 
-    private Database db = null;
-
-    private MaintenanceReason reason_id = null;
-
-    /**
-     *
-     */
-    public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
-        this.ctx = ctx;
-        this.db = db;
-        this.reason_id = reason;
-    }
-
-    @Override
-    public Void call() throws StorageException {
-        try {
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.moveDatabaseContext(ctx, db, reason_id);
-        } catch (StorageException e) {
-            log.error("", e);
-            // Because the client side only knows of the exceptions defined in the core we have
-            // to throw the trace as string
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw StorageException.storageExceptionFor(e);
-        }
-        return null;
-    }
-
+    /** Initializes a new {@link ApiClientExceptionMessages}. */
+    private ApiClientExceptionMessages() {}
 }

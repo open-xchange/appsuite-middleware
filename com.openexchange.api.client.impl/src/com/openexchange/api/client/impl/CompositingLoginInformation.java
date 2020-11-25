@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,81 @@
  *
  */
 
+package com.openexchange.api.client.impl;
 
-package com.openexchange.admin.plugin.hosting.tools;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.LoginInformation;
+import com.openexchange.api.client.common.calls.user.UserInformation;
 
-import java.util.concurrent.Callable;
-import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+/**
+ * {@link CompositingLoginInformation}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
+ */
+public class CompositingLoginInformation implements LoginInformation {
 
-public class DatabaseDataMover implements Callable<Void> {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatabaseDataMover.class);
-
-    private Context ctx = null;
-
-    private Database db = null;
-
-    private MaintenanceReason reason_id = null;
+    private LoginInformation delegatee;
+    private UserInformation userInformation;
 
     /**
-     *
+     * Initializes a new {@link CompositingLoginInformation}.
+     * 
+     * @param loginInformation The original login information
+     * @param userInformation Specific user information retrieved to the WhoAmI call
      */
-    public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
-        this.ctx = ctx;
-        this.db = db;
-        this.reason_id = reason;
+    public CompositingLoginInformation(LoginInformation loginInformation, UserInformation userInformation) {
+        super();
+        delegatee = loginInformation;
+        this.userInformation = userInformation;
     }
 
     @Override
-    public Void call() throws StorageException {
-        try {
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.moveDatabaseContext(ctx, db, reason_id);
-        } catch (StorageException e) {
-            log.error("", e);
-            // Because the client side only knows of the exceptions defined in the core we have
-            // to throw the trace as string
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw StorageException.storageExceptionFor(e);
-        }
-        return null;
+    @Nullable
+    public String getRemoteSessionId() {
+        return delegatee.getRemoteSessionId();
     }
 
+    @Override
+    @Nullable
+    public String getRemoteMailAddress() {
+        return userInformation.getEmail1();
+    }
+
+    @Override
+    public int getRemoteUserId() {
+        return userInformation.getId();
+    }
+
+    @Override
+    public int getRemoteContextId() {
+        return delegatee.getRemoteContextId();
+    }
+
+    @Override
+    @Nullable
+    public String getRemoteFolderId() {
+        return delegatee.getRemoteFolderId();
+    }
+
+    @Override
+    public String getModule() {
+        return delegatee.getModule();
+    }
+
+    @Override
+    public String getItem() {
+        return delegatee.getItem();
+    }
+
+    @Override
+    public String getLoginType() {
+        return delegatee.getLoginType();
+    }
+
+    @Override
+    @Nullable
+    public String getAdditional(String key) {
+        return delegatee.getAdditional(key);
+    }
 }

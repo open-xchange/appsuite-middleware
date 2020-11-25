@@ -1503,7 +1503,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, RemoteException {
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, InvalidDataException, DatabaseUpdateException, RemoteException {
         try {
             try {
                 doNullCheck(usr, access);
@@ -1538,7 +1538,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int retval = oxu.create(ctx, usr, access);
             usr.setId(Integer.valueOf(retval));
-            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -1687,9 +1687,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             int contextAdminId = tool.getAdminForContext(ctx);
-            List<User> filestoreOwners = new java.util.LinkedList<User>();
+            List<User> filestoreOwners = new java.util.LinkedList<>();
             {
-                Set<Integer> dubCheck = new HashSet<Integer>();
+                Set<Integer> dubCheck = new HashSet<>();
                 for (final User user : users) {
                     if (destUser != null && user.getId().intValue() == destUser.intValue()) {
                         throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
@@ -1765,11 +1765,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             User[] retusers = oxu.getData(ctx, users);
 
-            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<>();
 
             // Here we define a list which takes all exceptions which occur during plugin-processing
             // By this we are able to throw all exceptions to the client while concurrently processing all plugins
-            final List<Exception> exceptionlist = new ArrayList<Exception>();
+            final List<Exception> exceptionlist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -2241,7 +2241,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
-        final ArrayList<User> list = new ArrayList<User>(retusers.length);
+        final ArrayList<User> list = new ArrayList<>(retusers.length);
         for (final User user : retusers) {
             if (!tool.isContextAdmin(ctx, user.getId().intValue())) {
                 list.add(user);
@@ -2289,7 +2289,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 try {
                     permissionBits = Integer.parseInt(filter);
                 } catch (NumberFormatException nfe) {
-                    final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
+                    final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter, true);
                     if (namedAccessCombination == null) {
                         throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"", nfe);
                     }
@@ -2374,6 +2374,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public int getPermissionBits(UserModuleAccess namedAccessCombination) {
         int retval = 0;
 
@@ -2520,7 +2521,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
-            List<UserProperty> userProperties = new ArrayList<UserProperty>(capabilitiesSource.size());
+            List<UserProperty> userProperties = new ArrayList<>(capabilitiesSource.size());
             for (ConfigurationProperty property : capabilitiesSource) {
                 String value = isBlacklisted(property, optionalAdditionalConfigCheckPattern) ? "<OBFUSCATED>" : property.getValue();
                 userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata()));
@@ -2552,7 +2553,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Invalid context id.");
         }
 
-        Map<String, Map<String, Set<String>>> capabilitiesSource = new HashMap<String, Map<String, Set<String>>>();
+        Map<String, Map<String, Set<String>>> capabilitiesSource = new HashMap<>();
 
         Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
 

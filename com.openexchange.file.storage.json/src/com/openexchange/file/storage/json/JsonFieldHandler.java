@@ -294,12 +294,12 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             }
         }
         if (Date.class.isInstance(value)) {
-            Date d = (Date) value;
-            if (field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
+            Date d = Date.class.cast(value);
+            if (field == File.Field.LOCKED_UNTIL && (d.getTime() <= System.currentTimeMillis())) {
                 return Integer.valueOf(0);
             }
             TimeZone tz = Field.LAST_MODIFIED_UTC == field ? UTC : request.getTimezone();
-            return writeDate((Date) value, tz);
+            return writeDate(Date.class.cast(value), tz);
         }
 
         switch (field) {
@@ -458,7 +458,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder getInfoStorePersonalFolder() throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 
@@ -479,7 +479,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder getFolderFor(String folderId) throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 
@@ -499,7 +499,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder[] getSubfoldersFor(String folderId) throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 

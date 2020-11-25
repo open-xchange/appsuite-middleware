@@ -82,7 +82,7 @@ public class VersionsTest extends FileActionTest {
         request().param("id", "12").param("columns", "1,700,702") // id, title and filename
             .param("sort", "700").param("order", "desc").param("timezone", "Europe/Berlin");
 
-        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.VERSION);
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID, File.Field.VERSION);
         fileAccess().expectCall("getVersions", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());
 
         perform();

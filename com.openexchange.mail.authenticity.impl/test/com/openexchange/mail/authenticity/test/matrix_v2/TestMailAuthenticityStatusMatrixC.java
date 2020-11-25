@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test.matrix_v2;
 
+import static com.openexchange.java.Autoboxing.B;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCPass() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.PASS, false, "example.net", DMARCResult.PASS, DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(3, MailAuthenticityStatus.PASS, B(false), "example.net", DMARCResult.PASS, DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -93,7 +94,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCFailRejectPolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=reject sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.FAIL, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(3, MailAuthenticityStatus.FAIL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -103,7 +104,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCFailQuarantinePolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=quarantine sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -113,7 +114,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCFailNonePolicyWithDomainMatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -123,7 +124,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCFailNonePolicyWithDomainMismatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.org>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, true, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -133,7 +134,7 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCMissingWithDomainMatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, false, "example.net", DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DKIMResult.FAIL, SPFResult.PASS);
     }
 
     /**
@@ -143,6 +144,6 @@ public class TestMailAuthenticityStatusMatrixC extends AbstractTestMailAuthentic
     public void testSPFPassDKIMFailDMARCMissingWithDomainMismatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, true, "example.net", DKIMResult.FAIL, SPFResult.PASS);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DKIMResult.FAIL, SPFResult.PASS);
     }
 }

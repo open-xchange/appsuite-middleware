@@ -99,6 +99,7 @@ public final class GenericChecks {
      *
      * @param address The address string to check
      */
+    @SuppressWarnings("unused")
     public static boolean isValidMailAddress(String address) {
         if (null == address) {
             return false;
@@ -150,7 +151,7 @@ public final class GenericChecks {
         }
         try {
             return pattern.matcher(address).matches();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return false;
         }
     }
@@ -245,7 +246,7 @@ public final class GenericChecks {
             }
             String ids = identifiers.stream().map(i -> i.replaceAll("\\{", "")).map(i -> i.replaceAll("\\}", "")).collect(Collectors.joining(", ", "", ""));
             throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + ids);
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             throw new InvalidDataException("PasswordMechFactory not available. Did the server start properly?");
         }
     }
@@ -269,7 +270,7 @@ public final class GenericChecks {
             if (null != passwordMech) {
                 return passwordMech.check(clear, crypted, salt);
             }
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             // Ignore
         }
         return false;

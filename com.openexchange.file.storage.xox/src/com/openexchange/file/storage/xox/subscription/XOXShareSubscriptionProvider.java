@@ -58,6 +58,8 @@ import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.LoginInformation;
+import com.openexchange.api.client.common.calls.folders.GetFolderCall;
+import com.openexchange.api.client.common.calls.folders.RemoteFolder;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -154,7 +156,6 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
             apiClient = apiClientService.getApiClient(session, shareLink, null);
             LoginInformation loginInformation = apiClient.getLoginInformation();
             if (null != loginInformation) {
-                builder.state(ADDABLE);
                 if (Strings.isEmpty(loginInformation.getRemoteMailAddress())) {
                     /*
                      * Only anonymous guests have no mail address
@@ -170,6 +171,17 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                      * No guest
                      */
                     builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                } else {
+                    /*
+                     * Try to access the folder
+                     */
+                    String folder = getFolderFrom(shareLink);
+                    if (Strings.isNotEmpty(folder)) {
+                        RemoteFolder remoteFolder = apiClient.execute(new GetFolderCall(folder));
+                        if (folder.equals(remoteFolder.getID())) {
+                            builder.state(ADDABLE);
+                        }
+                    }
                 }
             }
         } catch (OXException e) {

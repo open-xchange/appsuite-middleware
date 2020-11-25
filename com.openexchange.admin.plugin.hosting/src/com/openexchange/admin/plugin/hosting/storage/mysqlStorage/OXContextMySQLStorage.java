@@ -1843,7 +1843,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     throw new StorageException(e);
                 } catch (RuntimeException e) {
                     LOG.error("Internal Error", e);
-                    throw StorageException.storageExceotionFor(e);
+                    throw StorageException.storageExceptionFor(e);
                 } finally {
                     if (rollback > 0) {
                         if (rollback == 1) {

@@ -83,10 +83,8 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     /**
      * Initializes a new {@link OneDriveAccountAccess}.
-     *
-     * @throws OXException If initialization fails
      */
-    public OneDriveAccountAccess(FileStorageService service, FileStorageAccount account, Session session) throws OXException {
+    public OneDriveAccountAccess(FileStorageService service, FileStorageAccount account, Session session) {
         super();
         this.service = service;
         this.account = account;
@@ -168,7 +166,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFolderAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
+        return new OneDriveFolderAccess((OneDriveOAuthAccess) oneDriveAccess, account, session);
     }
 
     @Override

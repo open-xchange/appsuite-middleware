@@ -136,3 +136,4 @@ Bundle-ClassPath: .,
  lib/minimal-json-0.9.1.jar,
  lib/box-java-sdk-2.2.1.jar
 Bundle-Activator: com.openexchange.file.storage.boxcom.osgi.BoxActivator
+Automatic-Module-Name: com.openexchange.file.storage.boxcom

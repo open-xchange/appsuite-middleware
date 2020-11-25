@@ -65,7 +65,6 @@ public class FileHolder {
 
     private final byte[] content;
 
-
     public FileHolder(File file) {
         super();
         this.file = new DefaultFile(file);
@@ -78,13 +77,14 @@ public class FileHolder {
         this.content = content;
     }
 
+    @SuppressWarnings("deprecation")
     public FileHolder(File file, InputStream content) {
         super();
         this.file = new DefaultFile(file);
         byte[] tmp;
         try {
             tmp = IOUtils.toByteArray(content);
-        } catch (IOException e) {
+        } catch (@SuppressWarnings("unused") IOException e) {
             tmp = new byte[0];
         } finally {
             IOUtils.closeQuietly(content);
@@ -108,6 +108,5 @@ public class FileHolder {
 
         return new ByteArrayInputStream(content);
     }
-
 
 }

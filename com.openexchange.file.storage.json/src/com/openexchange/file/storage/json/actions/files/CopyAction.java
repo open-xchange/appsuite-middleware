@@ -106,17 +106,16 @@ public class CopyAction extends AbstractWriteAction {
         }
 
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
-        if (newId == null && ignoreWarnings) {
+        if (ignoreWarnings) {
             newId = fileAccess.saveDocument(file, null, file.getSequenceNumber(), request.getSentColumns(), false, ignoreWarnings, false);
             return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
-        } else {
-            AJAXRequestResult result = new AJAXRequestResult(id);
-            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
-            result.addWarnings(warnings);
-            result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(id, fileAccess), id));
-
-            return result;
         }
+        AJAXRequestResult result = new AJAXRequestResult(id);
+        Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+        result.addWarnings(warnings);
+        result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(id, fileAccess), id));
+
+        return result;
     }
 
     private AJAXRequestResult handlePairs(List<IdVersionPair> pairs, InfostoreRequest request) throws OXException {

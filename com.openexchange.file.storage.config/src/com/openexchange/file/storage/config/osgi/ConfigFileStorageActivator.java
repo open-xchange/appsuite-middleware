@@ -49,12 +49,14 @@
 
 package com.openexchange.file.storage.config.osgi;
 
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAuthenticator;
 import com.openexchange.file.storage.config.internal.ConfigFileStorageAccountManagerProvider;
@@ -97,7 +99,11 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageActivator.class);
         logger.info("Re-available service: {}", clazz.getName());
         if (ConfigurationService.class.equals(clazz)) {
-            parseFileStorageProperties(getService(ConfigurationService.class));
+            try {
+                parseFileStorageProperties(getService(ConfigurationService.class));
+            } catch (IOException e) {
+                logger.error("", e);
+            }
         }
     }
 
@@ -170,8 +176,8 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
         }
     }
 
-    private void parseFileStorageProperties(final ConfigurationService configurationService) {
-        final Properties fsProperties = configurationService.getFile("filestorage.properties");
+    private void parseFileStorageProperties(final ConfigurationService configurationService) throws IOException {
+        Properties fsProperties = ConfigurationServices.loadPropertiesFrom(configurationService.getFileByName("filestorage.properties"));
         ConfigFileStorageAccountParser.getInstance().parse(fsProperties);
     }
 

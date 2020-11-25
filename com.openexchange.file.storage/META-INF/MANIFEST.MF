@@ -50,3 +50,4 @@ Export-Package: com.openexchange.file.storage,
  com.openexchange.file.storage.parse,
  com.openexchange.file.storage.registry,
  com.openexchange.file.storage.search
+Automatic-Module-Name: com.openexchange.file.storage

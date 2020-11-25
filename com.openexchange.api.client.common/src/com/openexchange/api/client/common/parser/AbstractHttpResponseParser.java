@@ -49,11 +49,7 @@
 
 package com.openexchange.api.client.common.parser;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -61,7 +57,6 @@ import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.HttpResponseParser;
 import com.openexchange.api.client.common.Checks;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.httpclient.util.HttpContextUtils;
 
 /**
  * {@link AbstractHttpResponseParser} - {@link HttpResponseParser} for the response that contains {@link ResponseFields#DATA}
@@ -75,7 +70,6 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
 
     private final boolean throwOnError;
     private final boolean handleStatusError;
-    private final List<String> cookies;
 
     /**
      * Initializes a new {@link AbstractHttpResponseParser}.
@@ -94,24 +88,6 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
         super();
         this.throwOnError = throwOnError;
         this.handleStatusError = handleStatusError;
-        this.cookies = Collections.emptyList();
-    }
-
-    /**
-     * Initializes a new {@link AbstractHttpResponseParser}.
-     *
-     * @param throwOnError <code>true</code> to throw a {@link OXException} if found in the response object, <code>false</code> to set in the response object
-     * @param handleStatusError <code>true</code> to throw a {@link OXException} if the status code implies a client or server error, <code>false</code> to ignore the status code
-     * @param cookiePrefix Prefixes of cookies that shall be checked if set
-     */
-    public AbstractHttpResponseParser(boolean throwOnError, boolean handleStatusError, String... cookiePrefix) {
-        super();
-        this.throwOnError = throwOnError;
-        this.handleStatusError = handleStatusError;
-        this.cookies = new ArrayList<>(cookiePrefix.length);
-        for (String prefix : cookiePrefix) {
-            cookies.add(prefix);
-        }
     }
 
     @Override
@@ -122,11 +98,6 @@ public abstract class AbstractHttpResponseParser<T> implements HttpResponseParse
         CommonApiResponse commonResponse = CommonApiResponse.build(response);
         if (throwOnError && commonResponse.hasOXException()) {
             throw commonResponse.getOXException();
-        }
-
-        CookieStore cookieStore = HttpContextUtils.getCookieStore(httpContext);
-        for (String cookiePrefix : cookies) {
-            Checks.checkCookieSet(cookiePrefix, cookieStore);
         }
 
         try {

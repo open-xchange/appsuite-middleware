@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -213,11 +214,12 @@ public class LocationSelector {
 
             File retval = null;
             boolean anyRemoved = false;
-            for (LocationAndFile location : directories.values()) {
+            for (Iterator<LocationAndFile> it = directories.values().iterator(); it.hasNext();) {
+                LocationAndFile location = it.next();
                 File[] files = getUserFiles(location, userId, contextId);
                 if (files == null || files.length <= 0) {
                     // Contains no user files at all
-                    directories.remove(location.location);
+                    it.remove();
                     anyRemoved = true;
                 } else {
                     if (retval == null) {

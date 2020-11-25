@@ -102,7 +102,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     // private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 
-    private String serviceId;
+    String serviceId;
 
     private FileStorageFileAccess files;
 
@@ -114,11 +114,11 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     private final FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
 
-    private String serviceId2;
+    String serviceId2;
 
-    private String accountId2;
+    String accountId2;
 
-    private final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
+    final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
 
     public CompositingFileAccessTest() {
         super(new SimSession());
@@ -358,11 +358,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         assertEquals(fileId.getService(), serviceId);
     }
 
-    private void verifyAccount2() {
-        assertEquals(fileId2.getAccountId(), accountId2);
-        assertEquals(fileId2.getService(), serviceId2);
-    }
-
     @Override
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         if (this.accountId == null) {
@@ -490,6 +485,8 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     @Override
     public List<FileStorageAccount> getAccounts(final Session session) throws OXException {
         final FileStorageAccount account = new FileStorageAccount() {
+
+            private static final long serialVersionUID = 1L;
 
             @Override
             public Map<String, Object> getConfiguration() {

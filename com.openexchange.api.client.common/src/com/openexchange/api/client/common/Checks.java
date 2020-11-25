@@ -53,20 +53,15 @@ import static com.openexchange.api.client.common.OXExceptionParser.parseExceptio
 import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.cookie.Cookie;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link Checks} - Util class with checks for HTTP response content
@@ -149,56 +144,6 @@ public final class Checks {
         } catch (MalformedURLException e) {
             throw ApiClientExceptions.INVALID_TARGET.create(e, redirectTarget);
         }
-    }
-
-    /**
-     * Checks that the JSESSION cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkJSESSIONCookie(CookieStore cookieStore) throws OXException {
-        checkCookieSet(Tools.JSESSIONID_COOKIE, cookieStore);
-    }
-
-    /**
-     * Checks that the secret cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkSecretCookie(CookieStore cookieStore) throws OXException {
-        checkCookieSet(LoginServlet.SECRET_PREFIX, cookieStore);
-    }
-
-    /**
-     * Checks that the public session cookie is set
-     *
-     * @param cookieStore The cookie store to get the cookies from
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkPublicSessionCookie(CookieStore cookieStore) throws OXException {
-        checkCookieSet(LoginServlet.PUBLIC_SESSION_PREFIX, cookieStore);
-    }
-
-    /**
-     * Checks that a certain cookie with a dedicated name is set
-     *
-     * @param cookiePrefix The name prefix of the cookie, e.g. {@value LoginServlet#SECRET_PREFIX}
-     * @param cookieStore The cookie store to get the cookies from
-     * @throws OXException In case the cookie is missing
-     */
-    public static void checkCookieSet(String cookiePrefix, CookieStore cookieStore) throws OXException {
-        List<Cookie> cookies = cookieStore.getCookies();
-        if (null == cookies || cookies.isEmpty()) {
-            throw ApiClientExceptions.MISSING_COOKIE.create();
-        }
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(cookiePrefix)) {
-                return;
-            }
-        }
-        throw ApiClientExceptions.MISSING_COOKIE.create();
     }
 
 }

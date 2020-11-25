@@ -129,14 +129,13 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ShareCreatedMail.init(casted, transportProvider, services).compose();
         if (preferNoReplyAccount(casted.getSession())) {
-            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
-        } else {
-            boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
-            if (usePersonalEmailAddress) {
+            if (getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession())) {
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), false), mail);
             } else {
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), true), mail);
             }
+        } else {
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         }
     }
 
@@ -145,14 +144,13 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         LinkCreatedNotification<InternetAddress> casted = (LinkCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = LinkCreatedMail.init(casted, transportProvider, services).compose();
         if (preferNoReplyAccount(casted.getSession())) {
-            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
-        } else {
-            boolean usePersonalEmailAddress = getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession());
-            if (usePersonalEmailAddress) {
+            if (getBoolValue("com.openexchange.share.notification.usePersonalEmailAddress", false, casted.getSession())) {
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), false), mail);
             } else {
                 sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID(), true), mail);
             }
+        } else {
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         }
     }
 

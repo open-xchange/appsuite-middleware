@@ -57,8 +57,6 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -151,13 +149,4 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         }
         return retval;
     }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (IllegalStateException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
 }

@@ -83,7 +83,7 @@ public class AllTest extends FileActionTest {
         request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
             .param("sort", "700").param("order", "desc");
 
-        final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
         fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());
 
         perform();

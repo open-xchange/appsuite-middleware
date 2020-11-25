@@ -186,7 +186,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         Integer iUserId = Integer.valueOf(user);
         Integer iContextId = Integer.valueOf(cid);
         try {
-            List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
+            List<FileStorageAccount> toDelete = new LinkedList<>();
             FakeSession session = new FakeSession(null, user, cid);
             for (FileStorageAccount account : getAccounts0(session, false)) {
                 Object obj = account.getConfiguration().get("account");
@@ -374,7 +374,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return getAccountManager0(secretAware).getAccounts(session);
         }
 
-        Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
+        Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<>(8);
         for (FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
             for (FileStorageAccount account : newInstanceFor(provider.getAccountManagerFor(getId())).getAccounts(session)) {
                 FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
@@ -386,7 +386,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             }
         }
 
-        List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
+        List<FileStorageAccount> ret = new ArrayList<>(accountsMap.size());
         for (FileStorageAccountInfo info : accountsMap.values()) {
             ret.add(info.getAccount());
         }

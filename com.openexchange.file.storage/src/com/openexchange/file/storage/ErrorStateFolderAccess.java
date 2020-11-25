@@ -67,7 +67,6 @@ import com.openexchange.session.Session;
 public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     private final OXException error;
-    //private final OXFunction<String, FileStorageFolder[],OXException> getSubFolderFunction;
 
     /**
      * {@link FileStorageFolderStub} represents a folder which is defective and will not be cached

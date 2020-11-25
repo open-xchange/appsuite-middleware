@@ -52,14 +52,26 @@ package com.openexchange.share.subscription;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OXExceptionMessages}
+ * {@link ShareSubscriptionExceptionMessages}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
 public class ShareSubscriptionExceptionMessages implements LocalizableStrings {
 
-    // After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+    /** Unable to find a subscription for \"%1$s\" */
+    public static final String MISSING_SUBSCRIPTION_MSG = "Unable to find a subscription for \"%1$s\"";
+
+    /** The given link \"%1$s\" can't be resolved to a share. */
+    public static final String NOT_USABLE_MSG = "The given link \"%1$s\" can't be resolved to a share.";
+
+    /** You don't have enough permissions to perform the operation. */
+    public static final String MISSING_PERMISSIONS_MSG = "You don't have enough permissions to perform the operation.";
+
+    /** The folder %1$s belongs to a folder tree that is unsubscribed. */
+    public static final String UNSUBSCRIEBED_FOLDER_MSG = "The folder %1$s belongs to a folder tree that is unsubscribed.";
+
+    /** After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed. */
     public static final String ACCOUNT_WILL_BE_REMOVED_MSG = "After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.";
 
     /**

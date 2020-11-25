@@ -186,7 +186,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @return The {@link OAuthClient} instance or <code>null</code>
      */
     @SuppressWarnings("unchecked")
-    protected <T> OAuthClient<T> getOAuthClient() {
+    public <T> OAuthClient<T> getOAuthClient() {
         return (OAuthClient<T>) oauthClientRef.get();
     }
 

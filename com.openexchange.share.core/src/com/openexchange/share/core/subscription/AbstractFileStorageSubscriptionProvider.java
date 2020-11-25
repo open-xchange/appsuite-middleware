@@ -579,7 +579,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @param shareLink The share link
      * @return The folder ID or <code>null</code>
      */
-    private String getFolderFrom(String shareLink) {
+    protected String getFolderFrom(String shareLink) {
         ShareTargetPath path = ShareTool.getShareTarget(shareLink);
         if (null != path) {
             return path.getFolder();

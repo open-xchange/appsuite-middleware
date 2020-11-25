@@ -63,20 +63,20 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum ApiClientExceptions implements DisplayableOXExceptionCode {
 
-    /** Can not access the link %1$s */
-    NO_ACCESS("Can not access the link %1$s", Category.CATEGORY_ERROR, 1),
+    /** Unable to access the link %1$s */
+    NO_ACCESS("Unable to access the link %1$s", Category.CATEGORY_ERROR, 1, ApiClientExceptionMessages.NO_ACCESS_MSG),
 
-    /** Credentials to access the link are missing. */
-    MISSING_CREDENTIALS("Credentials to access the link are missing.", Category.CATEGORY_ERROR, 2),
+    /**
+     * <li>Credentials to access the link are missing.</li>
+     * <li>{@value ApiClientExceptionMessages#MISSING_CREDENTIALS_MSG}.</li>
+     */
+    MISSING_CREDENTIALS("Credentials to access the link are missing.", Category.CATEGORY_ERROR, 2, ApiClientExceptionMessages.MISSING_CREDENTIALS_MSG),
 
     /** An I/O error occurred: %1$s */
     IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 3),
 
     /** The link %1$s is invalid */
     INVALID_TARGET("The link \"%1$s\" is invalid.", Category.CATEGORY_ERROR, 4, OXExceptionStrings.BAD_REQUEST),
-
-    /** A necessary cookie is missing */
-    MISSING_COOKIE("A necessary cookie is missing.", Category.CATEGORY_ERROR, 5),
 
     /** The targeted host %1$s is not covered by the same origin policy for %2$s . */
     NOT_SAME_ORIGIN("The targeted host %1$s is not covered by the same origin policy for %2$s.", Category.CATEGORY_ERROR, 6),
@@ -91,10 +91,13 @@ public enum ApiClientExceptions implements DisplayableOXExceptionCode {
     JSON_ERROR("JSON error: %1$s", Category.CATEGORY_ERROR, 9),
 
     /** A parameter for the request is missing. */
-    MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 10),
+    MISSING_PARAMETER("A parameter for the request is missing.", Category.CATEGORY_ERROR, 10, OXExceptionStrings.BAD_REQUEST),
 
-    /** The access to the share was revoked */
-    ACCESS_REVOKED("The access to the share was revoked", Category.CATEGORY_ERROR, 11),
+    /**
+     * <li>The access to the share was revoked</li>
+     * <li>{@value ApiClientExceptionMessages#ACCESS_REVOKED_MSG}.</li>
+     */
+    ACCESS_REVOKED("The access to the share was revoked", Category.CATEGORY_ERROR, 11, ApiClientExceptionMessages.ACCESS_REVOKED_MSG),
 
     /** The remote server responded with a client error: %1$s. */
     CLIENT_ERROR("The remote server responded with a client error %1$s.", Category.CATEGORY_USER_INPUT, 400),

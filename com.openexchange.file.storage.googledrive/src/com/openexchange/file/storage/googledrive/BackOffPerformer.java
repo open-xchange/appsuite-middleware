@@ -227,11 +227,11 @@ abstract class BackOffPerformer<T> {
     /**
      * Determines whether the specified {@link IOException} is caused due to an 'invalid_grant'.
      *
-     * @param content The exceptions content
+     * @param content The optional exceptions content
      * @return <code>true</code> if the exception was caused due to an 'invalid_grant'; <code>false</code>
      *         otherwise
      */
-    private boolean hasInvalidGrant(@Nullable String content) {
+    private boolean hasInvalidGrant(String content) {
         return Strings.isNotEmpty(content) && content.contains("invalid_grant");
     }
 

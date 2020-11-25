@@ -13,6 +13,37 @@ The following gives an overview about some of the more noteworthy changes introd
 
 ## Federated Sharing
 
+OX App Suite 7.10.5 introduces the new concept of "*Federated Sharing*" which allows a user to integrate a received share from another context 
+or another server into his own account and access these data in the same way as regular data.
+This provides a seamless integration of data shared from a different context or server without using the guest interface.
+
+The new *Federated Sharing* feature is part of of the ``open-xchange-subscribe`` package which needs to be installed in order to use it.
+
+OX App Suite can handle two different share modes: The **cross-context** mode and the **cross-ox** mode.
+The **cross-context** mode is chosen when a share comes from a different context on the same OX server. 
+The server will use internal services to access the shared data in the other context. No remote communication is required in this case.  
+The **cross-ox** mode is used when a share comes from *another* OX server. The communication between the OX servers will then take place over the HTTP API.
+**Please note** that the integration of calendar shares is currently only available in **cross-context** mode.
+
+The following properties needs to be set in order to enable the **cross-context** feature:
+
+* <code>[com.openexchange.capability.filestorage_xctx](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xctx) = true</code>
+
+* <code>[com.openexchange.calendar.xctx2.enabled](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.calendar.xctx2.enabled) = true</code>
+
+* <code>[com.openexchange.share.crossContextGuests](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.share.crossContextGuests) = true</code>
+
+
+The following properties needs to be set in order to enable the **cross-ox** feature:
+
+* <code>[com.openexchange.capability.filestorage_xox](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xox)=true</code>
+
+
+See [Federated-Sharing](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of configuration options related to Federated Sharing.
+
+See [Sharing and Guest Mode](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/sharing_and_guest_mode.html) for more information about sharing and federated sharing features.
+
+
 ## Reseller Scope in Config-Cascade
 
 ## Configuration Changes for Logback

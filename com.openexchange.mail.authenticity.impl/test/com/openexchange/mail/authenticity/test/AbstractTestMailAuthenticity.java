@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.test;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -106,14 +108,14 @@ public abstract class AbstractTestMailAuthenticity {
      * Sets up the test case
      */
     @Before
-    public void setUpTest() throws Exception {
+    public void setUpTest() {
         argumentCaptor = ArgumentCaptor.forClass(MailAuthenticityResult.class);
         headerCollection = new HeaderCollection();
 
         session = mock(Session.class);
 
-        when(session.getUserId()).thenReturn(1);
-        when(session.getContextId()).thenReturn(1);
+        when(I(session.getUserId())).thenReturn(I(1));
+        when(I(session.getContextId())).thenReturn(I(1));
 
         trustedMailService = mock(TrustedMailService.class);
         leanConfigService = mock(LeanConfigurationService.class);
@@ -170,7 +172,7 @@ public abstract class AbstractTestMailAuthenticity {
         }
         assertNotNull("The domain mismatch attribute is missing from the result.", result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH));
         assertEquals("The domain mismatch attribute differs.", expectedDomaimMismatch, result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH));
-        if (expectedDomaimMismatch) {
+        if (b(expectedDomaimMismatch)) {
             assertEquals("The domain does not match.", expectedDomain, result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN));
         }
     }

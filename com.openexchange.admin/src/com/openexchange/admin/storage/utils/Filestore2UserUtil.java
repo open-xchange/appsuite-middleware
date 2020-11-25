@@ -138,7 +138,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -174,7 +174,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -231,7 +231,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -280,7 +280,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -335,7 +335,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 try {
@@ -420,7 +420,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -476,7 +476,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -531,7 +531,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -588,7 +588,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -650,7 +650,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 if (rollback > 0) {
@@ -735,7 +735,7 @@ public class Filestore2UserUtil {
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (null != con) {
                 // Check whether to roll-back transactional changes
@@ -801,7 +801,7 @@ public class Filestore2UserUtil {
             } while (rs.next());
             return l;
         } catch (RuntimeException e) {
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }

@@ -120,7 +120,7 @@ public class UpdateAction extends AbstractWriteAction {
         }
 
         result.addWarnings(warnings);
-        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+        if (null == newId && false == warnings.isEmpty() && false == ignoreWarnings) {
             result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
         }
         return result;

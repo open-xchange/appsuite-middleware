@@ -1934,7 +1934,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         try {
                             updater.unblock(database.getScheme(), poolId, contextId);
                             if (outdatedUpdating == null) {
-                                outdatedUpdating = new LinkedList<Database>();
+                                outdatedUpdating = new LinkedList<>();
                             }
                             outdatedUpdating.add(database);
                         } catch (OXException e) {
@@ -2023,19 +2023,19 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     Date runningSince = status.blockingUpdatesRunningSince();
                     if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
                         if (outdatedUpdating == null) {
-                            outdatedUpdating = new LinkedList<Database>();
+                            outdatedUpdating = new LinkedList<>();
                         }
                         outdatedUpdating.add(database);
                     } else {
                         if (currentlyUpdating == null) {
-                            currentlyUpdating = new LinkedList<Database>();
+                            currentlyUpdating = new LinkedList<>();
                         }
                         currentlyUpdating.add(database);
                     }
                 } else if (status.needsBlockingUpdates()) {
                     // Needs update
                     if (needingUpdate == null) {
-                        needingUpdate = new LinkedList<Database>();
+                        needingUpdate = new LinkedList<>();
                     }
                     needingUpdate.add(database);
                 }
@@ -2194,20 +2194,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    @SuppressWarnings("unused")
     private Group[] getDomainUsedbyGroup(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
         // groups are currently not used with mail addresses in the core
         return null;
-        //        ArrayList<Group> data = new ArrayList<Group>();
-        //
-        //        if (data.size()==0){
-        //            return null;
-        //        }else{
-        //            return data.toArray(new Group[data.size()]);
-        //        }
     }
 
     private Resource[] getDomainUsedbyResource(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
-        final ArrayList<Resource> data = new ArrayList<Resource>();
+        final ArrayList<Resource> data = new ArrayList<>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
@@ -2230,11 +2224,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private User[] getDomainUsedbyUser(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
-        final ArrayList<User> data = new ArrayList<User>();
+        final ArrayList<User> data = new ArrayList<>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            final HashSet<Integer> usr_ids = new HashSet<Integer>();
+            final HashSet<Integer> usr_ids = new HashSet<>();
             // fetch from alias table
             prep_check = oxcon.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND alias LIKE ?");
             prep_check.setInt(1, ctx.getId().intValue());
@@ -3014,7 +3008,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     useraliases = dbuser.getAliases();
                 }
                 if (null != useraliases) {
-                    Set<String> tmp = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+                    Set<String> tmp = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
                     for (String email : useraliases) {
                         tmp.add(IDNA.toIDN(email));
                     }
@@ -3029,7 +3023,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 if (useraliases == null) {
                     useraliases = Collections.emptySet();
                 } else {
-                    Set<String> useraliasesAddresses = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+                    Set<String> useraliasesAddresses = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
                     for (String sAddr : useraliases) {
                         try {
                             QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
@@ -3258,7 +3252,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     return;
                 }
 
-                contextIdsForSchema = new LinkedList<Integer>();
+                contextIdsForSchema = new LinkedList<>();
                 do {
                     contextIdsForSchema.add(Integer.valueOf(rs.getInt(1)));
                 } while (rs.next());
@@ -3296,7 +3290,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             con = cache.getConnectionForContextNoTimeout(cid);
             UPDATE update = new UPDATE(table).SET(column, new BitAND(new BitOR(column, PLACEHOLDER), new INVERT(PLACEHOLDER)));
 
-            List<Object> values = new ArrayList<Object>();
+            List<Object> values = new ArrayList<>();
             values.add(I(addAccess));
             values.add(I(removeAccess));
 
@@ -3425,13 +3419,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             stmt.setInt(2, userId);
             result = stmt.executeQuery();
 
-            Map<Integer, List<Integer>> users = new HashMap<Integer, List<Integer>>();
+            Map<Integer, List<Integer>> users = new HashMap<>();
             while (result.next()) {
                 int id = result.getInt(1);
                 int cid = result.getInt(2);
                 List<Integer> userIds = users.get(I(cid));
                 if (userIds == null) {
-                    userIds = new ArrayList<Integer>();
+                    userIds = new ArrayList<>();
                     users.put(I(cid), userIds);
                 }
                 userIds.add(I(id));

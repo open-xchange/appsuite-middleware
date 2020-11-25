@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -370,7 +371,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
      */
     private List<IdVersionPair> generateIdVersionPairs() {
         int size = ids.size();
-        List<IdVersionPair> retval = new ArrayList<IdVersionPair>(size);
+        List<IdVersionPair> retval = new ArrayList<>(size);
 
         for (int i = size, pos = 0; i-- > 0; pos++) {
             String id = ids.get(pos);
@@ -399,7 +400,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return Collections.emptySet();
         }
 
-        return new HashSet<String>(Arrays.asList(Strings.splitByComma(parameter)));
+        return new HashSet<>(Arrays.asList(Strings.splitByComma(parameter)));
     }
 
     @Override
@@ -727,8 +728,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         try {
             JSONArray jsonArray = data.getJSONArray("entities");
-            List<Integer> entityIDs = new ArrayList<Integer>(jsonArray.length());
-            entityIDs = new ArrayList<Integer>();
+            List<Integer> entityIDs = new ArrayList<>(jsonArray.length());
+            entityIDs = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 entityIDs.add(Integer.valueOf(jsonArray.getInt(i)));
             }
@@ -773,10 +774,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             int length = array.length();
 
             // Initialize
-            List<String> ids = new ArrayList<String>(length);
-            List<String> folders = new ArrayList<String>(length);
-            Map<String, String> folderMapping = new HashMap<String, String>(length);
-            Map<String, Set<String>> versionMapping = new HashMap<String, Set<String>>(length);
+            List<String> ids = new ArrayList<>(length);
+            List<String> folders = new ArrayList<>(length);
+            Map<String, String> folderMapping = new HashMap<>(length);
+            Map<String, Set<String>> versionMapping = new HashMap<>(length);
 
             // Iterate JSON array
             for (int i = length, pos = 0; i-- > 0; pos++) {
@@ -813,7 +814,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     final String version = tuple.optString(PARAM_VERSION, FileStorageFileAccess.CURRENT_VERSION);
                     Set<String> list = versionMapping.get(id);
                     if (null == list) {
-                        list = new LinkedHashSet<String>(2);
+                        list = new LinkedHashSet<>(2);
                         versionMapping.put(id, list);
                     }
                     list.add(version);
@@ -844,7 +845,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return (JSONArray) obj;
     }
 
-    private JSONArray optBodyAsJsonArray() throws OXException {
+    private JSONArray optBodyAsJsonArray() {
         Object obj = data.getData();
         if (null == obj) {
             return null;
@@ -853,7 +854,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (!(obj instanceof JSONArray)) {
             try {
                 return new JSONArray(obj.toString());
-            } catch (Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 return null;
             }
         }
@@ -1027,11 +1028,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     private void parsePutUpload() throws OXException {
-
         if (contentData != null) {
             return;
         }
-        String method = data.optHttpServletRequest().getMethod();
+        HttpServletRequest optHttpServletRequest = data.optHttpServletRequest();
+        if (null == optHttpServletRequest) {
+            return;
+        }
+        String method = optHttpServletRequest.getMethod();
         if (!"PUT".equals(method)) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
@@ -1124,9 +1128,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             /*
              * use requested file fields only
              */
-            List<String> unknownColumns = new ArrayList<String>(0);
+            List<String> unknownColumns = new ArrayList<>(0);
             String[] columns = Strings.splitByComma(columnsParameter);
-            fieldsToLoad = new ArrayList<Field>(columns.length);
+            fieldsToLoad = new ArrayList<>(columns.length);
             requestedColumns = new int[columns.length];
             Reference<FileFieldCollector> fieldCollectorRef = null;
             for (int i = 0; i < columns.length; i++) {
@@ -1144,7 +1148,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     FileFieldCollector fieldCollector;
                     if (null == fieldCollectorRef) {
                         fieldCollector = Services.getFieldCollector();
-                        fieldCollectorRef = new Reference<FileFieldCollector>(fieldCollector);
+                        fieldCollectorRef = new Reference<>(fieldCollector);
                     } else {
                         fieldCollector = fieldCollectorRef.getValue();
                     }

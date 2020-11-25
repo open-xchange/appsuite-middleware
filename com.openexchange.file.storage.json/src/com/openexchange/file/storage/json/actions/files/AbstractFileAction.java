@@ -128,6 +128,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         /** The <code>"attached"</code> parameter */
         ATTACHED_ID("attached"),
         /** The <code>"module"</code> parameter */
+        @SuppressWarnings("hiding")
         MODULE("module"),
         /** The <code>"attachment"</code> parameter */
         ATTACHMENT("attachment"),
@@ -167,9 +168,8 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param file The file result
      * @param request The request
      * @return The AJAX result for a single file
-     * @throws OXException If result cannot be created
      */
-    protected AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
+    protected AJAXRequestResult result(final File file, final InfostoreRequest request) {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
@@ -208,7 +208,15 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         }
     }
 
-    public AJAXRequestResult result(final String[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
+    /**
+     * Compiles the result of the specified request
+     *
+     * @param versions An array with versions
+     * @param sequenceNumber The sequence number
+     * @param request The request
+     * @return The result
+     */
+    public AJAXRequestResult result(String[] versions, long sequenceNumber, InfostoreRequest request) {
         JSONArray array = new JSONArray(versions.length);
         for (String i : versions) {
             array.put(i);
@@ -279,6 +287,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param throwable The associated error
      * @throws OXException If call fails
      */
+    @SuppressWarnings("unused")
     protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException {
         // Nothing to do
     }
@@ -290,6 +299,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param result The associated result
      * @throws OXException If call fails
      */
+    @SuppressWarnings("unused")
     protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException {
         // Nothing to do
     }
@@ -300,6 +310,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param req The request
      * @throws OXException If the call fails
      */
+    @SuppressWarnings("unused")
     protected void before(final AJAXInfostoreRequest req) throws OXException {
         // Nothing to do
     }
@@ -333,6 +344,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param request The {@link InfostoreRequest}
      * @throws OXException
      */
+    @SuppressWarnings("unused")
     protected Result isEnqueueable(InfostoreRequest request) throws OXException {
         return EnqueuableAJAXActionService.resultFor(false);
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,55 @@
  *
  */
 
+package com.openexchange.file.storage.json;
 
-package com.openexchange.admin.plugin.hosting.tools;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.file.storage.json.actions.files.AllTest;
+import com.openexchange.file.storage.json.actions.files.DeleteTest;
+import com.openexchange.file.storage.json.actions.files.DetachTest;
+import com.openexchange.file.storage.json.actions.files.FileActionTest;
+import com.openexchange.file.storage.json.actions.files.GetTest;
+import com.openexchange.file.storage.json.actions.files.InfostoreRequestTest;
+import com.openexchange.file.storage.json.actions.files.ListTest;
+import com.openexchange.file.storage.json.actions.files.LockActionTest;
+import com.openexchange.file.storage.json.actions.files.NewTest;
+import com.openexchange.file.storage.json.actions.files.RevertTest;
+import com.openexchange.file.storage.json.actions.files.SearchTest;
+import com.openexchange.file.storage.json.actions.files.UnlockActionTest;
+import com.openexchange.file.storage.json.actions.files.UpdateTest;
+import com.openexchange.file.storage.json.actions.files.UpdatesTest;
+import com.openexchange.file.storage.json.actions.files.VersionsTest;
 
-import java.util.concurrent.Callable;
-import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-
-public class DatabaseDataMover implements Callable<Void> {
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DatabaseDataMover.class);
-
-    private Context ctx = null;
-
-    private Database db = null;
-
-    private MaintenanceReason reason_id = null;
-
-    /**
-     *
-     */
-    public DatabaseDataMover(final Context ctx, final Database db, final MaintenanceReason reason) {
-        this.ctx = ctx;
-        this.db = db;
-        this.reason_id = reason;
-    }
-
-    @Override
-    public Void call() throws StorageException {
-        try {
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.moveDatabaseContext(ctx, db, reason_id);
-        } catch (StorageException e) {
-            log.error("", e);
-            // Because the client side only knows of the exceptions defined in the core we have
-            // to throw the trace as string
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("", e);
-            throw StorageException.storageExceptionFor(e);
-        }
-        return null;
-    }
+/**
+ * {@link FileStorageTestSuite}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
+ */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    // @formatter:off
+    FileWriterTest.class, 
+    FileSearchTermParserTest.class,
+    FileParserTest.class, 
+    AllTest.class,
+    DeleteTest.class,
+    DetachTest.class,
+    FileActionTest.class,
+    GetTest.class,
+    InfostoreRequestTest.class,
+    ListTest.class,
+    LockActionTest.class,
+    NewTest.class,
+    RevertTest.class,
+    SearchTest.class,
+    UnlockActionTest.class,
+    UpdatesTest.class,
+    UpdateTest.class,
+    VersionsTest.class
+    // @formatter:on
+})
+public class FileStorageTestSuite {
 
 }

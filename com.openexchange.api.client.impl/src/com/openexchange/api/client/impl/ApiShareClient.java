@@ -60,6 +60,8 @@ import com.openexchange.api.client.common.calls.login.AnonymousLoginCall;
 import com.openexchange.api.client.common.calls.login.GuestLoginCall;
 import com.openexchange.api.client.common.calls.login.RedeemTokenCall;
 import com.openexchange.api.client.common.calls.login.ShareLoginInformation;
+import com.openexchange.api.client.common.calls.user.GetUserCall;
+import com.openexchange.api.client.common.calls.user.UserInformation;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -114,38 +116,29 @@ public class ApiShareClient extends AbstractApiClient {
          * Access the share
          */
         AccessShareCall accessCall = new AccessShareCall(loginLink);
-        ShareLoginInformation shareLoginInfos = execute(accessCall);
+        ShareLoginInformation infos = execute(accessCall);
 
         /*
          * Validate result and perform further calls if needed
          */
-        checkResponse(shareLoginInfos);
-        String loginType = shareLoginInfos.getLoginType();
-        if ("anonymous_password".equals(loginType)) {
-            /*
-             * Precondition check
-             */
-            if (null == credentials.getPassword()) {
-                throw ApiClientExceptions.MISSING_CREDENTIALS.create();
-            }
-            /*
-             * Perform anonymous login
-             */
-            shareLoginInfos = execute(new RedeemTokenCall(shareLoginInfos.getToken()));
-            /*
-             * Perform login with password
-             */
-            AnonymousLoginCall loginCall = new AnonymousLoginCall(services, credentials, shareLoginInfos.getShare(), shareLoginInfos.getTarget());
-            this.information = execute(loginCall);
-
-        } else if ("guest".equals(loginType) || "guest_password".equals(loginType)) {
-            GuestLoginCall loginCall = new GuestLoginCall(credentials, shareLoginInfos.getLoginName(), shareLoginInfos.getShare(), shareLoginInfos.getTarget());
-            this.information = execute(loginCall);
-        } else {
-            /*
-             * Login should have been successful
-             */
-            this.information = shareLoginInfos;
+        checkResponse(infos);
+        String loginType = null == infos.getLoginType() ? "" : infos.getLoginType();
+        switch (loginType) {
+            case "anonymous_password":
+                this.information = doAnonymousLogin(infos.getToken());
+                break;
+            case "guest":
+            case "guest_password":
+                this.information = doGuestLogin(infos);
+                break;
+            case "message_continue":
+                this.information = doGuestOnRemovedShareTarget(infos.getToken());
+                break;
+            default:
+                /*
+                 * Login should have been successful.
+                 */
+                this.information = infos;
         }
 
         if (Strings.isEmpty(information.getRemoteSessionId())) {
@@ -154,6 +147,70 @@ public class ApiShareClient extends AbstractApiClient {
              */
             throw ApiClientExceptions.NO_ACCESS.create(loginLink);
         }
+    }
+
+    /*
+     * ============================== HELPERS ==============================
+     */
+
+    /**
+     * Performs a guest login
+     *
+     * @param shareLoginInfos The infos
+     * @throws OXException In case login is not possible
+     * @return The login information
+     */
+    private LoginInformation doGuestLogin(ShareLoginInformation shareLoginInfos) throws OXException {
+        GuestLoginCall loginCall = new GuestLoginCall(credentials, shareLoginInfos.getLoginName(), shareLoginInfos.getShare(), shareLoginInfos.getTarget());
+        return execute(loginCall);
+    }
+
+    /**
+     * Performs a login even tough the specific share target has been removed.
+     * However guest still exists. Redeem token and login as guest.
+     *
+     * @param shareLoginInfos The token to redeem
+     * @throws OXException In case login is not possible
+     * @return The login information
+     * @see {@link com.openexchange.share.servlet.handler.WebUIShareHandler#redirectToLoginPage(AccessShareRequest, HttpServletRequest, HttpServletResponse)}
+     */
+    private LoginInformation doGuestOnRemovedShareTarget(String token) throws OXException {
+        ShareLoginInformation infos = execute(new RedeemTokenCall(token));
+        GuestLoginCall loginCall = new GuestLoginCall(credentials, infos.getLoginName(), infos.getShare(), infos.getTarget());
+        LoginInformation loginInformation = execute(loginCall);
+        this.information = loginInformation;
+
+        /*
+         * Remote mail address isn't resolved yet, see JavaDoc link.
+         * Execute additional call to get missing information
+         */
+        UserInformation userInformation = execute(new GetUserCall());
+        return new CompositingLoginInformation(loginInformation, userInformation);
+    }
+
+    /**
+     * Performs a login for an anonymous guest user with a password for the share
+     *
+     * @param token The token to redeem
+     * @throws OXException In case login is not possible
+     * @return The login information
+     */
+    private LoginInformation doAnonymousLogin(String token) throws OXException {
+        /*
+         * Precondition check
+         */
+        if (null == credentials.getPassword()) {
+            throw ApiClientExceptions.MISSING_CREDENTIALS.create();
+        }
+        /*
+         * Redeem the token to get the information for a login
+         */
+        ShareLoginInformation infos = execute(new RedeemTokenCall(token));
+        /*
+         * Perform login with password
+         */
+        AnonymousLoginCall loginCall = new AnonymousLoginCall(services, credentials, infos.getShare(), infos.getTarget());
+        return execute(loginCall);
     }
 
     /**
@@ -166,9 +223,7 @@ public class ApiShareClient extends AbstractApiClient {
      * @see {@link com.openexchange.share.servlet.utils.LoginLocation#status(String)}
      */
     private void checkResponse(ShareLoginInformation shareLoginInfos) throws OXException {
-        boolean message = "message".equals(shareLoginInfos.getLoginType());
-        boolean message_comtinue = "message_continue".equals(shareLoginInfos.getLoginType());
-        if (false == (message || message_comtinue)) {
+        if (false == "message".equals(shareLoginInfos.getLoginType())) {
             /*
              * No errors, continue.
              */
@@ -178,33 +233,25 @@ public class ApiShareClient extends AbstractApiClient {
          * Resolve token and get more infos
          */
         ShareLoginInformation errorInfos = execute(new RedeemTokenCall(shareLoginInfos.getToken()));
-        if (Strings.isNotEmpty(errorInfos.getStatus())) {
-            String status = errorInfos.getStatus();
-            if (status.startsWith("not_found")) {
+        String status = null == errorInfos.getStatus() ? "" : errorInfos.getStatus();
+        switch (status) {
+            case "not_found":
                 /*
                  * This indicates a removed resource
                  */
                 throw ApiClientExceptions.ACCESS_REVOKED.create();
-            } else if (status.equals("internal_error")) {
-                /*
-                 * Try again later error
-                 */
-                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == errorInfos.getMessage() ? "" : errorInfos.getMessage());
-            } else if (status.equals("client_blacklisted")) {
+            case "client_blacklisted":
                 /*
                  * Permanent error, can only be resolved by the remote server
                  */
                 LoggerFactory.getLogger(ApiShareClient.class).info("Remote OX {} blacklisted API client. Can't resolve share.", loginLink.getHost());
                 throw ApiClientExceptions.NO_ACCESS.create(loginLink);
-            }
+            case "internal_error":
+            default:
+                /*
+                 * "Try again later" error or unexpected response
+                 */
+                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == errorInfos.getMessage() ? "" : errorInfos.getMessage());
         }
-
-        /*
-         * Fallback to general analyze ..
-         */
-        if (message) {
-            throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(null == errorInfos.getMessage() ? "" : errorInfos.getMessage());
-        }
-        throw ApiClientExceptions.ACCESS_REVOKED.create();
     }
 }

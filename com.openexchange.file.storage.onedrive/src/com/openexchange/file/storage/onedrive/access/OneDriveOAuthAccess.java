@@ -54,6 +54,7 @@ import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
@@ -84,8 +85,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OneDriveOAuthAccess extends AbstractOAuthAccess {
-
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
 
@@ -131,7 +130,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
             @Override
             protected Boolean doPerform() throws OXException {
-                MicrosoftGraphDriveService client = (MicrosoftGraphDriveService) getOAuthClient().client;
+                MicrosoftGraphDriveService client = MicrosoftGraphDriveService.class.cast(getOAuthClient().client);
                 try {
                     client.getRootFolderId(getOAuthAccount().getToken());
                 } catch (OXException e) {
@@ -205,6 +204,8 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
      */
     private static class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
+        private static final Logger LOG = LoggerFactory.getLogger(OneDriveOAuthAccess.OneDriveReauthorizeClusterTask.class);
+
         private static final String EMPTY_STRING = "";
 
         /**
@@ -232,7 +233,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             try {
                 Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), new Verifier(EMPTY_STRING));
                 if (Strings.isEmpty(accessToken.getSecret())) {
-                    LOGGER.warn("Received invalid request_token from Microsoft Graph API: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+                    LOG.warn("Received invalid request_token from Microsoft Graph API: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
                 }
                 return accessToken;
             } catch (org.scribe.exceptions.OAuthException e) {
