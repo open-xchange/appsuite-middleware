@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.compose.impl.storage.db;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +59,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentStorage;
@@ -376,32 +383,112 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     }
 
     private void prepareContentFrom(CompositionSpaceDescription compositionSpaceDesc, CompositionSpaceDbStorage dbStorage, UUID id, Session session) throws OXException {
+        // Check if non-empty content is supposed to be stored
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
         if (messageDesc == null) {
             return;
         }
-
         if (!messageDesc.containsContent() && messageDesc.getContent() == null) {
             return;
         }
-
         String content = messageDesc.getContent();
         if (Strings.isEmpty(content)) {
             return;
         }
 
-        long maxAllowedPacketSize = dbStorage.getMaxAllowedPacketSize();
-        if (maxAllowedPacketSize > 0) {
-            // Keep a buffer for non-binary portion of the package
-            maxAllowedPacketSize = (long) (maxAllowedPacketSize * 0.66);
+        // Determine the max. content size that is allowed being stored into database
+        long effectiveMaxContentSize;
+        {
+            long configuredMaxContentSize = getConfiguredMaxContentSize(session.getUserId(), session.getContextId());
+            if (configuredMaxContentSize < 0) {
+                // No max. content size configured. Derive max. content size from "max_package_size" setting of the database
+                long maxAllowedPacketSize = dbStorage.getMaxAllowedPacketSize();
+                if (maxAllowedPacketSize > 0) {
+                    // Keep a buffer for non-binary portion of the package
+                    maxAllowedPacketSize = (long) (maxAllowedPacketSize * 0.66);
+                }
+                effectiveMaxContentSize = maxAllowedPacketSize;
+            } else {
+                effectiveMaxContentSize = configuredMaxContentSize;
+            }
         }
 
-        if (maxAllowedPacketSize > 0 && (content.length() > maxAllowedPacketSize || content.getBytes(StandardCharsets.UTF_8).length > maxAllowedPacketSize)) {
+        /*-
+         * Examine the effective max. content size. Either max. content size is 0 (zero) in which case every content is supposed to be
+         * stored as a file OR it is greater than 0 (zero) and current content's size exceeds that max. content size.
+         */
+        if ((effectiveMaxContentSize == 0) || exceedsMaxContentSize(content, effectiveMaxContentSize)) {
             boolean stored = fileCache.storeCachedContent(content, id, session.getUserId(), session.getContextId());
             if (stored) {
+                // Successfully stored as file. Set content to set to an empty string.
                 messageDesc.setContent("");
             }
         }
+    }
+
+    /** Size of write buffer. Aligned to java.io.Writer.WRITE_BUFFER_SIZE */
+    private static final int WRITE_BUFFER_LENGTH = 1024;
+
+    private static boolean exceedsMaxContentSize(String content, long maxContentSize) throws OXException {
+        // Fast check
+        int numberOfCharacters = content.length();
+        if (numberOfCharacters > maxContentSize) {
+            // Number of unicode code points is yet greater than given max. content size. Thus the limit is exceeded in any case.
+            return true;
+        }
+
+        // UTF-8 has at max. 2 bytes per character. Thus if that max. number of bytes is less than max. content size, the content does fit.
+        long estimate = numberOfCharacters << 1;
+        if (estimate <= maxContentSize) {
+            return false;
+        }
+
+        // Might exceed max. content size. Need to check precisely through generating UTF-8 bytes.
+        CountingOutputStream counter = null;
+        OutputStreamWriter osw = null;
+        try {
+            counter = new CountingOutputStream();
+            osw = new OutputStreamWriter(counter, StandardCharsets.UTF_8);
+
+            for (int i = 0; i < numberOfCharacters;) {
+                int end = i + WRITE_BUFFER_LENGTH;
+                if (end > numberOfCharacters) {
+                    end = numberOfCharacters;
+                }
+                osw.write(content.substring(i, end));
+                i = end;
+            }
+            osw.flush();
+            osw.close();
+            osw = null;
+
+            return counter.getCount() > maxContentSize;
+        } catch (IOException e) {
+            throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(osw, counter);
+        }
+    }
+
+    private static final String PROP_NAME = "com.openexchange.mail.compose.rdbstorage.content.maxSize";
+
+    /**
+     * Gets the configured max. content size.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The configured max. content size (equal to or greater than <code>0</code> (zero)) or <code>-1</code> if not set
+     * @throws OXException If configured max. content size cannot be retrieved
+     */
+    private long getConfiguredMaxContentSize(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            return -1L;
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+        long configuredMaxContentSize = ConfigViews.getDefinedLongPropertyFrom(PROP_NAME, -1L, view);
+        return configuredMaxContentSize < 0 ? -1L : configuredMaxContentSize;
     }
 
     private void deleteCachedContentSafe(Session session, UUID id) {

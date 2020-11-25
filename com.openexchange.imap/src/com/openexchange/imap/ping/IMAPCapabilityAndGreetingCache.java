@@ -72,7 +72,10 @@ import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link IMAPCapabilityAndGreetingCache} - A cache for CAPABILITY and greeting from IMAP servers.
@@ -287,18 +290,51 @@ public final class IMAPCapabilityAndGreetingCache {
                         s = new Socket();
                     }
 
-                    // Set connect timeout
+                    // Get connect timeout
                     int connectionTimeout = imapProperties.getImapConnectionTimeout();
-                    if (connectionTimeout > 0) {
-                        s.connect(toSocketAddress(endpoint) , connectionTimeout);
-                    } else {
-                        s.connect(toSocketAddress(endpoint));
-                    }
 
                     // Set read timeout
                     int timeout = imapProperties.getImapTimeout();
                     if (timeout > 0) {
                         s.setSoTimeout(timeout);
+                    }
+
+                    // Proxy settings
+                    String proxyHost = System.getProperties().getProperty("mail.imap.proxy.host", null);
+                    int proxyPort = 80;
+                    if (proxyHost == null) {
+                        // No proxy configured
+                        if (connectionTimeout > 0) {
+                            s.connect(toSocketAddress(endpoint) , connectionTimeout);
+                        } else {
+                            s.connect(toSocketAddress(endpoint));
+                        }
+                    } else {
+                        // Proxy available via configuration
+                        int i = proxyHost.indexOf(':');
+                        if (i >= 0) {
+                            try {
+                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
+                            } catch (NumberFormatException ex) {
+                                // ignore it
+                            }
+                            proxyHost = proxyHost.substring(0, i);
+                        }
+                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.imap.proxy.port", proxyPort);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(endpoint.getHost())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(toSocketAddress(endpoint) , connectionTimeout);
+                            } else {
+                                s.connect(toSocketAddress(endpoint));
+                            }
+                        } else {
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
+                        }
                     }
                 }
 

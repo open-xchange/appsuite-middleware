@@ -965,3 +965,36 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.compose.rdbstorage.content.fileCacheDir
+      description: |
+        Path to a directory used for caching of big message content exceeding database's max. package size. If not specified the directory
+        configured through "UPLOAD_DIRECTORY" property is used.
+      defaultValue: UPLOAD_DIRECTORY property
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+        - UPLOAD_DIRECTORY
+        - com.openexchange.mail.compose.rdbstorage.content.maxSize
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.rdbstorage.content.maxSize
+      description: |
+        Specifies the max. content size that is allowed being stored into database.
+        
+        Provided that a file cache directory is set:
+        A value of 0 (zero) causes every content being stored as a file. A value greater than 0 (zero) gives the threshold that must be
+        exceeded in order to deny storing into database, but store as a file instead. A value less than 0 (zero) causes to fall-back to
+        database's "max_package_size" setting.
+        
+        Note: If no file cache directory is configured, this setting is ineffective.
+      defaultValue: -1
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+        - com.openexchange.mail.compose.rdbstorage.content.fileCacheDir
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

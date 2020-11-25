@@ -65,10 +65,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link POP3CapabilityCache} - A cache for CAPA responses from POP3 servers.
@@ -364,21 +367,55 @@ public final class POP3CapabilityCache {
                         s = new Socket();
                     }
                     /*
-                     * Set connect timeout
+                     * Set socket timeout
                      */
-                    if (connectionTimeout > 0) {
-                        /*
-                         * Throws java.net.SocketTimeoutException if timeout expires before connecting
-                         */
-                        s.connect(key, connectionTimeout);
-                    } else {
-                        s.connect(key);
-                    }
                     if (timeout > 0) {
                         /*
                          * Define timeout for blocking operations
                          */
                         s.setSoTimeout(timeout);
+                    }
+                    /*
+                     * Proxy settings
+                     */
+                    String proxyHost = System.getProperties().getProperty("mail.pop3.proxy.host", null);
+                    int proxyPort = 80;
+                    if (proxyHost == null) {
+                        // No proxy configured
+                        if (connectionTimeout > 0) {
+                            /*
+                             * Throws java.net.SocketTimeoutException if timeout expires before connecting
+                             */
+                            s.connect(key, connectionTimeout);
+                        } else {
+                            s.connect(key);
+                        }
+                    } else {
+                        // Proxy available via configuration
+                        int i = proxyHost.indexOf(':');
+                        if (i >= 0) {
+                            try {
+                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
+                            } catch (NumberFormatException ex) {
+                                // ignore it
+                            }
+                            proxyHost = proxyHost.substring(0, i);
+                        }
+                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.pop3.proxy.port", proxyPort);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getPop3NonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(key, connectionTimeout);
+                            } else {
+                                s.connect(key);
+                            }
+                        } else {
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     throw e;

@@ -69,9 +69,12 @@ import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailProxyConfig;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.services.Services;
+import com.sun.mail.util.PropUtil;
 
 /**
  * {@link SMTPCapabilityCache} - A cache for CAPABILITY and greeting from SMTP servers.
@@ -264,20 +267,57 @@ public final class SMTPCapabilityCache {
                         s = new Socket();
                     }
                     /*
-                     * Set connect timeout
+                     * Get connect timeout
                      */
-                    final int connectionTimeout = smtpProperties.getSmtpConnectionTimeout();
-                    if (connectionTimeout > 0) {
-                        s.connect(key, connectionTimeout);
-                    } else {
-                        s.connect(key);
-                    }
-                    final int timeout = smtpProperties.getSmtpTimeout();
+                    int connectionTimeout = smtpProperties.getSmtpConnectionTimeout();
+                    /*
+                     * Set socket timeout
+                     */
+                    int timeout = smtpProperties.getSmtpTimeout();
                     if (timeout > 0) {
                         /*
                          * Define timeout for blocking operations
                          */
                         s.setSoTimeout(timeout);
+                    }
+                    /*
+                     * Proxy settings
+                     */
+                    String proxyHost = System.getProperties().getProperty("mail.smtp.proxy.host", null);
+                    int proxyPort = 80;
+                    if (proxyHost == null) {
+                        // No proxy configured
+                        if (connectionTimeout > 0) {
+                            s.connect(key, connectionTimeout);
+                        } else {
+                            s.connect(key);
+                        }
+                    } else {
+                        // Proxy available via configuration
+                        int i = proxyHost.indexOf(':');
+                        if (i >= 0) {
+                            try {
+                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
+                            } catch (NumberFormatException ex) {
+                                // ignore it
+                            }
+                            proxyHost = proxyHost.substring(0, i);
+                        }
+                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.smtp.proxy.port", proxyPort);
+                        HostList nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
+                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
+                            if (connectionTimeout > 0) {
+                                s.connect(key, connectionTimeout);
+                            } else {
+                                s.connect(key);
+                            }
+                        } else {
+                            if (connectionTimeout > 0) {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
+                            } else {
+                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     throw e;

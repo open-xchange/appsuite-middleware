@@ -163,6 +163,13 @@ public final class SMTPSessionProperties {
          * Deny NTLM authentication
          */
         properties.put("mail.smtp.auth.ntlm.disable", "true");
+        final Properties systemProperties = System.getProperties();
+        for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+            String propName = systemProperty.getKey().toString();
+            if (propName.startsWith("mail.")) {
+                properties.put(propName, systemProperty.getValue());
+            }
+        }
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties

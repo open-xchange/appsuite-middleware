@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning (7.10.4-14) stable; urgency=medium
+
+  * Build for patch 2020-11-23 (5905)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Nov 2020 14:11:41 +0000
+
 open-xchange-eas-provisioning (7.10.4-13) stable; urgency=medium
 
   * Build for patch 2020-11-09 (5891)

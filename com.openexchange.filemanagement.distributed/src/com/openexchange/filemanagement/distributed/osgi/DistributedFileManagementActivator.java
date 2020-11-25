@@ -11,6 +11,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -27,7 +28,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, ThreadPoolService.class, DistributedFileUtils.class };
     }
 
     @Override

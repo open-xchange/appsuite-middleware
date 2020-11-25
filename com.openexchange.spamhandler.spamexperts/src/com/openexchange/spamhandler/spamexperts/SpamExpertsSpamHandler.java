@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
@@ -114,7 +115,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         String imapUser = config.requireProperty(session, "com.openexchange.custom.spamexperts.imapuser");
         String imapPassword = config.requireProperty(session, "com.openexchange.custom.spamexperts.imappassword");
 
-        final Properties props = new Properties();
+        final Properties props = MimeDefaultSession.getDefaultMailProperties();
         if ("imaps".equals(imapUrl.getScheme())) {
             props.put("mail.imap.socketFactory.class", socketFactoryClass);
         } else {
