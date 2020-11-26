@@ -165,10 +165,10 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         boolean foundSecond = false;
         final int idPos = response.getColumnPos(Contact.OBJECT_ID);
         for (Object[] obj : response) {
-            if (contact1.getObjectID() == ((Integer) obj[idPos]).intValue()) {
+            if (contact1.getObjectID() == Integer.parseInt(String.class.cast(obj[idPos]))) {
                 foundFirst = true;
             }
-            if (contact2.getObjectID() == ((Integer) obj[idPos]).intValue()) {
+            if (contact2.getObjectID() == Integer.parseInt(String.class.cast(obj[idPos]))) {
                 foundSecond = true;
             }
         }
