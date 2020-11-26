@@ -789,11 +789,13 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             @Override
             public void update(String recrypted, String key) throws OXException {
                 CalendarAccount account = accountService.getAccount(session.getContextId(), session.getUserId(), accountId);
-                JSONObject userConfig = account.getUserConfiguration();
-                if (null != userConfig) {
-                    userConfig.putSafe(key, recrypted);
+                if (account != null) {
+                    JSONObject userConfig = account.getUserConfiguration();
+                    if (null != userConfig) {
+                        userConfig.putSafe(key, recrypted);
+                    }
+                    accountService.updateAccount(session.getContextId(), session.getUserId(), accountId, null, userConfig, account.getLastModified().getTime());
                 }
-                accountService.updateAccount(session.getContextId(), session.getUserId(), accountId, null, userConfig, account.getLastModified().getTime());
             }
         };
     }
