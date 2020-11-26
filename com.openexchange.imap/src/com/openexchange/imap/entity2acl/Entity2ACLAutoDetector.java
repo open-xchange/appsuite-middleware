@@ -67,6 +67,7 @@ import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.util.HostAndPort;
+import com.openexchange.mailaccount.MailAccount;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -165,7 +166,8 @@ public final class Entity2ACLAutoDetector {
 
         @Override
         public Entity2ACL call() throws Exception {
-            final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(HostAndPort.instanceFor(serverUrl), imapConfig.isSecure(), imapConfig.getIMAPProperties());
+            boolean isPrimary = imapConfig.getAccountId() == MailAccount.DEFAULT_ID;
+            String greeting = IMAPCapabilityAndGreetingCache.getGreeting(HostAndPort.instanceFor(serverUrl), imapConfig.isSecure(), imapConfig.getIMAPProperties(), isPrimary);
             return implFor(greeting, imapConfig);
         }
 
