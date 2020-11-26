@@ -65,6 +65,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.java.Strings;
@@ -81,7 +82,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware {
+public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware, SearchableFolderNameFolderAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(XOXFolderAccess.class);
 
@@ -332,6 +333,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
             }
         }
         return ret.toArray(new Quota[ret.size()]);
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        List<XOXFolder> folders = client.searchByFolderName("0", folderId, "infostore", null, query, date, includeSubfolders, all, start, end);
+        return folders.toArray(new XOXFolder[folders.size()]);
     }
 
 }

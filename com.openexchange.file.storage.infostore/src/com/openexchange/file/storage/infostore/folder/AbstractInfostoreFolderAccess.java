@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
@@ -65,6 +66,7 @@ import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -85,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess {
+public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess, SearchableFolderNameFolderAccess {
 
     /** The static identifier <code>9</code> of the <i>Infostore</i> root folder ("infostore / <code>FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID</code>) */
     public static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
@@ -297,6 +299,12 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     @Override
     public long getTotalSize(String folderId) throws OXException {
         return getInfostore().getTotalSize(Long.parseLong(folderId), session);
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        List<UserizedFolder> result = getFolderService().searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(result.toArray(new UserizedFolder[result.size()]));
     }
 
     /**

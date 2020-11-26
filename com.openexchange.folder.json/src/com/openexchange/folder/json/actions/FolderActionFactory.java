@@ -111,6 +111,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(NotifyAction.ACTION, new NotifyAction());
         tmp.put(RestoreAction.ACTION, new RestoreAction());
         tmp.put(CheckLimitsAction.ACTION, new CheckLimitsAction());
+        tmp.put(SearchAction.ACTION, new SearchAction());
         return tmp.build();
     }
 

@@ -77,6 +77,7 @@ import com.openexchange.api.client.common.calls.folders.FolderBody;
 import com.openexchange.api.client.common.calls.folders.GetFolderCall;
 import com.openexchange.api.client.common.calls.folders.ListFoldersCall;
 import com.openexchange.api.client.common.calls.folders.RemoteFolder;
+import com.openexchange.api.client.common.calls.folders.SearchFolderCall;
 import com.openexchange.api.client.common.calls.folders.UpdateCall;
 import com.openexchange.api.client.common.calls.infostore.AdvancedSearch;
 import com.openexchange.api.client.common.calls.infostore.DeleteCall;
@@ -769,6 +770,19 @@ public class ShareClient {
         //Do the search
         List<DefaultFile> result = getApiClient().execute(advancedSearch);
         return fileConverter.getStorageFiles(result, fields);
+    }
+
+    public List<XOXFolder> searchByFolderName(String tree, String id, String module, int[] columns, String query, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        if (null == columns) {
+            return searchByFolderName(tree, id, module, SearchFolderCall.DEFAULT_COLUMNS, query, date, includeSubfolders, all, start, end);
+        }
+        if (!checkServerVersion(API_LEVEL)) {
+            LOG.debug("Cannot perform search by folder name. Remote server does not support it in prior versions.");
+            //We cannot perform a search by folder name against the remote, because it was not available in prior versions
+            return Collections.emptyList();
+        }
+        List<RemoteFolder> result = getApiClient().execute(new SearchFolderCall(tree, id, columns, module, query, date, includeSubfolders, all, start, end));
+        return folderConverter.getStorageFolders(result);
     }
 
     /** A static reference since when the federated sharing feature was introduced and thus certain API functionality like the {@link Field#CREATED_FROM} field is available */

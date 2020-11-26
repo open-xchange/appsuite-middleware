@@ -217,11 +217,11 @@ public enum FolderField {
      */
     META(23, "meta"),
     /**
-     * 
+     * The created_from field
      */
     CREATED_FROM(51, "created_from"),
     /**
-     * 
+     * The modified_from field
      */
     MODIFIED_FROM(52, "modified_from"),
     ;
