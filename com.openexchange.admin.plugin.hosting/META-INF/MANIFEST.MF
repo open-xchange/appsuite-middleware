@@ -69,3 +69,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin
 Eclipse-BuddyPolicy: registered
+Automatic-Module-Name: com.openexchange.admin.plugin.hosting

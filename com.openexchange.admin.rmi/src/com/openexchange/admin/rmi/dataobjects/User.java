@@ -74,6 +74,7 @@ import com.openexchange.admin.rmi.utils.URIParser;
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
+@SuppressWarnings("deprecation")
 public class User extends ExtendableDataObject implements NameAndIdObject, PasswordMechObject {
 
     /**
@@ -628,6 +629,15 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Override
     final public Integer getId() {
         return id;
+    }
+    
+    /**
+     * Used to check if the used quota fieldd of this user object has been changed
+     *
+     * @return true if set; false if not
+     */
+    final public boolean isUsedQuotaSet() {
+        return usedQuotaset;
     }
 
     /**

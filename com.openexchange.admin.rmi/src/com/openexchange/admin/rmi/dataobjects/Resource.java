@@ -62,6 +62,7 @@ import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
+@SuppressWarnings("deprecation")
 public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
@@ -212,6 +213,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.description = description;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
