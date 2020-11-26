@@ -420,6 +420,9 @@ public class AllPerformer extends AbstractQueryPerformer {
              */
             if (Classification.PRIVATE.equals(event.getClassification()) && SharedType.getInstance().equals(folder.getType())) {
                 event = storage.getEventStorage().loadEvent(event.getId(), getFields(requestedFields));
+                if (event == null) {
+                    continue;
+                }
                 event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
                 if (isClassifiedFor(event, session.getUserId())) {
                     continue;
