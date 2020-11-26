@@ -94,12 +94,12 @@ public class JarFileProviderTest {
     @Rule
     private final TemporaryFolder folder = new TemporaryFolder();
 
-    List<File> configurationFiles = new ArrayList<File>();
+    List<File> configurationFiles = new ArrayList<>();
 
     private File rootFolder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(FileUtils.class);
@@ -129,7 +129,7 @@ public class JarFileProviderTest {
     }
 
     @Test
-    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
+    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
         PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
@@ -140,7 +140,7 @@ public class JarFileProviderTest {
     public void testAddFilesToDiffQueue_filesNotInConfFolder_noFileAddedToQueue() throws IOException {
         File newFile = folder.newFile("file1.jar");
         File newFile2 = folder.newFile("file2.jar");
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         files.add(newFile);
         files.add(newFile2);
 

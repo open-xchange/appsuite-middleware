@@ -52,8 +52,6 @@ package com.openexchange.admin.diff.file.handler.impl;
 import java.util.List;
 import com.openexchange.admin.diff.ConfigDiff;
 import com.openexchange.admin.diff.file.domain.ConfigurationFile;
-import com.openexchange.admin.diff.file.handler.impl.AbstractFileHandler;
-import com.openexchange.admin.diff.file.handler.impl.PropertyHandler;
 import com.openexchange.admin.diff.result.DiffResult;
 
 /**

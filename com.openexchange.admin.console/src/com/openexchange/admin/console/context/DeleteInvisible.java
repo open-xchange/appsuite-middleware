@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -57,16 +58,35 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class DeleteInvisible extends ContextAbstraction {
 
-    public DeleteInvisible(final String[] args2) {
+    /**
+     * Entry point
+     *
+     * @param args command line arguments
+     */
+    public static void main(final String args[]) {
+        new DeleteInvisible().execute(args);
+    }
 
-        final AdminParser parser = new AdminParser("deleteinvisible");
+    /**
+     * Initializes a new {@link DeleteInvisible}.
+     */
+    private DeleteInvisible() {
+        super();
+    }
 
+    /**
+     * Executes the command
+     *
+     * @param args the command line arguments
+     */
+    private void execute(final String[] args) {
+        AdminParser parser = new AdminParser("deleteinvisible");
         setOptions(parser);
 
         String successtext = null;
         try {
 
-            parser.ownparse(args2);
+            parser.ownparse(args);
             final Context ctx = contextparsing(parser);
 
             parseAndSetContextName(parser, ctx);
@@ -76,10 +96,12 @@ public class DeleteInvisible extends ContextAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
 
-            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-            oxres.disable(ctx, mr, auth); */
+            /*
+             * final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+             * oxres.disable(ctx, mr, auth);
+             */
             oxres.downgrade(ctx, auth);
 
             displayDowngradedMessage(successtext, null, parser);
@@ -87,10 +109,6 @@ public class DeleteInvisible extends ContextAbstraction {
         } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
-    }
-
-    public static void main(final String args[]) {
-        new DeleteInvisible(args);
     }
 
     private void setOptions(final AdminParser parser) {

@@ -94,4 +94,34 @@ public class IDManglingContact extends DelegatingContact {
     public String toString() {
         return "IDManglingContact [newFolderId=" + newFolderId + ", delegate=" + delegate + "]";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((newFolderId == null) ? 0 : newFolderId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        IDManglingContact other = (IDManglingContact) obj;
+        if (newFolderId == null) {
+            if (other.newFolderId != null) {
+                return false;
+            }
+        } else if (!newFolderId.equals(other.newFolderId)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -50,7 +50,6 @@
 package com.openexchange.admin.console.resource;
 
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -60,14 +59,11 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 public class Create extends CreateCore {
 
     public static void main(final String[] args) {
-        new Create(args);
+        new Create().execute(args);
     }
 
-    public Create(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("createresource");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args) {
+        commonfunctions(new AdminParser("createresource"), args);
     }
 
     @Override

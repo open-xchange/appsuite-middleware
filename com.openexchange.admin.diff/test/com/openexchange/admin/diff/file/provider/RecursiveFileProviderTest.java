@@ -92,12 +92,12 @@ public class RecursiveFileProviderTest {
     @Rule
     private final TemporaryFolder folder = new TemporaryFolder();
 
-    List<File> configurationFiles = new ArrayList<File>();
+    List<File> configurationFiles = new ArrayList<>();
 
     private File rootFolder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(FileUtils.class);
@@ -138,7 +138,7 @@ public class RecursiveFileProviderTest {
     public void testAddFilesToDiffQueue_filesProvided_addedToQueue() throws IOException {
         File newFile = folder.newFile("file1");
         File newFile2 = folder.newFile("file2");
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         files.add(newFile);
         files.add(newFile2);
 

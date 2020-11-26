@@ -81,7 +81,7 @@ public class ConfFileHandlerTest {
     private ConfigurationFile configurationFile = null;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockUtils.injectValueIntoPrivateField(CcfHandler.class, "instance", null);
         MockUtils.injectValueIntoPrivateField(ConfHandler.class, "instance", null);
         MockUtils.injectValueIntoPrivateField(PropertyHandler.class, "instance", null);

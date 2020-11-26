@@ -69,7 +69,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public final class CheckDatabase extends DatabaseAbstraction {
 
-    public CheckDatabase(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("checkdatabase");
 
@@ -85,7 +85,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
 
             // Trigger checkdatabase
             final AtomicReference<Database[][]> checkedDatabases = new AtomicReference<>(null);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            final AtomicReference<Exception> errorRef = new AtomicReference<>();
             Runnable runnbable = new Runnable() {
 
                 @Override
@@ -97,7 +97,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
                     }
                 }
             };
-            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            FutureTask<Void> ft = new FutureTask<>(runnbable, null);
             new Thread(ft, "Open-Xchange Database Checker").start();
 
             // Await termination
@@ -146,7 +146,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
         if (total <= 0) {
             createMessageForStdout("Neither pending, blocking nor stale schemas found", parser);
         } else {
-            ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(total);
+            ArrayList<ArrayList<String>> data = new ArrayList<>(total);
             for (Database database : needingUpdate) {
                 data.add(makeStandardData(database, false, "Needs update"));
             }
@@ -164,7 +164,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
 
     private void precsvinfos(final Database[][] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>(5);
+        final ArrayList<String> columns = new ArrayList<>(5);
         columns.add("id");
         columns.add("display_name");
         columns.add("url");
@@ -175,7 +175,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
         Database[] currentlyUpdating = databases[1];
         Database[] outdatedUpdating = databases[2];
 
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length);
+        ArrayList<ArrayList<String>> data = new ArrayList<>(needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length);
         for (final Database database : needingUpdate) {
             data.add(makeCSVData(database, "Needs update"));
         }
@@ -190,7 +190,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new CheckDatabase(args);
+        new CheckDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -209,7 +209,7 @@ public final class CheckDatabase extends DatabaseAbstraction {
     }
 
     private ArrayList<String> makeStandardData(Database db, boolean csv, String status) throws URISyntaxException {
-        ArrayList<String> rea_data = new ArrayList<String>();
+        ArrayList<String> rea_data = new ArrayList<>();
 
         rea_data.add(db.getId().toString());
 

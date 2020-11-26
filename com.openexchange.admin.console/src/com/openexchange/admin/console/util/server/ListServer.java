@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.server;
 
 import java.rmi.Naming;
@@ -63,8 +64,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class ListServer extends ServerAbstraction {
 
-    public ListServer(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("listserver");
 
         setOptions(parser);
@@ -76,7 +76,7 @@ public class ListServer extends ServerAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             String searchpattern = "*";
             if (parser.getOptionValue(this.searchOption) != null) {
@@ -98,7 +98,7 @@ public class ListServer extends ServerAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListServer(args);
+        new ListServer().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -107,7 +107,7 @@ public class ListServer extends ServerAbstraction {
     }
 
     private void sysoutOutput(Server[] servers) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final Server server : servers) {
             data.add(makeCSVData(server));
         }
@@ -118,11 +118,11 @@ public class ListServer extends ServerAbstraction {
 
     private void precsvinfos(Server[] servers) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("name");
 
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final Server server : servers) {
             data.add(makeCSVData(server));
@@ -132,7 +132,7 @@ public class ListServer extends ServerAbstraction {
     }
 
     private ArrayList<String> makeCSVData(Server server) {
-        final ArrayList<String> srv_data = new ArrayList<String>();
+        final ArrayList<String> srv_data = new ArrayList<>();
         srv_data.add(String.valueOf(server.getId()));
         final String servername = server.getName();
         if (servername != null) {

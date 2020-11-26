@@ -49,23 +49,15 @@
 
 package com.openexchange.admin.console.user;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Set;
 import java.util.TreeSet;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.java.Strings;
 
 /**
@@ -81,9 +73,8 @@ public class GetUserCapabilities extends UserAbstraction {
      *
      * @param args The CLI arguments
      */
-    public GetUserCapabilities(String[] args) {
-        final AdminParser parser = new AdminParser("getusercapabilities");
-        commonfunctions(parser, args);
+    public void execute(String[] args) {
+        commonfunctions(new AdminParser("getusercapabilities"), args);
     }
 
     protected void setOptions(final AdminParser parser) {
@@ -122,7 +113,7 @@ public class GetUserCapabilities extends UserAbstraction {
             } else {
                 final String lf = System.getProperty("line.separator");
                 sb.append("Capabilities for user ").append(userString).append(" in context ").append(ctx.getId()).append(":").append(lf);
-                for (final String cap : new TreeSet<String>(caps)) {
+                for (final String cap : new TreeSet<>(caps)) {
                     sb.append(cap).append(lf);
                 }
             }
@@ -145,17 +136,12 @@ public class GetUserCapabilities extends UserAbstraction {
      */
     private String compileUserString(User user, String optionalString) {
         if (Strings.isEmpty(optionalString)) {
-            return user.getId() != null ? Integer.toString(user.getId()) : user.getName();
+            return user.getId() != null ? Integer.toString(i(user.getId())) : user.getName();
         }
         return optionalString;
     }
 
-    private Set<String> maincall(Context ctx, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, StorageException, NoSuchContextException, InvalidDataException {
-        final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-        return oxres.getCapabilities(ctx, auth);
-    }
-
     public static void main(String[] args) {
-        new GetUserCapabilities(args);
+        new GetUserCapabilities().execute(args);
     }
 }

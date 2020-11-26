@@ -72,13 +72,11 @@ public class Delete extends DeleteCore {
     private CLIOption noReassignCLI;
 
     public static void main(final String[] args) {
-        new Delete(args);
+        new Delete().execute(args);
     }
 
-    public Delete(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("deleteuser");
-        commonfunctions(parser, args2);
+    public void execute(final String[] args) {
+        commonfunctions(new AdminParser("deleteuser"), args);
     }
 
     @Override
@@ -89,11 +87,7 @@ public class Delete extends DeleteCore {
         } else {
             Object o = parser.getOptionValue(reassignCLI);
             if (o != null) {
-                if (o instanceof String) {
-                    destUser = Integer.valueOf((String) o);
-                } else {
-                    destUser = (Integer) o;
-                }
+                destUser = o instanceof String ? Integer.valueOf((String) o) : Integer.class.cast(o);
             }
         }
         oxusr.delete(ctx, usr, destUser, auth);

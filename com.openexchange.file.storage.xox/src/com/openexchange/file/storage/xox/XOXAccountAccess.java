@@ -58,8 +58,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.Credentials;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.datahandler.DataHandlers;
@@ -88,6 +91,7 @@ import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.tools.arrays.Collections;
 
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.b;
 
 /**
  * {@link XOXAccountAccess}
@@ -141,9 +145,41 @@ public class XOXAccountAccess implements CapabilityAware {
             this,
             session,
             retryAfterError,
-            new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"));
+            new FileStorageAccountErrorHandler.CompositingFilter()
+                .add(new FileStorageAccountErrorHandler.IgnoreExceptionPrefixes("SES"))
+                .add((e) -> {
+                    if(ApiClientExceptions.ACCESS_REVOKED.equals(e) && isAutoRemoveUnknownShares(session)) {
+                        try {
+                            LOG.info("Guest account for cross-ox share subscription no longer exists, removing file storage account {}.", account.getId(), e);
+                            account.getFileStorageService().getAccountManager().deleteAccount(account, session);
+                            return Boolean.FALSE; //handle by removing the account, abort upstream processing
+                        }
+                        catch(OXException e2) {
+                            LOG.error("Unexpected error removing file storage account {}.", account.getId(), e2);
+                        }
+                    }
+                    return Boolean.TRUE; //not handled, continue with upstream processing (persist error in account)
+                })
+            );
     }
     //@formatter:on
+
+    /**
+     * Gets a value indicating whether the automatic removal of accounts in the <i>cross-ox</i> file storage provider that refer to a no
+     * longer existing guest user in the remote context is enabled or not.
+     *
+     * @param session The session to check the configuration for
+     * @return <code>true</code> if unknown shares should be removed automatically, <code>false</code>, otherwise
+     */
+    private boolean isAutoRemoveUnknownShares(Session session) {
+        Property property = XOXFileStorageProperties.AUTO_REMOVE_UNKNOWN_SHARES;
+        try {
+            return services.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(session.getUserId(), session.getContextId(), property);
+        } catch (OXException e) {
+            LOG.error("Error getting {}, falling back to defaults.", property, e);
+            return b(property.getDefaultValue(Boolean.class));
+        }
+    }
 
     /**
      * Gets the {@link Session}

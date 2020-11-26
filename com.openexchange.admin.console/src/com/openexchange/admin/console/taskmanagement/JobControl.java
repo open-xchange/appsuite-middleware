@@ -54,12 +54,12 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -88,7 +88,7 @@ public class JobControl extends BasicCommandlineOptions {
     private static final char OPT_FLUSH_SHORT = 'f';
 
     public static void main(final String[] args) {
-        new JobControl(args);
+        new JobControl().execute(args);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -98,12 +98,16 @@ public class JobControl extends BasicCommandlineOptions {
     private CLIOption details;
     private CLIOption flush;
 
-    public JobControl(final String[] args2) {
+    /**
+     * Initializes a new {@link JobControl}.
+     */
+    public JobControl() {
+        super();
+    }
 
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("jobControl");
-
         setOptions(parser);
-
         try {
             parser.ownparse(args2);
 
@@ -147,7 +151,7 @@ public class JobControl extends BasicCommandlineOptions {
         } catch (java.rmi.ConnectException neti) {
             printError(neti.getMessage(), parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (java.lang.NumberFormatException num) {
+        } catch (@SuppressWarnings("unused") java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (MalformedURLException e) {

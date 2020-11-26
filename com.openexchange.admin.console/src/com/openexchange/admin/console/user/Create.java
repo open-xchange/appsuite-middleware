@@ -65,14 +65,13 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Create extends CreateCore {
 
     public static void main(String[] args) {
-        new Create(args);
+        new Create().execute(args);
     }
 
     // ---------------------------------------------------------------------------------------------------------------------
 
-    public Create(String[] args2) {
-        AdminParser parser = new AdminParser("createuser");
-        commonfunctions(parser, args2);
+    public void execute(String[] args) {
+        commonfunctions(new AdminParser("createuser"), args);
     }
 
     @Override

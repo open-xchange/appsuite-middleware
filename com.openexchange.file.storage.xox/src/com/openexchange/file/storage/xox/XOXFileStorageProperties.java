@@ -70,4 +70,10 @@ public class XOXFileStorageProperties {
      * Defines the maximum number of allowed accounts within the xox file storage provider. A value of 0 disables the limit.
      */
     public static final Property MAX_ACCOUNTS = DefaultProperty.valueOf("com.openexchange.file.storage.xox.maxAccounts", I(20));
+
+    /**
+     * Indicates whether the automatic removal of accounts in the <i>cross-ox</i> file storage provider that refer to a no
+     * longer existing guest user in the remote context is enabled or not.
+     */
+    public static final Property AUTO_REMOVE_UNKNOWN_SHARES = DefaultProperty.valueOf("com.openexchange.file.storage.xox.autoRemoveUnknownShares", Boolean.TRUE);
 }

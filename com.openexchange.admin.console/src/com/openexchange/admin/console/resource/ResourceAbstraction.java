@@ -46,16 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.resource;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 
@@ -89,32 +92,32 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected String resourceid = null;
     protected String resourcename = null;
 
-    protected void setDisplayNameOption(final AdminParser admp,final boolean required){
-        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));
+    protected void setDisplayNameOption(final AdminParser admp, final boolean required) {
+        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT, _OPT_DISPNAME_LONG, "The resource display name", true, convertBooleantoTriState(required));
     }
 
-    protected void setRecipientOption(final AdminParser admp,final boolean required){
-        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));
+    protected void setRecipientOption(final AdminParser admp, final boolean required) {
+        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT, OPT_RECIPIENT_LONG, "Recipient who should receive mail addressed to the resource", true, convertBooleantoTriState(required));
     }
 
-    protected void setNameOption(final AdminParser admp,final NeededQuadState required){
-        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required);
+    protected void setNameOption(final AdminParser admp, final NeededQuadState required) {
+        resourceNameOption = setShortLongOpt(admp, _OPT_NAME_SHORT, _OPT_NAME_LONG, "The resource name", true, required);
     }
 
-    protected void setAvailableOption(final AdminParser admp,final boolean required){
+    protected void setAvailableOption(final AdminParser admp, final boolean required) {
         resourceAvailableOption = setShortLongOpt(admp, _OPT_AVAILABLE_SHORT, _OPT_AVAILABLE_LONG, "true/false", "Toggle resource availability", required);
     }
 
-    protected void setDescriptionOption(final AdminParser admp,final boolean required){
-        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, convertBooleantoTriState(required));
+    protected void setDescriptionOption(final AdminParser admp, final boolean required) {
+        resourceDescriptionOption = setShortLongOpt(admp, _OPT_DESCRIPTION_SHORT, _OPT_DESCRIPTION_LONG, "Description of this resource", true, convertBooleantoTriState(required));
     }
 
-    protected void setEmailOption(final AdminParser admp,final boolean required){
-        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, convertBooleantoTriState(required));
+    protected void setEmailOption(final AdminParser admp, final boolean required) {
+        resourceEmailOption = setShortLongOpt(admp, _OPT_EMAIL_SHORT, _OPT_EMAIL_LONG, "Email of this resource", true, convertBooleantoTriState(required));
     }
 
-    protected void setIdOption(final AdminParser admp){
-        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededQuadState.eitheror);
+    protected void setIdOption(final AdminParser admp) {
+        resourceIdOption = setShortLongOpt(admp, _OPT_RESOURCEID_SHORT, _OPT_RESOURCEID_LONG, "Id of this resource", true, NeededQuadState.eitheror);
     }
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
@@ -129,14 +132,16 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     private void parseAndSetResourceAvailable(final AdminParser parser, final Resource res) {
         final String resourceavailable = (String) parser.getOptionValue(this.resourceAvailableOption);
         if (resourceavailable != null) {
-            res.setAvailable(Boolean.parseBoolean(resourceavailable));
+            res.setAvailable(B(Boolean.parseBoolean(resourceavailable)));
         }
     }
 
     private void parseAndSetResourceDescription(final AdminParser parser, final Resource res) {
         String resourceDescription = (String) parser.getOptionValue(this.resourceDescriptionOption);
         if (resourceDescription != null) {
-            if ("".equals(resourceDescription)) { resourceDescription = null; }
+            if ("".equals(resourceDescription)) {
+                resourceDescription = null;
+            }
             res.setDescription(resourceDescription);
         }
     }
@@ -151,7 +156,9 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     private void parseAndSetResourceEmail(final AdminParser parser, final Resource res) {
         String resourceEmail = (String) parser.getOptionValue(this.resourceEmailOption);
         if (resourceEmail != null) {
-            if ("".equals(resourceEmail)) { resourceEmail = null; }
+            if ("".equals(resourceEmail)) {
+                resourceEmail = null;
+            }
             res.setEmail(resourceEmail);
         }
     }
@@ -165,20 +172,16 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
 
     protected void parseAndSetMandatoryFields(final AdminParser parser, final Resource res) {
         parseAndSetResourceAvailable(parser, res);
-
         parseAndSetResourceDescription(parser, res);
-
         parseAndSetResourceDisplayName(parser, res);
-
         parseAndSetResourceEmail(parser, res);
-
         parseAndSetResourceName(parser, res);
     }
 
     protected void parseAndSetResourceId(final AdminParser parser, final Resource res) {
-        resourceid = (String) parser.getOptionValue(this.resourceIdOption);
+        resourceid = String.class.cast(parser.getOptionValue(this.resourceIdOption));
         if (null != resourceid) {
-            res.setId(Integer.parseInt(resourceid));
+            res.setId(I(Integer.parseInt(resourceid)));
         }
     }
 }

@@ -72,38 +72,39 @@ public final class CheckCountsConsistency extends ContextAbstraction {
      * @param args The command line arguments
      */
     public static void main(final String args[]) {
-        new CheckCountsConsistency(args);
+        new CheckCountsConsistency().execute(args);
     }
 
     /**
-     * Initialises a new {@link CheckCountsConsistency}.
+     * Initializes a new {@link CheckCountsConsistency}.
+     */
+    private CheckCountsConsistency() {
+        super();
+    }
+
+    /**
+     * Executes the command
      *
      * @param args The command line arguments
      */
-    public CheckCountsConsistency(final String[] args) {
-
-        final AdminParser parser = new AdminParser("checkcountsconsistency");
-
+    private void execute(String[] args) {
+        AdminParser parser = new AdminParser("checkcountsconsistency");
         setDefaultCommandLineOptionsWithoutContextID(parser);
         try {
             parser.ownparse(args);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+            Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            OXUtilInterface oxutil = OXUtilInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME));
 
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
-            Runnable runnbable = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        oxutil.checkCountsConsistency(true, true, auth);
-                    } catch (Exception e) {
-                        errorRef.set(e);
-                    }
+            AtomicReference<Exception> errorRef = new AtomicReference<>();
+            Runnable runnbable = () -> {
+                try {
+                    oxutil.checkCountsConsistency(true, true, auth);
+                } catch (Exception e) {
+                    errorRef.set(e);
                 }
             };
-            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            FutureTask<Void> ft = new FutureTask<>(runnbable, null);
             new Thread(ft, "Open-Xchange Counts Consistency Checker").start();
 
             // Await termination

@@ -64,6 +64,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  * {@link GetModuleAccess} gets the module access informations for a given context
  *
  */
+@SuppressWarnings("deprecation")
 public class GetModuleAccess extends ContextAbstraction {
 
     /**
@@ -112,8 +113,8 @@ public class GetModuleAccess extends ContextAbstraction {
      * @throws InvalidDataException
      */
     private void doCsvOutput(final UserModuleAccess access) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        final ArrayList<String> datarow = new ArrayList<String>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
+        final ArrayList<String> datarow = new ArrayList<>();
         datarow.add(String.valueOf(access.getCalendar()));
         datarow.add(String.valueOf(access.getContacts()));
         datarow.add(String.valueOf(access.getDelegateTask()));
@@ -150,7 +151,7 @@ public class GetModuleAccess extends ContextAbstraction {
      * @return An {@link ArrayList} of column names
      */
     private static ArrayList<String> getAccessColums() {
-        final ArrayList<String> columnnames = new ArrayList<String>(32);
+        final ArrayList<String> columnnames = new ArrayList<>(32);
         columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
         columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);

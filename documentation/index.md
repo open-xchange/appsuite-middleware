@@ -31,8 +31,6 @@ The following properties needs to be set in order to enable the **cross-context*
 
 * <code>[com.openexchange.calendar.xctx2.enabled](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.calendar.xctx2.enabled) = true</code>
 
-* <code>[com.openexchange.share.crossContextGuests](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.share.crossContextGuests) = true</code>
-
 
 The following properties needs to be set in order to enable the **cross-ox** feature:
 

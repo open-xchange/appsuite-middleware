@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.util.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -72,10 +73,10 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
-import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
+import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -211,7 +212,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
                     throw e;
                 }
                 System.out.println("The schema '" + schemaName + "' is empty. Skipping.");
-            } catch (NoSuchObjectException e) {
+            } catch (@SuppressWarnings("unused") NoSuchObjectException e) {
                 System.out.println("Schema " + schemaName + " not found. Skipping");
             } finally {
                 if (!force && error) {
@@ -238,8 +239,8 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
         // Sort arithmetically, that is by integer suffix of each database schema
         Comparator<Database> comparator = (o1, o2) -> {
-            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().lastIndexOf('_') + 1));
-            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().lastIndexOf('_') + 1));
+            Integer i1 = I(Integer.parseInt(o1.getScheme().substring(o1.getScheme().lastIndexOf('_') + 1)));
+            Integer i2 = I(Integer.parseInt(o2.getScheme().substring(o2.getScheme().lastIndexOf('_') + 1)));
             return i1.compareTo(i2);
         };
         Arrays.sort(databases, comparator);
@@ -268,7 +269,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
             if (position >= 0) {
                 // Remember database position to be skipped
-                indexesToSkip.add(position);
+                indexesToSkip.add(I(position));
             }
         }
 
@@ -416,6 +417,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
                 case ABORT:
                     System.out.println("OK, aborting upgrade");
                     sysexit(0);
+                    return;
                 case CONTINUE:
                     scanner.close();
                     System.out.println("OK, proceeding with the upgrade");
@@ -455,7 +457,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
         if (jmxUsername == null || jmxPassword == null) {
             environment = null;
         } else {
-            environment = new HashMap<String, Object>(1);
+            environment = new HashMap<>(1);
             String[] creds = new String[] { jmxUsername, jmxPassword };
             environment.put(JMXConnector.CREDENTIALS, creds);
         }
@@ -471,7 +473,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
      * @param parser The {@link AdminParser}
      * @throws InvalidCredentialsException
      */
-    private void checkAndSetArguments(AdminParser parser) throws InvalidCredentialsException {
+    private void checkAndSetArguments(AdminParser parser) {
         // Parse the server name
         String serverName = (String) parser.getOptionValue(serverNameOption);
         server = new Server();
@@ -534,7 +536,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
         }
         try {
             port = Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             System.err.println("Port parameter is not a number: " + value);
             parser.printUsage();
             System.exit(1);

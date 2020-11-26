@@ -91,6 +91,7 @@ public abstract class ExistsCore extends ContextAbstraction {
             } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
+                return;
             }
             String ctxident;
             if ( null != ctx.getId() ) {

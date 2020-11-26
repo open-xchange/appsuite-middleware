@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class ListDatabaseSchema extends DatabaseAbstraction {
 
-    public ListDatabaseSchema(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("listdatabaseschema");
 
@@ -104,7 +104,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
     }
 
     private void sysoutOutput(final Database[] databases) throws InvalidDataException, URISyntaxException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final Database database : databases) {
             data.add(makeStandardData(database, false));
         }
@@ -116,14 +116,14 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
 
     private void precsvinfos(final Database[] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("display_name");
         columns.add("schema_name");
         columns.add("url");
         columns.add("currentunits");
 
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final Database database : databases) {
             data.add(makeCSVData(database));
@@ -133,7 +133,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListDatabaseSchema(args);
+        new ListDatabaseSchema().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -154,7 +154,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
     }
 
     private ArrayList<String> makeStandardData(final Database db, final boolean csv) throws URISyntaxException {
-        final ArrayList<String> rea_data = new ArrayList<String>();
+        final ArrayList<String> rea_data = new ArrayList<>();
 
         rea_data.add(db.getId().toString());
 

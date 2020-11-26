@@ -360,7 +360,7 @@ public class StatisticTools extends AbstractJMXTools {
         }
         try {
             allocatedBytes = (long[]) mbc.invoke(srvThrdName, "getThreadAllocatedBytes", new Object[] { allThreadIds }, new String[] { "[J" });
-        } catch (javax.management.ReflectionException e) {
+        } catch (@SuppressWarnings("unused") javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
             allocatedBytes = new long[threadInfo.length];
@@ -369,7 +369,7 @@ public class StatisticTools extends AbstractJMXTools {
         // First try the new method every time, if not available use the old iteration approach
         try {
             cpuTime = (long[]) mbc.invoke(srvThrdName, "getThreadCpuTime", new Object[] { allThreadIds }, new String[] { "[J" });
-        } catch (javax.management.ReflectionException e) {
+        } catch (@SuppressWarnings("unused") javax.management.ReflectionException e) {
             cpuTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
@@ -377,7 +377,7 @@ public class StatisticTools extends AbstractJMXTools {
         }
         try {
             userTime = (long[]) mbc.invoke(srvThrdName, "getThreadUserTime", new Object[] { allThreadIds }, new String[] { "[J" });
-        } catch (javax.management.ReflectionException e) {
+        } catch (@SuppressWarnings("unused") javax.management.ReflectionException e) {
             userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);
@@ -387,7 +387,7 @@ public class StatisticTools extends AbstractJMXTools {
             System.err.println("Different results returned");
             return sb.toString();
         }
-        final ArrayList<ThreadOutputElem> arrayList = new ArrayList<ThreadOutputElem>();
+        final ArrayList<ThreadOutputElem> arrayList = new ArrayList<>();
         sb.append("ThreadID, Name, AllocatedBytes, CpuTime, UserTime");
         if (stacktrace) {
             sb.append(", StackTrace");
@@ -630,11 +630,10 @@ public class StatisticTools extends AbstractJMXTools {
      *
      * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
      * @param out the {@link PrintStream} to write the output to.
-     * @throws IOException
      * @throws MalformedObjectNameException
      * @throws NullPointerException
      */
-    static String showGrizzlyData(final MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, NullPointerException, IOException {
+    static String showGrizzlyData(final MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, NullPointerException {
         StringBuilder sb = new StringBuilder();
         // Iterate over the MBeans we are interested in, query by objectName
         for (final GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {

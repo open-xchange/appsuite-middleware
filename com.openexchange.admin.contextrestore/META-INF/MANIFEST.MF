@@ -31,3 +31,4 @@ Import-Package: com.mysql.jdbc,
  org.osgi.framework,
  org.slf4j
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.admin.contextrestore

@@ -50,7 +50,6 @@
 package com.openexchange.admin.console.group;
 
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -60,13 +59,11 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 public class Change extends ChangeCore {
 
     public static void main(final String[] args) {
-        new Change(args);
+        new Change().execute(args);
     }
 
-    public Change(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("changegroup");
-
         commonfunctions(parser, args2);
     }
 

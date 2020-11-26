@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
@@ -67,7 +68,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public final class RegisterDatabase extends DatabaseAbstraction {
 
-    public RegisterDatabase(final String[] args2) {
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("registerdatabase");
 
@@ -99,7 +100,7 @@ public final class RegisterDatabase extends DatabaseAbstraction {
 
             // Trigger database registration w/ pre-creation of schemas
             final AtomicInteger dbId = new AtomicInteger(0);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            final AtomicReference<Exception> errorRef = new AtomicReference<>();
             Runnable runnbable = new Runnable() {
 
                 @Override
@@ -111,7 +112,7 @@ public final class RegisterDatabase extends DatabaseAbstraction {
                     }
                 }
             };
-            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            FutureTask<Void> ft = new FutureTask<>(runnbable, null);
             new Thread(ft, "Open-Xchange Database Registerer").start();
 
             // Await termination
@@ -154,7 +155,7 @@ public final class RegisterDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new RegisterDatabase(args);
+        new RegisterDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

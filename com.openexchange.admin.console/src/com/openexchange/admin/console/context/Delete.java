@@ -65,13 +65,29 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Delete extends DeleteCore {
 
-    public Delete(String args[]) {
+    /**
+     * Initializes a new {@link Delete}.
+     */
+    public Delete() {
         super();
-        commonfunctions(new AdminParser("deletecontext"), args);
     }
 
+    /**
+     * Entry point
+     *
+     * @param args command line arguments
+     */
     public static void main(final String args[]) {
-        new Delete(args);
+        new Delete().execute(args);
+    }
+
+    /**
+     * Executes the command
+     *
+     * @param args the command line arguments
+     */
+    private void execute(String[] args) {
+        commonfunctions(new AdminParser("deletecontext"), args);
     }
 
     @Override

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.filestore;
 
 import java.rmi.Naming;
@@ -65,7 +66,7 @@ public class RegisterFilestore extends FilestoreAbstraction {
 
     private CLIOption ifNonexistent;
 
-    public RegisterFilestore(final String[] args2) {
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("registerfilestore");
 
         setOptions(parser);
@@ -81,9 +82,7 @@ public class RegisterFilestore extends FilestoreAbstraction {
             final Filestore fstore = new Filestore();
 
             parseAndSetFilestorePath(parser, fstore);
-
             parseAndSetFilestoreSize(parser, fstore);
-
             parseAndSetFilestoreMaxCtxs(parser, fstore);
 
             if (parser.hasOption(ifNonexistent)) {
@@ -102,16 +101,13 @@ public class RegisterFilestore extends FilestoreAbstraction {
     }
 
     public static void main(final String args[]) {
-        new RegisterFilestore(args);
+        new RegisterFilestore().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
         setPathOption(parser, NeededQuadState.needed);
-
         setSizeOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_SIZE));
-
         setMaxCtxOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_MAX_CTX));
 
         ifNonexistent = setLongOpt(parser, "if-nonexistent", "If set returns the id of one an existing filestore instead of throwing an error.", false, false);

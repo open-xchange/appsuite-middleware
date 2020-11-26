@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.server;
 
 import java.rmi.Naming;
@@ -62,8 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class RegisterServer extends ServerAbstraction {
 
-    public RegisterServer(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("registerserver");
 
         setOptions(parser);
@@ -88,12 +88,11 @@ public class RegisterServer extends ServerAbstraction {
     }
 
     public static void main(final String args[]) {
-        new RegisterServer(args);
+        new RegisterServer().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
         setServernameOption(parser, NeededQuadState.needed);
     }
 }

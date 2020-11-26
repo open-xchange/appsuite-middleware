@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.user.configuration;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -165,7 +166,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         String contextVal = cmd.getOptionValue(OPT_CONTEXT_SHORT);
         try {
             contextId = Integer.valueOf(contextVal.trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             System.err.println("Cannot parse '" + contextVal + "' as a context id");
             printHelp();
             System.exit(1);
@@ -179,7 +180,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, String optRmiHostName) throws Exception {
         OXUserInterface oxUserInterface = getUserInterface();
 
-        final Context ctx = new Context(parseInt('c', 0, cmd, option));
+        final Context ctx = new Context(I(parseInt('c', 0, cmd, option)));
         final User user = new User(parseInt('i', 0, cmd, option));
         Credentials credentials = new Credentials(cmd.getOptionValue('A'), cmd.getOptionValue('P'));
 
@@ -238,7 +239,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             System.out.println();
             return;
         }
-        List<CapabilitySource> capabilitySources = new ArrayList<CapabilitySource>();
+        List<CapabilitySource> capabilitySources = new ArrayList<>();
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROVISIONING, userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.DENIED_KEY)));
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.CONFIGURATION, userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.DENIED_KEY)));
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROGRAMMATIC, userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.DENIED_KEY)));

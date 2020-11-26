@@ -108,7 +108,7 @@ public abstract class ListCore extends UserAbstraction {
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
-                final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
+                final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<>();
 
                 for (final User user : allusers) {
                     // fetch module access for every user
@@ -137,11 +137,11 @@ public abstract class ListCore extends UserAbstraction {
      * @throws InvalidDataException
      *
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     protected void precsvinfos(final User[] users, final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
         final Method[] methods = User.class.getMethods();
         // Filter out the old gui_spam_filter_enabled getters
-        final Map<String, String> notallowedOrReplace = new HashMap<String, String>();
+        final Map<String, String> notallowedOrReplace = new HashMap<>();
         notallowedOrReplace.put("GUI_Spam_filter_capabilities_enabled", "");
         notallowedOrReplace.put("Spam_filter_enabled", "");
         notallowedOrReplace.put("Gui_spam_filter_enabled", "GUI_Spam_filter_capabilities_enabled");
@@ -155,7 +155,7 @@ public abstract class ListCore extends UserAbstraction {
         notallowedOrReplace.put("SmtpPort", "");
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, notallowedOrReplace);
 
-        final ArrayList<String> columnnames = new ArrayList<String>(32);
+        final ArrayList<String> columnnames = new ArrayList<>(32);
         for (final MethodAndNames methodandnames : methArrayList) {
             columnnames.add(methodandnames.getName());
         }
@@ -192,9 +192,9 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
 
         }
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final User user : users) {
-            final ArrayList<String> datarow = new ArrayList<String>();
+            final ArrayList<String> datarow = new ArrayList<>();
             for (final MethodAndNames methodandnames : methArrayList) {
                 final String returntype = methodandnames.getReturntype();
                 if (returntype.equals(JAVA_LANG_STRING)) {
@@ -302,7 +302,7 @@ public abstract class ListCore extends UserAbstraction {
 
     protected final void sysoutOutput(final User[] users) throws InvalidDataException {
 
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final User user : users) {
             printExtensionsError(user);
             data.add(makeStandardData(user));
@@ -314,7 +314,7 @@ public abstract class ListCore extends UserAbstraction {
     }
 
     private ArrayList<String> makeStandardData(final User user) {
-        final ArrayList<String> res_data = new ArrayList<String>();
+        final ArrayList<String> res_data = new ArrayList<>();
 
         res_data.add(String.valueOf(user.getId()));// id
 

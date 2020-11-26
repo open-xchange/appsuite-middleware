@@ -75,6 +75,7 @@ public class ChangeServer extends ServerAbstraction {
     private static final String SERVER_ID_DESCRIPTION = "The identifier of the new server";
 
     private CLIOption schemaNameOption;
+    @SuppressWarnings("hiding")
     private CLIOption serverIdOption;
 
     /**
@@ -83,18 +84,23 @@ public class ChangeServer extends ServerAbstraction {
      * @param args The command line arguments
      */
     public static void main(String[] args) {
-        new ChangeServer(args);
+        new ChangeServer().execute(args);
     }
 
     /**
-     * Initialises a new {@link ChangeServer}.
+     * Initializes a new {@link ChangeServer}.
+     */
+    private ChangeServer() {
+        super();
+    }
+
+    /**
+     * Executes the command
      * 
      * @param args The command line arguments
      */
-    public ChangeServer(String args[]) {
-        super();
-
-        final AdminParser parser = new AdminParser("changeserver");
+    private void execute(String args[]) {
+        AdminParser parser = new AdminParser("changeserver");
         setOptions(parser);
 
         try {

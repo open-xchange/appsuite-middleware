@@ -51,7 +51,6 @@ package com.openexchange.admin.console.group;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -67,14 +66,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class List extends ListCore {
 
     public static void main(final String[] args) {
-        new List(args);
+        new List().execute(args);
     }
 
-    public List(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("listgroup");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args) {
+        commonfunctions(new AdminParser("listgroup"), args);
     }
 
     @Override

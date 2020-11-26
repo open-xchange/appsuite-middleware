@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
@@ -61,7 +62,8 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  *
  */
 public class UnregisterDatabase extends DatabaseAbstraction {
-    public UnregisterDatabase(final String[] args2) {
+
+    public void execute(final String[] args2) {
 
         final AdminParser parser = new AdminParser("unregisterdatabase");
 
@@ -81,7 +83,7 @@ public class UnregisterDatabase extends DatabaseAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             oxutil.unregisterDatabase(db, auth);
 
@@ -93,7 +95,7 @@ public class UnregisterDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new UnregisterDatabase(args);
+        new UnregisterDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

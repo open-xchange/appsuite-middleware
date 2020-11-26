@@ -64,14 +64,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class Exists extends ExistsCore {
 
     public static void main(final String[] args) {
-        new Exists(args);
+        new Exists().execute(args);
     }
 
-    public Exists(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("existsuser");
-
-        commonfunctions(parser, args2);
+    public void execute(final String[] args2) {
+        commonfunctions(new AdminParser("existsuser"), args2);
     }
 
     @Override

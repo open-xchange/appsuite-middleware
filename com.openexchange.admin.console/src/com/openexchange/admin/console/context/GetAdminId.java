@@ -62,7 +62,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * {@link GetAdminId}
  *
@@ -70,7 +69,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class GetAdminId extends ContextAbstraction {
 
-    public GetAdminId(String[] args) {
+    public void execute(String[] args) {
         final AdminParser parser = new AdminParser("getadminid");
 
         commonfunctions(parser, args);
@@ -116,6 +115,6 @@ public class GetAdminId extends ContextAbstraction {
     }
 
     public static void main(String[] args) {
-        new GetAdminId(args);
+        new GetAdminId().execute(args);
     }
 }

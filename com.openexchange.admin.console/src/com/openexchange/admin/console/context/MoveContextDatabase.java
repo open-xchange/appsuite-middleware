@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -58,8 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 
 public class MoveContextDatabase extends ContextAbstraction {
 
-    public MoveContextDatabase(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("movecontextdatabase");
         setOptions(parser);
 
@@ -75,14 +75,16 @@ public class MoveContextDatabase extends ContextAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
 
-            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-
-            oxres.moveContextDatabase(ctx, db, mr, auth);*/
+            /*
+             * final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+             * 
+             * oxres.moveContextDatabase(ctx, db, mr, auth);
+             */
             final int jobId = oxres.moveContextDatabase(ctx, db, auth);
 
             displayMovedMessage(successcontext, null, "to database " + (db.getId() != null ? db.getId() : db.getName()) + " scheduled as job " + jobId, parser);
@@ -96,7 +98,7 @@ public class MoveContextDatabase extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new MoveContextDatabase(args);
+        new MoveContextDatabase().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

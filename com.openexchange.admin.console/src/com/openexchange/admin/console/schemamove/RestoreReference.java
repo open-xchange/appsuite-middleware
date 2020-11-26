@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.schemamove;
 
+import static com.openexchange.java.Autoboxing.i;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
@@ -136,7 +137,7 @@ public class RestoreReference extends AbstractSchemaRMIToolkit {
             final Credentials auth = credentialsparsing(parser);
             String sourceSchema = (String) parser.getOptionValue(optSourceSchema);
             String targetSchema = (String) parser.getOptionValue(optTargetSchema);
-            int targetClusterId = Integer.valueOf((String) parser.getOptionValue(optTargetCluster));
+            int targetClusterId = i(Integer.valueOf((String) parser.getOptionValue(optTargetCluster)));
             String rmiHost = (String) parser.getOptionValue(optRMIHost);
 
             SchemaMoveRemote smr = null;

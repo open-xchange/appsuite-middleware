@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 public class GetAccessCombinationName extends UserAbstraction {
 
     public static void main(final String[] args) {
-        new GetAccessCombinationName(args);
+        new GetAccessCombinationName().execute(args);
     }
 
     protected final void setOptions(final AdminParser parser) {
@@ -68,17 +68,13 @@ public class GetAccessCombinationName extends UserAbstraction {
         setUsernameOption(parser, NeededQuadState.eitheror);
     }
 
-    public GetAccessCombinationName(final String[] args2) {
-
+    public void execute(final String[] args) {
         final AdminParser parser = new AdminParser("getaccesscombinationnameforuser");
-
         // set all needed options in our parser
         setOptions(parser);
-
         String successtext = null;
-
         try {
-            parser.ownparse(args2);
+            parser.ownparse(args);
 
             // create user obj
             final User usr = new User();
