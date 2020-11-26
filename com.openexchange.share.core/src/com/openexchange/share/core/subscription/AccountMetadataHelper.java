@@ -72,6 +72,8 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.session.Session;
 
+import static com.openexchange.java.Autoboxing.b;
+
 /**
  * {@link AccountMetadataHelper}
  *
@@ -233,7 +235,10 @@ public class AccountMetadataHelper {
      */
     public FileStorageFolderStub[] getLastKnownFolders() throws OXException {
         try {
-            JSONArray lastKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(account);
+
+            final JSONObject accountMetadata = FileStorageAccountMetaDataUtil.getAccountMetaData(account);
+            final JSONArray lastKnownFolders = FileStorageAccountMetaDataUtil.getLastKnownFolders(accountMetadata);
+
             if (lastKnownFolders != null) {
                 ArrayList<FileStorageFolderStub> ret = new ArrayList<FileStorageFolderStub>(lastKnownFolders.length());
                 for (int i = 0; i < lastKnownFolders.length(); i++) {
@@ -243,11 +248,12 @@ public class AccountMetadataHelper {
                     folder.setId(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_ID));
                     folder.setName(jsonFolder.getString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_NAME));
                     folder.setParentId(jsonFolder.optString(FileStorageAccountMetaDataUtil.JSON_FIELD_FOLDER_PARENT_ID, "10"));
-
                     folder.setExists(true);
-                    folder.setSubscribed(true);
-
                     folder.setProperties(new HashMap<String, Object>());
+
+                    //get the subscribed state from meta data
+                    Boolean isSubscribed = SubscribedHelper.getSubscribed(accountMetadata, folder.getId());
+                    folder.setSubscribed(isSubscribed == null || b(isSubscribed));
 
                     //default permissions
                     List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(1);
@@ -258,6 +264,7 @@ public class AccountMetadataHelper {
 
                     ret.add(folder);
                 }
+
                 return ret.toArray(new FileStorageFolderStub[ret.size()]);
             }
             return new FileStorageFolderStub[0];

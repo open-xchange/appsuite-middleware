@@ -52,7 +52,6 @@ package com.openexchange.file.storage;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.session.Session;
 
 /**
  * {@link ErrorStateFolderAccess} - A {@link FileStorageFolderAccess} implementation which can be used in case of an account error.
@@ -67,6 +66,7 @@ import com.openexchange.session.Session;
 public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess {
 
     private final OXException error;
+    private final FileStorageAccount account;
 
     /**
      * {@link FileStorageFolderStub} represents a folder which is defective and will not be cached
@@ -102,13 +102,13 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
     /**
      * Initializes a new {@link ErrorStateFolderAccess}.
      *
-     * @param error The current problem preventing to query the remote folders
      * @param account The {@link FileStorageAccount}
-     * @param session The {@link Session}
+     * @param error The current problem preventing to query the remote folders
      * @param getFolderFunction A function which will be used to retrieve the last known folder, when loaded
      */
     //@formatter:off
-    public ErrorStateFolderAccess(OXException error) {
+    public ErrorStateFolderAccess(FileStorageAccount account, OXException error) {
+        this.account = Objects.requireNonNull(account, "account must not be null");
         this.error = Objects.requireNonNull(error, "error must not be null");
     }
     //@formatter:on
@@ -130,6 +130,16 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
      * @throws OXException
      */
     public abstract FileStorageFolderStub[] getLastKnownSubFolders(String folderId) throws OXException;
+
+    /**
+     * Updates a last known folder
+     *
+     * @param folderId The folder to update
+     * @param toUpdate The file storage folder to update containing only the modified fields
+     * @return The ID of the updated folder, or null in case the folder could not be updated
+     * @throws OXException
+     */
+    public abstract String updateLastKnownFolder(FileStorageFolder folder, FileStorageFolder toUpdate) throws OXException;
 
     @Override
     public boolean exists(String folderId) throws OXException {
@@ -185,6 +195,21 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+        /*
+         * We are unable to perform the update in case of an error; except it is an persistent known folder
+         */
+        //Subscription update
+        FileStorageFolderStub lastKnownFolder = getLastKnownFolder(identifier);
+        if(lastKnownFolder != null) {
+            //Updating a known folder;
+            String folderId = updateLastKnownFolder(lastKnownFolder, toUpdate);
+            //The actual implementation decides whether or not the data can be updated
+            //in the persistent "last known" version of a folder
+            if(folderId != null) {
+                return folderId;
+            }
+        }
+        //..throw an exception otherwise
         throw error;
     }
 
@@ -225,6 +250,15 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+        //In case of an error state, we can only serve the path if the folder is part of the "last known folders".
+        FileStorageFolderStub lastKnownFolder = getLastKnownFolder(folderId);
+        if(lastKnownFolder != null) {
+            DefaultFileStorageFolder defaultFolder = new DefaultFileStorageFolder();
+            defaultFolder.setId("10");
+            FileStorageFolder[] ret = new FileStorageFolder[]{lastKnownFolder, defaultFolder};
+            return ret;
+        }
+        //..throw an exception otherwise
         throw error;
     }
 

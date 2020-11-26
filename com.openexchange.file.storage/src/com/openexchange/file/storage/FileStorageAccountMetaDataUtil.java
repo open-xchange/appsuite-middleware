@@ -106,8 +106,17 @@ public class FileStorageAccountMetaDataUtil {
      * @return the folders as JSONArray, or null if no known folders are present.
      */
     public static JSONArray getLastKnownFolders(FileStorageAccount account) {
-        JSONObject metadata = account.getMetadata();
-        return metadata.optJSONArray(JSON_ARRAY_LAST_KNOWN_FOLDERS);
+        return getLastKnownFolders(account.getMetadata());
+    }
+
+    /**
+     * Gets the last known folders from the given accountMetadata
+     *
+     * @param accountMetadata The meta data to get the last known folders from
+     * @return the folders as JSONArray, or null if no known folders are present.
+     */
+    public static JSONArray getLastKnownFolders(JSONObject accountMetadata) {
+        return accountMetadata.optJSONArray(JSON_ARRAY_LAST_KNOWN_FOLDERS);
     }
 
     /**
