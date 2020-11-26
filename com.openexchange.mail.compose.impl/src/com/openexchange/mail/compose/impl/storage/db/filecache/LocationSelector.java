@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.uploaddir.UploadDirService;
@@ -120,18 +121,16 @@ public class LocationSelector {
                 return getLocation(userId, contextId);
             }
 
-            Optional<File> optionalFallbackLocation = Optional.empty();
             String effectiveDirectoryPath = optionalConfiguredDirectoryPath.orElse(null);
             if (effectiveDirectoryPath == null) {
-                optionalFallbackLocation = getFallbackLocation();
-                if (optionalFallbackLocation.isPresent()) {
-                    effectiveDirectoryPath = optionalFallbackLocation.get().getAbsolutePath();
-                }
+                // Not configured. Fall-back to standard upload directory.
+                File fallbackLocation = requireFallbackLocation();
+                effectiveDirectoryPath = fallbackLocation.getAbsolutePath();
             }
 
             LocationAndFile dir = directories.get(effectiveDirectoryPath);
             if (dir == null) {
-                File newDirectory = optionalFallbackLocation.isPresent() ? optionalFallbackLocation.get() : new File(effectiveDirectoryPath);
+                File newDirectory = new File(effectiveDirectoryPath);
                 if (!newDirectory.isDirectory()) {
                     LoggerHolder.LOG.error("File cache directory does either not exist or is not a directory: {}. Using fall-back directory instead.", effectiveDirectoryPath);
                     return Optional.empty();
@@ -174,14 +173,17 @@ public class LocationSelector {
         return directories;
     }
 
-    private Optional<File> getFallbackLocation() throws OXException {
+    private File requireFallbackLocation() throws OXException {
         UploadDirService uploadDirService = services.getOptionalService(UploadDirService.class);
         if (uploadDirService == null) {
-            LoggerHolder.LOG.error("Missing service: {}", UploadDirService.class.getName());
-            return Optional.empty();
+            throw ServiceExceptionCode.absentService(UploadDirService.class);
         }
 
-        return Optional.of(uploadDirService.getUploadDir());
+        File uploadDir = uploadDirService.getUploadDir();
+        if (uploadDir == null) {
+            throw OXException.general("Missing upload directory.");
+        }
+        return uploadDir;
     }
 
     /**
