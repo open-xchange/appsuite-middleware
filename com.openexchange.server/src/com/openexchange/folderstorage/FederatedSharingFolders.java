@@ -160,7 +160,9 @@ public class FederatedSharingFolders {
                             access.connect();
                             FileStorageFolderAccess folderAccess = access.getFolderAccess();
                             FileStorageFolder[] sharedFolders = folderAccess.getSubfolders(String.valueOf(parentFolder), true);
-                            ret.addAll(toSortableIds(sharedFolders, service.getId(), account.getId(), ordinal));
+                            if (sharedFolders != null) {
+                                ret.addAll(toSortableIds(sharedFolders, service.getId(), account.getId(), ordinal));
+                            }
                         }
                         catch(Exception e) {
                             LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e);
