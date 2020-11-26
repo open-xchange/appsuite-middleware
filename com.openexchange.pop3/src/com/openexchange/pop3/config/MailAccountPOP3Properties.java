@@ -59,8 +59,6 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountPOP3Properties extends MailAccountProperties implements IPOP3Properties {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountPOP3Properties.class);
-
     /**
      * Initializes a new {@link MailAccountPOP3Properties}.
      *

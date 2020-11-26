@@ -55,7 +55,6 @@ import static com.openexchange.mail.autoconfig.sources.Guess.PROP_GENERAL_USER_I
 import static com.openexchange.mail.autoconfig.sources.Guess.PROP_SMTP_AUTH_SUPPORTED;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -68,13 +67,12 @@ import javax.mail.Transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.mime.MimeDefaultSession;
-import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.smtp.SMTPTransport;
-import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketFetcher;
 
 /**
  * {@link MailValidator}
@@ -347,52 +345,17 @@ public class MailValidator {
     }
 
     private static boolean tryConnect(String host, int port, boolean secure, String closePhrase, String name) {
-        try (Socket s = secure ? Services.getService(SSLSocketFactoryProvider.class).getDefault().createSocket() : new Socket()) {
-            /*
-             * Set connect timeout
-             */
-            String proxyHost = System.getProperties().getProperty("mail." + name + ".proxy.host", null);
-            int proxyPort = 80;
-            if (proxyHost == null) {
-                // No proxy configured
-                s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
-            } else {
-                // Proxy available via configuration
-                int i = proxyHost.indexOf(':');
-                if (i >= 0) {
-                    try {
-                        proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
-                    } catch (NumberFormatException ex) {
-                        // ignore it
-                    }
-                    proxyHost = proxyHost.substring(0, i);
-                }
-                proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail." + name + ".proxy.port", proxyPort);
-                HostList nonProxyHosts;
-                if ("imap".equals(name)) {
-                    nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-                } else if ("smtp".equals(name)) {
-                    nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
-                } else if ("pop3".equals(name)) {
-                    nonProxyHosts = MailProxyConfig.getInstance().getPop3NonProxyHostList();
-                } else {
-                    nonProxyHosts = HostList.EMPTY;
-                }
-                if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(host)) {
-                    s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
-                } else {
-                    s.connect(new InetSocketAddress(proxyHost, proxyPort), DEFAULT_CONNECT_TIMEOUT);
-                }
-            }
-            s.setSoTimeout(DEFAULT_TIMEOUT);
+        Socket s = null;
+        try {
+            // Establish socket connection
+            s = SocketFetcher.getSocket(host, port, createProps(name, port, secure), "mail." + name, false);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
             if (null == in || null == out) {
                 return false;
             }
-            /*
-             * Read IMAP server greeting on connect
-             */
+
+            // Read IMAP server greeting on connect
             boolean eol = false;
             boolean skipLF = false;
             int i = -1;
@@ -408,18 +371,19 @@ public class MailValidator {
                 // else; Ignore
             }
 
-            /*
-             * Consume final LF
-             */
+            // Consume final LF
             if (skipLF && -1 == in.read()) {
                 LOGGER.trace("Final LF should have been read but the end of the stream was already reached.");
             }
 
+            // Close
             out.write(closePhrase.getBytes(StandardCharsets.ISO_8859_1));
             out.flush();
         } catch (Exception e) {
             LOGGER.trace("Unable to connect.", e);
             return false;
+        } finally {
+            Streams.close(s);
         }
         return true;
     }
@@ -434,4 +398,35 @@ public class MailValidator {
             }
         }
     }
+
+    private static Properties createProps(String name, int port, boolean secure) {
+        Properties imapprops = MimeDefaultSession.getDefaultMailProperties();
+        {
+            int connectionTimeout = DEFAULT_CONNECT_TIMEOUT;
+            if (connectionTimeout > 0) {
+                imapprops.put("mail." + name + ".connectiontimeout", Integer.toString(connectionTimeout));
+            }
+        }
+        {
+            int timeout = DEFAULT_TIMEOUT;
+            if (timeout > 0) {
+                imapprops.put("mail." + name + ".timeout", Integer.toString(timeout));
+            }
+        }
+        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+        final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+        final String sPort = Integer.toString(port);
+        if (secure) {
+            imapprops.put("mail." + name + ".socketFactory.class", socketFactoryClass);
+            imapprops.put("mail." + name + ".socketFactory.port", sPort);
+            imapprops.put("mail." + name + ".socketFactory.fallback", "false");
+        } else {
+            imapprops.put("mail." + name + ".socketFactory.port", sPort);
+            imapprops.put("mail." + name + ".ssl.socketFactory.class", socketFactoryClass);
+            imapprops.put("mail." + name + ".ssl.socketFactory.port", sPort);
+            imapprops.put("mail." + name + ".socketFactory.fallback", "false");
+        }
+        return imapprops;
+    }
+
 }
