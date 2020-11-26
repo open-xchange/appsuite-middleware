@@ -140,7 +140,7 @@ public class GetUserCall extends AbstractGetCall<UserInformation> {
                     }
                 }
                 JSONArray aliases = jsonObject.optJSONArray("aliases");
-                if (null != groups) {
+                if (null != aliases) {
                     for (int i = 0; i < aliases.length(); i++) {
                         builder.addAliases(aliases.optString(i));
                     }
