@@ -171,7 +171,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         /*
          * otherwise use no-reply if session is restricted and has no required scope
          */
-        return AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
+        return false == AppPasswordUtils.isNotRestrictedOrHasScopes(session, "write_mail");
     }
 
     private void sendPasswordResetConfirm(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
