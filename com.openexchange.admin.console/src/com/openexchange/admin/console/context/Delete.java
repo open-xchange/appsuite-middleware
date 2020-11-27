@@ -86,7 +86,7 @@ public class Delete extends DeleteCore {
      *
      * @param args the command line arguments
      */
-    private void execute(String[] args) {
+    public void execute(String[] args) {
         commonfunctions(new AdminParser("deletecontext"), args);
     }
 
