@@ -6617,6 +6617,13 @@ msgid ""
 "Everyone who can see the subfolders of \"%1$s\" will lose access."
 msgstr ""
 
+#. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
+#: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:276
+#: com.openexchange.server/src/com/openexchange/mail/OAuthMailErrorMessages.java:62
+msgid "No account access permitted."
+msgstr ""
+
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 msgid "No group given."
@@ -9440,6 +9447,20 @@ msgid ""
 "inconsistent."
 msgstr ""
 
+#. *
+#. * The description of the read-only scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+msgid "Read all your mails"
+msgstr ""
+
+#. *
+#. * The description of the writable scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+msgid "Create, modify, delete, import and sent mails"
+msgstr ""
+
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -9488,15 +9509,6 @@ msgstr ""
 #. Fall-back name if a file has no valid name
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
-msgstr ""
-
-#. Application 'xyz' requires following permissions:
-#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
-#. - ...
-#: com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
-msgid ""
-"Send RFC822 data using primary account's transport. This requires master "
-"authentication to be active."
 msgstr ""
 
 #. *
