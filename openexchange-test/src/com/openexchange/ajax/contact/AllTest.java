@@ -119,7 +119,7 @@ public class AllTest extends AbstractManagedContactTest {
          * check results
          */
         Assert.assertArrayEquals("'admin=true' differs from default result", allContactsDefault, allContactsWithAdmin);
-        assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length + 1);
+        assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length);
     }
 
     @Test
