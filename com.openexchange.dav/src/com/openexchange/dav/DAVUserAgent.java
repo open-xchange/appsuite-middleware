@@ -137,7 +137,7 @@ public enum DAVUserAgent {
                 (userAgent.contains("CalendarStore") || (userAgent.contains("CalendarAgent")))) {
                 return MAC_CALENDAR;
             }
-            if ((userAgent.contains("Mac OS") || userAgent.contains("Mac_OS")) &&
+            if ((userAgent.contains("Mac OS") || userAgent.contains("Mac_OS") || userAgent.contains("macOS")) &&
                 (userAgent.contains("AddressBook"))) {
                 return MAC_CONTACTS;
             }
