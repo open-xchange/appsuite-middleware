@@ -3248,8 +3248,33 @@ msgid ""
 "%1$s characters."
 msgstr ""
 
-#. The account could not be updated 1$s
+#. With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:196
+msgid ""
+"With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
+"\"%3$s\" people will lose access."
+msgstr ""
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%2$s\" will lose access."
+msgstr ""
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:202
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
+msgstr ""
+
+#. With moving file \"%1$s\" its permissions will get lost.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
+msgid "With moving file \"%1$s\" its permissions will get lost."
+msgstr ""
+
+#. The account could not be updated 1$s
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:208
 msgid "The account could not be updated: 1$s"
 msgstr ""
 
@@ -6527,11 +6552,9 @@ msgstr ""
 msgid "Failed to delete all folders"
 msgstr ""
 
-#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#. The folder was not updated. Please review the warnings for details.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
-msgid ""
-"The folder was not updated due to possible data loss. Please review the "
-"warnings for details."
+msgid "The folder was not updated. Please review the warnings for details."
 msgstr ""
 
 #. Folder name contains not allowed characters: \"%1$s\"
@@ -6542,6 +6565,35 @@ msgstr ""
 #. User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
 msgid "The chosen permission(s) cannot be set"
+msgstr ""
+
+#. With moving the shared folder \"%1$s\" people will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:113
+msgid "With moving the shared folder \"%1$s\" people will lose access."
+msgstr ""
+
+#. This folder  will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:116
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%1$s\" will lose access."
+msgstr ""
+
+#. This folder will be shared with everyone who has access to \"%3$s\.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
+msgid "This folder will be shared with everyone who has access to \"%3$s\"."
+msgstr ""
+
+#. You are moving a folder that contains shares. People will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:122
+msgid "You are moving a folder that contains shares. People will lose access."
+msgstr ""
+
+#. This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:125
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see the subfolders of \"%1$s\" will lose access."
 msgstr ""
 
 #. No group given.
