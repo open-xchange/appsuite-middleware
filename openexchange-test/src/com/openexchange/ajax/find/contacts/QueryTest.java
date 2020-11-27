@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
+import com.google.api.client.util.Strings;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -324,7 +325,7 @@ public class QueryTest extends ContactsFindTest {
         List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, options);
         assertEquals("Wrong number of results", size, results.size());
         for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
+            names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
         }
         assertEquals("Wrong number of unique results", size, names.size());
 
@@ -333,7 +334,7 @@ public class QueryTest extends ContactsFindTest {
         results = query(Collections.singletonList(folderFacet), start, size, options);
         assertEquals("Wrong number of results", size, results.size());
         for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
+            names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
         }
         assertEquals("Wrong number of unique results", numberOfContacts, names.size());
     }
