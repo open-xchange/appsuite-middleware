@@ -97,6 +97,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
@@ -3334,83 +3335,12 @@ public final class OXFolderSQL {
     }
 
     /**
-     * Searches a folder by its name
+     * Searches folders by given name.
      *
      * @param query The folder name to search for
-     * @param parentId The parent folder identifier to check (as no subfolders are searched, only check folders with this parent folder identifier)
-     * @param date Timestamp to filter for results that are newer
-     * @param start A start index (inclusive) for the search results. Useful for paging.
-     * @param end An end index (exclusive) for the search results. Useful for paging.
-     * @param context The context
-     * @param readCon The connection
-     * @return Matching folder identifier as array
-     * @throws SQLException On SQL error
-     * @throws OXException On server error
-     */
-    public static int[] searchInfostoreFoldersByName(String query, int parentId, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
-        if (null == readCon) {
-            return searchInfostoreFoldersByName(query, parentId, date, start, end, context);
-        }
-
-        // Compile SQL query
-        StringBuilder sb = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = ?");
-        if (0 < parentId) {
-            sb.append(" AND parent = ?");
-        }
-        sb.append(" AND UPPER(fname) LIKE UPPER(?) ");
-        StringBuilder queryBuilder = new StringBuilder(query.length() + 2);
-        queryBuilder.append("%").append(hasWildcards(query) ? StringCollection.prepareForSearch(query.trim()) : query).append("%");
-        String sqlQuery = trimPercentCharacters(queryBuilder.toString());
-        if (date > -1) {
-            sb.append("AND creating_date > ? ");
-        }
-        sb.append("AND default_flag = 0 "); // Exclude localized standard folders
-        if (0 < end) {
-            sb.append("ORDER BY fname ASC LIMIT ?,?");
-        } else {
-            sb.append("ORDER BY fname ASC LIMIT ?");
-        }
-
-        // Execute statement
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = readCon.prepareStatement(sb.toString());
-            int pos = 1;
-            stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, FolderObject.INFOSTORE);
-            if (0 < parentId) {
-                stmt.setInt(pos++, parentId);
-            }
-            stmt.setString(pos++, sqlQuery);
-            if (date > -1) {
-                stmt.setLong(pos++, date);
-            }
-            stmt.setInt(pos++, start);
-            if (0 < end) {
-                stmt.setInt(pos++, end);
-            }
-            rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                return new int[0];
-            }
-
-            TIntList folderIds = new TIntArrayList();
-            do {
-                folderIds.add(rs.getInt(1));
-            } while (rs.next());
-            return folderIds.toArray();
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    /**
-     * Searches a folder by its name
-     *
-     * @param query The folder name to search for
-     * @param parentId The parent folder identifier to check (as no subfolders are searched, only check folders with this parent folder identifier)
-     * @param date Timestamp to filter for results that are newer
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param module The module
+     * @param date The time stamp to filter for results that are newer
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @param context The context
@@ -3418,21 +3348,25 @@ public final class OXFolderSQL {
      * @throws SQLException On SQL error
      * @throws OXException On server error
      */
-    public static int[] searchInfostoreFoldersByName(String query, int parentId, long date, int start, int end, Context context) throws SQLException, OXException {
+    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context) throws SQLException, OXException {
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
         Connection readCon = DBPool.pickup(context);
         try {
-            return searchInfostoreFoldersByName(query, parentId, date, start, end, context, readCon);
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
         } finally {
             DBPool.closeReaderSilent(readCon);
         }
     }
 
     /**
-     * Searches a folder by its name
+     * Searches folders by given name.
      *
      * @param query The folder name to search for
-     * @param folderIds The previous build list of visible folder identifier to check
-     * @param date Timestamp to filter for results that are newer
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param date The time stamp to filter for results that are newer
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @param context The context
@@ -3442,6 +3376,31 @@ public final class OXFolderSQL {
      * @throws OXException On server error
      */
     public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
+        }
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        if (folderIds.length <= Databases.IN_LIMIT) {
+            return doSearchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+        }
+
+        TIntList result = null;
+        for (int[] partition : Arrays.partition(folderIds, Databases.IN_LIMIT)) {
+            int[] searchResult = doSearchInfostoreFoldersByName(query, partition, date, start, end, context, readCon);
+            if (searchResult.length > 0) {
+                if (result == null) {
+                    result = new TIntArrayList();
+                }
+                result.add(searchResult);
+            }
+        }
+        return result == null ? new int[0] : result.toArray();
+    }
+
+    private static int[] doSearchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
         if (null == readCon) {
             return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
         }
@@ -3461,10 +3420,9 @@ public final class OXFolderSQL {
         StringBuilder queryBuilder = new StringBuilder(query.length() + 2);
         queryBuilder.append("%").append(hasWildcards(query) ? StringCollection.prepareForSearch(query.trim()) : query).append("%");
         String sqlQuery = trimPercentCharacters(queryBuilder.toString());
-        if (date > -1) {
+        if (date >= 0) {
             sb.append("AND creating_date > ? ");
         }
-        sb.append("AND default_flag = 0 "); // Exclude localized standard folders
         if (0 < end) {
             sb.append("ORDER BY fname ASC LIMIT ?,?");
         } else {
@@ -3489,99 +3447,6 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, start);
             if (0 < end) {
                 stmt.setInt(pos++, end);
-            }
-            rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                return new int[0];
-            }
-
-            TIntList result = new TIntArrayList();
-            do {
-                result.add(rs.getInt(1));
-            } while (rs.next());
-            return result.toArray();
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    /**
-     * Searches a folder by its name
-     *
-     * @param query The folder name to search for
-     * @param folderIds The previous build list of visible folder identifier to check
-     * @param module The module
-     * @param date Timestamp to filter for results that are newer
-     * @param start A start index (inclusive) for the search results. Useful for paging.
-     * @param end An end index (exclusive) for the search results. Useful for paging.
-     * @param context The context
-     * @return Matching folder identifier as array
-     * @throws SQLException On SQL error
-     * @throws OXException On server error
-     */
-    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context) throws SQLException, OXException {
-        if (null == folderIds || folderIds.length == 0) {
-            return new int[0];
-        }
-
-        Connection readCon = DBPool.pickup(context);
-        try {
-            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
-        } finally {
-            DBPool.closeReaderSilent(readCon);
-        }
-    }
-
-    /**
-     * Gets all media folder identifier for given module and calling user (folders with types 20,21,22,23,24 and default_flag set)
-     *
-     * @param module The module identifier
-     * @param types The types of the folders to query
-     * @param storageParameters The storage parameters
-     * @return Folder identifier as array
-     * @throws OXException On server error
-     * @throws SQLException On SQL error
-     */
-    public static int[] getDefaultMediaFoldersForModuleForUser(int module, int[] types, StorageParameters storageParameters) throws OXException, SQLException {
-        if (types == null || types.length <= 0) {
-            return new int[0];
-        }
-        Connection readCon = DBPool.pickup(storageParameters.getContext());
-        try {
-            return getDefaultFoldersForModuleForUser(module, types, storageParameters, readCon);
-        } finally {
-            DBPool.closeReaderSilent(readCon);
-        }
-    }
-
-    /**
-     * Gets all media folder identifier for given module and calling user (folders with types PICTURES, DOCUMENTS, MUSIC, VIDEOS, and TEMPLATES as well as default_flag set)
-     *
-     * @param module The module identifier
-     * @param mediaTypes The types of the folders to query
-     * @param storageParameters The storage parameters
-     * @param readCon A (readable) database connection
-     * @return Folder identifier as array
-     * @throws OXException On server error
-     * @throws SQLException On SQL error
-     */
-    public static int[] getDefaultFoldersForModuleForUser(int module, int[] types, StorageParameters storageParameters, Connection readCon) throws OXException, SQLException {
-        if (null == readCon) {
-            return getDefaultMediaFoldersForModuleForUser(module, types, storageParameters);
-        }
-        if (types == null || types.length <= 0) {
-            return new int[0];
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = readCon.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = ? AND created_from = ? AND type IN (" + Databases.appendIN(types.length) + " AND default_flag = 1");
-            int pos = 1;
-            stmt.setInt(pos++, storageParameters.getContextId());
-            stmt.setInt(pos++, module);
-            stmt.setInt(pos++, storageParameters.getUserId());
-            for (int type : types) {
-                stmt.setInt(pos++, type);
             }
             rs = stmt.executeQuery();
             if (false == rs.next()) {

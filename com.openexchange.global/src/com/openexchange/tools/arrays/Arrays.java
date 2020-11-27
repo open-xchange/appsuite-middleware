@@ -185,6 +185,39 @@ public final class Arrays {
         return retval;
     }
 
+    /**
+     * Generates consecutive subarrays for an array,each of the same size (the final array may be smaller).
+     * <p>
+     * For example, partitioning an array containing {@code [a, b, c, d, e]} with a partition
+     * size of 3 yields<br>{@code [[a, b, c], [d, e]]} -- an outer list containing two inner array
+     * of three and two elements, all in the original order.
+     *
+     * @param array The array to return consecutive subarrays of
+     * @param size The desired size of each subarray (the last may be smaller)
+     * @return A list of consecutive subarrays
+     * @throws IllegalArgumentException If {@code size} is non-positive
+     */
+    public static List<int[]> partition(int[] array, int size) {
+        checkNotNull(array);
+        checkArgument(size > 0);
+
+        int length = array.length;
+        if (length <= size) {
+            return Collections.singletonList(array);
+        }
+
+        List<int[]> retval = new ArrayList<>((length + size - 1) / size);
+        int stopIndex = 0;
+        for (int startIndex = 0; startIndex + size <= length; startIndex += size) {
+            stopIndex += size;
+            retval.add(java.util.Arrays.copyOfRange(array, startIndex, stopIndex));
+        }
+        if (stopIndex < length) {
+            retval.add(java.util.Arrays.copyOfRange(array, stopIndex, length));
+        }
+        return retval;
+    }
+
     @SafeVarargs
     public static <T> T[] remove(T[] removeFrom, T... toRemove) {
         List<T> tmp = new ArrayList<T>();

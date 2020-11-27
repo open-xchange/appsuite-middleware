@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.EntityInfo;
@@ -109,16 +110,21 @@ public class FolderConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        User user = session.getUser();
-        Context context = session.getContext();
-        if (FileStorageFolder.class.isInstance(resultObject)) {
-            resultObject = FolderWriter.writeSingle2Object(requestData,
-                null,
-                new UserizedFolderImpl(convertFileStorageFolder2FolderstorageFolder((FileStorageFolder) resultObject), session, user, context),
-                Constants.ADDITIONAL_FOLDER_FIELD_LIST);
-        } else {
-            throw new UnsupportedOperationException("unknown result object");
+        if (!(resultObject instanceof FileStorageFolder)) {
+            throw new UnsupportedOperationException("Unknown result object");
         }
+
+        FileStorageFolder fileStorageFolder = (FileStorageFolder) resultObject;
+        UserizedFolder userizedFolder;
+        {
+            Object optDelegate = fileStorageFolder.getDelegate();
+            if (optDelegate instanceof UserizedFolder) {
+                userizedFolder = (UserizedFolder) optDelegate;
+            } else {
+                userizedFolder = new UserizedFolderImpl(convertFileStorageFolder2FolderstorageFolder(fileStorageFolder), session, session.getUser(), session.getContext());
+            }
+        }
+        resultObject = FolderWriter.writeSingle2Object(requestData, null, userizedFolder, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         result.setResultObject(resultObject);
     }
 

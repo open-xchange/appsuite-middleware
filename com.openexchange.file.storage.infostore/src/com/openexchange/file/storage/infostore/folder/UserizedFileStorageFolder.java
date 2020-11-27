@@ -64,7 +64,6 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link UserizedFileStorageFolder}
@@ -91,7 +90,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setExists(true);
         setId(folder.getID());
         setLastModifiedDate(folder.getLastModifiedUTC());
-        String defaultName = folder.getLocalizedName(LocaleTools.DEFAULT_LOCALE, folder.isAltNames());
+        String defaultName = folder.getLocalizedName(folder.getLocale(), folder.isAltNames());
         setName(null != defaultName ? defaultName : folder.getName());
         setParentId(folder.getParentID());
         setPermissions(getFileStoragePermissions(folder.getPermissions()));
@@ -122,7 +121,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
 
     /**
      * Sets if the folder is cacheable or not. If not specified, the delegate's {@link UserizedFolder#isCacheable()} is consulted.
-     * 
+     *
      * @param cacheable {@link Boolean#TRUE} if the folder should indicate to be cacheable, {@link Boolean#FALSE} if not, or <code>null</code> to decide based on the delegate
      */
     public void setCacheable(Boolean cacheable) {
@@ -156,6 +155,11 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
     @Override
     public FolderPath getOrigin() {
         return folder.getOriginPath() == null ? null : FolderPath.parseFrom(folder.getOriginPath().toString());
+    }
+
+    @Override
+    public Object getDelegate() {
+        return folder;
     }
 
 }

@@ -333,6 +333,8 @@ public final class DatabaseFolderConverter {
                                                 "error getting owner for folder {}", I(fo.getObjectID()), e);
                                         }
                                     }
+                                } else if (altNames && fo.getCreatedBy() == user.getId()) {
+                                    localizableName = FolderStrings.DEFAULT_FILES_FOLDER_NAME;
                                 }
                                 break;
                             case FolderObject.TRASH:

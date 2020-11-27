@@ -745,7 +745,7 @@ public final class FolderWriter {
             }
         });
         m.put(FolderField.CREATED_FROM.getColumn(), new FolderFieldWriter() {
-            
+
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getCreatedFrom();
@@ -756,7 +756,7 @@ public final class FolderWriter {
             }
         });
         m.put(FolderField.MODIFIED_FROM.getColumn(), new FolderFieldWriter() {
-            
+
             @Override
             public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 EntityInfo entityInfo = folder.getModifiedFrom();
