@@ -98,7 +98,7 @@ public class RootCollection extends DAVRootCollection {
     	super(factory, "Addressbooks");
     	this.factory = factory;
     	includeProperties(new SyncToken(this));
-        if (DAVUserAgent.MAC_CONTACTS.equals(getUserAgent())) {
+    	if (isUseAggregatedCollection()) {
             /*
              * indicate permissions from default folder also for root collection for macOS client
              */
@@ -107,7 +107,7 @@ public class RootCollection extends DAVRootCollection {
             } catch (OXException e) {
                 throw protocolException(getUrl(), e);
             }
-        }
+    	}
     }
 
     @Override
