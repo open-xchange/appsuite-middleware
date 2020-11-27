@@ -686,20 +686,20 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             return new ShareLinkAnalyzeResult(UNRESOLVABLE, ShareSubscriptionExceptions.UNEXPECTED_ERROR.create("Unable to get share path from link"), getModuleInfo());
         }
 
-        String folderId = path.getFolder();
-        if (SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(folderId) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(folderId)) {
-            /*
-             * Do not allow to subscribe to files under the root folder of "shared" or "public" folder
-             */
-            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
-        }
 
         /*
          * Check if the file is already in a known folder
          */
         try {
+            String folderId = path.getFolder();
             accountAccess.connect();
             FileStorageFolder folder = accountAccess.getFolderAccess().getFolder(folderId);
+            if (SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(folder.getParentId()) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(folder.getParentId())) {
+                /*
+                 * Do not allow to subscribe to files under the root folder of "shared" or "public" folder
+                 */
+                return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+            }
             String item = getItemID(path);
             if (accountAccess.getFileAccess().exists(folder.getId(), item, FileStorageFileAccess.CURRENT_VERSION)) {
                 return new ShareLinkAnalyzeResult(SUBSCRIBED, generateInfos(folderId, accountAccess));
