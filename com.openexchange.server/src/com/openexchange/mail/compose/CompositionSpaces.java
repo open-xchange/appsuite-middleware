@@ -50,8 +50,11 @@
 package com.openexchange.mail.compose;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,10 +83,12 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.ISO8601Utils;
 import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.logging.ConsoleTable;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
@@ -618,6 +623,112 @@ public class CompositionSpaces {
                 return UUIDs.getUnformattedString(uuid);
             }
         };
+    }
+
+    /**
+     * Builds a table layout for given composition space for logging purposes.
+     *
+     * @param compositionSpace The composition space
+     * @param optionalUserAgent The optional User-Agent identifier
+     * @return The console table
+     */
+    public static String buildConsoleTableFor(CompositionSpace compositionSpace, Optional<String> optionalUserAgent) {
+        if (compositionSpace == null) {
+            return "null";
+        }
+
+        Message message = compositionSpace.getMessage();
+        if (message == null) {
+            if (optionalUserAgent.isPresent()) {
+                ConsoleTable.Builder table = ConsoleTable.builder(1, "ID", "Last-Modified", "User-Agent");
+                table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false), optionalUserAgent.get());
+                return table.build().buildTable();
+            }
+
+            ConsoleTable.Builder table = ConsoleTable.builder(1, "ID", "Last-Modified");
+            table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false));
+            return table.build().buildTable();
+        }
+
+        if (optionalUserAgent.isPresent()) {
+            String contentHash = CompositionSpaces.getMD5HashForLogging(message.getContent());
+            ConsoleTable.Builder table = ConsoleTable.builder(1, "ID", "Last-Modified", "Meta", "Subject", "To", "Content-Hash", "User-Agent");
+            table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false), getValueForLogging(message.getMeta()), getValueForLogging(message.getSubject()), getValueForLogging(message.getTo()), contentHash, optionalUserAgent.get());
+            return table.build().buildTable();
+        }
+
+        String contentHash = CompositionSpaces.getMD5HashForLogging(message.getContent());
+        ConsoleTable.Builder table = ConsoleTable.builder(1, "ID", "Last-Modified", "Meta", "Subject", "To", "Content-Hash");
+        table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false), getValueForLogging(message.getMeta()), getValueForLogging(message.getSubject()), getValueForLogging(message.getTo()), contentHash);
+        return table.build().buildTable();
+    }
+
+    /**
+     * Builds a table layout for given composition spaces for logging purposes.
+     *
+     * @param compositionSpaces The composition spaces
+     * @param optionalUserAgent The optional User-Agent identifier
+     * @return The console table
+     */
+    public static String buildConsoleTableFor(List<CompositionSpace> compositionSpaces, Optional<String> optionalUserAgent) {
+        if (compositionSpaces == null) {
+            return "null";
+        }
+
+        int size = compositionSpaces.size();
+        if (size <= 0) {
+            return "<empty>";
+        }
+
+        if (optionalUserAgent.isPresent()) {
+            String userAgent = optionalUserAgent.get();
+            ConsoleTable.Builder table = ConsoleTable.builder(size, "ID", "Last-Modified", "Meta", "Subject", "To", "Content-Hash", "User-Agent");
+            for (CompositionSpace compositionSpace : compositionSpaces) {
+                Message message = compositionSpace.getMessage();
+                String contentHash = CompositionSpaces.getMD5HashForLogging(message.getContent());
+                table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false), getValueForLogging(message.getMeta()), getValueForLogging(message.getSubject()), getValueForLogging(message.getTo()), contentHash, userAgent);
+            }
+            return table.build().buildTable();
+        }
+
+        ConsoleTable.Builder table = ConsoleTable.builder(size, "ID", "Last-Modified", "Meta", "Subject", "To", "Content-Hash");
+        for (CompositionSpace compositionSpace : compositionSpaces) {
+            Message message = compositionSpace.getMessage();
+            String contentHash = CompositionSpaces.getMD5HashForLogging(message.getContent());
+            table.addRow(compositionSpace.getId(), ISO8601Utils.format(new Date(compositionSpace.getLastModified()), false), getValueForLogging(message.getMeta()), getValueForLogging(message.getSubject()), getValueForLogging(message.getTo()), contentHash);
+        }
+        return table.build().buildTable();
+    }
+
+    private static String getValueForLogging(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        String sValue = value.toString();
+        return Strings.isEmpty(sValue) ? "<empty>" : sValue;
+    }
+
+    /**
+     * Calculates the MD5 hash for given value for logging purposes.
+     *
+     * @param value The value
+     * @return The hash or <code>"null"</code> if given value is <code>null</code>, <code>"&lt;empty&gt;"</code> if given value is empty or <code>"&lt;failure&gt;"</code> if hash calculation failed
+     */
+    public static String getMD5HashForLogging(String value) {
+        if (value == null) {
+            return "null";
+        }
+        if (Strings.isEmpty(value)) {
+            return "<empty>";
+        }
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("md5");
+            md5.update(value.getBytes(StandardCharsets.UTF_8));
+            return Strings.asHex(md5.digest());
+        } catch (Exception e) {
+            return "<failure>";
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
