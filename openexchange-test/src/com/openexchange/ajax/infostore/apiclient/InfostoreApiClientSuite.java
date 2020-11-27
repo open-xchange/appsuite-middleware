@@ -10,7 +10,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     UploadActionTest.class,
     RestoreTest.class,
     Bug40142Test.class,
-    PermissionLimitTest.class
+    PermissionLimitTest.class,
+    FileMovePermissionWarningTest.class
 })
 public class InfostoreApiClientSuite  {
     // empty

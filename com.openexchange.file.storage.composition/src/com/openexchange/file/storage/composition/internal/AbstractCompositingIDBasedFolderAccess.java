@@ -56,6 +56,7 @@ import static com.openexchange.file.storage.composition.internal.idmangling.IDMa
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -87,6 +88,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
@@ -244,6 +246,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     }
 
     @Override
+    public String moveFolder(String folderId, String newParentId, boolean ignoreWarnings) throws OXException {
+        return moveFolder(folderId, newParentId, null, ignoreWarnings);
+    }
+
+    @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         return moveFolder(folderId, newParentId, newName, false);
     }
@@ -258,7 +265,22 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
              */
             FileStorageFolderAccess folderAccess = getFolderAccess(sourceFolderID);
             FolderID[] sourcePath = getPathIds(sourceFolderID.getFolderId(), sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
-            String newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+            String newID;
+
+            if (folderAccess instanceof PermissionAware) {
+                FileStorageResult<String> response = ((PermissionAware) folderAccess).moveFolder(ignoreWarnings, sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+                newID = response.getResponse();
+                Collection<OXException> warnings = response.getWarnings();
+                if (0 < warnings.size()) {
+                    addWarnings(warnings);
+                    if (ignoreWarnings == false) {
+                        return null;
+                    }
+                }
+            } else {
+                newID = folderAccess.moveFolder(folderId, newParentId, newName);
+            }
+
             FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
             FolderID[] newPath = getPathIds(newID, sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
             fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, sourceFolderID, sourcePath)));

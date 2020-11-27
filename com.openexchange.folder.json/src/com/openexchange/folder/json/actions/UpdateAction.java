@@ -61,8 +61,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
+import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -219,8 +219,9 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
 
         Date lastModified = null != newId ? folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC() : null;
         AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
+
         result.addWarnings(warnings);
-        if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
+        if (newId == null && 0 < warnings.size() && false == ignoreWarnings) {
             result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(
                 getFolderNameSafe(session, folder, id, treeId, folderService), id));
         }

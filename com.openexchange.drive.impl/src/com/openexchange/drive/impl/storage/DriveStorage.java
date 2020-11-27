@@ -482,8 +482,9 @@ public class DriveStorage {
             /*
              * perform move / rename
              */
-            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId()) :
-                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName);
+            boolean ignoreWarnings = true;
+            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId(), ignoreWarnings) :
+                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName, ignoreWarnings);
         } else if (false == oldName.equals(newName)) {
             /*
              * perform rename only

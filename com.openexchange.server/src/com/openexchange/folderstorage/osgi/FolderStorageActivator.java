@@ -67,6 +67,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.admin.HideAdminService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -185,7 +187,9 @@ public final class FolderStorageActivator implements BundleActivator {
         UserPermissionService.class,
         ObjectUseCountService.class,
         HideAdminService.class,
-        PrincipalUseCountService.class
+        PrincipalUseCountService.class,
+        ConfigViewFactory.class,
+        LeanConfigurationService.class
     };
 
     @Override

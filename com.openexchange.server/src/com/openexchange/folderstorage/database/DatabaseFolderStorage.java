@@ -90,8 +90,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -108,12 +106,14 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderMoveWarningCollector;
 import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
+import com.openexchange.folderstorage.MoveFolderPermissionMode;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SetterAwareFolder;
@@ -1971,7 +1971,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     updateMe.setPermissions(optNewPermissions.orElse(oclPermissions));
                     changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
             } else {
-                MoveFolderPermissionMode mode = getMoveFolderPermissionMode(folder, storageParameters);
+                ServerSession serverSession;
+                if (context != null) {
+                    serverSession = ServerSessionAdapter.valueOf(session, context, storageParameters.getUser());
+                } else {
+                    serverSession = ServerSessionAdapter.valueOf(session);
+                }
+
+                MoveFolderPermissionMode mode = new FolderMoveWarningCollector(serverSession, storageParameters).getMoveFolderPermissionMode(folder.getParentID());
 
                 switch (mode) {
                     case INHERIT:
@@ -2213,49 +2220,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private MoveFolderPermissionMode getMoveFolderPermissionMode(Folder folder, StorageParameters storageParameters) throws OXException {
-        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(storageParameters.getUserId(), storageParameters.getContextId());
-        String mode = "keep";
-        if (isInPublicTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToPublic", String.class);
-            if (Strings.isEmpty(mode) && b(view.opt("com.openexchange.folderstorage.inheritParentPermissions", Boolean.class, Boolean.FALSE))) {
-                // Use old behaviour for public folders...
-                mode = "merge";
-            }
-        } else if (isInPrivateTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToPrivate", String.class);
-        } else if (isInSharedTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToShared", String.class);
-        }
-        return MoveFolderPermissionMode.getByName(mode);
-    }
-
-    private enum MoveFolderPermissionMode {
-        KEEP,
-        INHERIT,
-        MERGE
-        ;
-
-        public static MoveFolderPermissionMode getByName(String name) {
-            if (Strings.isEmpty(name)) {
-                LOG.warn("Move folder permission mode was not set, using fallback \"keep\".");
-                return MoveFolderPermissionMode.KEEP;
-            }
-            switch (name.toLowerCase()) {
-                case "keep":
-                    return MoveFolderPermissionMode.KEEP;
-                case "inherit":
-                    return MoveFolderPermissionMode.INHERIT;
-                case "merge":
-                    return MoveFolderPermissionMode.MERGE;
-                default:
-                    LOG.warn("Invalid move folder permission mode: {}. Using fallback \"keep\".", name);
-                    return MoveFolderPermissionMode.KEEP;
-            }
-        }
-    }
-
     private UpdatedFolderHandler updatedFolderHandlerFor(final StorageParameters storageParameters) {
         return new UpdatedFolderHandler() {
 
@@ -2337,63 +2301,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 permsMappingPerEntity.put(entity, parentPerm);
             }
         }
-    }
-
-    private boolean isInPublicTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        if (null == folder || Strings.isEmpty(folder.getParentID())) {
-            return false;
-        }
-        String parentId = folder.getParentID();
-        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        int id = 0;
-        do {
-            parentId = current.getParentID();
-            try {
-                id = Integer.parseInt(parentId);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            if (id == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                return true;
-            }
-            current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        } while (id > 0);
-        return false;
-    }
-
-    private boolean isInPrivateTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, true);
-    }
-
-    private boolean isInSharedTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, false);
-    }
-
-    private boolean checkFolder(int type, Folder folder, StorageParameters storageParameters, boolean checkCreatedBy) throws OXException {
-        if (null == folder || Strings.isEmpty(folder.getParentID())) {
-            return false;
-        }
-        String parentId = folder.getParentID();
-        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        int id = 0;
-        do {
-            parentId = current.getParentID();
-            try {
-                id = Integer.parseInt(parentId);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            if (id == type) {
-                if (checkCreatedBy) {
-                    // own private root folder
-                    return current.getCreatedBy() == storageParameters.getUserId();
-                }
-                // shared root folder
-                return current.getCreatedBy() != storageParameters.getUserId();
-            }
-            current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        } while (id > 0);
-        return false;
     }
 
     @Override

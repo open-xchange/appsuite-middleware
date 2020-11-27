@@ -43,6 +43,7 @@
         schema:
           type: string
       - $ref: '#/components/parameters/QueryParamFolderAutoRename'
+      - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
     responses:
       '200':
         description: >-

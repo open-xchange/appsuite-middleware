@@ -79,4 +79,24 @@ public interface PermissionAware extends FileStorageFolderAccess {
      */
     String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException;
 
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.folder
+     * </pre>
+     *
+     * @param ignoreWarnings true to force the folder move even if warnings are detected, false, otherwise
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    default FileStorageResult<String> moveFolder(boolean ignoreWarnings, String folderId, String newParentId, String newName) throws OXException {
+        return FileStorageResult.newFileStorageResult(moveFolder(folderId, newParentId, newName), null);
+    }
+
 }

@@ -166,7 +166,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         update.setId(defaultFolder);
         update.setSubscribed(FALSE);
         body.setFolder(update);
-        FolderUpdateResponse resp = foldersApi.updateFolder(getSessionId(), defaultFolder, body, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        FolderUpdateResponse resp = foldersApi.updateFolder(getSessionId(), defaultFolder, body, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNotNull(resp.getError());
         assertEquals("FLD-1044", resp.getCode());
     }
@@ -205,7 +205,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         updateData.setSubscribed(FALSE);
         updateData.setPermissions(perms);
         updateBody.setFolder(updateData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
@@ -220,7 +220,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         updateData.setSubscribed(TRUE);
         updateData.setPermissions(perms);
         updateBody.setFolder(updateData);
-        updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 

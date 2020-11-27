@@ -49,8 +49,8 @@
 
 package com.openexchange.folderstorage.cache;
 
-import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1740,6 +1740,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             UpdatePerformer updatePerformer = newUpdatePerformer(storageParameters);
             updatePerformer.setCheck4Duplicates(false);
             updatePerformer.setIncreaseObjectUseCount(false);
+            updatePerformer.setCollectFolderMoveWarnings(false);
             updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
             Set<OXException> warnings = updatePerformer.getWarnings();

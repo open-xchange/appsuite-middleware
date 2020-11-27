@@ -117,7 +117,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
             case "keep":
             case "inherit":
                 privateFolderId = createNewFolder(true, BITS_REVIEWER, false, true);
-                publicFolderId = createNewFolder(true, BITS_REVIEWER, false, false);
+                publicFolderId = createNewFolder(true, BITS_REVIEWER, true, false);
                 sharedFolderId = createSharedFolder();
                 break;
             case "merge":
@@ -171,6 +171,10 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     }
 
     protected String createNewFolder(boolean additionalPermissions, Integer additionalBits, boolean addGroup, boolean privateTree) throws Exception {
+        return createNewFolder(additionalPermissions ? userId2 : null, additionalBits, addGroup, privateTree);
+    }
+
+    protected String createNewFolder(Integer userIdToShare, Integer additionalBits, boolean addGroup, boolean privateTree) throws Exception {
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setModule(Module.INFOSTORE.getName());
@@ -180,8 +184,8 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         List<FolderPermission> perm = new ArrayList<FolderPermission>();
         FolderPermission p1 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
         perm.add(p1);
-        if (additionalPermissions) {
-            FolderPermission p = createPermissionFor(userId2, additionalBits, Boolean.FALSE);
+        if (userIdToShare != null && userIdToShare.intValue() > 0) {
+            FolderPermission p = createPermissionFor(userIdToShare, additionalBits, Boolean.FALSE);
             perm.add(p);
         }
         if (addGroup) {
@@ -191,6 +195,43 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         folder.setPermissions(perm);
         body.setFolder(folder);
         FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", getApiClient().getSession(), body, TREE, null, null, null);
+        String folderId = response.getData();
+        createdFolders.add(folderId);
+        return folderId;
+    }
+
+    protected String createChildFolder(String parentFolderId) throws ApiException {
+        NewFolderBody body = new NewFolderBody();
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setModule(Module.INFOSTORE.getName());
+        folder.setSummary("FolderPermissionTest_" + UUID.randomUUID().toString());
+        folder.setTitle(folder.getSummary());
+        folder.setSubscribed(Boolean.TRUE);
+        folder.setPermissions(null);
+        body.setFolder(folder);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, getApiClient().getSession(), body, TREE, null, null, null);
+        String folderId = response.getData();
+        createdFolders.add(folderId);
+        return folderId;
+    }
+
+    protected String createChildFolder(String parentFolderId, Integer userIdToShare) throws ApiException {
+        NewFolderBody body = new NewFolderBody();
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setModule(Module.INFOSTORE.getName());
+        folder.setSummary("FolderPermissionTest_" + UUID.randomUUID().toString());
+        folder.setTitle(folder.getSummary());
+        folder.setSubscribed(Boolean.TRUE);
+        List<FolderPermission> perm = new ArrayList<FolderPermission>();
+        FolderPermission p1 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
+        perm.add(p1);
+        if (userIdToShare != null && userIdToShare.intValue() > 0) {
+            FolderPermission p = createPermissionFor(userIdToShare, BITS_VIEWER, Boolean.FALSE);
+            perm.add(p);
+        }
+        folder.setPermissions(perm);
+        body.setFolder(folder);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, getApiClient().getSession(), body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;

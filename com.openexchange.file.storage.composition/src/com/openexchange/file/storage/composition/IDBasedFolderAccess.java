@@ -269,6 +269,24 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      *
      * @param folderId The folder identifier
      * @param newParentId The identifier of the new parent to move to
+     * @param ignoreWarnings <code>true</code> to force the folder move even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    String moveFolder(String folderId, String newParentId, boolean ignoreWarnings) throws OXException;
+
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
+     * it to the supplied new name.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.newName
+     * </pre>
+     *
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
      * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
      * @return The new identifier where the folder has been moved
      * @throws OXException If either folder does not exist or cannot be moved

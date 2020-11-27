@@ -330,3 +330,4 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
 }
+

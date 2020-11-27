@@ -49,22 +49,36 @@
 
 package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
+import com.openexchange.java.Strings;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.modules.FoldersApi;
-import com.openexchange.testing.httpclient.modules.ShareManagementApi;
-import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderBodyNotification;
+import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailData;
@@ -72,19 +86,9 @@ import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import static com.openexchange.java.Autoboxing.*;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.*;
+import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
  * {@link FederatedSharingFileStorageAccountTests}
@@ -303,7 +307,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         body.notification(notification);
 
         //update with new guest permission
-        FolderUpdateResponse updateResponse = api.updateFolder(api.getApiClient().getSession(), folderToShare.getId(), body, B(false), null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = api.updateFolder(api.getApiClient().getSession(), folderToShare.getId(), body, B(false), null, null, null, null, null, null, null);
         checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
     }
 

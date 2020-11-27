@@ -531,6 +531,15 @@ glbQueryParamsImageTransformationCropY:
   schema:
     type: integer
     format: int32
+glbQueryParamsIgnoreWarnings:
+  in: query
+  name: ignoreWarnings
+  description: >-
+          Indicates whether warnings should be ignored or not.
+  required: false
+  schema:
+    type: boolean
+    default: false
 QueryParamFolderAutoRename:
   name: autorename
   in: query
@@ -696,3 +705,4 @@ QueryParamMultifactorDeviceId:
   description: The ID of the multifactor device
   schema:
     type: string
+

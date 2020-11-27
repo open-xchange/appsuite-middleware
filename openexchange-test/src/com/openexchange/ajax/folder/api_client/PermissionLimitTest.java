@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.folder.api_client;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -199,7 +199,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         folder.setModule(Module.INFOSTORE.getName());
         folder.setId(id);
         body.folder(folder);
-        FolderUpdateResponse resp = folderApi.updateFolder(getSessionId(), id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null);
+        FolderUpdateResponse resp = folderApi.updateFolder(getSessionId(), id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null, null);
         if(errorCode.isPresent()) {
             assertNotNull("Response didn't contain an exception.", resp.getError());
             assertEquals("Unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());

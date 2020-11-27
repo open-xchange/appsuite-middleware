@@ -3,4 +3,4 @@ properties:
   $ref: ../common/CommonResponseDataWithWarnings.yaml
   data:
     type: string
-    description: The object id of the folder.
+    description: The new infoitem identifier.

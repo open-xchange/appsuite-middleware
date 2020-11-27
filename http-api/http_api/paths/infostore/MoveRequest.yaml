@@ -31,6 +31,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
     responses:
       '200':
         description: >
@@ -44,7 +45,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InfoItemsMovedResponse'
+              $ref: '#/components/schemas/InfoItemMovedResponse'
   put:
     operationId: moveInfoItems
     tags:
@@ -64,6 +65,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
     responses:
       '200':
         description: >

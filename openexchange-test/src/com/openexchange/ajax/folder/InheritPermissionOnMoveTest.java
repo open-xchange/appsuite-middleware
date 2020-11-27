@@ -82,7 +82,7 @@ public class InheritPermissionOnMoveTest extends AbstractFolderMovePermissionsTe
         folderData.setFolderId(privateFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE);
+        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
         FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);
@@ -109,19 +109,21 @@ public class InheritPermissionOnMoveTest extends AbstractFolderMovePermissionsTe
         folderData.setFolderId(publicFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE);
+        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
         FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);
         assertNotNull(resp);
         FolderData respData = resp.getData();
         List<FolderPermission> permissions = respData.getPermissions();
-        assertEquals(2, permissions.size());
+        assertEquals(3, permissions.size());
         for (FolderPermission perm : permissions) {
             if (perm.getEntity().equals(userId1)) {
                 assertEquals(BITS_ADMIN, perm.getBits());
             } else if (perm.getEntity().equals(userId2)) {
                 assertEquals(BITS_REVIEWER, perm.getBits());
+            } else if (perm.getEntity().equals(I(0))) {
+                assertEquals(BITS_VIEWER, perm.getBits());
             } else {
                 fail("Unexpected permission: " + perm.toString());
             }
@@ -136,7 +138,7 @@ public class InheritPermissionOnMoveTest extends AbstractFolderMovePermissionsTe
         folderData.setFolderId(sharedFolderId);
         folderData.setPermissions(null);
         folderBody.setFolder(folderData);
-        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE);
+        FolderUpdateResponse response = api.updateFolder(getSessionId(), toMoveFolderId, folderBody, Boolean.FALSE, L(System.currentTimeMillis()), TREE, null, Boolean.FALSE, null, Boolean.FALSE, Boolean.TRUE);
         assertNotNull(response);
 
         FolderResponse resp = api.getFolder(getSessionId(), toMoveFolderId, TREE, null, null);

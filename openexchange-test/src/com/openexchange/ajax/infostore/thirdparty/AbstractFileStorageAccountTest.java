@@ -620,8 +620,8 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         InfoItemListElement itemToMove = new InfoItemListElement();
         itemToMove.setFolder(getRootFolderId());
         itemToMove.setId(newFileId);
-        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getSessionId(), destinationFolderId, Collections.singletonList(itemToMove), null);
-        List<String> notMoved = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        InfoItemsMovedResponse response = infostoreApi.moveInfoItems(getSessionId(), destinationFolderId, Collections.singletonList(itemToMove), null, null);
+        List<InfoItemListElement> notMoved = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         assertThat(notMoved, is(empty()));
 
         //Check that the file is not in the source directory anymore
@@ -693,7 +693,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         FolderData folderData = new FolderData();
         folderData.setFolderId(folder.getId());
         folderBody.setFolder(folderData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder2.getId(), folderBody, null, null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder2.getId(), folderBody, null, null, null, null, null, null, null, null);
         String movedFolderId = checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
 
         //Folder present?
