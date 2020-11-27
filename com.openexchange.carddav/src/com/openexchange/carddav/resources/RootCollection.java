@@ -209,7 +209,7 @@ public class RootCollection extends DAVRootCollection {
 
     private Pattern getUserAgentForAggregatedCollection() {
         if (null == this.userAgentForAggregatedCollection) {
-            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*";
+            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*|.*macOS.*AddressBook.*";
             try {
                 regex = factory.getConfigValue(USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY, regex);
             } catch (OXException e) {
