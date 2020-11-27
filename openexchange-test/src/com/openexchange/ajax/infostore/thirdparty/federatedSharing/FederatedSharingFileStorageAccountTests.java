@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +100,9 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 @RunWith(Parameterized.class)
 public class FederatedSharingFileStorageAccountTests extends AbstractFileStorageAccountTest {
 
+
+    private static final String XOX8 = "xox8";
+    private static final String XCTX8 = "xctx8";
 
     protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Federated Sharing test storage";
 
@@ -153,8 +157,8 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     public static Collection getFileStorageServicesToTest() {
         //@formatter:off
         return Arrays.asList(new Object[] {
-            "xctx8",
-            "xox8",
+            XCTX8,
+            XOX8,
         });
         //@formatter:on
     }
@@ -203,6 +207,19 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         account = createAccount(fileStorageServiceId, XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
     }
 
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> configuration = new HashMap<>();
+        configuration.put("com.openexchange.capability.filestorage_xox", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.capability.filestorage_xctx", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.api.client.blacklistedHosts", "");
+        return configuration;
+    }
+
+    @Override
+    protected String getReloadables() {
+        return "CapabilityReloadable";
+    }
 
     @Override
     public void tearDown() throws Exception {
