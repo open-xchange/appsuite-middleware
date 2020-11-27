@@ -131,7 +131,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
          */
         requireAccess(session);
         if (isSingleFileShare(shareLink)) {
-            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+            return checkSingleFileAccessible(session, shareLink);
         }
         /*
          * Check if account exists and still accessible

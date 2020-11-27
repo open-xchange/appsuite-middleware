@@ -134,7 +134,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
          */
         requireAccess(session);
         if (isSingleFileShare(shareLink)) {
-            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+            return checkSingleFileAccessible(session, shareLink);
         }
 
         /*
