@@ -220,7 +220,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
                 }
             }
         }
-        if (null != folder.getExtendedProperties() && new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL))) {
+        if (null != folder.getExtendedProperties() && folder.getExtendedProperties().get(COLOR_LITERAL) != null && new AccountConfigHelper(internalConfig).setColor(folderId, folder.getExtendedProperties().get(COLOR_LITERAL))) {
             updated = true;
         }
         if (updated) {
