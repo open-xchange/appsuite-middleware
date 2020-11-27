@@ -53,7 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +64,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.MessageField;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -106,15 +107,15 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         }
         columns = null;
 
-        List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields, session);
         boolean debugEnabled = LOG.isDebugEnabled();
-        if (null == compositionSpaces) {
-            if (debugEnabled) {
-                LOG.debug("No open composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
-            }
-            return new AJAXRequestResult(JSONArray.EMPTY_ARRAY, "json");
+        if (debugEnabled && fields != null && fields.length > 0) {
+            EnumSet<MessageField> set = EnumSet.of(fields[0], fields);
+            set.add(MessageField.CONTENT);
+            set.add(MessageField.TO);
+            fields = set.toArray(new MessageField[set.size()]);
         }
 
+        List<CompositionSpace> compositionSpaces = compositionSpaceService.getCompositionSpaces(fields, session);
         int size = compositionSpaces.size();
         if (size <= 0) {
             if (debugEnabled) {
@@ -124,7 +125,7 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         }
 
         if (debugEnabled) {
-            LOG.debug("Detected {} open composition space(s) for user {} in context {}: {}", I(size), I(session.getUserId()), I(session.getContextId()), compositionSpaces.stream().map(c -> UUIDs.getUnformattedString(c.getId())).collect(Collectors.toList()).toString());
+            LOG.debug("Detected {} open composition space(s) for user {} in context {}:{}{}", I(size), I(session.getUserId()), I(session.getContextId()), Strings.getLineSeparator(), CompositionSpaces.buildConsoleTableFor(compositionSpaces, Optional.empty()));
         }
 
         if (hasColumns) {
