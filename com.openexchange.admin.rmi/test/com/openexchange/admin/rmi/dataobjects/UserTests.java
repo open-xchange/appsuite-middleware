@@ -49,12 +49,8 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
 
 /**
  * {@link UserTests}
@@ -62,7 +58,9 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
+@SuppressWarnings("deprecation")
 public class UserTests {
+
     /**
      * Initializes a new {@link UserTests}.
      */
@@ -70,8 +68,8 @@ public class UserTests {
         super();
     }
 
-         @Test
-     public void testIPv6IMAP() {
+    @Test
+    public void testIPv6IMAP() {
         User user = new User();
         user.setImapServer("imap://[2607:f0d0:1002:51::4]:1338");
 
@@ -80,8 +78,8 @@ public class UserTests {
         assertEquals("Unexpected host", "[2607:f0d0:1002:51::4]", user.getImapServer());
     }
 
-         @Test
-     public void testIPv6SMTP() {
+    @Test
+    public void testIPv6SMTP() {
         User user = new User();
         user.setSmtpServer("smtp://[2607:f0d0:1002:51::8]:1255");
 

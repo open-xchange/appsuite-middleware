@@ -79,13 +79,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @since v7.10.5
  */
 public class SubscribedHelper {
-    
+
     private final FileStorageAccount account;
     private final Set<String> possibleParentIds;
-    
+
     /**
      * Initializes a new {@link SubscribedHelper}.
-     * 
+     *
      * @param account The underlying file storage account
      * @param possibleParentIds The identifiers of those parent folders where subscribe/unsubscribe operations of subfolders are possible
      */
@@ -94,13 +94,13 @@ public class SubscribedHelper {
         this.account = account;
         this.possibleParentIds = possibleParentIds;
     }
-    
+
     /**
      * Looks up the account configuration whether folders are currently unsubscribed and sets the <i>subscribed</i> accordingly in the
      * passed folder references.
      * <p/>
      * The "subscribed subfolders" flag is implicitly set, too, so that the whole subfolder tree will effectively not appear in clients.
-     * 
+     *
      * @param folders The folders to set the subscribed information in
      * @param filterUnsubscribed <code>true</code> to exclude currently unsubscribed folders, <code>false</code>, otherwise
      * @return The (optionally filtered) folders, enriched by their subscribed information
@@ -119,7 +119,7 @@ public class SubscribedHelper {
                 if (filterUnsubscribed && false == folder.isSubscribed()) {
                     continue;
                 }
-            }            
+            }
             filteredFolders.add(folder);
         }
         return filteredFolders.toArray(new DefaultFileStorageFolder[filteredFolders.size()]);
@@ -130,7 +130,7 @@ public class SubscribedHelper {
      * in the passed folder reference.
      * <p/>
      * The "subscribed subfolders" flag is implicitly set, too, so that the whole subfolder tree will effectively not appear in clients.
-     * 
+     *
      * @param folder The folder to set the subscribed information in
      * @return The folder, enriched by its subscribed information
      */
@@ -146,7 +146,7 @@ public class SubscribedHelper {
     /**
      * Sets whether a particular folder is currently subscribed or not in the underlying account configuration and updates the account
      * in the storage.
-     * 
+     *
      * @param session The account owner's session
      * @param folder The folder to set the subscribed information for
      * @param subscribed <code>true</code> if subscribed, <code>false</code>, otherwise, or <code>null</code> to remove the stored value
@@ -168,7 +168,7 @@ public class SubscribedHelper {
     /**
      * Checks the parent folder of each file in the passed list, and removes those files that are located in an folder subtree that is
      * currently not subscribed.
-     * 
+     *
      * @param files The files to filter
      * @param getFolderFunction A function to retrieve a folder for the check by its identifier
      * @return The filtered files
@@ -199,7 +199,7 @@ public class SubscribedHelper {
     /**
      * Checks the parent folder of each file in the passed search iterator, and skips those files that are located in an folder subtree
      * that is currently not subscribed from the resulting iterator.
-     * 
+     *
      * @param searchIterator The search iterator to filter
      * @param getFolderFunction A function to retrieve a folder for the check by its identifier
      * @return A search iterator that skips filtered files
@@ -246,17 +246,14 @@ public class SubscribedHelper {
         return isSubscribed(folder.getParentId(), knownFolders, getFolderFunction);
     }
 
-    private JSONObject getAccountMetadata() {
-        JSONObject metadata = account.getMetadata();
-        return null == metadata ? new JSONObject() : metadata;
-    }
-    
-    private static Set<String> getUnsubscribedIds(JSONObject accountMetadata) {
-        JSONObject subscribedObject = accountMetadata.optJSONObject("subscribed");
-        return null != subscribedObject ? new HashSet<String>(subscribedObject.keySet()) : java.util.Collections.emptySet();
-    }
-
-    private static Boolean getSubscribed(JSONObject accountMetadata, String folderId) {
+    /**
+     * Gets whether or not the given folder is currently marked as subscribed
+     *
+     * @param accountMetadata The metaData to check
+     * @param folderId The ID of the folder
+     * @return <code>true</code> if the folder with the given ID is marked as subscribed in the given meta data, <code>false</code> otherwise
+     */
+    public static Boolean getSubscribed(JSONObject accountMetadata, String folderId) {
         if (null == accountMetadata) {
             return null;
         }
@@ -265,6 +262,17 @@ public class SubscribedHelper {
             return null;
         }
         return B(subscribedObject.optBoolean(folderId, true));
+    }
+
+
+    private JSONObject getAccountMetadata() {
+        JSONObject metadata = account.getMetadata();
+        return null == metadata ? new JSONObject() : metadata;
+    }
+
+    private static Set<String> getUnsubscribedIds(JSONObject accountMetadata) {
+        JSONObject subscribedObject = accountMetadata.optJSONObject("subscribed");
+        return null != subscribedObject ? new HashSet<String>(subscribedObject.keySet()) : java.util.Collections.emptySet();
     }
 
     private static boolean setSubscribed(JSONObject accountMetadata, String folderId, Boolean subscribed) {

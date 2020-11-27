@@ -452,7 +452,8 @@ public class CompositionSpaceDbStorage {
     private void insert(Connection connection, CompositionSpaceContainer compositionSpace, int maxSpacesPerUser) throws SQLException, OXException {
         MessageField[] mappedFields = MAPPER.getMappedFields();
 
-        StringBuilder sb = new StringBuilder().append("INSERT INTO compositionSpace (uuid,cid,user,lastModified,").append(MAPPER.getColumns(mappedFields)).append(") ");
+        StringBuilder sb = new StringBuilder(512).append("INSERT INTO compositionSpace (uuid,cid,user,lastModified,");
+        sb.append(MAPPER.getColumns(mappedFields)).append(") ");
         if (maxSpacesPerUser > 0) {
             sb.append("SELECT ?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append(" FROM DUAL ");
             sb.append("WHERE ?>(SELECT COUNT(*) FROM compositionSpace WHERE cid=? AND user=?)");

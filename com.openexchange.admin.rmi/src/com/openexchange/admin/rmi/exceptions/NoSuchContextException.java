@@ -46,8 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.exceptions;
 
+import static com.openexchange.java.Autoboxing.I;
 
 /**
  * Is thrown when user want to do an action in a context which doesn't exists in the system.
@@ -59,7 +61,7 @@ public class NoSuchContextException extends AbstractAdminRmiException {
 
     private static final String MSG_WITH_PARAM = "Context %d does not exist";
     private static final String MSG = "Context does not exist";
-	/**
+    /**
      * For serialization
      */
     private static final long serialVersionUID = 1991615694615324164L;
@@ -71,12 +73,11 @@ public class NoSuchContextException extends AbstractAdminRmiException {
         super(MSG);
     }
 
-
     /**
      * @param ctxId
      */
     public NoSuchContextException(int ctxId) {
-        super(String.format(MSG_WITH_PARAM, ctxId));
+        super(String.format(MSG_WITH_PARAM, I(ctxId)));
     }
 
     /**

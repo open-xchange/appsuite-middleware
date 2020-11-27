@@ -139,7 +139,7 @@ public class Bug16618Test extends AbstractAJAXSession {
             final int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
             final int imageURLPos = response.getColumnPos(Contact.IMAGE1_URL);
             for (final Object[] objA : response) {
-                if (contactId == ((Integer) objA[objectIdPos]).intValue()) {
+                if (contactId == Integer.parseInt(String.class.cast(objA[objectIdPos]))) {
                     final String imageURL = (String) objA[imageURLPos];
                     assertNotNull(imageURL);
                 }
@@ -157,7 +157,7 @@ public class Bug16618Test extends AbstractAJAXSession {
             final int lastModifiedPos = allResponse.getColumnPos(Contact.LAST_MODIFIED);
 
             for (final Object[] temp : allResponse) {
-                final int tempObjectId = ((Integer) temp[objectIdPos]).intValue();
+                final int tempObjectId = Integer.parseInt(String.class.cast(temp[objectIdPos]));
                 if (tempObjectId == contactId) {
                     contact.setLastModified(new Date(((Long) temp[lastModifiedPos]).longValue()));
                     final String imageURL = (String) temp[imageURLPos];

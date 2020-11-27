@@ -54,6 +54,7 @@ import java.io.Serializable;
  * @author choeger
  *
  */
+@SuppressWarnings("deprecation")
 public interface OXResourceExtensionInterface extends OXCommonExtensionInterface, Serializable {
 
 }

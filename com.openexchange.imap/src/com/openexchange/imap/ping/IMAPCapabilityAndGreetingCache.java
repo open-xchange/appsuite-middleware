@@ -57,6 +57,7 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentMap;
@@ -72,10 +73,9 @@ import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.config.MailProxyConfig;
-import com.openexchange.net.HostList;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketFetcher;
 
 /**
  * {@link IMAPCapabilityAndGreetingCache} - A cache for CAPABILITY and greeting from IMAP servers.
@@ -156,11 +156,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param endpoint The IMAP server's end-point
      * @param isSecure Whether to establish a secure connection
      * @param imapProperties The IMAP properties
+     * @param primary Whether considered IMAP end-point is the primary one or not
      * @return The greeting from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getGreeting(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
-        return getCapabilityAndGreeting(endpoint, isSecure, imapProperties).getGreeting();
+    public static String getGreeting(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties, boolean primary) throws IOException {
+        return getCapabilityAndGreeting(endpoint, isSecure, imapProperties, primary).getGreeting();
     }
 
     /**
@@ -169,11 +170,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param endpoint The IMAP server's end-point
      * @param isSecure Whether to establish a secure connection
      * @param imapProperties The IMAP properties
+     * @param primary Whether considered IMAP end-point is the primary one or not
      * @return The capabilities from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static Map<String, String> getCapabilities(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
-        return getCapabilityAndGreeting(endpoint, isSecure, imapProperties).getCapability();
+    public static Map<String, String> getCapabilities(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties, boolean primary) throws IOException {
+        return getCapabilityAndGreeting(endpoint, isSecure, imapProperties, primary).getCapability();
     }
 
     /**
@@ -182,14 +184,15 @@ public final class IMAPCapabilityAndGreetingCache {
      * @param endpoint The IMAP server's end-point
      * @param isSecure Whether to establish a secure connection
      * @param imapProperties The IMAP properties
+     * @param primary Whether considered IMAP end-point is the primary one or not
      * @return The capabilities & greeting
      * @throws IOException If an I/O error occurs
      */
-    public static CapabilityAndGreeting getCapabilityAndGreeting(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
+    public static CapabilityAndGreeting getCapabilityAndGreeting(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties, boolean primary) throws IOException {
         int idleTime = capabiltiesCacheIdleTime();
         if (idleTime < 0) {
             // Never cache
-            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties));
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties, primary));
             ft.run();
             return getFrom(ft);
         }
@@ -203,7 +206,7 @@ public final class IMAPCapabilityAndGreetingCache {
         Key key = new Key(endpoint.getHost(), endpoint.getPort(), isSecure);
         Future<CapabilityAndGreeting> f = map.get(key);
         if (null == f) {
-            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties));
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties, primary));
             f = map.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
@@ -213,7 +216,7 @@ public final class IMAPCapabilityAndGreetingCache {
 
         CapabilityAndGreeting cag = getFrom(f);
         if (isElapsed(cag, idleTime)) {
-            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties));
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(endpoint, isSecure, imapProperties, primary));
             if (map.replace(key, f, ft)) {
                 f = ft;
                 ft.run();
@@ -265,12 +268,14 @@ public final class IMAPCapabilityAndGreetingCache {
         private final HostAndPort endpoint;
         private final boolean isSecure;
         private final IIMAPProperties imapProperties;
+        private final boolean primary;
 
-        public CapabilityAndGreetingCallable(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties) {
+        CapabilityAndGreetingCallable(HostAndPort endpoint, boolean isSecure, IIMAPProperties imapProperties, boolean primary) {
             super();
             this.endpoint = endpoint;
             this.isSecure = isSecure;
             this.imapProperties = imapProperties;
+            this.primary = primary;
         }
 
         @Override
@@ -282,61 +287,7 @@ public final class IMAPCapabilityAndGreetingCache {
             Socket s = null;
             try {
                 // Establish socket connection
-                {
-                    if (isSecure) {
-                        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                        s = factoryProvider.getDefault().createSocket();
-                    } else {
-                        s = new Socket();
-                    }
-
-                    // Get connect timeout
-                    int connectionTimeout = imapProperties.getImapConnectionTimeout();
-
-                    // Set read timeout
-                    int timeout = imapProperties.getImapTimeout();
-                    if (timeout > 0) {
-                        s.setSoTimeout(timeout);
-                    }
-
-                    // Proxy settings
-                    String proxyHost = System.getProperties().getProperty("mail.imap.proxy.host", null);
-                    int proxyPort = 80;
-                    if (proxyHost == null) {
-                        // No proxy configured
-                        if (connectionTimeout > 0) {
-                            s.connect(toSocketAddress(endpoint) , connectionTimeout);
-                        } else {
-                            s.connect(toSocketAddress(endpoint));
-                        }
-                    } else {
-                        // Proxy available via configuration
-                        int i = proxyHost.indexOf(':');
-                        if (i >= 0) {
-                            try {
-                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
-                            } catch (NumberFormatException ex) {
-                                // ignore it
-                            }
-                            proxyHost = proxyHost.substring(0, i);
-                        }
-                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.imap.proxy.port", proxyPort);
-                        HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(endpoint.getHost())) {
-                            if (connectionTimeout > 0) {
-                                s.connect(toSocketAddress(endpoint) , connectionTimeout);
-                            } else {
-                                s.connect(toSocketAddress(endpoint));
-                            }
-                        } else {
-                            if (connectionTimeout > 0) {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
-                            } else {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
-                            }
-                        }
-                    }
-                }
+                s = SocketFetcher.getSocket(endpoint.getHost(), endpoint.getPort(), createImapProps(), "mail.imap", false);
 
                 // State variables
                 InputStream in = s.getInputStream();
@@ -448,6 +399,7 @@ public final class IMAPCapabilityAndGreetingCache {
                 out.flush();
 
                 // Create & return new CapabilityAndGreeting instance
+                LOG.debug("Successfully fetched capabilities and greeting from IMAP server \"{}\":{}{}{}{}", endpoint.getHost(), Strings.getLineSeparator(), greeting, Strings.getLineSeparator(), capabilities);
                 return new CapabilityAndGreeting(capabilities, greeting);
             } catch (BoundaryExceededException e) {
                 if (null == greeting) {
@@ -468,6 +420,71 @@ public final class IMAPCapabilityAndGreetingCache {
                         // ignore
                     }
                 }
+            }
+        }
+
+        private Properties createImapProps() {
+            Properties imapProps = MimeDefaultSession.getDefaultMailProperties();
+            {
+                int connectionTimeout = imapProperties.getImapConnectionTimeout();
+                if (connectionTimeout > 0) {
+                    imapProps.put("mail.imap.connectiontimeout", Integer.toString(connectionTimeout));
+                }
+            }
+            {
+                int timeout = imapProperties.getImapTimeout();
+                if (timeout > 0) {
+                    imapProps.put("mail.imap.timeout", Integer.toString(timeout));
+                }
+            }
+            SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+            final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+            final String sPort = Integer.toString(endpoint.getPort());
+            if (isSecure) {
+                imapProps.put("mail.imap.socketFactory.class", socketFactoryClass);
+                imapProps.put("mail.imap.socketFactory.port", sPort);
+                imapProps.put("mail.imap.socketFactory.fallback", "false");
+                applySslProtocols(imapProps);
+                applySslCipherSuites(imapProps);
+            } else {
+                applyEnableTls(imapProps);
+                imapProps.put("mail.imap.socketFactory.port", sPort);
+                imapProps.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
+                imapProps.put("mail.imap.ssl.socketFactory.port", sPort);
+                imapProps.put("mail.imap.socketFactory.fallback", "false");
+                applySslProtocols(imapProps);
+                applySslCipherSuites(imapProps);
+            }
+            if (primary) {
+                imapProps.put("mail.imap.primary", "true");
+            }
+            {
+                String authenc = imapProperties.getImapAuthEnc();
+                if (Strings.isNotEmpty(authenc)) {
+                    imapProps.put("mail.imap.login.encoding", authenc);
+                }
+            }
+            return imapProps;
+        }
+
+        private void applyEnableTls(Properties imapprops) {
+            boolean enableTls = imapProperties.isEnableTls();
+            if (enableTls) {
+                imapprops.put("mail.imap.starttls.enable", "true");
+            }
+        }
+
+        private void applySslProtocols(Properties imapprops) {
+            String sslProtocols = imapProperties.getSSLProtocols();
+            if (Strings.isNotEmpty(sslProtocols)) {
+                imapprops.put("mail.imap.ssl.protocols", sslProtocols);
+            }
+        }
+
+        private void applySslCipherSuites(Properties imapprops) {
+            String cipherSuites = imapProperties.getSSLCipherSuites();
+            if (Strings.isNotEmpty(cipherSuites)) {
+                imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
             }
         }
     }

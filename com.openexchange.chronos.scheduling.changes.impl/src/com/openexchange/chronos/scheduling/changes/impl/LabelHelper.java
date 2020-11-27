@@ -50,6 +50,7 @@
 package com.openexchange.chronos.scheduling.changes.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.scheduling.common.Utils.getDisplayName;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -175,11 +176,11 @@ public class LabelHelper {
     }
 
     public String getCounterOrganizerIntroduction() {
-        return new SentenceImpl(Messages.COUNTER_ORGANIZER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+        return new SentenceImpl(Messages.COUNTER_ORGANIZER_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
     }
 
     public String getCounterParticipantIntroduction() {
-        return new SentenceImpl(Messages.COUNTER_PARTICIPANT_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getOrganizer().getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+        return new SentenceImpl(Messages.COUNTER_PARTICIPANT_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(getDisplayName(update.getOrganizer()), ArgumentType.PARTICIPANT).getMessage(messageContext);
     }
 
     public String getCreateIntroduction() {
@@ -187,11 +188,11 @@ public class LabelHelper {
     }
 
     public String getCreateExceptionIntroduction() {
-        return new SentenceImpl(Messages.CREATE_EXCEPTION_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(messageContext);
+        return new SentenceImpl(Messages.CREATE_EXCEPTION_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(messageContext);
     }
 
     public String getRefreshIntroduction() {
-        return new SentenceImpl(Messages.REFRESH_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
+        return new SentenceImpl(Messages.REFRESH_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
     }
 
     public String getDeclineCounterIntroduction() {
@@ -339,7 +340,7 @@ public class LabelHelper {
                 msg = Messages.NONE_ON_YOUR_BEHALF_INTRO;
                 statusString = Messages.NONE;
             }
-            return new SentenceImpl(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(messageContext);
+            return new SentenceImpl(msg).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(messageContext);
         }
 
         @Override
@@ -360,7 +361,7 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext)
@@ -369,13 +370,13 @@ public class LabelHelper {
 
         @Override
         public String getDeleteIntroduction() {
-            return new SentenceImpl(Messages.DELETE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.DELETE_ON_YOUR_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getDeleteInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.DELETE_INSTANCE_ON_YOUR_BEHALF_INTRO)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext)
             ;
@@ -383,13 +384,13 @@ public class LabelHelper {
 
         @Override
         public String getUpdateIntroduction() {
-            return new SentenceImpl(Messages.UPDATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.UPDATE_ON_YOUR_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getUpdateInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.UPDATE_INSTANCE_ON_YOUR_BEHALF_INTRO)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext)
             ;
@@ -402,7 +403,7 @@ public class LabelHelper {
 
         @Override
         public String getCreateIntroduction() {
-            return new SentenceImpl(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
     }
@@ -425,9 +426,9 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext);
         }
 
@@ -449,51 +450,51 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
                 .add(ofSeries, ArgumentType.ITALIC)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext)
             ;
         }
 
         @Override
         public String getDeleteIntroduction() {
-            return new SentenceImpl(Messages.DELETE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.DELETE_ON_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getDeleteInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.DELETE_INSTANCE_ON_BEHALF_INTRO)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext)
             ;
         }
 
         @Override
         public String getUpdateIntroduction() {
-            return new SentenceImpl(Messages.UPDATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.UPDATE_ON_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getUpdateInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.UPDATE_INSTANCE_ON_BEHALF_INTRO)
-                .add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .getMessage(messageContext);
         }
 
         @Override
         public String getDeclineCounterIntroduction() {
-            return new SentenceImpl(Messages.DECLINECOUNTER_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
+            return new SentenceImpl(Messages.DECLINECOUNTER_ON_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
         }
 
         @Override
         public String getCreateIntroduction() {
-            return new SentenceImpl(Messages.CREATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn()).getMessage(messageContext);
+            return new SentenceImpl(Messages.CREATE_ON_BEHALF_INTRO).add(getDisplayName(originator.getSentBy()), ArgumentType.PARTICIPANT).add(getDisplayName(originator)).getMessage(messageContext);
         }
 
     }
@@ -510,7 +511,7 @@ public class LabelHelper {
                 msg = Messages.NONE_INTRO;
                 statusString = Messages.NONE;
             }
-            return new SentenceImpl(msg).add(originator.getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(messageContext);
+            return new SentenceImpl(msg).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(messageContext);
         }
 
         @Override
@@ -525,7 +526,7 @@ public class LabelHelper {
                 statusString = Messages.NONE;
             }
             return new SentenceImpl(msg)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .add(statusString, ArgumentType.STATUS, status)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext)
@@ -533,13 +534,13 @@ public class LabelHelper {
         }
         @Override
         public String getDeleteIntroduction() {
-            return new SentenceImpl(Messages.DELETE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.DELETE_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getDeleteInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.DELETE_INSTANCE_INTRO)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext)
             ;
@@ -547,25 +548,25 @@ public class LabelHelper {
 
         @Override
         public String getUpdateIntroduction() {
-            return new SentenceImpl(Messages.UPDATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.UPDATE_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
 
         @Override
         public String getUpdateInstanceIntroduction(String ofSeries) {
             return new SentenceImpl(Messages.UPDATE_INSTANCE_INTRO)
-                .add(originator.getCn(), ArgumentType.PARTICIPANT)
+                .add(getDisplayName(originator), ArgumentType.PARTICIPANT)
                 .add(ofSeries, ArgumentType.ITALIC)
                 .getMessage(messageContext);
         }
 
         @Override
         public String getDeclineCounterIntroduction() {
-            return new SentenceImpl(Messages.DECLINECOUNTER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
+            return new SentenceImpl(Messages.DECLINECOUNTER_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(messageContext);
         }
 
         @Override
         public String getCreateIntroduction() {
-            return new SentenceImpl(Messages.CREATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(messageContext);
+            return new SentenceImpl(Messages.CREATE_INTRO).add(getDisplayName(originator), ArgumentType.PARTICIPANT).getMessage(messageContext);
         }
     }
 

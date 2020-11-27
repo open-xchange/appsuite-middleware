@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -281,7 +282,7 @@ public class XOXAccountAccess implements CapabilityAware {
 
         //In case of an error state: we return an implementation which will only allow to get the last known folders
         if (recentException != null) {
-            return new ErrorStateFolderAccess(recentException) {
+            return new ErrorStateFolderAccess(account, recentException) {
 
                 @Override
                 public FileStorageFolderStub[] getLastKnownSubFolders(String folderId) throws OXException {
@@ -291,6 +292,16 @@ public class XOXAccountAccess implements CapabilityAware {
                 @Override
                 public FileStorageFolderStub getLastKnownFolder(String folderId) throws OXException {
                     return new AccountMetadataHelper(account, session).getLastKnownFolder(folderId);
+                }
+
+                @Override
+                public String updateLastKnownFolder(FileStorageFolder folder, FileStorageFolder toUpdate) throws OXException {
+                    //Only able update the subscription flag in case of an error
+                    if (SetterAwareFileStorageFolder.class.isInstance(toUpdate) && ((SetterAwareFileStorageFolder) toUpdate).containsSubscribed()) {
+                        getSubscribedHelper().setSubscribed(session, folder, B(toUpdate.isSubscribed()));
+                        return folder.getId();
+                    }
+                    return null;
                 }
             };
         }

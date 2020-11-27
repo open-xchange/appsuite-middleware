@@ -18,3 +18,4 @@ Eclipse-RegisterBuddy: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin.rmi,
  com.openexchange.admin
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.admin.reseller.rmi

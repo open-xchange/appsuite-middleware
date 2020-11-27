@@ -129,7 +129,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
         int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
         int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
         for (Object[] objA : response) {
-            if (contact.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+            if (contact.getObjectID() == Integer.parseInt(String.class.cast(objA[objectIdPos]))) {
                 test = new Contact();
                 test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
                 break;
@@ -147,7 +147,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
         int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
         int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
         for (Object[] objA : response) {
-            if (contact.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+            if (contact.getObjectID() == Integer.parseInt(String.class.cast(objA[objectIdPos]))) {
                 test = new Contact();
                 test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
                 break;

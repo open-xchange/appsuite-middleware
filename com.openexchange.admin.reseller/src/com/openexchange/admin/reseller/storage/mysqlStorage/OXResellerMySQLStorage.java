@@ -1908,6 +1908,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         return a.equals(b);
     }
 
+    @SuppressWarnings("deprecation")
     private int countUsersByModuleAccess(Context ctx, UserModuleAccess access) throws StorageException {
         try {
             UserPermissionBits ubp = new UserPermissionBits(0, 0, null, ctx.getId().intValue());

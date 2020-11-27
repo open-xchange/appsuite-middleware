@@ -130,10 +130,9 @@ public class NewListTest extends AbstractAJAXSession {
             final InsertResponse irr = mInsert.getResponse(DELETES);
             final InsertResponse irr2 = mInsert.getResponse(DELETES + 1);
 
-            if (((Integer) ar[1]).intValue() == irr.getId() || ((Integer) ar[1]).intValue() == irr2.getId()) {
+            if ((Integer.parseInt(String.class.cast(ar[1])) == irr.getId()) || (Integer.parseInt(String.class.cast(ar[1])) == irr2.getId())) {
                 assertFalse("Error: Object was found in list", true);
             }
-
         }
 
         final DeleteRequest[] deletes2 = new DeleteRequest[NUMBER - DELETES];

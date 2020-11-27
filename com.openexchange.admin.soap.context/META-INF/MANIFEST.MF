@@ -48,4 +48,5 @@ Import-Package: com.openexchange.admin.rmi,
  org.slf4j
 Bundle-Activator: com.openexchange.admin.soap.context.osgi.SoapContextActivator
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.admin.soap.context
 

@@ -296,7 +296,15 @@ public abstract class DataObject extends SystemObject {
             setLastModified((Date) value);
             break;
         case OBJECT_ID:
-            setObjectID(null == value ? 0 : ((Integer) value).intValue());
+            if (null == value) {
+                setObjectID(0);
+                break;
+            }
+            if (value instanceof Integer) {
+                setObjectID(Integer.class.cast(value).intValue());
+            } else if (value instanceof String) {
+                setObjectID(Integer.parseInt(String.class.cast(value)));
+            }
             break;
         case MODIFIED_BY:
             setModifiedBy(null == value ? 0 : ((Integer) value).intValue());

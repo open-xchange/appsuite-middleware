@@ -186,7 +186,7 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
                 // auto-provisioning tasks of the default account.
                 storedAccounts.set(index, isGuest(session) ? getVirtualDefaultAccount(session) : find(getAccounts(session, parameters), ContactsAccount.DEFAULT_ACCOUNT.getProviderId()));
             }
-            if (null == account) {
+            if (null == storedAccounts.get(index)) {
                 throw ContactsProviderExceptionCodes.ACCOUNT_NOT_FOUND.create(ids.get(index));
             }
             index++;
@@ -470,7 +470,7 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
             do {
                 try {
                     // ... execute as many times as necessary
-                    performer.executeUpdate();
+                    accounts.addAll(performer.executeUpdate());
                     return;
                 } catch (OXException e) {
                     if (false == ContactsProviderExceptionCodes.ACCOUNT_NOT_WRITTEN.equals(e)) {
