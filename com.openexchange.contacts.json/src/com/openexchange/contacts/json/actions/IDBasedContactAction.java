@@ -141,7 +141,7 @@ public abstract class IDBasedContactAction extends ContactAction {
 
     /**
      * Initialises the contacts access based on the specified contacts request
-     * 
+     *
      * @param requestData The request data
      * @return The initialised {@link IDBasedContactsAccess}
      */
