@@ -140,9 +140,7 @@ public class UserAndContext {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(32);
-        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append("}");
-        return builder.toString();
+        return new StringBuilder(32).append("[userId=").append(userId).append(", contextId=").append(contextId).append(']').toString();
     }
 
 }
