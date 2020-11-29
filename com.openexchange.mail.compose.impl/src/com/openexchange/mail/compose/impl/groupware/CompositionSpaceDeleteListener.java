@@ -455,7 +455,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             }
 
             {
-                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId=1");
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId>0");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 rs = stmt.executeQuery();
