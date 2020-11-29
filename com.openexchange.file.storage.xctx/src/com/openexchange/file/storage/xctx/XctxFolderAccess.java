@@ -63,8 +63,8 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.FileStorageResult;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
 import com.openexchange.file.storage.infostore.folder.FolderConverter;
@@ -259,11 +259,6 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
         return "XctxFolderAccess [accountId=" + accountAccess.getAccountId() +
             ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() +
             ", guestUser=" + super.session.getUserId() + '@' + super.session.getContextId() + ']';
-    }
-
-    @Override
-    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
-        return super.searchFolderByName(query, folderId, date, includeSubfolders, all, start, end);
     }
 
 }

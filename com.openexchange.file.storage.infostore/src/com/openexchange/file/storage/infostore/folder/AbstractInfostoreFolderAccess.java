@@ -53,8 +53,8 @@ import static com.openexchange.java.Autoboxing.B;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
@@ -255,6 +255,12 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     }
 
     @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        List<UserizedFolder> result = getFolderService().searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, initDecorator()).getResponse();
+        return getConverter().getStorageFolders(result.toArray(new UserizedFolder[result.size()]));
+    }
+
+    @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
@@ -299,12 +305,6 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     @Override
     public long getTotalSize(String folderId) throws OXException {
         return getInfostore().getTotalSize(Long.parseLong(folderId), session);
-    }
-
-    @Override
-    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
-        List<UserizedFolder> result = getFolderService().searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, initDecorator()).getResponse();
-        return FolderWriter.writeFolders(result.toArray(new UserizedFolder[result.size()]));
     }
 
     /**
