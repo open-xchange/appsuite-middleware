@@ -131,7 +131,7 @@ public class MailStorageCompositionSpaceConfig implements ForcedReloadable {
 
     public static final String PROPERTY_FILE_CACHE_ENABLED = "com.openexchange.mail.compose.mailstorage.fileCacheEnabled";
 
-    public static final String PROPERTY_FILE_CACHE_DIR = "com.openexchange.mail.compose.mailstorage.fileCachelDir";
+    public static final String PROPERTY_FILE_CACHE_DIR = "com.openexchange.mail.compose.mailstorage.fileCacheDir";
 
     public static final String PROPERTY_FILE_CACHE_MAX_IDLE_SECONDS = "com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds";
 
