@@ -257,11 +257,14 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
     @Override
     public E[] getMappedFields(int...columnIDs) {
-        ArrayList<E> ret = new ArrayList<E>();
-        for(int c : columnIDs) {
-           ret.add(getMappedField(c));
+        if (null != columnIDs && columnIDs.length > 0) {
+            ArrayList<E> ret = new ArrayList<E>();
+            for (int c : columnIDs) {
+                ret.add(getMappedField(c));
+            }
+            return ret.toArray(newArray(ret.size()));
         }
-        return ret.toArray(newArray(ret.size()));
+        return null;
     }
 
 
