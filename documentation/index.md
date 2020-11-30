@@ -11,6 +11,16 @@ The following gives an overview about some of the more noteworthy changes introd
 
 ## Draft-based Mail Compose
 
+With 7.10.2 a new backend implementation for composing emails in the webmailer was introduced, to provide contemporary features like instant attachment upload, attachment previews and listing of abandoned compose windows after login.
+
+The original implementation was based on App Suite database and filestore and produced real draft emails only on explicit user requests. To address operational and usability concerns, an alternative mail compose backend implementation based on real draft emails is now provided. The new approach operates solely on draft emails in users "Drafts" folders and is enabled by default. It is subject to replace the former mechanism.
+
+**The database and filestore-based mechanism is herewith declared as deprecated and subject for removal in a future release.**
+
+The new mechanism can be disabled – and therefore the former one still being used instead – by setting `com.openexchange.mail.compose.mailstorage.enabled = false`.
+
+**Please note** that the former approach is still used for all still open composition spaces. Do not decommission database and filestore resources until no more spaces are managed by the old mechanism.
+
 ## Federated Sharing
 
 OX App Suite 7.10.5 introduces the new concept of "*Federated Sharing*" which allows a user to integrate a received share from another context 
