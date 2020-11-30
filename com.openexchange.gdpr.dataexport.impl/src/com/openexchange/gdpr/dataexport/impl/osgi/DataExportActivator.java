@@ -78,6 +78,7 @@ import com.openexchange.gdpr.dataexport.DataExportStorageService;
 import com.openexchange.gdpr.dataexport.impl.DataExportDatabaseAccessProvider;
 import com.openexchange.gdpr.dataexport.impl.DataExportProviderRegistryImpl;
 import com.openexchange.gdpr.dataexport.impl.DataExportServiceImpl;
+import com.openexchange.gdpr.dataexport.impl.cleanup.DataExportCleanUpTask;
 import com.openexchange.gdpr.dataexport.impl.groupware.DataExportAddFailCountTask;
 import com.openexchange.gdpr.dataexport.impl.groupware.DataExportAddNotificationSentColumnTask;
 import com.openexchange.gdpr.dataexport.impl.groupware.DataExportAddReportTable;
@@ -94,6 +95,7 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.reseller.ResellerService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -225,6 +227,7 @@ public class DataExportActivator extends HousekeepingActivator {
         this.service = service;
 
         trackService(HostnameService.class);
+        trackService(ResellerService.class);
 
         openTrackers();
 
@@ -281,6 +284,8 @@ public class DataExportActivator extends HousekeepingActivator {
         }
 
         registerService(DeleteListener.class, new DataExportDeleteListener());
+
+        getService(TimerService.class).scheduleWithFixedDelay(new DataExportCleanUpTask(service, storageService, this), 5000, 43200000L); // Every 12 hours
     }
 
     @Override
