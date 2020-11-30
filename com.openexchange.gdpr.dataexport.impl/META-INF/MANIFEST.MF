@@ -6,7 +6,8 @@ Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.gdpr.dataexport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.common.annotations,
+Import-Package: com.eaio.util.text,
+ com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
  com.openexchange.ajax.container,
@@ -50,6 +51,8 @@ Import-Package: com.google.common.annotations,
  com.openexchange.notification.mail,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
+ com.openexchange.reseller,
+ com.openexchange.reseller.data,
  com.openexchange.server,
  com.openexchange.serverconfig,
  com.openexchange.session,
