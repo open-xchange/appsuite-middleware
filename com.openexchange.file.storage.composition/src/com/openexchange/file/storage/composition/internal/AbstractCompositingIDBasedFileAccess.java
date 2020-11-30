@@ -1480,7 +1480,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     private List<OXException> collectWarningsBeforeMultiMove(final List<String> sourceIds, String destFolderId, final FolderID destinationID) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         FileStorageFileAccess destFileAccess = getFileAccess(destinationID);
-        FileStorageFolder targetFolder = destFileAccess.getAccountAccess().getFolderAccess().getFolder(destFolderId);
+        FolderID targetFolderID = new FolderID(destFolderId);
+        FileStorageFolder targetFolder = destFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
         List<FileStoragePermission> destPermissions = targetFolder.getPermissions();
 
         List<String> potentialConflictings = new ArrayList<String>();
