@@ -285,7 +285,7 @@ public class DataExportActivator extends HousekeepingActivator {
 
         registerService(DeleteListener.class, new DataExportDeleteListener());
 
-        getService(TimerService.class).scheduleWithFixedDelay(new DataExportCleanUpTask(service, storageService, this), 5000, 43200000L); // Every 12 hours
+        getService(TimerService.class).scheduleWithFixedDelay(new DataExportCleanUpTask(service, storageService, this), 300000, 43200000L); // Every 12 hours
     }
 
     @Override
