@@ -51,8 +51,12 @@ package com.openexchange.file.storage.json.actions.accounts;
 
 import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -96,7 +100,15 @@ public class GetAction extends AbstractFileStorageAccountAction {
         FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
         FileStorageFolder rootFolder = optRootFolder(access);
 
-        return new AJAXRequestResult(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
+        try {
+            return new AJAXRequestResult(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
+        } catch (OXException e) {
+            //Add account with error
+            boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
+            JSONObject accountJSON = writer.write(account, null, determineCapabilities(access), null);
+            accountJSON.put("hasError", true);
+            ResponseWriter.addException(accountJSON, e, localeFrom(session), includeStackTraceOnError);
+            return new AJAXRequestResult(accountJSON);
+        }
     }
-
 }

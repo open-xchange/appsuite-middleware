@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.accounts;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +70,7 @@ import com.openexchange.file.storage.json.FileStorageAccountParser;
 import com.openexchange.file.storage.json.FileStorageAccountWriter;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -196,6 +198,20 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
         }
 
         return caps;
+    }
+
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            return Locale.US;
+        }
     }
 
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
