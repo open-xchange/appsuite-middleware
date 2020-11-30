@@ -188,9 +188,17 @@ public class Bug16292Test extends AbstractAJAXSession {
         final Iterator<Object> it = resp.iterator(objIdColumn);
         int i = 0;
         while (it.hasNext()) {
-            final Integer actual = (Integer) it.next();
-            if (actual != null && actual.intValue() == appointment.getObjectID()) {
-                assertNotNull(type + ": Number of attachments is null after " + reqType, resp.getValue(i, noaColumn));
+            Object candidate = it.next();
+            if (candidate.getClass().isAssignableFrom(Integer.class)) {
+                Integer actual = Integer.class.cast(candidate);
+                if (actual != null && actual.intValue() == appointment.getObjectID()) {
+                    assertNotNull(type + ": Number of attachments is null after " + reqType, resp.getValue(i, noaColumn));
+                }
+            } else if (candidate.getClass().isAssignableFrom(String.class)) {
+                String actual = String.class.cast(candidate);
+                if (actual != null && Integer.parseInt(actual) == appointment.getObjectID()) {
+                    assertNotNull(type + ": Number of attachments is null after " + reqType, resp.getValue(i, noaColumn));
+                }
             }
             i++;
         }
