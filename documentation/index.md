@@ -58,6 +58,33 @@ See [Sharing and Guest Mode](https://documentation.open-xchange.com/7.10.5/middl
 
 ## Improved API access with OAuth 2.0
 
+Since version v7.8.0 the OX App Suite is able to act as an OAuth 2.0 provider to allow access to certain API calls.
+With version v7.10.5 support for external authorization servers has been improved, the endpoints that can be accessed with OAuth have been expanded and their API documentation has been further enriched.
+
+Which endpoints are available with OAuth and which permission scopes are required for the respective api calls can be found in the current [API documentation](https://documentation.open-xchange.com/components/middleware/http/latest/index.html).
+
+Regarding the support of external authorization servers it is now possible to process and validate both JSON Web Token (JWT) and opaque access tokens issued by an external Identity & Access management system (e.g. [Keycloak](https://www.keycloak.org/)).
+
+As before, the OAuth 2.0 provider is activated by the property:
+
+* <code>com.openexchange.oauth.provider.enabled</code>
+
+The configuration property <code>com.openexchange.oauth.provider.isAuthorizationServer</code> 
+is no longer available and was transferred to <code>com.openexchange.oauth.provider.mode</code>, which now configures the OAuth provider.
+
+The following is a list of possible configurations:
+
+* <code>com.openexchange.oauth.provider.mode</code>
+ Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
+  * <code>auth_server</code>
+ Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also as authorization server.
+  * <code>expect_jwt</code>
+ Defines whether the enabled OAuth 2.0 provider is accesible with OAuth 2.0 Bearer Access Tokens that are JWTs, which were issued by an external Identity & Access management System.
+   * <code>token_introspection</code>
+ Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
+
+See [OAuth 2.0 Operator Guide](https://documentation.open-xchange.com/7.10.4/middleware/login_and_sessions/oauth_2.0_provider/01_operator_guide.html#using-an-external-authorization-server) for a complete list of configuration options.
+
 ## Upgrade to Hazelcast 4
 
 Hazelcast is upgraded to v4.1, which comes with a new network protocol that causes compatibility problems with nodes running the previous version of the Hazelcast library in the cluster, leading to the Hazelcast subsystem not starting up on the *newer* node. Therefore, it is required to separate the clusters from each other during *rolling* upgrade scenarios where middleware nodes are updated to the new version and restarted one after the other.
