@@ -104,15 +104,14 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
 
     @Override
     public boolean isSupported(Session session, String shareLink) {
-        ShareTargetPath shareTargetPath = ShareTool.getShareTarget(shareLink);
-        if (null == shareTargetPath) {
+        if (false == ShareTool.isShare(shareLink)) {
             return false;
         }
-        int module = shareTargetPath.getModule();
-        if (Module.INFOSTORE.getFolderConstant() != module) {
+        ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+        if (null == targetPath || (Module.INFOSTORE.getFolderConstant() != targetPath.getModule())) {
             return false;
         }
-        String folder = shareTargetPath.getFolder();
+        String folder = targetPath.getFolder();
         if (Strings.isEmpty(folder)) {
             return false;
         }
