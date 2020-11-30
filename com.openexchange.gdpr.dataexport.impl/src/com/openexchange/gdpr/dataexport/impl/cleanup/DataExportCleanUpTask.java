@@ -121,6 +121,20 @@ public class DataExportCleanUpTask implements Runnable {
         return f;
     }
 
+    private static String formatDuration(long duration) {
+        if (MILLIS_FORMAT_LOCK.tryLock()) {
+            try {
+                return MILLIS_FORMAT.format(duration);
+            } finally {
+                MILLIS_FORMAT_LOCK.unlock();
+            }
+        }
+
+        // Use thread-specific DecimalFormat instance
+        NumberFormat format = newNumberFormat();
+        return format.format(duration);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final DataExportService dataExportService;
@@ -143,82 +157,34 @@ public class DataExportCleanUpTask implements Runnable {
 
     @Override
     public void run() {
+        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (databaseService == null) {
+            LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run...");
+            return;
+        }
+
+        boolean acquired = false;
         Thread currentThread = Thread.currentThread();
         String prevName = currentThread.getName();
         currentThread.setName("DataExportCleanUpTask");
         try {
+            acquired = acquireCleanUpTaskLock(databaseService);
+            if (acquired == false) {
+                // Failed to acquire clean-up lock
+                LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run...");
+                return;
+            }
+
             long start = System.currentTimeMillis();
 
-            Set<Integer> fileStoreIds = null;
-
-            // Check for possible configured file storage identifiers once for context-sets, reseller and server scope
-            try {
-                ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
-                if (configurationService != null) {
-                    Map<String, Object> yamlFiles = configurationService.getYamlInFolder("contextSets");
-                    if (yamlFiles != null) {
-                        for (Map.Entry<String, Object> file : yamlFiles.entrySet()) {
-                            Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
-                            if (content != null) {
-                                for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
-                                    Map<String, Object> configuration = configData.getValue();
-                                    Object oFileStorageId = configuration.get("com.openexchange.gdpr.dataexport.fileStorageId");
-                                    if (oFileStorageId != null) {
-                                        if (fileStoreIds == null) {
-                                            fileStoreIds = new HashSet<>();
-                                        }
-                                        try {
-                                            fileStoreIds.add(Integer.valueOf(oFileStorageId.toString()));
-                                        } catch (NumberFormatException e) {
-                                            // Ignore
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage from context-sets scope", e);
+            Set<Integer> fileStoreIds = determineFileStorageIdsFromAllScopes(databaseService);
+            if (fileStoreIds == null || fileStoreIds.isEmpty() != false) {
+                LOG.info("Found no file storage(s) for data export files. Aborting clean-up run...");
+                return;
             }
 
-            try {
-                ResellerService resellerService = services.getOptionalService(ResellerService.class);
-                if (resellerService != null && resellerService.isEnabled()) {
-                    Set<Integer> resellerFileStoreIds = determineResellerFileStoreIds();
-                    if (resellerFileStoreIds.isEmpty() == false) {
-                        if (fileStoreIds == null) {
-                            fileStoreIds = new HashSet<>();
-                        }
-                        fileStoreIds.addAll(resellerFileStoreIds);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage from reseller scope", e);
-            }
-
-            try {
-                ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
-                int fileStoreId = configurationService == null ? -1 : configurationService.getIntProperty("com.openexchange.gdpr.dataexport.fileStorageId", -1);
-                if (fileStoreId > 0) {
-                    if (fileStoreIds == null) {
-                        fileStoreIds = new HashSet<>();
-                    }
-                    fileStoreIds.add(I(fileStoreId));
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage from server scope", e);
-            }
-
-            // Check for possible configured file storage identifiers once for context and user scope
-            for (Integer representativeContextId : services.getServiceSafe(ContextService.class).getDistinctContextsPerSchema()) {
-                fileStoreIds = addFileStoreIdsForSchema(representativeContextId.intValue(), fileStoreIds);
-            }
-
-            if (fileStoreIds != null) {
-                LOG.info("Going to check {} file storage(s) for orphaned data export files", I(fileStoreIds.size()));
-                fixOrphanedEntries(fileStoreIds);
-            }
+            LOG.info("Going to check {} file storage(s) for orphaned data export files", I(fileStoreIds.size()));
+            fixOrphanedEntries(fileStoreIds);
 
             long duration = System.currentTimeMillis() - start;
             LOG.info("Data export clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
@@ -226,22 +192,11 @@ public class DataExportCleanUpTask implements Runnable {
             ExceptionUtils.handleThrowable(t);
             LOG.warn("Failed to delete orphaned data export files", t);
         } finally {
+            if (acquired) {
+                releaseCleanUpTaskLockSafe(databaseService);
+            }
             currentThread.setName(prevName);
         }
-    }
-
-    private static String formatDuration(long duration) {
-        if (MILLIS_FORMAT_LOCK.tryLock()) {
-            try {
-                return MILLIS_FORMAT.format(duration);
-            } finally {
-                MILLIS_FORMAT_LOCK.unlock();
-            }
-        }
-
-        // Use thread-specific DecimalFormat instance
-        NumberFormat format = newNumberFormat();
-        return format.format(duration);
     }
 
     private void fixOrphanedEntries(Set<Integer> filestoreIds) throws OXException {
@@ -352,13 +307,79 @@ public class DataExportCleanUpTask implements Runnable {
         return retval == null ? Collections.emptyList() : retval;
     }
 
-    private Set<Integer> addFileStoreIdsForSchema(int representativeContextId, Set<Integer> fileStoreIds) {
-        Set<Integer> fids = null;
+    // ----------------------------------- Retrieval of file storage identifiers -----------------------------------------------------------
+
+    private Set<Integer> determineFileStorageIdsFromAllScopes(DatabaseService databaseService) {
+        Set<Integer> fileStoreIds = null;
+
+        // Check for possible configured file storage identifiers for context-sets scope
+        try {
+            ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
+            if (configurationService != null) {
+                Set<Integer> contextSetsFileStoreIds = determineContextSetsFileStoreIds(configurationService);
+                if (contextSetsFileStoreIds.isEmpty() == false) {
+                    fileStoreIds = new HashSet<>();
+                    fileStoreIds.addAll(contextSetsFileStoreIds);
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to retrieve possible identifiers of data export file storage from context-sets scope", e);
+        }
+
+        // Check for possible configured file storage identifiers for reseller scope
+        try {
+            ResellerService resellerService = services.getOptionalService(ResellerService.class);
+            if (resellerService != null && resellerService.isEnabled()) {
+                Set<Integer> resellerFileStoreIds = determineResellerFileStoreIds(databaseService);
+                if (resellerFileStoreIds.isEmpty() == false) {
+                    if (fileStoreIds == null) {
+                        fileStoreIds = new HashSet<>();
+                    }
+                    fileStoreIds.addAll(resellerFileStoreIds);
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to retrieve possible identifiers of data export file storage from reseller scope", e);
+        }
+
+        // Check for possible configured file storage identifiers for server scope
+        try {
+            ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
+            int fileStoreId = configurationService == null ? -1 : configurationService.getIntProperty("com.openexchange.gdpr.dataexport.fileStorageId", -1);
+            if (fileStoreId > 0) {
+                if (fileStoreIds == null) {
+                    fileStoreIds = new HashSet<>();
+                }
+                fileStoreIds.add(I(fileStoreId));
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to retrieve possible identifiers of data export file storage from server scope", e);
+        }
+
+        // Check for possible configured file storage identifiers for context and user scope
+        ContextService contextService = services.getOptionalService(ContextService.class);
+        if (contextService != null) {
+            try {
+                for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
+                    fileStoreIds = addFileStoreIdsForSchema(representativeContextId.intValue(), fileStoreIds, databaseService);
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed to retrieve possible identifiers of data export file storage from context and user scope", e);
+            }
+        }
+
+        return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
+    }
+
+    private Set<Integer> addFileStoreIdsForSchema(int representativeContextId, Set<Integer> fileStoreIds, DatabaseService databaseService) {
+        Set<Integer> fids = fileStoreIds;
 
         try {
-            Set<Integer> fileStoreIdsForSchema = determineFileStoreIdsFor(representativeContextId);
+            Set<Integer> fileStoreIdsForSchema = determineFileStoreIdsFor(representativeContextId, databaseService);
             if (fileStoreIdsForSchema.isEmpty() == false) {
-                fids = fileStoreIds == null ? new HashSet<>() : fileStoreIds;
+                if (fids == null) {
+                    fids = new HashSet<>();
+                }
                 fids.addAll(fileStoreIdsForSchema);
             }
         } catch (Exception e) {
@@ -373,8 +394,34 @@ public class DataExportCleanUpTask implements Runnable {
         return fids;
     }
 
-    private Set<Integer> determineResellerFileStoreIds() throws OXException {
-        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
+    private Set<Integer> determineContextSetsFileStoreIds(ConfigurationService configurationService) {
+        Set<Integer> fileStoreIds = null;
+        Map<String, Object> yamlFiles = configurationService.getYamlInFolder("contextSets");
+        if (yamlFiles != null) {
+            for (Map.Entry<String, Object> file : yamlFiles.entrySet()) {
+                Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+                if (content != null) {
+                    for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
+                        Map<String, Object> configuration = configData.getValue();
+                        Object oFileStorageId = configuration.get("com.openexchange.gdpr.dataexport.fileStorageId");
+                        if (oFileStorageId != null) {
+                            if (fileStoreIds == null) {
+                                fileStoreIds = new HashSet<>();
+                            }
+                            try {
+                                fileStoreIds.add(Integer.valueOf(oFileStorageId.toString()));
+                            } catch (NumberFormatException e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
+    }
+
+    private Set<Integer> determineResellerFileStoreIds(DatabaseService databaseService) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Connection con = databaseService.getReadOnly();
@@ -407,8 +454,7 @@ public class DataExportCleanUpTask implements Runnable {
         }
     }
 
-    private Set<Integer> determineFileStoreIdsFor(int representativeContextId) throws OXException {
-        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
+    private Set<Integer> determineFileStoreIdsFor(int representativeContextId, DatabaseService databaseService) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Connection con = databaseService.getReadOnly(representativeContextId);
@@ -481,7 +527,58 @@ public class DataExportCleanUpTask implements Runnable {
         }
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------ Locking stuff ----------------------------------------------------------------------
+
+    private static final int LOCK_ID = 1496146671;
+
+    private boolean acquireCleanUpTaskLock(DatabaseService databaseService) throws OXException {
+        PreparedStatement stmt = null;
+        Connection writeCon = databaseService.getWritable();
+        try {
+            stmt = writeCon.prepareStatement("INSERT INTO reason_text (id, text) VALUES (?, ?)");
+            stmt.setInt(1, LOCK_ID);
+            stmt.setString(2, "LOCKED");
+            try {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
+            }
+            return true;
+        } catch (SQLException e) {
+            throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            databaseService.backWritable(writeCon);
+        }
+    }
+
+    private void releaseCleanUpTaskLockSafe(DatabaseService databaseService) {
+        try {
+            releaseCleanUpTaskLock(databaseService);
+        } catch (Exception e) {
+            LOG.warn("Failed to release clean-up lock for data export files", e);
+        }
+    }
+
+    private boolean releaseCleanUpTaskLock(DatabaseService databaseService) throws OXException {
+        PreparedStatement stmt = null;
+        Connection writeCon = databaseService.getWritable();
+        try {
+            stmt = writeCon.prepareStatement("DELETE FROM reason_text WHERE id=?");
+            stmt.setInt(1, LOCK_ID);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            databaseService.backWritable(writeCon);
+        }
+    }
+
+    // -------------------------------------------------- Helper class ---------------------------------------------------------------------
 
     private static class FileStorageAndId {
 
