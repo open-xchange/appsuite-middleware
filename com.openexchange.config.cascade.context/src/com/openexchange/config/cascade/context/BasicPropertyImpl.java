@@ -195,7 +195,7 @@ final class BasicPropertyImpl implements BasicProperty {
         String value = values.get(0);
         int pos = value.indexOf(';');
         if (pos < 0) {
-            value = value.replaceAll("%3B", ";").replace("%25", "%");
+            value = value.replace("%3B", ";").replace("%25", "%");
             this.value = ConvertUtils.loadConvert(value);
             // Assume "protected=true" by default
             metadata = new HashMap<String, String>(2);
@@ -206,7 +206,7 @@ final class BasicPropertyImpl implements BasicProperty {
 
         // Parameters available
         String params = value.substring(pos).trim();
-        value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
+        value = value.substring(0, pos).trim().replace("%3B", ";").replace("%25", "%");
         this.value = ConvertUtils.loadConvert(value);
         metadata = new LinkedHashMap<String, String>(2);
         pos = 0;
