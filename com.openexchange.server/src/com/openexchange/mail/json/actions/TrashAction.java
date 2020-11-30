@@ -59,6 +59,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -68,10 +69,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageEnhancedDeletion;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -79,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class TrashAction extends AbstractMailAction {
 
     private final JSONArray emptyJsonArray;

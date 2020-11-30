@@ -62,6 +62,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
@@ -76,13 +77,11 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -92,7 +91,7 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class SearchAction extends AbstractMailAction {
 
     /**

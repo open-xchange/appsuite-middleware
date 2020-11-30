@@ -63,11 +63,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AttendeesMapping;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -80,7 +78,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 @RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdateAttendeeAction extends ChronosAction {
 

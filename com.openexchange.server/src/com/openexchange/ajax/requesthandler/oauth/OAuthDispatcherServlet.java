@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
@@ -189,7 +190,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         }
 
         AJAXActionService actionService = factory.createActionService(action);
-        if (actionService == null || !actionService.getClass().isAnnotationPresent(OAuthAction.class)) {
+        if (actionService == null || (!actionService.getClass().isAnnotationPresent(OAuthAction.class) && !actionService.getClass().isAnnotationPresent(RestrictedAction.class))) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, module);
         }
 

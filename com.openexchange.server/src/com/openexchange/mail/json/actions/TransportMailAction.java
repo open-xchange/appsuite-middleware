@@ -57,13 +57,13 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -72,7 +72,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.MailAccounts;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -83,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class TransportMailAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG =

@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -67,10 +68,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.compose.share.ShareReference;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -89,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public class ResolveShareReference extends AbstractMailAction {
 
     /**

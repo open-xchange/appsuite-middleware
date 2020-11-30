@@ -54,13 +54,12 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -68,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = AppointmentAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class DeleteAction extends AppointmentAction {
 
     /**

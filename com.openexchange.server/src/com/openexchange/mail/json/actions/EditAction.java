@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
@@ -68,13 +69,11 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -85,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class EditAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG =

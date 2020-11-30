@@ -55,14 +55,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -74,7 +72,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 @RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends IDBasedContactAction {
 

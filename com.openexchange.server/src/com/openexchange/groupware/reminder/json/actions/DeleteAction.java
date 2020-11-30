@@ -70,8 +70,6 @@ import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
-import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -80,7 +78,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 @RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class DeleteAction extends AbstractReminderAction {
 

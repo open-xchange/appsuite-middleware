@@ -56,14 +56,13 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
-import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -73,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAccountAction.MODULE, type = RestrictedAction.Type.READ)
 public final class AllAction extends AbstractMailAccountAction {
 
     public static final String ACTION = AJAXServlet.ACTION_ALL;

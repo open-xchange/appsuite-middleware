@@ -74,6 +74,8 @@ public abstract class AbstractConfigAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigAction.class);
 
+    protected static final String MODULE = "userconfig";
+
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     // ------------------------------------------------------------------------------------------------------------------

@@ -75,7 +75,6 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -86,7 +85,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
 @DispatcherNotes(enqueueable = true)
 @RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class UpdateAction extends AbstractFolderAction implements EnqueuableAJAXActionService {

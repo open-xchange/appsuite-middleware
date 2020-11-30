@@ -53,11 +53,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -66,12 +65,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
 public class ListUserAction extends ContactAction {
 
     /**
      * Initializes a new {@link ListUserAction}.
-     * 
+     *
      * @param serviceLookup
      */
     public ListUserAction(ServiceLookup serviceLookup) {

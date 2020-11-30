@@ -65,6 +65,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthModule
 public class ConfigActionFactory implements AJAXActionServiceFactory {
 
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_userconfig";
 
     private final Map<String, AJAXActionService> actions;

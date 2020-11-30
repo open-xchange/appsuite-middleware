@@ -66,6 +66,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.zip.Buffer;
 import com.openexchange.ajax.zip.ZipArchiveOutputStreamProvider;
 import com.openexchange.ajax.zip.ZipEntryAdder;
@@ -81,10 +82,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -93,7 +92,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
     /**

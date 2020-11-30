@@ -81,6 +81,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.capabilities.CapabilityService;
@@ -94,7 +95,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.osgi.MailJSONActivator;
@@ -105,7 +105,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
@@ -124,7 +123,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetAction extends AbstractMailAction {
 
     /** The logger constant */

@@ -57,13 +57,12 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 
 
@@ -72,7 +71,7 @@ import com.openexchange.tasks.json.TaskRequest;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class CopyAction extends TaskAction {
 
     public CopyAction(final ServiceLookup services) {

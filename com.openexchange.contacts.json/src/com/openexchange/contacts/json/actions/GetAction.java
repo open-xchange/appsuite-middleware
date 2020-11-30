@@ -51,15 +51,14 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -69,12 +68,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
 public class GetAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public GetAction(final ServiceLookup serviceLookup) {

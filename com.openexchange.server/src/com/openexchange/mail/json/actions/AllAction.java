@@ -60,6 +60,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
@@ -73,7 +74,6 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
@@ -83,7 +83,6 @@ import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -96,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     /**

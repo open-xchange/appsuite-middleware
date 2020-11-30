@@ -56,10 +56,8 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -70,7 +68,6 @@ import com.openexchange.server.ServiceLookup;
  */
 @RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 @DispatcherNotes(preferStream = true)
-@OAuthAction(MailActionFactory.OAUTH_WRITE_SCOPE)
 public class SendDataAction extends AbstractMailAction {
 
     private final NewAction delegate;

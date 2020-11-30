@@ -62,19 +62,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -87,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+@RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.READ)
 public class FreeBusyAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_FIELDS, PARAM_MASK_ID);

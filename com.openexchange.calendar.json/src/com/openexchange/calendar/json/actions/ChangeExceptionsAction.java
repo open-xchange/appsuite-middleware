@@ -53,19 +53,18 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 /**
  * {@link ChangeExceptionsAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-@OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AppointmentAction.MODULE, type = RestrictedAction.Type.READ)
 public class ChangeExceptionsAction extends AppointmentAction {
 
     /**

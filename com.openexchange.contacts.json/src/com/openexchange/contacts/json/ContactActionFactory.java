@@ -88,11 +88,13 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     /**
      * The read-only scope for OAuth requests
      */
+    @Deprecated
     public static final String OAUTH_READ_SCOPE = "read_contacts";
 
     /**
      * The writable scope for OAuth requests
      */
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_contacts";
 
     private final Map<String, ContactAction> actions;

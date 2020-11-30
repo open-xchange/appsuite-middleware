@@ -60,7 +60,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.json.action.ChronosAction;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -68,7 +67,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -78,7 +76,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 @RestrictedAction(type = RestrictedAction.Type.READ, module = ProbeAction.MODULE)
 public class ProbeAction extends ChronosAction {
 

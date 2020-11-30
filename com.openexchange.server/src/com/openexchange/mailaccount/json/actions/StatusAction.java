@@ -58,6 +58,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -72,8 +73,6 @@ import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
-import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -82,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAccountAction.MODULE, type = RestrictedAction.Type.READ)
 public final class StatusAction extends AbstractValidateMailAccountAction implements MailAccountFields {
 
     public static final String ACTION = "status";
@@ -136,7 +135,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
                 throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             }
         }
-        
+
         Status status = determineAccountStatus(id, true, storageService, warnings, session);
         JSONObject jStatus = serialize(status, session.getUser().getLocale());
         return new AJAXRequestResult(new JSONObject(2).putSafe(Integer.toString(id), jStatus), "json").addWarnings(warnings);
@@ -307,7 +306,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
     /**
      * Serializes an account status to JSON.
-     * 
+     *
      * @param status The status to serialize
      * @param locale The locale to use for translations
      * @return The serialized status as JSON object
@@ -324,7 +323,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
     /**
      * Optionally gets an error status for an encountered exception when trying to access the mail account.
-     * 
+     *
      * @param account The mail account being accessed
      * @param error The error that occurred
      * @return An appropriate error status

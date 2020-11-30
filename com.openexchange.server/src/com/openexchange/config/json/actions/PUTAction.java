@@ -58,9 +58,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.json.ConfigAJAXRequest;
-import com.openexchange.config.json.ConfigActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -71,7 +71,6 @@ import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -82,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = AbstractConfigAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class PUTAction extends AbstractConfigAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PUTAction.class);

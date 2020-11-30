@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -63,10 +64,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolderStatus;
-import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -74,7 +73,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
  */
-@OAuthAction(MailActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public class ExamineAction extends AbstractMailAction {
 
     /**

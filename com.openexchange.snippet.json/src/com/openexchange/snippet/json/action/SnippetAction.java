@@ -79,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class SnippetAction implements AJAXActionService {
 
+    protected static final String MODULE = "userconfig";
+
     /**
      * Splits a char sequence by comma-separated (<code>','</code>) values.
      */

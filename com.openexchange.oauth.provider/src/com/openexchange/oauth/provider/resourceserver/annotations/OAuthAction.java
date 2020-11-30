@@ -79,6 +79,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
+@Deprecated
 public @interface OAuthAction {
 
     /**
