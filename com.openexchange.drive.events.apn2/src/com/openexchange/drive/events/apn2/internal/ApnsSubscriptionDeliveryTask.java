@@ -111,7 +111,7 @@ public class ApnsSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
             }
         }
         builder.withPriority(DeliveryPriority.CONSERVE_POWER);
-        builder.withPushType(PushType.BACKGROUND);
+        builder.withPushType(PushType.FILEPROVIDER);
         return builder.build();
     }
 
