@@ -65,6 +65,8 @@ import ezvcard.property.Organization;
  */
 public class OrganizationMapping extends AbstractMapping {
 
+    private static final String EMPTY_STRING = "";
+
     /**
      * Initializes a new {@link OrganizationMapping}.
      */
@@ -82,8 +84,8 @@ public class OrganizationMapping extends AbstractMapping {
             } else {
                 property.getValues().clear();
             }
-            property.getValues().add(contact.getCompany());
-            property.getValues().add(contact.getDepartment());
+            property.getValues().add(contact.containsCompany() ? contact.getCompany() : EMPTY_STRING);
+            property.getValues().add(contact.containsDepartment() ? contact.getDepartment() : EMPTY_STRING);
             if (contact.containsBranches() && Strings.isNotEmpty(contact.getBranches())) {
                 for (String branch : Strings.splitByComma(contact.getBranches())) {
                     property.getValues().add(branch);
