@@ -74,6 +74,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
+import com.openexchange.xml.util.XMLUtils;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
@@ -125,7 +126,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                 xmlBuilder.append("  </parsers>").append(Strings.getLineSeparator());
                 xmlBuilder.append("</properties>").append(Strings.getLineSeparator());
 
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory factory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 document = builder.parse(new InputSource(new StringReader( xmlBuilder.toString())));
             } catch (RuntimeException e) {

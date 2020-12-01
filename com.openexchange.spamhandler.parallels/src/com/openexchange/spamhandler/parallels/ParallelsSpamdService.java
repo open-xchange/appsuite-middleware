@@ -250,8 +250,7 @@ public class ParallelsSpamdService implements SpamdService {
 
             // check if contains a "faultcode" part, if no, parse for data
             if (!xml_rpc_response.contains("<name>faultCode</name>")){
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                dbf = XMLUtils.safeDbf(dbf);
+                DocumentBuilderFactory dbf = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
                 final DocumentBuilder docBuilder = dbf.newDocumentBuilder();
                 final Document doc = docBuilder.parse (new ByteArrayInputStream(xml_rpc_response.getBytes(StandardCharsets.UTF_8)));
 
