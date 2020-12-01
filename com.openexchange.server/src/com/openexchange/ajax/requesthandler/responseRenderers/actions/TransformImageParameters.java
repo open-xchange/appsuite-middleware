@@ -94,6 +94,20 @@ public class TransformImageParameters extends ImageFormat {
     }
 
     /**
+     * @return
+     */
+    public String getICCacheKey() {
+        return m_icCacheKey;
+    }
+
+    /**
+     * @param icCacheKey
+     */
+    public void setICCacheKey(String icCacheKey) {
+        m_icCacheKey = icCacheKey;
+    }
+
+    /**
      * Gets the m_cropX
      *
      * @return The m_cropX
@@ -199,6 +213,8 @@ public class TransformImageParameters extends ImageFormat {
     // - Members ---------------------------------------------------------------
 
     private String m_imageMimeType = "image/jpeg";
+
+    private String m_icCacheKey = null;
 
     private int m_cropX = 0;
 
