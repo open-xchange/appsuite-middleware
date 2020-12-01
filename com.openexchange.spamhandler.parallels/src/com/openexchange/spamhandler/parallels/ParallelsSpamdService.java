@@ -251,6 +251,12 @@ public class ParallelsSpamdService implements SpamdService {
             if (!xml_rpc_response.contains("<name>faultCode</name>")){
 
                 final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+                /*
+                 * Disable DTD parsing to prevent XXE attacks
+                 * https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing
+                 * https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+                 */
+                docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
                 final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
                 final Document doc = docBuilder.parse (new ByteArrayInputStream(xml_rpc_response.getBytes(StandardCharsets.UTF_8)));
 
