@@ -100,7 +100,10 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(GoogleDriveFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(GoogleDriveFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(GoogleDriveFolderAccess.class, capability);
     }
 
     /**

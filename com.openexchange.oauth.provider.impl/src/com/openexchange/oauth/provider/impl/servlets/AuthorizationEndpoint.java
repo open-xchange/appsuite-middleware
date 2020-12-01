@@ -80,8 +80,7 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginExceptionMessages;
 import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -365,8 +364,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             User user = serverSession.getUser();
 
             // Check if OAuth is deactivated for this user
-            ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), context.getContextId());
-            if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue() || user.isGuest()) {
+            if (!services.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(user.getId(), context.getContextId(), OAuthProviderProperties.ENABLED) || user.isGuest()) {
                 return URLHelper.getErrorRedirectLocation(
                     authRequest.getRedirectURI(),
                     "access_denied",

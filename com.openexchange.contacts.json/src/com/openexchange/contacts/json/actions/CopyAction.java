@@ -53,8 +53,8 @@ import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -66,7 +66,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -82,12 +81,12 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class CopyAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link CopyAction}.
-     * 
+     *
      * @param serviceLookup The service lookup to use
      */
     public CopyAction(final ServiceLookup serviceLookup) {

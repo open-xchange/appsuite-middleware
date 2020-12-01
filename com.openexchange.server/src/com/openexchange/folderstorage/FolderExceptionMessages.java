@@ -97,8 +97,8 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Failed to delete all folders
     public static final String FOLDER_DELETION_FAILED_MSG_DISPLAY = "Failed to delete all folders";
 
-    // The folder was not updated due to possible data loss. Please review the warnings for details.
-    public static final String FOLDER_UPDATE_ABORTED_MSG_DISPLAY = "The folder was not updated due to possible data loss. Please review the warnings for details.";
+    // The folder was not updated. Please review the warnings for details.
+    public static final String FOLDER_UPDATE_ABORTED_MSG_DISPLAY = "The folder was not updated. Please review the warnings for details.";
 
     // Folder name contains not allowed characters: \"%1$s\"
     public static final String ILLEGAL_CHARACTERS_MSG = "Folder name contains illegal characters: \"%1$s\"";
@@ -108,6 +108,24 @@ public class FolderExceptionMessages implements LocalizableStrings {
 
     // User selected one or more permissions that cannot be applied to target folder; e.g. selected guest permission for a mail folder.
     public static final String INVALID_PERMISSIONS_MSG = "The chosen permission(s) cannot be set";
+
+    // With moving the shared folder \"%1$s\" people will lose access.
+    public static final String MOVE_TO_NOT_SHARED_WARNING = "With moving the shared folder \"%1$s\" people will lose access.";
+
+    // This folder  will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+    public static final String MOVE_TO_ANOTHER_SHARED_WARNING = "This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.";
+
+    // This folder will be shared with everyone who has access to \"%3$s\.
+    public static final String MOVE_TO_SHARED_WARNING = "This folder will be shared with everyone who has access to \"%3$s\".";
+
+    // You are moving a folder that contains shares. People will lose access.
+    public static final String MOVE_SHARED_SUBFOLDERS_TO_NOT_SHARED_WARNING = "You are moving a folder that contains shares. People will lose access.";
+
+    // This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+    public static final String MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING = "This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.";
+
+    // User tries to search folder by folder name, but that functionality is not supported
+    public static final String NO_SEARCH_SUPPORT_MSG = "Searching folder by folder name is not supported";
 
     /**
      * Initializes a new {@link FolderExceptionMessages}

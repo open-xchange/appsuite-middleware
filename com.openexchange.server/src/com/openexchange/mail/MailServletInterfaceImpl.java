@@ -3101,16 +3101,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initConnection(int accountId) throws OXException {
-        if (!init) {
-            mailAccess = initMailAccess(accountId);
-            mailConfig = mailAccess.getMailConfig();
-            this.accountId = accountId;
-            init = true;
-        } else if (accountId != mailAccess.getAccountId()) {
-            mailAccess.close(true);
-            mailAccess = initMailAccess(accountId);
-            mailConfig = mailAccess.getMailConfig();
-            this.accountId = accountId;
+        if (session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN) != null && MailAccount.DEFAULT_ID != accountId) {
+            throw OAuthMailErrorCodes.NO_ACCOUNT_ACCESS.create();
+        }
+        try {
+            if (!init) {
+                mailAccess = initMailAccess(accountId);
+                mailConfig = mailAccess.getMailConfig();
+                this.accountId = accountId;
+                init = true;
+            } else if (accountId != mailAccess.getAccountId()) {
+                mailAccess.close(true);
+                mailAccess = initMailAccess(accountId);
+                mailConfig = mailAccess.getMailConfig();
+                this.accountId = accountId;
+            }
+        } catch (OXException e) {
+            // Throw dedicated 403 oauth error in case the mail is not accessible. E.g. because master auth is not enabled
+            if (MailExceptionCode.MISSING_CONNECT_PARAM.equals(e) && session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN) != null && e.getArgument(MailConfig.MISSING_SESSION_PASSWORD) != null) {
+                throw OAuthMailErrorCodes.NO_ACCOUNT_ACCESS.create(e);
+            }
+            throw e;
         }
         return mailAccess;
     }

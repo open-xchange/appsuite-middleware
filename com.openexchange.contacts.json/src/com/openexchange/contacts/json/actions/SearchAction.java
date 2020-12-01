@@ -59,15 +59,14 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.ContactsSearchObject;
 import com.openexchange.groupware.search.ContactsSearchObject.Range;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -77,7 +76,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
 public class SearchAction extends IDBasedContactAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
@@ -86,7 +85,7 @@ public class SearchAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link SearchAction}.
-     * 
+     *
      * @param serviceLookup
      */
     public SearchAction(ServiceLookup serviceLookup) {

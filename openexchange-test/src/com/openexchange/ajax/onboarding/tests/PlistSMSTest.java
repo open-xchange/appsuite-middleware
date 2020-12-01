@@ -50,7 +50,6 @@
 package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertNotNull;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -79,7 +78,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     public void testExecute() throws Exception {
         String jsonString = "{\"sms\":\"+49276183850\"}";
         for (String id : SCENARIOS) {
-            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+            CommonResponse response = onboardingApi.executeClientOnboarding(id, "sms", jsonString);
 
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
@@ -97,7 +96,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         String jsonString = "{\"sms\":\"\"}";
 
         String id = SCENARIOS[0];
-        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+        CommonResponse response = onboardingApi.executeClientOnboarding(id, "sms", jsonString);
 
         // Expecting an invalid number exception
         checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
@@ -108,13 +107,13 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         String jsonString = "{\"sms\":\"1234\"}";
 
         String id = SCENARIOS[0];
-        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+        CommonResponse response = onboardingApi.executeClientOnboarding(id, "sms", jsonString);
 
         // Expecting an invalid number exception
         checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
 
         jsonString = "{\"sms\":\"abcde\"}";
-        response = onboardingApi.executeClientOnboarding(getSessionId(), id, "sms", jsonString);
+        response = onboardingApi.executeClientOnboarding(id, "sms", jsonString);
         // Expecting an invalid number exception
         checkException(response.getCode(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER);
     }
@@ -135,7 +134,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
 
 
-    public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getURL(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException {
         BaseEncoding encoder = BaseEncoding.base64().omitPadding();
         StringBuilder url = new StringBuilder();
 
@@ -149,7 +148,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         return url.toString();
     }
 
-    private static String toHash(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static String toHash(int userId, int contextId, String scenario, String device) throws NoSuchAlgorithmException {
         String secret = UID;
         String challenge = new StringBuilder(128).append(userId).append(contextId).append(device).append(scenario).append(secret).toString();
 

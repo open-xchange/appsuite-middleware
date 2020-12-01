@@ -273,7 +273,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix, true);
+        final OAuthDispatcherServlet oAuthDispatcherServletWithoutPrefix = new OAuthDispatcherServlet(this, prefix, false);
         trackService(OAuthResourceService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
@@ -313,9 +314,11 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (null == servlets.putIfAbsent(module, PRESENT)) {
-                    registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        registerSessionServlet(prefix + module, oAuthDispatcherServletWithoutPrefix);
                         registerSessionServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module, oAuthDispatcherServlet);
+                    } else {
+                        registerSessionServlet(prefix + module, dispatcherServlet);
                     }
                 }
             }

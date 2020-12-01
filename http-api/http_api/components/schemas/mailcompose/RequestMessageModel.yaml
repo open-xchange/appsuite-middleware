@@ -2,7 +2,7 @@ type: object
 properties:
   id:
     type: string
-    description: The identifier
+    description: An identifier
   from:
     $ref: Address.yaml
   to:
@@ -53,18 +53,9 @@ properties:
     $ref: SharedAttachments.yaml
   security:
     $ref: Security.yaml
-  customHeaders:
-    type: object
-    additionalProperties:
-      type: string
-  mailPath:
-    type: object
-    description: The path to the draft message reflecting composition space
-    properties:
-      id:
-        type: string
-        description: The identifier of the draft message
-      folderId:
-        type: string
-        description: The identifier of the folder in which the draft message resides
-    
+  claim:
+    description: |
+                 A unique client token to prevent conflicts due to concurrent editing. Must be a 16-character string consisting of [a-zA-Z0-9] only.
+                 If set, any request with a different token to check against will fail with MSGCS-0010. Note that requests with clientToken as query
+                 parameter will always succeed for backwards-compatibility!
+    type: string

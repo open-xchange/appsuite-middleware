@@ -120,6 +120,21 @@ public final class ResponseParser {
                 response.setException(exception);
             }
         }
+        if (json.has(ResponseFields.WARNINGS)) {
+            JSONObject warningObject = json.optJSONObject(ResponseFields.WARNINGS);
+            JSONArray warningArray = json.optJSONArray(ResponseFields.WARNINGS);
+            if (warningObject != null) {
+                OXException warning = parseException(warningObject);
+                if (warning != null)
+                    response.addWarning(warning);
+            } else if (warningArray != null) {
+                for (Object item : warningArray) {
+                    OXException warning = parseException((JSONObject) item);
+                    if (warning != null)
+                        response.addWarning(warning);
+                }
+            }
+        }
     }
 
     /**

@@ -77,7 +77,7 @@ public class Create extends CreateCore {
     /**
      * Initializes a new {@link Change}.
      */
-    private Create() {
+    public Create() {
         super();
     }
 
@@ -90,7 +90,7 @@ public class Create extends CreateCore {
      *
      * @param args the command line arguments
      */
-    private void execute(String[] args) {
+    public void execute(String[] args) {
         commonfunctions(new AdminParser("createcontext"), args);
     }
 

@@ -3,9 +3,10 @@
     operationId: getUser
     tags:
       - User
-    summary: Gets a user.
+    summary: Gets a user
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: >-

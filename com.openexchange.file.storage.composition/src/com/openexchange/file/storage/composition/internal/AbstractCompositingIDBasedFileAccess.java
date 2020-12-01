@@ -59,6 +59,7 @@ import static com.openexchange.file.storage.composition.internal.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +82,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -107,6 +109,7 @@ import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageMultiMove;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageRestoringFileAccess;
@@ -960,6 +963,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              * Special handling for move to different folder
              */
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
+
+            warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, sourceIDTuple, fileAccess, getFileMetaData(fileAccess, sourceIDTuple)));
+            if (0 < warnings.size()) {
+                addWarnings(warnings);
+                if (false == ignoreWarnings) {
+                    return null;
+                }
+            }
+
             document.setFolderId(sourceIDTuple.getFolder());
             document.setId(sourceIDTuple.getId());
             IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
@@ -1015,6 +1027,60 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     /**
+     * Gets the file meta data for a given file id tuple.
+     *
+     * @param fileAccess The file access.
+     * @param sourceIDTuple The id tuple of the wanted file.
+     * @return The file meta data.
+     * @throws OXException
+     */
+    private File getFileMetaData(FileStorageFileAccess fileAccess, final IDTuple sourceIDTuple) throws OXException {
+        SearchIterator<File> fileMetaDataResult = null;
+        try {
+            fileMetaDataResult = fileAccess.getDocuments(Arrays.asList(sourceIDTuple), Arrays.asList(Field.ID, Field.FOLDER_ID, Field.FILENAME, Field.OBJECT_PERMISSIONS)).results();
+            return fileMetaDataResult.hasNext() ? fileMetaDataResult.next() : null;
+        } finally {
+            if (fileMetaDataResult != null) {
+                fileMetaDataResult.close();
+            }
+        }
+    }
+
+    /**
+     * 
+     * Collects any possible warnings that might occur when moving a file.
+     *
+     * @param sourceFileID The file id of the file to move.
+     * @param targetFolderID The id of the target folder.
+     * @param sourceIDTuple The id tuple of the source file (optional).
+     * @param fileAccess The FileStorageFileAccess of the source file.
+     * @param file The file to move.
+     * @return The warnings, or an empty list if there are none.
+     * @throws OXException
+     */
+    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, final FolderID targetFolderID, final IDTuple sourceIDTuple, FileStorageFileAccess fileAccess, File file) throws OXException {
+        IDTuple fileIdTuple = sourceIDTuple;
+        if (fileIdTuple == null) {
+            fileIdTuple = new IDTuple();
+            fileIdTuple.setId(sourceFileID.getFileId());
+            fileIdTuple.setFolder(sourceFileID.getFolderId());
+        }
+
+        FileStorageFolder sourceFolder = fileAccess.getAccountAccess().getFolderAccess().getFolder(sourceFileID.getFolderId());
+        List<FileStoragePermission> sourceFolderPermissions = sourceFolder.getPermissions();
+
+        FileStorageFileAccess destFolderFileAccess = getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId());
+        FileStorageFolder destFolder = destFolderFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
+        List<FileStoragePermission> destFolderPermissions = destFolder.getPermissions();
+
+        return checkFileMoveForPermissionChangeWarnings(sourceFileID.toUniqueID(), file, sourceFileID.getFolderId(), sourceFolderPermissions, targetFolderID.getFolderId(), destFolderPermissions, fileAccess, destFolderFileAccess);
+    }
+
+    private String getFolderPath(FileStorageFileAccess fileAccess, final String folderId) throws OXException {
+        return getPathString(fileAccess.getAccountAccess().getFolderAccess().getPath2DefaultFolder(folderId));
+    }
+
+    /**
      * Moves a file to a folder located in a different file storage.
      *
      * @param document The document to move
@@ -1041,7 +1107,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * full move, check for potential data loss
              */
-            List<OXException> warnings = collectWarningsBeforeMove(id, sourceFile, folderId, modifiedColumns);
+            List<OXException> warnings = collectWarningsBeforeMoveToAnotherAccount(id, sourceFile, folderId, modifiedColumns, sourceAccess);
             if (0 < warnings.size()) {
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
@@ -1289,9 +1355,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
         });
     }
-
+    
     @Override
-    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded) throws OXException {
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded, boolean ignoreWarnings) throws OXException {
         final FolderID destinationID;
         if (null == destFolderId) {
             throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
@@ -1304,12 +1370,24 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FileStorageFileAccess fileAccess = getFileAccess(destService, destAccountId);
         if (FileStorageTools.supports(fileAccess, FileStorageCapability.MULTI_MOVE)) {
             useMultiMove = true;
+
             for (int i = sourceIds.size(); useMultiMove && i-- > 0;) {
                 FileID sourceID = new FileID(sourceIds.get(i));
                 useMultiMove = (sourceID.getService().equals(destService) && sourceID.getAccountId().equals(destAccountId));
             }
 
             if (useMultiMove) {
+                /*
+                 * check for file move warnings
+                 */
+                List<OXException> warnings = collectWarningsBeforeMultiMove(sourceIds, destFolderId, destinationID);
+                if (0 < warnings.size()) {
+                    addWarnings(warnings);
+                    if (ignoreWarnings == false) {
+                        return sourceIds;
+                    }
+                }
+
                 /*
                  * check for available listeners
                  */
@@ -1355,6 +1433,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
                     FileID newFileID = new FileID(destService, destAccountId, destFolderId, new FileID(sourceId).getFileId());
                     FolderID newFolderID = new FolderID(destService, destAccountId, destFolderId);
+                    // @formatter:off
                     postEvent(FileStorageEventHelper.buildDeleteEvent(
                         session,
                         sourceFileID.getService(),
@@ -1369,8 +1448,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         newFileID.getAccountId(),
                         newFolderID.toUniqueID(),
                         newFileID.toUniqueID(),
-                        null));
-                }
+                        null)); 
+                    // @formatter:on
+                    }
                 return conflicted;
             }
         }
@@ -1382,9 +1462,63 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             file.setFolderId(destFolderId);
 
             // Save file metadata without binary payload
-            saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE);
+            saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE, Arrays.asList(Field.ID, Field.FOLDER_ID), ignoreWarnings, false);
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * 
+     * Collects any possible warnings that might occur when moving multiple files to another folder via multimove.
+     *
+     * @param sourceIds An array with the ids of the files to move.
+     * @param destFolderId The id of the new parent folder.
+     * @param destinationID The FolderID of the new parent folder.
+     * @return The warnings, or an empty list if there are none.
+     * @throws OXException
+     */
+    private List<OXException> collectWarningsBeforeMultiMove(final List<String> sourceIds, String destFolderId, final FolderID destinationID) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        FileStorageFileAccess destFileAccess = getFileAccess(destinationID);
+        FolderID targetFolderID = new FolderID(destFolderId);
+        FileStorageFolder targetFolder = destFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
+        List<FileStoragePermission> destPermissions = targetFolder.getPermissions();
+
+        List<String> potentialConflictings = new ArrayList<String>();
+        String lastSourceFolderId = "-1";
+        FileStorageFolder sourceFolder = null;
+        for (String sourceId : sourceIds) {
+            FileID sourceID = new FileID(sourceId);
+            final String sourceService = sourceID.getService();
+            final String sourceAccountId = sourceID.getAccountId();
+            FileStorageFileAccess sourceFileAccess = getFileAccess(sourceService, sourceAccountId);
+
+            if (lastSourceFolderId.equals(sourceID.getFolderId()) == false || sourceFolder == null) {
+                FolderID sourceFolderID = new FolderID(sourceService, sourceAccountId, sourceID.getFolderId());
+                sourceFolder = getFolderAccess(sourceFolderID).getFolder(sourceFolderID.getFolderId());
+            }
+            lastSourceFolderId = sourceID.getFolderId();
+            List<FileStoragePermission> sourcePermissions = sourceFolder.getPermissions();
+
+            IDTuple fileIdTuple = new IDTuple();
+            fileIdTuple.setId(sourceID.getFileId());
+            fileIdTuple.setFolder(sourceID.getFolderId());
+            SearchIterator<File> fileMetaDataResult = sourceFileAccess.getDocuments(Arrays.asList(fileIdTuple), Arrays.asList(Field.ID, Field.FOLDER_ID, Field.FILENAME, Field.OBJECT_PERMISSIONS)).results();
+            File fileMetaData = null;
+            if (fileMetaDataResult.hasNext()) {
+                fileMetaData = fileMetaDataResult.next();
+            }
+            fileMetaDataResult.close();
+
+            potentialConflictings.add(sourceId);
+            warnings.addAll(checkFileMoveForPermissionChangeWarnings(sourceId, fileMetaData, sourceID.getFolderId(), sourcePermissions, destFolderId, destPermissions, sourceFileAccess, destFileAccess));
+        }
+        return warnings;
+    }
+
+    @Override
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded) throws OXException {
+        return move(sourceIds, sequenceNumber, destFolderId, adjustFilenamesAsNeeded, false);
     }
 
     @Override
@@ -1992,9 +2126,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @param sourceFile The source file
      * @param targetFolderID The identifier of the target folder
      * @param modifiedColumns A list of fields that are going to be modified during the copy operation, or <code>null</code> if all fields are copied
+     * @param sourceFileAccess The FileStorageFileAccess of the source file.
      * @return The warnings, or an empty list if there are none
      */
-    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns) throws OXException {
+    private List<OXException> collectWarningsBeforeMoveToAnotherAccount(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns, FileStorageFileAccess sourceFileAccess) throws OXException {
         List<OXException> warnings = new ArrayList<>(6);
         if (Strings.isNotEmpty(sourceFile.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION))) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
@@ -2020,6 +2155,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             warnings.add(FileStorageExceptionCodes.LOSS_OF_FILE_SHARES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
+
+        warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, null, sourceFileAccess, sourceFile));
         return warnings;
     }
 
@@ -2048,6 +2185,115 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(getAccountName(this, fileAccess), file.getFolderId(), I(session.getContextId())));
         }
         return warnings;
+    }
+
+    /**
+     * 
+     * Checks if permissions change when moving a file and adds warnings in this case.
+     *
+     * @param fileId The id of the file to move.
+     * @param file The file meta data of the file to move.
+     * @param sourceFolderId The id of the original parent folder.
+     * @param sourceFolderPermissions The permissions of the original parent folder.
+     * @param destFolderId The id of the new parent folder.
+     * @param destFolderPermissions The permissions of the new parent folder.
+     * @param sourceFolderFileAccess The FileStorageFileAccess of the original parent folder.
+     * @param destFolderFileAccess The FileStorageFileAccess of the new parent folder.
+     * @return A list with warnings.
+     * @throws OXException
+     */
+    private List<OXException> checkFileMoveForPermissionChangeWarnings(String fileId, File file, String sourceFolderId, List<FileStoragePermission> sourceFolderPermissions, String destFolderId, List<FileStoragePermission> destFolderPermissions, FileStorageFileAccess sourceFolderFileAccess, FileStorageFileAccess destFolderFileAccess) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+
+        // Checks if the permissions of the parent folder are changed
+        boolean sourceFolderContainsFP = containsForeignPermissions(session.getUserId(), sourceFolderPermissions);
+        boolean targetFolderContainsFP = containsForeignPermissions(session.getUserId(), destFolderPermissions);
+        Object[] args = null;
+        if (sourceFolderContainsFP != targetFolderContainsFP || haveEqualPermissionEntities(sourceFolderPermissions, destFolderPermissions) == false) {
+            if (sourceFolderContainsFP && targetFolderContainsFP) {
+                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                warnings.add(FileStorageExceptionCodes.MOVE_TO_ANOTHER_SHARED_WARNING.create(args));
+            } else if (sourceFolderContainsFP && targetFolderContainsFP == false) {
+                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                warnings.add(FileStorageExceptionCodes.MOVE_TO_NOT_SHARED_WARNING.create(args));
+                /*
+                 * Disabled warnings for getting new permissions with file move
+                 */
+                //            } else if (sourceFolderContainsFP == false && targetFolderContainsFP) {
+                //                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                //                warnings.add(FileStorageExceptionCodes.MOVE_TO_SHARED_WARNING.create(args));
+            }
+        }
+        // Checks if the file itself has object permissions, that will be removed when moving the file
+        List<FileStorageObjectPermission> objectPermissions = file != null ? file.getObjectPermissions() : null;
+        if (objectPermissions != null && objectPermissions.isEmpty() == false) {
+            warnings.add(FileStorageExceptionCodes.MOVE_SHARED_FILE_WARNING.create(args != null ? args : createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess)));
+        }
+        return warnings;
+    }
+
+    /**
+     *
+     * Gets a value indicating whether two list with permission entities contain the same entities.
+     *
+     * @param permissions1 One permission list.
+     * @param permissions2 Another permission list.
+     * @return <code>true</code> if the lists have the same entities, <code>false</code>, otherwise
+     */
+    private boolean haveEqualPermissionEntities(List<FileStoragePermission> permissions1, List<FileStoragePermission> permissions2) {
+        Set<Integer> entities1 = getPermissionEntities(permissions1);
+        Set<Integer> entities2 = getPermissionEntities(permissions2);
+        return entities1.equals(entities2);
+    }
+
+    /**
+     *
+     * Gets the permission entities from a given list of permissions.
+     *
+     * @param permissions The permission set.
+     * @return A set of the entities of the permissions.
+     */
+    private Set<Integer> getPermissionEntities(List<FileStoragePermission> permissions) {
+        return permissions.stream().map(p -> I(p.getEntity())).collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder contains permissions for entities other than the supplied current user.
+     *
+     * @param userID The entity identifier of the user that should be considered as "not" foreign
+     * @param oldPermissions The permissions to check
+     * @return <code>true</code> if foreign permissions were found, <code>false</code>, otherwise
+     */
+    private boolean containsForeignPermissions(int userID, List<FileStoragePermission> permissions) {
+        if (null != permissions && 0 < permissions.size()) {
+            for (FileStoragePermission permission : permissions) {
+                if (permission.getEntity() != userID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 
+     * Creates an object array with arguments for the warning that occurs when a file is moved between folders.
+     *
+     * @param fileId The if of the file to move.
+     * @param file The file, that should be moved.
+     * @param sourceFolderId The id of the original parent folder.
+     * @param destFolderId The id of the new parent folder.
+     * @param sourceFolderFileAccess The file access of the original parent folder.
+     * @param destFolderFileAccess The file access of the new parent folder.
+     * @return An object array with arguments for the warning.
+     * @throws OXException
+     */
+    private Object[] createWarningArguments(String fileId, File file, String sourceFolderId, String destFolderId, FileStorageFileAccess sourceFolderFileAccess, FileStorageFileAccess destFolderFileAccess) throws OXException {
+        String sourceFolderPath = getFolderPath(sourceFolderFileAccess, sourceFolderId);
+        String destFolderPath = getFolderPath(destFolderFileAccess, destFolderId);
+        String fileName = file != null ? file.getFileName() : null;
+        Object[] args = { fileName, sourceFolderPath, destFolderPath, fileId, destFolderId };
+        return args;
     }
 
     private static String getFileNameFrom(File file, FileStorageFileAccess fileAccess) throws OXException {

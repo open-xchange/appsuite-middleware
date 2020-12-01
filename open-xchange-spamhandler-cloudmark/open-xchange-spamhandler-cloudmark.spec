@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:	@OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,6 +58,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Nov 27 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 prepare for 7.10.5 release
 * Wed Aug 05 2020 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

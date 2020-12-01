@@ -54,17 +54,24 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
+import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess;
+import com.openexchange.file.storage.PermissionAware;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
+import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.RestoringFolderService;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
 import com.openexchange.folderstorage.type.PicturesType;
@@ -79,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess implements FileStorageRestoringFolderAccess, MediaFolderAwareFolderAccess {
+public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess, FileStorageRestoringFolderAccess, SearchableFolderNameFolderAccess {
 
     private final InfostoreFacade infostore;
 
@@ -156,6 +163,15 @@ public class InfostoreFolderAccess extends AbstractInfostoreFolderAccess impleme
     @Override
     protected InfostoreFacade getInfostore() throws OXException {
         return infostore;
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        FolderService folderService = getFolderService();
+        FolderServiceDecorator decorator = initDecorator();
+        FolderResponse<List<UserizedFolder>> result = folderService.searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, decorator);
+        List<UserizedFolder> userizedFolders = result.getResponse();
+        return FolderWriter.writeFolders(userizedFolders.toArray(new UserizedFolder[userizedFolders.size()]));
     }
 
 }

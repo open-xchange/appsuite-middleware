@@ -4,9 +4,10 @@
     tags:
       - Certificate
     summary: Deletes the fingerprint/hostname combination
+    security: 
+        - session: []    
     description: Deletes the fingerprint/hostname combination
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
         description: The fingerprint of the SSL certificate

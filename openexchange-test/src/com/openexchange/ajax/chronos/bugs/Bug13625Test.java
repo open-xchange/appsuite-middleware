@@ -100,7 +100,7 @@ public class Bug13625Test extends AbstractChronosTest {
         globalFacet.filter(filter);
         body.addFacetsItem(globalFacet);
 
-        FindQueryResponse response = defaultUserApi.getFindApi().doQuery(getSessionId(), "calendar", body, null, EventField.ID.name().toLowerCase());
+        FindQueryResponse response = defaultUserApi.getFindApi().doQuery("calendar", body, null, EventField.ID.name().toLowerCase());
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
 

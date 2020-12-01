@@ -62,17 +62,20 @@ public class ImmutableCompositionSpaceInfo implements CompositionSpaceInfo {
 
     private final CompositionSpaceId id;
     private final MailPath mailPath;
+    private long lastModified;
 
     /**
      * Initializes a new {@link ImmutableCompositionSpaceInfo}.
      *
      * @param id The composition space identifier
      * @param mailPath The optional mail path associated with composition space or <code>null</code>
+     * @param lastModified The current draft mails last modified date/sequence
      */
-    public ImmutableCompositionSpaceInfo(CompositionSpaceId id, MailPath mailPath) {
+    public ImmutableCompositionSpaceInfo(CompositionSpaceId id, MailPath mailPath, long lastModified) {
         super();
         this.id = id;
         this.mailPath = mailPath;
+        this.lastModified = lastModified;
     }
 
     @Override
@@ -86,6 +89,11 @@ public class ImmutableCompositionSpaceInfo implements CompositionSpaceInfo {
     }
 
     @Override
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
@@ -95,7 +103,7 @@ public class ImmutableCompositionSpaceInfo implements CompositionSpaceInfo {
         if (mailPath != null) {
             builder.append("mailPath=").append(mailPath).append(", ");
         }
-        builder.append("]");
+        builder.append("lastModified=").append(lastModified).append("]");
         return builder.toString();
     }
 

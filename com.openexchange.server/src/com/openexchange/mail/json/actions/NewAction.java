@@ -72,7 +72,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -147,7 +147,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(final ServiceLookup services) {

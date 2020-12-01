@@ -80,6 +80,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "cid INT4 unsigned NOT NULL,"
         + "user INT4 unsigned NOT NULL,"
         + "lastModified BIGINT(64) unsigned NOT NULL,"
+        + "clientToken VARCHAR(16) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "fromAddr VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "senderAddr VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "replyToAddr VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"

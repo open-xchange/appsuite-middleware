@@ -93,7 +93,10 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(OneDriveFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(OneDriveFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(OneDriveFolderAccess.class, capability);
     }
 
     /**

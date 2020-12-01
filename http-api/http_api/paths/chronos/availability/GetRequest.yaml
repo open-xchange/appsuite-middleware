@@ -4,8 +4,8 @@
     tags:
       - Chronos
     summary: Gets the configured availability of the user.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

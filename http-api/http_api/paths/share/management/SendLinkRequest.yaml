@@ -3,9 +3,9 @@
     operationId: sendShareLink
     tags:
       - Share/Management
-    summary: Sends a share link.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Sends a share link
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

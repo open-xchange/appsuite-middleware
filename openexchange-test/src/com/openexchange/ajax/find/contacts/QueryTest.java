@@ -324,7 +324,7 @@ public class QueryTest extends ContactsFindTest {
         List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, options);
         assertEquals("Wrong number of results", size, results.size());
         for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
+            names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
         }
         assertEquals("Wrong number of unique results", size, names.size());
 
@@ -333,7 +333,7 @@ public class QueryTest extends ContactsFindTest {
         results = query(Collections.singletonList(folderFacet), start, size, options);
         assertEquals("Wrong number of results", size, results.size());
         for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
+            names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
         }
         assertEquals("Wrong number of unique results", numberOfContacts, names.size());
     }

@@ -4,6 +4,8 @@
     tags:
       - JSlob
     summary: Updates a JSlob.
+    security: 
+        - session: []    
     description: >-
      When updating a JSlob entry there are two different ways to do so:
 
@@ -20,7 +22,6 @@
      In case no path is given the provided value is merged with the existing jslob entry and only provided fields are updated.
 
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The JSlob indentifier.
@@ -61,10 +62,11 @@
     tags:
       - JSlob
     summary: Updates a JSlob.
+    security: 
+        - session: []     
     description: >-
       When a valid jslobPath is provided the JSlob sub path is replaced by the given request data.    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The JSlob indentifier.

@@ -4,9 +4,14 @@
     tags:
       - Tasks
     summary: Gets a list of tasks.
+    security: 
+        - session: []      
+        - oauth:
+          - read_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamTaskColumns'
+    requestBody:
+      $ref: '#/components/requestBodies/TaskListElementArray'      
     responses:
       '200':
         description: >
@@ -24,5 +29,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TasksResponse'
-    requestBody:
-      $ref: '#/components/requestBodies/TaskListElementArray'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'      

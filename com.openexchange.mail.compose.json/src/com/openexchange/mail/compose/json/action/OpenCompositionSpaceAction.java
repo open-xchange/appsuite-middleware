@@ -49,7 +49,9 @@
 
 package com.openexchange.mail.compose.json.action;
 
+import static com.openexchange.mail.compose.CompositionSpaces.buildConsoleTableFor;
 import java.util.List;
+import java.util.Optional;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -57,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.Message.ContentType;
@@ -76,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.2
  */
 public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OpenCompositionSpaceAction.class);
 
     /**
      * Initializes a new {@link OpenCompositionSpaceAction}.
@@ -204,6 +209,11 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
             }
         }
 
+        ClientToken clientToken = getClaimedClientToken(requestData);
+        if (clientToken.isPresent()) {
+            parameters.withClientToken(clientToken);
+        }
+
         // Does not hold since a JSON array is expected for the mail paths...
         //        JSONObject jMessage = (JSONObject) requestData.getData();
         //        if (null != jMessage) {
@@ -225,6 +235,9 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
         //        }
 
         CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Opened composition space '{}':{}{}", compositionSpace.getId(), Strings.getLineSeparator(), buildConsoleTableFor(compositionSpace, Optional.ofNullable(requestData.getUserAgent())));
+        }
         return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }
 

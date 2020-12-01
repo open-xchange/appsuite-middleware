@@ -63,12 +63,16 @@ import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -84,6 +88,7 @@ import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement
 import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService;
 import com.openexchange.oauth.provider.impl.DefaultAuthorizationService;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
+import com.openexchange.oauth.provider.impl.OAuthProviderMode;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.impl.authcode.AbstractAuthorizationCodeProvider;
@@ -104,6 +109,9 @@ import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableServi
 import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableTask;
 import com.openexchange.oauth.provider.impl.groupware.OAuthGrantConvertUtf8ToUtf8mb4Task;
 import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListener;
+import com.openexchange.oauth.provider.impl.introspection.OAuthIntrospectionAuthorizationService;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJWTScopeService;
+import com.openexchange.oauth.provider.impl.jwt.OAuthJwtAuthorizationService;
 import com.openexchange.oauth.provider.impl.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.impl.servlets.TokenEndpoint;
@@ -112,7 +120,7 @@ import com.openexchange.oauth.provider.impl.servlets.TokenIntrospection;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
@@ -139,7 +147,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
+        return new Class<?>[] { DatabaseService.class, LeanConfigurationService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
             SessiondService.class, CapabilityService.class, ConfigViewFactory.class, NotificationMailFactory.class, HazelcastConfigurationService.class };
     }
@@ -149,9 +157,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         final ServiceLookup serviceLookup = this;
         Services.setServiceLookup(serviceLookup);
 
-        ConfigurationService configService = getService(ConfigurationService.class);
-        boolean providerEnabled = configService.getBoolProperty(OAuthProviderProperties.ENABLED, false);
-        if (!providerEnabled) {
+        LeanConfigurationService leanConfigService = getServiceSafe(LeanConfigurationService.class);
+        if (!leanConfigService.getBooleanProperty(OAuthProviderProperties.ENABLED)) {
             LOG.info("OAuth provider is disabled by configuration.");
             return;
         }
@@ -164,42 +171,41 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(MailService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
 
-        boolean isAuthorizationServer = configService.getBoolProperty(OAuthProviderProperties.IS_AUTHORIZATION_SERVER, true);
-        if (isAuthorizationServer) {
-            if ("hz".equalsIgnoreCase(configService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE, "hz").trim())) {
-                final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
-                if (!hzConfigService.isEnabled()) {
-                    String msg = "OAuth provider is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Aborting start of OAuth provider!";
-                    LOG.error(msg, new Exception(msg));
-                    return;
+        OAuthProviderMode mode = OAuthProviderMode.getProviderMode(leanConfigService.getProperty(OAuthProviderProperties.MODE));
+        switch (mode) {
+            default:
+            case AUTH_SEVER:
+                if ("hz".equalsIgnoreCase(leanConfigService.getProperty(OAuthProviderProperties.AUTHCODE_TYPE).trim())) {
+                    final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
+                    if (!hzConfigService.isEnabled()) {
+                        String msg = "OAuth provider is configured to use Hazelcast, but Hazelcast is disabled as per configuration! Aborting start of OAuth provider!";
+                        LOG.error(msg, new Exception(msg));
+                        return;
+                    }
+                    registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
+
+                    String hzMapName = discoverHzMapName(hzConfigService.getConfig(), HzAuthorizationCodeProvider.HZ_MAP_NAME, LOG);
+                    track(HazelcastInstance.class, new HzTracker(hzMapName));
+                } else {
+                    startAuthorizationServer(new DbAuthorizationCodeProvider(this));
                 }
-
-                registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory());
-
-                String hzMapName = discoverHzMapName(hzConfigService.getConfig(), HzAuthorizationCodeProvider.HZ_MAP_NAME, LOG);
-                track(HazelcastInstance.class, new HzTracker(hzMapName));
-            } else {
-                startAuthorizationServer(new DbAuthorizationCodeProvider(this));
-            }
+                break;
+            case EXPECT_JWT:
+                startJWTService(leanConfigService);
+                break;
+            case TOKEN_INTROSPECTION:
+                startTokenIntrospectionService(leanConfigService);
+                break;
         }
 
-        track(OAuthAuthorizationService.class, new SimpleRegistryListener<OAuthAuthorizationService>() {
+        RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService> oAuthAuthorizationService = new RankingAwareNearRegistryServiceTracker<OAuthAuthorizationService>(context, OAuthAuthorizationService.class);
 
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public void added(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
-                registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(service, serviceLookup));
-            }
-
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public void removed(ServiceReference<OAuthAuthorizationService> ref, OAuthAuthorizationService service) {
-                unregisterService(service);
-            }
-
-        });
+        rememberTracker(oAuthAuthorizationService);
 
         openTrackers();
+
+        registerService(OAuthResourceService.class, new OAuthResourceServiceImpl(oAuthAuthorizationService, serviceLookup));
+
     }
 
     @Override
@@ -269,6 +275,24 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             httpService.registerServlet(tokenIntrospectionAlias, tokenIntrospection, null, httpService.createDefaultHttpContext());
             registeredServlets.add(tokenIntrospectionAlias);
         }
+    }
+
+    private void startJWTService(LeanConfigurationService leanConfigService) throws OXException {
+    	OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
+    	registerService(Reloadable.class, scopeService);
+
+        OAuthJwtAuthorizationService jwtAuthorizationService = new OAuthJwtAuthorizationService(leanConfigService, scopeService);
+        registerService(OAuthAuthorizationService.class, jwtAuthorizationService);
+        registerService(ForcedReloadable.class, jwtAuthorizationService);
+    }
+
+    private void startTokenIntrospectionService(LeanConfigurationService leanConfigService) {
+        OAuthJWTScopeService scopeService = new OAuthJWTScopeService(leanConfigService);
+        registerService(Reloadable.class, scopeService);
+
+        OAuthIntrospectionAuthorizationService tokenIntrospectionAuthorizationService = new OAuthIntrospectionAuthorizationService(leanConfigService, scopeService);
+        registerService(OAuthAuthorizationService.class, tokenIntrospectionAuthorizationService, null);
+        registerService(Reloadable.class, tokenIntrospectionAuthorizationService);
     }
 
     private void stopAuthorizationServer() {

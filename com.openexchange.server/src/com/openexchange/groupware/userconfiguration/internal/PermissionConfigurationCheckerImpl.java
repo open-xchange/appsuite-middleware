@@ -137,10 +137,12 @@ public class PermissionConfigurationCheckerImpl implements PermissionConfigurati
 
         // Check context sets
         Map<String, Object> yamlInFolder = configService.getYamlInFolder("contextSets");
+        // @formatter:off
         yamlInFolder.entrySet()
                     .stream()
                     .filter((e) -> e.getValue() != null)
                     .forEach((e) -> containsPermissions(e.getValue().toString()).ifPresent((perm) -> LOG.error("Permissions must not be defined in context sets. Please remove '{}' from {}", perm, e.getKey())));
+        // @formatter:on
     }
 
     @Override

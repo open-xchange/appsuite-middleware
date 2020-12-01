@@ -76,7 +76,12 @@ public class OAuthProviderJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TranslatorFactory.class, ManagedFileManagement.class, CapabilityService.class, OAuthResourceService.class };
+        return new Class<?>[] { TranslatorFactory.class, ManagedFileManagement.class, CapabilityService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { OAuthResourceService.class };
     }
 
     @Override

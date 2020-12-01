@@ -128,7 +128,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         try {
             if (!folders.isEmpty()) {
                 FoldersApi folderApi = new FoldersApi(getApiClient());
-                folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
+                folderApi.deleteFolders(folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
             }
         } finally {
             super.tearDown();
@@ -264,7 +264,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         folder.setSubscribed(Boolean.TRUE);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null, null, null);
+        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, body, "1", null, null, null);
         return checkResponse(folderUpdateResponse);
     }
 
@@ -275,7 +275,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     private String getPrivateInfostoreFolder() throws ApiException {
         if (null == privateInfostoreFolder) {
             ConfigApi configApi = new ConfigApi(getApiClient());
-            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
+            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
             Object data = checkResponse(configNode);
             if (data != null && !data.toString().equalsIgnoreCase("null")) {
                 privateInfostoreFolder = String.valueOf(data);

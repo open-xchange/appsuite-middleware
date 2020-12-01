@@ -4,8 +4,11 @@
     tags:
       - Calendar
     summary: Gets a list of appointments.
+    security: 
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
       - $ref: '#/components/parameters/gblQueryParamRecurrenceMaster'
     responses:

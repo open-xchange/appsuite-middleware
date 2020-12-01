@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Updates an event.
+    security: 
+        - session: []  
+        - oauth:
+          - write_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
@@ -55,18 +58,6 @@
         schema:
           type: integer
           format: int64
-    responses:
-      '200':
-        description: >
-          A JSON object containing containing the result of the update. In case
-          of errors the
-
-          responsible fields in the response are filled (see [Error
-          handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChronosCalendarResultResponse'
     requestBody:
       content:
         application/json:
@@ -85,31 +76,48 @@
                   used to inform the attendees via notifications and invitation
                   mails
       description: A JSON object containing the event's data.
-      required: true
+      required: true          
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the update. In case
+          of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'                
   post:
     operationId: updateEventWithAttachments
     tags:
       - Chronos
     summary: Updates an event and its attachments.
-    description: >
-      #### Note
+    security: 
+        - session: []  
+        - oauth:
+          - write_calendar     
+    description: >-
+      #### Note:
 
       It is possible to update multiple attachments at once. Therefore add
-      additional form fields and replace "[index]" in `file_[index]` 
-
-      with the appropriate index, like `file_1`. The index always starts with 0
-      (mandatory attachment object). There can only be
-
-      one json payload describing the EventData, the rest json payloads (if
+      additional form fields and replace "[index]" in `file_[index]` with 
+      the appropriate index, like `file_1`. The index always starts with 0
+      (mandatory attachment object). There can only be one json payload 
+      describing the EventData, the rest json payloads (if
       present) will simply be ignored.
 
       If the event already has attachments, then for each of those attachments
-      their valid manageId must be provided as part of the attachment
+      their valid manageId must be provided as part of the attachment metadata. 
 
-      metadata. The absense of an already existing attachment for the event will
+      The absense of an already existing attachment for the event will
       result in the deletion of that attachment.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
@@ -133,17 +141,6 @@
         schema:
           type: integer
           format: int64
-    responses:
-      '200':
-        description: >
-          A HTML page containing the result of the update or in case of errors
-          an error object (see [File
-          uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)
-          as an example).
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -166,4 +163,20 @@
                 format: binary
             required:
               - json_0
-              - file_0
+              - file_0          
+    responses:
+      '200':
+        description: >
+          A HTML page containing the result of the update or in case of errors
+          an error object (see [File
+          uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)
+          as an example).
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'                
+

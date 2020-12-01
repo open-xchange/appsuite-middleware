@@ -4,9 +4,12 @@
     tags:
       - Mail
     summary: Forwards a mail.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     description: Returns the data for the message that shall be forwarded.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -51,3 +54,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailReplyResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

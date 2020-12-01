@@ -4,14 +4,27 @@
     tags:
       - Snippet
     summary: Updates a snippet.
+    security: 
+        - session: []
+        - oauth: 
+          - write_userconfig    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier of the snippet.
         required: true
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SnippetData'
+      description: >-
+        A JSON object providing the fields that should be changed, excluding its
+        attachments. For deleting attachments see `/snippet?action=detach`
+        request.
+      required: true          
     responses:
       '200':
         description: >
@@ -23,13 +36,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/SnippetResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/SnippetData'
-      description: >-
-        A JSON object providing the fields that should be changed, excluding its
-        attachments. For deleting attachments see `/snippet?action=detach`
-        request.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

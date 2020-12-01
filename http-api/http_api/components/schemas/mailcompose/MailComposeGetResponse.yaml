@@ -4,4 +4,4 @@ properties:
   data:
     type: array
     items:
-      $ref: '#/components/schemas/MailComposeMessageModel'
+      $ref: '#/components/schemas/MailComposeResponseMessageModel'

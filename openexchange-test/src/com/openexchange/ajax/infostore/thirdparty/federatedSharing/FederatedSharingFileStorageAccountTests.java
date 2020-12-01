@@ -49,22 +49,37 @@
 
 package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
+import com.openexchange.java.Strings;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.modules.FoldersApi;
-import com.openexchange.testing.httpclient.modules.ShareManagementApi;
-import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderBodyNotification;
+import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailData;
@@ -72,19 +87,9 @@ import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import static com.openexchange.java.Autoboxing.*;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.*;
+import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
  * {@link FederatedSharingFileStorageAccountTests}
@@ -95,6 +100,9 @@ import static org.hamcrest.Matchers.*;
 @RunWith(Parameterized.class)
 public class FederatedSharingFileStorageAccountTests extends AbstractFileStorageAccountTest {
 
+
+    private static final String XOX8 = "xox8";
+    private static final String XCTX8 = "xctx8";
 
     protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Federated Sharing test storage";
 
@@ -149,8 +157,8 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     public static Collection getFileStorageServicesToTest() {
         //@formatter:off
         return Arrays.asList(new Object[] {
-            "xctx8",
-            "xox8",
+            XCTX8,
+            XOX8,
         });
         //@formatter:on
     }
@@ -199,6 +207,19 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         account = createAccount(fileStorageServiceId, XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
     }
 
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        HashMap<String, String> configuration = new HashMap<>();
+        configuration.put("com.openexchange.capability.filestorage_xox", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.capability.filestorage_xctx", Boolean.TRUE.toString());
+        configuration.put("com.openexchange.api.client.blacklistedHosts", "");
+        return configuration;
+    }
+
+    @Override
+    protected String getReloadables() {
+        return "CapabilityReloadable";
+    }
 
     @Override
     public void tearDown() throws Exception {
@@ -240,7 +261,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     private MailData lookupMail(ApiClient apiClient, String folder, String subjectToMatch) throws Exception {
         for (int i = 0; i < 10; i++) {
             MailApi mailApi = new MailApi(apiClient);
-            MailsResponse mailsResponse = mailApi.getAllMails(apiClient.getSession(), folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
+            MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
             checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
             for (List<String> mail : mailsResponse.getData()) {
                 String subject = mail.get(2);
@@ -249,14 +270,14 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
                 }
 
                 //Get The mail
-                MailResponse mailResponse = mailApi.getMail(apiClient.getSession(), mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
+                MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
                 MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
 
                 //Delete the mail
                 MailListElement mailToDelete = new MailListElement();
                 mailToDelete.setFolder(mailData.getFolderId());
                 mailToDelete.setId(mailData.getId());
-                MailsCleanUpResponse deleteResponse = mailApi.deleteMails(apiClient.getSession(), Collections.singletonList(mailToDelete), L(Long.MAX_VALUE), B(true), B(false));
+                MailsCleanUpResponse deleteResponse = mailApi.deleteMails(Collections.singletonList(mailToDelete), L(Long.MAX_VALUE), B(true), B(false));
                 List<String> deletedMailIds = checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
                 assertThat(deletedMailIds, is(empty()));
 
@@ -303,7 +324,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         body.notification(notification);
 
         //update with new guest permission
-        FolderUpdateResponse updateResponse = api.updateFolder(api.getApiClient().getSession(), folderToShare.getId(), body, B(false), null, null, null, null, null, null);
+        FolderUpdateResponse updateResponse = api.updateFolder(folderToShare.getId(), body, B(false), null, null, null, null, null, null, null);
         checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
     }
 

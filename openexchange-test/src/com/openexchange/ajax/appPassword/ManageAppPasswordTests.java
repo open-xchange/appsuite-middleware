@@ -52,6 +52,7 @@ package com.openexchange.ajax.appPassword;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -72,23 +73,23 @@ public class ManageAppPasswordTests extends AbstractAppPasswordTest {
         removeAll();  // Verify cleanup
 
         // Get list
-        List<AppPasswordApplication> apps = getApps(this.getSessionId());
-        assertThat(apps.size(), greaterThan(1));
+        List<AppPasswordApplication> apps = getApps();
+        assertThat(I(apps.size()), greaterThan(I(1)));
         String type = apps.get(0).getName();
         // Add password
         AppPasswordRegistrationResponseData loginData = addPassword(type);
-        assertThat(loginData.getPassword().length(), is(19));
+        assertThat(I(loginData.getPassword().length()), is(I(19)));
 
         // Check exists in list now
         List<AppPassword> passwordList = getList();
-        assertThat(passwordList.size(), is(1));
+        assertThat(I(passwordList.size()), is(I(1)));
         assertThat(passwordList.get(0).getScope(), is(type));
 
         // Try removing
 
         removePassword(passwordList.get(0).getUUID());
         List<AppPassword> removedPasswordList = getList();
-        assertThat(removedPasswordList.size(), is(0));
+        assertThat(I(removedPasswordList.size()), is(I(0)));
 
     }
 

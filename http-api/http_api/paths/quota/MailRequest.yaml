@@ -4,8 +4,8 @@
     tags:
       - Quota
     summary: Gets the mail usage data.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

@@ -4,8 +4,11 @@
     tags:
       - Calendar
     summary: Searches for appointments.
+    security: 
+        - session: []
+        - oauth: 
+          - read_calendar            
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamCalendarColumns'
     responses:
       '200':

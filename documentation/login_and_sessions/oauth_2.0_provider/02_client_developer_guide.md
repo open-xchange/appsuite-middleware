@@ -156,13 +156,15 @@ If the token has expired, has been tampered with, or the permissions revoked, th
 
 ## HTTP JSON API
 
-With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org/wiki/index.php?title=HTTP_API). There are a few differences to the existing API documentation you have to keep in mind:
+With OAuth you can access a subset of the existing [HTTP API](https://documentation.open-xchange.com/components/middleware/http/latest/index.html). There are a few differences to the existing API documentation you have to keep in mind:
 
--   The available modules and actions must be accessed via a special servlet path `/appsuite/api/oauth/modules`.
+-   The available modules and actions can be accessed via a special servlet path `/appsuite/api/oauth/modules` in addition to the normal path. But this subpath is deprecated an will be removed in the future.
 
-        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123
+		GET /appsuite/api/contacts?action=all&folder=123
+		or
+        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123 (deprecated)
 
--   The session parameter can be omitted for every request. Instead the access token must be provided as authorization header:
+-   The session parameter must be omitted for every request. Instead the access token must be provided as authorization header:
 
         Authorization: Bearer 0062a74e65a74cefb364dcd17648eb04
 
@@ -199,12 +201,12 @@ Find the OAuth-enabled modules and actions below. Every action is bound to a spe
 
 ### reminder
 
-| Action | Scope |
+| Name | Scope |
 |--------|-------|
-| delete | write_reminders |
-| remindAgain | write_reminders |
-| range | read_reminders |
-| updates | read_reminders |
+| delete | write_reminder |
+| remindAgain | write_reminder |
+| range | read_reminder |
+| updates | read_reminder |
 
 
 ### config
@@ -220,6 +222,9 @@ Find the OAuth-enabled modules and actions below. Every action is bound to a spe
 | Name | Scope |
 |------|-------|
 | GET  | <any> |
+
+
+
 
 
 ### folders
@@ -294,6 +299,77 @@ Find the OAuth-enabled modules and actions below. Every action is bound to a spe
 | update              | write_calendar |
 | all                 | read_calendar  |
 | confirm             | write_calendar |
+
+### mail
+
+| Name                      | Scope      |
+|---------------------------|------------|
+| all 						| read_mail  |
+| threadedAll 				| read_mail  |
+| get 						| read_mail  |
+| get_structure 			    | read_mail  |
+| count 					    | read_mail  |
+| copy 						| write_mail |
+| move_all 					| write_mail |
+| archive 					| write_mail |
+| archive_folder 			| write_mail |
+| reply 					    | read_mail  |
+| replyall 					| read_mail  |
+| updates 					| read_mail  |
+| forward 					| read_mail  |
+| bounce 					| write_mail |
+| resend 					| write_mail |
+| attachment 				| read_mail  |
+| attachmentToken 			| read_mail  |
+| zip_attachments 			| read_mail  |
+| zip_messages 				| read_mail  |
+| saveVersit 				| write_mail |
+| list 						| read_mail  |
+| search 					| read_mail  |
+| update 					| write_mail |
+| delete 					| write_mail |
+| transport 				    | write_mail |
+| receipt_ack 				| write_mail |
+| clear 						| write_mail |
+| expunge 					| write_mail |
+| new 						| write_mail |
+| send_data 					| write_mail |
+| import 					| write_mail |
+| edit 						| write_mail |
+| autosave 					| write_mail |
+| all_seen 					| write_mail |
+| resolve_share_reference 	| read_mail  |
+| examine 					| read_mail  |
+| thread_references 			| read_mail  |
+| trash 						| write_mail |
+
+### snippet
+
+| Name                      | Scope            |
+|---------------------------|------------------|
+| all 						| <any>            |
+| getattachment  			| <any>            |
+| list 						| <any>            |
+| get 						| <any>            |
+| update						| write_userconfig |
+| detach						| write_userconfig |
+| attach						| write_userconfig |
+| import						| write_userconfig |
+| new   						| write_userconfig |
+| delete   					| write_userconfig |
+
+
+### filestorage
+
+| Name                      | Scope            |
+|---------------------------|------------------|
+| getAllFileServices 		| read_files       |
+| getFileService 			| read_files       |
+| getFileAccount 			| read_files       |
+| deleteFileAccount 			| write_files      |
+| updateFileAccount 			| write_files      |
+| createFileAccount 			| write_files      |
+| getAllFileAccounts 		| read_files       |
 
 
 ## Card- and CalDAV

@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Changes an organizer of an event.
+    security: 
+        - session: []  
+        - oauth:
+          - write_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
@@ -42,18 +45,6 @@
         schema:
           type: string
       - $ref: '#/components/parameters/QueryParamChronosScheduling'
-    responses:
-      '200':
-        description: >
-          A JSON object containing containing the result of the update. In case
-          of errors the
-
-          responsible fields in the response are filled (see [Error
-          handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChronosCalendarResultResponse'
     requestBody:
       content:
         application/json:
@@ -71,4 +62,20 @@
                   new organizer. This will not be peristed and is just used to
                   inform the attendees via notification mails
       description: A JSON object containing the new organizer and an optional comment.
-      required: true
+      required: true      
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the update. In case
+          of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'

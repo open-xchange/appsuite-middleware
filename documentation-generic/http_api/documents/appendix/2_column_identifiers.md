@@ -110,6 +110,7 @@ specific field data of single or multiple objects.
 | 3010 | **_DEPRECATED_** com.openexchange.publish.publicationFlag |Boolean|**_DEPRECATED_** The publication feature has been removed with v7.10.2. This column is igonred.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Direct write operations on the content of this folder is forbidden. Clients should therefore not offer those options to the user. Read Only, provided by the com.openexchange.subscribe plugin|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only|
+| 3031 | com.openexchange.folderstorage.accountError |Object| In case the account has errors this field contains a json object with fields related to this error. |
 | 3060 | com.openexchange.share.extendedPermissions |Array|Each element is an object described in [Extended permission object](#extended-permission-object). Read Only.|
 | 3201 | com.openexchange.calendar.extendedProperties |Object|A json object containing the extended properties of an calendar folder as key value pairs. Each value can be an object, an array or a simple value itself.|
 | 3203 | com.openexchange.calendar.provider |String|The name of the calendar provider.|

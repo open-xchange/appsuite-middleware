@@ -4,8 +4,9 @@
     tags:
       - Folders
     summary: Checks the existing upload for given type.
+    security:
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the folder to check.

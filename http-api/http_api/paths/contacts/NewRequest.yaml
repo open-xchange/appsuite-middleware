@@ -4,11 +4,22 @@
     tags:
       - Contacts
     summary: Creates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts    
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
       is necessary to use the `POST` method.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactData'
+      description: >-
+        A JSON object containing the contact's data. The field id is not
+        included.
+      required: true      
     responses:
       '200':
         description: >
@@ -20,20 +31,19 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContactData'
-      description: >-
-        A JSON object containing the contact's data. The field id is not
-        included.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
   post:
     operationId: createContactAdvanced
     tags:
       - Contacts
     summary: Creates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts
     description: >
       Creates a new contact with contact images. The normal request body must be
       placed as form-data using the
@@ -43,17 +53,6 @@
 
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
-    responses:
-      '200':
-        description: >
-          A HTML page as described in [File uploads](#file-uploads) containing
-          the object ID of the contact or errors if some occurred.
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -73,4 +72,17 @@
                 format: binary
             required:
               - json
-              - file
+              - file      
+    responses:
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing
+          the object ID of the contact or errors if some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

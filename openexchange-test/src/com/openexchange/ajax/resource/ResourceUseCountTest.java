@@ -95,7 +95,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         resourceData.setDisplayName(uuid + "-1");
         resourceData.setName("Test1");
         resourceData.setMailaddress("test1@oxdb.local");
-        ResourceUpdateResponse response = resourceApi.createResource(getSessionId(), resourceData);
+        ResourceUpdateResponse response = resourceApi.createResource(resourceData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resourceIds = new Integer[2];
         resourceIds[0] = response.getData().getId();
@@ -103,7 +103,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         resourceData.setDisplayName(uuid + "-2");
         resourceData.setName("Test2");
         resourceData.setMailaddress("test2@oxdb.local");
-        response = resourceApi.createResource(getSessionId(), resourceData);
+        response = resourceApi.createResource(resourceData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resourceIds[1] = response.getData().getId();
         timestamp = response.getTimestamp();
@@ -119,7 +119,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
                 element.setId(id);
                 resourcesToDelete.add(element);
             }
-            resourceApi.deleteResources(getSessionId(), timestamp, resourcesToDelete);
+            resourceApi.deleteResources(timestamp, resourcesToDelete);
         }
         super.tearDown();
     }
@@ -128,7 +128,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
     public void testUseCount() throws ApiException {
         ResourceSearchBody body = new ResourceSearchBody();
         body.setPattern(uuid);
-        ResourcesResponse response = resourceApi.searchResources(getSessionId(), body);
+        ResourcesResponse response = resourceApi.searchResources(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         List<ResourceData> resources = response.getData();
         Assert.assertEquals(2, resources.size());
@@ -149,7 +149,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         // Check order again
         body = new ResourceSearchBody();
         body.setPattern(uuid);
-        response = resourceApi.searchResources(getSessionId(), body);
+        response = resourceApi.searchResources(body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resources = response.getData();
         Assert.assertEquals(2, resources.size());

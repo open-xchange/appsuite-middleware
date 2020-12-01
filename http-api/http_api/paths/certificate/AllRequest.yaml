@@ -4,9 +4,9 @@
     tags:
       - Certificate
     summary: Gets all SSL certificates.
+    security: 
+        - session: []    
     description: Returns all trusted and untrusted SSL certificates
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

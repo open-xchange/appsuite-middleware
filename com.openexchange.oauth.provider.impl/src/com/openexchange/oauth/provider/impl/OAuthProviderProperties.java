@@ -49,21 +49,94 @@
 
 package com.openexchange.oauth.provider.impl;
 
+import com.openexchange.authentication.NamePart;
+import com.openexchange.config.lean.Property;
+import com.openexchange.oauth.provider.impl.introspection.OAuthIntrospectionProperty;
 
 /**
  * {@link OAuthProviderProperties}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:sebastian.lutz@open-xchange.com">Sebastian Lutz</a>
  * @since v7.8.0
  */
-public class OAuthProviderProperties {
+public enum OAuthProviderProperties implements Property{
 
-    public static final String ENABLED = "com.openexchange.oauth.provider.enabled";
+    /**
+     * Basically enables the OAuth 2.0 provider.
+     */
+    ENABLED("enabled", Boolean.FALSE),
 
-    public static final String AUTHCODE_TYPE = "com.openexchange.oauth.provider.authcode.type";
+    /**
+     * Configures the current provider mode ({@link OAuthProviderMode}).
+     */
+    MODE("mode", OAuthProviderMode.AUTH_SEVER),
 
-    public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
+    /**
+     * Specify how authorization codes shall be stored, to enable OAuth in multi-node environments.
+     * Options are Hazelcast ('hz') or database ('db').
+     */
+    AUTHCODE_TYPE("authcode.type", "hz"),
 
-    public static final String IS_AUTHORIZATION_SERVER = "com.openexchange.oauth.provider.isAuthorizationServer";
+    /**
+     * The key to encrypt client secrets that are stored within the database.
+     * A value must be set to enable the registration of OAuth 2.0 client applications.
+     * It must be the same on every node. After the first client has been registered, the key must not be changed anymore.
+     */
+    ENCRYPTION_KEY("encryptionKey", OAuthProviderProperties.EMPTY),
 
+    /**
+     * A comma separated list of issuer names (JWT claim "iss") that tokens are accepted from.
+     * If this property is empty, tokens are accepted from all issuers.
+     */
+    ALLOWED_ISSUER("allowedIssuer", OAuthProviderProperties.EMPTY),
+
+    /**
+     * Name of the claim that will be used to resolve a context.
+     */
+    CONTEXT_LOOKUP_CLAIM("contextLookupClaim", "sub"),
+
+    /**
+     * Gets the {@link NamePart} used for determining the context
+     * of a user for which a token has been obtained. The part
+     * is taken from the value of the according {@link OAuthIntrospectionProperty#CONTEXT_LOOKUP_CLAIM}.
+     */
+    CONTEXT_LOOKUP_NAME_PART("contextLookupNamePart", NamePart.DOMAIN.getConfigName()),
+
+    /**
+     * Name of the claim that will be used to resolve a user.
+     */
+    USER_LOOKUP_CLAIM("userLookupClaim", "sub"),
+
+    /**
+     * Gets the {@link NamePart} used for determining the user for
+     * which a token has been obtained. The part is taken from
+     * the value of the according {@link OAuthIntrospectionProperty#USER_LOOKUP_CLAIM}.
+     */
+    USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
+
+    public static final String PREFIX = "com.openexchange.oauth.provider.";
+    private static final String EMPTY = "";
+    private final String fqn;
+    private final Object defaultValue;
+
+    /**
+     * Initializes a new {@link OAuthProviderProperties}.
+     * @param suffix
+     * @param defaultValue
+     */
+    private OAuthProviderProperties(String suffix, Object defaultValue) {
+        this.fqn = PREFIX + suffix;
+        this.defaultValue = defaultValue;
+    }
+
+    @Override
+    public String getFQPropertyName() {
+        return fqn;
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

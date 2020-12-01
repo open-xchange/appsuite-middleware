@@ -115,7 +115,7 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.MailOAuthConstants;
+import com.openexchange.mail.json.OAuthScopeDescription;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
@@ -262,7 +262,15 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));
 
-        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailOAuthConstants.OAUTH_SEND_DATA, OAuthScopeDescription.SEND_DATA) {
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.OAUTH_READ_SCOPE) {
+
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
+            }
+        });
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.OAUTH_WRITE_SCOPE) {
 
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {

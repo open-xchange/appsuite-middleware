@@ -128,16 +128,13 @@ public class Address {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(24);
-        builder.append("[");
-        if (personal != null) {
-            builder.append("personal=").append(personal).append(", ");
+        if (personal == null) {
+            return address == null ? "<empty>" : address;
         }
-        if (address != null) {
-            builder.append("address=").append(address);
+        if (address == null) {
+            return personal;
         }
-        builder.append("]");
-        return builder.toString();
+        return new StringBuilder(personal.length() + address.length() + 5).append('"').append(personal).append("\" <").append(address).append('>').toString();
     }
 
 }

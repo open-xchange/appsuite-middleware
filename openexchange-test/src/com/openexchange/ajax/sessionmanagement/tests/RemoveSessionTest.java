@@ -71,9 +71,9 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveSession() throws Exception {
         String sessionId = apiClient2.getSession();
-        getApi().delete(apiClient.getSession(), Collections.singletonList(sessionId));
+        getApi().delete(Collections.singletonList(sessionId));
 
-        AllSessionsResponse response = getApi().all(apiClient.getSession());
+        AllSessionsResponse response = getApi().all();
         List<SessionManagementData> sessions = response.getData();
         assertEquals(1, sessions.size());
         for (SessionManagementData session : sessions) {
@@ -84,9 +84,8 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveSession_WrongSessionId() throws Exception {
-        String sessionId = apiClient.getSession();
-        getApi().delete(sessionId, Collections.singletonList("thisWillFail"));
-        AllSessionsResponse response = getApi().all(sessionId);
+        getApi().delete(Collections.singletonList("thisWillFail"));
+        AllSessionsResponse response = getApi().all();
         Collection<SessionManagementData> sessions = response.getData();
         assertEquals(2, sessions.size());
         for (SessionManagementData session : sessions) {

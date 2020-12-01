@@ -191,9 +191,24 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The account name is too long. Please limit the account name to a maximum of %1$s characters.
     public static final String ACCOUNT_NAME_TO_LONG_MSG = "The account name is too long. Please limit the account name to a maximum of %1$s characters.";
+
+    // With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
+    public static final String MOVE_TO_NOT_SHARED_WARNING = "With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.";
+
+    // The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+    public static final String MOVE_TO_ANOTHER_SHARED_WARNING = "The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.";
+
+    // The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+    public static final String MOVE_TO_SHARED_WARNING = "The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".";
+
+    // With moving file \"%1$s\" its permissions will get lost.
+    public static final String MOVE_SHARED_FILE = "With moving file \"%1$s\" its permissions will get lost.";
     
     // The account could not be updated 1$s
     public static final String UNALLOWED_ACCOUNT_UPDATE_MSG = "The account could not be updated: 1$s";
+
+    // Searching folder by folder name is not supported
+    public static final String NO_SEARCH_SUPPORT_MSG = "Searching folder by folder name is not supported";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

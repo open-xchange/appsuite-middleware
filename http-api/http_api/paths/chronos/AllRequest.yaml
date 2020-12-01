@@ -4,8 +4,11 @@
     tags:
       - Chronos
     summary: Gets all events in folder.
+    security: 
+        - session: []      
+        - oauth:
+          - read_calendar    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >-
@@ -51,13 +54,20 @@
           application/json:
             schema:
               $ref: '#/components/schemas/EventsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'
   put:
     operationId: getAllEventsForMultipleFolders
     tags:
       - Chronos
     summary: Gets all events of multiple folders.
+    security: 
+        - session: [] 
+        - oauth:
+          - read_calendar
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: rangeStart
         description: >
@@ -94,6 +104,10 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MultipleFolderEventsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
     requestBody:
       content:
         application/json:

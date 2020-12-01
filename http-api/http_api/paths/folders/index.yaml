@@ -13,3 +13,4 @@ requests:
   - SharesRequest.yaml
   - UpdateRequest.yaml
   - UpdatesRequest.yaml
+  - SearchRequest.yaml

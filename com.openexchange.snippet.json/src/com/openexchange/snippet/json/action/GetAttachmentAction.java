@@ -53,11 +53,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -76,7 +79,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction()
 public final class GetAttachmentAction extends SnippetAction implements ETagAwareAJAXActionService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GetAttachmentAction.class);
 
     private static String extractFilename(final Attachment attachment) {
         if (null == attachment) {
@@ -91,6 +97,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             }
             return fn;
         } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }
@@ -130,7 +137,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             final String saveParam = snippetRequest.getParameter(Mail.PARAMETER_SAVE, String.class, true);
             try {
                 saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 saveToDisk = "true".equalsIgnoreCase(saveParam) || "yes".equalsIgnoreCase(saveParam) || "on".equalsIgnoreCase(saveParam);
             }
         }

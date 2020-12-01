@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Deletes all versions of an infoitem leaving only the base object.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the base object.

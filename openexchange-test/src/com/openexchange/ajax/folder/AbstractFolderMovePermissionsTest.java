@@ -117,7 +117,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
             case "keep":
             case "inherit":
                 privateFolderId = createNewFolder(true, BITS_REVIEWER, false, true);
-                publicFolderId = createNewFolder(true, BITS_REVIEWER, false, false);
+                publicFolderId = createNewFolder(true, BITS_REVIEWER, true, false);
                 sharedFolderId = createSharedFolder();
                 break;
             case "merge":
@@ -132,9 +132,9 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
 
     @Override
     public void tearDown() throws Exception {
-        api.deleteFolders(getApiClient().getSession(), createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        api.deleteFolders(createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         if (Strings.isNotEmpty(sharedFolderId)) {
-            api2.deleteFolders(api2.getApiClient().getSession(), Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            api2.deleteFolders(Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }
@@ -155,7 +155,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
 
     protected String getPrivateInfostoreFolder(ApiClient apiClient) throws ApiException {
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), apiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
         Object data = checkResponse(configNode);
         if (data != null && !data.toString().equalsIgnoreCase("null")) {
             return String.valueOf(data);
@@ -171,6 +171,10 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     }
 
     protected String createNewFolder(boolean additionalPermissions, Integer additionalBits, boolean addGroup, boolean privateTree) throws Exception {
+        return createNewFolder(additionalPermissions ? userId2 : null, additionalBits, addGroup, privateTree);
+    }
+
+    protected String createNewFolder(Integer userIdToShare, Integer additionalBits, boolean addGroup, boolean privateTree) throws Exception {
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setModule(Module.INFOSTORE.getName());
@@ -180,8 +184,8 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         List<FolderPermission> perm = new ArrayList<FolderPermission>();
         FolderPermission p1 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
         perm.add(p1);
-        if (additionalPermissions) {
-            FolderPermission p = createPermissionFor(userId2, additionalBits, Boolean.FALSE);
+        if (userIdToShare != null && userIdToShare.intValue() > 0) {
+            FolderPermission p = createPermissionFor(userIdToShare, additionalBits, Boolean.FALSE);
             perm.add(p);
         }
         if (addGroup) {
@@ -190,7 +194,44 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         }
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", body, TREE, null, null, null);
+        String folderId = response.getData();
+        createdFolders.add(folderId);
+        return folderId;
+    }
+
+    protected String createChildFolder(String parentFolderId) throws ApiException {
+        NewFolderBody body = new NewFolderBody();
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setModule(Module.INFOSTORE.getName());
+        folder.setSummary("FolderPermissionTest_" + UUID.randomUUID().toString());
+        folder.setTitle(folder.getSummary());
+        folder.setSubscribed(Boolean.TRUE);
+        folder.setPermissions(null);
+        body.setFolder(folder);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, body, TREE, null, null, null);
+        String folderId = response.getData();
+        createdFolders.add(folderId);
+        return folderId;
+    }
+
+    protected String createChildFolder(String parentFolderId, Integer userIdToShare) throws ApiException {
+        NewFolderBody body = new NewFolderBody();
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setModule(Module.INFOSTORE.getName());
+        folder.setSummary("FolderPermissionTest_" + UUID.randomUUID().toString());
+        folder.setTitle(folder.getSummary());
+        folder.setSubscribed(Boolean.TRUE);
+        List<FolderPermission> perm = new ArrayList<FolderPermission>();
+        FolderPermission p1 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
+        perm.add(p1);
+        if (userIdToShare != null && userIdToShare.intValue() > 0) {
+            FolderPermission p = createPermissionFor(userIdToShare, BITS_VIEWER, Boolean.FALSE);
+            perm.add(p);
+        }
+        folder.setPermissions(perm);
+        body.setFolder(folder);
+        FolderUpdateResponse response = api.createFolder(parentFolderId, body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;
@@ -218,7 +259,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         perm.add(p2);
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api2.createFolder(getPrivateInfostoreFolder(api2.getApiClient()), api2.getApiClient().getSession(), body, TREE, null, null, null);
+        FolderUpdateResponse response = api2.createFolder(getPrivateInfostoreFolder(api2.getApiClient()), body, TREE, null, null, null);
         return response.getData();
     }
 

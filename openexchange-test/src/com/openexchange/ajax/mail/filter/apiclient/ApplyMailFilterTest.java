@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.apiclient;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static java.lang.Boolean.FALSE;
 import static org.junit.Assert.assertEquals;
@@ -102,7 +101,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         folder.setTitle(ApplyMailFilterTest.class.getSimpleName() + "_" + System.currentTimeMillis());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", getSessionId(), body, "0", null, null, null);
+        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", body, "0", null, null, null);
         assertNull(createFolder.getErrorDesc(), createFolder.getError());
         String folderId = rememberFolder(createFolder.getData());
 
@@ -110,36 +109,38 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         File f = new File(testMailDir, "mailfilter1.eml");
         Assert.assertTrue(f.exists());
-        MailImportResponse importResponse = mailApi.importMail(getSessionId(), folderId, f, null, B(true));
+
+        MailImportResponse importResponse = mailApi.importMail(folderId, f, null, Boolean.TRUE);
         Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
         f = new File(testMailDir, "mailfilter2.eml");
         Assert.assertTrue(f.exists());
-        importResponse = mailApi.importMail(getSessionId(), folderId, f, null, B(true));
+
+        importResponse = mailApi.importMail(folderId, f, null, Boolean.TRUE);
         Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
         List<MailDestinationData> data = importResponse.getData();
         Assert.assertNotNull(data);
         Assert.assertEquals(1, data.size());
         String matchingMailId = data.get(0).getId();
         // Add a new sieve rule and remember its id
-        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getSessionId(), getRule(), null);
+        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getRule(), null);
         Assert.assertNull(response.getErrorDesc(), response.getError());
         Integer ruleId = rememberSieveRule(response.getData());
 
         // Check amount of mails
-        MailsResponse allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+        MailsResponse allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
         Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
         Assert.assertNotNull(allMails.getData());
         Assert.assertEquals("Unexpected amount of mails returned.", 2, allMails.getData().size());
 
         // apply the rule to the new folder
-        MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(getSessionId(), ruleId, null, folderId);
+        MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(ruleId, null, folderId);
         // Check result is ok
         Assert.assertNull(applyPredefinedRule.getErrorDesc(), applyPredefinedRule.getError());
         Assert.assertNotNull(applyPredefinedRule.getData());
         Assert.assertEquals("Invalid size of results", 1, applyPredefinedRule.getData().size());
         applyPredefinedRule.getData().stream().forEach(m -> assertEquals(ResultEnum.OK, m.getResult()));
         // Check one mail is properly marked as deleted
-        allMails = mailApi.getAllMails(getSessionId(), folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
+        allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
         Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
         Assert.assertNotNull(allMails.getData());
         Assert.assertEquals("Unexpected amount of mails returned.", 1, allMails.getData().size());

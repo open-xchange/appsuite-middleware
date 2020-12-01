@@ -263,7 +263,10 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
         if (FileStorageCapability.RESTORE.equals(capability)) {
             return Boolean.FALSE;
         }
-        return FileStorageCapabilityTools.supportsByClass(XctxFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(XctxFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(XctxFolderAccess.class, capability);
     }
 
     @Override

@@ -4,8 +4,9 @@
     tags:
       - Multifactor
     summary: Starts the process of authentication against a multifactor device
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamMultifactorProviderName'
       - $ref: '#/components/parameters/QueryParamMultifactorDeviceId'
     responses:

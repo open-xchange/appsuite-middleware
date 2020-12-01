@@ -4,8 +4,9 @@
     tags:
       - OAuth
     summary: Initializes the creation of an OAuth account.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
         description: >-

@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
@@ -66,7 +67,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.WRITE_MAIL)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class AutosaveAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutosaveAction.class);

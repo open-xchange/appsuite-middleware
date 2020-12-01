@@ -2,7 +2,7 @@ type: object
 properties:
   id:
     type: string
-    description: An address
+    description: The identifier
   from:
     $ref: Address.yaml
   to:
@@ -53,3 +53,18 @@ properties:
     $ref: SharedAttachments.yaml
   security:
     $ref: Security.yaml
+  customHeaders:
+    type: object
+    additionalProperties:
+      type: string
+  mailPath:
+    type: object
+    description: The path to the draft message reflecting composition space
+    properties:
+      id:
+        type: string
+        description: The identifier of the draft message
+      folderId:
+        type: string
+        description: The identifier of the folder in which the draft message resides
+

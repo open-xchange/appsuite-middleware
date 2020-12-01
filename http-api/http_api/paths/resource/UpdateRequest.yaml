@@ -3,9 +3,10 @@
     operationId: updateResource
     tags:
       - Resources
-    summary: Updates a resource.
+    summary: Updates a resource
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: ID of the resource that shall be updated.

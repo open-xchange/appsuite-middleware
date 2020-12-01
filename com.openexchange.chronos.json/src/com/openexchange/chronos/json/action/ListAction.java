@@ -56,12 +56,11 @@ import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -72,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+@RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.READ)
 public class ListAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_FIELDS);

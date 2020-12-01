@@ -200,7 +200,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         }
 
         ImmutableMessage message = ImmutableMessage.builder().fromMessage(compositionSpace.getMessage()).build();
-        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified());
+        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified(), compositionSpace.getClientToken());
     }
 
     @Override
@@ -221,7 +221,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc, optionalEncrypt);
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
-        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId().getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId());
+        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId().getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId(), persistentCompositionSpace.getClientToken());
         spacesById.put(persistentCompositionSpace.getId().getId(), compositionSpace);
 
         return compositionSpace;
@@ -251,7 +251,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         compositionSpace.getMessage().applyFromMessageDescription(messageDesc);
 
         ImmutableMessage message = ImmutableMessage.builder().fromMessage(compositionSpace.getMessage()).build();
-        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified());
+        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified(), compositionSpace.getClientToken());
     }
 
     @Override

@@ -4,11 +4,12 @@
     tags:
       - JSlob
     summary: Stores or deletes a JSlob.
+    security: 
+        - session: []    
     description: >-
       To delete a JSON configuration just send an empty request body for the
       specified `id`.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The JSlob indentifier.

@@ -205,7 +205,7 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
                 .fromMessage(compositionSpace.getMessage())
                 .withContent(plainContent)
                 .build();
-            ImmutableCompositionSpace decryptedSpace = new ImmutableCompositionSpace(compositionSpaceId, null, msg, compositionSpace.getLastModified());
+            ImmutableCompositionSpace decryptedSpace = new ImmutableCompositionSpace(compositionSpaceId, null, msg, compositionSpace.getLastModified(), compositionSpace.getClientToken());
             return new DecryptResult(decryptedSpace, true);
         } catch (OXException e) {
             if (errorIfNotDecryptable) {

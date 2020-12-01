@@ -108,6 +108,9 @@ public class HeaderUtility {
     /** "X-OX-Composition-Space-Id" */
     public static final String HEADER_X_OX_COMPOSITION_SPACE_ID = MessageHeaders.HDR_X_OX_COMPOSITION_SPACE_ID;
 
+    /** {@value MessageHeaders#HDR_X_OX_CLIENT_TOKEN} */
+    public static final String HEADER_X_OX_CLIENT_TOKEN = MessageHeaders.HDR_X_OX_CLIENT_TOKEN;
+
     /**
      * Initializes a new {@link HeaderUtility}.
      */

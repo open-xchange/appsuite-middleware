@@ -4,8 +4,8 @@
     tags:
       - System
     summary: Returns information about the session
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

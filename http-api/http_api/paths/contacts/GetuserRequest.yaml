@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Gets a contact by user ID.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: User ID (not Object ID) of the requested user.
@@ -24,3 +27,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

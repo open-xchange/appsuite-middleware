@@ -69,6 +69,7 @@ public class OAuthInvalidTokenException extends OAuthRequestException {
         TOKEN_EXPIRED,
         TOKEN_UNKNOWN,
         TOKEN_MISSING,
+        TOKEN_INVALID,
         INVALID_AUTH_SCHEME
     }
 
@@ -76,6 +77,7 @@ public class OAuthInvalidTokenException extends OAuthRequestException {
     static {
         DESCRIPTIONS.put(Reason.TOKEN_EXPIRED, "The passed access token is expired.");
         DESCRIPTIONS.put(Reason.TOKEN_MALFORMED, "The passed access token is malformed.");
+        DESCRIPTIONS.put(Reason.TOKEN_INVALID, "The passed access token was rejected");
         DESCRIPTIONS.put(Reason.TOKEN_UNKNOWN, "The passed access token is unknown to the server.");
         DESCRIPTIONS.put(Reason.INVALID_AUTH_SCHEME, "Invalid auth scheme, must always be 'Bearer'.");
     }

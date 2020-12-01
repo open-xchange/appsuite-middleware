@@ -52,7 +52,6 @@ package com.openexchange.file.storage.json.actions.accounts;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,8 +71,6 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -158,18 +155,5 @@ public class AllAction extends AbstractFileStorageAccountAction {
         return requestResult;
     }
 
-    private static Locale localeFrom(final Session session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        try {
-            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
-        } catch (OXException e) {
-            return Locale.US;
-        }
-    }
 
 }

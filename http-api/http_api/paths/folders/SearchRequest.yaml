@@ -1,0 +1,51 @@
+/folders?action=search:
+  get:
+    operationId: searchFolder
+    tags:
+      - Folders
+    summary: Searches folders by folder name.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamFolderTree'
+      - name: columns
+        in: query
+        description: >-
+          A comma-separated list of columns to return, like "1,300". Each column is
+          specified by a numeric column identifier, see [Common folder data](#common-folder-data)
+          and [Detailed folder data](#detailed-folder-data).
+          Defaults to "1,2,3,5,51,52,300" (id,created_by,modified_by,creation_date,last_modified,created_from,modified_from,title)
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: id
+        description: Object ID of the folder used as root folder for the search.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: module
+        description: Module identifier to search, only valid values for 7.10.5 are "files" or "infostore".
+        required: true
+        schema:
+          type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderSearchBody'
+      description: A JSON object containing the search body
+      required: true
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with matching folders. The elements of each array
+          contain the information specified by the corresponding identifiers in the `columns`
+          parameter. In case of errors the responsible fields in the response are filled (see
+          [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema: 
+              type: array
+              items:
+                $ref: '#/components/schemas/FolderData'

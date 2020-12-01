@@ -4,13 +4,16 @@
     tags:
       - Contacts
     summary: Updates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts
     description: >
       Updates a contact's data. This request cannot change or add contact
       images. Therefore it
 
       is necessary to use the `POST` method.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - in: query
         name: id
@@ -27,6 +30,16 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactData'
+      description: >-
+        A JSON object containing the contact's data. Only modified fields must
+        be specified. To remove some contact image send the image attribute set
+        to null.
+      required: true          
     responses:
       '200':
         description: >
@@ -38,21 +51,19 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContactData'
-      description: >-
-        A JSON object containing the contact's data. Only modified fields must
-        be specified. To remove some contact image send the image attribute set
-        to null.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               
   post:
     operationId: updateContactAdvanced
     tags:
       - Contacts
     summary: Updates a contact.
+    security: 
+        - session: []
+        - oauth:
+          - write_contacts    
     description: >
       Updates a contact's data and images. The normal request body must be
       placed as form-data using the
@@ -63,7 +74,6 @@
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - in: query
         name: id
@@ -80,15 +90,6 @@
         schema:
           type: integer
           format: int64
-    responses:
-      '200':
-        description: >
-          A HTML page as described in [File uploads](#file-uploads) containing
-          the object ID of the contact or errors if some occurred.
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -110,4 +111,17 @@
                 format: binary
             required:
               - json
-              - file
+              - file          
+    responses:
+      '200':
+        description: >
+          A HTML page as described in [File uploads](#file-uploads) containing
+          the object ID of the contact or errors if some occurred.
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

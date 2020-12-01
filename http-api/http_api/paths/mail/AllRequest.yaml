@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets all mails.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - $ref: '#/components/parameters/gblQueryParamMailColumns'
       - $ref: '#/components/parameters/gblQueryParamMailHeaders'
@@ -81,3 +84,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

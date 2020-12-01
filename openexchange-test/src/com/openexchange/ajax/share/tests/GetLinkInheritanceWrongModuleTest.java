@@ -229,7 +229,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
         data.setModule("calendar");
-        ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
+        ShareLinkResponse shareLink = shareManagementApi.getShareLink(data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();

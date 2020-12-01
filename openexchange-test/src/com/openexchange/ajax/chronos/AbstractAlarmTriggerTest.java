@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -93,8 +94,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         rememberClient(enhancedClient);
 
         user2 = new UserApi(client, enhancedClient, testUser2, false);
-        folderId2 = getDefaultFolder(user2.getSession(), client);
-        eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
+        folderId2 = getDefaultFolder(client);
+        eventManager2 = new EventManager(user2, getDefaultFolder(client));
     }
 
     /**
@@ -121,6 +122,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
                 }
             }
         }
+        assertNotNull(result);
         assertEquals(expected, result.size());
         return result;
     }

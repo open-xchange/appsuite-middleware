@@ -91,7 +91,10 @@ public final class BoxAccountAccess implements CapabilityAware {
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(BoxFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(BoxFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(BoxFolderAccess.class, capability);
     }
 
     /**

@@ -99,7 +99,7 @@ public class ChangePrimaryMailAccountNameTest extends AbstractAPIClientSession {
 
     private MailAccountData getPrimaryAccount() throws ApiException {
         final String columns = Attribute.ID_LITERAL.getId()+","+Attribute.NAME_LITERAL.getId();
-        MailAccountsResponse response = accountApi.getAllAccounts(getSessionId(), columns);
+        MailAccountsResponse response = accountApi.getAllAccounts(columns);
 
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
@@ -119,7 +119,7 @@ public class ChangePrimaryMailAccountNameTest extends AbstractAPIClientSession {
 
     private void updateMailAccount(MailAccountData account, String newName) throws ApiException {
         account.setName(newName);
-        MailAccountUpdateResponse updateAccount = accountApi.updateAccount(getSessionId(), account);
+        MailAccountUpdateResponse updateAccount = accountApi.updateAccount(account);
         assertNull(updateAccount.getErrorDesc(), updateAccount.getError());
         assertNotNull(updateAccount.getData());
     }

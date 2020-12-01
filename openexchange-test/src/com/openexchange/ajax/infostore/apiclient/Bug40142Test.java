@@ -119,7 +119,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         actual.setFilename("name.name.txt.pgp");
         InfoItemBody body = new InfoItemBody();
         body.setFile(actual);
-        InfoItemUpdateResponse response = infostoreApi.updateInfoItem(getApiClient().getSession(), actual.getId(), timestamp, body, null);
+        InfoItemUpdateResponse response = infostoreApi.updateInfoItem(actual.getId(), timestamp, body, null);
         assertNull(response.getErrorDesc(), response.getError());
 
         InfoItemData changed = getItem(actual.getId());
@@ -138,7 +138,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
             actual = getItem(uploadInfoItem);
             assertEquals("Name should be the same", filename, actual.getFilename());
         }
-        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getApiClient().getSession(), actual.getId(), actual, null);
+        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(actual.getId(), actual, null);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         String newId = response.getData();
@@ -182,7 +182,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         deleteInfoItems(Collections.singletonList(element), Boolean.FALSE);
 
         ConfigApi configAPI = new ConfigApi(getApiClient());
-        ConfigResponse response = configAPI.getConfigNode("/modules/infostore/folder/trash", getApiClient().getSession());
+        ConfigResponse response = configAPI.getConfigNode("/modules/infostore/folder/trash");
 
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());

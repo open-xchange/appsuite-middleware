@@ -320,7 +320,7 @@ public abstract class PasswordChangeService {
         final EventAdmin eventAdmin = serviceRegistry.getService(EventAdmin.class);
         final int contextId = session.getContextId();
         if (null != eventAdmin) {
-            final Map<String, Object> properties = new HashMap<String, Object>(5);
+            final Map<String, Object> properties = new HashMap<String, Object>(8);
             properties.put("com.openexchange.passwordchange.contextId", Integer.valueOf(contextId));
             properties.put("com.openexchange.passwordchange.userId", Integer.valueOf(userId));
             properties.put("com.openexchange.passwordchange.session", session);

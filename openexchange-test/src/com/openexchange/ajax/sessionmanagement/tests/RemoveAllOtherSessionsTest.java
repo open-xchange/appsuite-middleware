@@ -69,8 +69,8 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     public void testRemoveAllOtherSessions() throws Exception {
         String sessionId = apiClient.getSession();
 
-        getApi().clear(sessionId);
-        AllSessionsResponse response = getApi().all(sessionId);
+        getApi().clear();
+        AllSessionsResponse response = getApi().all();
         Collection<SessionManagementData> sessions = response.getData();
         Assert.assertThat("Not all clients has been removed", new Integer(1), is(Integer.valueOf(sessions.size())));
 
@@ -85,15 +85,15 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
         // Third client
         String sessionId = apiClient.getSession();
 
-        AllSessionsResponse response = getApi().all(sessionId);
+        AllSessionsResponse response = getApi().all();
         Collection<SessionManagementData> sessions = response.getData();
 
         // Should not see blacklisted client
         Assert.assertThat("Blacklisted client is visible!", Integer.valueOf(sessions.size()), is(Integer.valueOf(2)));
 
-        getApi().clear(sessionId);
+        getApi().clear();
 
-        response = getApi().all(sessionId);
+        response = getApi().all();
         sessions = response.getData();
 
         // Should not see blacklisted client, client2 should have been loged out

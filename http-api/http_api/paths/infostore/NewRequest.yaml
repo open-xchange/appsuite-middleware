@@ -4,13 +4,14 @@
     tags:
       - Infostore
     summary: Creates an infoitem.
+    security: 
+        - session: []    
     description: >
       Creates a new infoitem. This request cannot add a file to the infoitem.
       Therefor it
 
       is necessary to use the `POST` method.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the infoitem that shall be updated.
@@ -59,6 +60,8 @@
     tags:
       - Infostore
     summary: Creates an infoitem.
+    security: 
+        - session: []    
     description: >
       Creates a new infoitem with a file. The normal request body must be placed
       as form-data using the
@@ -69,7 +72,6 @@
       must be placed in a file field named `file` (see also [File
       uploads](#file-uploads)).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: try_add_version
         description: Add new file version if file name exists

@@ -161,7 +161,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         checkMail(summary, time, getDates(expectedSentDate), 0);
     }
-    
+
     List<Long> getDates(long expectedSentDate){
         return Collections.singletonList(L(expectedSentDate));
     }
@@ -203,7 +203,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     private TimeZone getUserTimeZone() throws ApiException {
-        UserResponse userResponse = userApi.getUser(getSessionId(), null);
+        UserResponse userResponse = userApi.getUser(null);
         Assert.assertNull(userResponse.getErrorDesc(), userResponse.getError());
         Assert.assertNotNull(userResponse.getData());
         UserData data = userResponse.getData();
@@ -212,7 +212,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     private void checkMail(String summary, Calendar time, List<Long> expectedSentDates, int mails) throws ApiException {
-        MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, Boolean.FALSE, Boolean.FALSE, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, Integer.valueOf(100), null);
+        MailsResponse mailResponse = mailApi.getAllMails("default0/INBOX", getColumns(), null, Boolean.FALSE, Boolean.FALSE, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, Integer.valueOf(100), null);
         Assert.assertNull(mailResponse.getError());
         Assert.assertNotNull(mailResponse.getData());
         int found = 0;
@@ -229,7 +229,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                 MailListElement element = new MailListElement();
                 element.setFolder("default0/INBOX");
                 element.setId(mail.get(0));
-                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), L(Long.MAX_VALUE), null, null);
+                mailApi.deleteMails(Collections.singletonList(element), L(Long.MAX_VALUE), null, null);
                 found++;
                 boolean matchAnySentDate = false;
                 long closest = 0;

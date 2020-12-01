@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Marks all mails of a folder as seen.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
     responses:
       '200':
@@ -18,3 +21,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailsAllSeenResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

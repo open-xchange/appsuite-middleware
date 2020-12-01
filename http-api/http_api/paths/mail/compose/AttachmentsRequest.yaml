@@ -4,14 +4,16 @@
     tags:
       - MailCompose
     summary: Add new attachment.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the newly added attachment.

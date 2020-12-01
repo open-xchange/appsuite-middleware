@@ -72,11 +72,14 @@ public class OAuthConstants {
     /**
      * The Servlet alias sub-prefix for OAuth accesses:<br>
      * <pre>
-     *  [prefix] + "oauth/modules/" + [module]
+     * [prefix] + "oauth/modules/" + [module]
      * </pre>
      * Example<br>
      * <code>"/ajax/<b>oauth/modules/</b>contacts"</code>
+     * 
+     * @deprecated Modules can now be accessed via the normal path
      */
+    @Deprecated
     public static final String OAUTH_SERVLET_SUBPREFIX = "oauth/modules/";
 
 }

@@ -149,7 +149,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         checkFolderPermissions(D, 1, 1);
 
         // Move sub-folder to no-link folder
-        folderManager.moveFolder(B, D);
+        folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
         checkFolderPermissions(B, 2, 2);
@@ -159,7 +159,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         checkFolderPermissions(D, 1, 1);
 
         // Move sub-folder back to parent folder
-        folderManager.moveFolder(B, A);
+        folderManager.moveFolder(B, A, Boolean.TRUE);
 
         // Check sub-folder
         checkFolderPermissions(B, 2, 3, guestId);
@@ -182,7 +182,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         checkFolderPermissions(D, 1, 1);
 
         // Move sub-folder to no-link folder
-        folderManager.moveFolder(B, D);
+        folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
         checkFolderPermissions(B, 1, 1);
@@ -270,7 +270,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
         data.setModule(INFOSTORE);
-        ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
+        ShareLinkResponse shareLink = shareManagementApi.getShareLink(data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();

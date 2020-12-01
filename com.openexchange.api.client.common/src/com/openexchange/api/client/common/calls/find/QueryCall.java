@@ -490,6 +490,9 @@ public class QueryCall<O, E extends Enum<E>> extends AbstractPutCall<FindRespons
                             resultObjectMapper.getMappedFields(columns) :
                             resultObjectMapper.getMappedFields(calendarFields);
                     //@formatter:on
+                    if (null == mappedFields) {
+                        throw new IllegalArgumentException("mappedFields");
+                    }
                     results = new ArrayList<>(resultArray.length());
                     for (int i = 0; i < resultArray.length(); i++) {
                         results.add(resultObjectMapper.deserialize(resultArray.getJSONObject(i), mappedFields));

@@ -185,7 +185,7 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
     protected List<String> deleteFolder(String folderId, boolean hardDelete) throws ApiException {
         final boolean failOnError = true;
         final boolean extendedResponse = false;
-        FoldersCleanUpResponse response = foldersApi.deleteFolders(getSessionId(), Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, Boolean.FALSE);
+        FoldersCleanUpResponse response = foldersApi.deleteFolders(Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, Boolean.FALSE);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 

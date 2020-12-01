@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Moves one infoitem to another folder.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the infoitem to move.
@@ -31,6 +32,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
     responses:
       '200':
         description: >
@@ -44,14 +46,15 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InfoItemsMovedResponse'
+              $ref: '#/components/schemas/InfoItemMovedResponse'
   put:
     operationId: moveInfoItems
     tags:
       - Infostore
-    summary: Moves one or more infoitems to another folder.
+    summary: Moves one or more infoitems to another folder
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: ID of the destination folder.
@@ -64,6 +67,7 @@
         required: false
         schema:
           type: string
+      - $ref: '#/components/parameters/glbQueryParamsIgnoreWarnings'
     responses:
       '200':
         description: >

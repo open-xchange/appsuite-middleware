@@ -299,13 +299,13 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
             for (DataExportTask task : service.getDataExportTasks()) {
                 if (task.getResultFiles() != null) {
                     for (DataExportResultFile resultFile : task.getResultFiles()) {
-                        if (resultFile.getFileStorageLocation() != null && allFiles.containsKey(resultFile.getFileStorageLocation())) {
+                        if (resultFile.getFileStorageLocation() != null) {
                             allFiles.remove(resultFile.getFileStorageLocation());
                         }
                     }
                 }
                 for (DataExportWorkItem item : task.getWorkItems()) {
-                    if (item.getFileStorageLocation() != null && allFiles.containsKey(item.getFileStorageLocation())) {
+                    if (item.getFileStorageLocation() != null) {
                         allFiles.remove(item.getFileStorageLocation());
                     }
                 }
@@ -318,39 +318,45 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
     }
 
     private List<Pair<DataExportTask, DataExportWorkItem>> getOrphanedWorkItems_() throws RemoteException {
-        List<Pair<DataExportTask, DataExportWorkItem>> retval = new ArrayList<>();
         try {
             List<DataExportTask> tasks = service.getDataExportTasks();
+            List<Pair<DataExportTask, DataExportWorkItem>> retval = null;
             for (DataExportTask task : tasks) {
                 SortedSet<String> fileList = DataExportUtility.getFileStorageFor(task).getFileList();
                 for (DataExportWorkItem item : task.getWorkItems()) {
                     if (item.getFileStorageLocation() != null && !fileList.contains(item.getFileStorageLocation())) {
+                        if (retval == null) {
+                            retval = new ArrayList<>();
+                        }
                         retval.add(Pair.of(task, item));
                     }
                 }
             }
+            return retval == null ? Collections.emptyList() : retval;
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
         }
-        return retval;
     }
 
     private List<Pair<DataExportTask, DataExportResultFile>> getOrphanedResultFiles_() throws RemoteException {
         try {
             List<DataExportTask> tasks = service.getDataExportTasks();
-            List<Pair<DataExportTask, DataExportResultFile>> retval = new ArrayList<>(tasks.size());
+            List<Pair<DataExportTask, DataExportResultFile>> retval = null;
             for (DataExportTask task : tasks) {
                 if (task.getResultFiles() != null && !task.getResultFiles().isEmpty()) {
                     SortedSet<String> fileList = DataExportUtility.getFileStorageFor(task).getFileList();
                     for (DataExportResultFile resultFile : task.getResultFiles()) {
                         if (resultFile.getFileStorageLocation() != null && !fileList.contains(resultFile.getFileStorageLocation())) {
+                            if (retval == null) {
+                                retval = new ArrayList<>();
+                            }
                             retval.add(Pair.of(task, resultFile));
                         }
                     }
                 }
             }
-            return retval;
+            return retval == null ? Collections.emptyList() : retval;
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);

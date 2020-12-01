@@ -4,8 +4,9 @@
     tags:
       - MailCompose
     summary: Load the composition space under the given identifier
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space
@@ -28,14 +29,16 @@
     tags:
       - MailCompose
     summary: Deletes the composition space under the given identifier
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the success status.
@@ -59,17 +62,19 @@
     tags:
       - MailCompose
     summary: Updates the composition space
+    security: 
+        - session: []    
     description: >-
       Payload is JSON that reflects changes. Response is the current composition
       space message model after update.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the updated composition space.
@@ -85,7 +90,7 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MailComposeMessageModel'
+            $ref: '#/components/schemas/MailComposeRequestMessageModel'
       description: An object containing the attributes to update
       required: true
   patch:
@@ -93,19 +98,21 @@
     tags:
       - MailCompose
     summary: Patches the composition space
+    security: 
+        - session: []    
     description: >-
       Payload is JSON that reflects changes. Response is the current composition
       space message model after update.
 
       Note that it is not possible to change the attachments collection during this call.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: path
         name: id
         description: The ID of the composition space
         required: true
         schema:
           type: string
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the updated composition space.
@@ -121,6 +128,6 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MailComposeMessageModel'
+            $ref: '#/components/schemas/MailComposeRequestMessageModel'
       description: An object containing the attributes to update
       required: true

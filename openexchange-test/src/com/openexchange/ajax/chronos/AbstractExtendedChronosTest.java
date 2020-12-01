@@ -69,6 +69,7 @@ import com.openexchange.testing.httpclient.models.UserResponse;
  */
 public class AbstractExtendedChronosTest extends AbstractChronosTest {
 
+    @SuppressWarnings("hiding")
     protected ApiClient apiClient2;
 
     protected UserApi userApi2;
@@ -95,7 +96,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
         rememberClient(enhancedClient);
         userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, true);
 
-        folderId2 = getDefaultFolder(userApi2.getSession(), apiClient2);
+        folderId2 = getDefaultFolder(apiClient2);
         eventManager2 = new EventManager(userApi2, folderId2);
     }
 
@@ -112,7 +113,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
 
     /**
      * Create an attendee our of given user
-     * 
+     *
      * @param userId The identifier of the user
      * @return an {@link Attendee}
      * @throws ApiException If creating fails
@@ -131,21 +132,21 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
 
     /**
      * Get the user information for the specified user
-     * 
+     *
      * @param userId The identifier of the user
      * @return The {@link UserData} for the suer
      * @throws ApiException
      */
     protected UserData getUserInformation(Integer userId) throws ApiException {
         com.openexchange.testing.httpclient.modules.UserApi api = new com.openexchange.testing.httpclient.modules.UserApi(getApiClient());
-        UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
+        UserResponse userResponse = api.getUser(String.valueOf(userId));
         return userResponse.getData();
     }
 
     /**
      * Prepares an new (delta) event out of the current event.
      * Sets recurrence ID and the attendees. See {@link #prepareEventUpdate(EventData)}, too.
-     * 
+     *
      * @param occurrence An existing event occurrence
      * @return A new (delta) {@link EventData}
      */
@@ -160,7 +161,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
     /**
      * Prepares a new (delta) event out of the current event
      * Sets the ID and the last modified timespamp
-     * 
+     *
      * @param data An existing event
      * @return A new (delta) {@link EventData}
      */

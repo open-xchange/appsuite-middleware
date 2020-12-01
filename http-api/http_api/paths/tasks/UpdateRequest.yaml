@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Updates a task.
+    security: 
+        - session: []      
+        - oauth:
+          - write_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamTaskFolder'
       - in: query
         name: id
@@ -20,6 +23,15 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskData'
+      description: >-
+        A JSON object containing the task's data. Only modified fields are
+        present.
+      required: true          
     responses:
       '200':
         description: >
@@ -31,12 +43,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TaskUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TaskData'
-      description: >-
-        A JSON object containing the task's data. Only modified fields are
-        present.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

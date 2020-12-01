@@ -59,7 +59,7 @@
         description: Basic example
         example: >
           ==> GET
-          http://192.168.32.191/ajax/drive?action=subscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677
+          http://192.168.32.191/ajax/drive?action=subscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677&mode=separate
 
 
           <== HTTP 200 OK (13.6268 ms elapsed, 11 bytes received)
@@ -100,6 +100,16 @@
         required: true
         schema:
           type: string
+      - in: query
+        name: mode
+        description: >-
+          The subscription mode supported by the client. If set to "separate", SYNC actions for directory versions where changes occurred will be returned if possible.  
+        required: false
+        schema:
+          type: string
+          enum:
+            - default
+            - separate
     responses:
       '200':
         description: >
@@ -114,7 +124,7 @@
         description: Basic example
         example: >
           ==> PUT
-          http://192.168.32.191/ajax/drive?action=subscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677
+          http://192.168.32.191/ajax/drive?action=subscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677&mode=separate
 
           > Content:
             {

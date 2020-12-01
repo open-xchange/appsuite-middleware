@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -67,6 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class ArchiveFolderAction extends AbstractArchiveMailAction {
 
     /**
@@ -78,6 +80,7 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
         super(services);
     }
 
+    @SuppressWarnings("null")
     @Override
     protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
         ServerSession session = req.getSession();

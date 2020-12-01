@@ -1,0 +1,14 @@
+type: object
+properties:
+  error:
+    type: string
+    description: The error
+    enum: 
+      - invalid_token
+      - insufficient_scope
+  error_description:
+    type: string
+    description: The error description
+  scope:
+    type: string
+    description: The missing scope

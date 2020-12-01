@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
+import com.openexchange.java.ISO8601Utils;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 
@@ -446,25 +447,37 @@ public class Meta {
 
     @Override
     public String toString() {
-        StringBuilder builder2 = new StringBuilder();
-        builder2.append("[");
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
         if (type != null) {
-            builder2.append("type=").append(type).append(", ");
+            sb.append("type=").append(type);
         }
         if (date != null) {
-            builder2.append("date=").append(date).append(", ");
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("date=").append(ISO8601Utils.format(date, false));
         }
         if (replyFor != null) {
-            builder2.append("replyFor=").append(replyFor).append(", ");
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("replyFor=").append(replyFor);
         }
         if (forwardsFor != null) {
-            builder2.append("forwardsFor=").append(forwardsFor).append(", ");
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("forwardsFor=").append(forwardsFor);
         }
         if (editFor != null) {
-            builder2.append("editFor=").append(editFor);
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("editFor=").append(editFor);
         }
-        builder2.append("]");
-        return builder2.toString();
+        sb.append(']');
+        return sb.toString();
     }
 
 }

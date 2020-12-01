@@ -116,6 +116,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAccountAction.class);
 
+    protected static final String MODULE = "mailaccount";
+
     /** The service identifier for JSlob */
     public static final String JSLOB_SERVICE_ID = "com.openexchange.mailaccount";
 

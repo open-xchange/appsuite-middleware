@@ -1,0 +1,20 @@
+type: object
+properties:
+  query:
+    type: string
+    description: The query to search
+  start:
+    type: integer
+    description: The start of a pagination, if desired. Defaults to `0`.
+  size:
+    type: integer
+    description: The page size of a pagination, if desired. Defaults to `50`.
+  includeSubfolders:
+    type: boolean
+    description: Search in subfolders of given root folder too, defaults to `true`.
+  all:
+    type: boolean
+    description: Deliver all subfolders regardless of their subscribed status, defaults to `true`.
+  date:
+    type: long
+    description: The time stamp to limit search result to folders that are newer, defaults to `-1`.

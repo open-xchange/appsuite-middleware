@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Retreives a list of all countries that are supported by SchedJoules.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosSchedJoulesLanguage'
     responses:
       '200':

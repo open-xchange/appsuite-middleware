@@ -47,25 +47,47 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.file.storage;
 
+import com.openexchange.groupware.EntityInfo;
 
 /**
- * {@link MailOAuthConstants}
+ * {@link SimFileStorageFolder}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class MailOAuthConstants {
+public class SimFileStorageFolder extends AbstractRootFolder {
 
     /**
-     * Initializes a new {@link MailOAuthConstants}.
+     * Initializes a new {@link SimFileStorageFolder}.
      */
-    private MailOAuthConstants() {
+    public SimFileStorageFolder() {
         super();
     }
 
-    /** The OAuth scope granting permission to send a RFC822 data block via primary account's transport*/
-    public static final String OAUTH_SEND_DATA = "send_data";
+    @Override
+    public EntityInfo getCreatedFrom() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public int getFileCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
 }

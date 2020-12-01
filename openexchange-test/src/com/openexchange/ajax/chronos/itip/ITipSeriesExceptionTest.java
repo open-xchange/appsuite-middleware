@@ -115,7 +115,7 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         deltaEvent.getAttendees().add(replyingAttendee);
 
         UpdateEventBody body = getUpdateBody(deltaEvent);
-        ChronosCalendarResultResponse result = chronosApi.updateEvent(apiClient.getSession(), defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
+        ChronosCalendarResultResponse result = chronosApi.updateEvent(defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
         /*
          * Check result
          */

@@ -81,6 +81,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.capabilities.CapabilityService;
@@ -102,7 +103,6 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.preferences.ServerUserSetting;
@@ -123,6 +123,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetAction extends AbstractMailAction {
 
     /** The logger constant */
@@ -429,7 +430,7 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Check whether preview should be pre-generated
                  */
-                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS)) && hasPreviewEnabled(req)) {                        
+                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS)) && hasPreviewEnabled(req)) {
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
                     ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
                     if (null != previewService && null != threadPool) {

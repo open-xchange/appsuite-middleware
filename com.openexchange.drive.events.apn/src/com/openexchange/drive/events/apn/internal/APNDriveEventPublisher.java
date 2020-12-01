@@ -133,7 +133,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
                  * APN with certificate in keystore is configured
                  */
                 String keystore = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keystore, optionals);
-                if (Strings.isEmpty(keystore)) {
+                if (Strings.isNotEmpty(keystore)) {
                     String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
                     boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
                     String topic = configService.getProperty(userId, contextId, DriveEventsAPNProperty.topic, optionals);

@@ -119,7 +119,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         contactFolderId = getDefaultFolder(apiClient.getSession(), new FoldersApi(apiClient));
         userId = getUserId();
 
-        UserResponse resp = new UserApi(apiClient).getUser(apiClient.getSession(), String.valueOf(userId));
+        UserResponse resp = new UserApi(apiClient).getUser(String.valueOf(userId));
         assertNull(resp.getErrorDesc(), resp.getError());
         assertNotNull(resp.getData());
         tz = TimeZone.getTimeZone(resp.getData().getTimezone());
@@ -181,7 +181,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "contacts", "1,308", "0", null, Boolean.TRUE);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders("contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -450,7 +450,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
      * @throws Exception
      */
     public String createContact(final ContactData contactObj) throws Exception {
-        ContactUpdateResponse response = contactsApi.createContact(apiClient.getSession(), contactObj);
+        ContactUpdateResponse response = contactsApi.createContact(contactObj);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         lastTimestamp = response.getTimestamp();
@@ -473,7 +473,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         }
         if (!body.isEmpty()) {
             try {
-                contactsApi.deleteContacts(getSessionId(), Long.valueOf(Long.MAX_VALUE), body);
+                contactsApi.deleteContacts(Long.valueOf(Long.MAX_VALUE), body);
             } catch(@SuppressWarnings("unused") Exception e) {
                 // ignore
             }
@@ -482,12 +482,12 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
     }
 
     public void updateContact(final ContactData contactObj, String folder) throws Exception {
-        ContactUpdateResponse updateContact = contactsApi.updateContact(apiClient.getSession(), folder, contactObj.getId(), lastTimestamp, contactObj);
+        ContactUpdateResponse updateContact = contactsApi.updateContact(folder, contactObj.getId(), lastTimestamp, contactObj);
         assertNull(updateContact.getErrorDesc(), updateContact.getError());
     }
 
     public ContactData loadContact(final String objectId, final String folder) throws Exception {
-        ContactResponse response = contactsApi.getContact(apiClient.getSession(), objectId, folder);
+        ContactResponse response = contactsApi.getContact(objectId, folder);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         lastTimestamp = response.getTimestamp();

@@ -152,7 +152,7 @@ public class Bug65533Test extends AbstractITipTest {
         tmpFile = File.createTempFile("test", ".tmp");
         writer = new FileWriter(tmpFile);
         writer.write(iMip);
-        MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(apiClientC2.getSession(), tmpFile, null, null);
+        MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(tmpFile, null, null);
         assertNull(response.getError(), response.getError());
 
         /*
@@ -173,7 +173,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * check event in calendar
          */
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         eventData = eventResponse.getData();
         rememberForCleanup(eventData);
@@ -190,7 +190,7 @@ public class Bug65533Test extends AbstractITipTest {
         assertTrue(null != attachment.getSize());
         assertTrue(attachment.getSize().longValue() >= 177103);
         assertTrue(attachment.getSize().longValue() <= 177115);
-        byte[] attachmentData = chronosApi.getEventAttachment(apiClient.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
+        byte[] attachmentData = chronosApi.getEventAttachment(eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
          * receive & analyze iMIP reply as user b, too

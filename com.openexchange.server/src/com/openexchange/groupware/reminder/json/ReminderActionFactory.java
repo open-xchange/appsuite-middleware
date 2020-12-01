@@ -66,8 +66,10 @@ import com.openexchange.server.ServiceLookup;
 @OAuthModule
 public class ReminderActionFactory implements AJAXActionServiceFactory {
 
+    @Deprecated
     public static final String OAUTH_READ_SCOPE = "read_reminders";
 
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_reminders";
 
     private final Map<String, AbstractReminderAction> actions;

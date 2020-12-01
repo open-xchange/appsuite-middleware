@@ -4,8 +4,9 @@
     tags:
       - Groups
     summary: Updates a group.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: ID of the group that shall be updated.

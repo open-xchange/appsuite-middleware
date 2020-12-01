@@ -4,8 +4,8 @@
     tags:
       - Pns
     summary: Adds a new subscription associated with a token for certain topics
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

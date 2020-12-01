@@ -4,8 +4,8 @@
     tags:
       - sessionmanagement
     summary: Removes all user's session except given and blacklisted
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

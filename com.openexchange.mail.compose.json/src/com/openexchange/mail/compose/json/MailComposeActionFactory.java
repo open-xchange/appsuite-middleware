@@ -54,7 +54,6 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.json.action.AbstractMailComposeAction;
 import com.openexchange.mail.compose.json.action.AddAttachmentMailComposeAction;
 import com.openexchange.mail.compose.json.action.AddOriginalAttachmentsMailComposeAction;

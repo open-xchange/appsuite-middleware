@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.folder.api_client;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -104,7 +104,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         super.setUpConfiguration();
         folderApi = new FoldersApi(getApiClient());
         UserApi userApi = new UserApi(apiClient);
-        UsersResponse resp = userApi.getAllUsers(getSessionId(), "1", null, null);
+        UsersResponse resp = userApi.getAllUsers("1", null, null);
         assertNull(resp.getError());
         assertNotNull(resp.getData());
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> allUsers = (ArrayList<ArrayList<Object>>) resp.getData();
@@ -143,7 +143,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         folder.setModule(Module.INFOSTORE.getName());
         folder.setTitle(title);
         body.setFolder(folder);
-        FolderUpdateResponse resp = folderApi.createFolder(defaultFolder, getSessionId(), body, null, null, null, null);
+        FolderUpdateResponse resp = folderApi.createFolder(defaultFolder, body, null, null, null, null);
         if(errorCode.isPresent()) {
             assertEquals(errorCode.get(), resp.getCode());
             return null;
@@ -164,7 +164,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
      */
     @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session) throws Exception {
-        FoldersVisibilityResponse visibleFolders = folderApi.getVisibleFolders(session, "infostore", "1,308", "0", null, null);
+        FoldersVisibilityResponse visibleFolders = folderApi.getVisibleFolders("infostore", "1,308", "0", null, null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -199,7 +199,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         folder.setModule(Module.INFOSTORE.getName());
         folder.setId(id);
         body.folder(folder);
-        FolderUpdateResponse resp = folderApi.updateFolder(getSessionId(), id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null);
+        FolderUpdateResponse resp = folderApi.updateFolder(id, body, Boolean.FALSE, timestamp, null, null, B(cascade), null, null, null);
         if(errorCode.isPresent()) {
             assertNotNull("Response didn't contain an exception.", resp.getError());
             assertEquals("Unexpected error: " + resp.getErrorDesc(), errorCode.get(), resp.getCode());
@@ -232,7 +232,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         try {
-            folderApi.deleteFolders(getApiClient().getSession(), createdFolders, "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            folderApi.deleteFolders(createdFolders, "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         } finally {
             super.tearDown();
         }

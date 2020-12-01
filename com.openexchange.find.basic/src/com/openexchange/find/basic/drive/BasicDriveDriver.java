@@ -51,6 +51,7 @@ package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,8 +73,10 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -92,13 +95,16 @@ import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
+import com.openexchange.find.basic.common.Comparison;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.drive.FolderDocument;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
@@ -107,6 +113,7 @@ import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -174,6 +181,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         FileStorageAccountAccess accountAccess = getAccountAccess(autocompleteRequest, session);
         boolean supportsSearchByTerm = supportsSearchByTerm(accountAccess);
+        boolean supportsSearchInFolderName = supportsSearchInFolderName(accountAccess);
         String prefix = autocompleteRequest.getPrefix();
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
 
@@ -198,6 +206,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                     .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
                     .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
                     .build());
+            }
+
+            if (supportsSearchInFolderName) {
+                facets.add(newSimpleBuilder(DriveFacetType.FOLDER_NAME).
+                    withFormattableDisplayItem(DriveStrings.SEARCH_IN_FOLDER_NAME, prefix).
+                    withFilter(Filter.of(Constants.FIELD_FOLDER_NAME, prefixTokens)).
+                    build());
             }
         }
 
@@ -224,6 +239,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                     throw FindExceptionCode.INVALID_FOLDER_ID.create(folderId, Module.DRIVE.getIdentifier());
                 }
             }
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
 
             List<Field> fields = DEFAULT_FIELDS;
             int[] columns = searchRequest.getColumns().getIntColumns();
@@ -233,7 +249,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
             IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
 
+            List<Document> results = new ArrayList<Document>();
+
             boolean includeSubfolders = searchRequest.getOptions().getBoolOption("includeSubfolders", true);
+            boolean all = searchRequest.getOptions().getBoolOption("all", true);
 
             // Sort field
             Field sortField = Field.get(searchRequest.getOptions().getOption("sort", null));
@@ -252,17 +271,46 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 }
             }
 
-            if (supportsSearchByTerm(accountAccess)) {
-                return advancedSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+            int skippedResults = 0;
+            if (supportsSearchInFolderName(accountAccess) && canSearchForFolderName(searchRequest) && (isSearchForFolderName(searchRequest) || isGlobal(searchRequest))) {
+                if (Strings.isEmpty(folderId)) {
+                    folderId = accountAccess.getRootFolder().getId();
+                }
+                long date = extractDatePattern(searchRequest);
+                String query = extractFolderNamePattern(searchRequest);
+                if (SearchableFolderNameFolderAccess.class.isInstance(folderAccess)) {
+                    SearchableFolderNameFolderAccess searchableFolderAccess = (SearchableFolderNameFolderAccess) folderAccess;
+                    FileStorageFolder[] folders = searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, searchRequest.getStart(), searchRequest.getSize());
+                    if (null != folders && folders.length > 0) {
+                        for (FileStorageFolder folder : folders) {
+                            results.add(new FolderDocument(folder));
+                        }
+                    } else {
+                        // No folders found, check if folders were skipped due to paging
+                        folders = searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, 0, searchRequest.getStart());
+                        if (null != folders && folders.length > 0) {
+                            skippedResults = folders.length;
+                        }
+                    }
+                } else {
+                    throw FindExceptionCode.UNSUPPORTED_FACET.create(DriveFacetType.FOLDER_NAME.getDisplayName(), Module.DRIVE.getIdentifier());
+                }
             }
 
-            return simpleSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+            if (false == isSearchForFolderName(searchRequest)) {
+                if (supportsSearchByTerm(accountAccess)) {
+                    return advancedSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection, results, skippedResults);
+                }
+
+                return simpleSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection, results, skippedResults);
+            }
+            return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
         } finally {
             accountAccess.close();
         }
     }
 
-    private SearchResult advancedSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
+    private SearchResult advancedSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection, List<Document> results, int skippedResults) throws OXException {
         // Search by term only if supported
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
@@ -295,20 +343,26 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
         }
 
-        List<Document> results = new ArrayList<Document>();
-        SearchIterator<File> searchIterator = null;
-        try {
-            searchIterator = fileAccess.search(folderID, includeSubfolders, term, fields, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
-            while (searchIterator.hasNext()) {
-                results.add(new FileDocument(searchIterator.next()));
+        int start = 0;
+        if (results.size() == 0) {
+            start = (searchRequest.getStart() - skippedResults > 0) ? searchRequest.getStart() - skippedResults : 0;
+        }
+        int size = searchRequest.getSize() - results.size();
+        if (size > 0) {
+            SearchIterator<File> searchIterator = null;
+            try {
+                searchIterator = fileAccess.search(folderID, includeSubfolders, term, fields, sortField, sortDirection, start, size);
+                while (searchIterator.hasNext()) {
+                    results.add(new FileDocument(searchIterator.next()));
+                }
+            } finally {
+                SearchIterators.close(searchIterator);
             }
-        } finally {
-            SearchIterators.close(searchIterator);
         }
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
-    private SearchResult simpleSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
+    private SearchResult simpleSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection, List<Document> results, int skippedResults) throws OXException {
         // Search by simple pattern as fallback and filter folders manually
         List<String> queries = searchRequest.getQueries();
         String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
@@ -321,9 +375,14 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
         }
         List<File> files;
+        int start = 0;
+        if (results.size() == 0) {
+            start = (searchRequest.getStart() - skippedResults > 0) ? searchRequest.getStart() - skippedResults : 0;
+        }
+        int size = searchRequest.getSize() - results.size();
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = fileAccess.search(pattern, fields, folderID, includeSubfolders, sortField, sortDirection, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            searchIterator = fileAccess.search(pattern, fields, folderID, includeSubfolders, sortField, sortDirection, start, size);
             files = SearchIterators.asList(searchIterator);
         } finally {
             SearchIterators.close(searchIterator);
@@ -333,7 +392,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         if (null != fileType) {
             files = filter(files, fileType);
         }
-        List<Document> results = new ArrayList<Document>(files.size());
         for (final File file : files) {
             results.add(new FileDocument(file));
         }
@@ -367,6 +425,96 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
         FileStorageService fsService = Services.getFileStorageServiceRegistry().getFileStorageService(idParts.get(0));
         return fsService.getAccountAccess(idParts.get(1), session);
+    }
+
+    /**
+     * Checks if search request contains 'folder_name' facet
+     *
+     * @param searchRequest The search request
+     * @return <code>true</code> if search request contains 'folder_name' facet, <code>false</code> otherwise
+     */
+    private boolean isSearchForFolderName(SearchRequest searchRequest) {
+        List<ActiveFacet> facets = searchRequest.getActiveFacets(DriveFacetType.FOLDER_NAME);
+        return (facets != null) && facets.size() > 0;
+    }
+
+    /**
+     * Checks if search request does not contain facets conflicting with 'folder_name' facet
+     *
+     * @param searchRequest The search request
+     * @return <code>true</code> if search request does not contain facets conflicting with 'folder_name' facet, <code>false</code> otherwise
+     */
+    private boolean canSearchForFolderName(SearchRequest searchRequest) {
+        List<FacetType> conflictingFacets = DriveFacetType.FOLDER_NAME.getConflictingFacets();
+        for (FacetType conflictingFacet : conflictingFacets) {
+            List<ActiveFacet> facets = searchRequest.getActiveFacets(conflictingFacet);
+            if (null != facets && facets.size() > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+    * Checks if search request contains 'global' facet
+    *
+    * @param searchRequest The search request
+    * @return <code>true</code> if search request contains 'global' facet, <code>false</code> otherwise
+    */
+    private boolean isGlobal(SearchRequest searchRequest) {
+        List<ActiveFacet> facets = searchRequest.getActiveFacets(CommonFacetType.GLOBAL);
+        return (facets != null) && (facets.size() > 0);
+    }
+
+    /**
+     * Extracts the pattern for 'folder_name' search from search request
+     *
+     * @param searchRequest The search request
+     * @return The pattern
+     * @throws OXException If extracting fails
+     */
+    private String extractFolderNamePattern(SearchRequest searchRequest) throws OXException {
+        {
+            List<ActiveFacet> facets = searchRequest.getActiveFacets(DriveFacetType.FOLDER_NAME);
+            if (null != facets && facets.size() > 0) {
+                Filter filter = facets.get(0).getFilter();
+                if (false == filter.equals(Filter.NO_FILTER)) {
+                    List<String> queries = filter.getQueries();
+                    return (null != queries && 0 < queries.size()) ? queries.get(0) : "*";
+                }
+            }
+        }
+        {
+            List<ActiveFacet> facets = searchRequest.getActiveFacets(CommonFacetType.GLOBAL);
+            if (null != facets && facets.size() > 0) {
+                Filter filter = facets.get(0).getFilter();
+                if (false == filter.equals(Filter.NO_FILTER)) {
+                    List<String> queries = filter.getQueries();
+                    return (null != queries && 0 < queries.size()) ? queries.get(0) : "*";
+                }
+            }
+        }
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(Filter.NO_FILTER.toString(), Constants.FIELD_FOLDER_NAME);
+    }
+
+    /**
+     * Extracts the 'date' pattern from search request
+     *
+     * @param searchRequest The search request
+     * @return The timestamp
+     * @throws OXException If extracting fails
+     */
+    private long extractDatePattern(SearchRequest searchRequest) throws OXException {
+        List<ActiveFacet> facets = searchRequest.getActiveFacets(CommonFacetType.DATE);
+        if (null != facets && facets.size() > 0) {
+            Filter filter = facets.get(0).getFilter();
+            if (filter != Filter.NO_FILTER) {
+                List<String> queries = filter.getQueries();
+                Pair<Comparison, Long> parsed = Utils.parseDateQuery((null != queries && 0 < queries.size()) ? queries.get(0) : "*");
+                return l(parsed.getSecond());
+            }
+        }
+        return -1L;
     }
 
     /**
@@ -546,6 +694,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return Module.DRIVE;
     }
 
+    /**
+     * Checks if {@link FileStorageAccountAccess} is capable of using search terms
+     *
+     * @param accountAccess The account access
+     * @return <code>true</code> if account access supports search terms, <code>false</code> if not
+     * @throws OXException On error
+     */
     private static boolean supportsSearchByTerm(FileStorageAccountAccess accountAccess) throws OXException {
         if (accountAccess instanceof CapabilityAware) {
             Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_BY_TERM);
@@ -558,6 +713,30 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         try {
             FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
             return FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM);
+        } finally {
+            accountAccess.close();
+        }
+    }
+
+    /**
+     * Checks if {@link FileStorageAccountAccess} is capable of searching in folder names
+     *
+     * @param accountAccess The account access
+     * @return <code>true</code> if searching folder names is supported, <code>false</code> if not
+     * @throws OXException On error
+     */
+    private static boolean supportsSearchInFolderName(FileStorageAccountAccess accountAccess) throws OXException {
+        if (accountAccess instanceof CapabilityAware) {
+            Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_IN_FOLDER_NAME);
+            if (null != supported) {
+                return supported.booleanValue();
+            }
+        }
+
+        accountAccess.connect();
+        try {
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+            return FileStorageCapabilityTools.supports(folderAccess, FileStorageCapability.SEARCH_IN_FOLDER_NAME);
         } finally {
             accountAccess.close();
         }

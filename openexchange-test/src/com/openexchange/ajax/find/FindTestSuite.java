@@ -56,6 +56,7 @@ import com.openexchange.ajax.find.contacts.Bug33447Test;
 import com.openexchange.ajax.find.contacts.Bug33576Test;
 import com.openexchange.ajax.find.contacts.ExcludeContextAdminTest;
 import com.openexchange.ajax.find.drive.BasicDriveTest;
+import com.openexchange.ajax.find.drive.FolderNameFacetTest;
 import com.openexchange.ajax.find.mail.BasicMailTest;
 import com.openexchange.ajax.find.mail.Bug35442Test;
 import com.openexchange.ajax.find.mail.Bug36522Test;
@@ -91,6 +92,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug35442Test.class,
     Bug39105Test.class,
     Bug42970Test.class,
+    FolderNameFacetTest.class,
 })
 public final class FindTestSuite {
 }

@@ -266,19 +266,12 @@ public class ImmutablePermission extends BasicPermission {
      * Initializes a new {@link ImmutablePermission}.
      */
     ImmutablePermission(String identifier, int entity, EntityInfo entityInfo, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type, String legator) {
-        super();
+        super(entity, group, Permissions.createPermissionBits(folderPermission, readPermission, writePermission, deletePermission, admin));
         this.identifier = null != identifier ? identifier : String.valueOf(entity);
-        this.entity = entity;
         this.entityInfo = entityInfo;
-        this.group = group;
         this.system = system;
         this.type = type;
         this.legator = legator;
-        this.admin = admin;
-        this.folderPermission = folderPermission;
-        this.readPermission = readPermission;
-        this.writePermission = writePermission;
-        this.deletePermission = deletePermission;
     }
 
     @Override

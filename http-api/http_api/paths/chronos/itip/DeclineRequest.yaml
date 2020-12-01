@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Declines an itip invitation.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: message
         description: The comment the attendee wants to transmit

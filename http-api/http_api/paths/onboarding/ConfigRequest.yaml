@@ -3,11 +3,12 @@
     operationId: getClientOnboardingConfig
     tags:
       - Clientonboarding
-    summary: >-
+    summary: Get on-boarding configuration
+    security: 
+        - session: []    
+    description: >-
       Retrieves the configuration providing available client on-boarding
       possibilities for session-associated user
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

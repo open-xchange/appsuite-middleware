@@ -51,9 +51,9 @@ package com.openexchange.user.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.dto.Me;
@@ -63,7 +63,7 @@ import com.openexchange.user.json.dto.Me;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class MeAction extends AbstractUserAction {
 
     /**

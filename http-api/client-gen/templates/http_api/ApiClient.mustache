@@ -809,6 +809,7 @@ public class ApiClient {
 
         if(loginResponse.getSession() != null && !loginResponse.getSession().isEmpty()) {
             session = loginResponse.getSession();
+            setApiKey(session);
             user = loginResponse.getUser();
             userId = loginResponse.getUserId();
         } else {

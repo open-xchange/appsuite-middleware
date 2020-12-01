@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Search for contacts by filter.
+    security:
+        - session: []
+        - oauth:
+          - read_contacts             
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: sort

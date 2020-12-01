@@ -52,8 +52,10 @@ package com.openexchange.file.storage.xox;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -62,9 +64,11 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.java.Strings;
@@ -72,6 +76,7 @@ import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.subscription.AccountMetadataHelper;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
@@ -81,7 +86,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware {
+public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware, SearchableFolderNameFolderAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(XOXFolderAccess.class);
 
@@ -145,6 +150,25 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
      */
     private AccountQuota getInfostoreAccountQuota(String folderId) throws OXException {
         return client.getInfostoreQuota(folderId);
+    }
+
+    /**
+     * Returns a list of visible/subscribed root-subfolders
+     *
+     * @return A list of subscribed root subfolders
+     * @throws OXException
+     */
+    private List<FileStorageFolder> getVisibleFolders() throws OXException {
+        List<FileStorageFolder> ret = new ArrayList<>();
+        FileStorageFolder[] f1 = getSubfolders("10", false);
+        if (f1 != null) {
+            Collections.addAll(ret, f1);
+        }
+        FileStorageFolder[] f2 = getSubfolders("15", false);
+        if (f2 != null) {
+            Collections.addAll(ret, f2);
+        }
+        return ret;
     }
 
     @Override
@@ -228,24 +252,59 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        return updateFolder(identifier, toUpdate, Boolean.TRUE, null);
+        FileStorageResult<String> result = updateFolder(identifier, toUpdate, Boolean.TRUE, null, Boolean.TRUE);
+        return result.getResponse();
+    }
+
+    @Override
+    public FileStorageResult<String> updateFolder(String identifier, boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException {
+        return updateFolder(identifier, toUpdate, Boolean.TRUE, null, B(ignoreWarnings));
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
-        return updateFolder(identifier, toUpdate, null, B(cascadePermissions));
+        FileStorageResult<String> result = updateFolder(identifier, toUpdate, null, B(cascadePermissions), Boolean.TRUE);
+        return result.getResponse();
     }
 
-    private String updateFolder(String folderId, FileStorageFolder folderUpdate, Boolean autoRename, Boolean cascadePermissions) throws OXException {
+    @Override
+    public FileStorageResult<String> updateFolder(boolean ignoreWarnings, String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        return updateFolder(identifier, toUpdate, null, B(cascadePermissions), B(ignoreWarnings));
+    }
+
+    private FileStorageResult<String> updateFolder(String folderId, FileStorageFolder folderUpdate, Boolean autoRename, Boolean cascadePermissions, Boolean ignoreWarnings) throws OXException {
         /*
          * pass-through update to remote server & handle changed "subscribed" flag internally
          */
         String result = client.updateFolder(folderId, folderUpdate, FileStorageFileAccess.DISTANT_FUTURE, autoRename, cascadePermissions);
         if (SetterAwareFileStorageFolder.class.isInstance(folderUpdate) && ((SetterAwareFileStorageFolder) folderUpdate).containsSubscribed()) {
+            if(false == folderUpdate.isSubscribed()) {
+                //Transition to  'unsubscribed', check if everything else is already unsubscribed
+                List<FileStorageFolder> subscribedFolders = getVisibleFolders();
+                Optional<FileStorageFolder> folderToUnsubscibe =  subscribedFolders.stream().filter(f -> f.getId().equals(folderId)).findFirst();
+                if(folderToUnsubscibe.isPresent()) {
+                    subscribedFolders.removeIf(f -> f == folderToUnsubscibe.get());
+                    if(subscribedFolders.isEmpty()) {
+                        //The last folder is going to be unsubscribed
+                        if (ignoreWarnings == Boolean.TRUE) {
+                            //Delete
+                            accountAccess.getService().getAccountManager().deleteAccount(accountAccess.getAccount(), session);
+                        }
+                        else {
+
+                            //Throw a warning
+                            String folderName = folderToUnsubscibe.get().getName();
+                            String accountName = accountAccess.getAccount().getDisplayName();
+                            return FileStorageResult.newFileStorageResult(null, Arrays.asList(ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.create(folderName, accountName)));
+                        }
+                        return FileStorageResult.newFileStorageResult(null, null);
+                    }
+                }
+            }
             FileStorageFolder folder = client.getFolder(result);
             accountAccess.getSubscribedHelper().setSubscribed(accountAccess.getSession(), folder, B(folderUpdate.isSubscribed()));
         }
-        return result;
+        return FileStorageResult.newFileStorageResult(result, null);
     }
 
     @Override
@@ -332,6 +391,12 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
             }
         }
         return ret.toArray(new Quota[ret.size()]);
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        List<XOXFolder> folders = client.searchByFolderName("0", folderId, "infostore", null, query, date, includeSubfolders, all, start, end);
+        return folders.toArray(new XOXFolder[folders.size()]);
     }
 
 }

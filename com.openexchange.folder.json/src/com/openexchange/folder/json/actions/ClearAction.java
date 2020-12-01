@@ -56,13 +56,12 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -73,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class ClearAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_CLEAR;
@@ -139,7 +138,7 @@ public final class ClearAction extends AbstractFolderAction {
         try {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
-                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+                UserizedFolder folder = folderService.getFolder(treeId, folderId, session, getDecorator(request));
                 if (!mayWriteViaOAuthRequest(folder.getContentType(), access)) {
                     return false;
                 }

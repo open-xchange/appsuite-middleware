@@ -4,8 +4,17 @@
     tags:
       - Mailaccount
     summary: Creates a new mail account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []      
+        - oauth:
+          - write_mailaccount    
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailAccountData'
+      description: A JSON object describing the new account to create.
+      required: true
     responses:
       '200':
         description: >
@@ -17,10 +26,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailAccountUpdateResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MailAccountData'
-      description: A JSON object describing the new account to create.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'       

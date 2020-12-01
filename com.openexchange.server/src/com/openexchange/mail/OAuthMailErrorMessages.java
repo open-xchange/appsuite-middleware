@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,21 +47,18 @@
  *
  */
 
-
-package com.openexchange.mail.json.osgi;
+package com.openexchange.mail;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OAuthScopeDescription} - Strings describing the OAuth scopes.
+ * {@link OAuthMailErrorMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.5
  */
-final class OAuthScopeDescription implements LocalizableStrings {
-    // Application 'xyz' requires following permissions:
-    //  - Send RFC822 data using primary account's transport. This requires master authentication to be active.
-    //  - ...
-    public static final String SEND_DATA = "Send RFC822 data using primary account's transport. This requires master authentication to be active.";
+public class OAuthMailErrorMessages implements LocalizableStrings {
+
+    public final static String NO_ACCOUNT_ACCESS_MSG = "No account access permitted.";
 
 }

@@ -83,6 +83,9 @@ public class DriveStrings implements LocalizableStrings {
     // Search in file size
     public static final String FACET_FILE_SIZE = "File size";
 
+    // Search in folder name
+    public static final String FACET_FOLDER_NAME = "Folder name";
+
     // -------------------------- i18n strings for file types ---------------------------- //
 
     public static final String FILE_TYPE_IMAGES = "Images";
@@ -120,5 +123,10 @@ public class DriveStrings implements LocalizableStrings {
     // Displayed as: [Search for] 'user input' in file content.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String SEARCH_IN_FILE_CONTENT = "in file content";
+
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in folder name.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SEARCH_IN_FOLDER_NAME = "in folder name";
 
 }

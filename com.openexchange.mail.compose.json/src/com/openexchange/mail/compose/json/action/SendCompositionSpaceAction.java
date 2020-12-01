@@ -64,6 +64,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
@@ -97,6 +98,7 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
         CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+        final ClientToken clientToken = getClientToken(requestData);
 
         // Check for optional body data
         Optional<StreamedUploadFileIterator> optionalUploadedAttachments = Optional.empty();
@@ -132,7 +134,7 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, clientToken);
                 }
 
                 if (hasFileUploads) {
@@ -156,7 +158,7 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, clientToken);
                 }
 
                 if (hasFileUploads) {
@@ -166,7 +168,7 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
         }
 
         List<OXException> warnings = new ArrayList<OXException>(4);
-        MailPath mailPath = compositionSpaceService.transportCompositionSpace(compositionSpaceId.getId(), optionalUploadedAttachments, session.getUserSettingMail(), requestData, warnings, true);
+        MailPath mailPath = compositionSpaceService.transportCompositionSpace(compositionSpaceId.getId(), optionalUploadedAttachments, session.getUserSettingMail(), requestData, warnings, true, clientToken);
 
         AJAXRequestResult result;
         if (null == mailPath) {

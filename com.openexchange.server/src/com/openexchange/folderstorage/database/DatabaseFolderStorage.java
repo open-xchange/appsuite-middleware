@@ -90,8 +90,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -104,18 +102,22 @@ import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderMoveWarningCollector;
 import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
+import com.openexchange.folderstorage.MoveFolderPermissionMode;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -202,7 +204,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage, SearchableFileFolderNameFolderStorage {
 
     private static final String DEL_OXFOLDER_PERMISSIONS = "del_oxfolder_permissions";
 
@@ -1290,12 +1292,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     @Override
     public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
-        // No Support for root folders...
-        return getVisibleFolders(treeId, contentType, type, storageParameters);
-    }
-
-    @Override
-    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final User user = storageParameters.getUser();
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
@@ -1305,7 +1301,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
-            final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, ctx, con)).asList();
+            final List<FolderObject> list;
+            if (Strings.isEmpty(rootFolderId)) {
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, ctx)).asList();
+            } else {
+                final int iParent = Integer.parseInt(rootFolderId);
+                list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, iParent, ctx)).asList();
+            }
             if (FolderObject.PRIVATE == iType) {
                 /*
                  * Remove shared ones manually
@@ -1378,6 +1380,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } finally {
             provider.close();
         }
+    }
+
+    @Override
+    public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+        return getVisibleFolders(null, treeId, contentType, type, storageParameters);
     }
 
     @Override
@@ -1971,7 +1978,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     updateMe.setPermissions(optNewPermissions.orElse(oclPermissions));
                     changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
             } else {
-                MoveFolderPermissionMode mode = getMoveFolderPermissionMode(folder, storageParameters);
+                ServerSession serverSession;
+                if (context != null) {
+                    serverSession = ServerSessionAdapter.valueOf(session, context, storageParameters.getUser());
+                } else {
+                    serverSession = ServerSessionAdapter.valueOf(session);
+                }
+
+                MoveFolderPermissionMode mode = new FolderMoveWarningCollector(serverSession, storageParameters).getMoveFolderPermissionMode(folder.getParentID());
 
                 switch (mode) {
                     case INHERIT:
@@ -2070,7 +2084,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     /**
      * Gets the identifiers of all users that have access to a specific folder, based on its permissions.
-     * 
+     *
      * @param context The context in which the folder is located
      * @param folder The folder to get the affected users for
      * @return The identifiers of all users that have access to the folder
@@ -2213,49 +2227,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
     }
 
-    private MoveFolderPermissionMode getMoveFolderPermissionMode(Folder folder, StorageParameters storageParameters) throws OXException {
-        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(storageParameters.getUserId(), storageParameters.getContextId());
-        String mode = "keep";
-        if (isInPublicTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToPublic", String.class);
-            if (Strings.isEmpty(mode) && b(view.opt("com.openexchange.folderstorage.inheritParentPermissions", Boolean.class, Boolean.FALSE))) {
-                // Use old behaviour for public folders...
-                mode = "merge";
-            }
-        } else if (isInPrivateTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToPrivate", String.class);
-        } else if (isInSharedTree(folder, storageParameters)) {
-            mode = view.get("com.openexchange.folderstorage.permissions.moveToShared", String.class);
-        }
-        return MoveFolderPermissionMode.getByName(mode);
-    }
-
-    private enum MoveFolderPermissionMode {
-        KEEP,
-        INHERIT,
-        MERGE
-        ;
-
-        public static MoveFolderPermissionMode getByName(String name) {
-            if (Strings.isEmpty(name)) {
-                LOG.warn("Move folder permission mode was not set, using fallback \"keep\".");
-                return MoveFolderPermissionMode.KEEP;
-            }
-            switch (name.toLowerCase()) {
-                case "keep":
-                    return MoveFolderPermissionMode.KEEP;
-                case "inherit":
-                    return MoveFolderPermissionMode.INHERIT;
-                case "merge":
-                    return MoveFolderPermissionMode.MERGE;
-                default:
-                    LOG.warn("Invalid move folder permission mode: {}. Using fallback \"keep\".", name);
-                    return MoveFolderPermissionMode.KEEP;
-            }
-        }
-    }
-
     private UpdatedFolderHandler updatedFolderHandlerFor(final StorageParameters storageParameters) {
         return new UpdatedFolderHandler() {
 
@@ -2337,63 +2308,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 permsMappingPerEntity.put(entity, parentPerm);
             }
         }
-    }
-
-    private boolean isInPublicTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        if (null == folder || Strings.isEmpty(folder.getParentID())) {
-            return false;
-        }
-        String parentId = folder.getParentID();
-        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        int id = 0;
-        do {
-            parentId = current.getParentID();
-            try {
-                id = Integer.parseInt(parentId);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            if (id == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                return true;
-            }
-            current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        } while (id > 0);
-        return false;
-    }
-
-    private boolean isInPrivateTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, true);
-    }
-
-    private boolean isInSharedTree(Folder folder, StorageParameters storageParameters) throws OXException {
-        return checkFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folder, storageParameters, false);
-    }
-
-    private boolean checkFolder(int type, Folder folder, StorageParameters storageParameters, boolean checkCreatedBy) throws OXException {
-        if (null == folder || Strings.isEmpty(folder.getParentID())) {
-            return false;
-        }
-        String parentId = folder.getParentID();
-        Folder current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        int id = 0;
-        do {
-            parentId = current.getParentID();
-            try {
-                id = Integer.parseInt(parentId);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            if (id == type) {
-                if (checkCreatedBy) {
-                    // own private root folder
-                    return current.getCreatedBy() == storageParameters.getUserId();
-                }
-                // shared root folder
-                return current.getCreatedBy() != storageParameters.getUserId();
-            }
-            current = getFolder(folder.getTreeID(), parentId, storageParameters);
-        } while (id > 0);
-        return false;
     }
 
     @Override
@@ -2750,40 +2664,38 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @return <code>true</code> if the folder can be considered as "public", <code>false</code>, otherwise
      */
     private static boolean considerPrivate(FolderObject folder, Set<Integer> knownPrivateFolders, Connection connection, StorageParameters storageParameters) throws OXException {
-        if (FolderObject.INFOSTORE == folder.getModule()) {
-            /*
-             * infostore folders are always of "public" type, so check if they're somewhere below the personal subtree
-             */
-            List<Integer> seenFolders = new ArrayList<Integer>();
-            FolderObject currentFolder = folder;
-            do {
-                Integer id = I(currentFolder.getObjectID());
-                seenFolders.add(id);
-                if (knownPrivateFolders.contains(id) || knownPrivateFolders.contains(I(currentFolder.getParentFolderID())) || currentFolder.isDefaultFolder() && FolderObject.PUBLIC == currentFolder.getType()) {
-                    /*
-                     * folder or its parent is a previously recognized "private" folder, or the user's personal infostore folder is reached
-                     */
-                    knownPrivateFolders.addAll(seenFolders);
-                    return true;
-                } else {
-                    /*
-                     * check parent folder if there are more parent folders available
-                     */
-                    if (FolderObject.MIN_FOLDER_ID < currentFolder.getParentFolderID()) {
-                        currentFolder = getFolderObject(currentFolder.getParentFolderID(), storageParameters.getContext(), connection, storageParameters);
-                    } else {
-                        currentFolder = null;
-                        return false;
-                    }
-                }
-            } while (null != currentFolder);
-            return false;
-        } else {
+        if (FolderObject.INFOSTORE != folder.getModule()) {
             /*
              * always consider non-infostore "private" folders as private
              */
             return FolderObject.PRIVATE == folder.getType(storageParameters.getUserId());
         }
+        /*
+         * infostore folders are always of "public" type, so check if they're somewhere below the personal subtree
+         */
+        List<Integer> seenFolders = new ArrayList<Integer>();
+        FolderObject currentFolder = folder;
+        do {
+            Integer id = I(currentFolder.getObjectID());
+            seenFolders.add(id);
+            if (knownPrivateFolders.contains(id) || knownPrivateFolders.contains(I(currentFolder.getParentFolderID())) || currentFolder.isDefaultFolder() && FolderObject.PUBLIC == currentFolder.getType()) {
+                /*
+                 * folder or its parent is a previously recognized "private" folder, or the user's personal infostore folder is reached
+                 */
+                knownPrivateFolders.addAll(seenFolders);
+                return true;
+            }
+            /*
+             * check parent folder if there are more parent folders available
+             */
+            if (FolderObject.MIN_FOLDER_ID < currentFolder.getParentFolderID()) {
+                currentFolder = getFolderObject(currentFolder.getParentFolderID(), storageParameters.getContext(), connection, storageParameters);
+            } else {
+                currentFolder = null;
+                return false;
+            }
+        } while (null != currentFolder);
+        return false;
     }
 
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
@@ -2820,7 +2732,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                             } catch (OXException e) {
                                 d2 = null;
                             }
-                            ;
                             return collator.compare(d1, d2);
                         }
                     }
@@ -2877,7 +2788,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     } catch (OXException e) {
                         d2 = null;
                     }
-                    ;
                     return collator.compare(d1, d2);
                 }
             }
@@ -3127,16 +3037,221 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private boolean isBelowTrashFolder(int folderId, int trashFolderId, int rootFolderId, StorageParameters storageParameters, Connection con) throws OXException {
-        while (folderId > 0) {
-            if (trashFolderId == folderId) {
+        int fid = folderId;
+        while (fid > 0) {
+            if (trashFolderId == fid) {
                 return true;
             }
-            if (rootFolderId == folderId) {
+            if (rootFolderId == fid) {
                 return false;
             }
-            folderId = getFolderObject(folderId, storageParameters.getContext(), con, storageParameters).getParentFolderID();
+            fid = getFolderObject(fid, storageParameters.getContext(), con, storageParameters).getParentFolderID();
         }
         return false;
+    }
+
+    @Override
+    public List<Folder> searchFileStorageFolders(String treeId, String rootFolderId, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        if (Strings.isEmpty(query)) {
+            return Collections.emptyList();
+        }
+
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        try {
+            final Connection con = provider.getConnection();
+
+            // Query non-standard folders by database query
+            int parentId = getUnsignedInteger(rootFolderId);
+            if (parentId < 0) {
+                throw OXFolderExceptionCode.NOT_EXISTS.create(rootFolderId, Integer.valueOf(storageParameters.getContextId()));
+            }
+            Context context = storageParameters.getContext();
+            User user = storageParameters.getUser();
+
+            // Collect identifiers of visible folders
+            VisibleFolders visibleFolders = getVisibleFolders(parentId, FolderObject.INFOSTORE, includeSubfolders, storageParameters);
+
+            // Filter regular ones by database query
+            int[] filteredFolders = OXFolderSQL.searchInfostoreFoldersByName(query, visibleFolders.getRegularFolders(), date, start, end, context, con);
+
+            // Remember reference to special ones
+            int[] defaultFolders = visibleFolders.getSpecialFolders();
+            visibleFolders = null;
+
+            // Load folders by identifiers
+            List<Folder> result = new ArrayList<Folder>(filteredFolders.length);
+            TIntSet ids = new TIntHashSet(filteredFolders.length);
+            for (int id : filteredFolders) {
+                if (ids.add(id)) {
+                    DatabaseFolder folder = loadFolder(Integer.toString(id), StorageType.WORKING, storageParameters, con, treeId);
+                    if (user.isAnonymousGuest()) {
+                        handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
+                    }
+                    Permission ownPermission = CalculatePermission.calculate(folder, user, context, storageParameters.getDecorator().getAllowedContentTypes());
+                    if (ownPermission.isVisible()) {
+                        result.add(folder);
+                    }
+                }
+            }
+            filteredFolders = null;
+
+            // Check for special folders (personal, trash, documents, music, pictures, videos, ...)
+            if (defaultFolders.length > 0) {
+                Locale locale = storageParameters.getUser().getLocale();
+                String lowerCaseQuery = query.toLowerCase(locale);
+                for (int defaultFolderId : defaultFolders) {
+                    if (ids.add(defaultFolderId)) {
+                        DatabaseFolder folder = loadFolder(Integer.toString(defaultFolderId), StorageType.WORKING, storageParameters, con, treeId);
+                        if (localizedNameMatchesQuery(folder, lowerCaseQuery, locale)) {
+                            if (storageParameters.getUser().isAnonymousGuest()) {
+                                handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
+                            }
+                            Permission ownPermission = CalculatePermission.calculate(folder, storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator().getAllowedContentTypes());
+                            if (ownPermission.isVisible()) {
+                                result.add(folder);
+                            }
+                        }
+                    }
+                }
+            }
+            defaultFolders = null;
+
+            return result;
+        } catch (SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    /**
+     * Get all user-visible folder in module below given parent folder.
+     *
+     * @param parentId The parent folder identifier
+     * @param module The module
+     * @param includeSubfolders Whether to include sub-folders or not
+     * @param storageParameters The storage parameters
+     * @return A listing containing identifiers of all visible folders
+     * @throws OXException On server error
+     */
+    private VisibleFolders getVisibleFolders(int parentId, int module, boolean includeSubfolders, StorageParameters storageParameters) throws OXException {
+        ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        try {
+            Connection con = provider.getConnection();
+            return getVisibleFolders(parentId, module, includeSubfolders, storageParameters, con);
+        } finally {
+            provider.close();
+        }
+    }
+
+    /**
+     * Get all user-visible folder in module below given parent folder.
+     *
+     * @param parentId The parent folder identifier
+     * @param module The module
+     * @param includeSubfolders Whether to include sub-folders or not
+     * @param storageParameters The storage parameters
+     * @param con THe connection to use
+     * @return A listing containing identifiers of all visible folders
+     * @throws OXException On server error
+     */
+    private VisibleFolders getVisibleFolders(int parentId, int module, boolean includeSubfolders, StorageParameters storageParameters, Connection con) throws OXException {
+        UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+        User user = storageParameters.getUser();
+
+        if (parentId < 0) {
+            // Querying all folders of that module
+            List<FolderObject> folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), module, storageParameters.getContext(), con)).asList();
+            TIntList nonDefaultFolders = new TIntArrayList(folderList.size());
+            TIntList defaultFolders = null;
+            for (FolderObject folderObject : folderList) {
+                if (folderObject.isDefaultFolder()) {
+                    if (defaultFolders == null) {
+                        defaultFolders = new TIntArrayList();
+                    }
+                    defaultFolders.add(folderObject.getObjectID());
+                } else {
+                    nonDefaultFolders.add(folderObject.getObjectID());
+                }
+            }
+            return new VisibleFolders(nonDefaultFolders, defaultFolders);
+        }
+
+        List<FolderObject> folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, user.getId(), user.getGroups(), storageParameters.getContext(), userPermissionBits, null, con)).asList();
+        TIntList regularFolders = new TIntArrayList(folderList.size());
+        TIntList specialFolders = null;
+        for (FolderObject folderObject : folderList) {
+            int folderId = folderObject.getObjectID();
+            if (folderObject.isDefaultFolder() || folderId < FolderObject.MIN_FOLDER_ID) {
+                if (specialFolders == null) {
+                    specialFolders = new TIntArrayList();
+                }
+                specialFolders.add(folderId);
+            } else {
+                regularFolders.add(folderId);
+            }
+            if (includeSubfolders && folderObject.hasSubfolders()) {
+                VisibleFolders visibleFolders = getVisibleFolders(folderId, module, true, storageParameters);
+                regularFolders.add(visibleFolders.getRegularFolders());
+                int[] subDefaultFolders = visibleFolders.getSpecialFolders();
+                visibleFolders = null;
+                if (subDefaultFolders.length > 0) {
+                    if (specialFolders == null) {
+                        specialFolders = new TIntArrayList();
+                    }
+                    specialFolders.add(subDefaultFolders);
+                }
+                subDefaultFolders = null;
+            }
+        }
+        return new VisibleFolders(regularFolders, specialFolders);
+    }
+
+    /**
+     * Check if localized folder name matches query, needed for default folders like 'Documents', 'Templates', etc
+     *
+     * @param folder The folder
+     * @param lowerCaseQuery The query in locale-specific lower-case
+     * @param locale The user's locale
+     * @return <code>true</code> if localized folder name matches query, <code>false</code> if not
+     */
+    private static boolean localizedNameMatchesQuery(DatabaseFolder folder, String lowerCaseQuery, Locale locale) {
+        if (null == folder) {
+            return false;
+        }
+        String localizedName = folder.getLocalizedName(locale);
+        return Strings.isEmpty(localizedName) ? false : localizedName.toLowerCase(locale).indexOf(lowerCaseQuery) >= 0;
+    }
+
+    /** The result of <code>getVisibleFolders()</code> call */
+    private static class VisibleFolders {
+
+        private final int[] regularFolders;
+        private final int[] specialFolders;
+
+        VisibleFolders(TIntList regularFolders, TIntList specialFolders) {
+            super();
+            this.specialFolders = specialFolders == null ? new int[0] : specialFolders.toArray();
+            this.regularFolders = regularFolders == null ? new int[0] : regularFolders.toArray();
+        }
+
+        /**
+         * Gets the identifiers of regular folders.
+         *
+         * @return The identifiers of regular folders
+         */
+        public int[] getRegularFolders() {
+            return regularFolders;
+        }
+
+        /**
+         * Gets the identifiers of special folders.
+         *
+         * @return The identifiers of special folders
+         */
+        public int[] getSpecialFolders() {
+            return specialFolders;
+        }
     }
 
 }

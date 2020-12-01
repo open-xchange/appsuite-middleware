@@ -93,10 +93,11 @@ public interface CompositionSpaceService {
      * @param requestData The request data
      * @param warnings The optional collection to add possible warnings to
      * @param deleteAfterTransport Whether the composition space is supposed to be deleted after transport
+     * @param clientToken The clients current token to edit the space
      * @return The path to the sent mail or <code>null</code>
      * @throws OXException If transport fails
      */
-    MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport) throws OXException;
+    MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, ClientToken clientToken) throws OXException;
 
     /**
      * Saves given composition space to an appropriate draft mail.
@@ -104,10 +105,11 @@ public interface CompositionSpaceService {
      * @param compositionSpaceId The identifier of the composition space to save as draft mail
      * @param optionalUploadedAttachments The optional uploaded attachments that are streamed-through w/o being saved to attachment storage
      * @param deleteAfterSave Whether the composition space is supposed to be deleted after saving as draft mail
+     * @param clientToken The clients current token to edit the space
      * @return The path to the draft mail
      * @throws OXException If conversion fails
      */
-    MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave) throws OXException;
+    MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, ClientToken clientToken) throws OXException;
 
     /**
      * Opens a new composition space for composing a message according to given parameters.
@@ -121,10 +123,11 @@ public interface CompositionSpaceService {
      * Closes specified composition space and drops all associated resources.
      *
      * @param compositionSpaceId The composition space identifier
+     * @param clientToken The clients current token to edit the space
      * @return <code>true</code> if such a composition space has been successfully closed; otherwise <code>false</code>
      * @throws OXException If closing/deleting composition space fails
      */
-    boolean closeCompositionSpace(UUID compositionSpaceId) throws OXException;
+    boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException;
 
     /**
      * Closes those composition spaces associated with given session, which are idle for longer than given max. idle time.
@@ -157,10 +160,11 @@ public interface CompositionSpaceService {
      *
      * @param compositionSpaceId The composition space identifier
      * @param messageDescription The message description providing the changes to apply
+     * @param clientToken The clients current token to edit the space
      * @return The composition space
      * @throws OXException If composition space cannot be returned
      */
-    CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription messageDescription) throws OXException;
+    CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription messageDescription, ClientToken clientToken) throws OXException;
 
     /**
      * Adds new attachments from upload to given composition space.
@@ -169,10 +173,11 @@ public interface CompositionSpaceService {
      * @param attachmentId The identifier of the attachment to replace
      * @param uploadedAttachments The uploaded attachments
      * @param disposition The disposition
+     * @param clientToken The clients current token to edit the space
      * @return The replaced attachments
      * @throws OXException If replacing the attachment fails
      */
-    AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException;
+    AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException;
 
     /**
      * Adds new attachments from upload to given composition space.
@@ -180,10 +185,11 @@ public interface CompositionSpaceService {
      * @param compositionSpaceId The composition space identifier
      * @param uploadedAttachments The uploaded attachments
      * @param disposition The disposition
+     * @param clientToken The clients current token to edit the space
      * @return The added attachments
      * @throws OXException If adding the attachments fails
      */
-    AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException;
+    AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException;
 
     /**
      * Adds a new attachment to given composition space.
@@ -192,19 +198,21 @@ public interface CompositionSpaceService {
      * @param attachment The attachment description
      * @param data The attachment's data
      * @param disposition The disposition
+     * @param clientToken The clients current token to edit the space
      * @return The added attachment
      * @throws OXException If adding the attachment fails
      */
-    AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachment, InputStream data) throws OXException;
+    AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachment, InputStream data, ClientToken clientToken) throws OXException;
 
     /**
      * Adds user's vCard as attachment to given composition space.
      *
      * @param compositionSpaceId The composition space identifier
+     * @param clientToken The clients current token to edit the space
      * @return The added vCard attachment
      * @throws OXException If adding the vCard fails
      */
-    AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId) throws OXException;
+    AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException;
 
     /**
      * Adds given contact's vCard as attachment to given composition space.
@@ -212,28 +220,31 @@ public interface CompositionSpaceService {
      * @param compositionSpaceId The composition space identifier
      * @param contactId The identifier of the contact
      * @param folderId The identifier of the folder in which the contact resides
+     * @param clientToken The clients current token to edit the space
      * @return The added vCard attachment
      * @throws OXException If adding the vCard fails
      */
-    AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId) throws OXException;
+    AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId, ClientToken clientToken) throws OXException;
 
     /**
      * Adds the attachments from the original mail (e.g. on reply) to denoted composition space
      *
      * @param compositionSpaceId The composition space identifier
      * @return The added attachments
+     * @param clientToken The clients current token to edit the space
      * @throws OXException If adding attachments fails
      */
-    AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId) throws OXException;
+    AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException;
 
     /**
      * Deletes the specified attachment from given composition space.
      *
      * @param compositionSpaceId The composition space identifier
      * @param attachmentId The identifier of the attachment to delete
+     * @param clientToken The clients current token to edit the space
      * @throws OXException If deletion fails
      */
-    AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId) throws OXException;
+    AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId, ClientToken clientToken) throws OXException;
 
     /**
      * Gets the specified attachment from given composition space.

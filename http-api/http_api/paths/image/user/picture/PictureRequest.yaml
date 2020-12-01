@@ -5,7 +5,8 @@
       - Image
     summary: Requests a user's profile image.
     description: >-
-      <b>Important:</b> This endpoint is deprecated and will be removed in the
+      #### Important:
+      This endpoint is deprecated and will be removed in the
       future. Use the new /contacts/picture endpoint instead.
     deprecated: true
     parameters:

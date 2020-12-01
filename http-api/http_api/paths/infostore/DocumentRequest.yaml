@@ -4,6 +4,8 @@
     tags:
       - Infostore
     summary: Gets an infoitem document.
+    security: 
+        - session: []    
     description: >
       It is possible to add a filename to the request's URI like
       `/infostore/{filename}?action=document`.
@@ -15,7 +17,6 @@
       If the file is an image file then it is possible to use the image
       transformation parameters.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
       - in: query
         name: id

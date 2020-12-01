@@ -4,8 +4,9 @@
     tags:
       - Mailfilter
     summary: Deletes a mail filter rule.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: username
         description: >-

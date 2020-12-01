@@ -124,7 +124,8 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
 
         if (hasFileUploads) {
             // File upload available...
-            AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(compositionSpaceId.getId(), upload.getUploadFiles(), disposition);
+            AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(
+                compositionSpaceId.getId(), upload.getUploadFiles(), disposition, getClientToken(requestData));
             return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
         }
 
@@ -161,7 +162,8 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
             attachment.setContentDisposition(Attachment.ContentDisposition.dispositionFor(disposition));
             InputStream attachmentData = parseDriveAttachment(attachment, id, version, fileAccess);
             try {
-                AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(compositionSpaceId.getId(), attachment, attachmentData);
+                AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(
+                    compositionSpaceId.getId(), attachment, attachmentData, getClientToken(requestData));
                 return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
             } finally {
                 Streams.close(attachmentData);
@@ -171,7 +173,8 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
         if ("contacts".equals(origin)) {
             String contactId = jAttachment.getString("id");
             String folderId = jAttachment.getString("folderId");
-            AttachmentResult attachmentResult = compositionSpaceService.addContactVCardToCompositionSpace(compositionSpaceId.getId(), contactId, folderId);
+            AttachmentResult attachmentResult = compositionSpaceService.addContactVCardToCompositionSpace(
+                compositionSpaceId.getId(), contactId, folderId, getClientToken(requestData));
             return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
         }
 

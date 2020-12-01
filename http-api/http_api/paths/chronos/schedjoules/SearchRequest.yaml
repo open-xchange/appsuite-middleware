@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Performs a full text search with the specified query.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: query
         description: The query

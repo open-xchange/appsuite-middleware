@@ -66,9 +66,11 @@ public class MailAccountOAuthConstants {
     }
 
     /** The OAuth scope granting read-only permission */
+    @Deprecated
     public static final String OAUTH_READ_SCOPE = "read_mailaccounts";
 
     /** The OAuth scope granting write permission */
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_mailaccounts";
 
 }

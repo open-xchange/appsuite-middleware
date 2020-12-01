@@ -83,10 +83,10 @@ import com.openexchange.testing.httpclient.models.UpdateEventBody;
 
 /**
  * {@link ITipSeriesTest}
- * 
+ *
  * User A from context 1 will create a series with 10 occurrences with user B from context 2 as attendee.
  * User B will accept the event in the setup and the change will be accepted by the organizer.
- * 
+ *
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
@@ -94,10 +94,10 @@ import com.openexchange.testing.httpclient.models.UpdateEventBody;
 public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
     private String summary;
-    
+
     /** User B from context 2*/
     private Attendee replyingAttendee;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -131,7 +131,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
          * Take over accept and check in calendar
          */
         assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
         for (Attendee attendee : createdEvent.getAttendees()) {
@@ -153,7 +153,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         id.setId(createdEvent.getId());
         id.setRecurrenceId(recurrenceId);
         body.setEvents(Collections.singletonList(id));
-        ChronosMultipleCalendarResultResponse result = chronosApi.deleteEvent(apiClient.getSession(), now(), body, null, null, null, null, null, null, null);
+        ChronosMultipleCalendarResultResponse result = chronosApi.deleteEvent(now(), body, null, null, null, null, null, null, null);
 
         /*
          * Check result
@@ -188,7 +188,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         deltaEvent.setDescription("Totally new description for " + this.getClass().getName());
 
         UpdateEventBody body = getUpdateBody(deltaEvent);
-        ChronosCalendarResultResponse result = chronosApi.updateEvent(apiClient.getSession(), defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
+        ChronosCalendarResultResponse result = chronosApi.updateEvent(defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
 
         /*
          * Check result

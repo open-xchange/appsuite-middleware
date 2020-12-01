@@ -3,11 +3,13 @@
     operationId: storeCertificate_put_req
     tags:
       - Certificate
-    summary: >-
+    summary: Updates the exception for an SSL certificate 
+    description: >-
       Updates the exception for an SSL certificate in combination with a
       hostname as either trusted or untrusted
+    security: 
+        - session: []      
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
         description: The fingerprint of the SSL certificate

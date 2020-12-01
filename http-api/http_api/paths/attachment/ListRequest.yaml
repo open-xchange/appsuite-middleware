@@ -4,8 +4,9 @@
     tags:
       - Attachments
     summary: Gets a list of attachments.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamAttached'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'

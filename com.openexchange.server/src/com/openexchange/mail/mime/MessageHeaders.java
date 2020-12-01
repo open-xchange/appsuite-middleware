@@ -288,4 +288,9 @@ public final class MessageHeaders {
 
     public static final HeaderName SENDER = HeaderName.valueOf(HDR_SENDER);
 
+    /** {@value #HDR_X_OX_CLIENT_TOKEN} */
+    public static final String HDR_X_OX_CLIENT_TOKEN = "X-OX-Client-Token";
+
+    public static final HeaderName X_OX_CLIENT_TOKEN = HeaderName.valueOf(HDR_X_OX_CLIENT_TOKEN);
+
 }

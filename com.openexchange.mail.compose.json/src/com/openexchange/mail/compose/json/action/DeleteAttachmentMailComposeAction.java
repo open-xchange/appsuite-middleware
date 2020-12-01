@@ -90,7 +90,7 @@ public class DeleteAttachmentMailComposeAction extends AbstractMailComposeAction
 
         // Load composition space
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
-        AttachmentResult attachmentResult = compositionSpaceService.deleteAttachment(compositionSpaceId.getId(), attachmentUuid);
+        AttachmentResult attachmentResult = compositionSpaceService.deleteAttachment(compositionSpaceId.getId(), attachmentUuid, getClientToken(requestData));
 
         return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }

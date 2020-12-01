@@ -3,9 +3,10 @@
     operationId: searchUsers
     tags:
       - User
-    summary: Search for users.
+    summary: Search for users
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamUserColumns'
       - in: query
         name: sort

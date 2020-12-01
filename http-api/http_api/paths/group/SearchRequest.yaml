@@ -4,8 +4,8 @@
     tags:
       - Groups
     summary: Searches for groups.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

@@ -166,7 +166,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected List<MultifactorProvider> getProviders(String filter) throws ApiException {
-        MultifactorProvidersResponse resp = this.multifactorApi.multifactorProviderActionAll(getSessionId(), filter);
+        MultifactorProvidersResponse resp = this.multifactorApi.multifactorProviderActionAll(filter);
         return checkResponse(resp, resp.getData());
     }
 
@@ -223,7 +223,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected List<MultifactorDevice> getDevices() throws ApiException{
-        MultifactorDevicesResponse resp = multifactorApi.multifactorDeviceActionAll(getSessionId());
+        MultifactorDevicesResponse resp = multifactorApi.multifactorDeviceActionAll();
         return checkResponse(resp, resp.getData());
     }
 
@@ -303,7 +303,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
             deviceData.setParameters(paramters);
         }
 
-        MultifactorStartRegistrationResponse resp = api.multifactorDeviceActionStartRegistration(api.getApiClient().getSession(), deviceData);
+        MultifactorStartRegistrationResponse resp = api.multifactorDeviceActionStartRegistration(deviceData);
         return checkResponse(resp, resp.getData());
     }
 
@@ -340,7 +340,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
         data.setClientData(clientData);
         data.setRegistrationData(registrationData);
 
-        MultifactorFinishRegistrationResponse resp = api.multifactorDeviceActionfinishRegistration(api.getApiClient().getSession(), providerName, deviceId, data);
+        MultifactorFinishRegistrationResponse resp = api.multifactorDeviceActionfinishRegistration(providerName, deviceId, data);
         return checkResponse(resp, resp.getData());
     }
 
@@ -353,7 +353,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected List<String> unregisterDevice(String providerName, String deviceId) throws ApiException {
-        MultifactorDeleteResponse resp = MultifactorApi().multifactorDeviceActionDelete(getSessionId(), providerName, deviceId);
+        MultifactorDeleteResponse resp = MultifactorApi().multifactorDeviceActionDelete(providerName, deviceId);
         List<String> deletedDeviceIds = checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
 
         //ensure it's gone
@@ -373,7 +373,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @throws ApiException
      */
     protected MultifactorStartAuthenticationResponseData startAuthentication(String providerName, String deviceId) throws ApiException {
-        MultifactorStartAuthenticationResponse resp = MultifactorApi().multifactorDeviceActionStartAuthentication(getSessionId(), providerName, deviceId);
+        MultifactorStartAuthenticationResponse resp = MultifactorApi().multifactorDeviceActionStartAuthentication(providerName, deviceId);
         return checkResponse(resp, resp.getData());
     }
 
@@ -395,6 +395,6 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
         data.setClientData(clientData);
         data.setKeyHandle(keyHandle);
         data.setSignatureData(signatureData);
-        return MultifactorApi().multifactorDeviceActionfinishAuthentication(getSessionId(), providerName, deviceId, data);
+        return MultifactorApi().multifactorDeviceActionfinishAuthentication(providerName, deviceId, data);
     }
 }

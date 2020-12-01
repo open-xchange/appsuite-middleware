@@ -58,14 +58,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -76,7 +75,7 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.READ)
 public class ListAction extends TaskAction {
 
     /**

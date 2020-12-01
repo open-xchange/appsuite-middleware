@@ -55,7 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -68,7 +68,6 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -78,8 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
-@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class CreateAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_NEW;
@@ -124,7 +122,7 @@ public final class CreateAction extends AbstractFolderAction {
         /*
          * Parse parameters
          */
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME));
+        FolderServiceDecorator decorator = getDecorator(request).put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME));
         final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, decorator);
         final String newId = newIdResponse.getResponse();
         Collection<OXException> warnings = new ArrayList<>(newIdResponse.getWarnings());

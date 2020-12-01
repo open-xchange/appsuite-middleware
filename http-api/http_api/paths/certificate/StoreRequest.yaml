@@ -4,12 +4,13 @@
     tags:
       - Certificate
     summary: Stores the fingerprint of an SSL certificate.
+    security: 
+        - session: []    
     description: >-
       Stores the fingerprint of an SSL certificate in combination with a
       hostname as either trusted or untrusted. This API call also accepts a
       JSONObject.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
         description: The fingerprint of the SSL certificate

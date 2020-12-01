@@ -72,7 +72,8 @@ public interface AttachmentResult {
      * @return The first attachment or <code>null</code>
      */
     default Attachment getFirstAttachment() {
-        return getAttachments().isEmpty() ? null : getAttachments().get(0);
+        List<? extends Attachment> attachments = getAttachments();
+        return attachments.isEmpty() ? null : attachments.get(0);
     }
 
     /**

@@ -4,8 +4,17 @@
     tags:
       - Folders
     summary: Gets a folder.
+    security: 
+        - session: []
+        - oauth: 
+          - read_mails
+        - oauth: 
+          - read_tasks
+        - oauth: 
+          - read_calendar
+        - oauth: 
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested folder.
@@ -27,3 +36,5 @@
           application/json:
             schema:
               $ref: '#/components/schemas/FolderResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'

@@ -4,8 +4,8 @@
     tags:
       - Halo
     summary: Gets all halo services.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

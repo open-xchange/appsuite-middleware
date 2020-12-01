@@ -157,7 +157,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         Calendar end = getEnd();
 
-        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
+        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
         Assert.assertEquals(1, filter(eventsNeedingAction).size());
     }
@@ -176,7 +176,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
 
-        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
+        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
         Assert.assertEquals(2, filter(eventsNeedingAction).size());
     }
 
@@ -196,7 +196,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
-        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
+        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
         Assert.assertEquals(2, filter(eventsNeedingAction).size());
     }
@@ -221,7 +221,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
-        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
+        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
         Assert.assertEquals(1, filter(eventsNeedingAction).size());
     }
@@ -244,7 +244,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
 
-        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(client3.getSession(), DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
+        EventsResponse eventsNeedingAction = userApi3.getChronosApi().getEventsNeedingAction(DateTimeUtil.getDateTime(start).getValue(), DateTimeUtil.getDateTime(end).getValue(), null, null, null, null);
 
         Assert.assertEquals(3, filter(eventsNeedingAction).size());
     }

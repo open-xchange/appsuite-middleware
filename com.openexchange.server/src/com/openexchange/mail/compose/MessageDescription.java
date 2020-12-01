@@ -81,6 +81,7 @@ public class MessageDescription {
     private Meta meta;
     private Security security;
     private Priority priority;
+    private ClientToken clientToken;
     private boolean contentEncrypted;
     private Map<String, String> customHeaders;
 
@@ -99,6 +100,7 @@ public class MessageDescription {
     private boolean bMeta;
     private boolean bSecurity;
     private boolean bPriority;
+    private boolean bClientToken;
     private boolean bContentEncrypted;
     private boolean bCustomHeaders;
 
@@ -240,6 +242,15 @@ public class MessageDescription {
                     return false;
                 }
             } else if (!sharedAttachmentsInfo.equals(other.sharedAttachmentsInfo)) {
+                return false;
+            }
+        }
+        if (other.containsValidClientToken()) {
+            if (clientToken == null) {
+                if (other.clientToken != null) {
+                    return false;
+                }
+            } else if (!clientToken.equals(other.clientToken)) {
                 return false;
             }
         }
@@ -631,6 +642,34 @@ public class MessageDescription {
         bPriority = false;
     }
 
+    /**
+     * Gets the client token
+     *
+     * @return The client token
+     */
+    public ClientToken getClientToken() {
+        return clientToken;
+    }
+
+    public MessageDescription setClientToken(ClientToken clientToken) {
+        this.clientToken = clientToken;
+        bClientToken = true;
+        return this;
+    }
+
+    public boolean containsClientToken() {
+        return bClientToken;
+    }
+
+    public boolean containsValidClientToken() {
+        return clientToken != null && clientToken.isPresent();
+    }
+
+    public void removeClientToken() {
+        clientToken = null;
+        bClientToken = false;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -673,7 +712,10 @@ public class MessageDescription {
             builder.append("security=").append(security).append(", ");
         }
         if (priority != null) {
-            builder.append("priority=").append(priority);
+            builder.append("priority=").append(priority).append(", ");
+        }
+        if (clientToken != null) {
+            builder.append("clientToken=").append(clientToken);
         }
         builder.append("]");
         return builder.toString();

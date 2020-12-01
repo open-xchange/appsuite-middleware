@@ -59,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -84,8 +84,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 @RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class ResendAction extends AbstractMailAction {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResendAction.class);
 
     /**
      * Initializes a new {@link ResendAction}.
@@ -162,7 +160,7 @@ public final class ResendAction extends AbstractMailAction {
                     try {
                         mm.setHeader("X-Ignore", "Ignore");
                         mm.removeHeader("X-Ignore");
-                    } catch (javax.mail.IllegalWriteException e) {
+                    } catch (@SuppressWarnings("unused") javax.mail.IllegalWriteException e) {
                         readOnly = true;
                     } catch (javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);

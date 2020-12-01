@@ -56,6 +56,7 @@ import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.mailstorage.association.AssociationLock;
 import com.openexchange.mail.compose.mailstorage.association.AssociationLock.LockResult;
@@ -90,11 +91,12 @@ public class MailStorageExclusiveOperation {
          * @param lookUpResult The look-up result to pass
          * @param mailStorage The mail storage access
          * @param session The session providing user data
+         * @param clientToken The current client token to check against for preventing concurrent modifications
          * @return The computed result
          * @throws OXException If unable to compute a result
          * @throws MissingDraftException If referenced draft mail does not exist
          */
-        MailStorageResult<V> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session) throws OXException, MissingDraftException;
+        MailStorageResult<V> call(LookUpResult lookUpResult, IMailStorage mailStorage, Session session, ClientToken clientToken) throws OXException, MissingDraftException;
     }
 
     /**
@@ -104,29 +106,32 @@ public class MailStorageExclusiveOperation {
      * @param initialLookUpResult The initial look-up result
      * @param compositionSpaceService The composition space service to use
      * @param callable The operation to perform
+     * @param clientToken The current client token to check against for preventing concurrent modifications
      * @return The operation's result
      * @throws OXException If operation execution fails
      */
-    public static <V> V performOperation(LookUpResult initialLookUpResult, MailStorageCompositionSpaceService compositionSpaceService, MailStorageCallable<V> callable) throws OXException {
-        return new MailStorageExclusiveOperation(initialLookUpResult, compositionSpaceService).performOperation(callable);
+    public static <V> V performOperation(LookUpResult initialLookUpResult, MailStorageCompositionSpaceService compositionSpaceService, MailStorageCallable<V> callable, ClientToken clientToken) throws OXException {
+        return new MailStorageExclusiveOperation(initialLookUpResult, compositionSpaceService, clientToken).performOperation(callable);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final LookUpResult initialLookUpResult;
     private final MailStorageCompositionSpaceService compositionSpaceService;
+    private final ClientToken clientToken;
 
     /**
      * Initializes a new {@link MailStorageExclusiveOperation}.
      *
      * @param lookUpResult The initial look-up result
      * @param compositionSpaceService The composition space service to use
-     * @param session The session providing user data
+     * @param clientToken The current client token to check against for preventing concurrent modifications
      */
-    private MailStorageExclusiveOperation(LookUpResult initialLookUpResult, MailStorageCompositionSpaceService compositionSpaceService) {
+    private MailStorageExclusiveOperation(LookUpResult initialLookUpResult, MailStorageCompositionSpaceService compositionSpaceService, ClientToken clientToken) {
         super();
         this.initialLookUpResult = initialLookUpResult;
         this.compositionSpaceService = compositionSpaceService;
+        this.clientToken = clientToken;
     }
 
     private <V> V performOperation(MailStorageCallable<V> callable) throws OXException {
@@ -148,7 +153,7 @@ public class MailStorageExclusiveOperation {
                         }
 
                         // Execute operation to assign storage result to local variable
-                        MailStorageResult<V> storageResult = callable.call(lookUpResult, compositionSpaceService.getMailStorage(), session);
+                        MailStorageResult<V> storageResult = callable.call(lookUpResult, compositionSpaceService.getMailStorage(), session, clientToken);
 
                         // Take over possible warnings yielded by operation execution
                         compositionSpaceService.addWarnings(storageResult.getWarnings());
@@ -197,6 +202,8 @@ public class MailStorageExclusiveOperation {
                     lock.unlock();
                 }
             } catch (OXException e) {
+                throw e;
+                /*
                 boolean cancel = !CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e) || !lookUpResult.isFromCache();
                 if (cancel) {
                     throw e;
@@ -208,6 +215,7 @@ public class MailStorageExclusiveOperation {
                 // Reload & retry
                 lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                 association = lookUpResult.getAssociation();
+                */
             }
         } while (true);
     }

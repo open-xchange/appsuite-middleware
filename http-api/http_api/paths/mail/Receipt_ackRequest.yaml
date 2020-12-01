@@ -4,11 +4,22 @@
     tags:
       - Mail
     summary: Requests a delivery receipt for a priviously sent mail.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mail    
     description: >-
       This delivery receipt only acknowledges that the message could be
       receipted on the recipients computer.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailAckBody'
+      description: >-
+        A JSON object containing the information of a mail for which a delivery
+        receipt shall be requested.
+      required: true      
     responses:
       '200':
         description: >
@@ -21,12 +32,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailAckResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MailAckBody'
-      description: >-
-        A JSON object containing the information of a mail for which a delivery
-        receipt shall be requested.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

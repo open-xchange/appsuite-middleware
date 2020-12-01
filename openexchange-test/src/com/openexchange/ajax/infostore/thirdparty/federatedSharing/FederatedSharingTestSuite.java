@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * {@link FederatedSharingTestSuite} - Test for the XOX (Cross OX sharing) file storage integration
@@ -58,7 +59,7 @@ import org.junit.runners.Suite;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.5
  */
-@RunWith(Suite.class)
+@RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     FederatedSharingFileStorageAccountTests.class
 })

@@ -56,6 +56,7 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
+import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
@@ -122,6 +123,17 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
         return capabilityService.getCapabilities(session);
+    }
+
+    @Override
+    public AttachmentStorage getAttachmentStorageByType(AttachmentStorageType storageType) throws OXException {
+        // Find matching attachment storage
+        for (AttachmentStorage attachmentStorage : this) {
+            if (attachmentStorage.getStorageType().getType() == storageType.getType()) {
+                return new CryptoAttachmentStorage(attachmentStorage, compositionSpaceStorage.get(), keyStorageService, services);
+            }
+        }
+        throw CompositionSpaceErrorCode.NO_ATTACHMENT_STORAGE.create();
     }
 
 }

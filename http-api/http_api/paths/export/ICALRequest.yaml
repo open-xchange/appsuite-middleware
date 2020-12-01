@@ -4,8 +4,9 @@
     tags:
       - Export
     summary: Exports appointment and task data to an iCalendar file.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >-
@@ -28,9 +29,9 @@
     tags:
       - Export
     summary: Exports a batch of appointments and tasks data to a iCalendar file.
+    security: 
+        - session: []    
     description: Exports a batch of appointments and tasks data to a iCalendar file.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

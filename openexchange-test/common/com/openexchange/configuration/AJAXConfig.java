@@ -138,8 +138,21 @@ public class AJAXConfig extends AbstractConfig {
         TEST_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
-        
+
         PATH_PREFIX("pathPrefix"),
+
+        /**
+         * The token endpoint of an oauth authentication server (e.g. keycloak)
+         */
+        OAUTH_TOKEN_ENDPOINT("oauthTokenEndpoint"),
+        /**
+         * The client id configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_ID("oauthClientID"),
+        /**
+         * The client secret configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_PASSWORD("oauthClientPassword")
 
         ;
 

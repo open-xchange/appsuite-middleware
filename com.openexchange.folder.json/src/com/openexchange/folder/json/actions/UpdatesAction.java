@@ -55,19 +55,17 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderField;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public final class UpdatesAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATES;
@@ -119,8 +117,6 @@ public final class UpdatesAction extends AbstractFolderAction {
             final String parameter = request.getParameter("mail");
             includeMail = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
-        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
@@ -133,7 +129,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                 includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
                     "mail") } : null,
                     session,
-                    new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(session)));
+                getDecorator(request));
         /*
          * Determine last-modified time stamp
          */

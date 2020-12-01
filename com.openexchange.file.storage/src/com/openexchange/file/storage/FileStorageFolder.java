@@ -274,4 +274,13 @@ public interface FileStorageFolder extends FileStorageConstants {
     default OXException getAccountError() {
        return null;
     }
+
+    /**
+     * Gets the possible delegate object.
+     *
+     * @return The delegate object or <code>null</code>
+     */
+    default Object getDelegate() {
+        return null;
+    }
 }

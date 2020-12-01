@@ -55,18 +55,24 @@ import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.MessageDescription;
 
 /**
- * {@link CompositionSpaceDescription}
+ * {@link CompositionSpaceContainer}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.2
  */
 public class CompositionSpaceContainer {
 
-    public static CompositionSpaceContainer fromCompositionSpaceDescription(CompositionSpaceDescription cs) {
+    /**
+     * Initializes a new instance of <code>CompositionSpaceContainer</code> from given <code>CompositionSpaceDescription</code> instance.
+     *
+     * @param compositionSpaceDesc The <code>CompositionSpaceDescription</code> instance to initialize from
+     * @return The resulting instance of <code>CompositionSpaceContainer</code>
+     */
+    public static CompositionSpaceContainer fromCompositionSpaceDescription(CompositionSpaceDescription compositionSpaceDesc) {
         CompositionSpaceContainer retval = new CompositionSpaceContainer();
-        retval.setMessage(cs.getMessage());
-        retval.setUuid(cs.getUuid());
-        retval.setLastModified(cs.getLastModifiedDate());
+        retval.setMessage(compositionSpaceDesc.getMessage());
+        retval.setUuid(compositionSpaceDesc.getUuid());
+        retval.setLastModified(compositionSpaceDesc.getLastModifiedDate());
         return retval;
     }
 
@@ -103,4 +109,5 @@ public class CompositionSpaceContainer {
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
+
 }

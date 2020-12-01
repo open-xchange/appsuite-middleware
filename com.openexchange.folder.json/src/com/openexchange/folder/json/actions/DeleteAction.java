@@ -66,7 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -78,7 +78,6 @@ import com.openexchange.folderstorage.TrashAwareFolderService;
 import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -88,8 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
-@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class DeleteAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
     private static final String PARAM_HARD_DELETE = "hardDelete";
@@ -150,7 +148,7 @@ public final class DeleteAction extends AbstractFolderAction implements Enqueuab
          */
         final boolean failOnError = AJAXRequestDataTools.parseBoolParameter(PARAM_FAIL_ON_ERROR, request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator().put(PARAM_HARD_DELETE, request.getParameter(PARAM_HARD_DELETE));
+        FolderServiceDecorator decorator = getDecorator(request).put(PARAM_HARD_DELETE, request.getParameter(PARAM_HARD_DELETE));
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);

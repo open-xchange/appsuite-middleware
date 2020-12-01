@@ -357,4 +357,9 @@ public class FilteringFolderService implements FolderService, RestoringFolderSer
         }
         return FolderResponseImpl.newFolderResponse(response, restoreFolderFromTrash.getWarnings());
     }
+
+    @Override
+    public FolderResponse<List<UserizedFolder>> searchFolderByName(String treeId, String folderId, ContentType contentType, String query, long date, boolean includeSubfolders, boolean all, int start, int end, Session session, FolderServiceDecorator decorator) throws OXException {
+        return delegate.searchFolderByName(treeId, folderId, contentType, query, date, includeSubfolders, all, start, end, session, decorator);
+    }
 }

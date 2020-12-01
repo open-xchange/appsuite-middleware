@@ -120,6 +120,7 @@ import com.openexchange.mail.compose.AttachmentResult;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
@@ -275,8 +276,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport) throws OXException {
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         Message m = compositionSpace.getMessage();
         if (null == m) {
@@ -658,7 +662,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         if (deleteAfterTransport) {
             try {
-                boolean closed = closeCompositionSpace(compositionSpaceId);
+                boolean closed = closeCompositionSpace(compositionSpaceId, ClientToken.NONE);
                 if (!closed) {
                     LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
                 } else {
@@ -800,8 +804,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave) throws OXException {
+    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         Message m = compositionSpace.getMessage();
 
@@ -953,7 +960,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             if (deleteAfterSave) {
                 try {
-                    boolean closed = closeCompositionSpace(compositionSpaceId);
+                    boolean closed = closeCompositionSpace(compositionSpaceId, ClientToken.NONE);
                     if (!closed) {
                         LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
                     } else {
@@ -1575,6 +1582,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 message.setAttachments(attachments);
             }
 
+            message.setClientToken(parameters.getClientToken());
+
             CompositionSpace compositionSpace = getStorageService().openCompositionSpace(session, new CompositionSpaceDescription().setUuid(uuid).setMessage(message), Optional.of(encrypt));
             if (!compositionSpace.getId().getId().equals(uuid)) {
                 // Composition space identifier is not equal to generated one
@@ -1602,9 +1611,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachmentDesc, InputStream data) throws OXException {
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, AttachmentDescription attachmentDesc, InputStream data, ClientToken clientToken) throws OXException {
         try {
             CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+            if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+                throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+            }
+
             // Obtain attachment storage
             AttachmentStorage attachmentStorage = getAttachmentStorage(session);
             Attachment newAttachment = null;
@@ -1628,6 +1641,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                         compositionSpace = updatedCompositionSpace;
                         retry = false;
                     } catch (OXException e) {
+                        if (clientToken.isPresent()) {
+                            // Re-throw...
+                            throw e;
+                        }
+
                         if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                             throw e;
                         }
@@ -1655,8 +1673,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    public AttachmentResult replaceAttachmentInCompositionSpace(UUID compositionSpaceId, UUID attachmentId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         // Check attachment existence
         {
@@ -1744,6 +1765,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
+                    if (clientToken.isPresent()) {
+                        // Re-throw...
+                        throw e;
+                    }
+
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                         throw e;
                     }
@@ -1770,8 +1796,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition) throws OXException {
+    public AttachmentResult addAttachmentToCompositionSpace(UUID compositionSpaceId, StreamedUploadFileIterator uploadedAttachments, String disposition, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
@@ -1809,6 +1838,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
+                    if (clientToken.isPresent()) {
+                        // Re-throw...
+                        throw e;
+                    }
+
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                         throw e;
                     }
@@ -1837,8 +1871,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public AttachmentResult addVCardToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
+
         for (Attachment existingAttachment : compositionSpace.getMessage().getAttachments()) {
             if (AttachmentOrigin.VCARD == existingAttachment.getOrigin()) {
                 // vCard already contained
@@ -1883,6 +1921,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
+                    if (clientToken.isPresent()) {
+                        // Re-throw...
+                        throw e;
+                    }
+
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                         throw e;
                     }
@@ -1921,7 +1964,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId) throws OXException {
+    public AttachmentResult addContactVCardToCompositionSpace(UUID compositionSpaceId, String contactId, String folderId, ClientToken clientToken) throws OXException {
         if (contactId == null) {
             throw CompositionSpaceErrorCode.ERROR.create("Contact identifier must not be null");
         }
@@ -1930,6 +1973,10 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
+
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
 
         // Compile & save vCard attachment
@@ -1959,6 +2006,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
+                    if (clientToken.isPresent()) {
+                        // Re-throw...
+                        throw e;
+                    }
+
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                         throw e;
                     }
@@ -1996,7 +2048,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription md) throws OXException {
+    public CompositionSpace updateCompositionSpace(UUID compositionSpaceId, MessageDescription md, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = null;
 
         boolean retry = true;
@@ -2004,6 +2056,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         do {
             try {
                 compositionSpace = getCompositionSpace(compositionSpaceId);
+                if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+                    throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+                }
 
                 // Check if attachment identifiers are about to be changed
                 Set<UUID> oldAttachmentIds = null;
@@ -2035,6 +2090,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     attachmentStorage.deleteAttachments(toDelete, session);
                 }
             } catch (OXException e) {
+                if (clientToken.isPresent()) {
+                    // Re-throw...
+                    throw e;
+                }
+
                 if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                     throw e;
                 }
@@ -2053,7 +2113,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+        if (clientToken.isPresent()) {
+            CompositionSpace compositionSpace = getStorageService().getCompositionSpace(session, compositionSpaceId);
+            if (compositionSpace == null) {
+                // No such composition space
+                return false;
+            }
+            if (clientToken.isNotEquals(compositionSpace.getClientToken())) {
+                throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+            }
+        }
+
         boolean closed = getStorageService().closeCompositionSpace(session, compositionSpaceId);
         if (closed) {
             if (LOG.isInfoEnabled()) {
@@ -2092,8 +2163,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId) throws OXException {
+    public AttachmentResult addOriginalAttachmentsToCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         // Acquire meta information and determine the "replyFor" path
         Meta meta = compositionSpace.getMessage().getMeta();
@@ -2158,6 +2232,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     compositionSpace = updatedCompositionSpace;
                     retry = false;
                 } catch (OXException e) {
+                    if (clientToken.isPresent()) {
+                        // Re-throw...
+                        throw e;
+                    }
+
                     if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                         throw e;
                     }
@@ -2267,8 +2346,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId) throws OXException {
+    public AttachmentResult deleteAttachment(UUID compositionSpaceId, UUID attachmentId, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId);
+        if (clientToken.isPresent() && clientToken.isNotEquals(compositionSpace.getClientToken())) {
+            throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
+        }
 
         // Obtain attachment storage
         AttachmentStorage attachmentStorage = getAttachmentStorage(session);
@@ -2319,6 +2401,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 compositionSpace = updatedCompositionSpace;
                 retry = false;
             } catch (OXException e) {
+                if (clientToken.isPresent()) {
+                    // Re-throw...
+                    throw e;
+                }
+
                 if (!CompositionSpaceErrorCode.CONCURRENT_UPDATE.equals(e)) {
                     throw e;
                 }

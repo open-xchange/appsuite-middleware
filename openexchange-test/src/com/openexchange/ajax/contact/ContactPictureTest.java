@@ -227,7 +227,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     }
 
     private byte[] getContactPicture(String userID, String contactId, String mail, String contactFolderID) throws ApiException {
-        return contactsApi.getContactPicture(getSessionId(), userID, null, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
+        return contactsApi.getContactPicture(userID, null, contactId, contactFolderID, mail, null, null, null, null, null, null, null, null, null);
     }
 
     private void assertThatPictureIsMissing(String userID, String contactId, String mail) {
@@ -279,6 +279,6 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         ContactListElement element = new ContactListElement();
         element.setFolder(contactFolderId);
         element.setId(contactId);
-        contactsApi.deleteContacts(getSessionId(), L(Long.MAX_VALUE), Collections.singletonList(element));
+        contactsApi.deleteContacts(L(Long.MAX_VALUE), Collections.singletonList(element));
     }
 }

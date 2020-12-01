@@ -6,6 +6,10 @@
     summary: >-
       Import of mails as MIME data block
       ([RFC822](https://tools.ietf.org/html/rfc822)).
+    security: 
+        - session: []
+        - oauth:
+          - write_mail      
     description: >
       This request can be used to store a single or a lot of mails in the OX
       mail storage backend. This
@@ -17,7 +21,6 @@
 
       To import multiple mails add further form-data fields.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: The ID of the folder into that the emails should be imported.
@@ -42,18 +45,6 @@
         required: false
         schema:
           type: boolean
-    responses:
-      '200':
-        description: >
-          A JSON object containing an array of JSON objects each with the folder
-          identifier and the object ID
-
-          of the imported mail(s). In case of errors the responsible fields in
-          the response are filled (see [Error handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MailImportResponse'
     requestBody:
       content:
         multipart/form-data:
@@ -68,4 +59,20 @@
                 type: string
                 format: binary
             required:
-              - file
+              - file          
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of JSON objects each with the folder
+          identifier and the object ID
+
+          of the imported mail(s). In case of errors the responsible fields in
+          the response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailImportResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

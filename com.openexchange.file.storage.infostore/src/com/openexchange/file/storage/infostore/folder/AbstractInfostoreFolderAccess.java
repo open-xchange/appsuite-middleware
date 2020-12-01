@@ -49,20 +49,28 @@
 
 package com.openexchange.file.storage.infostore.folder;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.sql.Connection;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -79,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess {
+public abstract class AbstractInfostoreFolderAccess implements FileStorageFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess, SearchableFolderNameFolderAccess {
 
     /** The static identifier <code>9</code> of the <i>Infostore</i> root folder ("infostore / <code>FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID</code>) */
     public static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
@@ -247,6 +255,12 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     }
 
     @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        List<UserizedFolder> result = getFolderService().searchFolderByName(TREE_ID, folderId, InfostoreContentType.getInstance(), query, date, includeSubfolders, all, start, end, session, initDecorator()).getResponse();
+        return getConverter().getStorageFolders(result.toArray(new UserizedFolder[result.size()]));
+    }
+
+    @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
@@ -254,6 +268,11 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         return moveFolder(folderId, newParentId, newName, null);
+    }
+
+    @Override
+    public FileStorageResult<String> moveFolder(boolean ignoreWarnings, String folderId, String newParentId, String newName) throws OXException {
+        return moveFolder(folderId, newParentId, newName, null, ignoreWarnings);
     }
 
     @Override
@@ -310,6 +329,37 @@ public abstract class AbstractInfostoreFolderAccess implements FileStorageFolder
         }
         getFolderService().updateFolder(folder, null, session, initDecorator());
         return null == folder.getNewID() ? folderId : folder.getNewID();
+    }
+
+    /**
+     * Moves and/or renames a folder.
+     *
+     * @param folderId the ID of the folder to move
+     * @param newParentId The ID of the target folder, or <code>null</code> to leave unchanged
+     * @param newName The target name of the folder, or <code>null</code> to leave unchanged
+     * @param decorator The decorator, or <code>null</code> if not used
+     * @param ignoreWarnings true to force the folder move even if warnings are detected, false, otherwise
+     * @return The FolderWarningsResponse object with the ID of the moved folder
+     * @throws OXException
+     */
+    private FileStorageResult<String> moveFolder(final String folderId, final String newParentId, String newName, FolderServiceDecorator decorator, boolean ignoreWarnings) throws OXException {
+        ParsedFolder folder = new ParsedFolder();
+        folder.setTreeID(TREE_ID);
+        folder.setID(folderId);
+        if (null != newParentId) {
+            folder.setParentID(newParentId);
+        }
+        if (null != newName) {
+            folder.setName(newName);
+        }
+        FolderServiceDecorator usedDecorator = decorator != null ? decorator : initDecorator();
+        Map<String, Boolean> properties = new HashMap<String, Boolean>();
+        properties.put("ignoreWarnings", B(ignoreWarnings));
+        usedDecorator.putProperties(properties);
+        FolderResponse<Void> updateFolder = getFolderService().updateFolder(folder, null, session, usedDecorator);
+        Collection<OXException> warnings = updateFolder.getWarnings();
+        String resultFolderId = null == folder.getNewID() ? folderId : folder.getNewID();
+        return FileStorageResult.newFileStorageResult(resultFolderId, warnings);
     }
 
     /**

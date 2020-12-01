@@ -54,9 +54,9 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(OAuthAction.GRANT_ALL)
+@RestrictedAction()
 public class SharesAction extends AbstractFolderAction {
 
     /** The action identifier */
@@ -106,14 +105,8 @@ public class SharesAction extends AbstractFolderAction {
         /*
          * prepare folder service decorator based on additional request parameters
          */
-        FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .setLocale(optLocale(request))
-            .setTimeZone(Tools.getTimeZone(request.getParameter(AJAXServlet.PARAMETER_TIMEZONE)))
-            .setAllowedContentTypes(collectAllowedContentTypes(request))
-            .put("mailRootFolders", request.getParameter("mailRootFolders"))
-            .put("altNames", request.getParameter("altNames"))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
-        ;
+        FolderServiceDecorator decorator = getDecorator(request).put("mailRootFolders", request.getParameter("mailRootFolders"));
+
         /*
          * get shares from folder service
          */

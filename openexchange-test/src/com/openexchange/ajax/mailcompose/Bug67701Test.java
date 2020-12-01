@@ -56,8 +56,8 @@ import java.util.Collections;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.models.Attachment;
 import com.openexchange.testing.httpclient.models.ComposeBody;
-import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeResponseMessageModel;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 
 /**
@@ -76,12 +76,12 @@ public class Bug67701Test extends AbstractMailComposeTest {
         ComposeBody body = new ComposeBody();
         body.setFolderId(mailWithAttachment.getFolderId());
         body.setId(mailWithAttachment.getId());
-        MailComposeResponse reply = api.postMailCompose(getSessionId(), "FORWARD", null, Collections.singletonList(body));
+        MailComposeResponse reply = api.postMailCompose("FORWARD", null, null, Collections.singletonList(body));
         check(reply);
-        MailComposeMessageModel data = reply.getData();
+        MailComposeResponseMessageModel data = reply.getData();
         compositionSpaceIds.add(data.getId());
 
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), data.getId());
+        MailComposeResponse response = api.getMailComposeById(data.getId());
         check(response);
         assertThat(I(response.getData().getAttachments().size()), is(I(1)));
         Attachment attach = response.getData().getAttachments().get(0);

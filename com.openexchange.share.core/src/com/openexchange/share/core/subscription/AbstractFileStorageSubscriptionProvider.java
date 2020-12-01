@@ -52,9 +52,11 @@ package com.openexchange.share.core.subscription;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.share.core.tools.ShareLinks.extractHostName;
 import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REFRESH;
+import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -70,6 +72,7 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.SharingFileStorageService;
@@ -83,6 +86,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
@@ -475,10 +479,21 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * Generates the information about the account
      *
      * @param account The account to get the infos from
+     * @param shareLink The share link
      * @return The {@link ShareSubscriptionInformation}
      */
     protected ShareSubscriptionInformation generateInfos(FileStorageAccountAccess accountAccess, String shareLink) {
-        String folderId = ShareTool.getShareTarget(shareLink).getFolder();
+        return generateInfos(getFolderFrom(shareLink), accountAccess);
+    }
+
+    /**
+     * Generates the information about the account
+     *
+     * @param folderId The folder ID
+     * @param account The account to get the infos from
+     * @return The {@link ShareSubscriptionInformation}
+     */
+    protected ShareSubscriptionInformation generateInfos(String folderId, FileStorageAccountAccess accountAccess) {
         return new ShareSubscriptionInformation( // @formatter:off
             accountAccess.getAccountId(),
             String.valueOf(Module.INFOSTORE.getName()),
@@ -561,7 +576,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      */
     protected boolean isSingleFileShare(String shareLink) {
         ShareTargetPath path = ShareTool.getShareTarget(shareLink);
-        return Strings.isNotEmpty(path.getItem());
+        return null != path && Strings.isNotEmpty(path.getItem());
     }
 
     /**
@@ -646,6 +661,62 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a state indicating whether a single file is already contained in a subscribed share or not.
+     *
+     * @param session The user session
+     * @param shareLink The share link containing the file
+     * @return {@link ShareLinkState#SUBSCRIBED} if the file belongs to a subscribed folder,
+     *         {@link ShareLinkState#FORBIDDEN} if only the file is shared and the user has no further access
+     * @throws OXException
+     */
+    protected ShareLinkAnalyzeResult checkSingleFileAccessible(Session session, String shareLink) throws OXException {
+        FileStorageAccountAccess accountAccess = getStorageAccountAccess(session, shareLink);
+        if (null == accountAccess) {
+            /*
+             * Unknown share
+             */
+            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+        }
+        ShareTargetPath path = ShareTool.getShareTarget(shareLink);
+        if (null == path) {
+            // Should not happen since checked by precondition in isSupported()
+            return new ShareLinkAnalyzeResult(UNRESOLVABLE, ShareSubscriptionExceptions.UNEXPECTED_ERROR.create("Unable to get share path from link"), getModuleInfo());
+        }
+
+
+        /*
+         * Check if the file is already in a known folder
+         */
+        try {
+            String folderId = path.getFolder();
+            accountAccess.connect();
+            FileStorageFolder folder = accountAccess.getFolderAccess().getFolder(folderId);
+            if (SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(folder.getParentId()) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(folder.getParentId())) {
+                /*
+                 * Do not allow to subscribe to files under the root folder of "shared" or "public" folder
+                 */
+                return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+            }
+            String item = getItemID(path);
+            if (accountAccess.getFileAccess().exists(folder.getId(), item, FileStorageFileAccess.CURRENT_VERSION)) {
+                return new ShareLinkAnalyzeResult(SUBSCRIBED, generateInfos(folderId, accountAccess));
+            }
+        } finally {
+            accountAccess.close();
+        }
+        return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+    }
+
+    private String getItemID(ShareTargetPath path) {
+        String folderId = path.getFolder();
+        String item = path.getItem();
+        if (item.startsWith(folderId) && item.length() > (folderId.length() + 1)) {
+            item = item.substring(folderId.length() + 1); // "folderId/itemId"
+        }
+        return item;
     }
 
 }

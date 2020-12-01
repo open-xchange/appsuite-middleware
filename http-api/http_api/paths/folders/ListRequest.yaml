@@ -4,8 +4,17 @@
     tags:
       - Folders
     summary: Gets the subfolders of a specified parent folder.
+    security: 
+        - session: []
+        - oauth: 
+          - read_mails
+        - oauth: 
+          - read_tasks
+        - oauth: 
+          - read_calendar
+        - oauth: 
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: parent
         description: >-
@@ -47,3 +56,5 @@
           application/json:
             schema:
               $ref: '#/components/schemas/FoldersResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'

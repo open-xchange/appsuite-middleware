@@ -1,0 +1,216 @@
+feature_name: OAuth Provider
+feature_description: |
+  Configuration for usage of OAuth provider. The feature is disabled by default and must be activated manually.
+properties:
+  - key: com.openexchange.oauth.provider.enabled
+    description: |
+      Set to 'true' to basically enable the OAuth 2.0 provider. This setting can then be overridden
+      via config cascade to disallow granting access for certain users. If the provider is enabled and should act as
+      authorization server, an [[com.openexchange.oauth.provider.encryptionKey]] must be set!
+    defaultValue: false
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.authcode.type", "com.openexchange.oauth.provider.encryptionKey"]
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider"]
+  - key: com.openexchange.oauth.provider.mode
+    description: |
+      Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from. 
+      <ol>
+      <li><code>auth_server</code> - Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also
+      as authorization server. The following functionality will be provided:
+      <ol>
+      <li>An authorization endpoint, token endpoint and revocation endpoint are made available via HTTP</li>
+      <li>API calls for revoking access to external clients are made available, access can be revoked via App Suite</li>
+      <li> UI Provisioning interfaces to manage trusted clients are enabled</li>
+      </ol>
+      </li>
+      <li><code>expect_jwt</code> - Defines whether the enabled OAuth 2.0 provider is accesible with OAuth 2.0 Bearer Access Tokens that are JWTs, 
+      which were issued by an external Identity & Access management System.</li>
+      <li><code>token_introspection</code> - Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.</li>
+      </ol>
+    defaultValue: auth_server
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Authorization Server", "Introspection", "JWT"]
+  - key: com.openexchange.oauth.provider.authcode.type
+    description: | 
+      Specify how authorization codes shall be stored, to enable OAuth in multi-node environments. Options are Hazelcast ('hz') or database ('db').
+    defaultValue: hz
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.enabled
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Authorization Server"]
+  - key: com.openexchange.oauth.provider.encryptionKey
+    description: | 
+      The key to encrypt client secrets that are stored within the database. 
+      A value must be set to enable the registration of OAuth 2.0 client applications. 
+      It must be the same on every node. After the first client has been registered, the key must not be changed anymore.
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.enabled
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Authorization Server"]
+  - key: com.openexchange.oauth.provider.jwt.jwksUri
+    description: |
+      Specifies an URI used to fetch signature keys for token validation.
+      Examples:
+      <ul>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = http://YOUR_DOMAIN/.well-known/jwks.json</li>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = https://YOUR_DOMAIN/.well-known/jwks.json</li>
+        <li>com.openexchange.oauth.provider.jwksEndpoint = file://PATH_TO/jwks.json</li>
+      </ul>
+    defaultValue:
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "JWT"]
+  - key: com.openexchange.oauth.provider.allowedIssuer
+    description: |
+      A comma sperated list of issuer names (JWT claim "iss") that tokens are accepted from. 
+      If this property is empty, tokens are accepted from all issuers.
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "JWT"]
+  - key: com.openexchange.oauth.provider.scope.[EXTERNAL_SCOPE]
+    description: |
+      This property is used for mapping external authorization server scopes to internal Middleware scopes. 
+      Replace [EXTERNAL_SCOPE] with the corresponding external scope, which should be mapped to one or more internal scopes. 
+      Examples:
+      <pre>
+      com.openexchange.oauth.provider.scope.mail = read_mail, write_mail
+      </pre>
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "JWT"]
+  - key: com.openexchange.oauth.provider.contextLookupClaim
+    description: |
+      Name of the claim that will be used to resolve a context.
+    defaultValue: sub
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.contextLookupNamePart
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection", "JWT"]
+  - key: com.openexchange.oauth.provider.contextLookupNamePart
+    description: |
+      Gets the name part of the claim value used for
+      determining the context of a user. Possible values are
+
+      <ul>
+      <li><code>full</code> - The full string as returned by the authorization server. </li>
+      <li><code>local-part</code> - The local part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      <li><code>domain</code> - The domain part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      </ul>
+    defaultValue: domain
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.contextLookupClaim
+    file: oauth-provider-introspection.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection", "JWT"]
+  - key: com.openexchange.oauth.provider.userLookupClaim
+    description: |
+      Name of the claim that will be used to resolve a user.
+    defaultValue: sub
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.userLookupNamePart
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection", "JWT"]
+  - key: com.openexchange.oauth.provider.userLookupNamePart
+    description: |
+      Gets the name part of the claim value used for
+      determining a user within a context. Possible values are
+
+      <ul>
+      <li><code>full</code> - The full string as returned by the authorization server. </li>
+      <li><code>local-part</code> - The local part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      <li><code>domain</code> - The domain part of an email address (local-part@domain), 
+      if the provided name matches such. In case the name does not match an email address, the full string is taken.</li>
+      </ul>
+    defaultValue: local-part
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: com.openexchange.oauth.provider.userLookupClaim
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection", "JWT"]
+  - key: com.openexchange.oauth.provider.introspection.endpoint
+    description: |
+      A OAuth2-compliant Token Introspection Endpoint which clients can use to query the server to determine the active state of a Token.
+    defaultValue: true
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
+    file: oauth-provider-introspection.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.basicAuthEnabled
+    description: |
+      Indicates if HTTP basic auth should be used for Token Information Request
+    defaultValue: true
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.clientID", "com.openexchange.oauth.provider.introspection.clientSecret"]
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.clientID
+    description: |
+      The client identifier.
+    defaultValue:
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientSecret"]
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection"]
+  - key: com.openexchange.oauth.provider.introspection.clientSecret
+    description: |
+      The client secret.
+    defaultValue: 
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: ["com.openexchange.oauth.provider.introspection.endpoint", "com.openexchange.oauth.provider.introspection.basicAuthEnabled", "com.openexchange.oauth.provider.introspection.clientID"]
+    file: oauth-provider.properties
+    packageName: open-xchange-oauth-provider
+    tags: ["OAuth Provider", "Introspection"]

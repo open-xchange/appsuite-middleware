@@ -1,8 +1,18 @@
+# Common response Excception containing the error fields
+CommonResponseException:
+  type: object
+  properties:
+    $ref: ./common/CommonResponseExceptionData.yaml
 # Common response containing the error fields and a timestamp
 CommonResponse:
   type: object
   properties:
     $ref: ./common/CommonResponseData.yaml
+# Common response containing the error fields, a timestamp and warnings
+CommonResponseWithWarnings:
+  type: object
+  properties:
+    $ref: ./common/CommonResponseDataWithWarnings.yaml    
 # Module: login
 LoginResponse:
   $ref: ./login/LoginResponse.yaml
@@ -76,6 +86,8 @@ FolderCheckLimitsResponseData:
   $ref: ./folders/FolderCheckLimitsResponseData.yaml
 FolderCheckLimitsResponseErrorData:
   $ref: ./folders/FolderCheckLimitsResponseErrorData.yaml
+FolderSearchBody:
+  $ref: ./folders/FolderSearchBody.yaml
 # Module: tasks
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml
@@ -381,6 +393,8 @@ InfoItemZipElement:
   $ref: ./infostore/InfoItemZipElement.yaml
 InfoItemsMovedResponse:
   $ref: ./infostore/InfoItemsMovedResponse.yaml
+InfoItemMovedResponse:
+  $ref: ./infostore/InfoItemMovedResponse.yaml
 InfoItemBody:
   $ref: ./infostore/InfoItemBody.yaml
 InfoItemBodyNotification:
@@ -544,8 +558,10 @@ MailComposeResponse:
   $ref: ./mailcompose/MailComposeResponse.yaml
 MailComposeGetResponse:
   $ref: ./mailcompose/MailComposeGetResponse.yaml
-MailComposeMessageModel:
-  $ref: ./mailcompose/MessageModel.yaml
+MailComposeRequestMessageModel:
+  $ref: ./mailcompose/RequestMessageModel.yaml
+MailComposeResponseMessageModel:
+  $ref: ./mailcompose/ResponseMessageModel.yaml
 MailComposeMailPathModel:
   $ref: ./mailcompose/MailComposeMailPathModel.yaml
 MailComposeAttachmentResponse:
@@ -627,6 +643,8 @@ OAuthClientData:
   $ref: ./oauth/grants/OAuthClientData.yaml
 OAuthGrantsResponse:
   $ref: ./oauth/grants/OAuthGrantsResponse.yaml
+OAuthErrorResponse:
+  $ref: ./oauth/errors/OAuthErrorResponse.yaml
 # Module: JSlob
 JSlobData:
   $ref: ./jslob/JSlobData.yaml

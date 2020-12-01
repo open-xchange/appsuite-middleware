@@ -81,7 +81,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
     @Test
     public void testFolderEventExport() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testCreateSingle"), true);
-        String iCalEvent = importExportManager.exportICalFile(defaultUserApi.getSession(), expectedEventData.getFolder());
+        String iCalEvent = importExportManager.exportICalFile(expectedEventData.getFolder());
         assertNotNull(iCalEvent);
         assertTrue(iCalEvent.contains("testCreateSingle"));
     }
@@ -104,7 +104,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
         addInfoItemExport(itemList, expectedEventData.getFolder(), expectedEventData.getId());
         eventData.add(expectedEventData);
 
-        String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
+        String iCalExport = importExportManager.exportICalBatchFile(itemList);
         assertNotNull(iCalExport);
         assertEventData(eventData, iCalExport);
     }
@@ -156,7 +156,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
         List<InfoItemExport> itemList = new ArrayList<>();
         addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
 
-        String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
+        String iCalExport = importExportManager.exportICalBatchFile(itemList);
         assertNotNull(iCalExport);
         assertEventData(eventData, iCalExport);
     }

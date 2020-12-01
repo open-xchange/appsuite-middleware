@@ -106,7 +106,7 @@ public final class Databases {
 
     /**
      * Decides on how to return the write-able connection
-     * 
+     *
      * @param databaseService The database service
      * @param writeConnection The write-able connection to return to pool
      * @param contextId The context identifier
@@ -444,6 +444,28 @@ public final class Databases {
             retval.append("?,");
         }
         retval.setCharAt(retval.length() - 1, ')');
+        return retval.toString();
+    }
+
+    /**
+     * Appends an SQL statement with enough <code>'?'</code> characters in the last <code>IN</code> argument and appends the closing <code>")"</code>.
+     * <p>
+     * <b>Note</b>: SQL statement is expected to end with <code>"IN ("</code>
+     *
+     * @param length The number of entries.
+     * @return The ready to use SQL statement.
+     * @throws IllegalArgumentException If <code>sql</code> is <code>null</code> <i>OR</i> <code>length</code> is less than or equal to <code>0</code> (zero)
+     */
+    public static String appendIN(int length) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be positive");
+        }
+        StringBuilder retval = new StringBuilder(length << 1);
+        retval.append('?');
+        for (int i = length - 1; i-- > 0;) {
+            retval.append(",?");
+        }
+        retval.append(')');
         return retval.toString();
     }
 
@@ -959,7 +981,7 @@ public final class Databases {
 
     /**
      * Executes an SQL query
-     * 
+     *
      * @param <T> The class of the response object
      * @param databaseService The database service
      * @param connection The connection to use or <code>null</code> to obtain a connection
@@ -993,7 +1015,7 @@ public final class Databases {
 
     /**
      * Executes an SQL query.
-     * 
+     *
      * @param <T> The class of the result object
      * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
      * @param databaseService The {@link DatabaseService} to obtain the connection from
@@ -1129,7 +1151,7 @@ public final class Databases {
 
     /**
      * Executes an SQL query
-     * 
+     *
      * @param <T> The class of the response object
      * @param connection The connection to use
      * @param statement The statement to execute

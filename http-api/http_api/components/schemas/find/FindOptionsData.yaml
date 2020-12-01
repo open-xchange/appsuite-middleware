@@ -3,6 +3,18 @@ properties:
   timezone:
     type: string
     description: The timezone to use if any dates are returned.
+  includeSubfolders:
+    type: boolean
+    description: Search in subfolders of given root folder too, defaults to `true`.
+  all:
+    type: boolean
+    description: Deliver all subfolders regardless of their subscribed status, defaults to `true`
+  sort:
+    type: string
+    description: The field to sort results. Default varies depending on module.
+  order:
+    type: string
+    description: The sort order, possible values are `asc` and `desc`, defaults to `asc`.
   admin:
     type: boolean
     description: >-

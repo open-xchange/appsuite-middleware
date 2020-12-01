@@ -63,13 +63,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.PictureSearchData;
-import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -82,7 +80,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.1
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 @RestrictedAction(module = "contacts", type = RestrictedAction.Type.READ)
 public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
@@ -117,7 +114,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
 
     /**
      * Parses the {@link PictureSearchData} from the given {@link AJAXRequestData}
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @return The {@link PictureSearchData}
      * @throws OXException

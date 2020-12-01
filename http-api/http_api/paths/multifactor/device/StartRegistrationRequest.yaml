@@ -4,8 +4,8 @@
     tags:
       - Multifactor
     summary: Starts the process of registering a new multifactor device
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

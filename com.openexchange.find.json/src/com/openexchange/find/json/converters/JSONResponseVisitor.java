@@ -66,6 +66,7 @@ import com.openexchange.find.DocumentVisitor;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.drive.FolderDocument;
 import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
@@ -257,6 +258,25 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 }
                 AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getObject());
                 calendarConverter.convert(requestData, requestResult, session, null);
+                json.put(requestResult.getResultObject());
+            }
+        } catch (OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(FolderDocument folderDocument) {
+        try {
+            ResultConverter converter = converterRegistry.getConverter("folder");
+            if (null != converter) {
+                AJAXRequestData requestData = this.requestData.copyOf();
+                if (timeZone != null) {
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
+                }
+                AJAXRequestResult requestResult = new AJAXRequestResult(folderDocument.getFolder());
+                converter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }
         } catch (OXException e) {

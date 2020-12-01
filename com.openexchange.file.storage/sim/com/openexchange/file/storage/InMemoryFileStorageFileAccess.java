@@ -466,7 +466,92 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
             @Override
             public FileStorageFolderAccess getFolderAccess() throws OXException {
-                return null;
+                return new AbstractFileStorageFolderAccess() {
+
+                    @Override
+                    public boolean exists(String folderId) throws OXException {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+
+                    @Override
+                    public FileStorageFolder getFolder(String folderId) throws OXException {
+                        return new SimFileStorageFolder();
+                    }
+
+                    @Override
+                    public FileStorageFolder getPersonalFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder getTrashFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getPublicFolders() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder getRootFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String createFolder(FileStorageFolder toCreate) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String renameFolder(String folderId, String newName) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void clearFolder(String folderId, boolean hardDelete) throws OXException {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                    
+                };
             }
 
             @Override

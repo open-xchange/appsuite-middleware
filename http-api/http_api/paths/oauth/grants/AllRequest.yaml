@@ -4,8 +4,8 @@
     tags:
       - OAuth
     summary: Gets all OAuth grants.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

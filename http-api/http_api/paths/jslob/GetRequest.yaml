@@ -4,8 +4,9 @@
     tags:
       - JSlob
     summary: Gets a single JSlob.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
         description: >-
@@ -37,5 +38,4 @@
         content:
           application/json:
             schema:
-              description: 
               type: string

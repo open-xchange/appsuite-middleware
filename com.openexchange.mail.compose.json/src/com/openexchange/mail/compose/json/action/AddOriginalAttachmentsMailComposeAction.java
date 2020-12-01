@@ -84,7 +84,7 @@ public class AddOriginalAttachmentsMailComposeAction extends AbstractMailCompose
         CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
-        AttachmentResult attachmentResult = compositionSpaceService.addOriginalAttachmentsToCompositionSpace(compositionSpaceId.getId());
+        AttachmentResult attachmentResult = compositionSpaceService.addOriginalAttachmentsToCompositionSpace(compositionSpaceId.getId(), getClientToken(requestData));
 
         return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }

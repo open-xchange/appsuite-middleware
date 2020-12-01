@@ -4,8 +4,8 @@
     tags:
       - Jobqueue
     summary: Get all user's jobs
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

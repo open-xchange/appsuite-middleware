@@ -97,6 +97,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
@@ -3331,6 +3332,157 @@ public final class OXFolderSQL {
     private static String appendIndex(String name, int index) {
         StringBuilder sb = new StringBuilder(name).append(" (").append(index).append(")");
         return sb.toString();
+    }
+
+    /**
+     * Searches folders by given name.
+     *
+     * @param query The folder name to search for
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param module The module
+     * @param date The time stamp to filter for results that are newer
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param context The context
+     * @return Matching folder identifier as array
+     * @throws SQLException On SQL error
+     * @throws OXException On server error
+     */
+    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context) throws SQLException, OXException {
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        Connection readCon = DBPool.pickup(context);
+        try {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+        } finally {
+            DBPool.closeReaderSilent(readCon);
+        }
+    }
+
+    /**
+     * Searches folders by given name.
+     *
+     * @param query The folder name to search for
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param date The time stamp to filter for results that are newer
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param context The context
+     * @param readCon The connection
+     * @return Matching folder identifier as array
+     * @throws SQLException On SQL error
+     * @throws OXException On server error
+     */
+    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
+        }
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        if (folderIds.length <= Databases.IN_LIMIT) {
+            return doSearchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+        }
+
+        TIntList result = null;
+        for (int[] partition : Arrays.partition(folderIds, Databases.IN_LIMIT)) {
+            int[] searchResult = doSearchInfostoreFoldersByName(query, partition, date, start, end, context, readCon);
+            if (searchResult.length > 0) {
+                if (result == null) {
+                    result = new TIntArrayList();
+                }
+                result.add(searchResult);
+            }
+        }
+        return result == null ? new int[0] : result.toArray();
+    }
+
+    private static int[] doSearchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
+        }
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        // Compile SQL query
+        StringBuilder sb = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = ?");
+        sb.append(" AND fuid IN (");
+        for (int i = 0; i < folderIds.length; i++) {
+            sb.append("?,");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        sb.append(" AND UPPER(fname) LIKE UPPER(?) ");
+        StringBuilder queryBuilder = new StringBuilder(query.length() + 2);
+        queryBuilder.append("%").append(hasWildcards(query) ? StringCollection.prepareForSearch(query.trim()) : query).append("%");
+        String sqlQuery = trimPercentCharacters(queryBuilder.toString());
+        if (date >= 0) {
+            sb.append("AND creating_date > ? ");
+        }
+        if (0 < end) {
+            sb.append("ORDER BY fname ASC LIMIT ?,?");
+        } else {
+            sb.append("ORDER BY fname ASC LIMIT ?");
+        }
+
+        // Execute statement
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = readCon.prepareStatement(sb.toString());
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, FolderObject.INFOSTORE);
+            for (int folderId : folderIds) {
+                stmt.setInt(pos++, folderId);
+            }
+            stmt.setString(pos++, sqlQuery);
+            if (date > -1) {
+                stmt.setLong(pos++, date);
+            }
+            stmt.setInt(pos++, start);
+            if (0 < end) {
+                stmt.setInt(pos++, end);
+            }
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return new int[0];
+            }
+
+            TIntList result = new TIntArrayList();
+            do {
+                result.add(rs.getInt(1));
+            } while (rs.next());
+            return result.toArray();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static boolean hasWildcards(String query) {
+        return Strings.isNotEmpty(query) && (query.indexOf('*') >= 0 || query.indexOf('?') >= 0);
+    }
+
+    private static String trimPercentCharacters(String query) {
+        int len = query.length();
+        int st = 0;
+
+        while ((st < len) && (query.charAt(st) == '%')) {
+            st++;
+        }
+
+        while ((st < len) && (query.charAt(len - 1) == '%')) {
+            len--;
+        }
+
+        if (st > 1) {
+            return (len < query.length() - 1) ? query.substring(st - 1, len + 1) : query.substring(st - 1);
+        }
+        return (len < query.length() - 1) ? query.substring(0, len + 1) : query;
     }
 
 }

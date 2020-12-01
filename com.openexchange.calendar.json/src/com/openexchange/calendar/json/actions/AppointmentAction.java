@@ -70,9 +70,10 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
+import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.calendar.json.compat.Appointment;
@@ -113,7 +114,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @RestrictedAction(type = RestrictedAction.Type.READ, module = AppointmentAction.MODULE)  // Minimum for calendar actions is read
 public abstract class AppointmentAction implements AJAXActionService {
 
-    protected static final String MODULE = "calendar";
+    protected static final String MODULE = AppointmentActionFactory.MODULE;
 
     /** The columns alias for the columns included in the response of a typical <code>all</code> request */
     public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 206, 2 };
