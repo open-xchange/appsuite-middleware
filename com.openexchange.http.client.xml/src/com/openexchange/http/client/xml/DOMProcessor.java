@@ -67,8 +67,7 @@ public class DOMProcessor implements HTTPResponseProcessor {
     @Override
     public Object process(Object response) throws OXException {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf = XMLUtils.safeDbf(dbf);
+            DocumentBuilderFactory dbf = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
             return dbf.newDocumentBuilder().parse((InputStream) response, "UTF-8");
         } catch (Exception e) {
             throw OxHttpClientExceptionCodes.CATCH_ALL.create(e, e.getMessage());

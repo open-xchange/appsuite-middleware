@@ -76,8 +76,7 @@ public class CreateTimeZoneMappings {
     private static final String URL = "https://raw.githubusercontent.com/unicode-org/cldr/master/common/supplemental/windowsZones.xml";
 
     public static void main(String[] args) throws Exception {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory = XMLUtils.safeDbf(documentBuilderFactory);
+        DocumentBuilderFactory documentBuilderFactory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());;
         documentBuilderFactory.setValidating(false);
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();

@@ -53,6 +53,7 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.java.Strings;
+import com.openexchange.xml.util.XMLUtils;
 
 /**
  * {@link DOMUtils} - Copy of <code>org.apache.cxf.helpers.DOMUtils</code>.
@@ -80,11 +81,11 @@ public final class DOMUtils {
             loader = DOMUtils.class.getClassLoader();
         }
         if (loader == null) {
-            return XMLUtils.getParser();
+            return com.openexchange.plist.xml.helper.XMLUtils.getParser();
         }
         DocumentBuilder builder = DOCUMENT_BUILDERS.get(loader);
         if (builder == null) {
-            builder = XMLUtils.getParser();
+            builder = com.openexchange.plist.xml.helper.XMLUtils.getParser();
             DOCUMENT_BUILDERS.put(loader, builder);
         }
         return builder;
@@ -457,7 +458,7 @@ public final class DOMUtils {
      */
     public static Document readXml(final InputStream is) throws SAXException, IOException,
         ParserConfigurationException {
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbf = com.openexchange.xml.util.XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
 
         dbf.setValidating(false);
         dbf.setIgnoringComments(false);
@@ -476,7 +477,7 @@ public final class DOMUtils {
     }
 
     public static Document readXml(final Reader is) throws SAXException, IOException, ParserConfigurationException {
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbf = com.openexchange.xml.util.XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
 
         dbf.setValidating(false);
         dbf.setIgnoringComments(false);
@@ -497,7 +498,7 @@ public final class DOMUtils {
     public static Document readXml(final StreamSource is) throws SAXException, IOException,
         ParserConfigurationException {
 
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbf = com.openexchange.xml.util.XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
 
         dbf.setValidating(false);
         dbf.setIgnoringComments(false);

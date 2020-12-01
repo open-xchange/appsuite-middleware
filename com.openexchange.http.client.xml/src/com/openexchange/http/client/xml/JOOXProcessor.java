@@ -70,8 +70,7 @@ public class JOOXProcessor implements HTTPResponseProcessor {
     @Override
     public Object process(Object response) throws OXException {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf = XMLUtils.safeDbf(dbf);
+            DocumentBuilderFactory dbf = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
             Document document = dbf.newDocumentBuilder().parse((InputStream) response, "UTF-8");
             return JOOX.$(document);
         } catch (SAXException x) {

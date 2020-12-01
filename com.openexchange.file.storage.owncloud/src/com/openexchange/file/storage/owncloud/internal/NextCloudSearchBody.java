@@ -57,6 +57,7 @@ import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.webdav.client.WebDAVXmlBody;
+import com.openexchange.xml.util.XMLUtils;
 
 /**
  * {@link NextCloudSearchBody} defines a body for a search request against nextcloud
@@ -119,7 +120,7 @@ public class NextCloudSearchBody extends WebDAVXmlBody {
     @Override
     public Element toXML() throws OXException {
         try {
-            final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory docFactory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
             final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             final Document doc = docBuilder.newDocument();
 
