@@ -1,6 +1,6 @@
 ---
 title: Drive folder permission mode on folder move
-icon: fa-folder
+icon: fa-folder-plus
 tags: Configuration
 ---
 
