@@ -58,25 +58,29 @@ import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
+import com.openexchange.xml.util.XMLUtils;
 
 public class JOOXProcessor implements HTTPResponseProcessor {
-	@Override
-    public Class<?>[] getTypes() {
-		return new Class[]{InputStream.class, Match.class};
-	}
 
-	@Override
+    @Override
+    public Class<?>[] getTypes() {
+        return new Class[] { InputStream.class, Match.class };
+    }
+
+    @Override
     public Object process(Object response) throws OXException {
-		try {
-			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((InputStream) response, "UTF-8");
-			return JOOX.$(document);
-		} catch (SAXException x) {
-			if (x.getMessage().contains("Premature end of file.")) {
-				return null;
-			}
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf = XMLUtils.safeDbf(dbf);
+            Document document = dbf.newDocumentBuilder().parse((InputStream) response, "UTF-8");
+            return JOOX.$(document);
+        } catch (SAXException x) {
+            if (x.getMessage().contains("Premature end of file.")) {
+                return null;
+            }
             throw OxHttpClientExceptionCodes.SAX_ERROR.create(x, x.getMessage());
-		} catch (Exception e) {
+        } catch (Exception e) {
             throw OxHttpClientExceptionCodes.CATCH_ALL.create(e, e.getMessage());
-		}
-	}
+        }
+    }
 }
