@@ -85,7 +85,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public abstract class IDBasedContactAction extends ContactAction {
 
-    protected static final String MODULE = "contacts";
+    public static final String MODULE = "contacts";
 
     /** Named logger instance */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDBasedContactAction.class);
