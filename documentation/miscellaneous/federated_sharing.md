@@ -67,29 +67,116 @@ The following gives an overview about how to enable these storage integrations f
 
 ## Cross-Context File Storage
 
-...
+The cross-context file storage is registered in the middleware as separate file storage service. Within the service, separate accounts are 
+managed for each linked guest user in the remote context. The file storage service can be activated for end users by enabling the 
+corresponding capability ``filestorage_xctx``. Once enabled, users will be offered the options to subscribe to shares received from other 
+contexts of the installation when the invitation mail is opened in the App Suite user interface. 
+
+In cross-context mode, the integrated share's base token is used to resolve the *remote* context in the installation internally, whose data 
+may be located in another database schema and/or file store. Access to the underlying services is performed using internal interfaces, and 
+not using the HTTP API, in contrast to cross-ox shares.
+
+Besides the capability to enable/disable cross-context shares in module Drive, the 
+[configuration documentation](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=search&term=com.openexchange.file.storage.xctx.)
+lists further properties to control the behavior of the file storage service.
 
 ## Cross-OX File Storage
 
-...
+Also the file storage to integrate shares from foreign servers is registered in the middleware as separate file storage service. To allow the
+creation of accounts linked to guest users on other OX servers, the capability ``filestorage_xox`` can be enabled. Afterwards, users are able 
+to subscribe to shared received from other servers when the invitation mail is opened in the App Suite user interface. 
+
+Data on the remote server is accessed using an HTTP client integrated into the middleware, which basically proxies incoming requests from the 
+local client to the remote server and marshalls back the responses. Therefore, the guest session is initiated through the initial share link, and
+managed internally afterwards. 
+
+Further settings for the file storage service for cross-ox shares are listed over at the 
+[configuration documentation](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=search&term=com.openexchange.file.storage.xox.). 
+Characteristics of the internal HTTP client can be fine tuned through 
+[these properties](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=search&term=com.openexchange.api.client.); 
+furthermore, the general options to influence the HTTP client connections are available as described at the 
+[HTTP Client Configuration]({{ site.baseurl }}/middleware/administration/http_client_configuration.html) article.
 
 ## Cross-Context Calendar
 
-...
+Similarly as the file storage services are managing accounts for subscribed federated shares, there's also a separate calendar provider for 
+cross-context shares. The provider can be enabled for end users using the capability ``calendar_xctx2`` which is usually done through the 
+configuration property 
+``[com.openexchange.calendar.xctx2.enabled](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#com.openexchange.calendar.xctx2.enabled)``.
+Then, if an invitation mail to a calendar located in another context of the installation is displayed in App Suite, an option to subscribe to 
+the share will be offered. 
+
+Just like the cross-context file storage service, access to subscribed calendars is initiated through the share URL's base token which translates 
+to the *remote* context on the installation using regular internal services. No additional HTTP client requests are performed.
+
+Besides the capability to enable/disable cross-context shares in module Calendar, the 
+[configuration documentation](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=search&term=com.openexchange.calendar.xctx2.)
+lists further properties to control the behavior of the calendar provider.
 
 
-# Restriction & Limitations 
+# Further Details
+
+## Linked Guest Accounts
+
+The guest mode of App Suite works by making all data that is shared to a certain guest user (as identified by its email address) available in an 
+aggregated way. That means that a guest user will always have access to all data that has been shared to him from the originating context 
+within the same interface and session, regardless which share link he previously followed to open the App Suite client. 
+
+In a similar way, after a cross-context or cross-ox subscription has been established for a share, all data from the same module the guest user 
+has access to will also be available automatically as federated share in App Suite. For example, if two users from a context share their folders 
+to the same external user, and this external user subscribes to any of those shares in *his* App Suite, both folders will be available for him 
+automatically. Of course it is still possible to unsubscribe from them again later. Also, if a previously shared folder is no longer accessible for 
+the guest user (as it has either been deleted or permissions have been revoked), it will no longer appear as federated share.
+
+After a guest account has been integrated as federated share, this linked relationship will be kept up as long as the remote guest account exists. 
+As remote guest accounts are purged automatically after a configurable expiration time from after the last share has been revoked, the same is done
+on the subscribing side with the federated share. This default behavior may be adjusted using 
+[these properties](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=search&term=.autoRemoveUnknownShares). 
+
+Additionally, the user is able to remove the federated sharing account on his own whenever the last folder is unsubscribed. Afterwards, it is still 
+possible to re-link the guest account from the invitation mail. 
+
+
+## Guest Sessions
+
+Data of subscribed shares is always accessed under the perspective of the corresponding guest user account. In order to do so, an appropriate 
+session for the guest user is spawned in the remote context or server dynamically. 
+
+Therefore, for each integrated share, the original share URL is stored within the corresponding account's configuration data, after it was set up 
+through the original share invitation mail. In case the guest account is secured with a password, this password can also be stored within the 
+associated subscription, secured with the secrets of the local session's user. 
+
+Whenever needed, this share link (or rather its base token) is used to log in to the guest account and acquire a session on the remote context or 
+server, just like it would happen when opening the share link in a browser. This also means that the same restrictions and constraints regarding the
+maximum number of guest sessions or their default lifetime are still valid. Within the middleware, such spawned guest sessions are preserved and 
+re-used while when interacting with the shared data, and automatically time out if not used for a while. 
+
+
+## Proxy Access & Impersonation
+
+When acting within an integrated federated share, the user implicitly impersonates as the guest user on the remote context or server. This means that 
+all changes performed in the guest account are effectively performed by the guest user, and this is how they appear for the sharing user in the 
+original context. This is why it is only possible to subscribe to shares that are addressed to the user's email directly (or one of its registered 
+aliases), and these options won't be available for forwarded invitation mails for example. 
+
+The data from the remove context or server is always requested directly and no synchronization takes place, so that any changes performed on the 
+one side will directly appear at the other. That also means that no additional quota is accounted for subscribed shares, and the same limitations as
+when opening the share in the guest interface of App Suite apply.
+
+
+## Restriction & Limitations 
 
 Federated shares can be integrated into App Suite in a way that collaboration is not much different to regular, context-internal shares. 
 However, there are a few limitations: 
 
-- User needs general access to the module
-- User needs "groupware" module permissions (for shared/public tree)
-- User needs mail, to receive invitation mails
-- Named guest users, only 
-- No anonymous links
-- Can only subscribe shares if invited guest's email matches alias 
-- No free/busy, no adding of resources in cross-context calendar  
-- No re-sharing (guests don't have "invite-guests" capability)
-- ...
-
+* In order to integrate an external share, the user needs to have the corresponding module permissions (e.g. ``infostore`` or `calendar`)
+* To subscribe to shared folders, users need to have appropriate *groupware* module permissions (``readcreatesharedfolders``)
+* Federated shares are created in App Suite through invitation mails, so the ``webmail`` module permissions has to be granted
+* It is only possible to subscribe to shares for named guest users, i.e. *anonymous links* cannot be integrated as federated share
+* Only guest users with an email adress matching the user's email address (or an alias) can be integrated
+* It's not possible to subscribe to single file shares, i.e. only shared folders will be appear as federated share
+* Free/busy lookups and conflict checks cannot be performed in subscribed calenders for users/resources from the remote context
+* It is not possible to add *local* resource or group attendees to events created in *remote* calendars of federated shares 
+* No re-sharing of subscribed shares is possible, since guest users don't have 
+* Depending on the version the remote server is running in *cross-ox* mode, certain features may not be available when interacting with the share
+* No real-time collaboration is possible when editing *remote* documents located in subscribed federated shares

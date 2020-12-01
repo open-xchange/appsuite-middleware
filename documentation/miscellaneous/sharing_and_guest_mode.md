@@ -169,6 +169,9 @@ In contrast to an &quot;anonymous&quot; guest user, a named guest user has acces
 * The timespan after which an unused named guest user should be removed from the system can be configured via <code>com.openexchange.share.cleanup.guestExpiry</code> in <code>share.properties</code> - this value may also be set to <code>0</code> to force an immediate removal
 * For the removal of no longer needed guest user accounts, a periodical cleanup task is scheduled based on the interval of <code>com.openexchange.share.cleanup.periodicCleanerInterval</code>
 * Whether a cross-context database is considered for guest users may be configured via <code>com.openexchange.share.crossContextGuests</code>
+* To handle user and contact data across contexts boundaries the feature has to be enabled before a guest receives the first share. Guests that receive shares before the activation cannot be considered within the alignment process. Only latter shares will be considered.
+* At the moment this feature does only sync user and contact related data (no shared content). If the user got two shares from different contexts he will only see shares related to the given link.
+
 
 # Guest Login & Session Handling<a name="Guest Login & Session Handling"></a>
 
@@ -412,12 +415,15 @@ Further information about the JSON structure is available at:
 
 # Consuming Shares<a name="consuming shares"></a>
 
-
 Depending on the shared contents and the requesting user agent, shares may be consumed in a couple of different ways. The concrete response to a request to the share URL is evaluated by the share servlet in the backend.
 
 ## App Suite
 
 The default handling for all shares is forwarding them to the App Suite web interface, where the shared contents are made available through the existing client. Based on the underlying guest account, the client is either forwarded to the login prompt, or taken directly to the share target if no credentials need to be provided. This process is described in more detail at [Guest Login & Session Handling](#guest-login-amp-session-handling).
+
+## Federated Sharing
+
+Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX entities into the App Suite. Efficiently external shares will look and behave like shared internally. The feature is available for certain shares only, see [Federated-Sharing](https://documentation.open-xchange.com{{site.baseurl}}/middleware/miscellaneous/federated_sharing.html) for further details. 
 
 ## Direct Download
 
@@ -446,18 +452,6 @@ If accessing the item requires authentication, an unauthenticated request is res
 #### Administrator Notes:
 
 * The interval of task- and appointment data considered for conversion to iCal can be adjusted via <code>com.openexchange.share.handler.iCal.futureInterval</code> and <code>com.openexchange.share.handler.iCal.pastInterval</code> in configuration file <code>share.properties</code>
-
-# Cross-context functionality
-
-As already mentioned in previous sections the administrator is able to configure if guests should be handled per context (default) or server wide by using the configuration parameter <code>com.openexchange.share.crossContextGuests</code>.
-
-If set to <code>true</code> the guests email address is used to recognize if there is already a registered user with the given address and aligns the stored password to the already existing guest user. In addition to the password (which is the most important parameter this feature is about) even the users contact data gets synchronized.
-
-#### Administrator Notes:
-
-* To handle user and contact data across contexts boundaries the feature has to be enabled before a guest receives the first share. Guests that receive shares before the activation cannot be considered within the alignment process. Only latter shares will be considered.
-* At the moment this feature does only sync user and contact related data (no shared content). If the user got two shares from different contexts he will only see shares related to the given link.
-
 
 # Limit file accesses for named/anonymous guests
 
@@ -516,51 +510,3 @@ The following configuration will check the count limit for named guests and the 
 
 It is possible to reload an adapted configuration by using reloadconfiguration command line tool.
 
-
-# Integrating shares from other Open Xchange Server
-
-Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX entities into the App Suite. Efficiently external shares will look and behave like shared internally.
-
-> **Note:** Currently only shares of *infostore* folders are supported.
-
-## Adding a share
-
-The MW offers additional actions within the <code>share management</code> module of the HTTP API. Therefore a client can e.g. simply add a share by providing the share link to the MW. For details on the API please have a look [here]({{ site.baseurl }}/components/middleware/http/latest/index.html#!ShareManagement)
-
-## Modes
-
-When it comes to integrating a share there will be chosen between two different modes the *cross-context* and the *cross-ox* mode.
-
-### Cross context
-
-The *cross-context* mode is chosen when a share comes from a context on the same OX server. The server then will use internal services to access the shared data.
-
-#### Administrator Notes:
-
-The following properties should be checked to guarantee the functionality of the feature:
-
-* <code>com.openexchange.capability.filestorage_xctx=true</code>
-* <code>com.openexchange.share.crossContextGuests=true</code>
-
-### Cross OX
-
-The *cross-ox* mode is used when a share is from another OX server. The communication between the OX servers will then take place over the HTTP API.
-
-
-#### Technical mechanism
-
-Once the share is integrated into the App Suite, the UI will send request as usual to the Middleware. The Middleware is in charge to provide the data.
-To access the content provided within the share the local server needs to request this data. Therefore the data from the remote server will be requested via the HTTP API. Internally, a proper client will take care of the session lifecycle on the remote system.
-Once validation on the server has finished the response will be returned to the UI.
-
-#### Administrator Notes:
-
-The following properties should be checked to guarantee the functionality of the feature:
-
-* <code>com.openexchange.capability.filestorage_xox=true</code>
-
-Furthermore there are properties that influences the communication between the servers. A administrator can adjust:
-
-* <code>com.openexchange.api.client.blacklistedHosts</code>
-* <code>com.openexchange.api.client.allowedPorts</code>
-* <code>com.openenexchange.httpclient.apiClient*</code>, see [here]({{ site.baseurl }}/middleware/administration/http_client_configuration.html) for more details.
