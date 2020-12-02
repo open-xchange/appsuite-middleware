@@ -59,9 +59,9 @@ import com.openexchange.config.lean.Property;
  */
 public enum MovePermissionProperty implements Property {
 
-    MOVE_TO_PUBLIC("permissions.moveToPublic", null),
-    MOVE_TO_PRIVATE("permissions.moveToPrivate", null),
-    MOVE_TO_SHARED("permissions.moveToShared", null),
+    MOVE_TO_PUBLIC("permissions.moveToPublic", "inherit"),
+    MOVE_TO_PRIVATE("permissions.moveToPrivate", "inherit"),
+    MOVE_TO_SHARED("permissions.moveToShared", "inherit"),
     INHERIT_PARENT_PERMISSIONS("inheritParentPermissions", Boolean.FALSE)
     ;
 
