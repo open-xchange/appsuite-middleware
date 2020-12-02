@@ -69,7 +69,6 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -178,9 +177,9 @@ public class OIDCTools {
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        if (!Strings.isEmpty(deeplink)) {
-            retval += "&" + AJAXUtility.encodeUrl(deeplink.substring(1), true);
-        }
+
+        deeplink = sanitizeDeepLinkFragment(deeplink);
+        retval = retval + deeplink;
         return retval;
     }
 
@@ -607,6 +606,22 @@ public class OIDCTools {
      */
     public static Date expiresInToDate(long expiresIn) {
         return new Date(System.currentTimeMillis() + (expiresIn * 1000));
+    }
+
+    private static final String sanitizeDeepLinkFragment(String uriFragment) {
+        if (uriFragment == null) {
+            return "";
+        }
+
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+            uriFragment = uriFragment.substring(1);
+        }
+
+        if (uriFragment.length() > 0) {
+            uriFragment = "&" + uriFragment;
+        }
+
+        return uriFragment;
     }
 
 }
