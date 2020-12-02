@@ -46,10 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.importexport.actions;
 
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.Format;
 import com.openexchange.importexport.actions.exporter.CsvExportAction;
@@ -57,19 +58,19 @@ import com.openexchange.importexport.actions.exporter.ICalExportAction;
 import com.openexchange.importexport.actions.exporter.VCardExportAction;
 import com.openexchange.server.ServiceLookup;
 
-public class ExportActionFactory  extends AbstractIEActionFactory{
+public class ExportActionFactory extends AbstractIEActionFactory {
 
     public ExportActionFactory(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected Map<Format, AJAXActionService> getActions(){
-    	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CsvExportAction());
-    		put(Format.VCARD, new VCardExportAction());
-    		put(Format.ICAL, new ICalExportAction());
-    	}};
+    protected Map<Format, AJAXActionService> getActions() {
+        // @formatter:off
+        return ImmutableMap.of(
+    		Format.CSV, new CsvExportAction(),
+    		Format.VCARD, new VCardExportAction(),
+    		Format.ICAL, new ICalExportAction());
+       // @formatter:on
     }
-
 }

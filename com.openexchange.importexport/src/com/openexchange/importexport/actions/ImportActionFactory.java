@@ -46,10 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.importexport.actions;
 
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.Format;
 import com.openexchange.importexport.actions.importer.CSVImportAction;
@@ -57,10 +58,11 @@ import com.openexchange.importexport.actions.importer.ICalImportAction;
 import com.openexchange.importexport.actions.importer.VCardImportAction;
 import com.openexchange.server.ServiceLookup;
 
-public class ImportActionFactory extends AbstractIEActionFactory{
+public class ImportActionFactory extends AbstractIEActionFactory {
 
-   /**
+    /**
      * Initializes a new {@link ImportActionFactory}.
+     * 
      * @param services
      */
     public ImportActionFactory(ServiceLookup services) {
@@ -68,13 +70,12 @@ public class ImportActionFactory extends AbstractIEActionFactory{
     }
 
     @Override
-    protected Map<Format, AJAXActionService> getActions(){
-    	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CSVImportAction(services));
-    		put(Format.OUTLOOK_CSV, new CSVImportAction(services));
-    		put(Format.VCARD, new VCardImportAction(services));
-    		put(Format.ICAL, new ICalImportAction(services));
-    	}};
+    protected Map<Format, AJAXActionService> getActions() {
+        // @formatter:off
+    	return ImmutableMap.of(Format.CSV, new CSVImportAction(services),
+    		Format.OUTLOOK_CSV, new CSVImportAction(services),
+    		Format.VCARD, new VCardImportAction(services),
+    		Format.ICAL, new ICalImportAction(services));
+    	// @formatter:on
     }
-
 }

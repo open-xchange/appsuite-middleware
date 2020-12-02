@@ -96,7 +96,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
             }
 
             final File dir = new File(path);
-            if (dir == null || !dir.isDirectory()) {
+            if (!dir.isDirectory()) {
                 LOG.error("Directory {} supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.", path);
                 return imp;
             }
