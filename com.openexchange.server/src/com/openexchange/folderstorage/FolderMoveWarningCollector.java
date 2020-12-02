@@ -243,16 +243,18 @@ public class FolderMoveWarningCollector {
         if (null == folderId) {
             return RootFolderType.NOTAVAILABLE;
         }
+        int creatorOfTheLastFolder = -1;
         for (UserizedFolder f : getPathFolders(DEFAULT_TREE_ID, folderId, false)) {
             if (f != null && f.getID() != null) {
                 if (f.getID().equals(INFOSTORE_USER)) {
-                    if (f.getCreatedBy() == storageParameters.getUserId()) {
+                    if (creatorOfTheLastFolder == storageParameters.getUserId()) {
                         return RootFolderType.PRIVATE;
                     }
                     return RootFolderType.SHARED;
                 } else if (f.getID().equals(INFOSTORE_PUBLIC)) {
                     return RootFolderType.PUBLIC;
                 }
+                creatorOfTheLastFolder = f.getCreatedBy();
             }
         }
         return RootFolderType.NOTAVAILABLE;
