@@ -74,7 +74,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
@@ -87,6 +86,7 @@ import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.InfoItemMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemsMovedResponse;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.tools.io.IOTools;
 
 /**
@@ -148,8 +148,8 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         rememberClient(apiClient3);
         userId3 = apiClient3.getUserId();
 
-        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), "1");
-        folderManager2 = new FolderManager(new FolderApi(getApiClient2(), testUser2), "1");
+        folderManager = new FolderManager(new FoldersApi(getApiClient()), "1");
+        folderManager2 = new FolderManager(new FoldersApi(getApiClient2()), "1");
         foldersToDelete = new ArrayList<String>();
 
         file = File.createTempFile("FileMovePermissionWarningTest", ".txt");

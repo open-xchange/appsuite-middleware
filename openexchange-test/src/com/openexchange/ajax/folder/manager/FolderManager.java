@@ -103,6 +103,19 @@ public class FolderManager {
         this.lastTimestamp = Long.valueOf(0l);
     }
 
+    /**
+     * Initializes a new {@link FolderManager}.
+     *
+     * @param api The folders API to use
+     * @param tree The tree ID to work on. Most likely you want <code>"1"</code>
+     */
+    public FolderManager(FoldersApi api, String tree) {
+        super();
+        this.tree = tree;
+        this.foldersApi = api;
+        this.lastTimestamp = Long.valueOf(0l);
+    }
+
     public void setLastTimestamp(Long timestamp) {
         lastTimestamp = timestamp;
     }
