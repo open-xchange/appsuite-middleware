@@ -99,7 +99,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
      * @param seqNums The sequence numbers to fetch
      * @throws MessagingException If initialization fails
      */
-    public BodystructureFetchIMAPCommand(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
+    public BodystructureFetchIMAPCommand(IMAPFolder imapFolder, int[] seqNums) throws MessagingException {
         super(imapFolder);
         posMap = new TLongIntHashMap(seqNums.length, 0.5f, -1L, -1);
         for (int i = 0; i < seqNums.length; i++) {
@@ -128,7 +128,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public BodystructureFetchIMAPCommand(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public BodystructureFetchIMAPCommand(IMAPFolder imapFolder, long[] uids) throws MessagingException {
         super(imapFolder);
         posMap = new TLongIntHashMap(uids.length, 0.5f, -1L, -1);
         for (int i = 0; i < uids.length; i++) {
@@ -148,7 +148,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
     }
 
     @Override
-    protected String getDebugInfo(final int argsIndex) {
+    protected String getDebugInfo(int argsIndex) {
         final StringBuilder sb = new StringBuilder(64);
         if (uid) {
             sb.append("UID ");
@@ -180,7 +180,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final String arg = args[argsIndex];
         final StringBuilder sb = new StringBuilder(arg.length() + 64);
         if (uid) {
@@ -203,7 +203,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
     }
 
     @Override
-    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
@@ -233,7 +233,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
      * @param fetchResponse The <i>FETCH</i> response
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      */
-    private static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    private static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);

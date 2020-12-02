@@ -108,7 +108,7 @@ public final class ACLExtensionFactory {
      * @param imapConfig The IMAP configuration providing needed access data.
      * @return The appropriate ACL extension
      */
-    public ACLExtension getACLExtension(final IMAPConfig imapConfig) {
+    public ACLExtension getACLExtension(IMAPConfig imapConfig) {
         if (instantiated.get() && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             return configured;
         }
@@ -122,7 +122,7 @@ public final class ACLExtensionFactory {
      * @param imapConfig The IMAP configuration providing needed access data.
      * @return The appropriate ACL extension
      */
-    public ACLExtension getACLExtension(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
+    public ACLExtension getACLExtension(Map<String, String> capabilities, IMAPConfig imapConfig) {
         if (!instantiated.get()) {
             return ACLExtensionAutoDetector.getACLExtension(capabilities, imapConfig);
         }
@@ -142,7 +142,7 @@ public final class ACLExtensionFactory {
      *
      * @param singleton The singleton instance of {@link ACLExtension}
      */
-    void setACLExtensionInstance(final ACLExtension singleton) {
+    void setACLExtensionInstance(ACLExtension singleton) {
         configured = singleton;
         instantiated.set(true);
     }

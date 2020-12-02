@@ -81,11 +81,11 @@ final class ThreadSortParser {
      * @param threadList The thread-sort string.
      * @throws OXException If parsing thread-sort string fails.
      */
-    void parse(final String threadList) throws OXException {
+    void parse(String threadList) throws OXException {
         parse(threadList, threads);
     }
 
-    private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws OXException {
+    private void parse(String threadList, List<ThreadSortNode> recthreads) throws OXException {
         LOG.debug("Start parse: {}", threadList);
         final int length = threadList.length();
         if (threadList.charAt(0) == '{') {
@@ -138,11 +138,11 @@ final class ThreadSortParser {
         }
     }
 
-    private MessageInfo getMessageID(final String threadList) {
+    private MessageInfo getMessageID(String threadList) {
         return MessageInfo.valueOf(threadList, 0, threadList.indexOf('}') + 1);
     }
 
-    private int findMatchingBracket(final String threadList) {
+    private int findMatchingBracket(String threadList) {
         int openingBrackets = 0;
         int pos = 0;
         do {
@@ -171,7 +171,7 @@ final class ThreadSortParser {
      * @param threads The tree nodes list
      * @return The tree nodes list with first tree node pulled-up
      */
-    static List<ThreadSortNode> pullUpFirst(final List<ThreadSortNode> threads) {
+    static List<ThreadSortNode> pullUpFirst(List<ThreadSortNode> threads) {
         final List<ThreadSortNode> newthreads = new LinkedList<ThreadSortNode>();
         final int size = threads.size();
         for (int i = 0; i < size; i++) {

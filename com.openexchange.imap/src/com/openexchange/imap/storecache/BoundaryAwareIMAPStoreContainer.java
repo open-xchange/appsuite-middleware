@@ -78,7 +78,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
      *
      * @return The limiter
      */
-    private Limiter getLimiter(final int max) {
+    private Limiter getLimiter(int max) {
         Limiter tmp = limiter;
         if (null == tmp) {
             synchronized (this) {

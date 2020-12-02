@@ -137,7 +137,7 @@ public final class IMAPStoreCache {
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 SHRINKER_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000);
                 IDLE_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000);
                 IMAPStoreCache tmp = instance;
@@ -275,7 +275,7 @@ public final class IMAPStoreCache {
     public void dropFor(int userId, int contextId) {
         final Queue<Key> keyQueue = keys.remove(UserAndContext.newInstance(userId, contextId));
         if (null != keyQueue) {
-            for (final Key key : keyQueue) {
+            for (Key key : keyQueue) {
                 final IMAPStoreContainer container = map.remove(key);
                 if (null != container) {
                     container.clear();
@@ -481,7 +481,7 @@ public final class IMAPStoreCache {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

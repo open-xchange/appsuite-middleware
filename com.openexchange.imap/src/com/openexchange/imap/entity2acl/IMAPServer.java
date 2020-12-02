@@ -74,7 +74,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         @Override
-        public boolean matches(final String greeting) {
+        public boolean matches(String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(COURIER.getName())) >= 0;
         }
     }),
@@ -90,7 +90,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         @Override
-        public boolean matches(final String greeting) {
+        public boolean matches(String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(CYRUS.getName())) >= 0;
         }
     }),
@@ -106,7 +106,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         @Override
-        public boolean matches(final String greeting) {
+        public boolean matches(String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(DOVECOT.getName())) >= 0;
         }
     }),
@@ -122,7 +122,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         @Override
-        public boolean matches(final String greeting) {
+        public boolean matches(String greeting) {
             return greeting.indexOf("Sun Java(tm) System Messaging Server") >= 0;
         }
     }),
@@ -138,7 +138,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         @Override
-        public boolean matches(final String greeting) {
+        public boolean matches(String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(MDAEMON.getName())) >= 0;
         }
     }),
@@ -150,7 +150,7 @@ public enum IMAPServer {
     private final ArgumentGenerator argumentGenerator;
     private final GreetingMatcher greetingMatcher;
 
-    private IMAPServer(final String name, final Entity2ACL impl, final ArgumentGenerator argumentGenerator, final GreetingMatcher greetingMatcher) {
+    private IMAPServer(String name, Entity2ACL impl, ArgumentGenerator argumentGenerator, GreetingMatcher greetingMatcher) {
         this.name = name;
         this.impl = impl;
         this.argumentGenerator = argumentGenerator;
@@ -197,7 +197,7 @@ public enum IMAPServer {
      * @param greeting The IMAP server greeting to check against
      * @return <code>true</code> if specified IMAP server greeting indicates the server to be this IMAP server; otherwise <code>false</code>
      */
-    public boolean matches(final String greeting) {
+    public boolean matches(String greeting) {
         return greetingMatcher.matches(greeting);
     }
 
@@ -218,8 +218,8 @@ public enum IMAPServer {
      * @param name The IMAP server name
      * @return The class name of {@link Entity2ACL} implementation or <code>null</code> if none matches.
      */
-    public static final Entity2ACL getIMAPServerImpl(final String name) {
-        for (final IMAPServer imapServer : getIMAPServers()) {
+    public static final Entity2ACL getIMAPServerImpl(String name) {
+        for (IMAPServer imapServer : getIMAPServers()) {
             if (imapServer.getName().equalsIgnoreCase(name)) {
                 return imapServer.getImpl();
             }
@@ -260,7 +260,7 @@ public enum IMAPServer {
          * @param str The string
          * @return The lower-case string
          */
-        protected final String toLowerCase(final String str) {
+        protected final String toLowerCase(String str) {
             if (null == str) {
                 return null;
             }

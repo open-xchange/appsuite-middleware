@@ -71,7 +71,7 @@ public class UserGroupID {
      * @param id The user identifier
      * @throws IllegalArgumentException If identifier is less than zero
      */
-    UserGroupID(final int id) {
+    UserGroupID(int id) {
         this(id, false);
     }
 
@@ -82,7 +82,7 @@ public class UserGroupID {
      * @param group <code>true</code> if identifier denotes a group; otherwise <code>false</code>
      * @throws IllegalArgumentException If identifier is less than zero
      */
-    UserGroupID(final int id, final boolean group) {
+    UserGroupID(int id, boolean group) {
         this(id, group, false);
     }
 
@@ -94,7 +94,7 @@ public class UserGroupID {
      * @param allowNegative <code>true</code> if a negative identifier is allowed; otherwise <code>false</code>
      * @throws IllegalArgumentException If identifier is less than zero
      */
-    protected UserGroupID(final int id, final boolean group, final boolean allowNegative) {
+    protected UserGroupID(int id, boolean group, boolean allowNegative) {
         super();
         if (!allowNegative && id < 0) {
             throw new IllegalArgumentException("Identifier is less than zero.");
@@ -131,7 +131,7 @@ public class UserGroupID {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -167,7 +167,7 @@ public class UserGroupID {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

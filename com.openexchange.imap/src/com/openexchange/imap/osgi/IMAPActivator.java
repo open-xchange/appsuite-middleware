@@ -237,7 +237,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(final Event event) {
+                    public void handleEvent(Event event) {
                         if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(event.getTopic())) {
                             return;
                         }
@@ -290,7 +290,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(final Event event) {
+                    public void handleEvent(Event event) {
                         if (false == MailCategoriesConfigService.TOPIC_REORGANIZE.equals(event.getTopic())) {
                             return;
                         }

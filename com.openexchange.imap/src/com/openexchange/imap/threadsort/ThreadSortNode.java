@@ -78,7 +78,7 @@ public class ThreadSortNode {
      *
      * @param msgInfo The  message information of this tree node's message.
      */
-    public ThreadSortNode(final MessageInfo msgInfo, final long uid) {
+    public ThreadSortNode(MessageInfo msgInfo, long uid) {
         super();
         this.msgInfo = msgInfo;
         childs = new ArrayList<ThreadSortNode>();
@@ -90,7 +90,7 @@ public class ThreadSortNode {
      *
      * @param child The child to add.
      */
-    public void addChild(final ThreadSortNode child) {
+    public void addChild(ThreadSortNode child) {
         childs.add(child);
     }
 
@@ -99,7 +99,7 @@ public class ThreadSortNode {
      *
      * @param childThreads The children to add.
      */
-    public void addChildren(final List<ThreadSortNode> childThreads) {
+    public void addChildren(List<ThreadSortNode> childThreads) {
         childs.addAll(childThreads);
     }
 
@@ -150,21 +150,21 @@ public class ThreadSortNode {
      * @param fullName The full name to filter with
      * @param threadList The nodes
      */
-    public static void filterFullName(final String sentFullName, final List<ThreadSortNode> threadList) {
-        for (final Iterator<ThreadSortNode> iterator = threadList.iterator(); iterator.hasNext();) {
+    public static void filterFullName(String sentFullName, List<ThreadSortNode> threadList) {
+        for (Iterator<ThreadSortNode> iterator = threadList.iterator(); iterator.hasNext();) {
             if (checkFullName(sentFullName, iterator.next())) {
                 iterator.remove();
             }
         }
     }
 
-    private static boolean checkFullName(final String fullName, final ThreadSortNode node) {
+    private static boolean checkFullName(String fullName, ThreadSortNode node) {
         if (!fullName.equals(node.msgInfo.getFullName())) {
             return false;
         }
         final List<ThreadSortNode> childs = node.getChilds();
         if (null != childs) {
-            for (final ThreadSortNode child : childs) {
+            for (ThreadSortNode child : childs) {
                 if (!checkFullName(fullName, child)) {
                     return false;
                 }
@@ -180,11 +180,11 @@ public class ThreadSortNode {
      * @param fullName The full name to apply
      * @param threadList The thread list to apply to
      */
-    public static void applyFullName(final String fullName, final List<ThreadSortNode> threadList) {
+    public static void applyFullName(String fullName, List<ThreadSortNode> threadList) {
         if (null == threadList) {
             return;
         }
-        for (final ThreadSortNode node : threadList) {
+        for (ThreadSortNode node : threadList) {
             node.msgInfo.setFullName(fullName);
             applyFullName(fullName, node.getChilds());
         }

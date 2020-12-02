@@ -75,7 +75,7 @@ final class ACLExtensionAutoDetector {
      * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.
      */
-    public static ACLExtension getACLExtension(final IMAPConfig imapConfig) {
+    public static ACLExtension getACLExtension(IMAPConfig imapConfig) {
         return parse(imapConfig.asMap(), imapConfig);
     }
 
@@ -86,13 +86,13 @@ final class ACLExtensionAutoDetector {
      * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.
      */
-    public static ACLExtension getACLExtension(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
+    public static ACLExtension getACLExtension(Map<String, String> capabilities, IMAPConfig imapConfig) {
         return parse(capabilities, imapConfig);
     }
 
     private static final char[] RFC4314_CARACTERS_UPPER = { 'K', 'X', 'T', 'E' };
 
-    private static ACLExtension parse(final Map<String, String> capabilities, final IMAPConfig imapConfig) {
+    private static ACLExtension parse(Map<String, String> capabilities, IMAPConfig imapConfig) {
         /*
          * Examine CAPABILITY response
          */
@@ -103,7 +103,7 @@ final class ACLExtensionAutoDetector {
         /*
          * Check if newer ACL extension is supported
          */
-        for (final String upperName : capabilities.keySet()) {
+        for (String upperName : capabilities.keySet()) {
             if (upperName.startsWith("RIGHTS=", 0)) {
                 /*
                  * Check if RIGHTS=... capability contains right characters specified in RFC4314
@@ -123,7 +123,7 @@ final class ACLExtensionAutoDetector {
 
     /*-
      *
-    private static boolean containsRFC4314Character(final String rightsCapability) {
+    private static boolean containsRFC4314Character(String rightsCapability) {
         final int fromIndex = rightsCapability.indexOf('=');
         boolean found = false;
         for (int i = 0; !found && i < RFC4314_CARACTERS_UPPER.length; i++) {

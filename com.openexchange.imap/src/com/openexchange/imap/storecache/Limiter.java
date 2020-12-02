@@ -64,7 +64,7 @@ public final class Limiter {
     /**
      * Initializes a new {@link Limiter}.
      */
-    public Limiter(final int max) {
+    public Limiter(int max) {
         super();
         this.max = max;
         cur = new AtomicInteger(max);

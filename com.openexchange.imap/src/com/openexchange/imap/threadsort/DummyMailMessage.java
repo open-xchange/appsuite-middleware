@@ -87,12 +87,12 @@ final class DummyMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         mailId = id;
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         // Nothing to do
     }
 
@@ -112,7 +112,7 @@ final class DummyMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         throw new UnsupportedOperationException("DummyMailMessage.getEnclosedMailPart()");
     }
 

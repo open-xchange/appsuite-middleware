@@ -84,7 +84,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
      * @param imapFolder The backing IMAP folder
      * @param sep The separator character
      */
-    public ExtendedIMAPFolder(final IMAPFolder imapFolder, final char sep) {
+    public ExtendedIMAPFolder(IMAPFolder imapFolder, char sep) {
         super(imapFolder.getFullName(), sep, (IMAPStore) imapFolder.getStore(), Boolean.FALSE);
         this.imapFolder = imapFolder;
     }
@@ -94,92 +94,92 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
      *
      * @param type The type of FolderEvent
      */
-    public void triggerNotifyFolderListeners(final int type) {
+    public void triggerNotifyFolderListeners(int type) {
         notifyFolderListeners(type);
     }
 
     @Override
-    public void addACL(final ACL acl) throws MessagingException {
+    public void addACL(ACL acl) throws MessagingException {
         imapFolder.addACL(acl);
     }
 
     @Override
-    public void addConnectionListener(final ConnectionListener l) {
+    public void addConnectionListener(ConnectionListener l) {
         imapFolder.addConnectionListener(l);
     }
 
     @Override
-    public void addFolderListener(final FolderListener l) {
+    public void addFolderListener(FolderListener l) {
         imapFolder.addFolderListener(l);
     }
 
     @Override
-    public void addMessageChangedListener(final MessageChangedListener l) {
+    public void addMessageChangedListener(MessageChangedListener l) {
         imapFolder.addMessageChangedListener(l);
     }
 
     @Override
-    public void addMessageCountListener(final MessageCountListener l) {
+    public void addMessageCountListener(MessageCountListener l) {
         imapFolder.addMessageCountListener(l);
     }
 
     @Override
-    public Message[] addMessages(final Message[] msgs) throws MessagingException {
+    public Message[] addMessages(Message[] msgs) throws MessagingException {
         return imapFolder.addMessages(msgs);
     }
 
     @Override
-    public void addRights(final ACL acl) throws MessagingException {
+    public void addRights(ACL acl) throws MessagingException {
         imapFolder.addRights(acl);
     }
 
     @Override
-    public void appendMessages(final Message[] msgs) throws MessagingException {
+    public void appendMessages(Message[] msgs) throws MessagingException {
         imapFolder.appendMessages(msgs);
     }
 
     @Override
-    public AppendUID[] appendUIDMessages(final Message[] msgs) throws MessagingException {
+    public AppendUID[] appendUIDMessages(Message[] msgs) throws MessagingException {
         return imapFolder.appendUIDMessages(msgs);
     }
 
     @Override
-    public void close(final boolean expunge) throws MessagingException {
+    public void close(boolean expunge) throws MessagingException {
         imapFolder.close(expunge);
     }
 
     @Override
-    public void copyMessages(final Message[] msgs, final Folder folder) throws MessagingException {
+    public void copyMessages(Message[] msgs, Folder folder) throws MessagingException {
         imapFolder.copyMessages(msgs, folder);
     }
 
     @Override
-    public boolean create(final int type) throws MessagingException {
+    public boolean create(int type) throws MessagingException {
         return imapFolder.create(type);
     }
 
     @Override
-    public boolean delete(final boolean recurse) throws MessagingException {
+    public boolean delete(boolean recurse) throws MessagingException {
         return imapFolder.delete(recurse);
     }
 
     @Override
-    public Object doCommand(final ProtocolCommand cmd) throws MessagingException {
+    public Object doCommand(ProtocolCommand cmd) throws MessagingException {
         return imapFolder.doCommand(cmd);
     }
 
     @Override
-    public Object doCommandIgnoreFailure(final ProtocolCommand cmd) throws MessagingException {
+    public Object doCommandIgnoreFailure(ProtocolCommand cmd) throws MessagingException {
         return imapFolder.doCommandIgnoreFailure(cmd);
     }
 
     @Override
-    public Object doOptionalCommand(final String err, final ProtocolCommand cmd) throws MessagingException {
+    public Object doOptionalCommand(String err, ProtocolCommand cmd) throws MessagingException {
         return imapFolder.doOptionalCommand(err, cmd);
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         return imapFolder.equals(obj);
     }
 
@@ -194,12 +194,12 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Message[] expunge(final Message[] msgs) throws MessagingException {
+    public Message[] expunge(Message[] msgs) throws MessagingException {
         return imapFolder.expunge(msgs);
     }
 
     @Override
-    public void fetch(final Message[] msgs, final FetchProfile fp) throws MessagingException {
+    public void fetch(Message[] msgs, FetchProfile fp) throws MessagingException {
         imapFolder.fetch(msgs, fp);
     }
 
@@ -224,7 +224,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder getFolder(final String name) throws MessagingException {
+    public Folder getFolder(String name) throws MessagingException {
         return imapFolder.getFolder(name);
     }
 
@@ -234,12 +234,12 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Message getMessage(final int msgnum) throws MessagingException {
+    public Message getMessage(int msgnum) throws MessagingException {
         return imapFolder.getMessage(msgnum);
     }
 
     @Override
-    public Message getMessageByUID(final long uid) throws MessagingException {
+    public Message getMessageByUID(long uid) throws MessagingException {
         return imapFolder.getMessageByUID(uid);
     }
 
@@ -254,22 +254,22 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Message[] getMessages(final int start, final int end) throws MessagingException {
+    public Message[] getMessages(int start, int end) throws MessagingException {
         return imapFolder.getMessages(start, end);
     }
 
     @Override
-    public Message[] getMessages(final int[] msgnums) throws MessagingException {
+    public Message[] getMessages(int[] msgnums) throws MessagingException {
         return imapFolder.getMessages(msgnums);
     }
 
     @Override
-    public Message[] getMessagesByUID(final long start, final long end) throws MessagingException {
+    public Message[] getMessagesByUID(long start, long end) throws MessagingException {
         return imapFolder.getMessagesByUID(start, end);
     }
 
     @Override
-    public Message[] getMessagesByUID(final long[] uids) throws MessagingException {
+    public Message[] getMessagesByUID(long[] uids) throws MessagingException {
         return imapFolder.getMessagesByUID(uids);
     }
 
@@ -319,7 +319,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public long getUID(final Message message) throws MessagingException {
+    public long getUID(Message message) throws MessagingException {
         return imapFolder.getUID(message);
     }
 
@@ -344,7 +344,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public void handleResponse(final Response r) {
+    public void handleResponse(Response r) {
         imapFolder.handleResponse(r);
     }
 
@@ -379,12 +379,12 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder[] list(final String pattern) throws MessagingException {
+    public Folder[] list(String pattern) throws MessagingException {
         return imapFolder.list(pattern);
     }
 
     @Override
-    public Rights[] listRights(final String name) throws MessagingException {
+    public Rights[] listRights(String name) throws MessagingException {
         return imapFolder.listRights(name);
     }
 
@@ -394,7 +394,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder[] listSubscribed(final String pattern) throws MessagingException {
+    public Folder[] listSubscribed(String pattern) throws MessagingException {
         return imapFolder.listSubscribed(pattern);
     }
 
@@ -404,77 +404,77 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
     }
 
     @Override
-    public void open(final int mode) throws MessagingException {
+    public void open(int mode) throws MessagingException {
         imapFolder.open(mode);
     }
 
     @Override
-    public void removeACL(final String name) throws MessagingException {
+    public void removeACL(String name) throws MessagingException {
         imapFolder.removeACL(name);
     }
 
     @Override
-    public void removeConnectionListener(final ConnectionListener l) {
+    public void removeConnectionListener(ConnectionListener l) {
         imapFolder.removeConnectionListener(l);
     }
 
     @Override
-    public void removeFolderListener(final FolderListener l) {
+    public void removeFolderListener(FolderListener l) {
         imapFolder.removeFolderListener(l);
     }
 
     @Override
-    public void removeMessageChangedListener(final MessageChangedListener l) {
+    public void removeMessageChangedListener(MessageChangedListener l) {
         imapFolder.removeMessageChangedListener(l);
     }
 
     @Override
-    public void removeMessageCountListener(final MessageCountListener l) {
+    public void removeMessageCountListener(MessageCountListener l) {
         imapFolder.removeMessageCountListener(l);
     }
 
     @Override
-    public void removeRights(final ACL acl) throws MessagingException {
+    public void removeRights(ACL acl) throws MessagingException {
         imapFolder.removeRights(acl);
     }
 
     @Override
-    public boolean renameTo(final Folder f) throws MessagingException {
+    public boolean renameTo(Folder f) throws MessagingException {
         return imapFolder.renameTo(f);
     }
 
     @Override
-    public Message[] search(final SearchTerm term, final Message[] msgs) throws MessagingException {
+    public Message[] search(SearchTerm term, Message[] msgs) throws MessagingException {
         return imapFolder.search(term, msgs);
     }
 
     @Override
-    public Message[] search(final SearchTerm term) throws MessagingException {
+    public Message[] search(SearchTerm term) throws MessagingException {
         return imapFolder.search(term);
     }
 
     @Override
-    public void setFlags(final int start, final int end, final Flags flag, final boolean value) throws MessagingException {
+    public void setFlags(int start, int end, Flags flag, boolean value) throws MessagingException {
         imapFolder.setFlags(start, end, flag, value);
     }
 
     @Override
-    public void setFlags(final int[] msgnums, final Flags flag, final boolean value) throws MessagingException {
+    public void setFlags(int[] msgnums, Flags flag, boolean value) throws MessagingException {
         imapFolder.setFlags(msgnums, flag, value);
     }
 
     @Override
-    public void setFlags(final Message[] msgs, final Flags flag, final boolean value) throws MessagingException {
+    public void setFlags(Message[] msgs, Flags flag, boolean value) throws MessagingException {
         imapFolder.setFlags(msgs, flag, value);
     }
 
     @Override
-    public void setQuota(final Quota quota) throws MessagingException {
+    public void setQuota(Quota quota) throws MessagingException {
         imapFolder.setQuota(quota);
     }
 
     @Override
-    public void setSubscribed(final boolean subscribe) throws MessagingException {
+    public void setSubscribed(boolean subscribe) throws MessagingException {
         imapFolder.setSubscribed(subscribe);
     }
 

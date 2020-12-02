@@ -225,7 +225,7 @@ public final class RootSubfoldersEnabledCache {
         private final DefaultFolder imapDefaultFolder;
         private final boolean mNamespacePerUser;
 
-        RootSubfoldersEnabledCallable(final DefaultFolder imapDefaultFolder, boolean namespacePerUser) {
+        RootSubfoldersEnabledCallable(DefaultFolder imapDefaultFolder, boolean namespacePerUser) {
             super();
             this.imapDefaultFolder = imapDefaultFolder;
             this.mNamespacePerUser = namespacePerUser;

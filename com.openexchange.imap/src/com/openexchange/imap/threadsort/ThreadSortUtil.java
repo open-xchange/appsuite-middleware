@@ -98,7 +98,7 @@ public final class ThreadSortUtil {
      *            <code>&quot;&#042;&nbsp;THREAD&nbsp;(1&nbsp;(2)(3)(4)(5))(6)(7)(8)((9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19))&quot;</code>
      * @return A newly allocated array of <code>int</code> filled with message's sequence number
      */
-    public static List<MessageInfo> getSeqNumsFromThreadResponse(final String threadResponse) {
+    public static List<MessageInfo> getSeqNumsFromThreadResponse(String threadResponse) {
         if (null == threadResponse) {
             return Collections.emptyList();
         }
@@ -127,7 +127,7 @@ public final class ThreadSortUtil {
      * @param threadList
      * @return The message identifiers
      */
-    public static List<MessageInfo> fromThreadResponse(final List<ThreadSortNode> threadList) {
+    public static List<MessageInfo> fromThreadResponse(List<ThreadSortNode> threadList) {
         if (null == threadList || threadList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -136,8 +136,8 @@ public final class ThreadSortUtil {
         return list;
     }
 
-    private static void recThreadResponse(final List<ThreadSortNode> threadList, final List<MessageInfo> list) {
-        for (final ThreadSortNode threadSortNode : threadList) {
+    private static void recThreadResponse(List<ThreadSortNode> threadList, List<MessageInfo> list) {
+        for (ThreadSortNode threadSortNode : threadList) {
             list.add(threadSortNode.msgInfo);
             final List<ThreadSortNode> childs = threadSortNode.getChilds();
             if (null != childs) {
@@ -152,7 +152,7 @@ public final class ThreadSortUtil {
      * @param threadList The thread list
      * @return The extracted sequence numbers
      */
-    public static TIntList extractSeqNumsAsList(final List<ThreadSortNode> threadList) {
+    public static TIntList extractSeqNumsAsList(List<ThreadSortNode> threadList) {
         if (null == threadList || threadList.isEmpty()) {
             return new TIntArrayList(0);
         }
@@ -162,8 +162,8 @@ public final class ThreadSortUtil {
         return l;
     }
 
-    private static void recSeqNumsAsList(final List<ThreadSortNode> threadList, final TIntList l, final int initialCapacity) {
-        for (final ThreadSortNode threadSortNode : threadList) {
+    private static void recSeqNumsAsList(List<ThreadSortNode> threadList, TIntList l, int initialCapacity) {
+        for (ThreadSortNode threadSortNode : threadList) {
             l.add(threadSortNode.msgInfo.getMessageNumber());
             final List<ThreadSortNode> childs = threadSortNode.getChilds();
             if (null != childs) {
@@ -178,7 +178,7 @@ public final class ThreadSortUtil {
      * @param threadList The thread list
      * @return The extracted sequence numbers; &lt;full-name&gt; &lt;=&gt; &lt;sequence-numbers&gt;
      */
-    public static Map<String, TIntList> extractSeqNumsAsMap(final List<ThreadSortNode> threadList) {
+    public static Map<String, TIntList> extractSeqNumsAsMap(List<ThreadSortNode> threadList) {
         if (null == threadList || threadList.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -188,8 +188,8 @@ public final class ThreadSortUtil {
         return m;
     }
 
-    private static void recSeqNumsAsMap(final List<ThreadSortNode> threadList, final Map<String, TIntList> m, final int initialCapacity) {
-        for (final ThreadSortNode threadSortNode : threadList) {
+    private static void recSeqNumsAsMap(List<ThreadSortNode> threadList, Map<String, TIntList> m, int initialCapacity) {
+        for (ThreadSortNode threadSortNode : threadList) {
             final MessageInfo messageId = threadSortNode.msgInfo;
             final String fn = messageId.getFullName();
             TIntList list = m.get(fn);
@@ -212,7 +212,7 @@ public final class ThreadSortUtil {
      *
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
-    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final String threadResponse) {
+    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(String folderFullname, String threadResponse) {
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
         final StringBuilder sb = new StringBuilder(8);
         final int length = threadResponse.length();
@@ -251,7 +251,7 @@ public final class ThreadSortUtil {
      *
      * @return Parsed thread-sort string in a structured data type
      */
-    public static List<ThreadSortNode> parseThreadResponse(final String threadResponse) throws OXException {
+    public static List<ThreadSortNode> parseThreadResponse(String threadResponse) throws OXException {
         /*
          * Now parse the odd THREAD response string.
          */
@@ -274,12 +274,12 @@ public final class ThreadSortUtil {
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
+    public static String getThreadResponse(IMAPFolder imapFolder, String sortRange) throws MessagingException {
         final org.slf4j.Logger log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String command = new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                 final Response[] r;
                 {
@@ -359,15 +359,15 @@ public final class ThreadSortUtil {
      * @param structuredList The structured list
      * @param sb The string builder to output to
      */
-    public static void outputList(final List<ThreadSortMailMessage> structuredList, final StringBuilder sb) {
+    public static void outputList(List<ThreadSortMailMessage> structuredList, StringBuilder sb) {
         outputList(structuredList, "", sb);
     }
 
-    private static void outputList(final List<ThreadSortMailMessage> structuredList, final String prefix, final StringBuilder sb) {
+    private static void outputList(List<ThreadSortMailMessage> structuredList, String prefix, StringBuilder sb) {
         if (null == structuredList || structuredList.isEmpty()) {
             return;
         }
-        for (final ThreadSortMailMessage threadSortMailMessage : structuredList) {
+        for (ThreadSortMailMessage threadSortMailMessage : structuredList) {
             sb.append(prefix).append(threadSortMailMessage.getMailId()).append(" (").append(threadSortMailMessage.getThreadLevel()).append(
                 ')').append('\n');
             final List<ThreadSortMailMessage> structuredSubList = threadSortMailMessage.getChildMessages();
@@ -381,11 +381,11 @@ public final class ThreadSortUtil {
      * @param structuredList The structured list
      * @param flatList The flat list to fill
      */
-    public static void toFlatList(final List<ThreadSortMailMessage> structuredList, final List<MailMessage> flatList) {
+    public static void toFlatList(List<ThreadSortMailMessage> structuredList, List<MailMessage> flatList) {
         if (null == structuredList || structuredList.isEmpty()) {
             return;
         }
-        for (final ThreadSortMailMessage tsmm : structuredList) {
+        for (ThreadSortMailMessage tsmm : structuredList) {
             flatList.add(tsmm.getOriginalMessage());
             final List<ThreadSortMailMessage> children = tsmm.getChildMessages();
             toFlatList(children, flatList);
@@ -398,9 +398,9 @@ public final class ThreadSortUtil {
      * @param structuredList The structured list to convert
      * @param comparator The comparator to use to sort child messages
      */
-    public static List<List<MailMessage>> toSimplifiedStructure(final List<ThreadSortMailMessage> structuredList, final MailMessageComparator comparator) {
+    public static List<List<MailMessage>> toSimplifiedStructure(List<ThreadSortMailMessage> structuredList, MailMessageComparator comparator) {
         final List<List<MailMessage>> retval = new ArrayList<List<MailMessage>>(structuredList.size());
-        for (final ThreadSortMailMessage root : structuredList) {
+        for (ThreadSortMailMessage root : structuredList) {
             // Create flat list
             final LinkedList<MailMessage> flatList = new LinkedList<MailMessage>();
             flatList.add(root.getOriginalMessage());
@@ -412,11 +412,11 @@ public final class ThreadSortUtil {
         return retval;
     }
 
-    private static void toFlatList0(final List<ThreadSortMailMessage> structuredList, final List<MailMessage> flatList) {
+    private static void toFlatList0(List<ThreadSortMailMessage> structuredList, List<MailMessage> flatList) {
         if (null == structuredList || structuredList.isEmpty()) {
             return;
         }
-        for (final ThreadSortMailMessage tsmm : structuredList) {
+        for (ThreadSortMailMessage tsmm : structuredList) {
             // Add to list
             flatList.add(tsmm.getOriginalMessage());
             // Recursive invocation
@@ -431,9 +431,9 @@ public final class ThreadSortUtil {
      * @param map The map providing mails by sequence number
      * @return A structured list reflecting thread-order structure
      */
-    public static List<ThreadSortMailMessage> toThreadSortStructure(final List<ThreadSortNode> threadList, final Map<MessageInfo, MailMessage> map) {
+    public static List<ThreadSortMailMessage> toThreadSortStructure(List<ThreadSortNode> threadList, Map<MessageInfo, MailMessage> map) {
         final List<ThreadSortMailMessage> list = new ArrayList<ThreadSortMailMessage>(threadList.size());
-        for (final ThreadSortNode node : threadList) {
+        for (ThreadSortNode node : threadList) {
             final MailMessage rootMail = map.get(node.msgInfo);
             if (null != rootMail) {
                 rootMail.setThreadLevel(0);
@@ -448,8 +448,8 @@ public final class ThreadSortUtil {
         return list;
     }
 
-    private static void processSubnodes(final List<ThreadSortNode> nodes, final int level, final ThreadSortMailMessage parent, final Map<MessageInfo, MailMessage> map) {
-        for (final ThreadSortNode node : nodes) {
+    private static void processSubnodes(List<ThreadSortNode> nodes, int level, ThreadSortMailMessage parent, Map<MessageInfo, MailMessage> map) {
+        for (ThreadSortNode node : nodes) {
             final ThreadSortMailMessage tsmm = tsmmFor(map.get(node.msgInfo), level);
             if (null != tsmm) {
                 parent.addChildMessage(tsmm);
@@ -462,7 +462,7 @@ public final class ThreadSortUtil {
         }
     }
 
-    private static ThreadSortMailMessage tsmmFor(final MailMessage mail, final int level) {
+    private static ThreadSortMailMessage tsmmFor(MailMessage mail, int level) {
         if (null == mail) {
             return null;
         }
@@ -476,7 +476,7 @@ public final class ThreadSortUtil {
      * @param mails The mails with thread level applied
      * @return A structured list reflecting thread-order structure
      */
-    public static List<ThreadSortMailMessage> toThreadSortStructure(final MailMessage[] mails) {
+    public static List<ThreadSortMailMessage> toThreadSortStructure(MailMessage[] mails) {
         final List<ThreadSortMailMessage> list = new ArrayList<ThreadSortMailMessage>(mails.length);
         int i = 0;
         while (i < mails.length) {
@@ -493,7 +493,7 @@ public final class ThreadSortUtil {
         return list;
     }
 
-    private static int gatherChildren(final MailMessage[] mails, final int index, final int level, final List<ThreadSortMailMessage> newList) {
+    private static int gatherChildren(MailMessage[] mails, int index, int level, List<ThreadSortMailMessage> newList) {
         boolean b = true;
         int i = index;
         while (b && i < mails.length) {

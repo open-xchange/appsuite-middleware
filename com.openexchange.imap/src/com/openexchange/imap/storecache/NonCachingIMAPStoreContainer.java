@@ -79,16 +79,16 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
+    public void backStore(IMAPStore imapStore) {
         backStoreNoValidityCheck(imapStore);
     }
 
-    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
+    protected void backStoreNoValidityCheck(IMAPStore imapStore) {
         IMAPAccess.closeSafely(imapStore);
     }
 
     @Override
-    public void closeElapsed(final long stamp) {
+    public void closeElapsed(long stamp) {
         // Nothing to do
     }
 

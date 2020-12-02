@@ -70,7 +70,7 @@ public final class IMAPUpdateableData {
      * @param userFlags The message's user flags
      * @return The newly created {@link IMAPUpdateableData}
      */
-    public static IMAPUpdateableData newInstance(final long uid, final int flags, final Collection<? extends CharSequence> userFlags) {
+    public static IMAPUpdateableData newInstance(long uid, int flags, Collection<? extends CharSequence> userFlags) {
         return new IMAPUpdateableData(uid, flags, userFlags);
     }
 
@@ -93,7 +93,7 @@ public final class IMAPUpdateableData {
      * @param flags The message's flags
      * @param userFlags The message's user flags
      */
-    private IMAPUpdateableData(final long uid, final int flags, final Collection<? extends CharSequence> userFlags) {
+    private IMAPUpdateableData(long uid, int flags, Collection<? extends CharSequence> userFlags) {
         super();
         this.uid = uid;
         this.flags = flags;
@@ -101,7 +101,7 @@ public final class IMAPUpdateableData {
             this.userFlags = Collections.emptySet();
         } else {
             this.userFlags = new HashSet<HeaderName>(userFlags.size());
-            for (final CharSequence uFlag : userFlags) {
+            for (CharSequence uFlag : userFlags) {
                 this.userFlags.add(HeaderName.valueOf(uFlag));
             }
         }
@@ -119,7 +119,7 @@ public final class IMAPUpdateableData {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -149,7 +149,7 @@ public final class IMAPUpdateableData {
      * @param obj The reference object with which to compare.
      * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
      */
-    public boolean equalsByUID(final Object obj) {
+    public boolean equalsByUID(Object obj) {
         if (this == obj) {
             return true;
         }

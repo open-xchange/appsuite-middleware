@@ -428,7 +428,7 @@ public class MonitoringCommandExecutor implements CommandExecutor {
      * @param command The IMAP command as written out to the IMAP connection
      * @return The sanitized value for per-command monitoring
      */
-    private String sanitizeCommand(final String command) {
+    private String sanitizeCommand(String command) {
         int startIndex;
         int endIndex;
         if (command.length() > 4 && command.substring(0, 4).equalsIgnoreCase("uid ")) {

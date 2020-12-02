@@ -135,7 +135,7 @@ final class ThreadContainer {
      * @param target The target container
      * @return <code>true</code> if child is under self's tree; otherwise <code>false</code>
      */
-    boolean findChild(final ThreadContainer target) {
+    boolean findChild(ThreadContainer target) {
         try {
             if (child == null) {
                 return false;

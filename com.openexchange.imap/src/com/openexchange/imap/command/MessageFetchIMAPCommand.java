@@ -110,7 +110,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
         private final SeqNumFetcher delegate;
 
-        public MsgSeqNumFetcher(final Message[] msgs) {
+        public MsgSeqNumFetcher(Message[] msgs) {
             /*
              * Create array from messages' sequence numbers
              */
@@ -125,12 +125,12 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         }
 
         @Override
-        public int getNextSeqNum(final int index) {
+        public int getNextSeqNum(int index) {
             return delegate.getNextSeqNum(index);
         }
 
         @Override
-        public int getIndexOf(final int value) {
+        public int getIndexOf(int value) {
             return delegate.getIndexOf(value);
         }
     }
@@ -139,17 +139,17 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
         private final int[] arr;
 
-        public IntSeqNumFetcher(final int[] arr) {
+        public IntSeqNumFetcher(int[] arr) {
             this.arr = arr;
         }
 
         @Override
-        public int getNextSeqNum(final int index) {
+        public int getNextSeqNum(int index) {
             return arr[index];
         }
 
         @Override
-        public int getIndexOf(final int value) {
+        public int getIndexOf(int value) {
             for (int i = 0; i < arr.length; i++) {
                 if (arr[i] == value) {
                     return i;
@@ -221,7 +221,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @throws MessagingException
      */
-    public void set(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+    public void set(Object arr, boolean isSequential, boolean keepOrder) throws MessagingException {
         if (null == arr) {
             returnDefaultValue = true;
         } else {
@@ -240,7 +240,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public MessageFetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
+    public MessageFetchIMAPCommand setDetermineAttachmentyHeader(boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
     }
@@ -249,7 +249,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
-    private void createArgs(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
+    private void createArgs(Object arr, boolean isSequential, boolean keepOrder) throws MessagingException {
         if (arr instanceof int[]) {
             final int[] seqNums = (int[]) arr;
             uid = false;
@@ -365,7 +365,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     }
 
     @Override
-    protected String getDebugInfo(final int argsIndex) {
+    protected String getDebugInfo(int argsIndex) {
         final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
@@ -397,7 +397,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
@@ -432,7 +432,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     }
 
     @Override
-    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
@@ -509,7 +509,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     }
 
     /*-
-     * private static void addFetchItem(final FetchProfile fp, final int field) {
+     * private static void addFetchItem(FetchProfile fp, int field) {
         if (field == MailListField.ID.getField()) {
             fp.add(UIDFolder.FetchProfileItem.UID);
         } else if (field == MailListField.ATTACHMENT.getField()) {
@@ -547,7 +547,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      */
 
     /*-
-     * private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
+     * private static FetchItemHandler[] createItemHandlers(int itemCount, FetchResponse f,
             final boolean loadBody) {
         final FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
         for (int j = 0; j < itemCount; j++) {
@@ -581,7 +581,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     }
      */
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item, final boolean loadBody) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean loadBody) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             if (loadBody) {
                 return BODY_ITEM_HANDLER;
@@ -615,7 +615,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException;
+        public abstract void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException;
     }
 
     private static final class HeaderFetchItemHandler implements FetchItemHandler {
@@ -625,7 +625,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         }
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException {
             final InternetHeaders h;
             {
                 final InputStream headerStream;
@@ -647,7 +647,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                     h.load(headerStream);
                 }
             }
-            for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+            for (Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
                 if (MessageHeaders.HDR_SUBJECT.equals(name)) {
@@ -676,7 +676,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws MessagingException {
             msg.setFlags((FLAGS) item, true);
         }
     };
@@ -684,7 +684,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws MessagingException {
             final ENVELOPE env = (ENVELOPE) item;
             msg.addFrom(env.from);
             msg.setRecipients(RecipientType.TO, env.to);
@@ -701,7 +701,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) {
             msg.setReceivedDate(((INTERNALDATE) item).getDate());
         }
     };
@@ -709,7 +709,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) {
             msg.setSize((int) ((RFC822SIZE) item).size);
         }
     };
@@ -717,7 +717,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws OXException {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             msg.setBodystructure(bs);
             final StringBuilder sb = new StringBuilder();
@@ -738,7 +738,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) {
             msg.setUid(((UID) item).uid);
         }
     };
@@ -746,7 +746,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private static final FetchItemHandler BODY_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+        public void handleItem(Item item, ExtendedMimeMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException {
             final InputStream msgStream;
             if (item instanceof RFC822DATA) {
                 /*
@@ -822,7 +822,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     public static final FetchProfileModifier DEFAULT_PROFILE_MODIFIER = new FetchProfileModifier() {
 
         @Override
-        public FetchProfile modify(final FetchProfile fetchProfile) {
+        public FetchProfile modify(FetchProfile fetchProfile) {
             /*
              * Return unchanged
              */
@@ -841,7 +841,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     public static final FetchProfileModifier HEADERLESS_PROFILE_MODIFIER = new FetchProfileModifier() {
 
         @Override
-        public FetchProfile modify(final FetchProfile fetchProfile) {
+        public FetchProfile modify(FetchProfile fetchProfile) {
             return getHeaderlessFetchProfile(fetchProfile);
         }
 
@@ -857,7 +857,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     public static final FetchProfileModifier NO_BODYSTRUCTURE_PROFILE_MODIFIER = new FetchProfileModifier() {
 
         @Override
-        public FetchProfile modify(final FetchProfile fetchProfile) {
+        public FetchProfile modify(FetchProfile fetchProfile) {
             return getSafeFetchProfile(fetchProfile);
         }
 
@@ -873,20 +873,20 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param fetchProfile The fetch profile
      * @return The fetch profile with BODYSTRUCTURE item stripped
      */
-    public static final FetchProfile getSafeFetchProfile(final FetchProfile fetchProfile) {
+    public static final FetchProfile getSafeFetchProfile(FetchProfile fetchProfile) {
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             final FetchProfile newFetchProfile = new FetchProfile();
             newFetchProfile.add("Content-Type");
             if (!fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
                 newFetchProfile.add(UIDFolder.FetchProfileItem.UID);
             }
-            for (final javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
+            for (javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
                 if (!FetchProfile.Item.CONTENT_INFO.equals(item)) {
                     newFetchProfile.add(item);
                 }
             }
             final String[] names = fetchProfile.getHeaderNames();
-            for (final String name : names) {
+            for (String name : names) {
                 newFetchProfile.add(name);
             }
             return newFetchProfile;
@@ -900,7 +900,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param fetchProfile The fetch profile
      * @return The fetch profile with header names stripped
      */
-    public static final FetchProfile getHeaderlessFetchProfile(final FetchProfile fetchProfile) {
+    public static final FetchProfile getHeaderlessFetchProfile(FetchProfile fetchProfile) {
         final String[] headerNames = fetchProfile.getHeaderNames();
         if (null == headerNames || headerNames.length <= 0) {
             return fetchProfile;
@@ -909,7 +909,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
          * Strip header names
          */
         final FetchProfile newFetchProfile = new FetchProfile();
-        for (final javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
+        for (javax.mail.FetchProfile.Item item : fetchProfile.getItems()) {
             newFetchProfile.add(item);
         }
         newFetchProfile.add(IMAPFolder.FetchProfileItem.HEADERS);

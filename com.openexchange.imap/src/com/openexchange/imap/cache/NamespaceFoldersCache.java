@@ -91,7 +91,7 @@ public final class NamespaceFoldersCache {
      * @return The <b>binary-sorted</b> personal namespace folders
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static String[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static String[] getPersonalNamespaces(IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
@@ -123,7 +123,7 @@ public final class NamespaceFoldersCache {
      * @return The personal namespace folder or <code>null</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static String getPersonalNamespace(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static String getPersonalNamespace(IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         String[] personalNamespaces = getPersonalNamespaces(imapStore, load, session, accountId);
         return null != personalNamespaces && personalNamespaces.length != 0 ? personalNamespaces[0] : null;
     }
@@ -139,7 +139,7 @@ public final class NamespaceFoldersCache {
      * @return <code>true</code> if personal namespaces contain the specified full name; otherwise <code>false</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static boolean containedInPersonalNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static boolean containedInPersonalNamespaces(String fullname, IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         return Arrays.binarySearch(getPersonalNamespaces(imapStore, load, session, accountId), fullname) >= 0;
     }
 
@@ -153,7 +153,7 @@ public final class NamespaceFoldersCache {
      * @return The <b>binary-sorted</b> user namespace folders
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static String[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static String[] getUserNamespaces(IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
@@ -185,7 +185,7 @@ public final class NamespaceFoldersCache {
      * @return <code>true</code> if user namespaces contain the specified fullname; otherwise <code>false</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static boolean containedInUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static boolean containedInUserNamespaces(String fullname, IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         return Arrays.binarySearch(getUserNamespaces(imapStore, load, session, accountId), fullname) >= 0;
     }
 
@@ -200,8 +200,8 @@ public final class NamespaceFoldersCache {
      * @return <code>true</code> if provided full name starts with any of user namespaces; otherwise <code>false</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static boolean startsWithAnyOfUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
-        for (final String userNamespace : getUserNamespaces(imapStore, load, session, accountId)) {
+    public static boolean startsWithAnyOfUserNamespaces(String fullname, IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
+        for (String userNamespace : getUserNamespaces(imapStore, load, session, accountId)) {
             if (!isEmpty(userNamespace) && fullname.startsWith(userNamespace)) {
                 return true;
             }
@@ -219,7 +219,7 @@ public final class NamespaceFoldersCache {
      * @return The <b>binary-sorted</b> shared namespace folders
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static String[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static String[] getSharedNamespaces(IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
@@ -251,7 +251,7 @@ public final class NamespaceFoldersCache {
      * @return <code>true</code> if shared namespaces contain the specified full name; otherwise <code>false</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static boolean containedInSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static boolean containedInSharedNamespaces(String fullname, IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
         return Arrays.binarySearch(getSharedNamespaces(imapStore, load, session, accountId), fullname) >= 0;
     }
 
@@ -266,8 +266,8 @@ public final class NamespaceFoldersCache {
      * @return <code>true</code> if provided full name starts with any of shared namespaces; otherwise <code>false</code>
      * @throws MessagingException If <code>NAMESPACE</code> command fails
      */
-    public static boolean startsWithAnyOfSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
-        for (final String sharedNamespace : getSharedNamespaces(imapStore, load, session, accountId)) {
+    public static boolean startsWithAnyOfSharedNamespaces(String fullname, IMAPStore imapStore, boolean load, Session session, int accountId) throws MessagingException {
+        for (String sharedNamespace : getSharedNamespaces(imapStore, load, session, accountId)) {
             if (!isEmpty(sharedNamespace) && fullname.startsWith(sharedNamespace)) {
                 return true;
             }
@@ -310,7 +310,7 @@ public final class NamespaceFoldersCache {
         }
 
         @Override
-        public void setValue(final String[] value) {
+        public void setValue(String[] value) {
             fullnames = value;
         }
 

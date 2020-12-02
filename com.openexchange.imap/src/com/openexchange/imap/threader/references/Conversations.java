@@ -166,7 +166,7 @@ public final class Conversations {
      * @param byEnvelope <code>true</code> to use ENVELOPE fetch item; other <code>false</code> to use single headers (<i>"References"</i>, <i>"In-Reply-To"</i>, and <i>"Message-Id"</i>)
      * @return The fetch profile ready for building up conversations
      */
-    public static FetchProfile checkFetchProfile(final FetchProfile fetchProfile, final boolean byEnvelope) {
+    public static FetchProfile checkFetchProfile(FetchProfile fetchProfile, boolean byEnvelope) {
         // Add 'References' to FetchProfile if absent
         {
             String hdrReferences = MessageHeaders.HDR_REFERENCES;
@@ -213,7 +213,7 @@ public final class Conversations {
             return Collections.<Conversation> emptyList();
         }
         final List<Conversation> conversations = new ArrayList<Conversation>(messages.size());
-        for (final MailMessage message : messages) {
+        for (MailMessage message : messages) {
             conversations.add(new Conversation(message));
         }
         return conversations;
@@ -234,7 +234,7 @@ public final class Conversations {
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope, final boolean examineHasAttachmentUserFlags, final boolean previewSupported) throws MessagingException {
+    public static List<MailMessage> messagesFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -247,7 +247,7 @@ public final class Conversations {
         return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 // Compile command
                 final List<MailMessage> mails;
                 final String command;
@@ -343,12 +343,12 @@ public final class Conversations {
      * @param conversations The conversations to transform
      * @return The resulting list of <tt>ThreadSortNode</tt>s
      */
-    public static List<ThreadSortNode> toNodeList(final List<Conversation> conversations) {
+    public static List<ThreadSortNode> toNodeList(List<Conversation> conversations) {
         if (null == conversations) {
             return Collections.emptyList();
         }
         final List<ThreadSortNode> list = new ArrayList<ThreadSortNode>(conversations.size());
-        for (final Conversation conversation : conversations) {
+        for (Conversation conversation : conversations) {
             final List<MailMessage> messages = conversation.getMessages();
             final ThreadSortNode root = toThreadSortNode((IDMailMessage) messages.remove(0));
             root.addChildren(toThreadSortNodes(messages));
@@ -357,13 +357,13 @@ public final class Conversations {
         return list;
     }
 
-    private static ThreadSortNode toThreadSortNode(final IDMailMessage message) {
+    private static ThreadSortNode toThreadSortNode(IDMailMessage message) {
         return new ThreadSortNode(new MessageInfo(message.getSeqnum()).setFullName(message.getFolder()), message.getUid());
     }
 
-    private static List<ThreadSortNode> toThreadSortNodes(final List<MailMessage> messages) {
+    private static List<ThreadSortNode> toThreadSortNodes(List<MailMessage> messages) {
         final List<ThreadSortNode> ret = new ArrayList<ThreadSortNode>(messages.size());
-        for (final MailMessage message : messages) {
+        for (MailMessage message : messages) {
             ret.add(toThreadSortNode((IDMailMessage) message));
         }
         return ret;
@@ -375,12 +375,12 @@ public final class Conversations {
      * @param toFold The conversations to fold
      * @return The folded conversations
      */
-    public static List<Conversation> fold(final List<Conversation> toFold) {
+    public static List<Conversation> fold(List<Conversation> toFold) {
         fold(toFold, null);
         return toFold;
     }
 
-    private static void fold(final List<Conversation> toFold, Map<String, Conversation> lookupTable) {
+    private static void fold(List<Conversation> toFold, Map<String, Conversation> lookupTable) {
         // first collect a temporal lookup table and fold for the first time
         {
             Map<String, Conversation> tempLookupTable = new HashMap<String, Conversation>(toFold.size());
@@ -456,7 +456,7 @@ public final class Conversations {
      * @param toMergeWith The List of MaillMessages to be added
      * @return The folded conversations
      */
-    public static List<Conversation> foldAndMergeWithList(final List<Conversation> toFold, List<MailMessage> toMergeWith) {
+    public static List<Conversation> foldAndMergeWithList(List<Conversation> toFold, List<MailMessage> toMergeWith) {
         HashMap<String, Conversation> lookupTable = new HashMap<String, Conversation>(toFold.size() * 2);
         fold(toFold, lookupTable);
         for (MailMessage mailMessage : toMergeWith) {

@@ -80,7 +80,7 @@ public final class ImapUtility {
      * @param imapFolder The optional IMAP folder
      * @return The command with optional information appended
      */
-    public static String appendCommandInfo(final String info, final IMAPFolder imapFolder) {
+    public static String appendCommandInfo(String info, IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return info;
         }
@@ -102,7 +102,7 @@ public final class ImapUtility {
      * @param store The optional description of connected IMAP store
      * @return The command with optional information appended
      */
-    public static String appendCommandInfo(final String info, final String fullName, final String store) {
+    public static String appendCommandInfo(String info, String fullName, String store) {
         final StringBuilder sb = new StringBuilder(info);
         boolean parenthesis = true;
         if (!com.openexchange.java.Strings.isEmpty(fullName)) {
@@ -130,7 +130,7 @@ public final class ImapUtility {
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>MessagingException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
-    public static boolean isInvalidMessageset(final MessagingException error) {
+    public static boolean isInvalidMessageset(MessagingException error) {
         if (null == error) {
             return false;
         }
@@ -147,7 +147,7 @@ public final class ImapUtility {
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>BadCommandException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
-    public static boolean isInvalidMessageset(final com.sun.mail.iap.BadCommandException error) {
+    public static boolean isInvalidMessageset(com.sun.mail.iap.BadCommandException error) {
         // A90 BAD Error in IMAP command FETCH: Invalid messageset
         if (null == error) {
             return false;
@@ -166,7 +166,7 @@ public final class ImapUtility {
      * @param response The IMAP response to check
      * @return <code>true</code> if given response indicates "Invalid messageset" or "Invalid uidset" IMAP error; otherwise <code>false</code>
      */
-    public static boolean isInvalidMessageset(final Response response) {
+    public static boolean isInvalidMessageset(Response response) {
         // A90 BAD Error in IMAP command FETCH: Invalid messageset
         if (null == response || !response.isBAD()) {
             return false;

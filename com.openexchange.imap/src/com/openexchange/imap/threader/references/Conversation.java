@@ -101,7 +101,7 @@ public final class Conversation {
     /**
      * Initializes a new {@link Conversation}.
      */
-    public Conversation(final MailMessage message) {
+    public Conversation(MailMessage message) {
         this();
         addMessage(message);
     }
@@ -109,10 +109,10 @@ public final class Conversation {
     /**
      * Initializes a new {@link Conversation}.
      */
-    public Conversation(final Collection<MailMessage> messages) {
+    public Conversation(Collection<MailMessage> messages) {
         this();
         if (null != messages) {
-            for (final MailMessage message : messages) {
+            for (MailMessage message : messages) {
                 addMessage(message);
             }
         }
@@ -124,7 +124,7 @@ public final class Conversation {
      * @param message The message to add
      * @return This conversation with message added
      */
-    public Conversation addMessage(final MailMessage message) {
+    public Conversation addMessage(MailMessage message) {
         if (null != message) {
             addWrapper(new MailMessageWrapper(message));
         }
@@ -136,7 +136,7 @@ public final class Conversation {
      *
      * @param mmw The {@link MailMessageWrapper}
      */
-    private void addWrapper(final MailMessageWrapper mmw) {
+    private void addWrapper(MailMessageWrapper mmw) {
         Conversation main = getMain();
         if (main.messages.add(mmw)) {
             final MailMessage message = mmw.message;
@@ -149,7 +149,7 @@ public final class Conversation {
 
             final String[] sReferences = message.getReferences();
             if (null != sReferences) {
-                for (final String sReference : sReferences) {
+                for (String sReference : sReferences) {
                     if (null != sReference && Strings.isNotEmpty(sReference)) {
                         main.references.add(sReference);
                     }
@@ -169,7 +169,7 @@ public final class Conversation {
      * @param other The other conversation to join with
      * @return The main conversation
      */
-    public Conversation join(final Conversation other) {
+    public Conversation join(Conversation other) {
         if (null != other) {
             if (this.equals(other)) {
                 return this;
@@ -188,7 +188,7 @@ public final class Conversation {
             }
             
             final Set<MailMessageWrapper> messages = otherMain.messages;
-            for (final MailMessageWrapper mmw : messages) {
+            for (MailMessageWrapper mmw : messages) {
                 addWrapper(mmw);
             }
             otherMain.setMain(this);
@@ -257,13 +257,13 @@ public final class Conversation {
      * @param comparator The comparator used for sorting listed messages
      * @return The messages with given sorting
      */
-    public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {
+    public List<MailMessage> getMessages(Comparator<MailMessage> comparator) {
         Conversation main = getMain();
         if (main.messages.isEmpty()) {
             return Collections.emptyList();
         }
         final List<MailMessage> ret = new ArrayList<MailMessage>(main.messages.size());
-        for (final MailMessageWrapper mmw : main.messages) {
+        for (MailMessageWrapper mmw : main.messages) {
             ret.add(mmw.message);
         }
         Collections.sort(ret, null == comparator ? COMPARATOR_DESC : comparator);
@@ -303,7 +303,7 @@ public final class Conversation {
          *
          * @param message The {@link MailMessage} to wrap
          */
-        MailMessageWrapper(final MailMessage message) {
+        MailMessageWrapper(MailMessage message) {
             super();
             this.message = message;
             final String id = message.getMailId();
@@ -321,7 +321,7 @@ public final class Conversation {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

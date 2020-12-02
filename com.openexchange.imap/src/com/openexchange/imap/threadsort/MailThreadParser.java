@@ -191,7 +191,7 @@ public class MailThreadParser {
      * @param threads The tree nodes list
      * @return The tree nodes list with first tree node pulled-up
      */
-    private static List<MailThread> pullUpFirst(final List<MailThread> threads) {
+    private static List<MailThread> pullUpFirst(List<MailThread> threads) {
         int size = threads.size();
         List<MailThread> newthreads = new ArrayList<MailThread>(size);
         for (int i = 0; i < size; i++) {

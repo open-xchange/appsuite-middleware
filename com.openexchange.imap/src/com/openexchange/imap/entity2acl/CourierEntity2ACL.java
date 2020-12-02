@@ -103,7 +103,7 @@ public class CourierEntity2ACL extends AbstractOwnerCapableEntity2ACL {
     }
 
     @Override
-    public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
+    public String getACLName(int userId, Context ctx, Entity2ACLArgs entity2AclArgs) throws OXException {
         if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
             return ALIAS_ANYONE;
         }
@@ -145,7 +145,7 @@ public class CourierEntity2ACL extends AbstractOwnerCapableEntity2ACL {
     }
 
     @Override
-    public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
+    public UserGroupID getEntityID(String pattern, Context ctx, Entity2ACLArgs entity2AclArgs) throws OXException {
         if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
