@@ -225,6 +225,8 @@ public class XOXFileAccess implements /*@formatter:off*/
         IDTuple newId = client.moveDocument(source.getId(), destFolder, sequenceNumber);
         if (update != null && modifiedFields != null) {
             XOXFile movedFile = new XOXFile(update);
+            movedFile.setId(newId.getId());
+            movedFile.setFolderId(newId.getFolder());
             movedFile.setSequenceNumber(getMetadata(newId.getFolder(), newId.getId(), CURRENT_VERSION).getSequenceNumber());
             return saveFileMetadata(movedFile, movedFile.getSequenceNumber(), modifiedFields);
         }

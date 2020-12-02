@@ -106,28 +106,22 @@ public class TransformImageClientAction extends TransformImageAction {
      * @return The IImageClient service (if any available and if connected) or <code>null</code>
      */
     public IImageClient getImageClientIfValid() {
-        IImageClient imageClient = this.m_imageClient.get();
-        if (null == imageClient) {
-            // No IImageClient set
-            return null;
-        }
+        final IImageClient imageClient = this.m_imageClient.get();
 
         try {
-            if (imageClient.isConnected()) {
+            if ((null != imageClient) && imageClient.isConnected()) {
                 return imageClient;
             }
-        } catch (OXException e) {
-            // Only tracing here
-            LOG.trace("", e);
+        } catch (@SuppressWarnings("unused") OXException e) {
+            // OK, an IC server is currently not available
         }
 
-        // No valid IImageClient service
+        // use fallback
         return null;
     }
 
     @Override
     protected String getCacheKey(@NonNull final ServerSession session, @NonNull final AJAXRequestData request, @NonNull final AJAXRequestResult result, @NonNull final IFileHolder repetitiveFile, @NonNull final TransformImageParameters xformParams) throws OXException {
-        String cacheKey = null;
         final long size = repetitiveFile.getLength();
 
         if (null != getImageClientIfValid()) {
@@ -139,54 +133,41 @@ public class TransformImageClientAction extends TransformImageAction {
                     try (CheckedInputStream checkedInputStm = new CheckedInputStream(inputStm, crcImage); OutputStream nullSink = new NullOutputStream()) {
                         IOUtils.copy(checkedInputStm, nullSink);
                     }
+
+                    // set IC cache key at given xFormParams to be used for following IC related requests
+                    xformParams.setICCacheKey(new StringBuilder(32).append(size).append('-').append(crcImage.getValue()).toString());
                 }
             } catch (IOException e) {
                 LOG.error(Throwables.getRootCause(e).getMessage());
             }
-
-            cacheKey = new StringBuilder().append(size).append('-').append(crcImage.getValue()).toString();
-        } else {
-            cacheKey = super.getCacheKey(session, request, result, repetitiveFile, xformParams);
         }
 
-        return cacheKey;
+        // return the fallback cache key in every case as standard key
+        return super.getCacheKey(session, request, result, repetitiveFile, xformParams);
     }
 
     @Override
     protected IFileHolder getCachedResource(@NonNull final ServerSession session, @NonNull final String cacheKey, @NonNull final TransformImageParameters xformParams) throws OXException {
-        IFileHolder ret = null;
+        final String icCacheKey = xformParams.getICCacheKey();
+        IImageClient imageClient = null;
 
-        if (isNotEmpty(cacheKey)) {
-            IImageClient imageClient = getImageClientIfValid();
-            if (null != imageClient) {
-                try {
-                    final String requestFormatString = getRequestFormatString(xformParams, "auto");
-                    final InputStream imageInputStm = imageClient.getImage(cacheKey, requestFormatString, Integer.toString(session.getContext().getContextId()));
+        // try to get an IC cached image using the IC specific cache key first
+        if (isNotEmpty(icCacheKey) && (null != (imageClient = getImageClientIfValid()))) {
+            try {
+                final String requestFormatString = getRequestFormatString(xformParams, "auto");
+                final InputStream imageInputStm = imageClient.getImage(icCacheKey, requestFormatString, Integer.toString(session.getContext().getContextId()));
 
-                    if (null != imageInputStm) {
-                        ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
-                    }
-                } catch (ImageConverterException e) {
-                    // OK, we just didn't get a result
-                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server {}", Throwables.getRootCause(e).getMessage());
+                if (null != imageInputStm) {
+                    return new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), icCacheKey);
                 }
-            } else {
-                ret = super.getCachedResource(session, cacheKey, xformParams);
+            } catch (ImageConverterException e) {
+                // OK, we just didn't get a result => fallback behavior follows
+                LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server {}", Throwables.getRootCause(e).getMessage());
             }
         }
 
-        return ret;
-    }
-
-    @Override
-    protected void writeCachedResource(final ServerSession session, final String cacheKey, final String targetMimeType, final BasicTransformedImage transformedImage, final ThresholdFileHolder transformedFile, final String fileName, final long size) throws OXException, IOException {
-
-        // method is empty and superclass method mustn't (!) be called
-        // if valid, since all caching is done on ImageServer side
-        if (null == getImageClientIfValid()) {
-            super.writeCachedResource(session, cacheKey, targetMimeType, transformedImage, transformedFile, fileName, size);
-        }
-
+        // if we didn't return an IC server cached image so far, return the the fallback cache result using the standard cache key
+        return super.getCachedResource(session, cacheKey, xformParams);
     }
 
     @Override
@@ -195,21 +176,23 @@ public class TransformImageClientAction extends TransformImageAction {
 
         // check for valid IImageClient interface and use this one for transformation of image =>
         // if not successful, rely on ImageTransformation implementation and call super class method
-        IImageClient imageClient = getImageClientIfValid();
-        if (null != imageClient && isNotEmpty(cacheKey)) {
+        final String icCacheKey = xformParams.getICCacheKey();
+        IImageClient imageClient = null;
+
+        if (isNotEmpty(icCacheKey) && (null != (imageClient = getImageClientIfValid()))) {
             InputStream srcImageStm = file.getStream();
             if (null != srcImageStm) {
                 try {
                     String requestFormatString = getRequestFormatString(xformParams, "auto");
                     InputStream resultImageStm = null;
                     try {
-                        resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
+                        resultImageStm = imageClient.cacheAndGetImage(icCacheKey, requestFormatString, srcImageStm, getContextIdString(session));
                         if (null != resultImageStm) {
                             ThresholdFileHolder imageData = new ThresholdFileHolder();
                             try {
                                 imageData.write(resultImageStm);
                                 imageData.setContentType(xformParams.getImageMimeType());
-                                imageData.setName(cacheKey);
+                                imageData.setName(icCacheKey);
                                 BasicTransformedImage ret = new FileHolderBasicTransformedImage(imageData, xformParams);
                                 imageData = null; // Avoid premature closing
                                 return ret;
@@ -218,7 +201,8 @@ public class TransformImageClientAction extends TransformImageAction {
                             }
                         }
                     } catch (ImageConverterException e) {
-                        throw OXException.general("Communication with ImageConverter failed", e);
+                        // OK, we just didn't get a result => fallback behavior follows
+                        LOG.trace("TransformImageClientAction received an exception when trying to transform an image via the Image Server {}", Throwables.getRootCause(e).getMessage());
                     } finally {
                         Streams.close(resultImageStm);
                     }
@@ -228,7 +212,11 @@ public class TransformImageClientAction extends TransformImageAction {
             }
         }
 
-        return (null != imageClient ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
+        // not able to return the IC based transformation so far => reset icCacheKey
+        // and use the fallback transformation with the standard fallback cache key
+        xformParams.setICCacheKey(null);
+
+        return super.performTransformImage(session, file, xformParams, cacheKey, fileName);
     }
 
     // - Implementation --------------------------------------------------------

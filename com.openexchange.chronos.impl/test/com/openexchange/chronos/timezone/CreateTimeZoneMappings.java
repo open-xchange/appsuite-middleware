@@ -63,6 +63,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import com.openexchange.java.Strings;
+import com.openexchange.xml.util.XMLUtils;
 
 /**
  * {@link CreateTimeZoneMappings}
@@ -75,13 +76,9 @@ public class CreateTimeZoneMappings {
     private static final String URL = "https://raw.githubusercontent.com/unicode-org/cldr/master/common/supplemental/windowsZones.xml";
 
     public static void main(String[] args) throws Exception {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory documentBuilderFactory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());;
         documentBuilderFactory.setValidating(false);
         documentBuilderFactory.setNamespaceAware(true);
-        documentBuilderFactory.setFeature("http://xml.org/sax/features/namespaces", false);
-        documentBuilderFactory.setFeature("http://xml.org/sax/features/validation", false);
-        documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-        documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
         Map<String, String> mapppings;

@@ -1,6 +1,6 @@
 ---
 title: Data managed in file storage
-icon: fa-container-storage
+icon: fa-warehouse
 tags: Configuration , Storage, Drive, Files
 ---
 

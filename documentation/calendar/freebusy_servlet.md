@@ -1,13 +1,13 @@
 ---
 title: Internet Free Busy Servlet
-icon: fa-calendar-check-o
+icon: fa-business-time
 tags: API, Calendar, FreeBusy
 ---
 
-This article will describe how use the internet free busy servlet. 
+This article will describe how use the internet free busy servlet.
 
 # Overview
-Clients like Microsoft Outlook are able to discover the availability of a user or resource by querying a specific endpoint on a server. This endpoint is the free busy servlet. The free busy data of a user or resource can be requested via a HTTP request and is returned in iCalendar format. 
+Clients like Microsoft Outlook are able to discover the availability of a user or resource by querying a specific endpoint on a server. This endpoint is the free busy servlet. The free busy data of a user or resource can be requested via a HTTP request and is returned in iCalendar format.
 
 The servlet is disabled by default and must be enabled by the administrator. The free busy data for a context is published only when activated in the configuration.
 
@@ -49,10 +49,10 @@ Required parameters:
 
 Optional parameters:
 
-* **weeksIntoPast** (Integer): The requested time range into the past in weeks. 
+* **weeksIntoPast** (Integer): The requested time range into the past in weeks.
 If this value is greater than the configured maximum (see property above), the free busy times are only requested to configured maximum.
 Default value is 1 week into the past.
-          
+
 * **weeksIntoFuture** (Integer): The requested time range into the future in weeks.
 If this value is greater than the configured maximum (see property above), the free busy times are only requested to configured maximum.
 Default value is 4 week into the future.

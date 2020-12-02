@@ -693,8 +693,9 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         FolderData folderData = new FolderData();
         folderData.setFolderId(folder.getId());
         folderBody.setFolder(folderData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(newFolder2.getId(), folderBody, null, null, null, null, null, null, null, null);
-        String movedFolderId = checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
+        final Boolean ignoreWarnings = Boolean.TRUE;
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(newFolder2.getId(), folderBody, null, null, null, null, null, null, null, ignoreWarnings);
+        String movedFolderId = updateResponse.getData();
 
         //Folder present?
         FolderResponse checkResponse = foldersApi.getFolder(movedFolderId, null, null, null);

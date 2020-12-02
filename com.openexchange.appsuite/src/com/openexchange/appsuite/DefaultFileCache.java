@@ -52,6 +52,7 @@ package com.openexchange.appsuite;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -138,6 +139,7 @@ public class DefaultFileCache implements FileCache {
         for (int i = 0; i < roots.length; i++) {
             File f = new File(roots[i], pathToUse);
             try {
+                checkAbsoluteInSubpath(f.getAbsoluteFile(), roots[i]);
                 if (!f.getCanonicalPath().startsWith(prefixes[i])) {
                     continue;
                 }
@@ -167,5 +169,18 @@ public class DefaultFileCache implements FileCache {
     @Override
     public void clear() {
         cache.clear();
+    }
+
+    private synchronized void checkAbsoluteInSubpath(File f, File parentDir) throws FileNotFoundException {
+        File current = f;
+
+        while (current != null) {
+            current = current.getParentFile();
+            if (current.equals(parentDir)) {
+                return;
+            }
+        }
+        LOG.error("Trying to leave designated directory with a relative path. Denying request.");
+        throw new FileNotFoundException();
     }
 }

@@ -59,6 +59,7 @@ import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.webdav.client.WebDAVXmlBody;
+import com.openexchange.xml.util.XMLUtils;
 
 /**
  * {@link OwnCloudSearchBody}
@@ -95,7 +96,7 @@ public class OwnCloudSearchBody extends WebDAVXmlBody {
 
     @Override
     public Element toXML() throws OXException {
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());;
         DocumentBuilder docBuilder;
         try {
             docBuilder = docFactory.newDocumentBuilder();

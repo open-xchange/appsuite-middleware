@@ -159,11 +159,11 @@ public class DeleteFolderCall extends AbstractPutCall<List<String>> {
     protected void fillParameters(Map<String, String> parameters) {
         parameters.put("tree", tree);
         parameters.put("timestamp", String.valueOf(timestamp));
-        parameters.put("allowed_modules", allowedModules);
         parameters.put("hardDelete", Boolean.toString(hardDelete));
         parameters.put("failOnError", Boolean.toString(failOnError));
         parameters.put("extendedResponse", Boolean.toString(false));
         parameters.put("pushToken", pushToken);
+        putIfPresent(parameters, "allowed_modules", allowedModules);
     }
 
     @Override

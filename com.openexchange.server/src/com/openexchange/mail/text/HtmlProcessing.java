@@ -97,6 +97,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.xml.util.XMLUtils;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.Element;
@@ -757,7 +758,7 @@ public final class HtmlProcessing {
      */
     public static Document createDOMDocument(final String string) {
         try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(string)));
+            return XMLUtils.safeDbf(DocumentBuilderFactory.newInstance()).newDocumentBuilder().parse(new InputSource(new StringReader(string)));
         } catch (ParserConfigurationException e) {
             LOG.error("", e);
         } catch (SAXException e) {
