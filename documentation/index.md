@@ -1,6 +1,6 @@
 ---
 title: Middleware Documentation
-description: 
+description:
 ---
 
 Welcome to the documentation about the inner workings of the Java-based middleware platform of OX App Suite. This technical documentation covers articles about different topics and features, grouped by different subtopics on the left.
@@ -23,14 +23,14 @@ The new mechanism can be disabled – and therefore the former one still being u
 
 ## Federated Sharing
 
-OX App Suite 7.10.5 introduces the new concept of "*Federated Sharing*" which allows a user to integrate a received share from another context 
+OX App Suite 7.10.5 introduces the new concept of "*Federated Sharing*" which allows a user to integrate a received share from another context
 or another server into his own account and access these data in the same way as regular data.
 This provides a seamless integration of data shared from a different context or server without using the guest interface.
 
 The new *Federated Sharing* feature is part of of the ``open-xchange-subscribe`` package which needs to be installed in order to use it.
 
 OX App Suite can handle two different share modes: The **cross-context** mode and the **cross-ox** mode.
-The **cross-context** mode is chosen when a share comes from a different context on the same OX server. 
+The **cross-context** mode is chosen when a share comes from a different context on the same OX server.
 The server will use internal services to access the shared data in the other context. No remote communication is required in this case.  
 The **cross-ox** mode is used when a share comes from *another* OX server. The communication between the OX servers will then take place over the HTTP API.
 **Please note** that the integration of calendar shares is currently only available in **cross-context** mode.
@@ -54,7 +54,55 @@ See [Sharing and Guest Mode](https://documentation.open-xchange.com/7.10.5/middl
 
 ## Reseller Scope in Config-Cascade
 
+OX Cloud offers a level "above" the `context` to support different resellers. Certain configuration might be related in OX App Suite to this level and this is not yet supported. Therefore, with 7.10.5, a new scope was introduced, i.e. the `reseller` scope to bridge the gap between the `context` and `contextSets` scopes.
+
+For this to work, the `open-xchange-reseller` package must be installed. If so, the config cascade lookup order goes  from most to least specific: user (API) -> context (API) -> reseller (API) -> contextSet (Configuration) -> server (Configuration) -> default (Code).
+
+If a reseller does not have a value for a given config, then its parents (if exist) are iterated until a value is available. If no value can be found then the next scope down the line will be used, i.e. `contextSets`.
+
+To set properties, taxonomies and capabilities in the `reseller` scope, the `createadmin` and `changeadmin` command line tools can be used:
+
+```bash
+$ createadmin [...] --config/com.openexchange.oauth.twitter=false --config/com.openexchange.oauth.google=attributes --capabilities-to-add "portal, -autologin" --taxonomy/types=some-taxonomy
+$ changeadmin [...]  --config/com.openexchange.oauth.google=attributes --remove-config/com.openexchange.oauth.twitter --capabilities-to-add "portal" --capabilities-to-drop "autologin" --taxonomy/types=some-taxonomy --remove-taxonomy/types=hosting
+```
+
+Note that the difference between `remove` and `drop` in capabilities is that with remove the capability will be removed from a set if it was set in a less narrower scope, see "-" prefix; while with drop the entry will be erased from the database table and its default behavior will be restored.
+
+No operations are allowed on properties starting with `com.openexchange.capability.` and no capabilities are allowed that match a user permission bit.
+
+More information about ConfigCascade can be found [here](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/config_cascade.html).
+
 ## Configuration Changes for Logback
+
+As of version 7.10.5 of the AppSuite (and version 2.0.0 of the Open-Xchange Java Commons libraries) there is a slight change in the property naming of the `logback.xml` file. The changes are as follows:
+
+* The base package of all the extensions is further refined into sub-packages each containing a specific extension. There are four in total:
+  * `appenders`: Contains all available supported appenders
+     * Logstash (since 7.6.2)
+     * Kafka (since 7.10.5)
+  * `converters`: Contains all available supported converters
+      * `ExtendedReplacingCompositeConverter`
+      * `LineMDCConverter`
+      * `LogSanitisingConverter`
+      * `ThreadIdConverter`
+  * `encoders`: Contains all available supported encoders
+      * `ExtendedPatternLayoutEncoder`
+      * `JSONEncoder`
+  * `policies`: Contains all available supported policies
+      * `FixedWindowRollingPolicy`
+* The property and class names of the four previously mentioned extensions has changed to reflect the package name. In particular, the fully qualified property and class name now contains the package name, AND in case of an appender, the appender name as well. For example, the `FixedWindowRollingPolicy`, previously configured as `<rollingPolicy class="com.openexchange.logback.extensions.FixedWindowRollingPolicy">` , will now be configured as `<rollingPolicy class="com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy">`. For an extended list on how the names were changed and how to update your configuration files, please refer to the [Upgrade Guide](https://documentation.open-xchange.com/7.10.5/middleware/monitoring/05_logging.html#upgrading-from-an-older-version).
+
+Since 7.10.5, there is also a new appender available, namely "Kafka" which can directly write log entries to a Kafka topic in a Kafka cluster. The appender's class name is `com.openexchange.logback.extensions.appenders.KafkaAppender` and can be configured as follows:
+
+```xml
+<appender name="KAFKA" class="com.openexchange.logback.extensions.appenders.kafka.KafkaAppender">
+    <servers>kafka-node01:9092,kafka-node02:9092</servers>
+    <topic>logs</topic>
+    <key>node03</key>
+</appender>
+```
+For more information about logging with Logstash and Kafka can be found [here](https://documentation.open-xchange.com/7.10.5/middleware/monitoring/05_logging.html).
 
 ## Improved API access with OAuth 2.0
 
@@ -69,7 +117,7 @@ As before, the OAuth 2.0 provider is activated by the property:
 
 * <code>com.openexchange.oauth.provider.enabled</code>
 
-The configuration property <code>com.openexchange.oauth.provider.isAuthorizationServer</code> 
+The configuration property <code>com.openexchange.oauth.provider.isAuthorizationServer</code>
 is no longer available and was transferred to <code>com.openexchange.oauth.provider.mode</code>, which now configures the OAuth provider.
 
 The following is a list of possible configurations:
