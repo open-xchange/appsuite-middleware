@@ -160,14 +160,14 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
     public void createContact(String folderId, Contact contact) throws OXException {
         decorateSessionWithWritableConnection();
         getContactService().createContact(session.getSession(), folderId, contact);
-        transferIds(contact);
+        contact.setId(asString(contact.getObjectID()));
     }
 
     @Override
     public void updateContact(ContactID contactId, Contact contact, long clientTimestamp) throws OXException {
         decorateSessionWithWritableConnection();
         getContactService().updateContact(session.getSession(), contactId.getFolderID(), contactId.getObjectID(), contact, new Date(clientTimestamp));
-        transferIds(contact);
+        contact.setId(asString(contact.getObjectID()));
     }
 
     @Override
