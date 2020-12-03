@@ -85,7 +85,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * @param isSequential - whether supplied UIDs are in sequential order or not
      * @throws MessagingException - if an unknown system flag is used
      */
-    public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable, final boolean silent, final boolean isSequential) throws MessagingException {
+    public FlagsIMAPCommand(IMAPFolder imapFolder, long[] uids, Flags flags, boolean enable, boolean silent, boolean isSequential) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
@@ -121,7 +121,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         uid = true;
     }
 
-    private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder) throws MessagingException {
+    private void appendSystemFlags(Flag[] systemFlags, StringBuilder flagsStrBuilder) throws MessagingException {
         if (systemFlags.length > 0) {
             flagsStrBuilder.append(getFlagString(systemFlags[0]));
             for (int i = 1; i < systemFlags.length; i++) {
@@ -130,7 +130,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         }
     }
 
-    private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
+    private void appendUserFlags(String[] userFlags, StringBuilder flagsStrBuilder) {
         if (userFlags.length > 0) {
             if (flagsStrBuilder.length() > 0) {
                 flagsStrBuilder.append(' ');
@@ -153,7 +153,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * @param silent <code>true</code> to suppress returning the new value; otherwise <code>false</code>
      * @throws MessagingException - if an unknown system flag is used
      */
-    public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
+    public FlagsIMAPCommand(IMAPFolder imapFolder, Flags flags, boolean enable, boolean silent) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -191,7 +191,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * @param silent <code>true</code> to suppress returning the new value; otherwise <code>false</code>
      * @throws MessagingException - if an unknown system flag is used
      */
-    public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
+    public FlagsIMAPCommand(IMAPFolder imapFolder, int startSeqNum, int endSeqNum, Flags flags, boolean enable, boolean silent) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
@@ -230,7 +230,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     public static final String FLAG_USER = "\\User";
 
-    private static String getFlagString(final Flag systemFlag) throws MessagingException {
+    private static String getFlagString(Flag systemFlag) throws MessagingException {
         if (Flags.Flag.ANSWERED.equals(systemFlag)) {
             return FLAG_ANSWERED;
         } else if (Flags.Flag.DELETED.equals(systemFlag)) {
@@ -260,7 +260,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         // UID STORE %s %sFLAGS (%s)
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
@@ -288,7 +288,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected boolean handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(Response response) throws MessagingException {
         // No intermediate response expected
         return false;
     }

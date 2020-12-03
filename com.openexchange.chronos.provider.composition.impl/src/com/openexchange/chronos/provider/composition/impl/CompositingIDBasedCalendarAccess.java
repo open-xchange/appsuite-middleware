@@ -740,9 +740,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarAccess calendarAccess = getAccess(accountId);
             if (FolderCalendarAccess.class.isInstance(calendarAccess)) {
                 /*
-                 * update folder directly within folder-aware account
+                 * update folder within folder-aware account
                  */
                 String updatedId = ((FolderCalendarAccess) calendarAccess).updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
+                /*
+                 * additionally update account settings as needed
+                 */
+                if (null != userConfig) {
+                    CalendarAccount updatedAccount = requireService(CalendarAccountService.class, services).updateAccount(session, accountId, userConfig, clientTimestamp, this);
+                    clientTimestamp = updatedAccount.getLastModified().getTime();
+                }
                 return getUniqueFolderId(accountId, updatedId, GroupwareCalendarAccess.class.isInstance(calendarAccess));
             }
             /*

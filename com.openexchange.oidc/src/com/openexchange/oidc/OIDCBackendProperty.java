@@ -123,14 +123,12 @@ public enum OIDCBackendProperty implements Property {
     /**
      * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
      * for all valid values.
-     * so far the following values are valid: {off, ox_direct, sso_redirect}.
+     * so far the following values are valid: {off, ox_direct}.
      * <br>
      *   off - no autologin<br>
      *   ox_direct - load user session from cookie and load Appsuite directly<br>
-     *   sso_redirect - check for a valid session on OPs side before login into<br>
-     *     a valid session loaded from a cookie
      */
-    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF.getValue()),
+    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue()),
     /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"

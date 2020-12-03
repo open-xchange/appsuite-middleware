@@ -79,7 +79,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      *
      * @param threshold The threshold
      */
-    public ThresholdInputStreamProvider(final int threshold) {
+    public ThresholdInputStreamProvider(int threshold) {
         this(threshold, -1);
     }
 
@@ -89,7 +89,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @param threshold The threshold
      * @param initalCapacity The initial capacity
      */
-    public ThresholdInputStreamProvider(final int threshold, final int initalCapacity) {
+    public ThresholdInputStreamProvider(int threshold, int initalCapacity) {
         super();
         sink = new ThresholdFileHolder(threshold, initalCapacity, true);
     }
@@ -113,7 +113,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws IOException If write attempt fails
      * @throws IndexOutOfBoundsException If illegal arguments are specified
      */
-    public ThresholdInputStreamProvider write(final byte[] bytes, final int off, final int len) throws IOException {
+    public ThresholdInputStreamProvider write(byte[] bytes, int off, int len) throws IOException {
         try {
             sink.write(bytes, off, len);
             return this;
@@ -130,7 +130,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @return This file holder with content written
      * @throws IOException If write attempt fails
      */
-    public ThresholdInputStreamProvider write(final byte[] bytes) throws IOException {
+    public ThresholdInputStreamProvider write(byte[] bytes) throws IOException {
         try {
             sink.write(bytes);
             return this;
@@ -149,7 +149,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @return This file holder with content written
      * @throws IOException If write attempt fails
      */
-    public ThresholdInputStreamProvider write(final InputStream in) throws IOException {
+    public ThresholdInputStreamProvider write(InputStream in) throws IOException {
         try {
             sink.write(in);
             return this;

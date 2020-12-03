@@ -388,7 +388,7 @@ public class SAMLWebSSOProviderTest {
             LoginTools.parseUserAgent(autoLoginHTTPRequest),
             LoginTools.parseClient(autoLoginHTTPRequest, false, loginConfigurationLookup.getLoginConfiguration().getDefaultClient()));
         List<Cookie> cookies = new ArrayList<>();
-        cookies.add(new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + cookieHash, samlCookieValue));
+        cookies.add(new Cookie(LoginServlet.SESSION_PREFIX + cookieHash, session.getSessionID()));
         cookies.add(new Cookie(LoginServlet.SECRET_PREFIX + cookieHash, session.getSecret()));
         autoLoginHTTPRequest.setCookies(cookies);
         SimHttpServletResponse initLoginResponse = new SimHttpServletResponse();

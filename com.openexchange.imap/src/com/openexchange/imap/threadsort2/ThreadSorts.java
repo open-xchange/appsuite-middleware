@@ -106,12 +106,12 @@ public final class ThreadSorts {
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange, final boolean uid, final SearchTerm<?> searchTerm) throws MessagingException {
+    public static String getThreadResponse(IMAPFolder imapFolder, String sortRange, boolean uid, SearchTerm<?> searchTerm) throws MessagingException {
         final org.slf4j.Logger log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String cmd = uid ? "UID THREAD" : "THREAD";
 
                 Argument args = new Argument().writeAtom("REFERENCES UTF-8");
@@ -211,7 +211,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         if (null == fetchProfile) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -249,7 +249,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
+    public static List<Conversation> getConversationList(IMAPFolder imapFolder, String sortRange, boolean isRev1, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
@@ -310,7 +310,7 @@ public final class ThreadSorts {
         return conversations;
     }
 
-    private static int findMatchingBracket(final String threadList, final int off) {
+    private static int findMatchingBracket(String threadList, int off) {
         final int length = threadList.length();
         int openingBrackets = 1;
         int pos = off;

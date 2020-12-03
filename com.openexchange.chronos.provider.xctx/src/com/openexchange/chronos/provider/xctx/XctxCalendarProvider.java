@@ -74,8 +74,6 @@ import com.openexchange.chronos.provider.FallbackAwareCalendarProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionResult;
@@ -159,8 +157,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
          */
         try {
             Session guestSession = doGuestLogin(session, account.getUserConfiguration());
-            CalendarSession calendarSession = services.getServiceSafe(CalendarService.class).init(guestSession, parameters);
-            return new XctxCalendarAccess(services, account, session, calendarSession);
+            return new XctxCalendarAccess(services, account, session, guestSession, parameters);
         } catch (OXException e) {
             /*
              * remove calendar account if guest account no longer exists in foreign context, otherwise remember error to fail-fast during repeated attempts
@@ -220,7 +217,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
         if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
             return (JSONObject) internalConfig;
         }
-        return new JSONObject();
+        return null != calendarAccount ? calendarAccount.getInternalConfiguration() : new JSONObject();
     }
 
     @Override
@@ -245,7 +242,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
 
     @Override
     public CalendarAccess connectFallback(Session session, CalendarAccount account, CalendarParameters parameters, OXException error) {
-        return new FallbackXctxCalendarAccess(services, account, session, error);
+        return new FallbackXctxCalendarAccess(services, account, session, parameters, error);
     }
 
     @Override

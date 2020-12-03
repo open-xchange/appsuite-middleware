@@ -105,12 +105,12 @@ public final class IMAPReloadable implements Reloadable {
      *
      * @param reloadable The instance to add
      */
-    public void addReloadable(final Reloadable reloadable) {
+    public void addReloadable(Reloadable reloadable) {
         reloadables.add(reloadable);
     }
 
     @Override
-    public void reloadConfiguration(final ConfigurationService configService) {
+    public void reloadConfiguration(ConfigurationService configService) {
         try {
             final IMAPProperties imapProperties = IMAPProperties.getInstance();
             if (null != imapProperties) {
@@ -121,7 +121,7 @@ public final class IMAPReloadable implements Reloadable {
             LOGGER.warn("Failed to reload IMAP properties", e);
         }
 
-        for (final Reloadable reloadable : reloadables) {
+        for (Reloadable reloadable : reloadables) {
             reloadable.reloadConfiguration(configService);
         }
     }

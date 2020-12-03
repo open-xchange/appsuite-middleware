@@ -133,7 +133,7 @@ public final class IMAPFolderConverter {
         }
 
         @Override
-        public Object[] getArguments(final IMAPServer imapServer) throws OXException {
+        public Object[] getArguments(IMAPServer imapServer) throws OXException {
             return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespaces, publicNamespaces);
         }
     }
@@ -209,7 +209,7 @@ public final class IMAPFolderConverter {
      * @return An instance of <code>{@link IMAPMailFolder}</code> containing the attributes from given IMAP folder
      * @throws OXException If conversion fails
      */
-    public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session, final IMAPAccess imapAccess, final Context ctx) throws OXException {
+    public static IMAPMailFolder convertFolder(IMAPFolder imapFolder, Session session, IMAPAccess imapAccess, Context ctx) throws OXException {
         try {
             synchronized (imapFolder) {
                 final String imapFullName = imapFolder.getFullName();
@@ -486,8 +486,8 @@ public final class IMAPFolderConverter {
      * @param tmp Helper instance of <code>StringBuilder</code>
      * @return <code>true</code> if given IMAP full name starts with any of given personal/user namespaces; otherwise <code>false</code>
      */
-    public static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
-        for (final String string : userNamespaces) {
+    public static boolean startsWithOneOf(String imapFullName, char sep, String[] personalNamespaces, String[] userNamespaces, StringBuilder tmp) {
+        for (String string : userNamespaces) {
             if (imapFullName.equals(string)) {
                 return true;
             }
@@ -496,7 +496,7 @@ public final class IMAPFolderConverter {
                 return true;
             }
         }
-        for (final String string : personalNamespaces) {
+        for (String string : personalNamespaces) {
             if (imapFullName.equals(string)) {
                 return true;
             }
@@ -538,7 +538,7 @@ public final class IMAPFolderConverter {
         return ownRights;
     }
 
-    private static IMAPMailFolder convertRootFolder(final DefaultFolder rootFolder, final Session session, final IMAPConfig imapConfig) throws OXException {
+    private static IMAPMailFolder convertRootFolder(DefaultFolder rootFolder, Session session, IMAPConfig imapConfig) throws OXException {
         try {
             final IMAPMailFolder mailFolder = new IMAPMailFolder();
             mailFolder.setRootFolder(true);
@@ -607,14 +607,14 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static boolean isDefaultFoldersChecked(final Session session, final int accountId) {
+    private static boolean isDefaultFoldersChecked(Session session, int accountId) {
         final Boolean b = MailSessionCache.getInstance(session).getParameter(
             accountId,
             MailSessionParameterNames.getParamDefaultFolderChecked());
         return (b != null) && b.booleanValue();
     }
 
-    private static String[] getDefaultMailFolders(final Session session, final int accountId) {
+    private static String[] getDefaultMailFolders(Session session, int accountId) {
         return MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
     }
 
@@ -631,7 +631,7 @@ public final class IMAPFolderConverter {
      * @throws OXException If ACLs cannot be mapped
      * @throws MessagingException If a messaging error occurs
      */
-    private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws OXException, MessagingException {
+    private static void applyACL2Permissions(IMAPFolder imapFolder, ListLsubEntry listEntry, Session session, IMAPConfig imapConfig, MailFolder mailFolder, Rights ownRights, Context ctx) throws OXException, MessagingException {
         final ACL[] acls;
         try {
             final List<ACL> list = listEntry.getACLs();
@@ -695,16 +695,16 @@ public final class IMAPFolderConverter {
      *
      * @param mailFolder The mail folder containing own permission
      */
-    private static void addOwnACL(final MailFolder mailFolder) {
+    private static void addOwnACL(MailFolder mailFolder) {
         mailFolder.addPermission(mailFolder.getOwnPermission());
     }
 
-    private static boolean isUnknownEntityError(final OXException e) {
+    private static boolean isUnknownEntityError(OXException e) {
         final int code = e.getCode();
         return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId, boolean ignoreLsub) throws MessagingException, OXException {
+    private static boolean checkForNamespaceFolder(String fullName, IMAPStore imapStore, Session session, int accountId, boolean ignoreLsub) throws MessagingException, OXException {
         /*
          * Check for namespace folder
          */
@@ -724,7 +724,7 @@ public final class IMAPFolderConverter {
                         return true;
                     }
                     final List<ListLsubEntry> children = ListLsubCache.getCachedLISTEntry(userFolders[i], accountId, imapStore, session, ignoreLsub).getChildren();
-                    for (final ListLsubEntry entry : children) {
+                    for (ListLsubEntry entry : children) {
                         if (entry.getFullName().startsWith(fullName)) {
                             return true;
                         }
@@ -750,7 +750,7 @@ public final class IMAPFolderConverter {
      * @return The unread count
      * @throws OXException If returning unread count fails
      */
-    public static int getUnreadCount(final IMAPFolder imapFolder) throws OXException {
+    public static int getUnreadCount(IMAPFolder imapFolder) throws OXException {
         try {
             final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
             return status[2];
@@ -771,7 +771,7 @@ public final class IMAPFolderConverter {
      * @return The own rights
      * @throws MessagingException In case an unrecoverable exception occurs
      */
-    public static Rights getOwnRights(final IMAPFolder folder, final Session session, final IMAPConfig imapConfig) throws MessagingException {
+    public static Rights getOwnRights(IMAPFolder folder, Session session, IMAPConfig imapConfig) throws MessagingException {
         if (folder instanceof DefaultFolder) {
             return null;
         }
@@ -816,7 +816,7 @@ public final class IMAPFolderConverter {
         return retval;
     }
 
-    private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullName) {
+    private static void handleCommandFailedException(com.sun.mail.iap.CommandFailedException e, String fullName) {
         final String msg = e.getMessage().toLowerCase(Locale.ENGLISH);
         if (msg.indexOf("Mailbox doesn't exist") >= 0 || msg.indexOf("Mailbox does not exist") >= 0) {
             LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);

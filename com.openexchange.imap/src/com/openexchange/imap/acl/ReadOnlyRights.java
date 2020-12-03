@@ -65,7 +65,7 @@ final class ReadOnlyRights extends Rights {
      *
      * @param rights The rights for initialization
      */
-    ReadOnlyRights(final Rights rights) {
+    ReadOnlyRights(Rights rights) {
         super(rights);
         constructed = true;
     }
@@ -75,7 +75,7 @@ final class ReadOnlyRights extends Rights {
      *
      * @param rights The rights for initialization
      */
-    ReadOnlyRights(final String rights) {
+    ReadOnlyRights(String rights) {
         super(rights);
         constructed = true;
     }
@@ -85,7 +85,7 @@ final class ReadOnlyRights extends Rights {
      *
      * @param right The right for initialization
      */
-    ReadOnlyRights(final Right right) {
+    ReadOnlyRights(Right right) {
         super(right);
         constructed = true;
     }
@@ -96,7 +96,7 @@ final class ReadOnlyRights extends Rights {
      * @param right The right to add
      */
     @Override
-    public void add(final Right right) {
+    public void add(Right right) {
         if (constructed) {
             throw new UnsupportedOperationException();
         }
@@ -109,7 +109,7 @@ final class ReadOnlyRights extends Rights {
      * @param rights The rights to add
      */
     @Override
-    public void add(final Rights rights) {
+    public void add(Rights rights) {
         if (constructed) {
             throw new UnsupportedOperationException();
         }
@@ -122,7 +122,7 @@ final class ReadOnlyRights extends Rights {
      * @param right The right to be removed
      */
     @Override
-    public void remove(final Right right) {
+    public void remove(Right right) {
         throw new UnsupportedOperationException();
     }
 
@@ -132,7 +132,7 @@ final class ReadOnlyRights extends Rights {
      * @param rights The rights to be removed
      */
     @Override
-    public void remove(final Rights rights) {
+    public void remove(Rights rights) {
         throw new UnsupportedOperationException();
     }
 

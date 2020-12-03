@@ -141,7 +141,7 @@ public final class Threadables {
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 useCommonsNetThreader = null;
             }
 
@@ -158,7 +158,7 @@ public final class Threadables {
      * @param threadable
      * @return
      */
-    public static Threadable applyThreaderTo(final Threadable threadable) {
+    public static Threadable applyThreaderTo(Threadable threadable) {
         if (useCommonsNetThreader()) {
             ThreadableImpl threadableImpl = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
             if (threadableImpl != null) {
@@ -179,7 +179,7 @@ public final class Threadables {
         /** The cached flag */
         public final boolean cached;
 
-        protected ThreadableResult(final Threadable threadable, final boolean cached) {
+        protected ThreadableResult(Threadable threadable, boolean cached) {
             super();
             this.threadable = threadable;
             this.cached = cached;
@@ -198,7 +198,7 @@ public final class Threadables {
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int lookAhead, final int accountId, final Session session) throws MessagingException {
+    public static ThreadableResult getThreadableFor(IMAPFolder imapFolder, boolean sorted, boolean cache, int lookAhead, int accountId, Session session) throws MessagingException {
         Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
         if (sorted) {
             if (useCommonsNetThreader()) {
@@ -225,7 +225,7 @@ public final class Threadables {
         m.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
             @Override
-            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+            public void handle(Header hdr, Threadable threadable) throws MessagingException {
                 threadable.subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue()));
             }
         });
@@ -234,21 +234,21 @@ public final class Threadables {
             private final Pattern split = Pattern.compile(" +");
 
             @Override
-            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+            public void handle(Header hdr, Threadable threadable) throws MessagingException {
                 threadable.refs = split.split(MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
             }
         });
         m.put(MessageHeaders.HDR_MESSAGE_ID, new HeaderHandler() {
 
             @Override
-            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+            public void handle(Header hdr, Threadable threadable) throws MessagingException {
                 threadable.messageId = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
             }
         });
         m.put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
 
             @Override
-            public void handle(final Header hdr, final Threadable threadable) throws MessagingException {
+            public void handle(Header hdr, Threadable threadable) throws MessagingException {
                 threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
             }
         });
@@ -268,7 +268,7 @@ public final class Threadables {
      * @throws MessagingException If an error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean examineHasAttachmentUserFlags, final boolean previewSupported) throws MessagingException {
+    public static List<MailMessage> getAllMailsFrom(IMAPFolder imapFolder, int limit, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -373,7 +373,7 @@ public final class Threadables {
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int lookAhead) throws MessagingException {
+    public static Threadable getAllThreadablesFrom(IMAPFolder imapFolder, int lookAhead) throws MessagingException {
         return getAllThreadablesFrom(imapFolder, lookAhead, false);
     }
 
@@ -395,7 +395,7 @@ public final class Threadables {
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int limit, final boolean fetchSingleFields) throws MessagingException {
+    public static Threadable getAllThreadablesFrom(IMAPFolder imapFolder, int limit, boolean fetchSingleFields) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -408,7 +408,7 @@ public final class Threadables {
         return (Threadable) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 final List<Threadable> threadables;
                 final String command;
                 {
@@ -502,7 +502,7 @@ public final class Threadables {
                 Threadable first = threadables.remove(0);
                 {
                     Threadable cur = first;
-                    for (final Threadable threadable : threadables) {
+                    for (Threadable threadable : threadables) {
                         cur.next = threadable;
                         cur = threadable;
                     }
@@ -510,7 +510,7 @@ public final class Threadables {
                 return first;
             }
 
-            void handleByFields(final Map<String, HeaderHandler> handlers, final List<Threadable> threadables, final String fullName, final FetchResponse fetchResponse) throws MessagingException {
+            void handleByFields(Map<String, HeaderHandler> handlers, List<Threadable> threadables, String fullName, FetchResponse fetchResponse) throws MessagingException {
                 // Check for BODY / RFC822DATA
                 final InternetHeaders h;
                 {
@@ -535,7 +535,7 @@ public final class Threadables {
                 } else {
                     t = new Threadable().setFullName(fullName);
                     t.messageNumber = fetchResponse.getNumber();
-                    for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+                    for (Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                         final Header hdr = (Header) e.nextElement();
                         final HeaderHandler headerHandler = handlers.get(hdr.getName());
                         if (null != headerHandler) {
@@ -553,7 +553,7 @@ public final class Threadables {
                 }
             }
 
-            void handleByEnvelope(final List<Threadable> threadables, final String fullName, final boolean includeReferences, final String sReferences, final HeaderHandler refsHeaderHandler, final FetchResponse fetchResponse) throws MessagingException {
+            void handleByEnvelope(List<Threadable> threadables, String fullName, boolean includeReferences, String sReferences, HeaderHandler refsHeaderHandler, FetchResponse fetchResponse) throws MessagingException {
                 final ENVELOPE envelope = getItemOf(ENVELOPE.class, fetchResponse);
                 final Threadable t;
                 if (null == envelope) {
@@ -595,7 +595,7 @@ public final class Threadables {
                 }
             }
 
-            private void add2List(final Threadable t, final List<Threadable> threadables) {
+            private void add2List(Threadable t, List<Threadable> threadables) {
                 // Check References and In-Reply-To
                 if (null != t.inReplyTo) {
                     if (null == t.refs) {
@@ -622,7 +622,7 @@ public final class Threadables {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    protected static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);
@@ -641,13 +641,13 @@ public final class Threadables {
      * @param filter The filter
      * @return The resulting THREAD=REFERENCES string
      */
-    public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
+    public static String toThreadReferences(Threadable threadable, TIntSet filter) {
         final StringBuilder sb = new StringBuilder(256);
         toThreadReferences0(threadable, filter, sb);
         return sb.toString();
     }
 
-    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final StringBuilder sb) {
+    private static void toThreadReferences0(Threadable threadable, TIntSet filter, StringBuilder sb) {
         Threadable t = threadable;
         if (null == filter) {
             while (null != t) {
@@ -707,7 +707,7 @@ public final class Threadables {
      * @param threadable The <tt>Threadable</tt> instance
      * @param toAppend The <tt>Threadable</tt> instance to append
      */
-    public static void append(final Threadable threadable, final Threadable toAppend) {
+    public static void append(Threadable threadable, Threadable toAppend) {
         if (null == threadable) {
             return;
         }
@@ -724,7 +724,7 @@ public final class Threadables {
      * @param t The <tt>Threadable</tt> to transform
      * @return The resulting list of <tt>ThreadSortNode</tt>s
      */
-    public static List<ThreadSortNode> toNodeList(final Threadable t) {
+    public static List<ThreadSortNode> toNodeList(Threadable t) {
         if (null == t) {
             return Collections.emptyList();
         }
@@ -733,7 +733,7 @@ public final class Threadables {
         return list;
     }
 
-    private static void fillInList(final Threadable t, final List<ThreadSortNode> list) {
+    private static void fillInList(Threadable t, List<ThreadSortNode> list) {
         Threadable cur = t;
         while (null != cur) {
             if (cur.isDummy()) {
@@ -761,7 +761,7 @@ public final class Threadables {
      * @param fullName The full name to filter with
      * @param t The <tt>Threadable</tt> instance
      */
-    public static Threadable filterFullName(final String fullName, final Threadable t) {
+    public static Threadable filterFullName(String fullName, Threadable t) {
         Threadable first = t;
         Threadable prev = null;
         Threadable cur = t;
@@ -787,7 +787,7 @@ public final class Threadables {
         // return t;
         // }
         // // Filter
-        // for (final Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
+        // for (Iterator<Threadable> iterator = list.iterator(); iterator.hasNext();) {
         // final Threadable cur = iterator.next();
         // if (checkFullName(fullName, cur)) {
         // iterator.remove();
@@ -803,7 +803,7 @@ public final class Threadables {
      * @param t The <tt>Threadable</tt> to unfold
      * @return The resulting list
      */
-    public static List<Threadable> unfold(final Threadable t) {
+    public static List<Threadable> unfold(Threadable t) {
         final List<Threadable> list = new LinkedList<Threadable>();
         Threadable cur = t;
         while (null != cur) {
@@ -819,14 +819,14 @@ public final class Threadables {
      * @param list The list to fold
      * @return The folded <tt>Threadable</tt> instance
      */
-    public static Threadable fold(final List<Threadable> list) {
+    public static Threadable fold(List<Threadable> list) {
         if (null == list) {
             return null;
         }
         final Threadable first = list.remove(0);
 
         Threadable cur = first;
-        for (final Threadable threadable : list) {
+        for (Threadable threadable : list) {
             cur.next = threadable;
             cur = threadable;
         }
@@ -834,7 +834,7 @@ public final class Threadables {
         return first;
     }
 
-    private static boolean checkFullName(final String fullName, final Threadable t) {
+    private static boolean checkFullName(String fullName, Threadable t) {
         Threadable cur = t;
         while (null != cur) {
             if (cur.messageNumber > 0 && !fullName.equals(cur.fullName)) {

@@ -152,7 +152,8 @@ public class ICalTaskImporter extends AbstractICalImporter {
                 if (ignoreUIDs && task.containsUid()) {
                     // perform fixed UID replacement to keep recurring task relations
                     String originalUID = task.getUid();
-                    String replacedUID = uidReplacements.get(originalUID);
+                    //Guarded by ignoreUIDs
+                    @SuppressWarnings("null") String replacedUID = uidReplacements.get(originalUID);
                     if (null == replacedUID) {
                         replacedUID = UUID.randomUUID().toString();
                         uidReplacements.put(originalUID, replacedUID);

@@ -110,7 +110,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
     }
 
     @Override
-    public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
+    public String getACLName(int userId, Context ctx, Entity2ACLArgs entity2AclArgs) throws OXException {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return ALIAS_ANYONE;
         }
@@ -141,7 +141,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
     }
 
     @Override
-    public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
+    public UserGroupID getEntityID(String pattern, Context ctx, Entity2ACLArgs entity2AclArgs) throws OXException {
         if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
@@ -159,7 +159,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         }
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
+    private static int getUserIDInternal(String pattern, Context ctx, int accountId, String serverUrl, int sessionUser) throws OXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, sessionUser, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);

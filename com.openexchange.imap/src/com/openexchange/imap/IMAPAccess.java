@@ -228,7 +228,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The IMAP folder storage
      * @throws OXException If IMAP folder storage cannot be returned
      */
-    public static IMAPFolderStorage getIMAPFolderStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static IMAPFolderStorage getIMAPFolderStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         IMailFolderStorage fstore = mailAccess.getFolderStorage();
         if (!(fstore instanceof IMAPFolderStorage)) {
             if (!(fstore instanceof IMailFolderStorageDelegator)) {
@@ -249,7 +249,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @return The IMAP store
      * @throws OXException If IMAP store cannot be returned
      */
-    public static IMAPStore getIMAPStoreFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static IMAPStore getIMAPStoreFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         return getIMAPFolderStorageFrom(mailAccess).getImapStore();
     }
 
@@ -348,7 +348,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @param session The session providing needed user data
      */
-    protected IMAPAccess(final Session session) {
+    protected IMAPAccess(Session session) {
         super(session);
         setMailProperties((Properties) System.getProperties().clone());
     }
@@ -359,7 +359,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
-    protected IMAPAccess(final Session session, final int accountId) {
+    protected IMAPAccess(Session session, int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
     }
@@ -552,7 +552,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public int getUnreadMessagesCount(final String fullname) throws OXException {
+    public int getUnreadMessagesCount(String fullname) throws OXException {
         if (!isConnected()) {
             connect(false);
         }
@@ -575,7 +575,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             final Set<String> attrs = listEntry.getAttributes();
             if (null != attrs) {
-                for (final String attribute : attrs) {
+                for (String attribute : attrs) {
                     if ("\\NonExistent".equalsIgnoreCase(attribute)) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                     }
@@ -941,7 +941,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws OXException {
+    private boolean isPropagateAccount(IIMAPProperties imapConfProps) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             return true;
         }
@@ -962,13 +962,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If another error occurs
      */
-    public IMAPStore connectIMAPStore(final int maxCount) throws MessagingException, OXException {
+    public IMAPStore connectIMAPStore(int maxCount) throws MessagingException, OXException {
         return connectIMAPStore(maxCount, imapSession, server, port, login, password, clientIp);
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
-    private IMAPStore connectIMAPStore(final int maxCount, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
+    private IMAPStore connectIMAPStore(int maxCount, javax.mail.Session imapSession, String server, int port, String login, String pw, String clientIp) throws MessagingException, OXException {
         /*
          * Propagate client IP address
          */
@@ -1279,13 +1279,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         /*
                          * Clean-up temporary-down map
                          */
-                        for (final Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
+                        for (Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
                             final Entry<HostAndPort, Long> entry = iter.next();
                             if (System.currentTimeMillis() - entry.getValue().longValue() > MAX_TEMP_DOWN) {
                                 iter.remove();
                             }
                         }
-                        for (final Iterator<Entry<HostAndPortAndCredentials, StampAndOXException>> iter = map2.entrySet().iterator(); iter.hasNext();) {
+                        for (Iterator<Entry<HostAndPortAndCredentials, StampAndOXException>> iter = map2.entrySet().iterator(); iter.hasNext();) {
                             final Entry<HostAndPortAndCredentials, StampAndOXException> entry = iter.next();
                             if (System.currentTimeMillis() - entry.getValue().getStamp() > MAX_TEMP_DOWN) {
                                 iter.remove();
@@ -1587,7 +1587,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @param imapStore The IMAP store to close
      */
-    public static void closeSafely(final IMAPStore imapStore) {
+    public static void closeSafely(IMAPStore imapStore) {
         if (null != imapStore) {
             try {
                 imapStore.close();

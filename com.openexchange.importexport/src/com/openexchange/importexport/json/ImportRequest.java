@@ -95,10 +95,11 @@ public class ImportRequest {
 		if (!request.containsParameter("callback")) {
 			request.putParameter("callback", "import"); // hack to stay backwards-compatible with 6.20 version that did not comply to the HTTP API
 		}
-		if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-			throw ImportExportExceptionCodes.NEED_FOLDER.create();
-		}
-		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
+        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        if (folderId == null) {
+            throw ImportExportExceptionCodes.NEED_FOLDER.create();
+        }
+		this.folders = Arrays.asList(folderId.split(","));
 
 		long maxSize = sysconfMaxUpload();
 		if (!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
@@ -145,13 +146,11 @@ public class ImportRequest {
 	        "callback", AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ACTION, AJAXServlet.PARAMETER_SESSION));
 	    Map<String, String[]> optionalParameters = new HashMap<String, String[]>();
 	    Map<String, String> parameters = this.request.getParameters();
-	    if (null != parameters) {
-	        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-	            if (false == defaultParameters.contains(parameter.getKey())) {
-	                optionalParameters.put(parameter.getKey(), new String[] { parameter.getValue() });
-	            }
+        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+            if (false == defaultParameters.contains(parameter.getKey())) {
+                optionalParameters.put(parameter.getKey(), new String[] { parameter.getValue() });
             }
-	    }
+        }
         return optionalParameters;
 	}
 }

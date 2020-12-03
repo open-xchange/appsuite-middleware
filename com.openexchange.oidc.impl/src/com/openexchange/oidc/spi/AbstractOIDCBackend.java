@@ -488,9 +488,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);
         if (this.getBackendConfig().isAutologinEnabled()) {
-            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, getLoginConfiguration());
-            if (autologinCookie != null) {
-                SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+            Cookie sessionCookie = OIDCTools.loadSessionCookie(request, getLoginConfiguration());
+            if (sessionCookie != null) {
+                SessionUtility.removeCookie(sessionCookie, "", sessionCookie.getDomain(), response);
             }
         }
     }

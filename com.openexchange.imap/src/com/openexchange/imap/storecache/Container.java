@@ -87,7 +87,7 @@ public enum Container {
     private final String id;
     private final Class<? extends IMAPStore> clazz;
 
-    private Container(final String id, final Class<? extends IMAPStore> clazz) {
+    private Container(String id, Class<? extends IMAPStore> clazz) {
         this.id = id;
         this.clazz = clazz;
     }
@@ -123,11 +123,11 @@ public enum Container {
      * @param id The identifier
      * @return The associated container or <code>null</code>
      */
-    public static Container containerFor(final String id) {
+    public static Container containerFor(String id) {
         if (Strings.isEmpty(id)) {
             return null;
         }
-        for (final Container container : values()) {
+        for (Container container : values()) {
             if (id.equalsIgnoreCase(container.id)) {
                 return container;
             }

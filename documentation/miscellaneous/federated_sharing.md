@@ -175,8 +175,11 @@ However, there are a few limitations:
 * It is only possible to subscribe to shares for named guest users, i.e. *anonymous links* cannot be integrated as federated share
 * Only guest users with an email adress matching the user's email address (or an alias) can be integrated
 * It's not possible to subscribe to single file shares, i.e. only shared folders will be appear as federated share
+* Drive data from integrated federated shares won't be available when accessing the server via WebDAV
+* Drive data from integrated federated shares won't be available for Drive synchronization clients
+* No real-time collaboration is possible when editing *remote* documents located in subscribed federated shares
 * Free/busy lookups and conflict checks cannot be performed in subscribed calenders for users/resources from the remote context
 * It is not possible to add *local* resource or group attendees to events created in *remote* calendars of federated shares 
+* Calendars from integrated federated shares won't be available when accessing the server via CalDAV
 * No re-sharing of subscribed shares is possible, since guest users don't have 
 * Depending on the version the remote server is running in *cross-ox* mode, certain features may not be available when interacting with the share
-* No real-time collaboration is possible when editing *remote* documents located in subscribed federated shares

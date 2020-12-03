@@ -88,17 +88,17 @@ public final class IMAPProvider extends MailProvider {
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session) {
+    public MailAccess<?, ?> createNewMailAccess(Session session) {
         return new IMAPAccess(session);
     }
 
     @Override
-    public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) {
+    public MailAccess<?, ?> createNewMailAccess(Session session, int accountId) {
         return new IMAPAccess(session, accountId);
     }
 
     @Override
-    public MailPermission createNewMailPermission(final Session session, final int accountId) {
+    public MailPermission createNewMailPermission(Session session, int accountId) {
         return new ACLPermission();
     }
 

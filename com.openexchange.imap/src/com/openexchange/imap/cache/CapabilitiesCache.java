@@ -88,7 +88,7 @@ public final class CapabilitiesCache {
 
         private final Map<String, String> map;
 
-        CapabilitiesResponse(final ACLExtension aclExtension, final IMAPCapabilities imapCapabilities, final Map<String, String> map) {
+        CapabilitiesResponse(ACLExtension aclExtension, IMAPCapabilities imapCapabilities, Map<String, String> map) {
             super();
             this.aclExtension = aclExtension;
             this.imapCapabilities = imapCapabilities;
@@ -132,11 +132,11 @@ public final class CapabilitiesCache {
 
         private volatile CacheKey key;
 
-        public CapsCacheEntry(final int user) {
+        public CapsCacheEntry(int user) {
             this(null, user);
         }
 
-        public CapsCacheEntry(final CapabilitiesResponse capRes, final int user) {
+        public CapsCacheEntry(CapabilitiesResponse capRes, int user) {
             super();
             this.user = user;
             this.capRes = capRes;
@@ -162,7 +162,7 @@ public final class CapabilitiesCache {
         }
 
         @Override
-        public void setValue(final CapabilitiesResponse value) {
+        public void setValue(CapabilitiesResponse value) {
             capRes = value;
         }
 
@@ -182,7 +182,7 @@ public final class CapabilitiesCache {
      * @return The cached capabilities or <code>null</code>
      * @throws MessagingException If <code>MYRIGHTS</code> command fails
      */
-    public static CapabilitiesResponse getCapabilitiesResponse(final IMAPStore imapStore, final IMAPConfig imapConfig, final Session session, final int accontId) throws MessagingException {
+    public static CapabilitiesResponse getCapabilitiesResponse(IMAPStore imapStore, IMAPConfig imapConfig, Session session, int accontId) throws MessagingException {
         final CapsCacheEntry entry = new CapsCacheEntry(session.getUserId());
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
         mailCache.get(entry);
@@ -262,7 +262,7 @@ public final class CapabilitiesCache {
      * @param session The session providing the session-bound cache
      * @param accontId The account ID
      */
-    public static void removeCachedRights(final int user, final Session session, final int accontId) {
+    public static void removeCachedRights(int user, Session session, int accontId) {
         SessionMailCache.getInstance(session, accontId).remove(new CapsCacheEntry(user));
     }
 

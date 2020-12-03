@@ -885,7 +885,7 @@ public final class ListLsubCache {
         }
     }
 
-    private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session, final boolean ignoreSubscriptions) throws OXException, MessagingException {
+    private static ListLsubCollection getCollection(int accountId, IMAPFolder imapFolder, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
         // Get the associated map
         Cache<Integer, ListLsubCollection> cache = CACHE.getUnchecked(UserAndContext.newInstance(session));
 

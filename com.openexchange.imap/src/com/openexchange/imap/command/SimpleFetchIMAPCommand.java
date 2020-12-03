@@ -207,13 +207,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public SimpleFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
+    public SimpleFetchIMAPCommand setDetermineAttachmentByHeader(boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
     }
 
     @Override
-    protected String getDebugInfo(final int argsIndex) {
+    protected String getDebugInfo(int argsIndex) {
         final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
@@ -245,7 +245,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
@@ -267,7 +267,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     }
 
     @Override
-    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
@@ -361,7 +361,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         return true;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item, boolean examineHasAttachmentUserFlags) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean examineHasAttachmentUserFlags) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -398,9 +398,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException;
+        void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException;
 
-        void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException;
+        void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException;
     }
 
     /*-
@@ -419,56 +419,56 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             .put(MessageHeaders.HDR_FROM, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.addFrom(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                 }
             })
             .put(MessageHeaders.HDR_TO, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.addTo(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                 }
             })
             .put(MessageHeaders.HDR_CC, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.addCc(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                 }
             })
             .put(MessageHeaders.HDR_BCC, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.addBcc(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                 }
             })
             .put(MessageHeaders.HDR_REPLY_TO, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.addReplyTo(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                 }
             })
             .put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.setDispositionNotification(MimeMessageUtility.getAddressHeader(hdr.getValue())[0]);
                 }
             })
             .put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     mailMessage.setSubject(MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.checkNonAscii(hdr.getValue())), true);
                 }
             })
             .put(MessageHeaders.HDR_DATE, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     final MailDateFormat mdf = MimeMessageUtility.getDefaultMailDateFormat();
                     synchronized (mdf) {
                         try {
@@ -482,7 +482,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             .put(MessageHeaders.HDR_IMPORTANCE, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     final String value = hdr.getValue();
                     if (null != value) {
                         mailMessage.setPriority(MimeMessageUtility.parseImportance(value));
@@ -492,7 +492,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             .put(MessageHeaders.HDR_X_PRIORITY, new HeaderHandler() {
 
                 @Override
-                public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
+                public void handle(Header hdr, IDMailMessage mailMessage) throws OXException {
                     if (!mailMessage.containsPriority()) {
                         mailMessage.setPriority(MimeMessageUtility.parsePriority(hdr.getValue()));
                     }
@@ -501,7 +501,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             .build();
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException {
             final InternetHeaders h;
             {
                 final InputStream headerStream;
@@ -523,7 +523,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     h.load(headerStream);
                 }
             }
-            for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
+            for (Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
                 {
@@ -550,8 +550,8 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            for (final Enumeration<Header> e = message.getAllHeaders(); e.hasMoreElements();) {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException {
+            for (Enumeration<Header> e = message.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = e.nextElement();
                 final String name = hdr.getName();
                 {
@@ -588,7 +588,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             final FLAGS flags = (FLAGS) item;
             /*
              * Parse system flags
@@ -623,7 +623,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                  * Mark message to contain user flags
                  */
                 final Set<String> set = new HashSet<String>(userFlags.length);
-                for (final String userFlag : userFlags) {
+                for (String userFlag : userFlags) {
                     if (MailMessage.isColorLabel(userFlag)) {
                         try {
                             colorLabel = MailMessage.getColorLabelIntValue(userFlag);
@@ -656,7 +656,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             final Flags flags = message.getFlags();
             /*
              * Parse system flags
@@ -691,7 +691,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                  * Mark message to contain user flags
                  */
                 final Set<String> set = new HashSet<String>(userFlags.length);
-                for (final String userFlag : userFlags) {
+                for (String userFlag : userFlags) {
                     if (MailMessage.isColorLabel(userFlag)) {
                         try {
                             colorLabel = MailMessage.getColorLabelIntValue(userFlag);
@@ -723,7 +723,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler ENVELOPE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             final ENVELOPE env = (ENVELOPE) item;
             msg.addFrom(env.from);
             msg.addTo(env.to);
@@ -737,7 +737,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             msg.addFrom((InternetAddress[]) message.getFrom());
             msg.addTo((InternetAddress[]) message.getRecipients(RecipientType.TO));
             msg.addCc((InternetAddress[]) message.getRecipients(RecipientType.CC));
@@ -762,12 +762,12 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             msg.setReceivedDate(((INTERNALDATE) item).getDate());
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             msg.setReceivedDate(message.getReceivedDate());
         }
     };
@@ -775,12 +775,12 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             msg.setSize(((RFC822SIZE) item).size);
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             msg.setSize(message.getSize());
         }
     };
@@ -788,7 +788,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
             final StringBuilder sb = new StringBuilder();
             sb.append(bs.type).append('/').append(bs.subtype);
@@ -811,7 +811,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException, OXException {
             String contentType;
             try {
                 contentType = message.getContentType();
@@ -839,14 +839,14 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             final long id = ((UID) item).uid;
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             final long id = ((IMAPFolder) message.getFolder()).getUID(message);
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
@@ -856,13 +856,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             long originalUid = ((X_REAL_UID) item).uid;
             msg.setOriginalUid(originalUid);
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             // Nothing
         }
     };
@@ -870,13 +870,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             String mailbox = ((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox;
             msg.setOriginalFolder(new FullnameArgument(msg.getAccountId(), mailbox));
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             // Nothing
         }
     };
@@ -884,13 +884,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private static final FetchItemHandler SNIPPET_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+        public void handleItem(Item item, IDMailMessage msg, org.slf4j.Logger logger) {
             String textPreview = ((SNIPPET) item).getText();
             msg.setTextPreview(textPreview);
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+        public void handleMessage(Message message, IDMailMessage msg, org.slf4j.Logger logger) throws MessagingException {
             // Nothing
         }
     };
@@ -934,7 +934,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fetchProfile The fetch profile
      * @return The fetch profile with BODYSTRUCTURE item stripped
      */
-    public static final FetchProfile getSafeFetchProfile(final FetchProfile fetchProfile) {
+    public static final FetchProfile getSafeFetchProfile(FetchProfile fetchProfile) {
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             final FetchProfile newFetchProfile = new FetchProfile();
             newFetchProfile.add("Content-Type");
@@ -942,13 +942,13 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 newFetchProfile.add(UIDFolder.FetchProfileItem.UID);
             }
             final javax.mail.FetchProfile.Item[] items = fetchProfile.getItems();
-            for (final javax.mail.FetchProfile.Item item : items) {
+            for (javax.mail.FetchProfile.Item item : items) {
                 if (!FetchProfile.Item.CONTENT_INFO.equals(item)) {
                     newFetchProfile.add(item);
                 }
             }
             final String[] names = fetchProfile.getHeaderNames();
-            for (final String name : names) {
+            for (String name : names) {
                 newFetchProfile.add(name);
             }
             return newFetchProfile;
@@ -964,7 +964,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fetchResponse The <i>FETCH</i> response
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    protected static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);

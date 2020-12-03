@@ -247,7 +247,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
      * @return
      * @throws OXException
      */
-    private Map<String, FolderInfo> getExternalAccountFolders(final IMAPFolder imapFolder) throws OXException {
+    private Map<String, FolderInfo> getExternalAccountFolders(IMAPFolder imapFolder) throws OXException {
         try {
             final Map<String, FolderInfo> results = new HashMap<String, FolderInfo>(8);
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {

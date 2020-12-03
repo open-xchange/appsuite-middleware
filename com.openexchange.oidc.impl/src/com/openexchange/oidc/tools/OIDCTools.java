@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +68,6 @@ import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -92,7 +90,6 @@ import com.openexchange.session.Session;
 import com.openexchange.session.oauth.OAuthTokens;
 import com.openexchange.session.oauth.TokenRefreshConfig;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
@@ -123,8 +120,6 @@ public class OIDCTools {
     public static final String RESUME = "resume";
 
     public static final String STATE = "state";
-
-    public static final String AUTOLOGIN_COOKIE_PREFIX = "open-xchange-oidc-";
 
     public static final String SESSION_COOKIE = "com.openexchange.oidc.SessionCookie";
 
@@ -178,9 +173,9 @@ public class OIDCTools {
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        if (!Strings.isEmpty(deeplink)) {
-            retval += "&" + AJAXUtility.encodeUrl(deeplink.substring(1), true);
-        }
+
+        deeplink = sanitizeDeepLinkFragment(deeplink);
+        retval = retval + deeplink;
         return retval;
     }
 
@@ -279,18 +274,18 @@ public class OIDCTools {
     }
 
     /**
-     * Load the OIDC auto-login cookie with the given {@link HttpServletRequest} informations.
+     * Load the session cookie with the given {@link HttpServletRequest} informations.
      *
      * @param request The {@link HttpServletRequest} with needed information
      * @param loginConfiguration The {@link LoginConfiguration} to get additional information from
-     * @return The auto-login cookie or null
+     * @return The session cookie or null
      * @throws OXException If something fails
      */
-    public static Cookie loadAutologinCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
-        LOG.trace("loadAutologinCookie(HttpServletRequest request: {}, LoginConfiguration loginConfiguration)", request.getRequestURI());
+    public static Cookie loadSessionCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
+        LOG.trace("loadSessionCookie(HttpServletRequest request: {}, LoginConfiguration loginConfiguration)", request.getRequestURI());
         String hash = calculateHash(request, loginConfiguration);
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
+        return cookies.get(LoginServlet.SESSION_PREFIX + hash);
     }
 
     public static String calculateHash(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
@@ -416,20 +411,14 @@ public class OIDCTools {
     /**
      * Load a session from the given {@link Cookie}.
      *
-     * @param oidcAtologinCookie The cookie where the session is stored.
+     * @param sessionCookie The cookie where the session is stored.
      * @param request Used to validate the found session.
      * @return The loaded session or null, if no session could be found or the validation failed.
-     * @throws OXException If an error occurs while filtering, when finding sessions
      */
-    public static Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
-        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
-        Session session = null;
+    public static Session getSessionFromSessionCookie(Cookie sessionCookie, HttpServletRequest request) {
+        LOG.trace("getSessionFromSessionCookie(Cookie sessionCookie: {})", sessionCookie.getValue());
         SessiondService sessiondService = Services.getService(SessiondService.class);
-        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-        if (!sessions.isEmpty()) {
-            session = sessiondService.getSession(sessions.iterator().next());
-        }
-
+        Session session = sessiondService.getSession(sessionCookie.getValue());
         if (session == null) {
             return null;
         }
@@ -607,6 +596,22 @@ public class OIDCTools {
      */
     public static Date expiresInToDate(long expiresIn) {
         return new Date(System.currentTimeMillis() + (expiresIn * 1000));
+    }
+
+    private static final String sanitizeDeepLinkFragment(String uriFragment) {
+        if (uriFragment == null) {
+            return "";
+        }
+
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+            uriFragment = uriFragment.substring(1);
+        }
+
+        if (uriFragment.length() > 0) {
+            uriFragment = "&" + uriFragment;
+        }
+
+        return uriFragment;
     }
 
 }

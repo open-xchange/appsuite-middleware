@@ -89,7 +89,7 @@ public final class UserFlagsCache {
      * @return <code>true</code> if user flags are supported; otherwise <code>false</code>
      * @throws MessagingException If <code>SELECT</code> command fails
      */
-    public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final Session session, final int accountId) throws MessagingException {
+    public static boolean supportsUserFlags(IMAPFolder f, boolean load, Session session, int accountId) throws MessagingException {
         final UserFlagCacheEntry entry = new UserFlagCacheEntry(CHECK_ONCE ? INBOX : f.getFullName());
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
@@ -124,7 +124,7 @@ public final class UserFlagsCache {
      * @param session The session providing the session-bound cache
      * @param accountId The account ID
      */
-    public static void removeUserFlags(final IMAPFolder f, final Session session, final int accountId) {
+    public static void removeUserFlags(IMAPFolder f, Session session, int accountId) {
         SessionMailCache.getInstance(session, accountId).remove(new UserFlagCacheEntry(f.getFullName()));
     }
 
@@ -135,7 +135,7 @@ public final class UserFlagsCache {
      * @param session The session providing the session-bound cache
      * @param accountId The account ID
      */
-    public static void removeUserFlags(final String fullName, final Session session, final int accountId) {
+    public static void removeUserFlags(String fullName, Session session, int accountId) {
         SessionMailCache.getInstance(session, accountId).remove(new UserFlagCacheEntry(fullName));
     }
 
@@ -147,7 +147,7 @@ public final class UserFlagsCache {
 
         private volatile CacheKey key;
 
-        public UserFlagCacheEntry(final String fullname) {
+        public UserFlagCacheEntry(String fullname) {
             super();
             this.fullname = fullname;
         }
@@ -171,7 +171,7 @@ public final class UserFlagsCache {
         }
 
         @Override
-        public void setValue(final Boolean value) {
+        public void setValue(Boolean value) {
             this.value = value;
         }
 

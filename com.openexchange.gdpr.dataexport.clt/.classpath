@@ -11,6 +11,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.13.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.gdpr.dataexport"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.gdpr.dataexport.impl"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.12.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.13.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

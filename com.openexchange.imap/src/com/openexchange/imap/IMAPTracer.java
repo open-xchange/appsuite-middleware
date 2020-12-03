@@ -78,7 +78,7 @@ public final class IMAPTracer {
      *             (or a subclass or implementor thereof)
      * @throws IllegalAccessException If the underlying field is inaccessible
      */
-    public static TracerState enableTrace(final com.sun.mail.iap.Protocol protocol, final OutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    public static TracerState enableTrace(com.sun.mail.iap.Protocol protocol, OutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
         traceInputField.setAccessible(true);
         /*
@@ -128,7 +128,7 @@ public final class IMAPTracer {
      *             (or a subclass or implementor thereof)
      * @throws IllegalAccessException If the underlying field is inaccessible
      */
-    public static void restoreTraceState(final com.sun.mail.iap.Protocol protocol, final TracerState tracerState) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    public static void restoreTraceState(com.sun.mail.iap.Protocol protocol, TracerState tracerState) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
         traceInputField.setAccessible(true);
         /*
@@ -176,7 +176,7 @@ public final class IMAPTracer {
 
         private final java.io.OutputStream out;
 
-        public TracerStateImpl(final boolean trace, final OutputStream out) {
+        public TracerStateImpl(boolean trace, OutputStream out) {
             super();
             this.trace = trace;
             this.out = out;

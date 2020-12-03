@@ -79,9 +79,9 @@ public final class MessageInfo {
      * @param messageIds The message identifiers
      * @return The message numbers
      */
-    public static TIntList toSeqNums(final Collection<MessageInfo> messageIds) {
+    public static TIntList toSeqNums(Collection<MessageInfo> messageIds) {
         final TIntList ret = new TIntArrayList(messageIds.size());
-        for (final MessageInfo messageId : messageIds) {
+        for (MessageInfo messageId : messageIds) {
             ret.add(messageId.messageNumber);
         }
         return ret;
@@ -93,10 +93,10 @@ public final class MessageInfo {
      * @param messageIds The message identifiers
      * @return The message numbers
      */
-    public static int[] toSeqNumsArray(final Collection<MessageInfo> messageIds) {
+    public static int[] toSeqNumsArray(Collection<MessageInfo> messageIds) {
         final int[] ret = new int[messageIds.size()];
         int i = 0;
-        for (final MessageInfo messageId : messageIds) {
+        for (MessageInfo messageId : messageIds) {
             ret[i++] = messageId.messageNumber;
         }
         return ret;
@@ -108,7 +108,7 @@ public final class MessageInfo {
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
-    public static MessageInfo valueOf(final String msgId) {
+    public static MessageInfo valueOf(String msgId) {
         return valueOf(msgId, 0, msgId.length());
     }
 
@@ -118,7 +118,7 @@ public final class MessageInfo {
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
-    public static MessageInfo valueOf(final String msgId, final int off, final int len) {
+    public static MessageInfo valueOf(String msgId, int off, int len) {
         if (com.openexchange.java.Strings.isEmpty(msgId)) {
             return null;
         }
@@ -161,7 +161,7 @@ public final class MessageInfo {
      *
      * @param messageNumber The message number
      */
-    public MessageInfo(final int messageNumber) {
+    public MessageInfo(int messageNumber) {
         super();
         this.messageNumber = messageNumber;
         accountId = -1;
@@ -183,7 +183,7 @@ public final class MessageInfo {
      * @param slen The <code>slen</code> to set
      * @return This message identifier
      */
-    public MessageInfo setSlen(final int slen) {
+    public MessageInfo setSlen(int slen) {
         this.slen = slen;
         return this;
     }
@@ -203,7 +203,7 @@ public final class MessageInfo {
      * @param messageNumber The message number to set
      * @return This message identifier
      */
-    public MessageInfo setMessageNumber(final int messageNumber) {
+    public MessageInfo setMessageNumber(int messageNumber) {
         this.messageNumber = messageNumber;
         return this;
     }
@@ -223,7 +223,7 @@ public final class MessageInfo {
      * @param fullName The full name to set
      * @return This message identifier
      */
-    public MessageInfo setFullName(final String fullName) {
+    public MessageInfo setFullName(String fullName) {
         this.fullName = fullName;
         return this;
     }
@@ -243,7 +243,7 @@ public final class MessageInfo {
      * @param accountId The account identifier to set
      * @return This message identifier
      */
-    public MessageInfo setAccountId(final int accountId) {
+    public MessageInfo setAccountId(int accountId) {
         this.accountId = accountId;
         return this;
     }
@@ -273,7 +273,7 @@ public final class MessageInfo {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

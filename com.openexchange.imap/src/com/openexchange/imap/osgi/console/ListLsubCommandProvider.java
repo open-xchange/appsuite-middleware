@@ -73,7 +73,7 @@ public class ListLsubCommandProvider implements CommandProvider {
         return "imaplistlsub <user-id> <context-id> - Lists the content of the IMAP LIST/LSUB cache for the primary account\n";
     }
     
-    public void _imaplistlsub(final CommandInterpreter ci) {
+    public void _imaplistlsub(CommandInterpreter ci) {
         String sUserId = ci.nextArgument();
         String sContextId = ci.nextArgument();
         

@@ -93,7 +93,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
      * @param seqNums The sequence numbers to fetch
      * @throws MessagingException If initialization fails
      */
-    public BodyFetchIMAPCommand(final IMAPFolder imapFolder, final int seqNum, final String sequenceId, final boolean isRev1) throws MessagingException {
+    public BodyFetchIMAPCommand(IMAPFolder imapFolder, int seqNum, String sequenceId, boolean isRev1) throws MessagingException {
         super(imapFolder);
         if (!isRev1) {
             throw new IllegalArgumentException("IMAP4rev1 is required!");
@@ -117,7 +117,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public BodyFetchIMAPCommand(final IMAPFolder imapFolder, final long uid, final String sequenceId, final boolean isRev1) throws MessagingException {
+    public BodyFetchIMAPCommand(IMAPFolder imapFolder, long uid, String sequenceId, boolean isRev1) throws MessagingException {
         super(imapFolder);
         if (!isRev1) {
             throw new IllegalArgumentException("IMAP4rev1 is required!");
@@ -142,7 +142,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final String arg = args[argsIndex];
         final StringBuilder sb = new StringBuilder(arg.length() + 64);
         if (uid) {
@@ -163,7 +163,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
     }
 
     @Override
-    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */

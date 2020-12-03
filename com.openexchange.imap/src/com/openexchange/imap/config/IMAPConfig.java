@@ -117,7 +117,7 @@ public final class IMAPConfig extends MailConfig {
      *
      * @param accountId The account identifier
      */
-    public IMAPConfig(final int accountId) {
+    public IMAPConfig(int accountId) {
         super();
         this.accountId = accountId;
         params = new NonBlockingHashMap<String, Object>(4);
@@ -145,7 +145,7 @@ public final class IMAPConfig extends MailConfig {
      * @param name The name
      * @param value The value
      */
-    public void setParameter(final String name, final Object value) {
+    public void setParameter(String name, Object value) {
         if (null == value) {
             params.remove(name);
         } else {
@@ -160,7 +160,7 @@ public final class IMAPConfig extends MailConfig {
      * @param clazz The parameter's type
      * @return The value
      */
-    public <V> V getParameter(final String name, final Class<? extends V> clazz) {
+    public <V> V getParameter(String name, Class<? extends V> clazz) {
         return clazz.cast(params.get(name));
     }
 
@@ -215,7 +215,7 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    public void setPort(final int imapPort) {
+    public void setPort(int imapPort) {
         this.imapPort = imapPort;
     }
 
@@ -230,7 +230,7 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    public void setServer(final String imapServer) {
+    public void setServer(String imapServer) {
         this.imapServer = null == imapServer ? null : IDNA.toUnicode(imapServer);
     }
 
@@ -242,7 +242,7 @@ public final class IMAPConfig extends MailConfig {
      * @throws OXException If IMAP capabilities cannot be initialized
      */
     @SuppressWarnings("unchecked")
-    public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
+    public void initializeCapabilities(IMAPStore imapStore, Session session) throws OXException {
         if (imapCapabilities == null) {
             synchronized (this) {
                 this.imapStore = imapStore;
@@ -317,7 +317,7 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    public void setSecure(final boolean secure) {
+    public void setSecure(boolean secure) {
         this.secure = secure;
     }
 
@@ -349,7 +349,7 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final UrlInfo urlInfo) throws OXException {
+    protected void parseServerURL(UrlInfo urlInfo) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.IMAP);
@@ -404,7 +404,7 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    public void setMailProperties(final IMailProperties mailProperties) {
+    public void setMailProperties(IMailProperties mailProperties) {
         this.mailProperties = (IIMAPProperties) mailProperties;
     }
 

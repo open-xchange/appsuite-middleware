@@ -18,7 +18,7 @@ Possible modes are one of
  - `inherit` - Inherit folder from new parent folder, previous permissions from moved folder are dropped
  - `keep` - Keep permissions from moved folder as is, don't change anything
 
-where `keep` is the default for all three properties. Please be aware that when merging two permissions for the same user results in the permissions with more rights to win. E.g. when merging a viewer and and author permission for the same user the author permissions wins.
+where `inherit` is the default for all three properties. Please be aware that when merging two permissions for the same user results in the permissions with more rights to win. E.g. when merging a viewer and and author permission for the same user the author permissions wins.
 
 # Examples
 

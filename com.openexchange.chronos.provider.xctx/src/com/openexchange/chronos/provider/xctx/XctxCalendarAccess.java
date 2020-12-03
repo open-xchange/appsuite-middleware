@@ -56,12 +56,10 @@ import static com.openexchange.chronos.provider.xctx.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.xctx.Constants.PUBLIC_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.TREE_ID;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.osgi.Tools.requireService;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -81,6 +79,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
@@ -98,6 +97,7 @@ import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolde
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -138,6 +138,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
     private final CalendarSession guestSession;
     private final CalendarAccount account;
     private final List<OXException> warnings;
+    private final CalendarParameters parameters;
 
     /**
      * Initializes a new {@link XctxCalendarAccess}.
@@ -146,10 +147,12 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      * @param account The underlying calendar account
      * @param localSession The user's <i>local</i> session associated with the file storage account
      * @param guestSession The <i>remote</i> session of the guest user used to access the contents of the foreign context
+     * @param parameters Additional calendar parameters
      */
-    public XctxCalendarAccess(ServiceLookup services, CalendarAccount account, Session localSession, CalendarSession guestSession) {
+    public XctxCalendarAccess(ServiceLookup services, CalendarAccount account, Session localSession, Session guestSession, CalendarParameters parameters) throws OXException {
         super();
-        this.guestSession = guestSession;
+        this.parameters = parameters;
+        this.guestSession = services.getServiceSafe(CalendarService.class).init(guestSession, prepareRemoteParameters(parameters));
         this.services = services;
         this.localSession = localSession;
         this.account = account;
@@ -226,7 +229,7 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         if (updated) {
             JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
             userConfig.putSafe("internalConfig", internalConfig);
-            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, null);
+            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, parameters);
         }
         /*
          * forward common folder update to remote context
@@ -423,19 +426,11 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
      */
     private FolderServiceDecorator initDecorator() throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
-        Connection connection = optConnection();
-        if (null != connection) {
-            decorator.put(Connection.class.getName(), connection);
-        }
         decorator.setLocale(guestSession.getEntityResolver().getLocale(guestSession.getUserId()));
         decorator.put("altNames", Boolean.TRUE.toString());
         decorator.setTimeZone(TimeZones.UTC);
         decorator.setAllowedContentTypes(Collections.<ContentType> singletonList(CONTENT_TYPE));
         return decorator;
-    }
-
-    private Connection optConnection() {
-        return guestSession.get(PARAMETER_CONNECTION(), Connection.class);
     }
 
     /**
@@ -549,12 +544,21 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
             try {
                 JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
                 userConfig.putSafe("internalConfig", internalConfig);
-                services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, DISTANT_FUTURE, null);
+                services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, DISTANT_FUTURE, parameters);
             } catch (OXException e) {
                 LOG.warn("Error remembering calendar folders in account config", e);
             }
         }
         return calendarFolders;
+    }
+
+    private static CalendarParameters prepareRemoteParameters(CalendarParameters parameters) {
+        if (null == parameters) {
+            return null;
+        }
+        DefaultCalendarParameters remoteParameters = new DefaultCalendarParameters(parameters);
+        remoteParameters.set(CalendarParameters.PARAMETER_CONNECTION(), null);
+        return remoteParameters;
     }
 
 }

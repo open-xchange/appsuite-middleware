@@ -81,7 +81,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
     /**
      * @param imapFolder
      */
-    public SeqNumIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final boolean isSequential) {
+    public SeqNumIMAPCommand(IMAPFolder imapFolder, long[] uids, boolean isSequential) {
         super(imapFolder);
         this.uids = uids == null ? L1 : uids;
         returnDefaultValue = (this.uids.length == 0);
@@ -102,7 +102,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append("UID FETCH ");
         sb.append(args[argsIndex]);
@@ -123,7 +123,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
     }
 
     @Override
-    protected boolean handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(Response response) throws MessagingException {
         if (!(response instanceof FetchResponse)) {
             return false;
         }

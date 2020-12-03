@@ -167,6 +167,7 @@ if [type] == "LogX" {
 }
 ```
 ## Kafka Appender
+
 Since 7.10.5, there is a new appender introduced, namely "Kafka" which can directly write log entries to a Kafka topic in a Kafka cluster. The appender's class name is `com.openexchange.logback.extensions.appenders.KafkaAppender`  and can be configured as follows:
 
 ```xml
@@ -176,6 +177,7 @@ Since 7.10.5, there is a new appender introduced, namely "Kafka" which can direc
     <key>node03</key>
 </appender>
 ```
+
 ### Kafka Configuration
 You should already have a Kafka cluster running and a topic already created. The Kafka configuration is out of the scope of this guide. Please refer to this [article](https://kafka.apache.org/quickstart) for that.
 

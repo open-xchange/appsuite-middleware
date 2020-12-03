@@ -93,8 +93,8 @@ public class SAMLSessionSsoProvider implements SessionSsoProvider {
     @Override
     public boolean skipAutoLoginAttempt(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         LoginConfiguration loginConfiguration = loginConfigLookup.getLoginConfiguration();
-        Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
-        Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, sessiondService);
+        Cookie sessionCookie = SAMLLoginTools.getSessionCookie(httpRequest, loginConfiguration);
+        Session session = SAMLLoginTools.getSessionForSessionCookie(sessionCookie, sessiondService);
         if (session == null) {
             return false;
         }

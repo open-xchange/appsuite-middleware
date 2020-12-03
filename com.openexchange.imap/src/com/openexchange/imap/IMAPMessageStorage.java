@@ -349,7 +349,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 useImapThreaderIfSupported = null;
             }
 
@@ -412,7 +412,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param session The session providing needed user data
      * @throws OXException If initialization fails
      */
-    public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    public IMAPMessageStorage(IMAPStore imapStore, IMAPAccess imapAccess, Session session) throws OXException {
         super(imapStore, imapAccess, session);
         imapFolderStorage = imapAccess.getFolderStorage();
     }
@@ -504,7 +504,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param fullName The full name of the folder to open
      * @throws OXException If opening folder fails
      */
-    protected void openReadOnly(final String fullName) throws OXException {
+    protected void openReadOnly(String fullName) throws OXException {
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
         } catch (MessagingException e) {
@@ -549,20 +549,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] mailFields, final String[] headerNames) throws OXException {
+    public MailMessage[] getMessages(String fullName, String[] mailIds, MailField[] mailFields, String[] headerNames) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
         return getMessagesInternal(fullName, uids2longs(mailIds), mailFields, headerNames);
     }
 
-    private static String extractPlainText(final String content, final String optMimeType) throws OXException {
+    private static String extractPlainText(String content, String optMimeType) throws OXException {
         final TextXtractService textXtractService = Services.getService(TextXtractService.class);
         return textXtractService.extractFrom(Streams.newByteArrayInputStream(content.getBytes(Charsets.UTF_8)), optMimeType);
     }
 
     @Override
-    public String[] getPrimaryContentsLong(final String fullName, final long[] mailIds) throws OXException {
+    public String[] getPrimaryContentsLong(String fullName, long[] mailIds) throws OXException {
         if (!imapConfig.getImapCapabilities().hasIMAP4rev1()) {
             return super.getPrimaryContentsLong(fullName, mailIds);
         }
@@ -594,7 +594,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     // private static final Pattern PATTERN_CRLF = Pattern.compile("(\r?\n)+");
 
-    private String handleBODYSTRUCTURE(final String fullName, final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
+    private String handleBODYSTRUCTURE(String fullName, long mailId, BODYSTRUCTURE bodystructure, String prefix, int partCount, boolean[] mpDetected) throws OXException {
         try {
             final String type = com.openexchange.java.Strings.toLowerCase(bodystructure.type);
             if ("text".equals(type)) {
@@ -714,7 +714,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static String readContent(final byte[] bytes, final String charset, final String encoding) throws IOException {
+    private static String readContent(byte[] bytes, String charset, String encoding) throws IOException {
         if (null == encoding) {
             return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), charset);
         }
@@ -735,7 +735,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param partCount The part count
      * @return The sequence ID
      */
-    private static String getSequenceId(final String prefix, final int partCount) {
+    private static String getSequenceId(String prefix, int partCount) {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
@@ -868,7 +868,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum) throws OXException {
+    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(String fullName, Object array, int len, FetchProfile fetchProfile, boolean isRev1, boolean seqnum) throws OXException {
         final String key = new StringBuilder(16).append(accountId).append(".imap.fetch.modifier").toString();
         final FetchProfile fp = fetchProfile;
         int retry = 0;
@@ -889,10 +889,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if ((nextException instanceof BadCommandException) || (nextException instanceof CommandFailedException)) {
                     if (LOG.isDebugEnabled()) {
                         final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
-                        for (final Item item : fetchProfile.getItems()) {
+                        for (Item item : fetchProfile.getItems()) {
                             sb.append(item.getClass().getSimpleName()).append(',');
                         }
-                        for (final String name : fetchProfile.getHeaderNames()) {
+                        for (String name : fetchProfile.getHeaderNames()) {
                             sb.append(name).append(',');
                         }
                         sb.deleteCharAt(sb.length() - 1);
@@ -916,10 +916,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 if (LOG.isDebugEnabled()) {
                     final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
-                    for (final Item item : fetchProfile.getItems()) {
+                    for (Item item : fetchProfile.getItems()) {
                         sb.append(item.getClass().getSimpleName()).append(',');
                     }
-                    for (final String name : fetchProfile.getHeaderNames()) {
+                    for (String name : fetchProfile.getHeaderNames()) {
                         sb.append(name).append(',');
                     }
                     sb.deleteCharAt(sb.length() - 1);
@@ -940,7 +940,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
+    private TLongObjectHashMap<MailMessage> fetchValidFor(String fullName, Object array, int len, FetchProfile fetchProfile, boolean isRev1, boolean seqnum, boolean byContentType) throws MessagingException, OXException {
         if (null == imapFolder || !imapFolder.checkOpen()) {
             openReadOnly(fullName);
         }
@@ -958,7 +958,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(len), Long.valueOf(time));
-        for (final MailMessage mailMessage : tmp) {
+        for (MailMessage mailMessage : tmp) {
             if (null != mailMessage) {
                 IDMailMessage idmm = (IDMailMessage) mailMessage;
                 map.put(seqnum ? idmm.getSeqnum() : idmm.getUid(), idmm);
@@ -970,7 +970,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @SuppressWarnings("unused")
     @Override
-    public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+    public MailMessage[] getMessagesByMessageID(String... messageIDs) throws OXException {
         try {
             final int length = messageIDs.length;
             int count = 0;
@@ -1007,7 +1007,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private int recursiveMessageIDLookUp(final IMAPFolder parentFolder, final String[] messageIDs, final MailMessage[] retval, final int countArg) throws OXException, MessagingException {
+    private int recursiveMessageIDLookUp(IMAPFolder parentFolder, String[] messageIDs, MailMessage[] retval, int countArg) throws OXException, MessagingException {
         int count = countArg;
         final Folder[] folders = parentFolder.list();
         for (int i = 0; count >= 0 && i < folders.length; i++) {
@@ -1040,7 +1040,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     };
 
     @Override
-    public MailPart getAttachmentLong(final String fullName, final long msgUID, final String sequenceId) throws OXException {
+    public MailPart getAttachmentLong(String fullName, long msgUID, String sequenceId) throws OXException {
         if (msgUID < 0 || null == sequenceId) {
             return null;
         }
@@ -1128,12 +1128,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static boolean isTNEFMimeType(final ContentType contentType) {
+    private static boolean isTNEFMimeType(ContentType contentType) {
         // note that application/ms-tnefx was also observed in the wild
         return contentType != null && (contentType.startsWith("application/ms-tnef") || contentType.startsWith("application/vnd.ms-tnef"));
     }
 
-    private static boolean isUUEncoded(final MailPart part, final ContentType contentType) throws OXException, IOException {
+    private static boolean isUUEncoded(MailPart part, ContentType contentType) throws OXException, IOException {
         if (null == part) {
             return false;
         }
@@ -1144,7 +1144,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
+    public MailPart getImageAttachmentLong(String fullName, long msgUID, String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
             return null;
         }
@@ -1231,7 +1231,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final String SUFFIX = "@" + VersionService.NAME;
 
-    private Part examinePart(final Part part, final String contentId) throws OXException {
+    private Part examinePart(Part part, String contentId) throws OXException {
         try {
             String ct = Strings.toLowerCase(getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part));
 
@@ -1306,7 +1306,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static String getRealFilename(final Part part) throws MessagingException {
+    private static String getRealFilename(Part part) throws MessagingException {
         String fileName;
         try {
             fileName = part.getFileName();
@@ -1334,7 +1334,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static String getContentTypeFilename(final Part part) throws MessagingException {
+    private static String getContentTypeFilename(Part part) throws MessagingException {
         final String hdr = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part);
         if (hdr == null || hdr.length() == 0) {
             return null;
@@ -1347,7 +1347,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static String getFirstHeaderFrom(final String name, final Part part) throws MessagingException {
+    private static String getFirstHeaderFrom(String name, Part part) throws MessagingException {
         return MimeMessageUtility.getHeader(name, null, part);
     }
 
@@ -1723,7 +1723,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     };
 
     @Override
-    public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
+    public MailMessage getMessageLong(String fullName, long msgUID, boolean markSeen) throws OXException {
         try {
             int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
             try {
@@ -1969,7 +1969,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return count;
     }
 
-    private void setSeenFlag(@SuppressWarnings("unused") final String fullName, final MailMessage mail, final IMAPMessage msg) {
+    private void setSeenFlag(@SuppressWarnings("unused") final String fullName, MailMessage mail, IMAPMessage msg) {
         try {
             // Set \Seen fag explicitly although actually fetching content applies \Seen flag automatically,
             // but we cannot know for sure that content will really be fetched. Therefore accept a possibly
@@ -2636,7 +2636,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return list;
     }
 
-    private int[] applyIndexRange(final int[] sortSeqNums, final IndexRange indexRange) {
+    private int[] applyIndexRange(int[] sortSeqNums, IndexRange indexRange) {
         if (indexRange == null) {
             return sortSeqNums;
         }
@@ -2667,7 +2667,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return retval;
     }
 
-    private List<MailMessage> applyIndexRange(final List<MailMessage> mails, final IndexRange indexRange) {
+    private List<MailMessage> applyIndexRange(List<MailMessage> mails, IndexRange indexRange) {
         if (indexRange == null) {
             return mails;
         }
@@ -2693,7 +2693,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return mails.subList(fromIndex, toIndex);
     }
 
-    private MailSortField determineSortFieldForSearch(final String fullName, final MailSortField requestedSortField) throws OXException {
+    private MailSortField determineSortFieldForSearch(String fullName, MailSortField requestedSortField) throws OXException {
         final MailSortField effectiveSortField;
         if (null == requestedSortField) {
             effectiveSortField = MailSortField.RECEIVED_DATE;
@@ -2723,7 +2723,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws MessagingException
      * @throws OXException
      */
-    private MailMessage toMailMessage(final MailAccount mailAccount, final String fullName, final Message message, final int unreadMessages) throws MessagingException, OXException {
+    private MailMessage toMailMessage(MailAccount mailAccount, String fullName, Message message, int unreadMessages) throws MessagingException, OXException {
         final IMAPMessage imapMessage = (IMAPMessage) message;
         final long msgUID = imapFolder.getUID(message);
         imapMessage.setUID(msgUID);
@@ -2864,7 +2864,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailMessage[] getUnreadMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final int limit) throws OXException {
+    public MailMessage[] getUnreadMessages(String fullName, MailSortField sortField, OrderDirection order, MailField[] mailFields, int limit) throws OXException {
         try {
             openReadOnly(fullName);
             MailMessage[] mails;
@@ -2913,7 +2913,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public void deleteMessagesLong(final String fullName, final long[] msgUIDs, final boolean hardDelete) throws OXException {
+    public void deleteMessagesLong(String fullName, long[] msgUIDs, boolean hardDelete) throws OXException {
         try {
             try {
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
@@ -3368,19 +3368,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public long[] copyMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
+    public long[] copyMessagesLong(String sourceFolder, String destFolder, long[] mailIds, boolean fast) throws OXException {
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, false, fast);
     }
 
     @Override
-    public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
+    public long[] moveMessagesLong(String sourceFolder, String destFolder, long[] mailIds, boolean fast) throws OXException {
         if (ROOT_FOLDER_ID.equals(destFolder)) {
             throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
         }
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
     }
 
-    private long[] copyOrMoveMessages(final String sourceFullName, final String destFullName, final long[] mailIds, final boolean move, final boolean fast) throws OXException {
+    private long[] copyOrMoveMessages(String sourceFullName, String destFullName, long[] mailIds, boolean move, boolean fast) throws OXException {
         try {
             if (null == mailIds) {
                 throw IMAPException.create(IMAPException.Code.MISSING_PARAMETER, imapConfig, session, "mailIDs");
@@ -3531,7 +3531,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullName, final long[] tmp) throws MessagingException, OXException, IMAPException {
+    private long[] copyOrMoveByUID(boolean move, boolean fast, String destFullName, long[] tmp) throws MessagingException, OXException, IMAPException {
         final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
         final AbstractIMAPCommand<long[]> command;
         if (supportsMove) {
@@ -3635,7 +3635,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public String[] appendMimeMessages(final String destFullName, final Message[] msgs) throws OXException {
+    public String[] appendMimeMessages(String destFullName, Message[] msgs) throws OXException {
         if (null == msgs) {
             return new String[0];
         }
@@ -3815,7 +3815,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public long[] appendMessagesLong(final String destFullName, final MailMessage[] mailMessages) throws OXException {
+    public long[] appendMessagesLong(String destFullName, MailMessage[] mailMessages) throws OXException {
         if (null == mailMessages) {
             return new long[0];
         }
@@ -3853,7 +3853,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Drop special "x-original-headers" header
                  */
-                for (final MailMessage mail : filterNullElements(mailMessages)) {
+                for (MailMessage mail : filterNullElements(mailMessages)) {
                     mail.removeHeader("x-original-headers");
                 }
                 /*
@@ -4022,7 +4022,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw handleRuntimeException(e);
         } finally {
             if (null != msgs) {
-                for (final Message message : msgs) {
+                for (Message message : msgs) {
                     if (message instanceof MimeCleanUp) {
                         ((MimeCleanUp) message).cleanUp();
                     }
@@ -4057,12 +4057,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
 
     @Override
-    public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, final boolean set) throws OXException {
+    public void updateMessageFlagsLong(String fullName, long[] msgUIDs, int flagsArg, boolean set) throws OXException {
         updateMessageFlagsLong(fullName, msgUIDs, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
     }
 
     @Override
-    public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
+    public void updateMessageFlagsLong(String fullName, long[] msgUIDs, int flagsArg, String[] userFlags, boolean set) throws OXException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
             // Nothing to do
             return;
@@ -4199,12 +4199,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public void updateMessageFlags(final String fullName, final int flagsArg, final boolean set) throws OXException {
+    public void updateMessageFlags(String fullName, int flagsArg, boolean set) throws OXException {
         updateMessageFlags(fullName, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
     }
 
     @Override
-    public void updateMessageFlags(final String fullName, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
+    public void updateMessageFlags(String fullName, int flagsArg, String[] userFlags, boolean set) throws OXException {
         if (null == fullName) {
             // Nothing to do
             return;
@@ -4401,7 +4401,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public void updateMessageColorLabelLong(final String fullName, final long[] msgUIDs, final int colorLabel) throws OXException {
+    public void updateMessageColorLabelLong(String fullName, long[] msgUIDs, int colorLabel) throws OXException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
             // Nothing to do
             return;
@@ -4467,7 +4467,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public void updateMessageColorLabel(final String fullName, final int colorLabel) throws OXException {
+    public void updateMessageColorLabel(String fullName, int colorLabel) throws OXException {
         if (null == fullName) {
             // Nothing to do
             return;
@@ -4533,7 +4533,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage composedMail) throws OXException {
+    public MailMessage saveDraft(String draftFullName, ComposedMailMessage composedMail) throws OXException {
         try {
             /*
              * Message content available?
@@ -4641,14 +4641,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailMessage[] getNewAndModifiedMessages(final String fullName, final MailField[] fields) throws OXException {
+    public MailMessage[] getNewAndModifiedMessages(String fullName, MailField[] fields) throws OXException {
         // TODO: Needs to be thoroughly tested
         return EMPTY_RETVAL;
         // return getChangedMessages(folder, fields, 0);
     }
 
     @Override
-    public MailMessage[] getDeletedMessages(final String fullName, final MailField[] fields) throws OXException {
+    public MailMessage[] getDeletedMessages(String fullName, MailField[] fields) throws OXException {
         // TODO: Needs to be thoroughly tested
         return EMPTY_RETVAL;
         // return getChangedMessages(folder, fields, 1);
@@ -4660,11 +4660,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private void unsetMarker(final OperationKey key) {
+    private void unsetMarker(OperationKey key) {
         OperationKey.unsetMarker(key, session);
     }
 
-    private boolean setMarker(final OperationKey key) throws OXException {
+    private boolean setMarker(OperationKey key) throws OXException {
         final int result = OperationKey.setMarker(key, session);
         if (result < 0) {
             // In use...
@@ -4678,7 +4678,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return result > 0;
     }
 
-    private static boolean noUIDsAssigned(final long[] arr, final int expectedLen) {
+    private static boolean noUIDsAssigned(long[] arr, int expectedLen) {
         final long[] tmp = new long[expectedLen];
         Arrays.fill(tmp, -1L);
         return Arrays.equals(arr, tmp);
@@ -4693,7 +4693,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws MessagingException
      * @throws OXException
      */
-    private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullName) throws MessagingException, OXException {
+    private long[] getDestinationUIDs(long[] msgUIDs, String destFullName) throws MessagingException, OXException {
         /*
          * No COPYUID present in response code. Since UIDs are assigned in strictly ascending order in the mailbox (refer to IMAPv4 rfc3501,
          * section 2.3.1.1), we can discover corresponding UIDs by selecting the destination mailbox and detecting the location of messages
@@ -4746,7 +4746,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return retval;
     }
 
-    private void handleSpamByUID(final long[] msgUIDs, final boolean isSpam, final boolean move, final String fullName, final int desiredMode) throws OXException {
+    private void handleSpamByUID(long[] msgUIDs, boolean isSpam, boolean move, String fullName, int desiredMode) throws OXException {
         /*
          * Check for spam handling
          */
@@ -4822,7 +4822,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return An array of long for each valid {@link AppendUID} element or a zero size array of long if an invalid {@link AppendUID}
      *         element was detected.
      */
-    private static long[] checkAndConvertAppendUID(final AppendUID[] appendUIDs) {
+    private static long[] checkAndConvertAppendUID(AppendUID[] appendUIDs) {
         if (appendUIDs == null || appendUIDs.length == 0) {
             return new long[0];
         }
@@ -4893,7 +4893,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws OXException If mail account cannot be obtained
      */
-    protected MailMessage setAccountInfo(final MailMessage mailMessage) throws OXException {
+    protected MailMessage setAccountInfo(MailMessage mailMessage) throws OXException {
         if (null == mailMessage) {
             return null;
         }
@@ -4910,7 +4910,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
      */
-    protected MailMessage[] setAccountInfo(final MailMessage[] mailMessages) throws OXException {
+    protected MailMessage[] setAccountInfo(MailMessage[] mailMessages) throws OXException {
         return setAccountInfo(mailMessages, -1);
     }
 
@@ -4922,7 +4922,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
      */
-    private MailMessage[] setAccountInfo(final MailMessage[] mailMessages, int numberUnreadMessage) throws OXException {
+    private MailMessage[] setAccountInfo(MailMessage[] mailMessages, int numberUnreadMessage) throws OXException {
         final MailAccount account = getMailAccount();
         final String name = account.getName();
         final int id = account.getId();
@@ -4946,7 +4946,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
      */
-    protected <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col) throws OXException {
+    protected <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(W col) throws OXException {
         return setAccountInfo2(col, getMailAccount());
     }
 
@@ -4956,11 +4956,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      */
-    protected static <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col, MailAccount account) {
+    protected static <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(W col, MailAccount account) {
         final String name = account.getName();
         final int id = account.getId();
-        for (final C mailMessages : col) {
-            for (final MailMessage mailMessage : mailMessages) {
+        for (C mailMessages : col) {
+            for (MailMessage mailMessage : mailMessages) {
                 if (null != mailMessage) {
                     mailMessage.setAccountId(id);
                     mailMessage.setAccountName(name);
@@ -4970,7 +4970,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return col;
     }
 
-    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields) throws OXException {
+    private MailMessage[] convert2Mails(Message[] msgs, MailField[] fields) throws OXException {
         return convert2Mails(msgs, fields, null, false);
     }
 
@@ -4983,11 +4983,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The {@link MailMessage} instances
      * @throws OXException If conversion fails
      */
-    protected MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final boolean includeBody) throws OXException {
+    protected MailMessage[] convert2Mails(Message[] msgs, MailField[] fields, boolean includeBody) throws OXException {
         return convert2Mails(msgs, fields, null, includeBody);
     }
 
-    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws OXException {
+    private MailMessage[] convert2Mails(Message[] msgs, MailField[] fields, String[] headerNames, boolean includeBody) throws OXException {
         return MimeMessageConverter.convertMessages(msgs, fields, headerNames, includeBody, imapConfig);
     }
 
@@ -4999,15 +4999,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws OXException If separator character cannot be return
      * @throws MessagingException If a messaging error occurs
      */
-    protected char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
+    protected char getSeparator(IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry("INBOX", imapFolder).getSeparator();
     }
 
-    private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
+    private ListLsubEntry getLISTEntry(String fullName, IMAPFolder imapFolder) throws OXException, MessagingException {
         return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session, this.ignoreSubscriptions);
     }
 
-    private static boolean isSubfolderOf(final String fullName, final String possibleParent, final char separator) {
+    private static boolean isSubfolderOf(String fullName, String possibleParent, char separator) {
         if (!fullName.startsWith(possibleParent)) {
             return false;
         }
@@ -5023,7 +5023,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      *
      * @param imapFolder The IMAP folder to close
      */
-    protected static void closeSafe(final IMAPFolder imapFolder) {
+    protected static void closeSafe(IMAPFolder imapFolder) {
         if (null != imapFolder) {
             try {
                 imapFolder.close(false);
@@ -5108,7 +5108,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         FetchProfile newFetchProfile = new FetchProfile();
-        for (final Item item : fetchProfile.getItems()) {
+        for (Item item : fetchProfile.getItems()) {
             newFetchProfile.add(item);
         }
         return newFetchProfile;

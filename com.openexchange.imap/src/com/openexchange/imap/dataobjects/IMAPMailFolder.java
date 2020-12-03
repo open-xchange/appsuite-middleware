@@ -109,7 +109,7 @@ public final class IMAPMailFolder extends MailFolder {
 	 *            <code>true</code> to set as non-existent; otherwise
 	 *            <code>false</code>
 	 */
-	public void setNonExistent(final boolean nonExistent) {
+	public void setNonExistent(boolean nonExistent) {
 		this.nonExistent = nonExistent;
 		b_nonExistent = true;
 	}

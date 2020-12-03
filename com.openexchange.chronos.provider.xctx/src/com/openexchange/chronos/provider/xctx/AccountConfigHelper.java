@@ -136,7 +136,7 @@ public class AccountConfigHelper {
      * <p/>
      * Previously remembered folders of this type are purged implicitly, so that the passed collection of folders will effectively replace
      * the last known state for this folder type afterwards.
-     * 
+     *
      * @param calendarFolders The calendar folders to remember
      * @param type The folder type to remember the calendars for
      * @return <code>true</code> if the configuration was effectively changed by this operation, <code>false</code>, otherwise
@@ -202,7 +202,7 @@ public class AccountConfigHelper {
         JSONObject folderConfig = foldersConfig.optJSONObject(folderId);
         if (null == folderConfig) {
             folderConfig = new JSONObject();
-            foldersConfig.putSafe(folderId, foldersConfig);
+            foldersConfig.putSafe(folderId, folderConfig);
         }
         return folderConfig;
     }

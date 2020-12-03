@@ -200,7 +200,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasACL;
     }
 
-    public void setACL(final boolean hasACL) {
+    public void setACL(boolean hasACL) {
         this.hasACL = hasACL;
     }
 
@@ -208,7 +208,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasIMAP4;
     }
 
-    public void setIMAP4(final boolean hasIMAP4) {
+    public void setIMAP4(boolean hasIMAP4) {
         this.hasIMAP4 = hasIMAP4;
     }
 
@@ -216,7 +216,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasIMAP4rev1;
     }
 
-    public void setIMAP4rev1(final boolean hasIMAP4rev1) {
+    public void setIMAP4rev1(boolean hasIMAP4rev1) {
         this.hasIMAP4rev1 = hasIMAP4rev1;
     }
 
@@ -225,7 +225,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasQuota;
     }
 
-    public void setQuota(final boolean hasQuota) {
+    public void setQuota(boolean hasQuota) {
         this.hasQuota = hasQuota;
     }
 
@@ -234,7 +234,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasSort;
     }
 
-    public void setSort(final boolean hasSort) {
+    public void setSort(boolean hasSort) {
         this.hasSort = hasSort;
     }
 
@@ -242,7 +242,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasThreadOrderedSubject;
     }
 
-    public void setThreadOrderedSubject(final boolean hasThreadOrderedSubject) {
+    public void setThreadOrderedSubject(boolean hasThreadOrderedSubject) {
         this.hasThreadOrderedSubject = hasThreadOrderedSubject;
     }
 
@@ -251,7 +251,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasThreadReferences;
     }
 
-    public void setThreadReferences(final boolean hasThreadReferences) {
+    public void setThreadReferences(boolean hasThreadReferences) {
         this.hasThreadReferences = hasThreadReferences;
     }
 
@@ -259,7 +259,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasUIDPlus;
     }
 
-    public void setUIDPlus(final boolean hasUIDPlus) {
+    public void setUIDPlus(boolean hasUIDPlus) {
         this.hasUIDPlus = hasUIDPlus;
     }
 
@@ -268,7 +268,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasSubscription;
     }
 
-    public void setHasSubscription(final boolean hasSubscription) {
+    public void setHasSubscription(boolean hasSubscription) {
         this.hasSubscription = hasSubscription;
     }
 
@@ -276,7 +276,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasNamespace;
     }
 
-    public void setNamespace(final boolean hasNamespace) {
+    public void setNamespace(boolean hasNamespace) {
         this.hasNamespace = hasNamespace;
     }
 
@@ -284,7 +284,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasIdle;
     }
 
-    public void setIdle(final boolean hasIdle) {
+    public void setIdle(boolean hasIdle) {
         this.hasIdle = hasIdle;
     }
 
@@ -292,7 +292,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasChildren;
     }
 
-    public void setChildren(final boolean hasChildren) {
+    public void setChildren(boolean hasChildren) {
         this.hasChildren = hasChildren;
     }
 
@@ -300,7 +300,7 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasSortDisplay;
     }
 
-    public void setSortDisplay(final boolean hasSortDisplay) {
+    public void setSortDisplay(boolean hasSortDisplay) {
         this.hasSortDisplay = hasSortDisplay;
     }
 

@@ -70,7 +70,7 @@ public abstract class Entity2ACL {
 
     private static final ConcurrentMap<String, String> GREETING_CACHE = new ConcurrentHashMap<String, String>(16, 0.9f, 1);
 
-    private static String getGreeting(final IMAPStore imapStore, final IMAPConfig imapConfig) throws MessagingException {
+    private static String getGreeting(IMAPStore imapStore, IMAPConfig imapConfig) throws MessagingException {
         String greeting = GREETING_CACHE.get(imapConfig.getServer());
         if (null == greeting) {
             final String grt = imapStore.getGreeting();
@@ -101,7 +101,7 @@ public abstract class Entity2ACL {
      * @return an instance implementing the {@link Entity2ACL} interface.
      * @throws OXException if the instance can't be created.
      */
-    public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws OXException {
+    public static final Entity2ACL getInstance(IMAPConfig imapConfig) throws OXException {
         if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation
@@ -128,7 +128,7 @@ public abstract class Entity2ACL {
      * @return an instance implementing the {@link Entity2ACL} interface.
      * @throws OXException If a mail error occurs
      */
-    public static final Entity2ACL getInstance(final IMAPStore imapStore, final IMAPConfig imapConfig) throws OXException {
+    public static final Entity2ACL getInstance(IMAPStore imapStore, IMAPConfig imapConfig) throws OXException {
         if (instantiated && MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
             /*
              * Auto-detection is turned off, return configured implementation
@@ -160,7 +160,7 @@ public abstract class Entity2ACL {
      *
      * @param singleton The singleton instance of {@link Entity2ACL}
      */
-    protected final static void setInstance(final Entity2ACL singleton) {
+    protected final static void setInstance(Entity2ACL singleton) {
         Entity2ACL.singleton = singleton;
         instantiated = true;
     }
@@ -182,7 +182,7 @@ public abstract class Entity2ACL {
      * @param userId The user ID
      * @return A newly created {@link UserGroupID} instance reflecting a found user.
      */
-    protected final UserGroupID getUserRetval(final int userId) {
+    protected final UserGroupID getUserRetval(int userId) {
         if (userId < 0) {
             return UserGroupID.NULL;
         }
@@ -210,6 +210,6 @@ public abstract class Entity2ACL {
      *         {@link UserGroupID#NULL} if none found.
      * @throws OXException If user/group search fails
      */
-    public abstract UserGroupID getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws OXException;
+    public abstract UserGroupID getEntityID(String pattern, Context ctx, Entity2ACLArgs args) throws OXException;
 
 }

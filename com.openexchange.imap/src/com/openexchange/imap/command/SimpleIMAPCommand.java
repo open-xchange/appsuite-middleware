@@ -70,7 +70,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * @param imapFolder The IMAP folder
      * @param command The command to execute
      */
-    public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command) {
+    public SimpleIMAPCommand(IMAPFolder imapFolder, String command) {
         super(imapFolder);
         this.command = command;
         args = ARGS_EMPTY;
@@ -83,7 +83,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * @param command The command to execute
      * @param uids The UIDs
      */
-    public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids) {
+    public SimpleIMAPCommand(IMAPFolder imapFolder, String command, long[] uids) {
         super(imapFolder);
         if (uids == null) {
             returnDefaultValue = true;
@@ -103,7 +103,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append(command);
         if (!java.util.Arrays.equals(ARGS_EMPTY, args)) {
@@ -123,7 +123,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected boolean handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(Response response) throws MessagingException {
         // Nothing to do
         return false;
     }

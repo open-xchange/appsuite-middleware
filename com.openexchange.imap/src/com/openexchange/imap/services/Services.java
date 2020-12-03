@@ -74,7 +74,7 @@ public final class Services {
      *
      * @param serviceLookup The service lookup or <code>null</code>
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
         REF.set(serviceLookup);
     }
 
@@ -94,7 +94,7 @@ public final class Services {
      * @return The service
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+    public static <S extends Object> S getService(Class<? extends S> clazz) {
         final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imap\" not started?");
@@ -111,7 +111,7 @@ public final class Services {
      * @throws IllegalStateException If an error occurs while returning the demanded service
      * @throws OXException In case the service is missing
      */
-    public static <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+    public static <S extends Object> S getServiceSafe(Class<? extends S> clazz) throws OXException {
         final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imap\" not started?");
@@ -125,7 +125,7 @@ public final class Services {
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+    public static <S extends Object> S optService(Class<? extends S> clazz) {
         ServiceLookup serviceLookup = REF.get();
         return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }

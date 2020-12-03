@@ -109,7 +109,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         final MessagingException error;
         final long stamp;
 
-        FailFastError(final MessagingException e) {
+        FailFastError(MessagingException e) {
             super();
             this.error = e;
             this.stamp = System.currentTimeMillis();
@@ -139,7 +139,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 failFastTimeout = null;
             }
 
@@ -214,7 +214,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param session The session providing needed user data
      * @throws OXException If context lading fails
      */
-    protected IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    protected IMAPFolderWorker(IMAPStore imapStore, IMAPAccess imapAccess, Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
@@ -311,7 +311,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      *
      * @param modifiedFullName The full name of the folder which has been modified
      */
-    public void notifyIMAPFolderModification(final String modifiedFullName) {
+    public void notifyIMAPFolderModification(String modifiedFullName) {
         if ((null == imapFolder) || !modifiedFullName.equals(imapFolder.getFullName())) {
             /*
              * Modified folder did not affect remembered IMAP folder
@@ -332,7 +332,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      *
      * @param modifiedFullNames The full names of the folders which have been modified
      */
-    public void notifyIMAPFolderModification(final Set<String> modifiedFullNames) {
+    public void notifyIMAPFolderModification(Set<String> modifiedFullNames) {
         if ((null == imapFolder) || !modifiedFullNames.contains(imapFolder.getFullName())) {
             /*
              * Modified folders did not affect remembered IMAP folder
@@ -351,7 +351,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      *
      * @param folder The IMAP folder to add
      */
-    protected void addOpenedFolder(final IMAPFolder folder) {
+    protected void addOpenedFolder(IMAPFolder folder) {
         if (null == folder) {
             return;
         }
@@ -378,7 +378,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     private void closeOtherFolders() {
-        for (final IMAPFolder f : otherFolders) {
+        for (IMAPFolder f : otherFolders) {
             try {
                 f.close(false);
             } catch (Exception e) {
@@ -425,7 +425,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final String fullName, final int desiredMode) throws MessagingException, OXException {
+    protected final IMAPFolder setAndOpenFolder(String fullName, int desiredMode) throws MessagingException, OXException {
         return setAndOpenFolder(null, fullName, desiredMode);
     }
 
@@ -441,7 +441,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If user does not hold sufficient rights to open the IMAP folder in desired mode
      */
-    protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullName, final int desiredMode) throws MessagingException, OXException {
+    protected final IMAPFolder setAndOpenFolder(IMAPFolder imapFolder, String fullName, int desiredMode) throws MessagingException, OXException {
         if (null == fullName) {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
@@ -597,7 +597,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param e The runtime exception to handle
      * @return An appropriate {@link OXException}
      */
-    protected OXException handleRuntimeException(final RuntimeException e) {
+    protected OXException handleRuntimeException(RuntimeException e) {
         if (e instanceof ListLsubRuntimeException) {
             ListLsubCache.clearCache(accountId, session);
             return MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
@@ -610,7 +610,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      *
      * @param imapFolder The IMAP folder
      */
-    public static void clearCache(final IMAPFolder imapFolder) {
+    public static void clearCache(IMAPFolder imapFolder) {
         if (null == imapFolder) {
             return;
         }
@@ -618,7 +618,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     /** Safely clears the cache */
-    protected static void clearCacheSafe(final IMAPFolder imapFolder) {
+    protected static void clearCacheSafe(IMAPFolder imapFolder) {
         try {
             clearCache(imapFolder);
         } catch (Exception e) {

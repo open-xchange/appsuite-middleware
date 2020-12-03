@@ -201,7 +201,7 @@ public final class IMAPConversationWorker {
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 useImapThreaderIfSupported = null;
             }
 
@@ -254,7 +254,7 @@ public final class IMAPConversationWorker {
      * @return The message conversations
      * @throws OXException If message conversations cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, @SuppressWarnings("unused") final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, @SuppressWarnings("unused") final boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -309,7 +309,7 @@ public final class IMAPConversationWorker {
 
     private static final MailFields FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
 
-    private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
+    private List<List<MailMessage>> doReferenceOnlyThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
         boolean useSearchTerm = searchTerm != null;
         final MailFields usedFields = new MailFields(mailFields);
         // add necessary fields for searchTerm
@@ -421,7 +421,7 @@ public final class IMAPConversationWorker {
                     // Filter messages already contained in conversations
                     {
                         Set<String> allMessageIds = new HashSet<>(conversations.size());
-                        for (final Conversation conversation : conversations) {
+                        for (Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
                         for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
@@ -450,7 +450,7 @@ public final class IMAPConversationWorker {
         MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
         final List<List<MailMessage>> list = new ArrayList<>(conversations.size());
-        for (final Conversation conversation : conversations) {
+        for (Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
         conversations = null;
@@ -778,7 +778,7 @@ public final class IMAPConversationWorker {
                     // Filter messages already contained in conversations
                     {
                         Set<String> allMessageIds = new HashSet<>(conversations.size());
-                        for (final Conversation conversation : conversations) {
+                        for (Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
                         for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
@@ -802,7 +802,7 @@ public final class IMAPConversationWorker {
             final MailMessageComparator threadComparator = COMPARATOR_DESC;
             // Sort
             list = new LinkedList<>();
-            for (final Conversation conversation : conversations) {
+            for (Conversation conversation : conversations) {
                 list.add(conversation.getMessages(threadComparator));
             }
             conversations = null;
@@ -896,7 +896,7 @@ public final class IMAPConversationWorker {
         return list;
     }
 
-    private String getSortRange(int lookAhead, final int messageCount, final OrderDirection order) {
+    private String getSortRange(int lookAhead, int messageCount, OrderDirection order) {
         final String sortRange;
         if (lookAhead <= 0) {
             sortRange = "ALL";
@@ -910,12 +910,12 @@ public final class IMAPConversationWorker {
         return sortRange;
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String fullName, final Locale locale) {
+    private Comparator<List<MailMessage>> getListComparator(MailSortField sortField, OrderDirection order, String fullName, Locale locale) {
         final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(sortField, order, locale, imapFolderStorage.getSession(), imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
-            public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+            public int compare(List<MailMessage> o1, List<MailMessage> o2) {
                 MailMessage msg1 = lookUpFirstBelongingToFolder(fullName, o1);
                 MailMessage msg2 = lookUpFirstBelongingToFolder(fullName, o2);
 
@@ -1147,7 +1147,7 @@ public final class IMAPConversationWorker {
         return mailThreads;
     }
 
-    private Comparator<MailThread> getThreadComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
+    private Comparator<MailThread> getThreadComparator(MailSortField sortField, OrderDirection order, Locale locale) {
         final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(sortField, order, locale, imapFolderStorage.getSession(), imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
         Comparator<MailThread> threadComparator = new Comparator<MailThread>() {
 
@@ -1177,7 +1177,7 @@ public final class IMAPConversationWorker {
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
-    public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
+    public MailMessage[] getThreadSortedMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         try {
             imapMessageStorage.openReadOnly(fullName);
             if (0 >= imapMessageStorage.getImapFolder().getMessageCount()) {
@@ -1243,7 +1243,7 @@ public final class IMAPConversationWorker {
             }
             final List<MessageInfo> messageIds = ThreadSortUtil.fromThreadResponse(threadList);
             final TIntObjectMap<MessageInfo> seqNum2MessageId = new TIntObjectHashMap<>(messageIds.size());
-            for (final MessageInfo messageId : messageIds) {
+            for (MessageInfo messageId : messageIds) {
                 seqNum2MessageId.put(messageId.getMessageNumber(), messageId);
             }
             /*
@@ -1268,7 +1268,7 @@ public final class IMAPConversationWorker {
                     messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
 
                         @Override
-                        public boolean execute(final long seqNum, final MailMessage m) {
+                        public boolean execute(long seqNum, MailMessage m) {
                             mapping.put(seqNum2MessageId.get((int) seqNum), m);
                             return true;
                         }
@@ -1285,7 +1285,7 @@ public final class IMAPConversationWorker {
                  */
                 List<MailMessage> flatList = new LinkedList<>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    for (final MailMessage mail : flatList) {
+                    for (MailMessage mail : flatList) {
                         imapMessageStorage.setAccountInfo(mail);
                     }
                 }
@@ -1377,7 +1377,7 @@ public final class IMAPConversationWorker {
         }
     }
 
-    private static int applyThreadLevel(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
+    private static int applyThreadLevel(List<ThreadSortNode> threadList, int level, Message[] msgs, int index) {
         if (null == threadList) {
             return index;
         }

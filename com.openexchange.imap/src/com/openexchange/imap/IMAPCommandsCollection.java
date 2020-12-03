@@ -199,7 +199,7 @@ public final class IMAPCommandsCollection {
 
         private final Set<String> set;
 
-        Capabilities(final Collection<String> col) {
+        Capabilities(Collection<String> col) {
             super();
             set = java.util.Collections.unmodifiableSet(new HashSet<String>(col));
         }
@@ -207,7 +207,7 @@ public final class IMAPCommandsCollection {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder(set.size() * 8);
-            for (final String cap : set) {
+            for (String cap : set) {
                 sb.append(' ').append(cap);
             }
             sb.deleteCharAt(0);
@@ -233,11 +233,11 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, String> getCapabilities(final IMAPFolder imapFolder) throws MessagingException {
+    public static Map<String, String> getCapabilities(IMAPFolder imapFolder) throws MessagingException {
         return ((Map<String, String>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 return java.util.Collections.unmodifiableMap(new HashMap<String, String>(p.getCapabilities()));
             }
         }));
@@ -251,7 +251,7 @@ public final class IMAPCommandsCollection {
      * @return The ACL
      * @throws MessagingException If ACL cannot be returned
      */
-    public static ACL[] getACL(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+    public static ACL[] getACL(String fullName, IMAPFolder imapFolder) throws MessagingException {
         return ((ACL[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -270,7 +270,7 @@ public final class IMAPCommandsCollection {
      * @return The available subfolders
      * @throws MessagingException If subfolders cannot be returned
      */
-    public static ListInfo[] listSubfolders(final String fullName, final char separator, IMAPFolder imapFolder) throws MessagingException {
+    public static ListInfo[] listSubfolders(String fullName, char separator, IMAPFolder imapFolder) throws MessagingException {
         ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -290,7 +290,7 @@ public final class IMAPCommandsCollection {
      * @return The available subfolders
      * @throws MessagingException If subfolders cannot be returned
      */
-    public static ListInfo[] listAllSubfolders(final String fullName, final char separator, IMAPFolder imapFolder) throws MessagingException {
+    public static ListInfo[] listAllSubfolders(String fullName, char separator, IMAPFolder imapFolder) throws MessagingException {
         ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -310,7 +310,7 @@ public final class IMAPCommandsCollection {
      * @return The LSUB entries
      * @throws MessagingException If LSUB entries cannot be returned
      */
-    public static ListInfo[] listLSUBSubfolders(final String fullName, final char separator, IMAPFolder imapFolder) throws MessagingException {
+    public static ListInfo[] listLSUBSubfolders(String fullName, char separator, IMAPFolder imapFolder) throws MessagingException {
         ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -329,7 +329,7 @@ public final class IMAPCommandsCollection {
      * @return The LIST info or <code>null</code> (if no such mailbox exists)
      * @throws MessagingException If LIST info cannot be returned
      */
-    public static ListInfo getListInfo(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+    public static ListInfo getListInfo(String fullName, IMAPFolder imapFolder) throws MessagingException {
         ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -351,7 +351,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if existing; otherwise <code>false</code>
      * @throws MessagingException If exists status cannot be returned
      */
-    public static boolean exists(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+    public static boolean exists(String fullName, IMAPFolder imapFolder) throws MessagingException {
         ListInfo listInfo = getListInfo(fullName, imapFolder);
         return listInfo != null && fullName.equals(listInfo.name);
     }
@@ -380,11 +380,11 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if IMAP root folder allows subfolder creation; otherwise <code>false</code>
      * @throws MessagingException If checking IMAP root folder for subfolder creation fails
      */
-    public static Boolean canCreateSubfolder(final DefaultFolder rootFolder, final boolean namespacePerUser) throws MessagingException {
+    public static Boolean canCreateSubfolder(DefaultFolder rootFolder, boolean namespacePerUser) throws MessagingException {
         return ((Boolean) rootFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 // Ensure a unique name is used to probe with
                 String fname = getRandomProbe();
 
@@ -486,11 +486,11 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if IMAP server supports specified folder type; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static boolean supportsFolderType(final IMAPFolder imapFolder, final int type, final String fullnamePrefix, final char defaultSeparator) throws MessagingException {
+    public static boolean supportsFolderType(IMAPFolder imapFolder, int type, String fullnamePrefix, char defaultSeparator) throws MessagingException {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String fullName;
                 if (null == fullnamePrefix || fullnamePrefix.length() == 0) {
                     fullName = Long.toString(System.currentTimeMillis());
@@ -548,11 +548,11 @@ public final class IMAPCommandsCollection {
      * @return The separator character
      * @throws MessagingException If a messaging error occurs
      */
-    public static char getSeparator(final IMAPFolder imapFolder, final char defaultSeparator) throws MessagingException {
+    public static char getSeparator(IMAPFolder imapFolder, char defaultSeparator) throws MessagingException {
         return ((Character) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 return Character.valueOf(getSeparator(p, defaultSeparator));
             }
         }))).charValue();
@@ -579,7 +579,7 @@ public final class IMAPCommandsCollection {
      * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getStatus(final IMAPFolder imapFolder) throws MessagingException {
+    public static int[] getStatus(IMAPFolder imapFolder) throws MessagingException {
         return getStatus(imapFolder.getFullName(), imapFolder);
     }
 
@@ -591,11 +591,11 @@ public final class IMAPCommandsCollection {
      * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getStatus(final String fullName, final IMAPFolder imapFolder) throws MessagingException {
+    public static int[] getStatus(String fullName, IMAPFolder imapFolder) throws MessagingException {
         return (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
@@ -669,11 +669,11 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If determining counts fails
      */
     @SuppressWarnings("unchecked")
-    public static List<ACL> getAcl(final String fullName, final IMAPFolder imapFolder, final boolean checkCapabilities) throws MessagingException {
+    public static List<ACL> getAcl(String fullName, IMAPFolder imapFolder, boolean checkCapabilities) throws MessagingException {
         return (List<ACL>) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (checkCapabilities && !protocol.hasCapability("ACL")) {
                     throw new com.sun.mail.iap.BadCommandException("ACL not supported");
                 }
@@ -734,11 +734,11 @@ public final class IMAPCommandsCollection {
      * @return The MYRIGHTS
      * @throws MessagingException If determining counts fails
      */
-    public static Rights getMyRights(final String fullName, final IMAPFolder imapFolder, final boolean checkCapabilities) throws MessagingException {
+    public static Rights getMyRights(String fullName, IMAPFolder imapFolder, boolean checkCapabilities) throws MessagingException {
         return (Rights) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (checkCapabilities && !protocol.hasCapability("ACL")) {
                     throw new com.sun.mail.iap.BadCommandException("ACL not supported");
                 }
@@ -791,7 +791,7 @@ public final class IMAPCommandsCollection {
      * @return The unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getUnread(final IMAPFolder imapFolder) throws MessagingException {
+    public static int getUnread(IMAPFolder imapFolder) throws MessagingException {
         return getUnread(imapFolder, false);
     }
 
@@ -802,11 +802,11 @@ public final class IMAPCommandsCollection {
      * @return The unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getUnread(final IMAPFolder imapFolder, final boolean ignoreDeleted) throws MessagingException {
+    public static int getUnread(IMAPFolder imapFolder, boolean ignoreDeleted) throws MessagingException {
         return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 /*
                  * If ignoreDeleted is true, perform via "SEARCH UNSEEN NOT DELETED" command
                  */
@@ -912,12 +912,12 @@ public final class IMAPCommandsCollection {
      * @return The recent message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getRecent(final IMAPStore imapStore, final String fullName) throws MessagingException {
+    public static int getRecent(IMAPStore imapStore, String fullName) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
@@ -978,12 +978,12 @@ public final class IMAPCommandsCollection {
      * @return The total message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getTotal(final IMAPStore imapStore, final String fullName) throws MessagingException {
+    public static int getTotal(IMAPStore imapStore, String fullName) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
@@ -1043,11 +1043,11 @@ public final class IMAPCommandsCollection {
      * @return The total/unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getTotalAndUnread(final IMAPFolder imapFolder) throws MessagingException {
+    public static int[] getTotalAndUnread(IMAPFolder imapFolder) throws MessagingException {
         return ((int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
@@ -1104,7 +1104,7 @@ public final class IMAPCommandsCollection {
      * @return The total/unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName, final boolean excludeDeleted) throws MessagingException {
+    public static int[] getTotalAndUnread(IMAPStore imapStore, String fullName, boolean excludeDeleted) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         return excludeDeleted ? getTotalAndUnreadBySearch(defaultFolder, fullName) : getTotalAndUnreadByStatus(defaultFolder, fullName);
     }
@@ -1113,7 +1113,7 @@ public final class IMAPCommandsCollection {
         return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
                     /*
                      * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
@@ -1163,11 +1163,11 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, final String fullName) throws MessagingException{
+    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, String fullName) throws MessagingException{
        return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 Integer total = null;
                 {
                     // Encode the mbox as per RFC2060
@@ -1212,7 +1212,7 @@ public final class IMAPCommandsCollection {
                 return new int[] { null == total ? 0 : total.intValue(), unread };
             }
 
-            private int handleSearchResponses(final Response[] r, final IMAPProtocol protocol, String command) throws ProtocolException {
+            private int handleSearchResponses(Response[] r, IMAPProtocol protocol, String command) throws ProtocolException {
                 int result = 0;
                 Response response = r[r.length - 1];
                 if (response.isOK()) {
@@ -1262,7 +1262,7 @@ public final class IMAPCommandsCollection {
      *         <code>1</code>) and unread (index <code>2</code>) messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    protected static int[] parseStatusResponse(final Response statusResponse) throws ParsingException {
+    protected static int[] parseStatusResponse(Response statusResponse) throws ParsingException {
         if (null == statusResponse) {
             throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
         }
@@ -1322,7 +1322,7 @@ public final class IMAPCommandsCollection {
      * @return The  number of total messages
      * @throws ParsingException If parsing STATUS response fails
      */
-    protected static int[] parseStatusResponse(final Response statusResponse, final String... counterTypes) throws ParsingException {
+    protected static int[] parseStatusResponse(Response statusResponse, String... counterTypes) throws ParsingException {
         if (null == counterTypes || counterTypes.length == 0) {
             return new int[0];
         }
@@ -1372,7 +1372,7 @@ public final class IMAPCommandsCollection {
         return arr;
     }
 
-    private static int find(final String elem, final String[] arr) {
+    private static int find(String elem, String[] arr) {
         for (int i = 0; i < arr.length; i++) {
             if (arr[i].equals(elem)) {
                 return i;
@@ -1392,11 +1392,11 @@ public final class IMAPCommandsCollection {
      * @return The quotas for the quota-root associated with given IMAP folder
      * @throws MessagingException If determining the quotas fails
      */
-    public static Quota[] getQuotaRoot(final IMAPFolder imapFolder) throws MessagingException {
+    public static Quota[] getQuotaRoot(IMAPFolder imapFolder) throws MessagingException {
         return (Quota[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 /*
                  * Encode the mbox as per RFC2060
                  */
@@ -1465,7 +1465,7 @@ public final class IMAPCommandsCollection {
      * @return The parsed instance of {@link Quota}
      * @throws ParsingException If parsing QUOTA response fails
      */
-    protected static Quota parseQuota(final IMAPResponse r) throws ParsingException {
+    protected static Quota parseQuota(IMAPResponse r) throws ParsingException {
         final String quotaRoot = r.readAtomString();
         final Quota q = new Quota(quotaRoot);
         r.skipSpaces();
@@ -1516,12 +1516,12 @@ public final class IMAPCommandsCollection {
      * existence of said folder. They even demonstrate a case in which it might indeed be valid to be subscribed to a folder that does not
      * appear to exist at a given moment.)
      */
-    public static void forceSetSubscribed(final Store store, final String folder, final boolean subscribe) {
+    public static void forceSetSubscribed(Store store, String folder, boolean subscribe) {
         try {
             ((IMAPFolder) store.getDefaultFolder()).doCommandIgnoreFailure(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol p) {
+                public Object doCommand(IMAPProtocol p) {
                     final Argument args = ImapUtility.encodeFolderName(folder, p);
                     performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args, Optional.empty(), true);
                     return null;
@@ -1547,12 +1547,12 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if folder is subscribed; otherwise <code>false</code>
      * @throws MessagingException If checking folder subscription fails
      */
-    public static boolean isSubscribed(final String fullName, final char separator, final boolean isNamespace, final IMAPFolder defaultFolder) throws MessagingException {
+    public static boolean isSubscribed(String fullName, char separator, boolean isNamespace, IMAPFolder defaultFolder) throws MessagingException {
         final String lfolder = ((isNamespace || (fullName.length() == 0)) && (separator != '\0')) ? fullName + separator : fullName;
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String command = new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString();
                 Response[] r = performCommand(p, command);
                 Response response = r[r.length - 1];
@@ -1573,7 +1573,7 @@ public final class IMAPCommandsCollection {
                 return Boolean.FALSE;
             }
 
-            private int parseIMAPResponse(final IMAPResponse ir) throws ParsingException {
+            private int parseIMAPResponse(IMAPResponse ir) throws ParsingException {
                 if (ir.keyEquals(COMMAND_LSUB)) {
                     final ListInfo li = new ListInfo(ir);
                     if (li.name.equals(fullName)) {
@@ -1585,12 +1585,12 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
-    public static void renameFolder(final IMAPFolder folder, final char separator, final IMAPFolder renameTo) throws MessagingException {
+    public static void renameFolder(IMAPFolder folder, char separator, IMAPFolder renameTo) throws MessagingException {
         final String renameFullname = renameTo.getFullName();
         final Boolean ret = (Boolean) folder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 if (renameTo.getStore() != folder.getStore()) {
                     throw new ProtocolException("Can't rename across Stores");
                 }
@@ -1640,19 +1640,19 @@ public final class IMAPCommandsCollection {
         tmp.triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
-    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {
+    public static void createFolder(IMAPFolder newFolder, char separator, int type) throws MessagingException {
         createFolder(newFolder, separator, type, true);
     }
 
-    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType) throws MessagingException {
+    public static void createFolder(IMAPFolder newFolder, char separator, int type, boolean errorOnUnsupportedType) throws MessagingException {
         createFolder(newFolder, separator, type, errorOnUnsupportedType, null);
     }
 
-    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType, final Collection<String> specialUses) throws MessagingException {
+    public static void createFolder(IMAPFolder newFolder, char separator, int type, boolean errorOnUnsupportedType, Collection<String> specialUses) throws MessagingException {
         final Boolean ret = (Boolean) newFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 final String fullName = newFolder.getFullName();
                 // Encode the mbox as per RFC2060
                 final String mbox;
@@ -1730,7 +1730,7 @@ public final class IMAPCommandsCollection {
      * @param specialUses The SPECIAL-USE flags to apply; e.g. <code>"\Draft"</code>, <code>"\Sent"</code>, <code>"\Junk"</code>, or <code>"\Trash"</code>
      * @throws MessagingException If operation fails
      */
-    public static void setSpecialUses(final IMAPFolder imapFolder, final Collection<String> specialUses) throws MessagingException {
+    public static void setSpecialUses(IMAPFolder imapFolder, Collection<String> specialUses) throws MessagingException {
         if (null == specialUses || specialUses.isEmpty()) {
             return;
         }
@@ -1817,7 +1817,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if color could be set successfully; otherwise <code>false</code>
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static void clearAndSetColorLabelSafely(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException, OXException {
+    public static void clearAndSetColorLabelSafely(IMAPFolder imapFolder, long[] msgUIDs, String colorLabelFlag) throws MessagingException, OXException {
         // Only set colors allowed in ALL_COLOR_LABELS
         if (!MailMessage.isValidColorLabel(colorLabelFlag)) {
             throw IMAPException.create(IMAPException.Code.FLAG_FAILED, colorLabelFlag, "Unknown color label.");
@@ -1838,7 +1838,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    private static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
+    private static boolean clearAllColorLabels(IMAPFolder imapFolder, long[] msgUIDs) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1849,7 +1849,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
@@ -1897,7 +1897,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    private static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
+    private static boolean setColorLabel(IMAPFolder imapFolder, long[] msgUIDs, String colorLabelFlag) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1908,7 +1908,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
@@ -1955,7 +1955,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static boolean setUserFlags(final IMAPFolder imapFolder, final long[] msgUIDs, final String[] flags, final boolean set) throws MessagingException {
+    public static boolean setUserFlags(IMAPFolder imapFolder, long[] msgUIDs, String[] flags, boolean set) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1966,7 +1966,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
@@ -2005,7 +2005,7 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
-    static String userFlags2String(final String[] flags) {
+    static String userFlags2String(String[] flags) {
         final StringBuilder sb = new StringBuilder(64);
         boolean first = true;
         for (String flag : flags) {
@@ -2028,12 +2028,12 @@ public final class IMAPCommandsCollection {
      *
      * @param f The IMAP folder providing the connected store
      */
-    public static void forceCloseCommand(final IMAPFolder f) {
+    public static void forceCloseCommand(IMAPFolder f) {
         try {
             f.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     final Response[] r = performCommand(protocol, COMMAND_CLOSE, true);
                     /*
                      * Grab last response that should indicate an OK
@@ -2057,12 +2057,12 @@ public final class IMAPCommandsCollection {
      *
      * @param f The IMAP folder providing the connected store
      */
-    public static void forceNoopCommand(final IMAPFolder f) {
+    public static void forceNoopCommand(IMAPFolder f) {
         try {
             f.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     final Response[] r = performCommand(protocol, COMMAND_NOOP, true);
                     /*
                      * Grab last response that should indicate an OK
@@ -2083,12 +2083,12 @@ public final class IMAPCommandsCollection {
      * @param f The IMAP folder
      * @param clientIP The client IP address
      */
-    public static void propagateClientIP(final IMAPFolder f, final String clientIP) {
+    public static void propagateClientIP(IMAPFolder f, String clientIP) {
         try {
             f.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     final Response[] r = performCommand(protocol, new StringBuilder(COMMAND_NOOP).append(' ').append(clientIP).toString());
                     /*
                      * Grab last response that should indicate an OK
@@ -2178,7 +2178,7 @@ public final class IMAPCommandsCollection {
      * @return An array of <code>int</code> representing sorted messages' sequence numbers
      * @throws MessagingException
      */
-    public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit) throws MessagingException {
+    public static int[] getServerSortList(IMAPFolder folder, String sortCrit) throws MessagingException {
         return getServerSortList(folder, sortCrit, RANGE_ALL);
     }
 
@@ -2194,7 +2194,7 @@ public final class IMAPCommandsCollection {
      * @return An array of <code>int</code> representing sorted messages' sequence numbers
      * @throws MessagingException If IMAP <i>SORT</i> command fails
      */
-    public static int[] getServerSortList(final IMAPFolder imapFolder, final String sortCrit, final String[] mdat) throws MessagingException {
+    public static int[] getServerSortList(IMAPFolder imapFolder, String sortCrit, String[] mdat) throws MessagingException {
         final String numArgument;
         if (mdat == null) {
             numArgument = RANGE_ALL[0];
@@ -2287,12 +2287,12 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo, final Session session, IMAPConfig imapConfig) throws MessagingException {
+    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, boolean ignoreDeleted, IMAPServerInfo serverInfo, Session session, IMAPConfig imapConfig) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String command = ignoreDeleted ? COMMAND_SEARCH_UNSEEN_NOT_DELETED : COMMAND_SEARCH_UNSEEN;
                 Response[] r = performCommand(p, command);
                 /*
@@ -2371,7 +2371,7 @@ public final class IMAPCommandsCollection {
                 return newMsgs;
             }
 
-            private int[] handleSearchResponses(final Response[] r, final IMAPProtocol p, String command) throws ProtocolException {
+            private int[] handleSearchResponses(Response[] r, IMAPProtocol p, String command) throws ProtocolException {
                 final Response response = r[r.length - 1];
                 final TIntList tmp = new TIntArrayList(32);
                 if (response.isOK()) {
@@ -2454,7 +2454,7 @@ public final class IMAPCommandsCollection {
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String command = "EXPUNGE";
                 Response[] r = performCommand(p, command, !returnRemovedOnes);
                 Response response = r[r.length - 1];
@@ -2643,12 +2643,12 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> is IMAP folder is marked as READ-ONLY; otherwise <code>false</code>
      * @throws OXException
      */
-    public static boolean isReadOnly(final IMAPFolder f) throws OXException {
+    public static boolean isReadOnly(IMAPFolder f) throws OXException {
         try {
             final Boolean val = (Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                public Object doCommand(IMAPProtocol p) throws ProtocolException {
                     /*
                      * Encode the mbox as per RFC2060
                      */
@@ -2688,7 +2688,7 @@ public final class IMAPCommandsCollection {
      *         <code>false</code>
      * @throws OXException If an IMAP error occurs
      */
-    public static boolean canBeOpened(final IMAPFolder f, final String fullName, final int mode) throws OXException {
+    public static boolean canBeOpened(IMAPFolder f, String fullName, int mode) throws OXException {
         if ((Folder.READ_ONLY != mode) && (Folder.READ_WRITE != mode)) {
             IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(mode));
         }
@@ -2696,7 +2696,7 @@ public final class IMAPCommandsCollection {
             return ((Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                public Object doCommand(IMAPProtocol p) throws ProtocolException {
                     final Boolean retval;
                     {
                         /*
@@ -2751,7 +2751,7 @@ public final class IMAPCommandsCollection {
      * @return All messages marked as deleted in given IMAP folder filtered by specified <code>filter</code>
      * @throws MessagingException If a protocol error occurs
      */
-    private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws MessagingException {
+    private static long[] getDeletedMessages(IMAPFolder imapFolder, long[] filter) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -2761,7 +2761,7 @@ public final class IMAPCommandsCollection {
         return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String command = FETCH_FLAGS;
                 Response[] r = performCommand(p, command);
                 int mlen = r.length - 1;
@@ -2793,7 +2793,7 @@ public final class IMAPCommandsCollection {
                     }
                     retval = new long[set.size()];
                     int i = 0;
-                    for (final Long l : set) {
+                    for (Long l : set) {
                         retval[i++] = l.longValue();
                     }
                 } else if (response.isBAD()) {
@@ -2822,7 +2822,7 @@ public final class IMAPCommandsCollection {
      * @return The corresponding UIDs
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static TIntLongMap seqNums2UIDs(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TIntLongMap seqNums2UIDs(IMAPFolder imapFolder, long[] uids) throws MessagingException {
         int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -2834,7 +2834,7 @@ public final class IMAPCommandsCollection {
         return (TIntLongMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 Response[] r = null;
                 Response response = null;
@@ -2894,7 +2894,7 @@ public final class IMAPCommandsCollection {
      * @return The corresponding UIDs
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static long[] getUIDs(final IMAPFolder imapFolder) throws MessagingException {
+    public static long[] getUIDs(IMAPFolder imapFolder) throws MessagingException {
         return getUIDCollection(imapFolder).toArray();
     }
 
@@ -2905,7 +2905,7 @@ public final class IMAPCommandsCollection {
      * @return The corresponding UIDs
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static TLongCollection getUIDCollection(final IMAPFolder imapFolder) throws MessagingException {
+    public static TLongCollection getUIDCollection(IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -2916,7 +2916,7 @@ public final class IMAPCommandsCollection {
         return (TLongList) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 Response[] r = null;
                 Response response = null;
                 final TLongList uids = new TLongArrayList(messageCount);
@@ -2976,7 +2976,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if such a message exists; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static boolean existsMessage(final IMAPFolder imapFolder, final long uid) throws MessagingException {
+    public static boolean existsMessage(IMAPFolder imapFolder, long uid) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             return false;
@@ -2987,7 +2987,7 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String command = String.format(TEMPL_UID_FETCH_UID, Long.toString(uid));
                 final Response[] r = performCommand(p, command);
                 final int len = r.length - 1;
@@ -3021,7 +3021,7 @@ public final class IMAPCommandsCollection {
      * @return The current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static int[] uids2SeqNums(IMAPFolder imapFolder, long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -3039,7 +3039,7 @@ public final class IMAPCommandsCollection {
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 /*
                  * Execute command
                  */
@@ -3117,7 +3117,7 @@ public final class IMAPCommandsCollection {
      * @return A map resolving specified UIDs to current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    public static TLongIntMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TLongIntMap uids2SeqNumsMap(IMAPFolder imapFolder, long[] uids) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -3128,7 +3128,7 @@ public final class IMAPCommandsCollection {
         return (TLongIntMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
                 String[] args;
                 String commandTemplate;
@@ -3199,7 +3199,7 @@ public final class IMAPCommandsCollection {
      * @return All UIDs from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static long[] fetchUIDs(final IMAPFolder imapFolder) throws MessagingException {
+    public static long[] fetchUIDs(IMAPFolder imapFolder) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -3209,7 +3209,7 @@ public final class IMAPCommandsCollection {
         return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -3265,7 +3265,7 @@ public final class IMAPCommandsCollection {
      * @return All UIDs from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static IMAPUpdateableData[] fetchUIDAndFlags(final IMAPFolder imapFolder) throws MessagingException {
+    public static IMAPUpdateableData[] fetchUIDAndFlags(IMAPFolder imapFolder) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -3275,7 +3275,7 @@ public final class IMAPCommandsCollection {
         return (IMAPUpdateableData[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -3330,7 +3330,7 @@ public final class IMAPCommandsCollection {
      * @param flags The flags to parse
      * @return The parsed system flags
      */
-    protected static int parseSystemFlags(final Flags flags) {
+    protected static int parseSystemFlags(Flags flags) {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
@@ -3362,7 +3362,7 @@ public final class IMAPCommandsCollection {
      * @param flags The flags to parse
      * @return The parsed user flags
      */
-    protected static Set<String> parseUserFlags(final Flags flags) {
+    protected static Set<String> parseUserFlags(Flags flags) {
         final String[] userFlags = flags.getUserFlags();
         if (userFlags == null) {
             return java.util.Collections.emptySet();
@@ -3383,7 +3383,7 @@ public final class IMAPCommandsCollection {
      * @return The data or <code>null</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static MailPart getPart(final IMAPFolder imapFolder, final long uid, final String sectionId, final boolean peek) throws MessagingException {
+    public static MailPart getPart(IMAPFolder imapFolder, long uid, String sectionId, boolean peek) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -3393,7 +3393,7 @@ public final class IMAPCommandsCollection {
         return (MailPart) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 BODYSTRUCTURE bodystructure = null;
                 {
                     final Response[] r = p.fetch(uid, "BODYSTRUCTURE");
@@ -3494,7 +3494,7 @@ public final class IMAPCommandsCollection {
                 return Boolean.FALSE;
             }
 
-            private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
+            private boolean isApplicationSmil(BODYSTRUCTURE bodystructure) {
                 return /*bodystructure.isMulti() &&*/ "related".equals(asciiLowerCase(bodystructure.subtype)) && "application/smil".equals(asciiLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
             }
 
@@ -3509,7 +3509,7 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    protected static BodyAndId getBODYSTRUCTURE(final String sectionId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
+    protected static BodyAndId getBODYSTRUCTURE(String sectionId, BODYSTRUCTURE bodystructure, String prefix, int partCount, boolean[] mpDetected) throws MessagingException {
         final String sequenceId = getSequenceId(prefix, partCount);
         boolean candidate = false;
         if (sectionId.equals(sequenceId)) {
@@ -3576,7 +3576,7 @@ public final class IMAPCommandsCollection {
      * @return The data or <code>null</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static MailPart getPartByContentId(final IMAPFolder imapFolder, final long uid, final String contentId, final boolean peek) throws MessagingException {
+    public static MailPart getPartByContentId(IMAPFolder imapFolder, long uid, String contentId, boolean peek) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -3586,7 +3586,7 @@ public final class IMAPCommandsCollection {
         return (MailPart) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 BODYSTRUCTURE bodystructure = null;
                 {
                     final Response[] r = p.fetch(uid, "BODYSTRUCTURE");
@@ -3672,7 +3672,7 @@ public final class IMAPCommandsCollection {
 
     private static final String SUFFIX = "@" + VersionService.NAME;
 
-    protected static BodyAndId getBODYSTRUCTUREByContentId(final String contentId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
+    protected static BodyAndId getBODYSTRUCTUREByContentId(String contentId, BODYSTRUCTURE bodystructure, String prefix, int partCount, boolean[] mpDetected) throws MessagingException {
         final String sequenceId = getSequenceId(prefix, partCount);
         if (MimeMessageUtility.equalsCID(contentId, bodystructure.id, SUFFIX)) {
             return new BodyAndId(bodystructure, sequenceId);
@@ -3721,7 +3721,7 @@ public final class IMAPCommandsCollection {
         return null;
     }
 
-    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure, final String fullName, final boolean loadContent) throws ProtocolException {
+    protected static MailPart toMailPart(IMAPMessage msg, String sectionId, boolean peek, BODYSTRUCTURE bodystructure, String fullName, boolean loadContent) throws ProtocolException {
         try {
             final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName, loadContent);
             ret.applyBodyStructure(bodystructure);
@@ -3733,7 +3733,7 @@ public final class IMAPCommandsCollection {
         }
     }
 
-    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
+    protected static MailPart toMailPart(ByteArray byteArray, BODYSTRUCTURE bodystructure, String fullName) throws ProtocolException {
         try {
             final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
@@ -3752,7 +3752,7 @@ public final class IMAPCommandsCollection {
      * @param partCount The part count
      * @return The sequence ID
      */
-    private static String getSequenceId(final String prefix, final int partCount) {
+    private static String getSequenceId(String prefix, int partCount) {
         if (prefix == null) {
             return Integer.toString(partCount);
         }
@@ -3773,7 +3773,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static boolean uidExpunge(IMAPFolder imapFolder, long[] uids) throws MessagingException {
         uidExpunge(imapFolder, uids, false);
         return true;
     }
@@ -3801,7 +3801,7 @@ public final class IMAPCommandsCollection {
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 12); // "UID EXPUNGE <uids>"
                 TIntList sequenceNumbers = returnRemovedOnes ? new TIntArrayList(uids.length) : null;
                 Response[] r = null;
@@ -3857,11 +3857,11 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if user flags are supported; otherwise <code>false</code>
      * @throws MessagingException If SELECT command fails
      */
-    public static boolean supportsUserDefinedFlags(final IMAPFolder imapFolder) throws MessagingException {
+    public static boolean supportsUserDefinedFlags(IMAPFolder imapFolder) throws MessagingException {
         final Boolean val = (Boolean) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 final String command = new StringBuilder("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
                 final Response[] r = performCommand(p, command, false);
                 final Response response = r[r.length - 1];
@@ -3906,7 +3906,7 @@ public final class IMAPCommandsCollection {
     private static HeaderString REV1HeaderStream = new HeaderString() {
 
         @Override
-        public String getHeaderString(final Item fetchItem) {
+        public String getHeaderString(Item fetchItem) {
             final ByteArray byteArray = ((BODY) fetchItem).getByteArray();
             if (null == byteArray) {
                 return null;
@@ -3918,7 +3918,7 @@ public final class IMAPCommandsCollection {
     private static HeaderString RFCHeaderStream = new HeaderString() {
 
         @Override
-        public String getHeaderString(final Item fetchItem) {
+        public String getHeaderString(Item fetchItem) {
             final ByteArray byteArray = ((RFC822DATA) fetchItem).getByteArray();
             if (null == byteArray) {
                 return null;
@@ -3927,7 +3927,7 @@ public final class IMAPCommandsCollection {
         }
     };
 
-    protected static HeaderString getHeaderStream(final boolean isREV1) {
+    protected static HeaderString getHeaderStream(boolean isREV1) {
         if (isREV1) {
             return REV1HeaderStream;
         }
@@ -3943,7 +3943,7 @@ public final class IMAPCommandsCollection {
      * @return The matching message's UID or <code>-1</code> if none found
      * @throws MessagingException If marker look-up fails
      */
-    public static long[] findMarker(final String marker, final int numOfAppendedMessages, final IMAPFolder imapFolder) throws MessagingException {
+    public static long[] findMarker(String marker, int numOfAppendedMessages, IMAPFolder imapFolder) throws MessagingException {
         if ((marker == null) || (marker.length() == 0)) {
             return new long[0];
         }
@@ -3956,7 +3956,7 @@ public final class IMAPCommandsCollection {
         return ((long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 boolean isREV1 = p.isREV1();
                 String command = isREV1 ? cmdRev1 : cmdRfc;
                 Response[] r = performCommand(p, command);
@@ -4036,7 +4036,7 @@ public final class IMAPCommandsCollection {
      * @return The UIDs of matching message or <code>-1</code> if none found
      * @throws MessagingException
      */
-    public static long[] messageId2UID(final IMAPFolder imapFolder, final String... messageIds) throws MessagingException {
+    public static long[] messageId2UID(IMAPFolder imapFolder, String... messageIds) throws MessagingException {
         if (0 == messageIds.length) {
             return new long[0];
         }
@@ -4048,7 +4048,7 @@ public final class IMAPCommandsCollection {
         return (long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 String command = COMMAND_FETCH_ENV_UID;
                 Response[] r = performCommand(p, command);
                 Response response = r[r.length - 1];

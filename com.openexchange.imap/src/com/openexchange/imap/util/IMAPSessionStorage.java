@@ -85,7 +85,7 @@ final class IMAPSessionStorage {
      *
      * @param lock The lock object
      */
-    IMAPSessionStorage(final Object lock) {
+    IMAPSessionStorage(Object lock) {
         super();
         dataMap = new NonBlockingHashMap<AccAndFN, Set<IMAPUpdateableData>>();
         this.lock = lock;
@@ -98,7 +98,7 @@ final class IMAPSessionStorage {
      * @param imapFolder The IMAP folder
      * @return <code>true</code> if session storage contains entries for given folder; otherwise <code>false</code>
      */
-    public boolean hasSessionStorage(final int accountId, final IMAPFolder imapFolder) {
+    public boolean hasSessionStorage(int accountId, IMAPFolder imapFolder) {
         return (dataMap.containsKey(new AccAndFN(accountId, imapFolder.getFullName())));
     }
 
@@ -109,7 +109,7 @@ final class IMAPSessionStorage {
      * @param imapFolder The IMAP folder
      * @throws OXException If a mail error occurs
      */
-    public void fillSessionStorage(final int accountId, final IMAPFolder imapFolder) throws OXException {
+    public void fillSessionStorage(int accountId, IMAPFolder imapFolder) throws OXException {
         final Set<IMAPUpdateableData> currentData;
         try {
             currentData = new HashSet<IMAPUpdateableData>(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
@@ -140,7 +140,7 @@ final class IMAPSessionStorage {
      * @return The IMAP messages of which flags have been changed since specified time stamp
      * @throws OXException If a mail error occurs
      */
-    public long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final int mode, final int userId, final int contextId) throws OXException {
+    public long[][] getChanges(int accountId, IMAPFolder imapFolder, int mode, int userId, int contextId) throws OXException {
         synchronized (lock) {
             try {
                 final String fullName = imapFolder.getFullName();
@@ -175,7 +175,7 @@ final class IMAPSessionStorage {
                      * Remove deleted ones from session??? If yes, this routine's result are only yielded per call and thus are not
                      * reproduceable
                      */
-                    for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
+                    for (Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                         final IMAPUpdateableData tmp = iter.next();
                         if (deleted.contains(tmp.getUid())) {
                             iter.remove();
@@ -222,7 +222,7 @@ final class IMAPSessionStorage {
                              * Write changes to DB storage??? If yes, this routine's result are only yielded per call and thus are not
                              * reproduceable
                              */
-                            for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
+                            for (Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                                 final IMAPUpdateableData tmp = iter.next();
                                 if (changedUIDs.contains(tmp.getUid())) {
                                     iter.remove();
@@ -262,7 +262,7 @@ final class IMAPSessionStorage {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final String fullName) {
+    public void removeDeletedSessionData(long[] deletedUIDs, int accountId, String fullName) {
         final Set<Long> s = new HashSet<Long>(deletedUIDs.length);
         for (int i = 0; i < deletedUIDs.length; i++) {
             s.add(Long.valueOf(deletedUIDs[i]));
@@ -278,7 +278,7 @@ final class IMAPSessionStorage {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final String fullName) {
+    public void removeDeletedSessionData(Set<Long> deletedUIDs, int accountId, String fullName) {
         synchronized (lock) {
             final AccAndFN key = new AccAndFN(accountId, fullName);
             Set<IMAPUpdateableData> sessionData = dataMap.get(key);
@@ -286,7 +286,7 @@ final class IMAPSessionStorage {
                 sessionData = new HashSet<IMAPUpdateableData>();
                 dataMap.put(key, sessionData);
             }
-            for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
+            for (Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                 final IMAPUpdateableData tmp = iter.next();
                 if (deletedUIDs.contains(Long.valueOf(tmp.getUid()))) {
                     iter.remove();
@@ -302,7 +302,7 @@ final class IMAPSessionStorage {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public void removeDeletedFolder(final int accountId, final String fullName) {
+    public void removeDeletedFolder(int accountId, String fullName) {
         synchronized (lock) {
             final AccAndFN key = new AccAndFN(accountId, fullName);
             final Set<IMAPUpdateableData> sessionData = dataMap.get(key);
@@ -317,7 +317,7 @@ final class IMAPSessionStorage {
      * ############################ HELPER METHODS ############################
      */
 
-    private static TLongHashSet data2UIDSet(final IMAPUpdateableData[] updateableDatas) {
+    private static TLongHashSet data2UIDSet(IMAPUpdateableData[] updateableDatas) {
         final TLongHashSet uids = new TLongHashSet(updateableDatas.length);
         for (int i = 0; i < updateableDatas.length; i++) {
             uids.add(updateableDatas[i].getUid());
@@ -325,15 +325,15 @@ final class IMAPSessionStorage {
         return uids;
     }
 
-    private static TLongHashSet data2UIDSet(final Collection<IMAPUpdateableData> updateableDatas) {
+    private static TLongHashSet data2UIDSet(Collection<IMAPUpdateableData> updateableDatas) {
         final TLongHashSet uids = new TLongHashSet(updateableDatas.size());
-        for (final IMAPUpdateableData updateableData : updateableDatas) {
+        for (IMAPUpdateableData updateableData : updateableDatas) {
             uids.add(updateableData.getUid());
         }
         return uids;
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final TLongSet uids, final IMAPUpdateableData[] updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(TLongSet uids, IMAPUpdateableData[] updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
         for (int i = 0; i < updateableDatas.length; i++) {
             final IMAPUpdateableData updateableData = updateableDatas[i];
@@ -344,9 +344,9 @@ final class IMAPSessionStorage {
         return tmp.toArray(new IMAPUpdateableData[tmp.size()]);
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final TLongSet uids, final Collection<IMAPUpdateableData> updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(TLongSet uids, Collection<IMAPUpdateableData> updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
-        for (final IMAPUpdateableData updateableData : updateableDatas) {
+        for (IMAPUpdateableData updateableData : updateableDatas) {
             if (uids.contains(updateableData.getUid())) {
                 tmp.add(updateableData);
             }
@@ -364,7 +364,7 @@ final class IMAPSessionStorage {
 
         private final String fn;
 
-        public AccAndFN(final int acc, final String fn) {
+        public AccAndFN(int acc, String fn) {
             super();
             this.acc = acc;
             this.fn = fn;
@@ -380,7 +380,7 @@ final class IMAPSessionStorage {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

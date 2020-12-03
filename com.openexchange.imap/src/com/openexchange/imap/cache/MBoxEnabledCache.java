@@ -125,7 +125,7 @@ public final class MBoxEnabledCache {
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
      * @throws OXException If a mail error occurs
      */
-    public static boolean isMBoxEnabled(final IMAPConfig imapConfig, final IMAPFolder imapFolder, final String prefix) throws OXException {
+    public static boolean isMBoxEnabled(IMAPConfig imapConfig, IMAPFolder imapFolder, String prefix) throws OXException {
         final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
         Future<Boolean> f = map.get(imapConfig.getImapServerSocketAddress());
         if (null == f) {
@@ -192,12 +192,12 @@ public final class MBoxEnabledCache {
 
     private static final class SettableFutureTask<V> extends FutureTask<V> {
 
-        public SettableFutureTask(final Callable<V> callable) {
+        public SettableFutureTask(Callable<V> callable) {
             super(callable);
         }
 
         @Override
-        public void set(final V v) {
+        public void set(V v) {
             super.set(v);
         }
 

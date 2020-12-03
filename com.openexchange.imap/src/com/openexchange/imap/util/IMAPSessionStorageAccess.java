@@ -79,7 +79,7 @@ public final class IMAPSessionStorageAccess {
         return ENABLED;
     }
 
-    private static IMAPSessionStorage ensureExistence(final Session session) {
+    private static IMAPSessionStorage ensureExistence(Session session) {
         return new IMAPSessionStorage(session);
     }
 
@@ -91,7 +91,7 @@ public final class IMAPSessionStorageAccess {
      * @param session The session providing user data
      * @return <code>true</code> if session storage contains entries for given folder; otherwise <code>false</code>
      */
-    public static boolean hasSessionStorage(final int accountId, final IMAPFolder imapFolder, final Session session) {
+    public static boolean hasSessionStorage(int accountId, IMAPFolder imapFolder, Session session) {
         if (!ENABLED) {
             return true;
         }
@@ -106,7 +106,7 @@ public final class IMAPSessionStorageAccess {
      * @param session The session providing user data
      * @throws OXException If a mail error occurs
      */
-    public static void fillSessionStorage(final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException {
+    public static void fillSessionStorage(int accountId, IMAPFolder imapFolder, Session session) throws OXException {
         if (!ENABLED) {
             return;
         }
@@ -124,7 +124,7 @@ public final class IMAPSessionStorageAccess {
      * @return The IMAP messages of which flags have been changed since specified time stamp
      * @throws OXException If a mail error occurs
      */
-    public static long[][] getChanges(final int accountId, final IMAPFolder imapFolder, final Session session, final int mode) throws OXException {
+    public static long[][] getChanges(int accountId, IMAPFolder imapFolder, Session session, int mode) throws OXException {
         if (!ENABLED) {
             return new long[][] { new long[] {}, new long[] {} };
         }
@@ -140,7 +140,7 @@ public final class IMAPSessionStorageAccess {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedSessionData(final long[] deletedUIDs, final int accountId, final Session session, final String fullName) {
+    public static void removeDeletedSessionData(long[] deletedUIDs, int accountId, Session session, String fullName) {
         if (!ENABLED) {
             return;
         }
@@ -156,7 +156,7 @@ public final class IMAPSessionStorageAccess {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedSessionData(final Set<Long> deletedUIDs, final int accountId, final Session session, final String fullName) {
+    public static void removeDeletedSessionData(Set<Long> deletedUIDs, int accountId, Session session, String fullName) {
         if (!ENABLED) {
             return;
         }
@@ -171,7 +171,7 @@ public final class IMAPSessionStorageAccess {
      * @param fullName The IMAP folder's full name
      * @throws OXException If an error occurs while deleting UIDs
      */
-    public static void removeDeletedFolder(final int accountId, final Session session, final String fullName) {
+    public static void removeDeletedFolder(int accountId, Session session, String fullName) {
         if (!ENABLED) {
             return;
         }

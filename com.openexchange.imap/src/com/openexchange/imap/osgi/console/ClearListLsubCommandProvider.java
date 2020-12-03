@@ -73,7 +73,7 @@ public class ClearListLsubCommandProvider implements CommandProvider {
         return "clearimaplistlsub <user-id> <context-id> - Clears the content of the IMAP LIST/LSUB cache for the primary account\n";
     }
 
-    public void _clearimaplistlsub(final CommandInterpreter ci) {
+    public void _clearimaplistlsub(CommandInterpreter ci) {
         String sUserId = ci.nextArgument();
         String sContextId = ci.nextArgument();
 

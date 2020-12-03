@@ -64,6 +64,7 @@ import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolde
 import com.openexchange.chronos.provider.groupware.FallbackGroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
@@ -80,17 +81,20 @@ public class FallbackXctxCalendarAccess extends FallbackGroupwareCalendarAccess 
     private final ServiceLookup services;
     private final OXException error;
     private final Session localSession;
+    private final CalendarParameters parameters;
 
     /**
      * @param services A service lookup reference
      * @param account The underlying calendar account
      * @param localSession The user's <i>local</i> session associated with the file storage account
+     * @param parameters Additional calendar parameters
      * @param error The error to include in the folders
      */
-    public FallbackXctxCalendarAccess(ServiceLookup services, CalendarAccount account, Session localSession, OXException error) {
+    public FallbackXctxCalendarAccess(ServiceLookup services, CalendarAccount account, Session localSession, CalendarParameters parameters, OXException error) {
         super(account);
         this.services = services;
         this.error = error;
+        this.parameters = parameters;
         this.localSession = localSession;
     }
 
@@ -124,7 +128,7 @@ public class FallbackXctxCalendarAccess extends FallbackGroupwareCalendarAccess 
         if (updated) {
             JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
             userConfig.putSafe("internalConfig", internalConfig);
-            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, null);
+            services.getService(CalendarAccountService.class).updateAccount(localSession, account.getAccountId(), userConfig, clientTimestamp, parameters);
         }
         return folderId;
     }
@@ -143,7 +147,7 @@ public class FallbackXctxCalendarAccess extends FallbackGroupwareCalendarAccess 
          * insert a system permission for the user to ensure folder is considered as visible for the local session user throughout the stack
          */
         CalendarPermission ownSystemPermission = new DefaultCalendarPermission(String.valueOf(account.getUserId()), account.getUserId(), null,
-            CalendarPermission.READ_FOLDER, CalendarPermission.READ_OWN_OBJECTS, CalendarPermission.NO_PERMISSIONS, CalendarPermission.NO_PERMISSIONS, 
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_OWN_OBJECTS, CalendarPermission.NO_PERMISSIONS, CalendarPermission.NO_PERMISSIONS,
             false, false, Permissions.createPermissionBits(CalendarPermission.READ_FOLDER, CalendarPermission.READ_OWN_OBJECTS, CalendarPermission.NO_PERMISSIONS, CalendarPermission.NO_PERMISSIONS, false));
         rememberedFolder.setPermissions(Collections.singletonList(ownSystemPermission));
         /*

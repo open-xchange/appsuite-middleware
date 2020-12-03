@@ -80,7 +80,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
      * @param imapFolder The IMAP folder
      * @param msgs The messages
      */
-    public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
+    public MessageUIDsIMAPCommand(IMAPFolder imapFolder, Message[] msgs) {
         super(imapFolder);
         if (msgs == null) {
             returnDefaultValue = true;
@@ -105,7 +105,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append("FETCH ");
         sb.append(args[argsIndex]);
@@ -126,7 +126,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
     }
 
     @Override
-    protected boolean handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(Response response) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */

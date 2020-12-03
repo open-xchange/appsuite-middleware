@@ -84,32 +84,32 @@ abstract class AbstractACLExtension implements ACLExtension {
     }
 
     @Override
-    public boolean canRead(final Rights rights) {
+    public boolean canRead(Rights rights) {
         return rights.contains(Rights.Right.READ);
     }
 
     @Override
-    public boolean canLookUp(final Rights rights) {
+    public boolean canLookUp(Rights rights) {
         return rights.contains(Rights.Right.LOOKUP);
     }
 
     @Override
-    public boolean canKeepSeen(final Rights rights) {
+    public boolean canKeepSeen(Rights rights) {
         return rights.contains(Rights.Right.KEEP_SEEN);
     }
 
     @Override
-    public boolean canWrite(final Rights rights) {
+    public boolean canWrite(Rights rights) {
         return rights.contains(Rights.Right.WRITE);
     }
 
     @Override
-    public boolean canInsert(final Rights rights) {
+    public boolean canInsert(Rights rights) {
         return rights.contains(Rights.Right.INSERT);
     }
 
     @Override
-    public boolean canPost(final Rights rights) {
+    public boolean canPost(Rights rights) {
         return rights.contains(Rights.Right.POST);
     }
 

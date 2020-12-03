@@ -72,13 +72,13 @@ public enum MoveFolderPermissionMode {
 
     public static MoveFolderPermissionMode getByName(String name) {
         if (Strings.isEmpty(name)) {
-            return MoveFolderPermissionMode.KEEP;
+            return MoveFolderPermissionMode.INHERIT;
         }
 
         Optional<MoveFolderPermissionMode> optResult = Arrays.asList(MoveFolderPermissionMode.values()).stream().filter(mode -> mode.name().equals(name.toUpperCase())).findAny();
         if (optResult.isPresent() == false) {
-            LOGGER.warn("Invalid move folder permission mode: {}. Using fallback \"keep\".", name);
+            LOGGER.warn("Invalid move folder permission mode: {}. Using fallback \"inherit\".", name);
         }
-        return optResult.orElse(MoveFolderPermissionMode.KEEP);
+        return optResult.orElse(MoveFolderPermissionMode.INHERIT);
     }
 }
