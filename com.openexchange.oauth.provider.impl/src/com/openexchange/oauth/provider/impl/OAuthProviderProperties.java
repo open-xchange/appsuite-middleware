@@ -70,7 +70,7 @@ public enum OAuthProviderProperties implements Property{
     /**
      * Configures the current provider mode ({@link OAuthProviderMode}).
      */
-    MODE("mode", OAuthProviderMode.AUTH_SEVER),
+    MODE("mode", OAuthProviderMode.AUTH_SEVER.getProviderModeString()),
 
     /**
      * Specify how authorization codes shall be stored, to enable OAuth in multi-node environments.
