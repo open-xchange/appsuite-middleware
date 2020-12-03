@@ -49,18 +49,17 @@
 
 package com.openexchange.file.storage.xctx;
 
+import static com.openexchange.file.storage.xctx.XctxAccountAccess.XCTX_PARENT_FOLDER_IDS;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageResult;
@@ -72,7 +71,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.share.core.subscription.AccountMetadataHelper;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
-import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,9 +82,6 @@ import com.openexchange.tools.session.ServerSession;
 public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements SearchableFolderNameFolderAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(XctxFolderAccess.class);
-
-    /** Identifiers of those system folders that are shared with the default infostore, hence served by the cross-context file storage provider */
-    static final Set<String> UNHANDLED_FOLDER_IDS = Collections.unmodifiableSet(INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
     private final XctxAccountAccess accountAccess;
     private final XctxFolderConverter folderConverter;
@@ -142,7 +137,7 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
 
     @Override
     public DefaultFileStorageFolder getFolder(String folderId) throws OXException {
-        if (UNHANDLED_FOLDER_IDS.contains(folderId)) {
+        if (XCTX_PARENT_FOLDER_IDS.contains(folderId)) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId, accountAccess.getAccountId(), accountAccess.getService().getId(), I(localSession.getUserId()), I(localSession.getContextId()));
         }
@@ -152,33 +147,12 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
 
     @Override
     public DefaultFileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        final FileStorageAccount account = accountAccess.getAccount();
-        DefaultFileStorageFolder[] ret = null;
-        try {
-            DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, true);
-            ret = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
-            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
-                //Set the last known folders
-                new AccountMetadataHelper(accountAccess.getAccount(), session).storeSubFolders(ret, parentIdentifier);
-            }
-        } catch (Exception e) {
-            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
-                try {
-                    //Error: We do return the last known sub folders in case of an error.
-                    //Those folders get decorated with an error when loaded later and thus can be displayed by the client
-                    LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
-                    ret = new AccountMetadataHelper(account, session).getLastKnownFolders(parentIdentifier);
-                    if (ret.length == 0) {
-                        LOG.debug("There are no last known federated sharing folders for account " + account.getId());
-                    }
-                } catch (Exception e2) {
-                    LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e2);
-                }
-            } else {
-                throw e;
-            }
+        DefaultFileStorageFolder[] subfolders = super.getSubfolders(parentIdentifier, true);
+        subfolders = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+        if (XCTX_PARENT_FOLDER_IDS.contains(parentIdentifier)) {
+            rememberSubfolders(parentIdentifier, subfolders);
         }
-        return ret;
+        return subfolders;
     }
 
     @Override
@@ -252,6 +226,25 @@ public class XctxFolderAccess extends AbstractInfostoreFolderAccess implements S
     @Override
     public DefaultFileStorageFolder getRootFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    /**
+     * Remembers the subfolders of a certain parent folder within the account configuration.
+     * <p/>
+     * Previously remembered folders of this parent are purged implicitly, so that the passed collection of folders will effectively
+     * replace the last known state for this folder type afterwards.
+     *
+     * @param subfolders The subfolders to remember
+     * @param parentId The identifier of the parent folder to remember the subfolders for
+     * @return The passed folders after they were remembered
+     */
+    private DefaultFileStorageFolder[] rememberSubfolders(String parentId, DefaultFileStorageFolder[] subfolders) {
+        try {
+            new AccountMetadataHelper(accountAccess.getAccount(), localSession).storeSubFolders(subfolders, parentId);
+        } catch (Exception e) {
+            LOG.warn("Error remembering subfolders of {} in account config", parentId, e);
+        }
+        return subfolders;
     }
 
     @Override

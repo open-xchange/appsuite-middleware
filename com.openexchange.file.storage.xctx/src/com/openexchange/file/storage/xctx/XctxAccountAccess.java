@@ -51,6 +51,7 @@ package com.openexchange.file.storage.xctx;
 
 import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.PUBLIC_INFOSTORE_FOLDER_ID;
 import static com.openexchange.file.storage.infostore.folder.AbstractInfostoreFolderAccess.USER_INFOSTORE_FOLDER_ID;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.b;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -99,8 +100,6 @@ import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-import static com.openexchange.java.Autoboxing.B;
-
 /**
  * {@link XctxAccountAccess}
  *
@@ -110,7 +109,7 @@ import static com.openexchange.java.Autoboxing.B;
 public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     /** The identifiers of the parent folders where adjusting the subscribed flag is supported, which mark the entry points for shared and public files */
-    private static final Set<String> SUBSCRIBE_PARENT_IDS = Collections.unmodifiableSet(USER_INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
+    static final Set<String> XCTX_PARENT_FOLDER_IDS = Collections.unmodifiableSet(USER_INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
     private static final Logger LOG = LoggerFactory.getLogger(XctxFileStorageService.class);
 
@@ -180,7 +179,7 @@ public class XctxAccountAccess implements FileStorageAccountAccess, CapabilityAw
      * @return The subscribed helper
      */
     public SubscribedHelper getSubscribedHelper() {
-        return new SubscribedHelper(account, SUBSCRIBE_PARENT_IDS);
+        return new SubscribedHelper(account, XCTX_PARENT_FOLDER_IDS);
     }
 
     /**
