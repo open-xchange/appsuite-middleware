@@ -354,7 +354,7 @@ public class MailStorage implements IMailStorage {
             MessageDescription currentDraft = processor.getCurrentDraft();
             SecuritySettings securitySettings = getSecuritySettings(currentDraft.getSecurity());
             if (changed) {
-                MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+                MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
                 MailPath newDraftPath = newDraft.getMailPath();
                 long size = newDraft.getSize();
                 if (size < 0) {
@@ -490,7 +490,7 @@ public class MailStorage implements IMailStorage {
             processor.addAttachments(draftMessage.getAttachments());
             MessageDescription update = processor.getCurrentDraft();
 
-            ComposedMailMessage composedMessage = processor.compileDraft(false);
+            ComposedMailMessage composedMessage = processor.compileDraft();
             composedMessage = applyGuardEncryption(getSecuritySettings(draftMessage.getSecurity()), composedMessage, session);
             composedMessage.setSendType(ComposeType.DRAFT);
 
@@ -521,29 +521,50 @@ public class MailStorage implements IMailStorage {
         }
 
         MailService mailService = services.getServiceSafe(MailService.class);
-        MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess = null;
+        List<MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>> mailAccesses = new ArrayList<>(2);
         try {
-            mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-            mailAccess.connect(false);
+            MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> defaultMailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            mailAccesses.add(defaultMailAccess);
+            defaultMailAccess.connect(false);
 
-            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, mailAccess, clientToken);
+            MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, defaultMailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
             SecuritySettings securitySettings = getSecuritySettings(getSecurity(originalDescription));
-            MailPath newDraftPath = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, true, session).getMailPath();
+
+            Meta meta = originalDescription.getMeta();
+            Optional<MailMessage> optRefMessage = Optional.empty();
+            if (meta != null) {
+                MailPath referencedMessage = null;
+                MetaType metaType = meta.getType();
+                if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
+                    referencedMessage = meta.getReplyFor();
+                } else if (metaType == MetaType.FORWARD_INLINE) {
+                    referencedMessage = meta.getForwardsFor().get(0);
+                }
+
+                if (referencedMessage != null) {
+                    try {
+                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess));
+                    } catch (OXException e) {
+                        LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
+                    }
+                }
+            }
+
+            MailPath newDraftPath = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, true, optRefMessage, session).getMailPath();
             processor.getFileCacheReference().ifPresent(r -> r.cleanUp());
 
             // Check for edit-draft
-            Meta meta = originalDescription.getMeta();
-            MailPath editFor = meta.getEditFor();
+            MailPath editFor = meta == null ? null : meta.getEditFor();
             if (editFor != null) {
-                mailAccess.getMessageStorage().deleteMessages(editFor.getFolder(), new String[] { editFor.getMailID() }, true);
+                defaultMailAccess.getMessageStorage().deleteMessages(editFor.getFolder(), new String[] { editFor.getMailID() }, true);
             }
 
-            return MailStorageResult.resultFor(null, newDraftPath, true, mailAccess, processor);
+            return MailStorageResult.resultFor(null, newDraftPath, true, defaultMailAccess, processor);
         } finally {
-            if (mailAccess != null) {
+            for (MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess : mailAccesses) {
                 mailAccess.close(true);
             }
         }
@@ -578,7 +599,7 @@ public class MailStorage implements IMailStorage {
             processor.applyUpdate(newDescription);
             applySharedAttachmentsChanges(originalDescription, newDescription, processor, session);
 
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -683,7 +704,7 @@ public class MailStorage implements IMailStorage {
                 // No attachments to add
                 if (changed) {
                     SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
-                    MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, false, session);
+                    MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, false, Optional.empty(), session);
                     MailPath newDraftPath = newDraft.getMailPath();
                     long size = newDraft.getSize();
                     if (size < 0) {
@@ -702,7 +723,7 @@ public class MailStorage implements IMailStorage {
 
             SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
 
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, false, Optional.empty(), session);
             long size = newDraft.getSize();
             if (size < 0) {
                 size = fetchMailSize(defaultMailAccess.getMessageStorage(), draftPath);
@@ -776,7 +797,7 @@ public class MailStorage implements IMailStorage {
             }
 
             SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -825,7 +846,7 @@ public class MailStorage implements IMailStorage {
             Attachment addedAttachment = processor.addAttachments(Collections.singletonList(vcardAttachment)).get(0);
 
             SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -863,7 +884,7 @@ public class MailStorage implements IMailStorage {
             SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
             List<Attachment> addedAttachments = processor.addAttachments(attachments);
 
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -902,7 +923,7 @@ public class MailStorage implements IMailStorage {
             SecuritySettings securitySettings = getSecuritySettings(originalDescription.getSecurity());
             Attachment addedAttachment = processor.replaceAttachment(attachment);
 
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -978,7 +999,7 @@ public class MailStorage implements IMailStorage {
 
             processor.deleteAttachments(attachmentIds);
 
-            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, session);
+            MailMessage newDraft = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, mailAccess, false, Optional.empty(), session);
             MailPath newDraftPath = newDraft.getMailPath();
             long size = newDraft.getSize();
             if (size < 0) {
@@ -1056,7 +1077,7 @@ public class MailStorage implements IMailStorage {
 
             MessageDescription currentDraft = processor.getCurrentDraft();
             SecuritySettings securitySettings = getSecuritySettings(currentDraft.getSecurity());
-            MailPath newDraftPath = deleteAndSaveDraftMail(draftMail, processor, securitySettings, mailAccess, false, session).getMailPath();
+            MailPath newDraftPath = deleteAndSaveDraftMail(draftMail, processor, securitySettings, mailAccess, false, Optional.empty(), session).getMailPath();
             MailStorageId newId = new DefaultMailStorageId(newDraftPath, compositionSpaceId, processor.getFileCacheReference());
             return MailStorageResult.resultFor(newId, Optional.of(newDraftPath), true, mailAccess, processor);
         } finally {
@@ -1474,11 +1495,11 @@ public class MailStorage implements IMailStorage {
         }
     }
 
-    private MailMessage deleteAndSaveDraftMail(MailMessage draftMail, MailMessageProcessor processor, SecuritySettings securitySettings, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, boolean asFinalDraft, Session session) throws OXException {
-        return deleteAndSaveDraftMail(draftMail.getMailPath(), draftMail.getSize(), processor, securitySettings, mailAccess, asFinalDraft, session);
+    private MailMessage deleteAndSaveDraftMail(MailMessage draftMail, MailMessageProcessor processor, SecuritySettings securitySettings, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, boolean asFinalDraft, Optional<MailMessage> optRefMessage, Session session) throws OXException {
+        return deleteAndSaveDraftMail(draftMail.getMailPath(), draftMail.getSize(), processor, securitySettings, mailAccess, asFinalDraft, optRefMessage, session);
     }
 
-    private MailMessage deleteAndSaveDraftMail(MailPath draftPath, long oldMessageSize, MailMessageProcessor processor, SecuritySettings securitySettings, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, boolean asFinalDraft, Session session) throws OXException {
+    private MailMessage deleteAndSaveDraftMail(MailPath draftPath, long oldMessageSize, MailMessageProcessor processor, SecuritySettings securitySettings, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> mailAccess, boolean asFinalDraft, Optional<MailMessage> optRefMessage, Session session) throws OXException {
         // Retrieve quota
         Quota storageQuota = mailAccess.getFolderStorage().getQuotas(draftPath.getFolder(), new Quota.Type[] { Quota.Type.STORAGE })[0];
         if (storageQuota.getLimit() == 0) {
@@ -1488,7 +1509,12 @@ public class MailStorage implements IMailStorage {
 
         // Create the new draft mail
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        ComposedMailMessage newDraftMail = processor.compileDraft(asFinalDraft);
+        ComposedMailMessage newDraftMail;
+        if (asFinalDraft) {
+            newDraftMail = processor.compileFinalDraft(optRefMessage);
+        } else {
+            newDraftMail = processor.compileDraft();
+        }
 
         newDraftMail = applyGuardEncryption(securitySettings, newDraftMail, session);
         return deleteAndSaveDraftMailSafe(draftPath, storageQuota, messageStorage, newDraftMail);
