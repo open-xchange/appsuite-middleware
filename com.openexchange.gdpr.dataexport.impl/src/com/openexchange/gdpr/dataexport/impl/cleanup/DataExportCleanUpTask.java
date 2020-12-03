@@ -88,7 +88,6 @@ import com.openexchange.gdpr.dataexport.DataExportTask;
 import com.openexchange.gdpr.dataexport.DataExportWorkItem;
 import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
 import com.openexchange.java.ConvertUtils;
-import com.openexchange.reseller.ResellerService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -326,22 +325,6 @@ public class DataExportCleanUpTask implements Runnable {
             LOG.warn("Failed to retrieve possible identifiers of data export file storage from context-sets scope", e);
         }
 
-        // Check for possible configured file storage identifiers for reseller scope
-        try {
-            ResellerService resellerService = services.getOptionalService(ResellerService.class);
-            if (resellerService != null && resellerService.isEnabled()) {
-                Set<Integer> resellerFileStoreIds = determineResellerFileStoreIds(databaseService);
-                if (resellerFileStoreIds.isEmpty() == false) {
-                    if (fileStoreIds == null) {
-                        fileStoreIds = new HashSet<>();
-                    }
-                    fileStoreIds.addAll(resellerFileStoreIds);
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn("Failed to retrieve possible identifiers of data export file storage from reseller scope", e);
-        }
-
         // Check for possible configured file storage identifiers for server scope
         try {
             ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
@@ -419,39 +402,6 @@ public class DataExportCleanUpTask implements Runnable {
             }
         }
         return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
-    }
-
-    private Set<Integer> determineResellerFileStoreIds(DatabaseService databaseService) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Connection con = databaseService.getReadOnly();
-        try {
-            if (Databases.tableExists(con, "subadmin_config_properties") == false) {
-                return Collections.emptySet();
-            }
-
-            stmt = con.prepareStatement("SELECT propertyValue FROM subadmin_config_properties WHERE propertyKey = ?");
-            stmt.setString(1, "com.openexchange.gdpr.dataexport.fileStorageId");
-            rs = stmt.executeQuery();
-            if (rs.next() == false) {
-                return Collections.emptySet();
-            }
-
-            Set<Integer> fileStoreIds = new HashSet<>();
-            do {
-                try {
-                    fileStoreIds.add(Integer.valueOf(rs.getString(1)));
-                } catch (NumberFormatException e) {
-                    // Ignore
-                }
-            } while (rs.next());
-            return fileStoreIds;
-        } catch (SQLException e) {
-            throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(con);
-        }
     }
 
     private Set<Integer> determineFileStoreIdsFor(int representativeContextId, DatabaseService databaseService) throws OXException {
