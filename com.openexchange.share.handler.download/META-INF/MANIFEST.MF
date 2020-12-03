@@ -40,3 +40,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.share.handler.download.osgi.DownloadHandlerActivator
+Automatic-Module-Name: com.openexchange.share.handler.download
