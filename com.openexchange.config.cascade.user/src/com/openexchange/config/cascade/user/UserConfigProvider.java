@@ -130,16 +130,16 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
+    public BasicProperty get(String propertyName, int contextId, int userId) throws OXException {
         if (userId == NO_USER) {
             return NO_PROPERTY;
         }
 
         PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
-        BasicProperty basicProperty = propertyMap.get(property);
+        BasicProperty basicProperty = propertyMap.get(propertyName);
         if (null == basicProperty) {
-            BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
-            basicProperty = propertyMap.putIfAbsent(property, loaded);
+            BasicProperty loaded = new BasicPropertyImpl(propertyName, userId, contextId, services);
+            basicProperty = propertyMap.putIfAbsent(propertyName, loaded);
             if (null == basicProperty) {
                 basicProperty = loaded;
             }

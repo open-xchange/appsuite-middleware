@@ -147,34 +147,34 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         @Override
-        public <T> void set(String scope, String property, T value) throws OXException {
-            ((ConfigProperty<T>) property(scope, property, value.getClass())).set(value);
+        public <T> void set(String scope, String propertyName, T value) throws OXException {
+            ((ConfigProperty<T>) property(scope, propertyName, value.getClass())).set(value);
         }
 
         @Override
-        public <T> T get(String property, Class<T> coerceTo) throws OXException {
-            return property(property, coerceTo).get();
+        public <T> T get(String propertyName, Class<T> coerceTo) throws OXException {
+            return property(propertyName, coerceTo).get();
         }
 
         @Override
-        public <T> T opt(String property, java.lang.Class<T> coerceTo, T defaultValue) throws OXException {
-            ComposedConfigProperty<T> p = property(property, coerceTo);
+        public <T> T opt(String propertyName, java.lang.Class<T> coerceTo, T defaultValue) throws OXException {
+            ComposedConfigProperty<T> p = property(propertyName, coerceTo);
             return p.isDefined() ? p.get() : defaultValue;
         }
 
         @Override
-        public <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException {
+        public <T> ConfigProperty<T> property(String scope, String propertyName, Class<T> coerceTo) throws OXException {
             ConfigProviderService configProviderService = providers.get(scope);
             if (configProviderService == null) {
                 // No such config provider for specified scope
-                return new CoercingConfigProperty<T>(coerceTo, new NonExistentBasicProperty(property, scope), stringParser);
+                return new CoercingConfigProperty<T>(coerceTo, new NonExistentBasicProperty(propertyName, scope), stringParser);
             }
-            return new CoercingConfigProperty<T>(coerceTo, configProviderService.get(property, context, user), stringParser);
+            return new CoercingConfigProperty<T>(coerceTo, configProviderService.get(propertyName, context, user), stringParser);
         }
 
         @Override
-        public <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) {
-            return new CoercingComposedConfigProperty<T>(coerceTo, new DefaultComposedConfigProperty(property, this), stringParser);
+        public <T> ComposedConfigProperty<T> property(String propertyName, Class<T> coerceTo) {
+            return new CoercingComposedConfigProperty<T>(coerceTo, new DefaultComposedConfigProperty(propertyName, this), stringParser);
         }
 
         @Override

@@ -107,13 +107,13 @@ public interface ConfigProviderService {
     /**
      * Gets the denoted property.
      *
-     * @param property The property name
+     * @param propertyName The property name
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return The property if found; otherwise {@link #NO_PROPERTY}
      * @throws OXException If returning property fails for any reason
      */
-    BasicProperty get(String property, int contextId, int userId) throws OXException;
+    BasicProperty get(String propertyName, int contextId, int userId) throws OXException;
 
     /**
      * Gets all property names for specified user.

@@ -146,10 +146,10 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     }
 
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
+    public BasicProperty get(String propertyName, int contextId, int userId) throws OXException {
         BasicProperty first = null;
         for (final Element e : elementsRef.get()) {
-            final BasicProperty prop = e.configProviderService.get(property, contextId, userId);
+            final BasicProperty prop = e.configProviderService.get(propertyName, contextId, userId);
             if (prop.isDefined()) {
                 return prop;
             }
@@ -161,7 +161,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
             return first;
         }
         // Return empty property
-        return new EmptyBasicProperty(property);
+        return new EmptyBasicProperty(propertyName);
     }
 
     @Override

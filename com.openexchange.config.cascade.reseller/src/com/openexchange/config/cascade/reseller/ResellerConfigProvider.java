@@ -76,7 +76,7 @@ public class ResellerConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
+    public BasicProperty get(String propertyName, int contextId, int userId) throws OXException {
         if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
@@ -84,7 +84,7 @@ public class ResellerConfigProvider implements ConfigProviderService {
         if (resellerService == null || false == resellerService.isEnabled()) {
             return NO_PROPERTY;
         }
-        return new ResellerBasicPropertyImpl(property, contextId, services);
+        return new ResellerBasicPropertyImpl(propertyName, contextId, services);
     }
 
     @Override
