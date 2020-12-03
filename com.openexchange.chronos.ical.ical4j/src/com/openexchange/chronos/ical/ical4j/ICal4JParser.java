@@ -156,7 +156,7 @@ public class ICal4JParser {
                 if (importLimit >= 0 && eventCount++ > importLimit) {
                     // Too many events
                     LOGGER.debug("The defined maximum value of {} events was exceeded. Aborting the import.", I(importLimit));
-                    throw ICalExceptionCodes.TOO_MANY_IMPORTS.create();
+                    throw ICalExceptionCodes.TOO_MANY_IMPORTS.create(I(importLimit));
                 }
             } else if (line.matches("^\\s*END:VEVENT")) {
                 inTransition = false;

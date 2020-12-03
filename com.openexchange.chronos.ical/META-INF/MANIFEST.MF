@@ -21,3 +21,4 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.chronos.ical
+Automatic-Module-Name: com.openexchange.chronos.ical
