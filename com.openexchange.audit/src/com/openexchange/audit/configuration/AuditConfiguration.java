@@ -74,19 +74,19 @@ public class AuditConfiguration {
     }
 
     public static int getLogfileLimit() throws OXException {
-        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.limit", "2097152"));
+        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.limit", "2097152"));
     }
 
     public static int getLogfileCount() throws OXException {
-        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.count", "99"));
+        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.count", "99"));
     }
 
     public static Formatter getLogfileFormatter() throws InstantiationException, IllegalAccessException, ClassNotFoundException, OXException {
-        return (Formatter) Class.forName(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance();
+        return (Formatter) Class.forName(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance();
     }
 
     public static boolean getLogfileAppend() throws OXException {
-        return Boolean.parseBoolean(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.append", "true"));
+        return Boolean.parseBoolean(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.append", "true"));
     }
 
     public static boolean getFileAccessLogging() throws OXException {
