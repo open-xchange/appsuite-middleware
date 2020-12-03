@@ -42,3 +42,4 @@ Import-Package: com.openexchange.ajax,
 Require-Bundle: com.openexchange.sessionstorage.hazelcast;resolution:=optional
 Export-Package: com.openexchange.kerberos
 Eclipse-RegisterBuddy: com.openexchange.sessionstorage.hazelcast
+Automatic-Module-Name: com.openexchange.authentication.kerberos
