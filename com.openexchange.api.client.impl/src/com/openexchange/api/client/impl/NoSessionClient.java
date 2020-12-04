@@ -67,14 +67,15 @@ public class NoSessionClient extends AbstractApiClient {
 
     /**
      * Initializes a new {@link NoSessionClient}.
-     * 
+     *
      * @param services The services
      * @param contextId The context identifier of this local OX node
      * @param userId The user identifier of this local OX node
+     * @param sessionId The user identifier of this local OX node
      * @param loginLink The link to the target to log in into
      */
-    public NoSessionClient(ServiceLookup services, int contextId, int userId, URL loginLink) {
-        super(services, contextId, userId, loginLink);
+    public NoSessionClient(ServiceLookup services, int contextId, int userId, String sessionId, URL loginLink) {
+        super(services, contextId, userId, sessionId, loginLink);
     }
 
     @Override

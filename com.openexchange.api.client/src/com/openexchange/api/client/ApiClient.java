@@ -77,6 +77,13 @@ public interface ApiClient {
     int getUserId();
 
     /**
+     * Gets the session identifier that belongs to the local server
+     *
+     * @return The local user session ID
+     */
+    String getSession();
+
+    /**
      * Gets the link to the login or rather the URL for the remote App Suite instance
      *
      * @return The initial link, e.g. <code>share.appsuite.example.org/share/1123</code>

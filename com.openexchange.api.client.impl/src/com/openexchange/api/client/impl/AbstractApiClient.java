@@ -136,6 +136,7 @@ public abstract class AbstractApiClient implements ApiClient {
 
     protected final int contextId;
     protected final int userId;
+    protected final String sessionId;
     protected final URL loginLink;
 
     protected final CookieStore cookieStore;
@@ -148,15 +149,17 @@ public abstract class AbstractApiClient implements ApiClient {
      * @param services The service lookup
      * @param contextId The context identifier of this local OX node for logging
      * @param userId The user identifier of this local OX node for logging
+     * @param sessionId The session identifier of this local OX node
      * @param loginLink The link to the target to log in into
      */
-    public AbstractApiClient(ServiceLookup services, int contextId, int userId, URL loginLink) {
+    public AbstractApiClient(ServiceLookup services, int contextId, int userId, String sessionId, URL loginLink) {
         super();
 
         this.services = services;
         this.loginLink = loginLink;
         this.contextId = contextId;
         this.userId = userId;
+        this.sessionId = sessionId;
 
         this.cookieStore = HttpContextUtils.createCookieStore();
 
@@ -171,6 +174,11 @@ public abstract class AbstractApiClient implements ApiClient {
     @Override
     public int getUserId() {
         return userId;
+    }
+
+    @Override
+    public String getSession() {
+        return sessionId;
     }
 
     @Override
@@ -286,7 +294,7 @@ public abstract class AbstractApiClient implements ApiClient {
      * Performs a logout call.
      * <p>
      * Clears the cookie store
-     * 
+     *
      * @param logOnError If an error should be logged
      */
     protected void doLogout(boolean logOnError) {

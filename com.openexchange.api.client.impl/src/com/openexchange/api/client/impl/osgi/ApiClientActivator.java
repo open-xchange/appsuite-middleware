@@ -49,12 +49,15 @@
 
 package com.openexchange.api.client.impl.osgi;
 
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.api.client.ApiClientService;
 import com.openexchange.api.client.impl.ApiClientServiceImpl;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.user.UserService;
 import com.openexchange.version.VersionService;
 
@@ -78,7 +81,9 @@ public class ApiClientActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(ApiClientService.class, new ApiClientServiceImpl(this));
+        ApiClientServiceImpl apiClientService = new ApiClientServiceImpl(this);
+        registerService(ApiClientService.class, apiClientService);
+        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_REMOVE_SESSION));
         registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
     }
 

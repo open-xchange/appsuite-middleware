@@ -86,11 +86,12 @@ public class ApiShareClient extends AbstractApiClient {
      * @param services The service lookup
      * @param contextId The context identifier of this local OX node
      * @param userId The user identifier of this local OX node
+     * @param sessionId The session identifier of this local OX node
      * @param loginTarget The link to the target to log in into
      * @param credentials The credentials to access the targets resources
      */
-    public ApiShareClient(ServiceLookup services, int contextId, int userId, URL loginTarget, Credentials credentials) {
-        super(services, contextId, userId, loginTarget);
+    public ApiShareClient(ServiceLookup services, int contextId, int userId, String sessionId, URL loginTarget, Credentials credentials) {
+        super(services, contextId, userId, sessionId, loginTarget);
         this.credentials = null == credentials ? Credentials.EMPTY : credentials;
     }
 
