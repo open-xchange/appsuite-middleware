@@ -903,6 +903,28 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 }
             }
 
+            mailInterface = MailServletInterface.getInstance(session);
+
+            // Reply or (inline) forward?
+            Meta meta = m.getMeta();
+            Optional<MailMessage> originalMail = null;
+            {
+                MetaType metaType = meta.getType();
+                if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
+                    MailPath replyFor = meta.getReplyFor();
+                    originalMail = optionalMailMessage(replyFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), mimeMessage);
+                    }
+                } else if (metaType == MetaType.FORWARD_INLINE) {
+                    MailPath forwardFor = meta.getForwardsFor().get(0);
+                    originalMail = optionalMailMessage(forwardFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), mimeMessage);
+                    }
+                }
+            }
+
             // Build MIME body
             String charset = MailProperties.getInstance().getDefaultMimeCharset();
             List<Attachment> attachments = m.getAttachments();
@@ -939,7 +961,6 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 }
             }
 
-            mailInterface = MailServletInterface.getInstance(session);
             MailPath draftPath = mailInterface.saveDraft(mailMessage, false, accountId);
 
             // Check if original mails needs to be removed
@@ -2490,6 +2511,63 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
              * "References:" field.
              */
             message.setHeader(HDR_REFERENCES, refBuilder.toString());
+        }
+    }
+
+    /**
+     * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
+     *
+     * @param referencedMail The referenced mail
+     * @param mimeMessage The MIME message to set in
+     * @throws MessagingException If headers cannot be set
+     */
+    private static void setReplyHeaders(MailMessage referencedMail, MimeMessage mimeMessage) throws MessagingException {
+        if (null == referencedMail) {
+            /*
+             * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.
+             */
+            return;
+        }
+        final String pMsgId = referencedMail.getFirstHeader(HDR_MESSAGE_ID);
+        if (pMsgId != null) {
+            mimeMessage.setHeader(HDR_IN_REPLY_TO, pMsgId);
+        }
+        /*
+         * Set References header field
+         */
+        final String pReferences = referencedMail.getFirstHeader(HDR_REFERENCES);
+        final String pInReplyTo = referencedMail.getFirstHeader(HDR_IN_REPLY_TO);
+        final StringBuilder refBuilder = new StringBuilder();
+        if (pReferences != null) {
+            /*
+             * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
+             * the parent's "Message-ID:" field (if any).
+             */
+            refBuilder.append(pReferences);
+        } else if (pInReplyTo != null) {
+            /*
+             * If the parent message does not contain a "References:" field but does have an "In-Reply-To:" field containing a single
+             * message identifier, then the "References:" field will contain the contents of the parent's "In-Reply-To:" field followed by
+             * the contents of the parent's "Message-ID:" field (if any).
+             */
+            refBuilder.append(pInReplyTo);
+        }
+        if (pMsgId != null) {
+            if (refBuilder.length() > 0) {
+                refBuilder.append(' ');
+            }
+            refBuilder.append(pMsgId);
+            /*
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
+             * "References:" field.
+             */
+            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
+        } else if (refBuilder.length() > 0) {
+            /*
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
+             * "References:" field.
+             */
+            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
         }
     }
 

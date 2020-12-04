@@ -77,6 +77,298 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class ConfigCascade implements ConfigViewFactory {
 
+    private final ConcurrentMap<String, ConfigProviderService> providers;
+    private final SearchPath searchPath;
+    private final AtomicReference<StringParser> stringParserReference;
+
+    /**
+     * Initializes a new {@link ConfigCascade}.
+     */
+    public ConfigCascade() {
+        super();
+        ConcurrentMap<String, ConfigProviderService> providers = new ConcurrentHashMap<String, ConfigProviderService>(8, 0.9F, 1);
+        this.providers = providers;
+        searchPath = new SearchPath(providers);
+        stringParserReference = new AtomicReference<StringParser>(null);
+    }
+
+    public void setProvider(String scope, ConfigProviderService configProvider) {
+        providers.put(scope, configProvider);
+    }
+
+    @Override
+    public ConfigView getView(int userId, int contextId) {
+        int user = userId <= 0 ? -1 : userId;
+        int context = contextId <= 0 ? -1 : contextId;
+        return new View(user, context, providers, searchPath.getSearchPath(), getConfigProviders(), stringParserReference.get());
+    }
+
+    @Override
+    public ConfigView getView() {
+        return new View(-1, -1, providers, searchPath.getSearchPath(), getConfigProviders(), stringParserReference.get());
+    }
+
+    public void setSearchPath(String... searchPath) {
+        this.searchPath.setSearchPath(searchPath);
+    }
+
+    @Override
+    public String[] getSearchPath() {
+        return searchPath.getSearchPath();
+    }
+
+    protected List<ConfigProviderService> getConfigProviders() {
+        return searchPath.getConfigProviders();
+    }
+
+    public void setStringParser(StringParser stringParser) {
+        stringParserReference.set(stringParser);
+    }
+
+    // ------------------------------------------------------------------------------------------
+
+    private static final class View implements ConfigView {
+
+        final int context;
+        final int user;
+        final String[] searchPath;
+        final ConcurrentMap<String, ConfigProviderService> providers;
+        final StringParser stringParser;
+        private final List<ConfigProviderService> configProviders;
+
+        View(int user, int context, ConcurrentMap<String, ConfigProviderService> providers, String[] searchPath, List<ConfigProviderService> configProviders, StringParser stringParser) {
+            super();
+            this.user = user;
+            this.context = context;
+            this.providers = providers;
+            this.searchPath = searchPath;
+            this.configProviders = configProviders;
+            this.stringParser = stringParser;
+        }
+
+        @Override
+        public <T> void set(String scope, String propertyName, T value) throws OXException {
+            ((ConfigProperty<T>) property(scope, propertyName, value.getClass())).set(value);
+        }
+
+        @Override
+        public <T> T get(String propertyName, Class<T> coerceTo) throws OXException {
+            return property(propertyName, coerceTo).get();
+        }
+
+        @Override
+        public <T> T opt(String propertyName, java.lang.Class<T> coerceTo, T defaultValue) throws OXException {
+            ComposedConfigProperty<T> p = property(propertyName, coerceTo);
+            return p.isDefined() ? p.get() : defaultValue;
+        }
+
+        @Override
+        public <T> ConfigProperty<T> property(String scope, String propertyName, Class<T> coerceTo) throws OXException {
+            ConfigProviderService configProviderService = providers.get(scope);
+            if (configProviderService == null) {
+                // No such config provider for specified scope
+                return new CoercingConfigProperty<T>(coerceTo, new NonExistentBasicProperty(propertyName, scope), stringParser);
+            }
+            return new CoercingConfigProperty<T>(coerceTo, configProviderService.get(propertyName, context, user), stringParser);
+        }
+
+        @Override
+        public <T> ComposedConfigProperty<T> property(String propertyName, Class<T> coerceTo) {
+            return new CoercingComposedConfigProperty<T>(coerceTo, new DefaultComposedConfigProperty(propertyName, this), stringParser);
+        }
+
+        @Override
+        public Map<String, ComposedConfigProperty<String>> all() throws OXException {
+            Set<String> names = new HashSet<String>();
+            for (ConfigProviderService provider : configProviders) {
+                names.addAll(provider.getAllPropertyNames(context, user));
+            }
+
+            Map<String, ComposedConfigProperty<String>> properties = new HashMap<String, ComposedConfigProperty<String>>();
+            for (String name : names) {
+                properties.put(name, property(name, String.class));
+            }
+
+            return properties;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class DefaultComposedConfigProperty implements ComposedConfigProperty<String> {
+
+        private final AtomicReference<String[]> overriddenStrings;
+        private final String property;
+        private final View view;
+
+        DefaultComposedConfigProperty(String property, View view) {
+            super();
+            this.property = property;
+            this.view = view;
+            overriddenStrings = new AtomicReference<String[]>(null);
+        }
+
+        @Override
+        public String get() throws OXException {
+            String finalScope = getFinalScope();
+            for (ConfigProviderService provider : getConfigProviders(finalScope)) {
+                String value = provider.get(property, view.context, view.user).get();
+                if (value != null) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        private String getFinalScope() throws OXException {
+            return view.property(property, String.class).precedence("server", "reseller", "context", "user").get("final");
+        }
+
+        @Override
+        public String get(String metadataName) throws OXException {
+            for (ConfigProviderService provider : getConfigProviders(null)) {
+                String value = provider.get(property, view.context, view.user).get(metadataName);
+                if (value != null) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String getScope() throws OXException {
+            String finalScope = getFinalScope();
+            for (ConfigProviderService provider : getConfigProviders(finalScope)) {
+                String value = provider.get(property, view.context, view.user).get();
+                if (value != null) {
+                    return provider.getScope();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public <M> M get(String metadataName, Class<M> m) throws OXException {
+            for (ConfigProviderService provider : getConfigProviders(null)) {
+                String value = provider.get(property, view.context, view.user).get(metadataName);
+                if (value != null) {
+                    M parsed = view.stringParser.parse(value, m);
+                    if (parsed == null) {
+                        throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, m.getName());
+                    }
+                    return parsed;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public List<String> getMetadataNames() throws OXException {
+            Set<String> metadataNames = new HashSet<String>();
+            for (ConfigProviderService provider : getConfigProviders(null)) {
+                BasicProperty basicProperty = provider.get(property, view.context, view.user);
+                if (basicProperty != null) {
+                    metadataNames.addAll(basicProperty.getMetadataNames());
+                }
+            }
+            return new ArrayList<String>(metadataNames);
+        }
+
+        @Override
+        public <M> ComposedConfigProperty<String> set(String metadataName, M value) throws OXException {
+            throw new UnsupportedOperationException("Unscoped set is not supported");
+        }
+
+        @Override
+        public ComposedConfigProperty<String> set(String value) throws OXException {
+            throw new UnsupportedOperationException("Unscoped set is not supported");
+        }
+
+        @Override
+        public ComposedConfigProperty<String> precedence(String... scopes) throws OXException {
+            overriddenStrings.set(scopes);
+            return this;
+        }
+
+        private List<ConfigProviderService> getConfigProviders(String finalScope) {
+            String[] overriddenStrings = this.overriddenStrings.get();
+            String[] s = (overriddenStrings == null) ? view.searchPath : overriddenStrings;
+
+            List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
+            boolean collect = false;
+            for (String scope : s) {
+                collect = collect || finalScope == null || finalScope.equals(scope);
+
+                if (collect) {
+                    ConfigProviderService providerService = view.providers.get(scope);
+                    if (providerService != null) {
+                        p.add(providerService);
+                    }
+                }
+            }
+            return p;
+        }
+
+        @Override
+        public boolean isDefined() throws OXException {
+            String finalScope = getFinalScope();
+            for (ConfigProviderService provider : getConfigProviders(finalScope)) {
+                boolean defined = provider.get(property, view.context,view.user).isDefined();
+                if (defined) {
+                    return defined;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws OXException {
+            return new CoercingComposedConfigProperty<M>(otherType, this, view.stringParser);
+        }
+    }
+
+    private static class NonExistentBasicProperty implements BasicProperty {
+
+        private final String property;
+        private final String scope;
+
+        NonExistentBasicProperty(String property, String scope) {
+            super();
+            this.property = property;
+            this.scope = scope;
+        }
+
+        @Override
+        public void set(String metadataName, String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, scope);
+        }
+
+        @Override
+        public void set(String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, scope);
+        }
+
+        @Override
+        public boolean isDefined() throws OXException {
+            return false;
+        }
+
+        @Override
+        public List<String> getMetadataNames() throws OXException {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String get(String metadataName) throws OXException {
+            return null;
+        }
+
+        @Override
+        public String get() throws OXException {
+            return null;
+        }
+    }
+
     private static final class SearchPath {
 
         private final ConcurrentMap<String, ConfigProviderService> providers;
@@ -131,287 +423,4 @@ public class ConfigCascade implements ConfigViewFactory {
         }
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    final ConcurrentMap<String, ConfigProviderService> providers;
-    final SearchPath searchPath;
-    final AtomicReference<StringParser> stringParser;
-
-    /**
-     * Initializes a new {@link ConfigCascade}.
-     */
-    public ConfigCascade() {
-        super();
-        ConcurrentMap<String, ConfigProviderService> providers = new ConcurrentHashMap<String, ConfigProviderService>(8, 0.9F, 1);
-        this.providers = providers;
-        searchPath = new SearchPath(providers);
-        stringParser = new AtomicReference<StringParser>(null);
-    }
-
-    public void setProvider(final String scope, final ConfigProviderService configProvider) {
-        providers.put(scope, configProvider);
-    }
-
-    @Override
-    public ConfigView getView(int userId, int contextId) {
-        int user = userId <= 0 ? -1 : userId;
-        int context = contextId <= 0 ? -1 : contextId;
-        return new View(user, context, providers, searchPath.getSearchPath(), getConfigProviders(), stringParser.get());
-    }
-
-    @Override
-    public ConfigView getView() {
-        return new View(-1, -1, providers, searchPath.getSearchPath(), getConfigProviders(), stringParser.get());
-    }
-
-    public void setSearchPath(final String... searchPath) {
-        this.searchPath.setSearchPath(searchPath);
-    }
-
-    @Override
-    public String[] getSearchPath() {
-        return searchPath.getSearchPath();
-    }
-
-    protected List<ConfigProviderService> getConfigProviders() {
-        return searchPath.getConfigProviders();
-    }
-
-    public void setStringParser(final StringParser stringParser) {
-        this.stringParser.set(stringParser);
-    }
-
-    // ------------------------------------------------------------------------------------------
-
-    private static final class View implements ConfigView {
-
-        final int context;
-        final int user;
-        final String[] searchPath;
-        final ConcurrentMap<String, ConfigProviderService> providers;
-        final StringParser stringParser;
-        final List<ConfigProviderService> configProviders;
-
-        View(int user, int context, ConcurrentMap<String, ConfigProviderService> providers, String[] searchPath, List<ConfigProviderService> configProviders, StringParser stringParser) {
-            super();
-            this.user = user;
-            this.context = context;
-            this.providers = providers;
-            this.searchPath = searchPath;
-            this.configProviders = configProviders;
-            this.stringParser = stringParser;
-        }
-
-        @Override
-        public <T> void set(final String scope, final String property, final T value) throws OXException {
-            ((ConfigProperty<T>) property(scope, property, value.getClass())).set(value);
-        }
-
-        @Override
-        public <T> T get(final String property, final Class<T> coerceTo) throws OXException {
-            return property(property, coerceTo).get();
-        }
-
-        @Override
-        public <T> T opt(final String property, final java.lang.Class<T> coerceTo, final T defaultValue) throws OXException {
-            final ComposedConfigProperty<T> p = property(property, coerceTo);
-            return p.isDefined() ? p.get() : defaultValue;
-        }
-
-        @Override
-        public <T> ConfigProperty<T> property(final String scope, final String property, final Class<T> coerceTo) throws OXException {
-            ConfigProviderService configProviderService = providers.get(scope);
-            if (configProviderService == null) {
-                // No such config provider for specified scope
-                return new CoercingConfigProperty<T>(coerceTo, new NonExistentBasicProperty(property, scope), stringParser);
-            }
-            return new CoercingConfigProperty<T>(coerceTo, configProviderService.get(property, context, user), stringParser);
-        }
-
-        @Override
-        public <T> ComposedConfigProperty<T> property(final String property, final Class<T> coerceTo) {
-            return new CoercingComposedConfigProperty<T>(coerceTo, new ComposedConfigProperty<String>() {
-
-                private final AtomicReference<String[]> overriddenStrings = new AtomicReference<String[]>(null);
-
-                @Override
-                public String get() throws OXException {
-                    final String finalScope = getFinalScope();
-                    for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
-                        final String value = provider.get(property, context, user).get();
-                        if (value != null) {
-                            return value;
-                        }
-                    }
-                    return null;
-                }
-
-                private String getFinalScope() throws OXException {
-                    return property(property, String.class).precedence("server", "reseller", "context", "user").get("final");
-                }
-
-                @Override
-                public String get(final String metadataName) throws OXException {
-                    for (final ConfigProviderService provider : getConfigProviders(null)) {
-                        final String value = provider.get(property, context, user).get(metadataName);
-                        if (value != null) {
-                            return value;
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                public String getScope() throws OXException {
-                    final String finalScope = getFinalScope();
-                    for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
-                        final String value = provider.get(property, context, user).get();
-                        if (value != null) {
-                            return provider.getScope();
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                public <M> M get(final String metadataName, final Class<M> m) throws OXException {
-                    for (final ConfigProviderService provider : getConfigProviders(null)) {
-                        final String value = provider.get(property, context, user).get(metadataName);
-                        if (value != null) {
-                            final M parsed = stringParser.parse(value, m);
-                            if (parsed == null) {
-                                throw ConfigCascadeExceptionCodes.COULD_NOT_COERCE_VALUE.create(value, m.getName());
-                            }
-                            return parsed;
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                public List<String> getMetadataNames() throws OXException {
-                    final Set<String> metadataNames = new HashSet<String>();
-                    for (final ConfigProviderService provider : getConfigProviders(null)) {
-                        final BasicProperty basicProperty = provider.get(property, context, user);
-                        if (basicProperty != null) {
-                            metadataNames.addAll(basicProperty.getMetadataNames());
-                        }
-                    }
-                    return new ArrayList<String>(metadataNames);
-                }
-
-                @Override
-                public <M> ComposedConfigProperty<String> set(final String metadataName, final M value) throws OXException {
-                    throw new UnsupportedOperationException("Unscoped set is not supported");
-                }
-
-                @Override
-                public ComposedConfigProperty<String> set(final String value) throws OXException {
-                    throw new UnsupportedOperationException("Unscoped set is not supported");
-                }
-
-                @Override
-                public ComposedConfigProperty<String> precedence(final String... scopes) throws OXException {
-                    overriddenStrings.set(scopes);
-                    return this;
-                }
-
-                private List<ConfigProviderService> getConfigProviders(final String finalScope) {
-                    String[] overriddenStrings = this.overriddenStrings.get();
-                    final String[] s = (overriddenStrings == null) ? searchPath : overriddenStrings;
-
-                    final List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
-                    boolean collect = false;
-                    for (final String scope : s) {
-                        collect = collect || finalScope == null || finalScope.equals(scope);
-
-                        if (collect) {
-                            ConfigProviderService providerService = providers.get(scope);
-                            if (providerService != null) {
-                                p.add(providerService);
-                            }
-                        }
-                    }
-                    return p;
-                }
-
-                @Override
-                public boolean isDefined() throws OXException {
-                    final String finalScope = getFinalScope();
-                    for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
-                        final boolean defined = provider.get(property, context, user).isDefined();
-                        if (defined) {
-                            return defined;
-                        }
-                    }
-                    return false;
-                }
-
-                @Override
-                public <M> ComposedConfigProperty<M> to(final Class<M> otherType) throws OXException {
-                    return new CoercingComposedConfigProperty<M>(otherType, this, stringParser);
-                }
-
-            }, stringParser);
-        }
-
-        @Override
-        public Map<String, ComposedConfigProperty<String>> all() throws OXException {
-            final Set<String> names = new HashSet<String>();
-            for (final ConfigProviderService provider : configProviders) {
-                names.addAll(provider.getAllPropertyNames(context, user));
-            }
-
-            final Map<String, ComposedConfigProperty<String>> properties = new HashMap<String, ComposedConfigProperty<String>>();
-            for (final String name : names) {
-                properties.put(name, property(name, String.class));
-            }
-
-            return properties;
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final class NonExistentBasicProperty implements BasicProperty {
-
-        private final String property;
-        private final String scope;
-
-        NonExistentBasicProperty(String property, String scope) {
-            super();
-            this.property = property;
-            this.scope = scope;
-        }
-
-        @Override
-        public void set(String metadataName, String value) throws OXException {
-            throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, scope);
-        }
-
-        @Override
-        public void set(String value) throws OXException {
-            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, scope);
-        }
-
-        @Override
-        public boolean isDefined() throws OXException {
-            return false;
-        }
-
-        @Override
-        public List<String> getMetadataNames() throws OXException {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public String get(String metadataName) throws OXException {
-            return null;
-        }
-
-        @Override
-        public String get() throws OXException {
-            return null;
-        }
-    }
 }

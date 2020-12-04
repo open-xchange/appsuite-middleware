@@ -938,13 +938,25 @@ public class MailMessageProcessor {
     /**
      * Compiles the draft mail from current draft representation.
      *
-     * @param asFinalDraft Whether to compile as final draft mail
      * @return A ComposedMailMessage
      * @throws OXException If compilation failed
      */
-    public ComposedMailMessage compileDraft(boolean asFinalDraft) throws OXException {
+    public ComposedMailMessage compileDraft() throws OXException {
         validateState();
-        compileDraft0(asFinalDraft);
+        compileDraft0(false, Optional.empty());
+        return new ContentAwareComposedMailMessage(this.mimeMessage, session.getContextId());
+    }
+
+    /**
+     * Compiles the draft mail from current draft representation.
+     *
+     * @param optRefMessage The optional referenced message (in case of reply, forward, etc.)
+     * @return A ComposedMailMessage
+     * @throws OXException If compilation failed
+     */
+    public ComposedMailMessage compileFinalDraft(Optional<MailMessage> optRefMessage) throws OXException {
+        validateState();
+        compileDraft0(true, optRefMessage);
         return new ContentAwareComposedMailMessage(this.mimeMessage, session.getContextId());
     }
 
@@ -1965,11 +1977,12 @@ public class MailMessageProcessor {
      * @param asFinalDraft <code>true</code> if the compiled message is supposed to be stored
      *        due to an explicit "save as draft" request. <code>false</code> if message is used for
      *        transport.
+     * @param optRefMessage The optional referenced message (in case of reply, forward, etc.)
      * @throws OXException
      */
-    private void compileDraft0(boolean asFinalDraft) throws OXException {
+    private void compileDraft0(boolean asFinalDraft, Optional<MailMessage> optRefMessage) throws OXException {
         // Apply outstanding changes to MIME Message representation
-        compileMimeMessage(asFinalDraft ? CompileMode.FINAL_DRAFT : CompileMode.COMPOSITION_SPACE);
+        compileMimeMessage(asFinalDraft ? CompileMode.FINAL_DRAFT : CompileMode.COMPOSITION_SPACE, optRefMessage);
 
         Result cacheResult = cacheMessage();
         if (cacheResult.success()) {
@@ -2151,7 +2164,7 @@ public class MailMessageProcessor {
         sourceMessage.setContentType(this.contentType.getId());
     }
 
-    private void compileMimeMessage(CompileMode compileMode) throws OXException {
+    private void compileMimeMessage(CompileMode compileMode, Optional<MailMessage> optRefMessage) throws OXException {
         boolean isHtml = this.contentType.isImpliesHtml();
         String charset = MailProperties.getInstance().getDefaultMimeCharset();
         try {
@@ -2168,6 +2181,9 @@ public class MailMessageProcessor {
                     cleanCompositionSpaceHeaders(true);
                     break;
                 case FINAL_DRAFT:
+                    if (optRefMessage.isPresent()) {
+                        setReplyHeaders(optRefMessage.get(), mimeMessage);
+                    }
                     cleanCompositionSpaceHeaders(false);
                     break;
                 default:
@@ -2703,6 +2719,62 @@ public class MailMessageProcessor {
         }
     }
 
+    /**
+     * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
+     *
+     * @param referencedMail The referenced mail
+     * @param mimeMessage The MIME message to set in
+     * @throws MessagingException If reply headers cannot be set
+     */
+    private static void setReplyHeaders(MailMessage referencedMail, MimeMessage mimeMessage) throws MessagingException {
+        if (null == referencedMail) {
+            /*
+             * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.
+             */
+            return;
+        }
+        final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
+        if (pMsgId != null) {
+            mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
+        }
+        /*
+         * Set References header field
+         */
+        final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
+        final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
+        final StringBuilder refBuilder = new StringBuilder();
+        if (pReferences != null) {
+            /*
+             * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
+             * the parent's "Message-ID:" field (if any).
+             */
+            refBuilder.append(pReferences);
+        } else if (pInReplyTo != null) {
+            /*
+             * If the parent message does not contain a "References:" field but does have an "In-Reply-To:" field containing a single
+             * message identifier, then the "References:" field will contain the contents of the parent's "In-Reply-To:" field followed by
+             * the contents of the parent's "Message-ID:" field (if any).
+             */
+            refBuilder.append(pInReplyTo);
+        }
+        if (pMsgId != null) {
+            if (refBuilder.length() > 0) {
+                refBuilder.append(' ');
+            }
+            refBuilder.append(pMsgId);
+            /*
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
+             * "References:" field.
+             */
+            mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
+        } else if (refBuilder.length() > 0) {
+            /*
+             * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
+             * "References:" field.
+             */
+            mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
+        }
+    }
 
     // ---------------------------------------- HELPERS ----------------------------------------
 

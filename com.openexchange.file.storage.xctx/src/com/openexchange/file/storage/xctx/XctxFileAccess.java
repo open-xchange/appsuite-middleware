@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.xctx;
 
+import static com.openexchange.file.storage.xctx.XctxAccountAccess.XCTX_PARENT_FOLDER_IDS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess implements FileS
 
     @Override
     protected InfostoreFacade getInfostore(String folderId) throws OXException {
-        if (XctxFolderAccess.UNHANDLED_FOLDER_IDS.contains(folderId)) {
+        if (XCTX_PARENT_FOLDER_IDS.contains(folderId)) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
                 folderId, accountAccess.getAccountId(), accountAccess.getService().getId(), I(localSession.getUserId()), I(localSession.getContextId()));
         }
@@ -137,10 +138,6 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess implements FileS
         return filterUnsubscribed(super.search(folderId, includeSubfolders, searchTerm, fields, sort, order, start, end));
     }
 
-    private SearchIterator<File> filterUnsubscribed(SearchIterator<File> searchIterator) {
-        return accountAccess.getSubscribedHelper().filterUnsubscribed(searchIterator, (id) -> accountAccess.getFolderAccess().getFolder(id));
-    }
-
     @Override
     public String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException {
         String shareUrl = (String) accountAccess.getAccount().getConfiguration().get("url");
@@ -158,6 +155,10 @@ public class XctxFileAccess extends AbstractInfostoreFileAccess implements FileS
         return "XctxFileAccess [accountId=" + accountAccess.getAccountId() +
             ", localUser=" + localSession.getUserId() + '@' + localSession.getContextId() +
             ", guestUser=" + super.session.getUserId() + '@' + super.session.getContextId() + ']';
+    }
+
+    private SearchIterator<File> filterUnsubscribed(SearchIterator<File> searchIterator) {
+        return accountAccess.getSubscribedHelper().filterUnsubscribed(searchIterator, (id) -> accountAccess.getFolderAccess().getFolder(id));
     }
 
 }

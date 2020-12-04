@@ -212,6 +212,13 @@ public class ProvisioningSetup {
 
     private static File getPropFile() throws OXException {
         String propertyFileName = getPropertyFileName();
+
+        //Check for custom provisioning properties
+        final File customPropFile = new File(propertyFileName.replace(".properties", "-custom.properties"));
+        if (customPropFile.exists() && customPropFile.canRead()) {
+            return customPropFile;
+        }
+
         final File propFile = new File(propertyFileName);
         if (!propFile.exists()) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsoluteFile());
@@ -219,7 +226,7 @@ public class ProvisioningSetup {
         if (!propFile.canRead()) {
             throw ConfigurationExceptionCodes.NOT_READABLE.create(propFile.getAbsoluteFile());
         }
-        return propFile;
+            return propFile;
     }
 
     protected static String getPropertyFileName() throws OXException {

@@ -398,6 +398,7 @@ properties:
     related: 
     file: contact.properties
     packageName: open-xchange-core
+    tags: ["Contact"]
   - key: com.openexchange.contactcollector.enabled
     description: |
       Whether enabled or disabled regardless of bundle start-up.

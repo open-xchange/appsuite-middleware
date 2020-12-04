@@ -79,7 +79,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
     }
 
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
+    public BasicProperty get(String propertyName, int contextId, int userId) throws OXException {
         if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
@@ -87,7 +87,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextService == null) {
             return NO_PROPERTY;
         }
-        return get(property, contextService.loadContext(contextId), userId);
+        return get(propertyName, contextService.loadContext(contextId), userId);
     }
 
     @Override

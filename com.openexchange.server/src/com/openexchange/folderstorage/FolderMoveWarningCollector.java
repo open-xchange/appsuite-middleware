@@ -184,10 +184,6 @@ public class FolderMoveWarningCollector {
         switch (folderType) {
             case PUBLIC:
                 mode = configService.getProperty(userId, contextId, MovePermissionProperty.MOVE_TO_PUBLIC);
-                if (Strings.isEmpty(mode) && configService.getBooleanProperty(userId, contextId, MovePermissionProperty.INHERIT_PARENT_PERMISSIONS)) {
-                    // Use old behaviour for public folders...
-                    mode = "merge";
-                }
                 break;
             case SHARED:
                 mode = configService.getProperty(userId, contextId, MovePermissionProperty.MOVE_TO_SHARED);

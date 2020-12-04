@@ -58,6 +58,7 @@ import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.EntityInfo;

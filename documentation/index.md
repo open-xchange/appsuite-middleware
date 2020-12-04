@@ -1,6 +1,7 @@
 ---
 title: Middleware Documentation
 description:
+classes: no-counting
 ---
 
 Welcome to the documentation about the inner workings of the Java-based middleware platform of OX App Suite. This technical documentation covers articles about different topics and features, grouped by different subtopics on the left.
@@ -115,14 +116,14 @@ Regarding the support of external authorization servers it is now possible to pr
 
 As before, the OAuth 2.0 provider is activated by the property:
 
-* <code>com.openexchange.oauth.provider.enabled</code>
+* <code>[com.openexchange.oauth.provider.enabled](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.oauth.provider.enabled)</code>
 
 The configuration property <code>com.openexchange.oauth.provider.isAuthorizationServer</code>
-is no longer available and was transferred to <code>com.openexchange.oauth.provider.mode</code>, which now configures the OAuth provider.
+is no longer available and was transferred to <code>[com.openexchange.oauth.provider.mode](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.oauth.provider.mode)</code>, which now configures the OAuth provider.
 
 The following is a list of possible configurations:
 
-* <code>com.openexchange.oauth.provider.mode</code>
+* <code>[com.openexchange.oauth.provider.mode](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.oauth.provider.mode)</code>
  Besides the functionality to act as an OAuth 2.0 provider, there are three different modes to choose from:
   * <code>auth_server</code>
  Defines whether the enabled OAuth 2.0 provider does not only act as resource server but also as authorization server.
@@ -131,7 +132,7 @@ The following is a list of possible configurations:
    * <code>token_introspection</code>
  Defines whether the enabled OAuth 2.0 provider is able to grant access based on opaque bearer tokens through token introspection.
 
-See [OAuth 2.0 Operator Guide](https://documentation.open-xchange.com/7.10.4/middleware/login_and_sessions/oauth_2.0_provider/01_operator_guide.html#using-an-external-authorization-server) for a complete list of configuration options.
+See [OAuth 2.0 Operator Guide](https://documentation.open-xchange.com/7.10.5/middleware/login_and_sessions/oauth_2.0_provider/01_operator_guide.html) for a complete list of configuration options.
 
 ## Upgrade to Hazelcast 4
 

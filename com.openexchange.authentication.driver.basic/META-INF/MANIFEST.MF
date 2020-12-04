@@ -20,3 +20,4 @@ Import-Package: com.openexchange.authentication,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.authentication.driver.basic

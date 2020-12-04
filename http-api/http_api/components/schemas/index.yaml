@@ -127,9 +127,11 @@ DistributionListMember:
 ContactData:
   allOf:
   - type: object
+    title: CommonObjectData
     properties:
       $ref: ./common/CommonObjectData.yaml
   - type: object
+    title: RawContactData
     properties:
       $ref: ./contacts/RawContactData.yaml
 ContactDataWithInternalId:
