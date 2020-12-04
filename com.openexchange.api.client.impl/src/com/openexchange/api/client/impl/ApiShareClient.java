@@ -51,6 +51,7 @@ package com.openexchange.api.client.impl;
 
 import java.net.URL;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.Credentials;
@@ -77,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
 public class ApiShareClient extends AbstractApiClient {
 
     private LoginInformation information;
-    private final Credentials credentials;
+    private final @NonNull Credentials credentials;
 
     /**
      * Initializes a new {@link ApiShareClient}.
@@ -90,7 +91,7 @@ public class ApiShareClient extends AbstractApiClient {
      */
     public ApiShareClient(ServiceLookup services, int contextId, int userId, URL loginTarget, Credentials credentials) {
         super(services, contextId, userId, loginTarget);
-        this.credentials = null == credentials ? new Credentials("") : credentials;
+        this.credentials = null == credentials ? Credentials.EMPTY : credentials;
     }
 
     @Override
@@ -100,7 +101,7 @@ public class ApiShareClient extends AbstractApiClient {
     }
 
     @Override
-    @Nullable
+    @NonNull
     public Credentials getCredentials() {
         return credentials;
     }

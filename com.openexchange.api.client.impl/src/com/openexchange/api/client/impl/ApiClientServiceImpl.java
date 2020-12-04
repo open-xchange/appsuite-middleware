@@ -120,7 +120,7 @@ public class ApiClientServiceImpl implements ApiClientService {
         URL url = generateURL(loginLink);
         checkBlackList(url, contextId, userId);
 
-        Credentials credentials = null == creds ? new Credentials("") : creds;
+        Credentials credentials = null == creds ? Credentials.EMPTY : creds;
         String cacheKey = generateCacheKey(contextId, userId, url);
         try {
             ApiClient client = cachedClients.get(cacheKey, () -> loginClient(chooseClient(contextId, userId, url, credentials)));

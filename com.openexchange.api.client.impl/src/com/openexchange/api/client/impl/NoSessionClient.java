@@ -50,6 +50,7 @@
 package com.openexchange.api.client.impl;
 
 import java.net.URL;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.api.client.Credentials;
 import com.openexchange.api.client.LoginInformation;
@@ -77,9 +78,9 @@ public class NoSessionClient extends AbstractApiClient {
     }
 
     @Override
-    @Nullable
+    @NonNull
     public Credentials getCredentials() {
-        return null;
+        return Credentials.EMPTY;
     }
 
     @Override

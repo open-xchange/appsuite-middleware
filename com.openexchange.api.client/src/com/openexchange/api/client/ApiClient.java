@@ -50,6 +50,7 @@
 package com.openexchange.api.client;
 
 import java.net.URL;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
@@ -85,9 +86,9 @@ public interface ApiClient {
     /**
      * Gets the {@link Credentials}
      *
-     * @return The credentials, or null if no credentials are set
+     * @return The credentials. If not specified by the caller {@link Credentials#EMPTY} is returned
      */
-    @Nullable
+    @NonNull
     Credentials getCredentials();
 
     /**
