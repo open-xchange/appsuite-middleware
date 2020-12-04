@@ -265,6 +265,9 @@ public class DataExportServiceImpl implements DataExportService {
         }
 
         List<DataExportTask> dataExportTasks = storageService.getDataExportTasks();
+        if (dataExportTasks.isEmpty()) {
+            return dataExportTasks;
+        }
 
         ContextService contextService = services.getOptionalService(ContextService.class);
         if (contextService != null) {
