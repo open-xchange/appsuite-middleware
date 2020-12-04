@@ -84,7 +84,7 @@ public class ResellerConfigProvider implements ConfigProviderService {
         if (resellerService == null || false == resellerService.isEnabled()) {
             return NO_PROPERTY;
         }
-        return new ResellerBasicPropertyImpl(propertyName, contextId, services);
+        return new ResellerBasicPropertyImpl(propertyName, contextId, resellerService);
     }
 
     @Override

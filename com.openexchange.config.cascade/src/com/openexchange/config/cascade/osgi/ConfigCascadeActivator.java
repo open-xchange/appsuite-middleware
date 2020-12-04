@@ -57,8 +57,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
@@ -124,20 +126,16 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
                         return;
                     }
 
-                    ServiceTracker<ConfigProviderService, ConfigProviderService> configProviders = activator.track(TrackingProvider.createFilter("server", context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
+                    ServiceTracker<ConfigProviderService, ConfigProviderService> configProviders = activator.track(TrackingProvider.createFilter(ConfigViewScope.SERVER.getScopeName(), context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
 
                         @Override
                         public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
                             ConfigProviderService provider = context.getService(reference);
                             if (isServerProvider(reference)) {
                                 String scopes = getScopes(provider);
-                                try {
-                                    configure(scopes, configCascade);
-                                    configCascade.setProvider("server", provider);
-                                    registerService(ConfigViewFactory.class, configCascade);
-                                } catch (OXException e) {
-                                    logger.error("", e);
-                                }
+                                configure(scopes, configCascade);
+                                configCascade.setProvider(ConfigViewScope.SERVER.getScopeName(), provider);
+                                registerService(ConfigViewFactory.class, configCascade);
                             }
                             return provider;
                         }
@@ -190,7 +188,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
 
     boolean isServerProvider(final ServiceReference<?> reference) {
         Object scope = reference.getProperty("scope");
-        return "server".equals(scope);
+        return ConfigViewScope.SERVER.getScopeName().equals(scope);
     }
 
     String getScopes(ConfigProviderService config) {
@@ -203,16 +201,25 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         return null;
     }
 
-    synchronized void configure(String scopes, ConfigCascade cascade) throws OXException {
+    synchronized void configure(String scopes, ConfigCascade cascade) {
         if (configured) {
             return;
         }
-        final String scops = scopes == null ? "user, context, reseller, contextSets, server" : scopes;
-        configured = true;
 
-        String[] searchPath = scops.split("\\s*,\\s*");
+        String[] searchPath;
+        if (scopes == null) {
+            searchPath = new String[5];
+            searchPath[0] = ConfigViewScope.USER.getScopeName();
+            searchPath[1] = ConfigViewScope.CONTEXT.getScopeName();
+            searchPath[2] = ConfigViewScope.RESELLER.getScopeName();
+            searchPath[3] = ConfigViewScope.CONTEXT_SETS.getScopeName();
+            searchPath[4] = ConfigViewScope.SERVER.getScopeName();
+        } else {
+            searchPath = Strings.splitByComma(scopes);
+        }
+
         for (String scope : searchPath) {
-            if ("server".equals(scope)) {
+            if (ConfigViewScope.SERVER.getScopeName().equals(scope)) {
                 continue;
             }
 
@@ -223,6 +230,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         }
 
         cascade.setSearchPath(searchPath);
+        configured = true;
     }
 
 }

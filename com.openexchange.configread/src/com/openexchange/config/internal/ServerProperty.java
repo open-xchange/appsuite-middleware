@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 
 /**
@@ -108,7 +109,7 @@ public class ServerProperty implements BasicProperty {
      */
     @Override
     public void set(String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create("", "server");
+        throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create("", ConfigViewScope.SERVER.getScopeName());
     }
 
     /**
@@ -116,7 +117,7 @@ public class ServerProperty implements BasicProperty {
      */
     @Override
     public void set(String metadataName, String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "server");
+        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, ConfigViewScope.SERVER.getScopeName());
     }
 
     @Override

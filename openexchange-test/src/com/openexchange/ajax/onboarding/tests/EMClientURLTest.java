@@ -60,6 +60,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.config.cascade.ConfigViewScope;
 
 /**
  * {@link EMClientURLTest}
@@ -91,7 +92,7 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
 
     @Override
     public String getScope() {
-        return "user";
+        return ConfigViewScope.USER.getScopeName();
     }
 
     @Test

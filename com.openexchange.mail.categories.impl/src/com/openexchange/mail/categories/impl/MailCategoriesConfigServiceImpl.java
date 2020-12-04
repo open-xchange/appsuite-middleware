@@ -65,6 +65,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
@@ -680,7 +681,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             return;
         }
 
-        final ConfigProperty<String> hasRun = view.property("user", MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
+        final ConfigProperty<String> hasRun = view.property(ConfigViewScope.USER.getScopeName(), MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
         String currentStatus = hasRun.get();
         if (hasRun.isDefined() && (currentStatus.equals(STATUS_RUNNING) || currentStatus.equals(STATUS_FINISHED))) {
             return;

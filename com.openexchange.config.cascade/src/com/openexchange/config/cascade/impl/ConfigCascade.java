@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.strings.StringParser;
 
@@ -221,7 +222,7 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         private String getFinalScope() throws OXException {
-            return view.property(property, String.class).precedence("server", "reseller", "context", "user").get("final");
+            return view.property(property, String.class).precedence(ConfigViewScope.SERVER, ConfigViewScope.RESELLER, ConfigViewScope.CONTEXT, ConfigViewScope.USER).get("final");
         }
 
         @Override
@@ -285,6 +286,16 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         @Override
+        public ComposedConfigProperty<String> precedence(ConfigViewScope... scopes) throws OXException {
+            String[] scopez = new String[scopes.length];
+            for (int i = scopez.length; i-- > 0;) {
+                scopez[i] = scopes[i].getScopeName();
+            }
+            overriddenStrings.set(scopez);
+            return this;
+        }
+
+        @Override
         public ComposedConfigProperty<String> precedence(String... scopes) throws OXException {
             overriddenStrings.set(scopes);
             return this;
@@ -294,7 +305,7 @@ public class ConfigCascade implements ConfigViewFactory {
             String[] overriddenStrings = this.overriddenStrings.get();
             String[] s = (overriddenStrings == null) ? view.searchPath : overriddenStrings;
 
-            List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
+            List<ConfigProviderService> p = new ArrayList<ConfigProviderService>(s.length);
             boolean collect = false;
             for (String scope : s) {
                 collect = collect || finalScope == null || finalScope.equals(scope);

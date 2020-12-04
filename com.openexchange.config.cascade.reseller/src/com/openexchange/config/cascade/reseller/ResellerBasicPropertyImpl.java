@@ -57,7 +57,6 @@ import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerConfigProperty;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ResellerBasicPropertyImpl}
@@ -69,20 +68,21 @@ public class ResellerBasicPropertyImpl implements BasicProperty {
 
     private static final String SCOPE = ConfigViewScope.RESELLER.getScopeName();
     private static final String RESELLER_ID_METADATA_NAME = "resellerId";
+
     private final String property;
     private final int contextId;
-    private final ServiceLookup services;
+    private final ResellerService resellerService;
     private ResellerConfigProperty resellerProperty;
     private boolean loaded;
 
     /**
      * Initializes a new {@link ResellerBasicPropertyImpl}.
      */
-    public ResellerBasicPropertyImpl(String property, int contextId, ServiceLookup services) {
+    public ResellerBasicPropertyImpl(String property, int contextId, ResellerService resellerService) {
         super();
         this.property = property;
         this.contextId = contextId;
-        this.services = services;
+        this.resellerService = resellerService;
     }
 
     @Override
@@ -130,7 +130,6 @@ public class ResellerBasicPropertyImpl implements BasicProperty {
         if (loaded) {
             return;
         }
-        ResellerService resellerService = services.getServiceSafe(ResellerService.class);
         resellerProperty = resellerService.getConfigPropertyByContext(contextId, property);
         loaded = true;
     }

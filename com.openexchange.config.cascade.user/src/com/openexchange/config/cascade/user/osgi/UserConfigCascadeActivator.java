@@ -57,6 +57,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.user.UserConfigProvider;
 import com.openexchange.config.cascade.user.cache.CacheInvalidator;
 import com.openexchange.context.ContextService;
@@ -82,7 +83,7 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         // Register config provider for "user" scope
         Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put("scope", "user");
+        properties.put("scope", ConfigViewScope.USER.getScopeName());
         registerService(ConfigProviderService.class, new UserConfigProvider(this), properties);
 
         // Register event handler alongside with a cache invalidator

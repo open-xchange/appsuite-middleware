@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.strings.StringParser;
 
@@ -78,6 +79,13 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
 
     private void initDelegate(final ComposedConfigProperty<String> d) {
         this.delegate.set(d);
+    }
+
+    @Override
+    public ComposedConfigProperty<T> precedence(ConfigViewScope... scopes) throws OXException {
+        ComposedConfigProperty<String> delegate = this.delegate.get();
+        initDelegate(delegate.precedence(scopes));
+        return this;
     }
 
     @Override

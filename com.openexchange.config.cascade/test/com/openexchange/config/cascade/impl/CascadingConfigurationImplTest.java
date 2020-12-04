@@ -57,6 +57,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 
@@ -72,11 +73,11 @@ public class CascadingConfigurationImplTest {
 
     @Before
     public void setUp() throws Exception {
-        cascade.setProvider("server", new InMemoryConfigProvider());
-        cascade.setProvider("context", new InMemoryConfigProvider());
-        cascade.setProvider("user", new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.SERVER.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.CONTEXT.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.USER.getScopeName(), new InMemoryConfigProvider());
 
-        cascade.setSearchPath("user", "context", "server");
+        cascade.setSearchPath(ConfigViewScope.USER.getScopeName(), ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.SERVER.getScopeName());
 
         cascade.setStringParser(new BasicTypesStringParser());
 
@@ -85,49 +86,49 @@ public class CascadingConfigurationImplTest {
 
          @Test
      public void testCascadingProperty() throws OXException {
-        view.set("server", "com.openexchange.test.property", "Rosebud");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", "Rosebud");
         assertEquals("Rosebud", view.get("com.openexchange.test.property", String.class));
 
         // Now let's override this on context level
 
-        view.set("context", "com.openexchange.test.property", "Lemongrass");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", "Lemongrass");
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
 
         // And finally on user level
 
-        view.set("user", "com.openexchange.test.property", "Rootbeer");
+        view.set(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property", "Rootbeer");
         assertEquals("Rootbeer", view.get("com.openexchange.test.property", String.class));
 
         // Even if I change the context value, once the user value is set, it doesn't matter
-        view.set("context", "com.openexchange.test.property", "Forget-Me-Not");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", "Forget-Me-Not");
         assertEquals("Rootbeer", view.get("com.openexchange.test.property", String.class));
 
     }
 
          @Test
      public void testPropertyMetadata() throws OXException {
-        view.property("server", "com.openexchange.test.property", String.class).set("published", "true");
+        view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("published", "true");
 
         assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
 
-        view.property("server", "com.openexchange.test.property", String.class).set("final", "server");
-        view.property("context", "com.openexchange.test.property", String.class).set("final", "context");
+        view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.SERVER.getScopeName());
+        view.property(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.CONTEXT.getScopeName());
 
-        assertEquals("context", view.property("com.openexchange.test.property", String.class).get("final"));
+        assertEquals(ConfigViewScope.CONTEXT.getScopeName(), view.property("com.openexchange.test.property", String.class).get("final"));
 
         // On combined properties the precedence may be changed
-        assertEquals("server", view.property("com.openexchange.test.property", String.class).precedence("server","context", "user").get("final"));
+        assertEquals(ConfigViewScope.SERVER.getScopeName(), view.property("com.openexchange.test.property", String.class).precedence(ConfigViewScope.SERVER.getScopeName(), ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.USER.getScopeName()).get("final"));
     }
 
 
          @Test
      public void testFinalProperty() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
-        view.set("server", "com.openexchange.test.property", "Rosebud");
-        view.set("context", "com.openexchange.test.property", "Lemongrass");
-        view.set("user", "com.openexchange.test.property", "Rootbeer");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", "Rosebud");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", "Lemongrass");
+        view.set(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property", "Rootbeer");
 
-        view.property("server", "com.openexchange.test.property", String.class).set("final", "context");
+        view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.CONTEXT.getScopeName());
 
 
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
@@ -136,12 +137,12 @@ public class CascadingConfigurationImplTest {
          @Test
      public void testFinalPropertyInversesSearchOrder() throws OXException {
         // The metadata key "final" points to the Scope where the search iteration should stop, effectively prohibiting that a value is overridden
-        view.set("server", "com.openexchange.test.property", "Rosebud");
-        view.set("context", "com.openexchange.test.property", "Lemongrass");
-        view.set("user", "com.openexchange.test.property", "Rootbeer");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", "Rosebud");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", "Lemongrass");
+        view.set(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property", "Rootbeer");
 
-        view.property("server", "com.openexchange.test.property", String.class).set("final", "context");
-        view.property("user", "com.openexchange.test.property", String.class).set("final", "user");
+        view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.CONTEXT.getScopeName());
+        view.property(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.USER.getScopeName());
 
 
         assertEquals("Lemongrass", view.get("com.openexchange.test.property", String.class));
@@ -149,19 +150,19 @@ public class CascadingConfigurationImplTest {
 
          @Test
      public void testAllProperties() throws OXException {
-        view.set("server", "com.openexchange.test.property1", "Rosebud");
-        view.set("server", "com.openexchange.test.property2", "Rosebud");
-        view.set("server", "com.openexchange.test.property3", "Rosebud");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property1", "Rosebud");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property2", "Rosebud");
+        view.set(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property3", "Rosebud");
         view.property("server", "com.openexchange.test.property4", String.class)
             .set("Rosebud")
-            .set("final", "server");
+            .set("final", ConfigViewScope.SERVER.getScopeName());
 
-        view.set("context", "com.openexchange.test.property2", "Lemongrass");
-        view.set("context", "com.openexchange.test.property3", "Lemongrass");
-        view.set("context", "com.openexchange.test.property4", "Lemongrass");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property2", "Lemongrass");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property3", "Lemongrass");
+        view.set(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property4", "Lemongrass");
 
-        view.set("user", "com.openexchange.test.property3", "Rootbeer");
-        view.set("user", "com.openexchange.test.property4", "Rootbeer");
+        view.set(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property3", "Rootbeer");
+        view.set(ConfigViewScope.USER.getScopeName(), "com.openexchange.test.property4", "Rootbeer");
 
         final Map<String, ComposedConfigProperty<String>> allProps = view.all();
 

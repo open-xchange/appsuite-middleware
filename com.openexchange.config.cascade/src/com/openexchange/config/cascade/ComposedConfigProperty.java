@@ -58,17 +58,25 @@ import com.openexchange.exception.OXException;
  */
 public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
 
-    public ComposedConfigProperty<T> precedence(String... scopes) throws OXException;
+    default ComposedConfigProperty<T> precedence(ConfigViewScope... scopes) throws OXException {
+        String[] scopez = new String[scopes.length];
+        for (int i = scopez.length; i-- > 0;) {
+            scopez[i] = scopes[i].getScopeName();
+        }
+        return precedence(scopez);
+    }
+
+    ComposedConfigProperty<T> precedence(String... scopes) throws OXException;
 
     @Override
-    public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws OXException;
+    <M> ComposedConfigProperty<M> to(Class<M> otherType) throws OXException;
 
     @Override
-    public ComposedConfigProperty<T> set(T value) throws OXException;
+    ComposedConfigProperty<T> set(T value) throws OXException;
 
     @Override
-    public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws OXException;
-    
-    public String getScope() throws OXException;
+    <M> ComposedConfigProperty<T> set(String metadataName, M value) throws OXException;
+
+    String getScope() throws OXException;
 
 }

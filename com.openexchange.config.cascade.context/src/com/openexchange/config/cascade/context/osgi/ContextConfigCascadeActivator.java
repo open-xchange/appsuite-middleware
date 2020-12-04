@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.context.ContextConfigProvider;
 import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
@@ -76,13 +77,13 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put("scope", "context");
+            properties.put("scope", ConfigViewScope.CONTEXT.getScopeName());
             registerService(ConfigProviderService.class, new ContextConfigProvider(this), properties);
         }
 
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put("scope", "contextSets");
+            properties.put("scope", ConfigViewScope.CONTEXT_SETS.getScopeName());
             registerService(ConfigProviderService.class, new ContextSetConfigProvider(this), properties);
         }
     }

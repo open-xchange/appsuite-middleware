@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -122,7 +123,7 @@ final class BasicPropertyImpl implements BasicProperty {
 
     @Override
     public void set(final String metadataName, final String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
+        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, ConfigViewScope.USER.getScopeName());
     }
 
     @Override

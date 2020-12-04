@@ -64,6 +64,7 @@ import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.context.matching.ContextSetTerm;
 import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
@@ -89,7 +90,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
 
-    private static final String SCOPE = "contextSets";
+    private static final String SCOPE = ConfigViewScope.CONTEXT_SETS.getScopeName();
 
     private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
 
@@ -325,7 +326,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     public String getScope() {
-        return "contextSets";
+        return ConfigViewScope.CONTEXT_SETS.getScopeName();
     }
 
     // -----------------------------------------------------------------------------------------------------------

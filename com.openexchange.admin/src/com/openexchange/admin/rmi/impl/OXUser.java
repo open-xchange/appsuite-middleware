@@ -115,6 +115,7 @@ import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -1622,7 +1623,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     view = viewFactory.getView(usr.getId().intValue(), ctx.getId().intValue());
                     Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                     if (check != null && check.booleanValue()) {
-                        ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                        ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), "com.openexchange.mail.specialuse.check", Boolean.class);
                         prop.set(Boolean.TRUE);
                         usr.setUserAttribute("config", "com.openexchange.mail.specialuse.check", Boolean.TRUE.toString());
                     }
@@ -1860,7 +1861,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 String property = "com.openexchange.unifiedquota.enabled";
                 Boolean enabled = view.opt(property, Boolean.class, Boolean.FALSE);
                 if (enabled != null && enabled.booleanValue()) {
-                    ConfigProperty<Boolean> prop = view.property("user", property, Boolean.class);
+                    ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), property, Boolean.class);
                     prop.set(Boolean.FALSE);
                     user.setUserAttribute("config", property, Boolean.FALSE.toString());
                 }

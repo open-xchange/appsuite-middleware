@@ -81,6 +81,7 @@ import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
@@ -540,10 +541,10 @@ public final class Init {
 
     private static void startAndInjectConfigViewFactory() {
         ConfigCascade cascade = new ConfigCascade();
-        cascade.setProvider("server", new InMemoryConfigProvider());
-        cascade.setProvider("context", new InMemoryConfigProvider());
-        cascade.setProvider("user", new InMemoryConfigProvider());
-        cascade.setSearchPath("user", "context", "server");
+        cascade.setProvider(ConfigViewScope.SERVER.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.CONTEXT.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.USER.getScopeName(), new InMemoryConfigProvider());
+        cascade.setSearchPath(ConfigViewScope.USER.getScopeName(), ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.SERVER.getScopeName());
         cascade.setStringParser(new BasicTypesStringParser());
         services.put(ConfigViewFactory.class, cascade);
         TestServiceRegistry.getInstance().addService(ConfigViewFactory.class, cascade);
