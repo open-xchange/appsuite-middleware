@@ -108,6 +108,16 @@ public abstract class UserStorage {
     public abstract boolean isGuest(int userId, Context context) throws OXException;
 
     /**
+     * Checks if specified user does exist.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a user does exist; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    public abstract boolean exists(int userId, int contextId) throws OXException;
+
+    /**
      * Searches for a user whose login matches the given uid.
      *
      * @param loginInfo Login name of the user.

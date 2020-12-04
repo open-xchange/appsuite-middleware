@@ -78,6 +78,25 @@ public interface ContextService {
     int getContextId(String loginContextInfo) throws OXException;
 
     /**
+     * Checks if specified context does exist.
+     *
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a context is existent; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    default boolean exists(int contextId) throws OXException {
+        try {
+            Context context = getContext(contextId);
+            return context != null;
+        } catch (OXException e) {
+            if (e.equalsCode(2, "CTX")) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    /**
      * Gets the context for the given context unique identifier.
      *
      * @param contextId The unique identifier of the context.

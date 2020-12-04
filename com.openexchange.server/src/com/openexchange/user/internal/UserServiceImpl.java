@@ -139,6 +139,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean exists(int userId, int contextId) throws OXException {
+        return UserStorage.getInstance().exists(userId, contextId);
+    }
+
+    @Override
     public User getUser(final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(uid, context);
     }
