@@ -381,7 +381,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
         Attendee partyCrasher = preparePartyCrasher(attendee);
         Event eventData = prepareEvent(original, partyCrasher);
         List<Event> originalChangeExceptions = loadExceptionData(original);
-        InternalEventUpdate eventUpdate = new InternalEventUpdate(session, folder, original, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, SKIPPED_FIELDS);
+        InternalEventUpdate eventUpdate = new InternalEventUpdate(session, folder, original, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, false, SKIPPED_FIELDS);
 
         /*
          * Perform update on event and possible exceptions
@@ -391,7 +391,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
         List<Event> updatedChangeExceptions = new ArrayList<Event>();
         for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
             Event originalChangeException = updatedException.getOriginal();
-            InternalEventUpdate exceptionUpdate = new InternalEventUpdate(session, folder, originalChangeException, null, originalSeriesMasterEvent, prepareEvent(originalChangeException, partyCrasher), timestamp, SKIPPED_FIELDS);
+            InternalEventUpdate exceptionUpdate = new InternalEventUpdate(session, folder, originalChangeException, null, originalSeriesMasterEvent, prepareEvent(originalChangeException, partyCrasher), timestamp, false, SKIPPED_FIELDS);
             Event updatedChangeException = insertAttendee(exceptionUpdate, partyCrasher);
             resultTracker.trackUpdate(original, updatedChangeException);
             updatedChangeExceptions.add(updatedChangeException);

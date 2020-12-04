@@ -383,7 +383,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
         Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? optEventData(originalEvent.getSeriesId()) : null;
         InternalEventUpdate eventUpdate = new InternalEventUpdate(
-            session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
+            session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, assumeExternalOrganizerUpdate, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
