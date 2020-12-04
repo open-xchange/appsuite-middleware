@@ -3101,7 +3101,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> initConnection(int accountId) throws OXException {
-        if (session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN) != null && MailAccount.DEFAULT_ID != accountId) {
+        if (MailAccount.DEFAULT_ID != accountId && session.containsParameter(Session.PARAM_IS_OAUTH)) {
             throw OAuthMailErrorCodes.NO_ACCOUNT_ACCESS.create();
         }
         try {

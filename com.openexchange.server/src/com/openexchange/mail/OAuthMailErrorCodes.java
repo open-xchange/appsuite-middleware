@@ -71,7 +71,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
     NO_ACCOUNT_ACCESS("No account access permitted", CATEGORY_PERMISSION_DENIED, 1, 403, OAuthMailErrorMessages.NO_ACCOUNT_ACCESS_MSG);
 
     private static final String HTTP_STATUS = "HTTP_STATUS";
-    private static final String PREFIX = "OAUTHFLD";
+    private static final String PREFIX = "OAUTHMAIL";
 
     /**
      * The prefix for this error codes.
