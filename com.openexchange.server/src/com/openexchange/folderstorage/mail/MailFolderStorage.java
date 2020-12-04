@@ -519,20 +519,20 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     /**
-     * Checks whether the request is an oauth request or not
+     * Checks whether the request is an OAuth request or not
      *
      * @param params The {@link StorageParameters}
-     * @return <code>true</code> in case it is an oauth request, <code>false</code> otherwise
+     * @return <code>true</code> in case it is an OAuth request, <code>false</code> otherwise
      */
     private boolean isAccessedViaOAuth(StorageParameters params) {
         return isAccessedViaOAuth(params.getSession());
     }
 
     /**
-     * Checks whether the session is oauth based or not
+     * Checks whether the session is OAuth based or not
      *
      * @param session The session to check
-     * @return <code>true</code> in case the session is oauth based, <code>false</code> otherwise
+     * @return <code>true</code> in case the session is OAuth based, <code>false</code> otherwise
      */
     private boolean isAccessedViaOAuth(Session session) {
         return session != null && session.containsParameter(Session.PARAM_IS_OAUTH);
