@@ -905,7 +905,17 @@ public class AdminCache {
     }
 
     public boolean isMasterAdmin(Credentials auth) {
-        return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
+        return isMasterAdmin(auth, true);
+    }
+
+    public boolean isMasterAdmin(Credentials auth, boolean considerMasterAuthenticationDisabled) {
+        if (considerMasterAuthenticationDisabled && masterAuthenticationDisabled) {
+            // Considered as master since master authentication is disabled.
+            return true;
+        }
+
+        Credentials masterCredentials = getMasterCredentials();
+        return masterCredentials != null && masterCredentials.getLogin().equals(auth.getLogin());
     }
 
     /**
