@@ -103,6 +103,11 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
+    public boolean exists(int contextId) throws OXException {
+        return ContextStorage.getInstance().exists(contextId);
+    }
+
+    @Override
     public Context loadContext(int contextId) throws OXException {
         return ContextStorage.getInstance().loadContext(contextId);
     }

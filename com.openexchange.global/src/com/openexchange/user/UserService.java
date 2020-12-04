@@ -174,6 +174,26 @@ public interface UserService {
     int getUserId(String loginInfo, Context context) throws OXException;
 
     /**
+     * Checks if specified user does exist.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a user does exist; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    default boolean exists(int userId, int contextId) throws OXException {
+        try {
+            User user = getUser(userId, contextId);
+            return user != null;
+        } catch (OXException e) {
+            if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    /**
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param uid The user identifier.

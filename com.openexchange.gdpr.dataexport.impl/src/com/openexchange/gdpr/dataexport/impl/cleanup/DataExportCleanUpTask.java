@@ -250,7 +250,7 @@ public class DataExportCleanUpTask implements Runnable {
             }
         }
 
-        for (DataExportTask task : dataExportService.getDataExportTasks()) {
+        for (DataExportTask task : dataExportService.getDataExportTasks(true)) {
             if (task.getResultFiles() != null) {
                 for (DataExportResultFile resultFile : task.getResultFiles()) {
                     if (resultFile.getFileStorageLocation() != null) {
@@ -271,7 +271,7 @@ public class DataExportCleanUpTask implements Runnable {
     }
 
     private List<Pair<DataExportTask, DataExportWorkItem>> getOrphanedWorkItems() throws OXException {
-        List<DataExportTask> tasks = dataExportService.getDataExportTasks();
+        List<DataExportTask> tasks = dataExportService.getDataExportTasks(false);
         List<Pair<DataExportTask, DataExportWorkItem>> retval = null;
         for (DataExportTask task : tasks) {
             SortedSet<String> fileList = DataExportUtility.getFileStorageFor(task).getFileList();
@@ -288,7 +288,7 @@ public class DataExportCleanUpTask implements Runnable {
     }
 
     private List<Pair<DataExportTask, DataExportResultFile>> getOrphanedResultFiles() throws OXException {
-        List<DataExportTask> tasks = dataExportService.getDataExportTasks();
+        List<DataExportTask> tasks = dataExportService.getDataExportTasks(false);
         List<Pair<DataExportTask, DataExportResultFile>> retval = null;
         for (DataExportTask task : tasks) {
             if (task.getResultFiles() != null && !task.getResultFiles().isEmpty()) {

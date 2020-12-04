@@ -96,6 +96,11 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
+    public boolean exists(int contextId) throws OXException {
+        return getService().exists(contextId);
+    }
+
+    @Override
     public Context getContext(int contextId) throws OXException {
         return getService().getContext(contextId);
     }
