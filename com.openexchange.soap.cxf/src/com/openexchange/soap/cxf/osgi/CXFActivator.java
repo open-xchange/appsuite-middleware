@@ -69,6 +69,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.soap.cxf.ExceptionUtils;
 import com.openexchange.soap.cxf.custom.CXFOsgiServlet;
 import com.openexchange.soap.cxf.interceptor.DropDeprecatedElementsInterceptor;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
@@ -117,16 +118,12 @@ public class CXFActivator extends HousekeepingActivator {
                     public synchronized void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
                         final HttpService httpService = service;
                         if (httpService != null) {
-                            try {
-                                httpService.unregister(alias);
-                                httpService.unregister(alias2);
-                                String servletAlias = alias3;
-                                if (null != servletAlias) {
-                                    httpService.unregister(servletAlias);
-                                    alias3 = null;
-                                }
-                            } catch (Exception e) {
-                                // Ignore
+                            unregisterHttpAlias(alias, httpService);
+                            unregisterHttpAlias(alias2, httpService);
+                            String servletAlias = alias3;
+                            if (null != servletAlias) {
+                                alias3 = null;
+                                unregisterHttpAlias(servletAlias, httpService);
                             }
                         }
                         final WebserviceCollector collector = this.collector;
@@ -242,16 +239,12 @@ public class CXFActivator extends HousekeepingActivator {
                             log.error("Couldn't register CXF Servlet", e);
                         } catch (RuntimeException e) {
                             if (servletRegistered) {
-                                try {
-                                    httpService.unregister(alias);
-                                    httpService.unregister(alias2);
-                                    String servletAlias = alias3;
-                                    if (null != servletAlias) {
-                                        httpService.unregister(servletAlias);
-                                        alias3 = null;
-                                    }
-                                } catch (Exception e1) {
-                                    // Ignore
+                                unregisterHttpAlias(alias, httpService);
+                                unregisterHttpAlias(alias2, httpService);
+                                String servletAlias = alias3;
+                                if (null != servletAlias) {
+                                    unregisterHttpAlias(servletAlias, httpService);
+                                    alias3 = null;
                                 }
                             }
                             if (collectorOpened) {
@@ -283,6 +276,16 @@ public class CXFActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         Services.setServiceLookup(null);
+    }
+
+    static void unregisterHttpAlias(String alias, HttpService httpService) {
+        if (alias != null) {
+            try {
+                httpService.unregister(alias);
+            } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+            }
+        }
     }
 
 }
