@@ -87,9 +87,6 @@ public abstract class IDBasedContactAction extends ContactAction {
 
     public static final String MODULE = "contacts";
 
-    /** Named logger instance */
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDBasedContactAction.class);
-
     public static final int[] COLUMNS_ALIAS_ALL = new int[] { 20, 1, 5, 2, 602 };
     public static final int[] COLUMNS_ALIAS_LIST = new int[] { 20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
 
