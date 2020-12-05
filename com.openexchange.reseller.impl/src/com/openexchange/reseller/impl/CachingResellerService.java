@@ -105,10 +105,7 @@ public class CachingResellerService implements ResellerService {
      * The default reseller admin for contexts that are not
      * assigned to any reseller.
      */
-    private static ResellerAdmin DEFAULT;
-    static {
-        DEFAULT = ResellerAdmin.builder().id(I(-1)).parentId(I(-1)).name("default").build();
-    }
+    private static ResellerAdmin DEFAULT = ResellerAdmin.builder().id(I(-1)).parentId(I(-1)).name("default").build();
 
     private final ResellerServiceImpl delegate;
     private final ServiceLookup services;
@@ -140,7 +137,7 @@ public class CachingResellerService implements ResellerService {
             }
 
             ResellerAdmin resellerAdmin = delegate.getReseller(contextId);
-            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+            cache.put(key, resellerAdmin, false);
             return resellerAdmin;
         } finally {
             lock.unlock();
@@ -423,13 +420,6 @@ public class CachingResellerService implements ResellerService {
      * @throws OXException if an error is occurred
      */
     private ResellerValue optResellerValue(int contextId) throws OXException {
-        CacheService cacheService = getCacheService();
-        Cache cache = cacheService.getCache(RESELLER_CONTEXT_NAME);
-        Integer key = I(contextId);
-        Object object = cache.get(key);
-        if (object instanceof ResellerValue) {
-            return ResellerValue.class.cast(object);
-        }
         ResellerAdmin resellerAdmin = optReseller(contextId);
         return null == resellerAdmin ? null : new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId());
     }
@@ -459,11 +449,11 @@ public class CachingResellerService implements ResellerService {
 
             ResellerAdmin resellerAdmin = delegate.optResellerAdmin(contextId, null);
             if (null == resellerAdmin) {
-                // Yes, fall-back to the DEFAULT reseller admin, as we don't want to 
+                // Yes, fall-back to the DEFAULT reseller admin, as we don't want to
                 // look-up the DB for the same unassigned context.
                 resellerAdmin = DEFAULT;
             }
-            cache.put(key, new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId()), false);
+            cache.put(key, resellerAdmin, false);
             return resellerAdmin;
         } finally {
             lock.unlock();
