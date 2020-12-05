@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,50 @@
  *
  */
 
-package com.openexchange.reseller.groupware;
+package com.openexchange.reseller.impl.osgi;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.sql.Connection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.caching.CacheService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.ContextDelete;
-import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.lock.LockService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.impl.CachingResellerService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.reseller.impl.ResellerServiceImpl;
+import com.openexchange.reseller.impl.groupware.CacheInvalidationOnContextDelete;
 
 /**
- * {@link CacheInvalidationOnContextDelete} - Invalidates the {@link CachingResellerService#RESELLER_CONTEXT_NAME}
- * cache region upon context deletion.
+ * {@link ResellerServiceActivator}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.5
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public class CacheInvalidationOnContextDelete extends ContextDelete {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CacheInvalidationOnContextDelete.class);
-
-    private final ServiceLookup services;
+public class ResellerServiceActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link CacheInvalidationOnContextDelete}.
+     * Initializes a new {@link ResellerServiceActivator}.
      */
-    public CacheInvalidationOnContextDelete(ServiceLookup services) {
+    public ResellerServiceActivator() {
         super();
-        this.services = services;
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (false == isContextDelete(event)) {
-            return;
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { DatabaseService.class };
+    }
 
-        CacheService cacheService = services.getOptionalService(CacheService.class);
-        if (null == cacheService) {
-            return;
-        }
-        try {
-            cacheService.getCache(CachingResellerService.RESELLER_CONTEXT_NAME).remove(I(event.getContext().getContextId()));
-        } catch (OXException e) {
-            LOGGER.error("", e);
-        }
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { LockService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(ResellerService.class, new CachingResellerService(this, new ResellerServiceImpl(getService(DatabaseService.class))));
+        registerService(DeleteListener.class, new CacheInvalidationOnContextDelete(this));
     }
 }

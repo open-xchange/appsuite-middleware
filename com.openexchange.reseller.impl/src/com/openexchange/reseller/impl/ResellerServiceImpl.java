@@ -77,7 +77,7 @@ import com.openexchange.reseller.data.ResellerTaxonomy;
 import com.openexchange.reseller.data.Restriction;
 
 /**
- * {@link ResellerServiceImpl}
+ * {@link ResellerServiceImpl} - The reseller service implementation.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -85,26 +85,10 @@ import com.openexchange.reseller.data.Restriction;
  */
 public class ResellerServiceImpl implements ResellerService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerServiceImpl.class);
-
-    private static final String DATABASE_COLUMN_VALUE = "value";
-    private static final String DATABASE_COLUMN_NAME = "name";
-    private static final String DATABASE_COLUMN_ID = "rid";
-
-    private static final String GET_RESELLER_FOR_CTX = "SELECT sid FROM context2subadmin WHERE cid=?;";
-    private static final String GET_RESELLER = "SELECT sid FROM subadmin WHERE sid=?;";
-    private static final String GET_RESELLER_ID = "SELECT sid FROM subadmin WHERE name=?;";
-    private static final String GET_PARENT_RESELLER = "SELECT sid FROM subadmin WHERE pid=?;";
-    private static final String GET_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin WHERE sid=?;";
-    private static final String GET_ALL_RESELLER_DATA = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin;";
-    private static final String GET_RESELLER_RESTRICTIONS = "SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?;";
-    private static final String GET_RESELLER_PROPERTY = "SELECT propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey = ?;";
-    private static final String GET_RESELLER_CAPABILITIES = "SELECT capability FROM subadmin_capabilities WHERE sid=?";
-    private static final String GET_RESELLER_TAXONOMIES = "SELECT taxonomy FROM subadmin_taxonomies WHERE sid=?;";
-    private static final String GET_RESELLER_PROPERTIES = "SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ?;";
-    private static final String GET_RESELLER_SELECTED_PROPERTIES = "SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (";
-
-    // -------------------------------------------------------------------------------------------------
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerServiceImpl.class);
+    }
 
     private final DatabaseService dbService;
 
@@ -125,11 +109,11 @@ public class ResellerServiceImpl implements ResellerService {
 
     @Override
     public ResellerAdmin getResellerByName(String resellerName) throws OXException {
-        Connection con = dbService.getReadOnly();
         PreparedStatement prep = null;
         ResultSet rs = null;
+        Connection con = dbService.getReadOnly();
         try {
-            prep = con.prepareStatement(GET_RESELLER_ID);
+            prep = con.prepareStatement("SELECT sid FROM subadmin WHERE name=?");
             prep.setString(1, resellerName);
             rs = prep.executeQuery();
             if (!rs.next()) {
@@ -137,7 +121,7 @@ public class ResellerServiceImpl implements ResellerService {
             }
             return getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), con);
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -173,11 +157,11 @@ public class ResellerServiceImpl implements ResellerService {
      */
     @Override
     public List<ResellerAdmin> getSubResellers(int parentId) throws OXException {
-        Connection con = dbService.getReadOnly();
         PreparedStatement prep = null;
         ResultSet rs = null;
+        Connection con = dbService.getReadOnly();
         try {
-            prep = con.prepareStatement(GET_PARENT_RESELLER);
+            prep = con.prepareStatement("SELECT sid FROM subadmin WHERE pid=?");
             prep.setInt(1, parentId);
             rs = prep.executeQuery();
             if (!rs.next()) {
@@ -190,7 +174,7 @@ public class ResellerServiceImpl implements ResellerService {
             } while (rs.next());
             return subadmins.build();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -206,11 +190,11 @@ public class ResellerServiceImpl implements ResellerService {
      */
     @Override
     public List<ResellerAdmin> getAll() throws OXException {
-        Connection con = dbService.getReadOnly();
         PreparedStatement prep = null;
         ResultSet rs = null;
+        Connection con = dbService.getReadOnly();
         try {
-            prep = con.prepareStatement(GET_ALL_RESELLER_DATA);
+            prep = con.prepareStatement("SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin");
             rs = prep.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
@@ -222,7 +206,7 @@ public class ResellerServiceImpl implements ResellerService {
             } while (rs.next());
             return ret.build();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -238,9 +222,9 @@ public class ResellerServiceImpl implements ResellerService {
     /**
      * Retrieves all capabilities for the reseller with the specified identifier
      *
-     * @param resellerId the reseller identifier
+     * @param resellerId The reseller identifier
      * @return The capabilities as an <b>immutable set</b>
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Set<ResellerCapability> getCapabilities(int resellerId) throws OXException {
@@ -252,9 +236,9 @@ public class ResellerServiceImpl implements ResellerService {
      * by traversing up the reseller admin path and merging all capabilities
      * from all resellers in that path.
      *
-     * @param contextId the context identifier
+     * @param contextId The context identifier
      * @return The capabilities as an <b>immutable set</b>
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Set<ResellerCapability> getCapabilitiesByContext(int contextId) throws OXException {
@@ -276,7 +260,7 @@ public class ResellerServiceImpl implements ResellerService {
      *
      * @param resellerId The reseller identifier
      * @return An <b>immutable map</b> with all configuration properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Map<String, ResellerConfigProperty> getAllConfigProperties(int resellerId) throws OXException {
@@ -291,7 +275,7 @@ public class ResellerServiceImpl implements ResellerService {
      *
      * @param contextId The context identifier
      * @return An <b>immutable map</b> with all configuration properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId) throws OXException {
@@ -304,7 +288,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param resellerId The reseller identifier
      * @param keys A set of property keys
      * @return An <b>immutable map</b> with the specified configuration properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Map<String, ResellerConfigProperty> getConfigProperties(int resellerId, Set<String> keys) throws OXException {
@@ -320,7 +304,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param contextId The context identifier
      * @param keys A set of property keys
      * @return An <b>immutable map</b> with the specified configuration properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     @Override
     public Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys) throws OXException {
@@ -352,16 +336,16 @@ public class ResellerServiceImpl implements ResellerService {
         return getTaxonomiesByContext(contextId, null);
     }
 
-    ///////////////////////////////////////// HELPERS /////////////////////////////////
+    //----------------------------------------------------- HELPERS ------------------------------------------------------------------------
 
     /**
      * Optionally gets the reseller admin path. If no reseller exists for the specified
      * context, then an empty list will be returned.
      *
-     * @param cid the context identifier
+     * @param cid The context identifier
      * @param connection The connection
      * @return A List with the path
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private List<ResellerAdmin> optResellerAdminPath(int cid, Connection connection) throws OXException {
         return getResellerAdminPath(cid, connection, false);
@@ -371,10 +355,10 @@ public class ResellerServiceImpl implements ResellerService {
      * Gets the reseller admin path. If no reseller exists for the specified
      * context an exception will be thrown
      *
-     * @param cid the context identifier
+     * @param cid The context identifier
      * @param connection The connection
      * @return A List with the path
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private List<ResellerAdmin> getResellerAdminPath(int cid, Connection connection) throws OXException {
         return getResellerAdminPath(cid, connection, true);
@@ -387,7 +371,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param connection The connection
      * @param throwEx Whether to throw an exception if the the specified context has no reseller
      * @return A List with the path
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private List<ResellerAdmin> getResellerAdminPath(int cid, Connection connection, boolean throwEx) throws OXException {
         boolean connectionInit = false;
@@ -398,7 +382,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInit = true;
             }
-            prep = connection.prepareStatement(GET_RESELLER_FOR_CTX);
+            prep = connection.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
             prep.setInt(1, cid);
             rs = prep.executeQuery();
             if (rs.next()) {
@@ -409,7 +393,7 @@ public class ResellerServiceImpl implements ResellerService {
             }
             return ImmutableList.of();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -426,8 +410,8 @@ public class ResellerServiceImpl implements ResellerService {
      * @param connection The connection
      * @param rs The result set
      * @return A List with the path
-     * @throws SQLException if an SQL error is occurred
-     * @throws OXException if an error is occurred
+     * @throws SQLException If an SQL error is occurred
+     * @throws OXException If an error is occurred
      */
     private List<ResellerAdmin> renderPath(Connection connection, ResultSet rs) throws SQLException, OXException {
         ResellerAdmin admin = getData(ResellerAdmin.builder().id(I(rs.getInt(1))).build(), connection);
@@ -452,7 +436,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param contextId The context identifier
      * @param connection The optional connection
      * @return The reseller admin or <code>null</code> if no admin exists
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     public ResellerAdmin optResellerAdmin(int contextId, Connection connection) throws OXException {
         return getResellerAdmin(contextId, connection, false);
@@ -465,7 +449,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param contextId The context identifier
      * @param connection The optional connection
      * @return The reseller admin
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerAdmin getResellerAdmin(int contextId, Connection connection) throws OXException {
         return getResellerAdmin(contextId, connection, true);
@@ -478,7 +462,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param connection The optional connection
      * @param throwEx Whether to throw an exception if the reseller admin does not exist
      * @return The reseller admin or <code>null</code> (dictated by the throwEx parameter)
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerAdmin getResellerAdmin(int contextId, Connection connection, boolean throwEx) throws OXException {
         boolean connectionInit = false;
@@ -489,7 +473,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInit = true;
             }
-            prep = connection.prepareStatement(GET_RESELLER_FOR_CTX);
+            prep = connection.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
             prep.setInt(1, contextId);
             rs = prep.executeQuery();
             if (rs.next()) {
@@ -500,7 +484,7 @@ public class ResellerServiceImpl implements ResellerService {
             }
             return null;
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -511,25 +495,25 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * Gets the reseller admin by id.
+     * Gets the reseller admin by identifier.
      *
      * @param resellerId The reseller identifier
      * @param connection The connection
      * @return The reseller admin
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerAdmin getResellerById(int resellerId, Connection connection) throws OXException {
         return getResellerById(resellerId, connection, true);
     }
 
     /**
-     * Gets the reseller admin by id.
+     * Gets the reseller admin by identifier.
      *
      * @param resellerId The reseller identifier
      * @param connection The connection
      * @param throwEx Whether to throw an exception if no reseller exists.
      * @return The reseller admin or <code>null</code> (controlled by throwEx)
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerAdmin getResellerById(int resellerId, Connection connection, boolean throwEx) throws OXException {
         boolean connectionInit = false;
@@ -540,7 +524,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInit = true;
             }
-            prep = connection.prepareStatement(GET_RESELLER);
+            prep = connection.prepareStatement("SELECT sid FROM subadmin WHERE sid=?");
             prep.setInt(1, resellerId);
             rs = prep.executeQuery();
             if (rs.next()) {
@@ -551,7 +535,7 @@ public class ResellerServiceImpl implements ResellerService {
             }
             return null;
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw ResellerExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(rs, prep);
@@ -567,8 +551,8 @@ public class ResellerServiceImpl implements ResellerService {
      * @param admin The {@link ResellerAdmin}
      * @param con The optional {@link ConnectException}
      * @return The {@link ResellerAdmin} metadata
-     * @throws SQLException if an SQL error is occurred
-     * @throws OXException if an OX error is occurred
+     * @throws SQLException If an SQL error is occurred
+     * @throws OXException If an OX error is occurred
      */
     private ResellerAdmin getData(ResellerAdmin admin, Connection connection) throws SQLException, OXException {
         return getData(ImmutableList.of(admin), connection).get(0);
@@ -580,8 +564,8 @@ public class ResellerServiceImpl implements ResellerService {
      * @param admins The {@link ResellerAdmin}s
      * @param con The optional {@link ConnectException}
      * @return The {@link ResellerAdmin} metadata
-     * @throws SQLException if an SQL error is occurred
-     * @throws OXException if an OX error is occurred
+     * @throws SQLException If an SQL error is occurred
+     * @throws OXException If an OX error is occurred
      */
     private List<ResellerAdmin> getData(List<ResellerAdmin> admins, Connection con) throws SQLException, OXException {
         PreparedStatement prep = null;
@@ -594,7 +578,7 @@ public class ResellerServiceImpl implements ResellerService {
             }
             List<ResellerAdmin> ret = new ArrayList<>(admins.size());
             for (ResellerAdmin adm : admins) {
-                prep = con.prepareStatement(GET_RESELLER_DATA);
+                prep = con.prepareStatement("SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin WHERE sid=?");
                 prep.setInt(1, adm.getId().intValue());
                 rs = prep.executeQuery();
                 if (!rs.next()) {
@@ -636,19 +620,19 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * Retrieves the subadmin restrictions for the {@link ResellerAdmin} with the specified identifier
+     * Retrieves the subadmin restrictions for the {@link ResellerAdmin} with the specified identifier.
      *
      * @param id The reseller identifier
      * @param parentId The parent of the reseller
      * @param con The {@link Connection}
      * @return The restrictions
-     * @throws SQLException if an SQL error is occurred
+     * @throws SQLException If an SQL error is occurred
      */
     private List<Restriction> getRestrictionDataForAdmin(Integer id, Integer parentId, Connection con) throws SQLException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            prep = con.prepareStatement(GET_RESELLER_RESTRICTIONS);
+            prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
             prep.setInt(1, i(i(parentId) > 0 ? parentId : id));
             rs = prep.executeQuery();
 
@@ -669,27 +653,31 @@ public class ResellerServiceImpl implements ResellerService {
         }
     }
 
+    private static final String COLUMN_VALUE = "value";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_RID = "rid";
+
     /**
-     * Parses the specified {@link ResultSet} to a {@link Restriction}
+     * Parses the specified {@link ResultSet} to a {@link Restriction}.
      *
      * @param resultSet The {@link ResultSet} to parse
      * @return The {@link Restriction}
-     * @throws SQLException if an SQL error is occurred
+     * @throws SQLException If an SQL error is occurred
      */
     private Restriction parseRestriction(ResultSet resultSet) throws SQLException {
-        return new Restriction(Integer.valueOf(resultSet.getInt(DATABASE_COLUMN_ID)), resultSet.getString(DATABASE_COLUMN_NAME), resultSet.getString(DATABASE_COLUMN_VALUE));
+        return new Restriction(Integer.valueOf(resultSet.getInt(COLUMN_RID)), resultSet.getString(COLUMN_NAME), resultSet.getString(COLUMN_VALUE));
     }
 
     /**
-     * Parses the specified {@link ResultSet} to a {@link ResellerAdminBuilder}
+     * Parses the specified {@link ResultSet} to a {@link ResellerAdminBuilder}.
      *
      * @param resultSet The {@link ResultSet} to parse
      * @return The {@link ResellerAdminBuilder}
-     * @throws SQLException if an SQL error is occurred
+     * @throws SQLException If an SQL error is occurred
      */
     private ResellerAdminBuilder parseResellerAdminBuilder(ResultSet resultSet) throws SQLException {
         ResellerAdminBuilder builder = ResellerAdmin.builder().id(Integer.valueOf(resultSet.getInt("sid")));
-        builder.name(resultSet.getString(DATABASE_COLUMN_NAME));
+        builder.name(resultSet.getString(COLUMN_NAME));
         builder.parentId(Integer.valueOf(resultSet.getInt("pid")));
         builder.displayname(resultSet.getString("displayName"));
         builder.password(resultSet.getString("password"));
@@ -702,10 +690,10 @@ public class ResellerServiceImpl implements ResellerService {
      * Retrieves the capabilities for the specified context. Traverses the admin path upwards
      * to locate and merge all stored capabilities.
      *
-     * @param contextId the context identifier
+     * @param contextId The context identifier
      * @param connection The optional connection
      * @return The capabilities
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Set<ResellerCapability> getCapabilitiesByContext(int contextId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -731,12 +719,12 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * Returns all capabilities for the specified reseller
+     * Returns all capabilities for the specified reseller.
      *
      * @param resellerId The reseller identifier
      * @param connection The optional database connection
      * @return A Set with all capabilities for the specified reseller
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Set<ResellerCapability> getCapabilitiesByReseller(int resellerId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -747,7 +735,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInitialised = true;
             }
-            stmt = connection.prepareStatement(GET_RESELLER_CAPABILITIES);
+            stmt = connection.prepareStatement("SELECT capability FROM subadmin_capabilities WHERE sid=?");
             stmt.setLong(1, resellerId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -759,7 +747,7 @@ public class ResellerServiceImpl implements ResellerService {
             } while (rs.next());
             return capas.build();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw new OXException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -770,13 +758,13 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * Retrieves the value of the specified property
+     * Retrieves the value of the specified property.
      *
      * @param resellerId The reseller identifier
      * @param key The key of the property
      * @param connection the optional database connection
      * @return The value of the property if it exists; <code>null</code> otherwise
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerConfigProperty getConfigPropertyByReseller(int resellerId, String key, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -787,13 +775,13 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInitialised = true;
             }
-            stmt = connection.prepareStatement(GET_RESELLER_PROPERTY);
+            stmt = connection.prepareStatement("SELECT propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey = ?");
             stmt.setInt(1, resellerId);
             stmt.setString(2, key);
             rs = stmt.executeQuery();
             return rs.next() ? new ResellerConfigProperty(key, rs.getString(1), resellerId) : null;
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw new OXException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -804,13 +792,13 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * Retrieves the value of the specified property
+     * Retrieves the value of the specified property.
      *
      * @param contextId The reseller identifier
      * @param key The key of the property
      * @param connection the optional database connection
      * @return The value of the property if it exists; <code>null</code> otherwise
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private ResellerConfigProperty getConfigPropertyByContext(int contextId, String key, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -845,7 +833,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param resellerId The reseller identifier
      * @param connection The connection
      * @return A Map with all configured properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Map<String, ResellerConfigProperty> getAllConfigPropertiesByReseller(int resellerId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -856,7 +844,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInitialised = true;
             }
-            stmt = connection.prepareStatement(GET_RESELLER_PROPERTIES);
+            stmt = connection.prepareStatement("SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ?");
             stmt.setInt(1, resellerId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -869,7 +857,7 @@ public class ResellerServiceImpl implements ResellerService {
             }  while (rs.next());
             return props.build();
         } catch (SQLException e) {
-            LOG.error("SQL Error", e);
+            LoggerHolder.LOG.error("SQL Error", e);
             throw new OXException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -887,7 +875,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param contextId The context identifier
      * @param connection The connection
      * @return A Map with all configured properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Map<String, ResellerConfigProperty> getAllConfigPropertiesByContext(int contextId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -919,7 +907,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param keys The properties to get
      * @param connection The connection
      * @return A Map with the specified configured properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Map<String, ResellerConfigProperty> getConfigPropertiesByReseller(int resellerId, Set<String> keys, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -930,7 +918,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInitialised = true;
             }
-            stmt = connection.prepareStatement(Databases.getIN(GET_RESELLER_SELECTED_PROPERTIES, keys.size()));
+            stmt = connection.prepareStatement(Databases.getIN("SELECT propertyKey, propertyValue FROM subadmin_config_properties WHERE sid = ? AND propertyKey IN (", keys.size()));
             int pIndex = 1;
             stmt.setInt(pIndex++, resellerId);
             for (String key : keys) {
@@ -947,7 +935,7 @@ public class ResellerServiceImpl implements ResellerService {
             } while (rs.next());
             return props.build();
         } catch (SQLException e) {
-            LOG.error("SQL Error", e);
+            LoggerHolder.LOG.error("SQL Error", e);
             throw new OXException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -966,7 +954,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param keys The properties to get
      * @param connection The connection
      * @return A Map with the specified configured properties
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Map<String, ResellerConfigProperty> getConfigPropertiesByContext(int contextId, Set<String> keys, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -997,7 +985,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param resellerId The reseller identifier
      * @param connection The connection
      * @return A Set with all taxonomies for the reseller
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Set<ResellerTaxonomy> getTaxonomiesByReseller(int resellerId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -1008,7 +996,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connection = dbService.getReadOnly();
                 connectionInitialised = true;
             }
-            stmt = connection.prepareStatement(GET_RESELLER_TAXONOMIES);
+            stmt = connection.prepareStatement("SELECT taxonomy FROM subadmin_taxonomies WHERE sid=?");
             stmt.setLong(1, resellerId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -1020,7 +1008,7 @@ public class ResellerServiceImpl implements ResellerService {
             } while (rs.next());
             return taxonomies.build();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw new OXException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1038,7 +1026,7 @@ public class ResellerServiceImpl implements ResellerService {
      * @param resellerId The reseller identifier
      * @param connection The connection
      * @return A Set with all taxonomies for the reseller
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     private Set<ResellerTaxonomy> getTaxonomiesByContext(int contextId, Connection connection) throws OXException {
         boolean connectionInitialised = false;
@@ -1062,4 +1050,5 @@ public class ResellerServiceImpl implements ResellerService {
             }
         }
     }
+
 }

@@ -73,39 +73,32 @@ import com.openexchange.reseller.data.ResellerTaxonomy;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CachingResellerService}
+ * {@link CachingResellerService} - Wraps reseller service implementation with caches for fast look-up.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
 public class CachingResellerService implements ResellerService {
 
-    /**
-     * Caches a reverse index for the contextId-resellerId. Stores {@link ResellerValue}s
-     */
+    /** Caches a reverse index for the contextId-resellerId. Stores {@link ResellerAdmin}s */
     public static final String RESELLER_CONTEXT_NAME = "ResellerContext";
-    /**
-     * Stores {@link Set<ResellerCapability>} entries cached by resellerId.
-     */
+
+    /** Stores {@link Set<ResellerCapability>} entries cached by resellerId. */
     private static final String CAPABILITIES_REGION_NAME = "CapabilitiesReseller";
-    /**
-     * Stores {@link Map<String, ResellerConfigProperty>} entries cached by resellerId.
-     */
+
+    /** Stores {@link Map<String, ResellerConfigProperty>} entries cached by resellerId. */
     private static final String CONFIGURATION_REGION_NAME = "ConfigurationReseller";
-    /**
-     * Stores {@link Set<ResellerTaxonomy>} entries cached by resellerId.
-     */
+
+    /** Stores {@link Set<ResellerTaxonomy>} entries cached by resellerId. */
     private static final String TAXONOMIES_REGION_NAME = "TaxonomiesReseller";
-    /**
-     * Stores {@link ResellerAdmin} entries cached by resellerId.
-     */
+
+    /** Stores {@link ResellerAdmin} entries cached by resellerId. */
     private static final String RESELLER_ADMIN_NAME = "ResellerAdmin";
 
-    /**
-     * The default reseller admin for contexts that are not
-     * assigned to any reseller.
-     */
+    /** The default reseller admin for contexts that are not assigned to any reseller. */
     private static ResellerAdmin DEFAULT = ResellerAdmin.builder().id(I(-1)).parentId(I(-1)).name("default").build();
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final ResellerServiceImpl delegate;
     private final ServiceLookup services;
