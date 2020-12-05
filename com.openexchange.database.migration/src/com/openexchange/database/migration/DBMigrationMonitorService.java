@@ -52,7 +52,7 @@ package com.openexchange.database.migration;
 import java.util.Collection;
 
 /**
- * Provides access to the monitor that shows current status of currently scheduled config db changes.
+ * Provides access to the monitor that shows current status of currently scheduled Config-DB changes.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.0
@@ -60,9 +60,9 @@ import java.util.Collection;
 public interface DBMigrationMonitorService {
 
     /**
-     * Returns the collection of currently scheduled files which are queued to get executed.
+     * Gets the collection of currently scheduled files that are enqueued for execution.
      *
-     * @return Collection<String> - collection with the files the changesets have to be executed
+     * @return A collection containing the names of the change-sets files that have to be executed
      */
     Collection<String> getScheduledFiles();
 
