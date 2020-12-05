@@ -56,6 +56,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -110,7 +111,7 @@ public class SetPropertyAction extends AbstractConfigAction {
         // Get the configuration view associated with current user
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
 
-        ConfigProperty<String> property = view.property("context", propertyName, String.class);
+        ConfigProperty<String> property = view.property(ConfigViewScope.CONTEXT.getScopeName(), propertyName, String.class);
         property.set(propertyValue); // Fails if protected
 
         Reloadables.propagatePropertyChange(propertyName);

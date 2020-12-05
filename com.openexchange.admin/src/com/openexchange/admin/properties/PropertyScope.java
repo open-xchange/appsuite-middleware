@@ -52,6 +52,7 @@ package com.openexchange.admin.properties;
 import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.openexchange.config.cascade.ConfigViewScope;
 
 /**
  * The scope for a configuration option.
@@ -62,13 +63,13 @@ import com.google.common.collect.ImmutableList;
 public class PropertyScope {
 
     /** A listing of scopes: <code>user</code> -&gt; <code>context</code> -&gt; <code>server</code> */
-    private static final List<String> SCOPES_FROM_USER = ImmutableList.of("user", "context", "reseller", "server");
+    private static final List<String> SCOPES_FROM_USER = ImmutableList.of(ConfigViewScope.USER.getScopeName(), ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.RESELLER.getScopeName(), ConfigViewScope.SERVER.getScopeName());
 
     /** A listing of scopes: <code>context</code> -&gt; <code>server</code> */
-    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of("context", "reseller", "server");
+    private static final List<String> SCOPES_FROM_CONTEXT = ImmutableList.of(ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.RESELLER.getScopeName(), ConfigViewScope.SERVER.getScopeName());
 
     /** A listing of scopes: <code>server</code> */
-    private static final List<String> SCOPES_FROM_SERVER = ImmutableList.of("server");
+    private static final List<String> SCOPES_FROM_SERVER = ImmutableList.of(ConfigViewScope.SERVER.getScopeName());
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 

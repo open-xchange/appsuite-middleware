@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConstants;
@@ -263,7 +264,7 @@ public final class MailCategoriesConfigUtil implements Reloadable {
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
         String propertyName = MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE;
-        ConfigProperty<String> property = view.property("user", propertyName, String.class);
+        ConfigProperty<String> property = view.property(ConfigViewScope.USER.getScopeName(), propertyName, String.class);
         property.set(String.valueOf(activate));
 
         Reloadables.propagatePropertyChange(propertyName);
@@ -281,7 +282,7 @@ public final class MailCategoriesConfigUtil implements Reloadable {
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
-        ConfigProperty<String> confProperty = view.property("user", property, String.class);
+        ConfigProperty<String> confProperty = view.property(ConfigViewScope.USER.getScopeName(), property, String.class);
         confProperty.set(value);
 
         Reloadables.propagatePropertyChange(property);

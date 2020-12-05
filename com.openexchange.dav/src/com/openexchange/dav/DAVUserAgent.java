@@ -60,6 +60,7 @@ public enum DAVUserAgent {
     MAC_CALENDAR("Mac OS Calendar (CalDAV)"),
     MAC_CONTACTS("Mac OS Addressbook (CardDAV)"),
     IOS("iOS Addressbook and Calendar (CalDAV/CardDAV)"),
+    IOS_REMINDERS("iOS Reminders (CalDAV)"),
     THUNDERBIRD_LIGHTNING("Mozilla Thunderbird / Lightning (CalDAV)"),
     EM_CLIENT("eM Client (CalDAV/CardDAV)"),
     EM_CLIENT_FOR_APPSUITE("eM Client for OX App Suite (CalDAV/CardDAV)"),
@@ -121,6 +122,9 @@ public enum DAVUserAgent {
             if (userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
                 return THUNDERBIRD_LIGHTNING;
             }
+            if (userAgent.contains("iOS") && userAgent.contains("remindd") && false == userAgent.contains("Android")) {
+                return IOS_REMINDERS;
+            }
             if (userAgent.contains("iOS") && userAgent.contains("dataaccessd") && false == userAgent.contains("Android")) {
                 return IOS;
             }
@@ -133,7 +137,7 @@ public enum DAVUserAgent {
             if (userAgent.startsWith("MSFT-WIN")) {
                 return WINDOWS;
             }
-            if ((userAgent.contains("Mac OS") || userAgent.contains("Mac+OS")) &&
+            if ((userAgent.contains("Mac OS") || userAgent.contains("Mac+OS") || userAgent.contains("macOS")) &&
                 (userAgent.contains("CalendarStore") || (userAgent.contains("CalendarAgent")))) {
                 return MAC_CALENDAR;
             }

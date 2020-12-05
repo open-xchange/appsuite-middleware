@@ -88,7 +88,7 @@ public class FileStorageAndId {
             result = 1;
             result = prime * result + fileStorageId;
             hash = result;
-        };
+        }
         return result;
     }
 

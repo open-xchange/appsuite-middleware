@@ -50,6 +50,7 @@
 package com.openexchange.api.client;
 
 import java.net.URL;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
@@ -76,6 +77,13 @@ public interface ApiClient {
     int getUserId();
 
     /**
+     * Gets the session identifier that belongs to the local server
+     *
+     * @return The local user session ID
+     */
+    String getSession();
+
+    /**
      * Gets the link to the login or rather the URL for the remote App Suite instance
      *
      * @return The initial link, e.g. <code>share.appsuite.example.org/share/1123</code>
@@ -85,9 +93,9 @@ public interface ApiClient {
     /**
      * Gets the {@link Credentials}
      *
-     * @return The credentials, or null if no credentials are set
+     * @return The credentials. If not specified by the caller {@link Credentials#EMPTY} is returned
      */
-    @Nullable
+    @NonNull
     Credentials getCredentials();
 
     /**

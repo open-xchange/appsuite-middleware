@@ -78,7 +78,7 @@ public class XOXFileStorageAccountManager implements FileStorageAccountManager {
 
     /**
      * Initializes a new {@link XOXFileStorageAccountManager}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
      * @param delegatee The actual manager to delegate to
      */
@@ -167,7 +167,7 @@ public class XOXFileStorageAccountManager implements FileStorageAccountManager {
      * @throws OXException In case service is missing
      */
     private void clearRemoteSessions(Session session, String shareLink) throws OXException {
-        services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), shareLink);
+        services.getServiceSafe(ApiClientService.class).close(session, shareLink);
     }
 
 }

@@ -49,8 +49,11 @@
 
 package com.openexchange.file.storage.xox;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
@@ -79,6 +82,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.java.Strings;
@@ -89,6 +93,7 @@ import com.openexchange.share.core.subscription.EntityMangler;
 import com.openexchange.share.core.subscription.SubscribedHelper;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.tools.arrays.Collections;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.b;
@@ -294,13 +299,36 @@ public class XOXAccountAccess implements CapabilityAware {
                 }
 
                 @Override
-                public String updateLastKnownFolder(FileStorageFolder folder, FileStorageFolder toUpdate) throws OXException {
+                public FileStorageResult<String> updateLastKnownFolder(FileStorageFolder folder, boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException {
                     //Only able update the subscription flag in case of an error
                     if (SetterAwareFileStorageFolder.class.isInstance(toUpdate) && ((SetterAwareFileStorageFolder) toUpdate).containsSubscribed()) {
+
+                        //Check for un-subscription and check if the last folder is going to be unscubscribed
+                        if (false == toUpdate.isSubscribed()) {
+                            List<FileStorageFolder> subscribedFolders = getVisibleRootFolders();
+                            Optional<FileStorageFolder> folderToUnsubscibe = subscribedFolders.stream().filter(f -> f.getId().equals(folder.getId())).findFirst();
+                            if (folderToUnsubscibe.isPresent()) {
+                                subscribedFolders.removeIf(f -> f == folderToUnsubscibe.get());
+                                if (subscribedFolders.isEmpty()) {
+                                    //The last folder is going to be unsubscribed
+                                    if (ignoreWarnings) {
+                                        //Delete
+                                        getService().getAccountManager().deleteAccount(getAccount(), session);
+                                    } else {
+                                        //Throw a warning
+                                        String folderName = folderToUnsubscibe.get().getName();
+                                        String accountName = getAccount().getDisplayName();
+                                        return FileStorageResult.newFileStorageResult(null, Arrays.asList(ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.create(folderName, accountName)));
+                                    }
+                                    return FileStorageResult.newFileStorageResult(null, null);
+                                }
+                            }
+                        }
+
                         getSubscribedHelper().setSubscribed(session, folder, B(toUpdate.isSubscribed()));
-                        return folder.getId();
+                        return FileStorageResult.newFileStorageResult(folder.getId(), null);
                     }
-                    return null;
+                    return FileStorageResult.newFileStorageResult(null, null);
                 }
             };
         }

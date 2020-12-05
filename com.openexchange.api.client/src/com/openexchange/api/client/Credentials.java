@@ -49,6 +49,7 @@
 
 package com.openexchange.api.client;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.java.Strings;
 
 /**
@@ -58,6 +59,9 @@ import com.openexchange.java.Strings;
  * @since v7.10.5
  */
 public class Credentials {
+
+    /** Object representing empty credentials */
+    public static final @NonNull Credentials EMPTY = new Credentials(null);
 
     private final String login;
     private final String password;

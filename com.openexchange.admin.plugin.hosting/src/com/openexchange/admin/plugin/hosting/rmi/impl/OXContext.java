@@ -118,6 +118,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -1246,7 +1247,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 view = viewFactory.getView(admin_user.getId().intValue(), ret.getId().intValue());
                 Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                 if (check != null && check.booleanValue()) {
-                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
                 }
             } catch (OXException e) {

@@ -76,6 +76,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -319,7 +320,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         try {
             ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, ctxId);
-            ConfigProperty<String> property = view.property("user", PREVIEW_CONFIG, String.class);
+            ConfigProperty<String> property = view.property(ConfigViewScope.USER.getScopeName(), PREVIEW_CONFIG, String.class);
 
             DatabaseService dbService = Services.getService(DatabaseService.class);
             Connection con = dbService.getWritable();

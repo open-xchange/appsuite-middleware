@@ -1067,7 +1067,7 @@ public abstract class AbstractDataExportSql<R> {
                     try {
                         fileStorage.fileStorage.deleteFile(fileStorageLocation);
                     } catch (Exception e) {
-                        LOGGER.warn("Failed to delete file storage item {} from file storage {}", fileStorageLocation, I(fileStorage.fileStorageId), e);
+                        LOGGER.warn("Failed to delete file storage item {} from file storage {} ({})", fileStorageLocation, I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), e);
                     }
                 }
             }

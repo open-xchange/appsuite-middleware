@@ -58,6 +58,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.user.cache.PropertyMap;
 import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
 import com.openexchange.context.ContextService;
@@ -98,7 +99,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     @Override
     public String getScope() {
-    	return "user";
+    	return ConfigViewScope.USER.getScopeName();
     }
 
     /**

@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota.Type;
@@ -135,11 +138,31 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
      * Updates a last known folder
      *
      * @param folderId The folder to update
+     * @param ignoreWarnings <code>true</code> in order to ignore all warnings, <code>false</code> to raise warnings
      * @param toUpdate The file storage folder to update containing only the modified fields
      * @return The ID of the updated folder, or null in case the folder could not be updated
      * @throws OXException
      */
-    public abstract String updateLastKnownFolder(FileStorageFolder folder, FileStorageFolder toUpdate) throws OXException;
+    public abstract FileStorageResult<String> updateLastKnownFolder(FileStorageFolder folder, boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException;
+
+    /**
+     * Returns a list of visible/subscribed root-subfolders
+     *
+     * @return A list of subscribed root subfolders
+     * @throws OXException
+     */
+    protected List<FileStorageFolder> getVisibleRootFolders() throws OXException {
+        List<FileStorageFolder> ret = new ArrayList<>();
+        FileStorageFolder[] f1 = getSubfolders("10", false);
+        if (f1 != null) {
+            java.util.Collections.addAll(ret, f1);
+        }
+        FileStorageFolder[] f2 = getSubfolders("15", false);
+        if (f2 != null) {
+            java.util.Collections.addAll(ret, f2);
+        }
+        return ret;
+    }
 
     @Override
     public boolean exists(String folderId) throws OXException {
@@ -175,7 +198,8 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        return getLastKnownSubFolders(parentIdentifier);
+        FileStorageFolderStub[] subfolders = getLastKnownSubFolders(parentIdentifier);
+        return all ? subfolders : Arrays.asList(subfolders).stream().filter(f -> f.subscribed).toArray(FileStorageFolder[]::new);
     }
 
     @Override
@@ -195,6 +219,15 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+        FileStorageResult<String> updateFolder = updateFolder(identifier, true, toUpdate);
+        if(updateFolder != null) {
+            return updateFolder.getResponse();
+        }
+        return null;
+    }
+
+    @Override
+    public FileStorageResult<String> updateFolder(String identifier, boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException {
         /*
          * We are unable to perform the update in case of an error; except it is an persistent known folder
          */
@@ -202,11 +235,11 @@ public abstract class ErrorStateFolderAccess implements FileStorageFolderAccess 
         FileStorageFolderStub lastKnownFolder = getLastKnownFolder(identifier);
         if(lastKnownFolder != null) {
             //Updating a known folder;
-            String folderId = updateLastKnownFolder(lastKnownFolder, toUpdate);
+             FileStorageResult<String> updateLastKnownFolder = updateLastKnownFolder(lastKnownFolder, ignoreWarnings, toUpdate);
             //The actual implementation decides whether or not the data can be updated
             //in the persistent "last known" version of a folder
-            if(folderId != null) {
-                return folderId;
+            if(updateLastKnownFolder != null) {
+                return updateLastKnownFolder;
             }
         }
         //..throw an exception otherwise

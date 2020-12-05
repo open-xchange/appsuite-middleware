@@ -59,6 +59,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
@@ -74,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.share.core.tools.ShareTool;
 
 /**
@@ -82,13 +86,15 @@ import com.openexchange.share.core.tools.ShareTool;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class ApiClientServiceImpl implements ApiClientService {
+public class ApiClientServiceImpl implements ApiClientService, EventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiClientServiceImpl.class);
 
     private final Cache<String, ApiClient> cachedClients;
 
     private final ServiceLookup services;
+
+    private static final String PARAM_API_CLIENT_SESSIONS = "__session.api_client";
 
     /**
      * Initializes a new {@link ApiClientServiceImpl}.
@@ -111,26 +117,27 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     @Override
-    public ApiClient getApiClient(Session session, String loginLink, Credentials credentials) throws OXException {
-        return getApiClient(session.getContextId(), session.getUserId(), loginLink, credentials);
-    }
-
-    @Override
-    public ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials creds) throws OXException {
+    public ApiClient getApiClient(Session session, String loginLink, Credentials creds) throws OXException {
         URL url = generateURL(loginLink);
-        checkBlackList(url, contextId, userId);
+        checkBlackList(url, session);
 
-        Credentials credentials = null == creds ? new Credentials("") : creds;
-        String cacheKey = generateCacheKey(contextId, userId, url);
+        Credentials credentials = null == creds ? Credentials.EMPTY : creds;
+        String cacheKey = generateCacheKey(session, url);
         try {
-            ApiClient client = cachedClients.get(cacheKey, () -> loginClient(chooseClient(contextId, userId, url, credentials)));
+            ApiClient client = cachedClients.get(cacheKey, () -> loginClient(chooseClient(session, url, credentials)));
             if (client.isClosed() || false == Objects.equals(client.getCredentials(), credentials)) {
                 /*
                  * Client is closed or credentials are outdated. Remove from cache and create a new instance.
                  */
                 close(client);
-                return getApiClient(contextId, userId, loginLink, credentials);
+                return getApiClient(session, loginLink, credentials);
             }
+
+            /*
+             * Decorate the session so API client is closed along the user session
+             */
+            session.setParameter(PARAM_API_CLIENT_SESSIONS, Boolean.TRUE);
+
             return client;
         } catch (ExecutionException e) {
             /*
@@ -155,29 +162,28 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     @Override
-    public void close(int contextId, int userId, String loginLink) {
-        if (contextId < 1 || userId < 1) {
-            return;
-        }
+    public void close(Session session, String loginLink) {
+
         if (Strings.isNotEmpty(loginLink)) {
             /*
              * Revoke single access
              */
             try {
                 URL host = generateURL(loginLink);
-                cachedClients.invalidate(generateCacheKey(contextId, userId, host));
+                cachedClients.invalidate(generateCacheKey(session, host));
             } catch (OXException e) {
-                LOGGER.warn("Unable to revoke access for user {} in context {}.", I(userId), I(contextId), e);
+                LOGGER.warn("Unable to revoke access for user {} in context {}.", I(session.getUserId()), I(session.getContextId()), e);
             }
             return;
         }
+
         /*
-         * Revoke all user associated accesses
+         * Revoke all session associated accesses
          */
         List<String> removeable = new ArrayList<>();
         for (ApiClient clientAccess : cachedClients.asMap().values()) {
-            if (clientAccess.getContextId() == contextId && clientAccess.getUserId() == userId) {
-                removeable.add(generateCacheKey(clientAccess));
+            if (clientAccess.getSession().equals(session.getSessionID())) {
+                removeable.add(generateCacheKey(session, clientAccess.getLoginLink()));
             }
         }
         cachedClients.invalidateAll(removeable);
@@ -215,7 +221,18 @@ public class ApiClientServiceImpl implements ApiClientService {
      * @return The cache key
      */
     private static String generateCacheKey(ApiClient client) {
-        return generateCacheKey(client.getContextId(), client.getUserId(), client.getLoginLink());
+        return generateCacheKey(client.getContextId(), client.getUserId(), client.getSession(), client.getLoginLink());
+    }
+
+    /**
+     * Generates the cache key
+     *
+     * @param session The session
+     * @param host The host to connect to
+     * @return The cache key
+     */
+    private static String generateCacheKey(Session session, URL host) {
+        return generateCacheKey(session.getContextId(), session.getUserId(), session.getSessionID(), host);
     }
 
     /**
@@ -223,34 +240,34 @@ public class ApiClientServiceImpl implements ApiClientService {
      *
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param sessionId The session identifier
      * @param host The host to connect to
      * @return The cache key
      */
-    private static String generateCacheKey(int contextId, int userId, URL host) {
+    private static String generateCacheKey(int contextId, int userId, String sessionId, URL host) {
         String baseToken = ShareTool.getBaseToken(host.getPath());
         if (Strings.isEmpty(baseToken)) {
-            return Strings.concat("-", I(contextId), I(userId), host.getHost());
+            return Strings.concat("-", sessionId, I(contextId), I(userId), host.getHost());
         }
-        return Strings.concat("-", I(contextId), I(userId), host.getHost(), Strings.isEmpty(baseToken) ? host.getPath() : baseToken);
+        return Strings.concat("-", sessionId, I(contextId), I(userId), host.getHost(), baseToken);
     }
 
     /**
      * Chooses the most likely and best fitting client for the given login link
      *
-     * @param contextId The context ID
-     * @param userId The user ID
+     * @param session The Session
      * @param url The login link to choose the client from
      * @param credentials The optional credentials to pass to the client
      * @return The client
      */
-    protected ApiClient chooseClient(int contextId, int userId, URL url, Credentials credentials) {
-        LOGGER.debug("Creating API client for remote system {} in context {} for user {}.", url.getHost(), I(contextId), I(userId));
+    protected ApiClient chooseClient(Session session, URL url, Credentials credentials) {
+        LOGGER.debug("Creating API client for remote system {} in context {} for user {}.", url.getHost(), I(session.getContextId()), I(session.getUserId()));
 
         ApiClient client = null;
         if (ShareTool.isShare(url.getPath())) {
-            client = new ApiShareClient(services, contextId, userId, url, credentials);
+            client = new ApiShareClient(services, session.getContextId(), session.getUserId(), session.getSessionID(), url, credentials);
         } else {
-            client = new NoSessionClient(services, contextId, userId, url);
+            client = new NoSessionClient(services, session.getContextId(), session.getUserId(), session.getSessionID(), url);
         }
         return client;
     }
@@ -273,20 +290,61 @@ public class ApiClientServiceImpl implements ApiClientService {
      * Removes any blacklisted client from the cache.
      *
      * @param url The URL to check
-     * @param contextId The context ID
+     * @param session The session
      * @param userId the user ID
      * @throws OXException In case the URL is blacklisted
      */
-    private void checkBlackList(URL url, int contextId, int userId) throws OXException {
+    private void checkBlackList(URL url, Session session) throws OXException {
         LeanConfigurationService configurationService = services.getService(LeanConfigurationService.class);
-        if (isBlacklisted(configurationService, url, contextId, userId)) {
+        if (isBlacklisted(configurationService, url, session.getContextId(), session.getUserId())) {
             if (Strings.isNotEmpty(url.getHost())) {
-                cachedClients.invalidate(generateCacheKey(contextId, userId, url));
+                cachedClients.invalidate(generateCacheKey(session.getContextId(), session.getUserId(), session.getSessionID(), url));
             }
             throw ApiClientExceptions.NO_ACCESS.create(url.toString());
         }
-        if (false == isPortAllowed(configurationService, url, contextId, userId)) {
+        if (false == isPortAllowed(configurationService, url, session.getContextId(), session.getUserId())) {
             throw ApiClientExceptions.NO_ACCESS.create(url.toString());
+        }
+    }
+
+    /*
+     * -------------------------------------- EventHandler --------------------------------------
+     */
+
+    @Override
+    public void handleEvent(Event event) {
+        if (event == null || !SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
+            return;
+        }
+        try {
+            close((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+        } catch (Exception e) {
+            LOGGER.warn("Unexpected error invalidating API client after local session was removed", e);
+        }
+    }
+
+    /**
+     * Closes all cached clients for the given session
+     *
+     * @param session The session
+     */
+    private void close(Session session) {
+        if (null == session || false == session.containsParameter(PARAM_API_CLIENT_SESSIONS)) {
+            return;
+        }
+        /*
+         * Get the keys of all API clients for the given session
+         */
+        String sessionID = session.getSessionID();
+        List<String> toInvalidate = cachedClients.asMap().keySet() //
+            .stream().filter(k -> k.startsWith(sessionID)).collect(Collectors.toList());
+
+        /*
+         * Invalidate
+         */
+        if (toInvalidate.isEmpty() == false) {
+            cachedClients.invalidateAll(toInvalidate);
+            LOGGER.debug("Successfully invalidated {} API client(s) for session {}.", I(toInvalidate.size()), sessionID);
         }
     }
 }

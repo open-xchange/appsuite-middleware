@@ -76,6 +76,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.advertisement.json.AdConfigRestService;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.rest.advertisement.actions.GetConfigRequest;
@@ -373,6 +374,6 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     @Override
     protected String getScope() {
-        return "user";
+        return ConfigViewScope.USER.getScopeName();
     }
 }

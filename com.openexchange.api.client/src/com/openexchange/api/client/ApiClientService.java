@@ -74,18 +74,6 @@ public interface ApiClientService {
     ApiClient getApiClient(Session session, String loginLink, Credentials credentials) throws OXException;
 
     /**
-     * Gets a client that can execute requests to another OX server
-     * 
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param loginLink The link to the login endpoint
-     * @param credentials The optional credentials to access the share
-     * @return An {@link ApiClient}
-     * @throws OXException In case an access can't be generated
-     */
-    ApiClient getApiClient(int contextId, int userId, String loginLink, Credentials credentials) throws OXException;
-
-    /**
      * Closes the client and logs out from the remote system
      *
      * @param client The client to close
@@ -94,11 +82,10 @@ public interface ApiClientService {
 
     /**
      * Closes the client and logs out from the remote system
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param loginLink The optional login link the client was created with. If not set, all clients for the user will be removed
      */
-    void close(int contextId, int userId, String loginLink);
-
+    void close(Session session, String loginLink);
 }

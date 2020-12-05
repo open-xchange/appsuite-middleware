@@ -186,7 +186,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
     @Override
     public List<Map<String, Object>> getDataExportTasks() throws RemoteException {
         try {
-            List<DataExportTask> tasks = service.getDataExportTasks();
+            List<DataExportTask> tasks = service.getDataExportTasks(true);
 
             List<Map<String, Object>> retval = new ArrayList<>(tasks.size());
             for (DataExportTask task : tasks) {
@@ -296,7 +296,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
                 }
             }
 
-            for (DataExportTask task : service.getDataExportTasks()) {
+            for (DataExportTask task : service.getDataExportTasks(false)) {
                 if (task.getResultFiles() != null) {
                     for (DataExportResultFile resultFile : task.getResultFiles()) {
                         if (resultFile.getFileStorageLocation() != null) {
@@ -319,7 +319,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
 
     private List<Pair<DataExportTask, DataExportWorkItem>> getOrphanedWorkItems_() throws RemoteException {
         try {
-            List<DataExportTask> tasks = service.getDataExportTasks();
+            List<DataExportTask> tasks = service.getDataExportTasks(false);
             List<Pair<DataExportTask, DataExportWorkItem>> retval = null;
             for (DataExportTask task : tasks) {
                 SortedSet<String> fileList = DataExportUtility.getFileStorageFor(task).getFileList();
@@ -341,7 +341,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
 
     private List<Pair<DataExportTask, DataExportResultFile>> getOrphanedResultFiles_() throws RemoteException {
         try {
-            List<DataExportTask> tasks = service.getDataExportTasks();
+            List<DataExportTask> tasks = service.getDataExportTasks(false);
             List<Pair<DataExportTask, DataExportResultFile>> retval = null;
             for (DataExportTask task : tasks) {
                 if (task.getResultFiles() != null && !task.getResultFiles().isEmpty()) {

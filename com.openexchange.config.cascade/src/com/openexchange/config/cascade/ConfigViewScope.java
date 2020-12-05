@@ -49,8 +49,10 @@
 
 package com.openexchange.config.cascade;
 
+import com.openexchange.java.Strings;
+
 /**
- * {@link ConfigViewScope}
+ * {@link ConfigViewScope} - An enumeration of known config view scopes.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
@@ -64,20 +66,11 @@ public enum ConfigViewScope {
     USER("user"),
     ;
 
-    private static final String[] availableScopeNames;
-    static {
-        availableScopeNames = new String[ConfigViewScope.values().length];
-        int index = 0;
-        for (ConfigViewScope scope : ConfigViewScope.values()) {
-            availableScopeNames[index++] = scope.getScopeName();
-        }
-    }
-
     private final String scopeName;
 
     /**
      * Initializes a new {@link ConfigViewScope}.
-     * 
+     *
      * @param scopeName the scope name
      */
     private ConfigViewScope(String scopeName) {
@@ -93,8 +86,38 @@ public enum ConfigViewScope {
         return scopeName;
     }
 
+    /**
+     * Gets the config view scope for given identifier.
+     *
+     * @param scope The scope identifier to resolve
+     * @return The config view scope or <code>null</code>
+     */
+    public static ConfigViewScope scopeFor(String scope) {
+        if (Strings.isEmpty(scope)) {
+            return null;
+        }
+
+        String lcs = Strings.asciiLowerCase(scope);
+        for (ConfigViewScope configViewScope : ConfigViewScope.values()) {
+            if (configViewScope.scopeName.equals(lcs)) {
+                return configViewScope;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets all available scope names.
+     *
+     * @return All available scope names
+     */
     public static String[] getAvailableScopeNames() {
-        return availableScopeNames;
+        ConfigViewScope[] configViewScopes = ConfigViewScope.values();
+        String[] scopez = new String[configViewScopes.length];
+        for (int i = scopez.length; i-- > 0;) {
+            scopez[i] = configViewScopes[i].getScopeName();
+        }
+        return scopez;
     }
 
 }

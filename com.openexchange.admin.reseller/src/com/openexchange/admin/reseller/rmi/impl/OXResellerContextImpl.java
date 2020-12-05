@@ -103,7 +103,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void change(final Context ctx, final Credentials auth) throws PluginException {
-        if (!cache.isMasterAdmin(auth)) {
+        if (!cache.isMasterAdmin(auth, false)) {
             checkOwnerShipAndSetSid(ctx, auth);
         }
         final OXContextExtensionImpl firstExtensionByName = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
@@ -130,7 +130,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
 
@@ -145,7 +145,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
 
@@ -160,7 +160,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
 
@@ -175,7 +175,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
 
@@ -196,7 +196,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             throw new PluginException(e1);
         }
         applyRestrictionsPerContext(ctx);
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             try {
                 oxresell.writeCustomId(ctx);
             } catch (StorageException e) {
@@ -254,7 +254,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public Map<String, Object> undoableDelete(Context ctx, Credentials auth) throws PluginException {
-        boolean ismasteradmin = cache.isMasterAdmin(auth);
+        boolean ismasteradmin = cache.isMasterAdmin(auth, false);
         try {
             Map<String, Object> undoInfo = new HashMap<String, Object>(4);
             if (ismasteradmin) {
@@ -301,7 +301,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void disable(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);
@@ -309,7 +309,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void disableAll(final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
 
@@ -325,7 +325,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void downgrade(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);
@@ -333,7 +333,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void enable(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);
@@ -341,7 +341,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void enableAll(final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         try {
@@ -355,7 +355,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public String getAccessCombinationName(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return null;
         }
         checkOwnerShipAndSetSid(ctx, auth);
@@ -364,9 +364,10 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
-        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();
+        boolean masterAdmin = cache.isMasterAdmin(auth, false);
+        List<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(ctxs.size());
         for (final Context ctx : ctxs) {
-            if (cache.isMasterAdmin(auth)) {
+            if (masterAdmin) {
                 try {
                     final OXContextExtensionImpl ctxext = new OXContextExtensionImpl(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx));
                     ctxext.setCustomid(oxresell.getCustomId(ctx));
@@ -394,7 +395,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return null;
         }
         checkOwnerShipAndSetSid(ctx, auth);
@@ -414,12 +415,13 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
     @Override
     public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException {
         try {
-            if ( ! ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
-                ResellerAdmin adm = null;
-                adm = (this.oxresell.getData(new ResellerAdmin[]{ new ResellerAdmin(auth.getLogin()) } ))[0];
-                return new ResellerContextFilter(cache, adm);
+            if (ClientAdminThreadExtended.cache.isMasterAdmin(auth, false) ) {
+                return null;
             }
-            return null;
+
+            ResellerAdmin adm = null;
+            adm = (this.oxresell.getData(new ResellerAdmin[]{ new ResellerAdmin(auth.getLogin()) } ))[0];
+            return new ResellerContextFilter(cache, adm);
         } catch (StorageException e) {
             throw new PluginException(e);
         }
@@ -490,7 +492,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void exists(Context ctx, Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         if (null == ctx.getId()) {
@@ -507,7 +509,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void existsInServer(Context ctx, Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         if (null == ctx.getId()) {
@@ -524,7 +526,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 
     @Override
     public void getAdminId(Context ctx, Credentials auth) throws PluginException {
-        if (cache.isMasterAdmin(auth)) {
+        if (cache.isMasterAdmin(auth, false)) {
             return;
         }
         checkOwnerShipAndSetSid(ctx, auth);

@@ -59,7 +59,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -88,7 +88,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFileStorageFolderAccess, PermissionAware, SearchableFolderNameFolderAccess {
 
-    private static final Logger LOG = LoggerFactory.getLogger(XOXFolderAccess.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(XOXFolderAccess.class);
 
     /** The identifier of the root folder on the remote account */
     private static final String ROOT_FOLDER_ID = "9"; // SYSTEM_INFOSTORE_FOLDER_ID
@@ -171,6 +171,25 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
         return ret;
     }
 
+    /**
+     * Remembers the subfolders of a certain parent folder within the account configuration.
+     * <p/>
+     * Previously remembered folders of this parent are purged implicitly, so that the passed collection of folders will effectively
+     * replace the last known state for this folder type afterwards.
+     *
+     * @param subfolders The subfolders to remember
+     * @param parentId The identifier of the parent folder to remember the subfolders for
+     * @return The passed folders after they were remembered
+     */
+    private DefaultFileStorageFolder[] rememberSubfolders(String parentId, DefaultFileStorageFolder[] subfolders) {
+        try {
+            new AccountMetadataHelper(accountAccess.getAccount(), session).storeSubFolders(subfolders, parentId);
+        } catch (Exception e) {
+            LOGGER.warn("Error remembering subfolders of {} in account config", parentId, e);
+        }
+        return subfolders;
+    }
+
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
@@ -206,33 +225,13 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        final FileStorageAccount account = accountAccess.getAccount();
-        FileStorageFolder[] ret = null;
-        try {
-            XOXFolder[] subfolders = client.getSubFolders(parentIdentifier);
-            ret = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
-            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
-                //Set the last known root folders
-                new AccountMetadataHelper(account, session).storeSubFolders(ret, parentIdentifier);
-            }
-        } catch (Exception e) {
-            if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
-                try {
-                    //Error: We do return last known sub folders in case of an error.
-                    //Those folders get decorated with an error when loaded later and thus can be displayed by the client
-                    LOG.debug("Unable to load federate sharing folders for account " + account.getId() + ": " + e.getMessage());
-                    ret = new AccountMetadataHelper(account, session).getLastKnownFolders(parentIdentifier);
-                    if (ret.length == 0) {
-                        LOG.debug("There are no last known federated sharing folders for account " + account.getId());
-                    }
-                } catch (Exception e2) {
-                    LOG.error("Unable to load last known federate sharing folders for account " + account.getId(), e2);
-                }
-            } else {
-                throw e;
-            }
+        DefaultFileStorageFolder[] subfolders = client.getSubFolders(parentIdentifier);
+        subfolders = accountAccess.getSubscribedHelper().addSubscribed(subfolders, false == all);
+        if (parentIdentifier.equals("10") || parentIdentifier.equals("15")) {
+            //Set the last known root folders
+            rememberSubfolders(parentIdentifier, subfolders);
         }
-        return ret;
+        return subfolders;
     }
 
     @Override

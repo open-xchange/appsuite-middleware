@@ -50,26 +50,25 @@
 package com.openexchange.gdpr.dataexport.impl.groupware;
 
 import static com.openexchange.gdpr.dataexport.impl.storage.AbstractDataExportSql.isUseGlobalDb;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
-import com.openexchange.gdpr.dataexport.impl.osgi.Services;
 import com.openexchange.gdpr.dataexport.impl.utils.FileStorageAndId;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -83,10 +82,7 @@ import com.openexchange.java.util.UUIDs;
  */
 public class DataExportDeleteListener implements DeleteListener {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DataExportDeleteListener.class);
-    }
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataExportDeleteListener.class);
 
     /**
      * Initializes a new {@link DataExportDeleteListener}.
@@ -100,19 +96,17 @@ public class DataExportDeleteListener implements DeleteListener {
         int contextId = event.getContext().getContextId();
 
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            boolean useGlobalDb = isUseGlobalDb();
-
-            if (useGlobalDb) {
-                deleteTaskOnUserDeletion(event.getId(), contextId, event.getGlobalDbConnection());
+            int userId = event.getId();
+            LOG.debug("Going to drop possibly existing data export task and its remnants due to deletion of user {} in context {}", I(userId), I(contextId));
+            if (isUseGlobalDb()) {
+                deleteTaskOnUserDeletion(userId, contextId, event.getGlobalDbConnection());
             } else {
-                deleteTaskOnUserDeletion(event.getId(), contextId, writeCon);
+                deleteTaskOnUserDeletion(userId, contextId, writeCon);
             }
         } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            ConfigurationService configService = Services.requireService(ConfigurationService.class);
-            boolean useGlobalDb = configService.getBoolProperty("com.openexchange.gdpr.dataexport.useGlobalDb", true);
-
+            LOG.debug("Going to drop possibly existing data export tasks and its remnants due to deletion of context {}", I(contextId));
             Set<FileStorageAndId> fileStorages;
-            if (useGlobalDb) {
+            if (isUseGlobalDb()) {
                 fileStorages = deleteTasksOnContextDeletion(contextId, event.getGlobalDbConnection());
             } else {
                 fileStorages = deleteTasksOnContextDeletion(contextId, writeCon);
@@ -130,7 +124,7 @@ public class DataExportDeleteListener implements DeleteListener {
                 try {
                     fileStorage.remove();
                 } catch (Exception e) {
-                    LoggerHolder.LOG.warn("Failed to delete the filestore {}", fileStorage.getUri(), e);
+                    LOG.warn("Failed to delete the filestore {}", fileStorage.getUri(), e);
                 }
             }
         }
@@ -138,81 +132,127 @@ public class DataExportDeleteListener implements DeleteListener {
 
     private boolean deleteTaskOnUserDeletion(int userId, int contextId, Connection con) throws OXException {
         if (con == null) {
+            LOG.debug("Cannot drop possibly existing data export task and its remnants for user {} in context {}. No such connection available.", I(userId), I(contextId));
             return false;
         }
 
         try {
             if (false == Databases.tableExists(con, "dataExportTask")) {
+                LOG.debug("Cannot drop possibly existing data export task and its remnants for user {} in context {}. No such table existent.", I(userId), I(contextId));
                 return false;
             }
 
-            UUID taskId = null;
-            FileStorageAndId fileStorage = null;
-            try (PreparedStatement stmt = con.prepareStatement("SELECT uuid, filestore FROM dataExportTask WHERE cid = ? AND user = ?")) {
+            UUID taskId;
+            FileStorageAndId fileStorage;
+
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT uuid, filestore FROM dataExportTask WHERE cid = ? AND user = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        taskId = UUIDs.toUUID(rs.getBytes(1));
-                        int fileStorageId = rs.getInt(2);
-                        fileStorage = new FileStorageAndId(fileStorageId, DataExportUtility.getFileStorageFor(fileStorageId, contextId));
-                    } else {
-                        return false;
-                    }
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return false;
                 }
+
+                taskId = UUIDs.toUUID(rs.getBytes(1));
+                int fileStorageId = rs.getInt(2);
+                fileStorage = new FileStorageAndId(fileStorageId, DataExportUtility.getFileStorageFor(fileStorageId, contextId));
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
             }
 
+            LOG.debug("Found data export task {} using file storage {} ({}) for user {} in context {}.", UUIDs.getUnformattedString(taskId), I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), I(userId), I(contextId));
             byte[] taskIdBytes = UUIDs.toByteArray(taskId);
 
             List<String> fileStorageLocations = null;
-            try (PreparedStatement stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportTaskWorklist WHERE taskId = ? AND filestoreLocation IS NOT NULL")) {
+            try {
+                stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportTaskWorklist WHERE taskId = ? AND filestoreLocation IS NOT NULL");
                 stmt.setBytes(1, taskIdBytes);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        fileStorageLocations = new ArrayList<>();
-                        do {
-                            fileStorageLocations.add(rs.getString(1));
-                        } while (rs.next());
-                    }
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    fileStorageLocations = new ArrayList<>();
+                    do {
+                        fileStorageLocations.add(rs.getString(1));
+                    } while (rs.next());
                 }
-            }
-            try (PreparedStatement stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportFilestoreLocation WHERE taskId = ?")) {
-                stmt.setBytes(1, taskIdBytes);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        if (fileStorageLocations == null) {
-                            fileStorageLocations = new ArrayList<>();
-                        }
-                        do {
-                            fileStorageLocations.add(rs.getString(1));
-                        } while (rs.next());
-                    }
-                }
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
             }
 
-            try (PreparedStatement stmt = con.prepareStatement("DELETE FROM dataExportTask WHERE uuid = ?")) {
+
+            try {
+                stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportFilestoreLocation WHERE taskId = ?");
+                stmt.setBytes(1, taskIdBytes);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    if (fileStorageLocations == null) {
+                        fileStorageLocations = new ArrayList<>();
+                    }
+                    do {
+                        fileStorageLocations.add(rs.getString(1));
+                    } while (rs.next());
+                }
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            if (fileStorageLocations == null) {
+                LOG.debug("Found no file storage locations associated with data export task {} using file storage {} ({}) for user {} in context {}.", UUIDs.getUnformattedString(taskId), I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), I(userId), I(contextId));
+            } else {
+                LOG.debug("Collected all file storage locations associated with data export task {} using file storage {} ({}) for user {} in context {}: {}", UUIDs.getUnformattedString(taskId), I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), I(userId), I(contextId), fileStorageLocations);
+            }
+
+            try {
+                stmt = con.prepareStatement("DELETE FROM dataExportTask WHERE uuid = ?");
                 stmt.setBytes(1, taskIdBytes);
                 int count = stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+
                 if (count > 0) {
-                    try (PreparedStatement stmt2 = con.prepareStatement("DELETE FROM dataExportTaskWorklist WHERE taskId = ?")) {
-                        stmt2.setBytes(1, taskIdBytes);
-                        stmt2.executeUpdate();
-                    }
-                    try (PreparedStatement stmt2 = con.prepareStatement("DELETE FROM dataExportFilestoreLocation WHERE taskId = ?")) {
-                        stmt2.setBytes(1, taskIdBytes);
-                        stmt2.executeUpdate();
-                    }
+                    stmt = con.prepareStatement("DELETE FROM dataExportTaskWorklist WHERE taskId = ?");
+                    stmt.setBytes(1, taskIdBytes);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM dataExportFilestoreLocation WHERE taskId = ?");
+                    stmt.setBytes(1, taskIdBytes);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM dataExportReport WHERE taskId = ?");
+                    stmt.setBytes(1, taskIdBytes);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    LOG.debug("Deleted data export task {} for user {} in context {}.", UUIDs.getUnformattedString(taskId), I(userId), I(contextId));
+
                     if (fileStorageLocations != null ) {
                         for (String fileStorageLocation : fileStorageLocations) {
                             try {
                                 fileStorage.fileStorage.deleteFile(fileStorageLocation);
+                                LOG.debug("Deleted file storage location {} of data export task {} for user {} in context {}.", fileStorageLocation, UUIDs.getUnformattedString(taskId), I(userId), I(contextId));
                             } catch (Exception e) {
-                                LoggerHolder.LOG.warn("Failed to delete file storage item {} from file storage {}", fileStorageLocation, fileStorage.fileStorage.getUri(), e);
+                                LOG.warn("Failed to delete file storage location {} from file storage {} ({})", fileStorageLocation, I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), e);
                             }
                         }
                     }
                     return true;
                 }
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
         } catch (SQLException e) {
             throw DataExportExceptionCode.SQL_ERROR.create(e);
@@ -231,75 +271,132 @@ public class DataExportDeleteListener implements DeleteListener {
      */
     private Set<FileStorageAndId> deleteTasksOnContextDeletion(int contextId, Connection con) throws OXException {
         if (con == null) {
+            LOG.debug("Cannot drop possibly existing data export tasks and its remnants for context {}. No such connection available.", I(contextId));
             return Collections.emptySet();
         }
 
         try {
             if (false == Databases.tableExists(con, "dataExportTask")) {
+                LOG.debug("Cannot drop possibly existing data export tasks and its remnants for  context {}. No such table existent.", I(contextId));
                 return Collections.emptySet();
             }
 
             List<UUID> taskIds = new ArrayList<>();
             Map<UUID, FileStorageAndId> fileStorages = new LinkedHashMap<>();
-            try (PreparedStatement stmt = con.prepareStatement("SELECT uuid, filestore FROM dataExportTask WHERE cid = ?")) {
-                stmt.setInt(1, contextId);
-                try (ResultSet rs = stmt.executeQuery()) {
+
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            {
+                Map<Integer, FileStorageAndId> visistedFileStorages = new HashMap<>(2);
+                try {
+                    stmt = con.prepareStatement("SELECT uuid, filestore FROM dataExportTask WHERE cid = ?");
+                    stmt.setInt(1, contextId);
+                    rs = stmt.executeQuery();
                     while (rs.next()) {
                         UUID taskId = UUIDs.toUUID(rs.getBytes(1));
                         taskIds.add(taskId);
                         int fileStorageId = rs.getInt(2);
-                        fileStorages.put(taskId, new FileStorageAndId(fileStorageId, DataExportUtility.getFileStorageFor(fileStorageId, contextId)));
+                        FileStorageAndId fileStorageAndId = visistedFileStorages.get(I(fileStorageId));
+                        if (fileStorageAndId == null) {
+                            fileStorageAndId = new FileStorageAndId(fileStorageId, DataExportUtility.getFileStorageFor(fileStorageId, contextId));
+                            visistedFileStorages.put(I(fileStorageId), fileStorageAndId);
+                        }
+                        fileStorages.put(taskId, fileStorageAndId);
                     }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
                 }
+                visistedFileStorages = null; // Help GC
             }
+
+            if (taskIds.isEmpty()) {
+                LOG.debug("Found no data export tasks for context {}.", I(contextId));
+            }
+
+            LOG.debug("Found {} data export task(s) for context {}.", I(taskIds.size()), I(contextId));
 
             Map<UUID, List<String>> fileStorageLocations = new LinkedHashMap<>();
             for (UUID taskId : taskIds) {
                 byte[] taskIdBytes = UUIDs.toByteArray(taskId);
                 List<String> locations = null;
-                try (PreparedStatement stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportTaskWorklist WHERE taskId = ? AND filestoreLocation IS NOT NULL")) {
+                try {
+                    stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportTaskWorklist WHERE taskId = ? AND filestoreLocation IS NOT NULL");
                     stmt.setBytes(1, taskIdBytes);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next()) {
-                            locations = new ArrayList<>();
-                            do {
-                                locations.add(rs.getString(1));
-                            } while (rs.next());
-                        }
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        locations = new ArrayList<>();
+                        do {
+                            locations.add(rs.getString(1));
+                        } while (rs.next());
                     }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
                 }
-                try (PreparedStatement stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportFilestoreLocation WHERE taskId = ?")) {
+                try {
+                    stmt = con.prepareStatement("SELECT filestoreLocation FROM dataExportFilestoreLocation WHERE taskId = ?");
                     stmt.setBytes(1, taskIdBytes);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next()) {
-                            if (locations == null) {
-                                locations = new ArrayList<>();
-                            }
-                            do {
-                                locations.add(rs.getString(1));
-                            } while (rs.next());
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        if (locations == null) {
+                            locations = new ArrayList<>();
                         }
+                        do {
+                            locations.add(rs.getString(1));
+                        } while (rs.next());
                     }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
                 }
                 fileStorageLocations.put(taskId, locations == null ? Collections.emptyList() : locations);
             }
 
+            LOG.debug("Found {} file storage location(s) for context {}.", I(fileStorageLocations.size()), I(contextId));
+
             for (UUID taskId : taskIds) {
                 byte[] taskIdBytes = UUIDs.toByteArray(taskId);
-                try (PreparedStatement stmt = con.prepareStatement("DELETE FROM dataExportTask WHERE uuid = ?")) {
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dataExportTask WHERE uuid = ?");
                     stmt.setBytes(1, taskIdBytes);
                     stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
 
-                try (PreparedStatement stmt = con.prepareStatement("DELETE FROM dataExportTaskWorklist WHERE taskId = ?")) {
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dataExportTaskWorklist WHERE taskId = ?");
                     stmt.setBytes(1, taskIdBytes);
                     stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
 
-                try (PreparedStatement stmt = con.prepareStatement("DELETE FROM dataExportFilestoreLocation WHERE taskId = ?")) {
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dataExportFilestoreLocation WHERE taskId = ?");
                     stmt.setBytes(1, taskIdBytes);
                     stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
+
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dataExportReport WHERE taskId = ?");
+                    stmt.setBytes(1, taskIdBytes);
+                    stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
+                LOG.debug("Deleted data export task {} for context {}.", UUIDs.getUnformattedString(taskId), I(contextId));
             }
 
             for (Map.Entry<UUID, List<String>> fileStorageLocation : fileStorageLocations.entrySet()) {
@@ -308,8 +405,9 @@ public class DataExportDeleteListener implements DeleteListener {
                 for (String location : fileStorageLocation.getValue()) {
                     try {
                         fileStorage.fileStorage.deleteFile(location);
+                        LOG.debug("Deleted file storage location {} of data export task {} for context {}.", fileStorageLocation, UUIDs.getUnformattedString(taskId), I(contextId));
                     } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete file storage item {} from file storage {}", fileStorageLocation, fileStorage.fileStorage.getUri(), e);
+                        LOG.warn("Failed to delete file storage location {} from file storage {} ({})", fileStorageLocation, I(fileStorage.fileStorageId), fileStorage.fileStorage.getUri(), e);
                     }
                 }
             }

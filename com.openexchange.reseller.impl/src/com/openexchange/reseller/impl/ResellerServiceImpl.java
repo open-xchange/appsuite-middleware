@@ -446,7 +446,7 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * 
+     *
      * Optionally retrieves the reseller admin for the specified context identifier
      *
      * @param contextId The context identifier
@@ -459,7 +459,7 @@ public class ResellerServiceImpl implements ResellerService {
     }
 
     /**
-     * 
+     *
      * Retrieves the reseller admin for the specified context identifier
      *
      * @param contextId The context identifier
@@ -857,8 +857,7 @@ public class ResellerServiceImpl implements ResellerService {
                 connectionInitialised = true;
             }
             stmt = connection.prepareStatement(GET_RESELLER_PROPERTIES);
-            int pIndex = 1;
-            stmt.setInt(pIndex++, resellerId);
+            stmt.setInt(1, resellerId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyMap();

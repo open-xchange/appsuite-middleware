@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 
@@ -136,7 +137,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjax
 
     @Override
     protected String getScope() {
-        return "user";
+        return ConfigViewScope.USER.getScopeName();
     }
 
     /**

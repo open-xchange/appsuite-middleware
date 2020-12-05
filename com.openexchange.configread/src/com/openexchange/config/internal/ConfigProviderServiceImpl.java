@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -141,7 +142,7 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
 
     @Override
     public String getScope() {
-    	return "server";
+    	return ConfigViewScope.SERVER.getScopeName();
     }
 
     @Override

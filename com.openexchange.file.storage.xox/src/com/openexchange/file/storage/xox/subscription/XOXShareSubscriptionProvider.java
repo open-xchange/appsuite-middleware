@@ -243,6 +243,6 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
      * @throws OXException In case service is missing
      */
     private void clearRemoteSessions(Session session, String shareLink) throws OXException {
-        services.getServiceSafe(ApiClientService.class).close(session.getContextId(), session.getUserId(), shareLink);
+        services.getServiceSafe(ApiClientService.class).close(session, shareLink);
     }
 }

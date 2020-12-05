@@ -62,6 +62,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -186,7 +187,7 @@ public class Activator extends HousekeepingActivator {
                         try {
                             final String finalScope = property.get("final");
                             final String isProtected = property.get("protected");
-                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
+                            return (finalScope == null || finalScope.equals(ConfigViewScope.USER.getScopeName())) && (isProtected == null || !Boolean.parseBoolean(isProtected));
                         } catch (OXException x) {
                             LOG.error("", x);
                             return false;
@@ -213,7 +214,7 @@ public class Activator extends HousekeepingActivator {
                         if (value != null) {
                             // Clients have a habit of dumping the config back at us, so we only save differing values.
                             if (!value.equals(oldValue)) {
-                                viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
+                                viewFactory.getView(user.getId(), ctx.getContextId()).set(ConfigViewScope.USER.getScopeName(), propertyName, value);
                             }
 
                         }
@@ -312,7 +313,7 @@ public class Activator extends HousekeepingActivator {
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                         final String finalScope = property.get("final");
                         final String isProtected = property.get("protected");
-                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
+                        final boolean writable = (finalScope == null || finalScope.equals(ConfigViewScope.USER.getScopeName())) && (isProtected == null || !Boolean.parseBoolean(isProtected));
                         setting.setSingleValue(Boolean.valueOf(writable));
                     }
 

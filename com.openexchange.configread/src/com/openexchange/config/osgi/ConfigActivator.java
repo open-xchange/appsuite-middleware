@@ -61,6 +61,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.mbean.ConfigReloadMBean;
@@ -105,7 +106,7 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             {
                 Dictionary<String, Object> properties = new Hashtable<>(2);
-                properties.put("scope", "server");
+                properties.put("scope", ConfigViewScope.SERVER.getScopeName());
                 ConfigProviderServiceImpl configProviderServiceImpl = new ConfigProviderServiceImpl(configService);
                 configService.setConfigProviderServiceImpl(configProviderServiceImpl);
                 registerService(ConfigProviderService.class, configProviderServiceImpl, properties);

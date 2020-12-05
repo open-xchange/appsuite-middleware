@@ -172,10 +172,11 @@ public interface DataExportService {
     /**
      * Gets all data export tasks.
      *
+     * @param checkValidity Whether to check validity of queried tasks
      * @return The data export tasks
      * @throws OXException If data export tasks cannot be returned
      */
-    List<DataExportTask> getDataExportTasks() throws OXException;
+    List<DataExportTask> getDataExportTasks(boolean checkValidity) throws OXException;
 
     /**
      * Removes the completed data export task (if any) and any associated resources for specified user.
