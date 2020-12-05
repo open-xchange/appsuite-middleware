@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -278,7 +277,10 @@ public class ApnsHttp2PushPerformer {
         }
 
         // Create mapping for device token to push match
-        Map<String, PushMatch> deviceToken2PushMatch = payloads.stream().collect(Collectors.toMap(entry -> entry.getValue().getToken(), entry -> entry.getKey()));
+        Map<String, PushMatch> deviceToken2PushMatch = new HashMap<>(payloads.size());
+        for (Map.Entry<PushMatch, ApnsPushNotification> payload : payloads) {
+            deviceToken2PushMatch.putIfAbsent(payload.getValue().getToken(), payload.getKey());
+        }
 
         // Process results
         for (NotificationResponsePerDevice notificationPerDevice : notifications) {
