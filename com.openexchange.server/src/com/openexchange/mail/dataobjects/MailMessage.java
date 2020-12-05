@@ -276,7 +276,7 @@ public abstract class MailMessage extends MailPart {
      * @return The color label's <code>int</code> value
      * @throws OXException
      */
-    public static int getColorLabelIntValue(final String cl) throws OXException {
+    public static int getColorLabelIntValue(String cl) throws OXException {
         if (!isColorLabel(cl)) {
             throw MailExceptionCode.UNKNOWN_COLOR_LABEL.create(cl);
         } else if (!isValidColorLabel(cl)) {
@@ -295,7 +295,7 @@ public abstract class MailMessage extends MailPart {
      * @param cl The string to check
      * @return <code>true</code> if specified string matches a color label pattern; otherwise <code>false</code>
      */
-    public static boolean isColorLabel(final String cl) {
+    public static boolean isColorLabel(String cl) {
         return (cl != null && (cl.startsWith(MailMessage.COLOR_LABEL_PREFIX) || cl.startsWith(MailMessage.COLOR_LABEL_PREFIX_OLD)));
     }
 
@@ -305,7 +305,7 @@ public abstract class MailMessage extends MailPart {
      * @param cl The string to check
      * @return <code>true</code> if specified string is a valid color label; otherwise <code>false</code>
      */
-    public static boolean isValidColorLabel(final String cl) {
+    public static boolean isValidColorLabel(String cl) {
         return ALL_COLOR_LABELS.contains(cl);
     }
 
@@ -318,7 +318,7 @@ public abstract class MailMessage extends MailPart {
      * @param defaultValue The default value to return if parsing color label's <code>int</code> value fails
      * @return The color label's <code>int</code> value or <code>defaultValue</code> on failure.
      */
-    public static int parseColorLabel(final String cl, final int defaultValue) {
+    public static int parseColorLabel(String cl, int defaultValue) {
         try {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (NumberFormatException e) {
@@ -336,7 +336,7 @@ public abstract class MailMessage extends MailPart {
      * @param cl The color label's <code>int</code> value
      * @return The color abel's string representation
      */
-    public static String getColorLabelStringValue(final int cl) {
+    public static String getColorLabelStringValue(int cl) {
         return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
     }
 
@@ -603,7 +603,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addr The address
      */
-    public void addFrom(final InternetAddress addr) {
+    public void addFrom(InternetAddress addr) {
         if (null == addr) {
             b_from = true;
             return;
@@ -619,7 +619,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addFrom(final InternetAddress[] addrs) {
+    public void addFrom(InternetAddress[] addrs) {
         if (null == addrs) {
             b_from = true;
             return;
@@ -635,7 +635,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addFrom(final Collection<InternetAddress> addrs) {
+    public void addFrom(Collection<InternetAddress> addrs) {
         if (null == addrs) {
             b_from = true;
             return;
@@ -693,7 +693,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addr The address
      */
-    public void addTo(final InternetAddress addr) {
+    public void addTo(InternetAddress addr) {
         if (null == addr) {
             b_to = true;
             return;
@@ -709,7 +709,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addTo(final InternetAddress[] addrs) {
+    public void addTo(InternetAddress[] addrs) {
         if (null == addrs) {
             b_to = true;
             return;
@@ -725,7 +725,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addTo(final Collection<InternetAddress> addrs) {
+    public void addTo(Collection<InternetAddress> addrs) {
         if (null == addrs) {
             b_to = true;
             return;
@@ -783,7 +783,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addr The address
      */
-    public void addCc(final InternetAddress addr) {
+    public void addCc(InternetAddress addr) {
         if (null == addr) {
             b_cc = true;
             return;
@@ -799,7 +799,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addCc(final InternetAddress[] addrs) {
+    public void addCc(InternetAddress[] addrs) {
         if (null == addrs) {
             b_cc = true;
             return;
@@ -815,7 +815,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addCc(final Collection<InternetAddress> addrs) {
+    public void addCc(Collection<InternetAddress> addrs) {
         if (null == addrs) {
             b_cc = true;
             return;
@@ -873,7 +873,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addr The address
      */
-    public void addBcc(final InternetAddress addr) {
+    public void addBcc(InternetAddress addr) {
         if (null == addr) {
             b_bcc = true;
             return;
@@ -889,7 +889,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addBcc(final InternetAddress[] addrs) {
+    public void addBcc(InternetAddress[] addrs) {
         if (null == addrs) {
             b_bcc = true;
             return;
@@ -905,7 +905,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addBcc(final Collection<InternetAddress> addrs) {
+    public void addBcc(Collection<InternetAddress> addrs) {
         if (null == addrs) {
             b_bcc = true;
             return;
@@ -977,7 +977,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addr The address
      */
-    public void addReplyTo(final InternetAddress addr) {
+    public void addReplyTo(InternetAddress addr) {
         if (null == addr) {
             b_replyTo = true;
             return;
@@ -993,7 +993,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addReplyTo(final InternetAddress[] addrs) {
+    public void addReplyTo(InternetAddress[] addrs) {
         if (null == addrs) {
             b_replyTo = true;
             return;
@@ -1009,7 +1009,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param addrs The addresses
      */
-    public void addReplyTo(final Collection<InternetAddress> addrs) {
+    public void addReplyTo(Collection<InternetAddress> addrs) {
         if (null == addrs) {
             b_replyTo = true;
             return;
@@ -1161,7 +1161,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param flags the flags to set
      */
-    public void setFlags(final int flags) {
+    public void setFlags(int flags) {
         this.flags = flags;
         b_flags = true;
     }
@@ -1173,7 +1173,7 @@ public abstract class MailMessage extends MailPart {
      * @param enable <code>true</code> to enable; otherwise <code>false</code>
      * @throws OXException If an illegal flag argument is specified
      */
-    public void setFlag(final int flag, final boolean enable) throws OXException {
+    public void setFlag(int flag, boolean enable) throws OXException {
         if ((flag == 1) || ((flag % 2) != 0)) {
             throw MailExceptionCode.ILLEGAL_FLAG_ARGUMENT.create(Integer.valueOf(flag));
         }
@@ -1216,7 +1216,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param prevSeen the previous \Seen state to set
      */
-    public void setPrevSeen(final boolean prevSeen) {
+    public void setPrevSeen(boolean prevSeen) {
         this.prevSeen = prevSeen;
         b_prevSeen = true;
     }
@@ -1250,7 +1250,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param threadLevel the threadLevel to set
      */
-    public void setThreadLevel(final int threadLevel) {
+    public void setThreadLevel(int threadLevel) {
         this.threadLevel = threadLevel;
         b_threadLevel = true;
     }
@@ -1291,7 +1291,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param subject the subject to set
      */
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         this.subject = subject;
         b_subject = true;
     }
@@ -1302,7 +1302,7 @@ public abstract class MailMessage extends MailPart {
      * @param subject The subject to set
      * @param decoded <code>true</code> if ensured to be decoded; otherwise <code>false</code>
      */
-    public void setSubject(final String subject, boolean decoded) {
+    public void setSubject(String subject, boolean decoded) {
         this.subject = subject;
         b_subject = true;
         this.subjectDecoded = decoded;
@@ -1370,7 +1370,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param sentDate the sent date to set
      */
-    public void setSentDate(final Date sentDate) {
+    public void setSentDate(Date sentDate) {
         this.sentDate = sentDate == null ? null : new Date(sentDate.getTime());
         b_sentDate = true;
     }
@@ -1414,7 +1414,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param receivedDate the received date to set
      */
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         this.receivedDate = receivedDate == null ? null : new Date(receivedDate.getTime());
         b_receivedDate = true;
     }
@@ -1424,7 +1424,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param userFlag The user flag to add
      */
-    public void addUserFlag(final String userFlag) {
+    public void addUserFlag(String userFlag) {
         if (userFlag == null) {
             return;
         } else if (userFlags == null) {
@@ -1439,7 +1439,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param userFlags The user flags to add
      */
-    public void addUserFlags(final String[] userFlags) {
+    public void addUserFlags(String[] userFlags) {
         if (userFlags == null) {
             return;
         } else if (this.userFlags == null) {
@@ -1456,7 +1456,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param userFlags The user flags to add
      */
-    public void addUserFlags(final Collection<String> userFlags) {
+    public void addUserFlags(Collection<String> userFlags) {
         if (userFlags == null) {
             return;
         } else if (this.userFlags == null) {
@@ -1535,7 +1535,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param colorLabel the color label to set
      */
-    public void setColorLabel(final int colorLabel) {
+    public void setColorLabel(int colorLabel) {
         this.colorLabel = colorLabel;
         b_colorLabel = true;
     }
@@ -1582,7 +1582,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param priority the priority to set
      */
-    public void setPriority(final int priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
         b_priority = true;
     }
@@ -1628,7 +1628,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param dispositionNotification the dispositionNotification to set
      */
-    public void setDispositionNotification(final InternetAddress dispositionNotification) {
+    public void setDispositionNotification(InternetAddress dispositionNotification) {
         this.dispositionNotification = dispositionNotification;
         b_dispositionNotification = true;
     }
@@ -1662,7 +1662,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param originalFolder the original folder to set
      */
-    public void setOriginalFolder(final FullnameArgument originalFolder) {
+    public void setOriginalFolder(FullnameArgument originalFolder) {
         this.originalFolder = originalFolder;
         b_originalFolder = true;
     }
@@ -1696,7 +1696,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param textPreview the text preview to set
      */
-    public void setTextPreview(final String textPreview) {
+    public void setTextPreview(String textPreview) {
         this.textPreview = textPreview;
         b_textPreview = true;
     }
@@ -1730,7 +1730,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param originalId the original identifier to set
      */
-    public void setOriginalId(final String originalId) {
+    public void setOriginalId(String originalId) {
         this.originalId = originalId;
         b_originalId = true;
     }
@@ -1764,7 +1764,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param folder the folder to set
      */
-    public void setFolder(final String folder) {
+    public void setFolder(String folder) {
         this.folder = folder;
         b_folder = true;
     }
@@ -1798,7 +1798,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param accountId The account ID
      */
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
         b_accountId = true;
     }
@@ -1832,7 +1832,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param accountName The account name
      */
-    public void setAccountName(final String accountName) {
+    public void setAccountName(String accountName) {
         this.accountName = accountName;
         b_accountName = true;
     }
@@ -1875,7 +1875,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param hasAttachment the has-attachment flag to set
      */
-    public void setHasAttachment(final boolean hasAttachment) {
+    public void setHasAttachment(boolean hasAttachment) {
         this.hasAttachment = hasAttachment;
         b_hasAttachment = true;
     }
@@ -1909,7 +1909,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param hasAttachment the alternative has-attachment flag to set
      */
-    public void setAlternativeHasAttachment(final boolean hasAttachment) {
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
         this.alternativeHasAttachment = hasAttachment;
         b_alternativeHasAttachment = true;
     }
@@ -1970,7 +1970,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param appendVCard the appendVCard to set
      */
-    public void setAppendVCard(final boolean appendVCard) {
+    public void setAppendVCard(boolean appendVCard) {
         this.appendVCard = appendVCard;
         b_appendVCard = true;
     }
@@ -2004,7 +2004,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param recentCount The recent count
      */
-    public void setRecentCount(final int recentCount) {
+    public void setRecentCount(int recentCount) {
         this.recentCount = recentCount;
         b_recentCount = true;
     }
@@ -2055,7 +2055,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param sReferences The <i>Message-Id</i> header value
      */
-    public void setMessageId(final String messageId) {
+    public void setMessageId(String messageId) {
         b_messageId = true;
         this.messageId = messageId;
     }
@@ -2121,7 +2121,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param sReferences The <i>References</i> header value
      */
-    public void setReferences(final String sReferences) {
+    public void setReferences(String sReferences) {
         if (null == sReferences) {
             this.references = null;
             b_references = true;
@@ -2135,7 +2135,7 @@ public abstract class MailMessage extends MailPart {
      *
      * @param references The <i>References</i>
      */
-    public void setReferences(final String[] references) {
+    public void setReferences(String[] references) {
         if (null == references) {
             this.references = null;
         } else {

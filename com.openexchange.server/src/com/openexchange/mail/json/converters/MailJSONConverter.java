@@ -69,7 +69,7 @@ public class MailJSONConverter implements ResultConverter {
     /**
      * Initializes a new {@link MailJSONConverter}.
      */
-    public MailJSONConverter(final MailConverter mailConverter) {
+    public MailJSONConverter(MailConverter mailConverter) {
         super();
         this.mailConverter = mailConverter;
     }
@@ -90,7 +90,7 @@ public class MailJSONConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         mailConverter.convert2JSON(requestData, result, session);
     }
 

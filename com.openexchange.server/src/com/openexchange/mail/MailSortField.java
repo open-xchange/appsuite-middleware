@@ -128,7 +128,7 @@ public enum MailSortField {
     private final String key;
     private final MailListField listField;
 
-    private MailSortField(final MailListField listField) {
+    private MailSortField(MailListField listField) {
         field = listField.getField();
         key = listField.getKey();
         this.listField = listField;
@@ -181,7 +181,7 @@ public enum MailSortField {
      * @param fields The <code>int</code> values
      * @return The array of {@link MailSortField} corresponding to given <code>int</code> values
      */
-    public static final MailSortField[] getFields(final int[] fields) {
+    public static final MailSortField[] getFields(int[] fields) {
         if ((fields == null) || (fields.length == 0)) {
             return EMPTY_FIELDS;
         }
@@ -196,7 +196,7 @@ public enum MailSortField {
 
     static {
         final MailSortField[] fields = MailSortField.values();
-        for (final MailSortField listField : fields) {
+        for (MailSortField listField : fields) {
             field2sortfield.put(listField.field, listField);
         }
     }
@@ -207,7 +207,7 @@ public enum MailSortField {
      * @param field The <code>int</code> value
      * @return The corresponding {@link MailSortField} constant
      */
-    public static final MailSortField getField(final int field) {
+    public static final MailSortField getField(int field) {
         return field2sortfield.get(field);
     }
 }

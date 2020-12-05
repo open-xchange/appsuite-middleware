@@ -98,7 +98,7 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
      *
      * @param nonInlineParts The container for non-inline parts
      */
-    public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
+    public NonInlineForwardPartHandler(List<MailPart> nonInlineParts) {
         super();
         iCalendarContent = false;
         this.nonInlineParts = nonInlineParts;
@@ -126,20 +126,20 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
      *
      * @param imageContentIds The content IDs
      */
-    public void setImageContentIds(final Collection<String> imageContentIds) {
+    public void setImageContentIds(Collection<String> imageContentIds) {
         this.imageContentIds.clear();
         this.imageContentIds.addAll(imageContentIds);
     }
 
     @Override
-    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+    public boolean handleMultipartEnd(MailPart mp, String id) throws OXException {
         return true;
     }
 
     private static final String APPLICATION = "application/";
 
     @Override
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+    public boolean handleAttachment(MailPart part, boolean isInline, String baseContentType, String fileName, String id) throws OXException {
         if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().startsWith(APPLICATION)) {
             if (!part.containsSequenceId()) {
                 part.setSequenceId(id);
@@ -150,42 +150,42 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleBccRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleCcRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleColorLabel(final int colorLabel) throws OXException {
+    public boolean handleColorLabel(int colorLabel) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleContentId(final String contentId) throws OXException {
+    public boolean handleContentId(String contentId) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
+    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean acknowledged) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
+    public boolean handleFrom(InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
+    public boolean handleHeaders(int size, Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
+    public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, boolean isInline, String fileName, String id) throws OXException {
         if (imageCID == null && (!isInline || part.getContentDisposition().containsFilenameParameter())) {
             if (!part.containsSequenceId()) {
                 part.setSequenceId(id);
@@ -211,7 +211,7 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
         return true;
     }
 
-    private static String prepareContentId(final String contentId) {
+    private static String prepareContentId(String contentId) {
         if (null == contentId) {
             return null;
         }
@@ -227,17 +227,17 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineHtml(final ContentProvider htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineHtml(ContentProvider htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlinePlainText(String plainTextContent, ContentType contentType, long size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
+    public boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws OXException {
         final MailPart mailPart = new UUEncodedAttachmentMailPart(part);
         String ct = MimeType2ExtMap.getContentType(part.getFileName());
         if (ct == null || ct.length() == 0) {
@@ -252,27 +252,27 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public void handleMessageEnd(final MailMessage mail) throws OXException {
+    public void handleMessageEnd(MailMessage mail) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public boolean handleMsgRef(final String msgRef) throws OXException {
+    public boolean handleMsgRef(String msgRef) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
+    public boolean handleMultipart(MailPart mp, int bodyPartCount, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+    public boolean handleNestedMessage(MailPart mailPart, String id) throws OXException {
         /*
          * Force to add as attachment
          */
@@ -288,22 +288,22 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handlePriority(final int priority) throws OXException {
+    public boolean handlePriority(int priority) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
+    public boolean handleReceivedDate(Date receivedDate) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSentDate(final Date sentDate) throws OXException {
+    public boolean handleSentDate(Date sentDate) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
+    public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws OXException {
         if (baseContentType.startsWith("text/")) {
             if (!part.containsSequenceId()) {
                 part.setSequenceId(id);
@@ -326,22 +326,22 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleSubject(final String subject) throws OXException {
+    public boolean handleSubject(String subject) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSystemFlags(final int flags) throws OXException {
+    public boolean handleSystemFlags(int flags) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleToRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleUserFlags(final String[] userFlags) throws OXException {
+    public boolean handleUserFlags(String[] userFlags) throws OXException {
         return true;
     }
 

@@ -79,7 +79,7 @@ public class MailLogicTools {
      * @param session The session providing user data
      * @param accountId The account ID
      */
-    public MailLogicTools(final Session session, final int accountId) {
+    public MailLogicTools(Session session, int accountId) {
         super();
         this.session = session;
         this.accountId = accountId;
@@ -97,7 +97,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the reply message
      * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws OXException {
+    public MailMessage getReplyMessage(MailMessage originalMail, boolean replyAll) throws OXException {
         return getReplyMessage(originalMail, replyAll, false);
     }
 
@@ -114,7 +114,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the reply message
      * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final boolean setFrom) throws OXException {
+    public MailMessage getReplyMessage(MailMessage originalMail, boolean replyAll, boolean setFrom) throws OXException {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, setFrom);
     }
 
@@ -133,7 +133,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the reply message
      * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws OXException {
+    public MailMessage getReplyMessage(MailMessage originalMail, boolean replyAll, UserSettingMail usm) throws OXException {
         return getReplyMessage(originalMail, replyAll, usm, false);
     }
 
@@ -151,7 +151,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the reply message
      * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm, final boolean setFrom) throws OXException {
+    public MailMessage getReplyMessage(MailMessage originalMail, boolean replyAll, UserSettingMail usm, boolean setFrom) throws OXException {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm, setFrom);
     }
 
@@ -169,7 +169,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the reply message
      * @throws OXException If reply message cannot be generated
      */
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm, final FromAddressProvider fromAddressProvider) throws OXException {
+    public MailMessage getReplyMessage(MailMessage originalMail, boolean replyAll, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm, fromAddressProvider);
     }
 
@@ -188,7 +188,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final boolean setFrom) throws OXException {
+    public MailMessage getFowardMessage(MailMessage[] originalMails, boolean setFrom) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, setFrom);
     }
 
@@ -208,7 +208,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm, boolean setFrom) throws OXException {
+    public MailMessage getFowardMessage(MailMessage[] originalMails, UserSettingMail usm, boolean setFrom) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, usm, setFrom);
     }
 
@@ -226,7 +226,7 @@ public class MailLogicTools {
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
+    public MailMessage getFowardMessage(MailMessage[] originalMails, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, usm, fromAddressProvider);
     }
 

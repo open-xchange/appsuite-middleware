@@ -92,7 +92,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      *
      * @throws OXException If setting message as content fails
      */
-    public MimeMailMessage(final MimeMessage msg) throws OXException {
+    public MimeMailMessage(MimeMessage msg) throws OXException {
         super();
         mailPart = new MimeMailPart(msg);
     }
@@ -116,7 +116,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      *
      * @param separator The separator to set
      */
-    public void setSeparator(final char separator) {
+    public void setSeparator(char separator) {
         this.separator = separator;
     }
 
@@ -134,7 +134,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      *
      * @param seqnum The sequence number to set
      */
-    public void setSeqnum(final int seqnum) {
+    public void setSeqnum(int seqnum) {
         this.seqnum = seqnum;
     }
 
@@ -146,7 +146,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      * @param msg The MIME message or <code>null</code> to clear any body references
      * @throws OXException If setting message as content fails
      */
-    public void setContent(final MimeMessage msg) throws OXException {
+    public void setContent(MimeMessage msg) throws OXException {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
         mailPart = msg == null ? new MimeMailPart((Part) null) : new MimeMailPart(msg);
     }
@@ -178,7 +178,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         this.id = id;
     }
 
@@ -198,7 +198,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return mailPart.getEnclosedMailPart(index);
     }
 
@@ -213,7 +213,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         mailPart.writeTo(out);
     }
 
@@ -228,7 +228,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         this.unreadMessages = unreadMessages;
     }
 

@@ -84,19 +84,19 @@ public final class ThreadSortMailMessage extends MailMessage {
      *
      * @param delegatee
      */
-    public ThreadSortMailMessage(final MailMessage delegatee) {
+    public ThreadSortMailMessage(MailMessage delegatee) {
         super();
         this.delegatee = delegatee;
         childMessages = new ArrayList<ThreadSortMailMessage>(8);
     }
 
     @Override
-    public void addReplyTo(final InternetAddress addr) {
+    public void addReplyTo(InternetAddress addr) {
         delegatee.addReplyTo(addr);
     }
 
     @Override
-    public void addReplyTo(final InternetAddress[] addrs) {
+    public void addReplyTo(InternetAddress[] addrs) {
         delegatee.addReplyTo(addrs);
     }
 
@@ -121,7 +121,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setHeader(final String name, final String value) {
+    public void setHeader(String name, String value) {
         delegatee.setHeader(name, value);
     }
 
@@ -141,7 +141,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMessageId(final String messageId) {
+    public void setMessageId(String messageId) {
         delegatee.setMessageId(messageId);
     }
 
@@ -166,72 +166,72 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setReferences(final String sReferences) {
+    public void setReferences(String sReferences) {
         delegatee.setReferences(sReferences);
     }
 
     @Override
-    public void setReferences(final String[] references) {
+    public void setReferences(String[] references) {
         delegatee.setReferences(references);
     }
 
     @Override
-    public void addBcc(final InternetAddress addr) {
+    public void addBcc(InternetAddress addr) {
         delegatee.addBcc(addr);
     }
 
     @Override
-    public void addBcc(final InternetAddress[] addrs) {
+    public void addBcc(InternetAddress[] addrs) {
         delegatee.addBcc(addrs);
     }
 
     @Override
-    public void addCc(final InternetAddress addr) {
+    public void addCc(InternetAddress addr) {
         delegatee.addCc(addr);
     }
 
     @Override
-    public void addCc(final InternetAddress[] addrs) {
+    public void addCc(InternetAddress[] addrs) {
         delegatee.addCc(addrs);
     }
 
     @Override
-    public void addFrom(final InternetAddress addr) {
+    public void addFrom(InternetAddress addr) {
         delegatee.addFrom(addr);
     }
 
     @Override
-    public void addFrom(final InternetAddress[] addrs) {
+    public void addFrom(InternetAddress[] addrs) {
         delegatee.addFrom(addrs);
     }
 
     @Override
-    public void addHeader(final String name, final String value) {
+    public void addHeader(String name, String value) {
         delegatee.addHeader(name, value);
     }
 
     @Override
-    public void addHeaders(final HeaderCollection headers) {
+    public void addHeaders(HeaderCollection headers) {
         delegatee.addHeaders(headers);
     }
 
     @Override
-    public void addTo(final InternetAddress addr) {
+    public void addTo(InternetAddress addr) {
         delegatee.addTo(addr);
     }
 
     @Override
-    public void addTo(final InternetAddress[] addrs) {
+    public void addTo(InternetAddress[] addrs) {
         delegatee.addTo(addrs);
     }
 
     @Override
-    public void addUserFlag(final String userFlag) {
+    public void addUserFlag(String userFlag) {
         delegatee.addUserFlag(userFlag);
     }
 
     @Override
-    public void addUserFlags(final String[] userFlags) {
+    public void addUserFlags(String[] userFlags) {
         delegatee.addUserFlags(userFlags);
     }
 
@@ -316,7 +316,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean containsHeader(final String name) {
+    public boolean containsHeader(String name) {
         return delegatee.containsHeader(name);
     }
 
@@ -381,7 +381,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         return delegatee.equals(obj);
     }
 
@@ -446,7 +446,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return delegatee.getEnclosedMailPart(index);
     }
 
@@ -456,7 +456,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public String getFirstHeader(final String name) {
+    public String getFirstHeader(String name) {
         return delegatee.getFirstHeader(name);
     }
 
@@ -476,17 +476,17 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public String getHeader(final String name, final String delimiter) {
+    public String getHeader(String name, String delimiter) {
         return delegatee.getHeader(name, delimiter);
     }
 
     @Override
-    public String getHeader(final String name, final char delimiter) {
+    public String getHeader(String name, char delimiter) {
         return delegatee.getHeader(name, delimiter);
     }
 
     @Override
-    public String[] getHeader(final String name) {
+    public String[] getHeader(String name) {
         return delegatee.getHeader(name);
     }
 
@@ -521,7 +521,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public Iterator<Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+    public Iterator<Entry<String, String>> getMatchingHeaders(String[] matchingHeaders) {
         return delegatee.getMatchingHeaders(matchingHeaders);
     }
 
@@ -531,7 +531,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public Iterator<Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+    public Iterator<Entry<String, String>> getNonMatchingHeaders(String[] nonMatchingHeaders) {
         return delegatee.getNonMatchingHeaders(nonMatchingHeaders);
     }
 
@@ -761,7 +761,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void removeHeader(final String name) {
+    public void removeHeader(String name) {
         delegatee.removeHeader(name);
     }
 
@@ -826,122 +826,122 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         delegatee.setAccountId(accountId);
     }
 
     @Override
-    public void setAccountName(final String accountName) {
+    public void setAccountName(String accountName) {
         delegatee.setAccountName(accountName);
     }
 
     @Override
-    public void setAppendVCard(final boolean appendVCard) {
+    public void setAppendVCard(boolean appendVCard) {
         delegatee.setAppendVCard(appendVCard);
     }
 
     @Override
-    public void setColorLabel(final int colorLabel) {
+    public void setColorLabel(int colorLabel) {
         delegatee.setColorLabel(colorLabel);
     }
 
     @Override
-    public void setContentDisposition(final ContentDisposition disposition) {
+    public void setContentDisposition(ContentDisposition disposition) {
         delegatee.setContentDisposition(disposition);
     }
 
     @Override
-    public void setContentDisposition(final String disposition) throws OXException {
+    public void setContentDisposition(String disposition) throws OXException {
         delegatee.setContentDisposition(disposition);
     }
 
     @Override
-    public void setContentId(final String contentId) {
+    public void setContentId(String contentId) {
         delegatee.setContentId(contentId);
     }
 
     @Override
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         delegatee.setContentType(contentType);
     }
 
     @Override
-    public void setContentType(final String contentType) throws OXException {
+    public void setContentType(String contentType) throws OXException {
         delegatee.setContentType(contentType);
     }
 
     @Override
-    public void setDispositionNotification(final InternetAddress dispositionNotification) {
+    public void setDispositionNotification(InternetAddress dispositionNotification) {
         delegatee.setDispositionNotification(dispositionNotification);
     }
 
     @Override
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         delegatee.setFileName(fileName);
     }
 
     @Override
-    public void setFlag(final int flag, final boolean enable) throws OXException {
+    public void setFlag(int flag, boolean enable) throws OXException {
         delegatee.setFlag(flag, enable);
     }
 
     @Override
-    public void setFlags(final int flags) {
+    public void setFlags(int flags) {
         delegatee.setFlags(flags);
     }
 
     @Override
-    public void setFolder(final String folder) {
+    public void setFolder(String folder) {
         delegatee.setFolder(folder);
     }
 
     @Override
-    public void setHasAttachment(final boolean hasAttachment) {
+    public void setHasAttachment(boolean hasAttachment) {
         delegatee.setHasAttachment(hasAttachment);
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         delegatee.setMailId(id);
     }
 
     @Override
-    public void setMsgref(final MailPath msgref) {
+    public void setMsgref(MailPath msgref) {
         delegatee.setMsgref(msgref);
     }
 
     @Override
-    public void setPrevSeen(final boolean prevSeen) {
+    public void setPrevSeen(boolean prevSeen) {
         delegatee.setPrevSeen(prevSeen);
     }
 
     @Override
-    public void setPriority(final int priority) {
+    public void setPriority(int priority) {
         delegatee.setPriority(priority);
     }
 
     @Override
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         delegatee.setReceivedDate(receivedDate);
     }
 
     @Override
-    public void setSentDate(final Date sentDate) {
+    public void setSentDate(Date sentDate) {
         delegatee.setSentDate(sentDate);
     }
 
     @Override
-    public void setSequenceId(final String sequenceId) {
+    public void setSequenceId(String sequenceId) {
         delegatee.setSequenceId(sequenceId);
     }
 
     @Override
-    public void setSize(final long size) {
+    public void setSize(long size) {
         delegatee.setSize(size);
     }
 
     @Override
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         delegatee.setSubject(subject);
     }
 
@@ -951,12 +951,12 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setThreadLevel(final int threadLevel) {
+    public void setThreadLevel(int threadLevel) {
         delegatee.setThreadLevel(threadLevel);
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         delegatee.setUnreadMessages(unreadMessages);
     }
 
@@ -966,12 +966,12 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         delegatee.writeTo(out);
     }
 
     @Override
-    public boolean hasHeaders(final String... names) {
+    public boolean hasHeaders(String... names) {
         return delegatee.hasHeaders(names);
     }
 
@@ -996,7 +996,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setRecentCount(final int recentCount) {
+    public void setRecentCount(int recentCount) {
         delegatee.setRecentCount(recentCount);
     }
 
@@ -1220,7 +1220,7 @@ public final class ThreadSortMailMessage extends MailMessage {
      *
      * @param mailMessages The child messages
      */
-    public void setChildMessages(final Collection<ThreadSortMailMessage> mailMessages) {
+    public void setChildMessages(Collection<ThreadSortMailMessage> mailMessages) {
         childMessages.clear();
         if (null != mailMessages && !mailMessages.isEmpty()) {
             childMessages.addAll(mailMessages);
@@ -1232,7 +1232,7 @@ public final class ThreadSortMailMessage extends MailMessage {
      *
      * @param mailMessage The child message
      */
-    public void addChildMessage(final ThreadSortMailMessage mailMessage) {
+    public void addChildMessage(ThreadSortMailMessage mailMessage) {
         childMessages.add(mailMessage);
     }
 
@@ -1241,7 +1241,7 @@ public final class ThreadSortMailMessage extends MailMessage {
      *
      * @param mailMessages The child messages
      */
-    public void addChildMessages(final Collection<ThreadSortMailMessage> mailMessages) {
+    public void addChildMessages(Collection<ThreadSortMailMessage> mailMessages) {
         childMessages.addAll(mailMessages);
     }
 

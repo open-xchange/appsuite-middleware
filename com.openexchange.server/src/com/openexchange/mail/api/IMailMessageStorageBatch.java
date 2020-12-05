@@ -120,6 +120,6 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
      * @throws OXException If system flags cannot be updated
      */
-    public void updateMessageFlags(final String fullName, final int flagsArg, String[] userFlags, final boolean set) throws OXException;
+    public void updateMessageFlags(String fullName, int flagsArg, String[] userFlags, boolean set) throws OXException;
 
 }

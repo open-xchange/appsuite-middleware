@@ -88,8 +88,8 @@ public final class IcsMimeFilter extends MimeFilter {
     private static final Set<String> ITIP_METHODS = ImmutableSet.of("REQUEST", "CANCEL", "REPLY");
 
     @Override
-    public boolean ignorable(final String contentType, final BodyPart bodyPart) {
-        for (final String baseType : ignorableContentTypes) {
+    public boolean ignorable(String contentType, BodyPart bodyPart) {
+        for (String baseType : ignorableContentTypes) {
             if (contentType.startsWith(baseType)) {
                 /*
                  * Check ICal part for a valid METHOD and its presence in Content-Type header
@@ -108,8 +108,8 @@ public final class IcsMimeFilter extends MimeFilter {
     }
 
     @Override
-    public boolean ignorable(final String contentType, final MailPart bodyPart) {
-        for (final String baseType : ignorableContentTypes) {
+    public boolean ignorable(String contentType, MailPart bodyPart) {
+        for (String baseType : ignorableContentTypes) {
             if (contentType.startsWith(baseType)) {
                 /*
                  * Check ICal part for a valid METHOD and its presence in Content-Type header

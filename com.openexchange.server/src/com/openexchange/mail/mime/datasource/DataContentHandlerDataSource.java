@@ -80,7 +80,7 @@ public final class DataContentHandlerDataSource implements DataSource {
     /**
      * Initializes a new {@link DataContentHandlerDataSource}.
      */
-    public DataContentHandlerDataSource(final Object object, final String objectMimeType, final DataContentHandler dch) {
+    public DataContentHandlerDataSource(Object object, String objectMimeType, DataContentHandler dch) {
         super();
         this.object = object;
         this.objectMimeType = objectMimeType;

@@ -229,7 +229,7 @@ public final class MailProperties implements IMailProperties {
         CACHE_PRIMARY_PROPS.invalidateAll();
     }
 
-    private static PrimaryMailProps getPrimaryMailProps(final int userId, final int contextId) throws OXException {
+    private static PrimaryMailProps getPrimaryMailProps(int userId, int contextId) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         PrimaryMailProps primaryMailProps = CACHE_PRIMARY_PROPS.getIfPresent(key);
         if (null != primaryMailProps) {
@@ -1286,7 +1286,7 @@ public final class MailProperties implements IMailProperties {
      * @return The appropriate instance of {@link Properties}
      * @throws OXException If reading property file fails
      */
-    protected static Properties readPropertiesFromFile(final String propFile) throws OXException {
+    protected static Properties readPropertiesFromFile(String propFile) throws OXException {
         final Properties properties = new Properties();
         final FileInputStream fis;
         try {

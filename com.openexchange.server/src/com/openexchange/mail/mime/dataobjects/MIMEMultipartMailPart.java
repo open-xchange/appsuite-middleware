@@ -116,7 +116,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final DataSource dataSource) throws OXException {
+    public MIMEMultipartMailPart(DataSource dataSource) throws OXException {
         this(null, dataSource);
     }
 
@@ -127,7 +127,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final ContentType contentType, final DataSource dataSource) throws OXException {
+    public MIMEMultipartMailPart(ContentType contentType, DataSource dataSource) throws OXException {
         super();
         if (contentType == null) {
             try {
@@ -150,7 +150,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param inputData The input data
      * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final byte[] inputData) throws OXException {
+    public MIMEMultipartMailPart(byte[] inputData) throws OXException {
         this(null, inputData);
     }
 
@@ -161,7 +161,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param inputData The input data
      * @throws OXException If reading input stream fails
      */
-    public MIMEMultipartMailPart(final ContentType contentType, final byte[] inputData) throws OXException {
+    public MIMEMultipartMailPart(ContentType contentType, byte[] inputData) throws OXException {
         super();
         if (contentType == null) {
             try {
@@ -300,7 +300,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      */
     private static final byte[] DELIM1 = "\n\r\n".getBytes(StandardCharsets.ISO_8859_1);
 
-    public static int getHeaderEnd(final byte[] dataBytes) {
+    public static int getHeaderEnd(byte[] dataBytes) {
         int headerEnd = indexOf(dataBytes, DELIM1, 0, dataBytes.length);
         if (-1 == headerEnd) {
             headerEnd = indexOf(dataBytes, DELIM2, 0, dataBytes.length);
@@ -308,11 +308,11 @@ public final class MIMEMultipartMailPart extends MailPart {
         return headerEnd;
     }
 
-    private static boolean isLineBreak(final byte first, final byte second) {
+    private static boolean isLineBreak(byte first, byte second) {
         return ('\n' == first || ('\r' == first && '\n' == second));
     }
 
-    private static boolean isLineBreakOrEOF(final byte[] dataBytes, final int startIndex) {
+    private static boolean isLineBreakOrEOF(byte[] dataBytes, int startIndex) {
         // Test for EOF
         if (startIndex >= dataBytes.length) {
             return true;
@@ -327,7 +327,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         getEnclosedCount();
         if (index < 0 || index >= count) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
@@ -410,7 +410,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
     }
 
-    private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedCharsetException, OXException {
+    private static MailPart createTextPart(byte[] subArr, String charset) throws UnsupportedCharsetException, OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
             MessageUtility.setText(new String(subArr, Charsets.forName(charset)), charset, mbp);
@@ -448,7 +448,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         try {
             dataAccess.writeTo(out);
         } catch (IOException e) {
@@ -483,7 +483,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
      */
-    private void readObject(final java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         /*
          * Restore common fields
          */
@@ -497,7 +497,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
-    private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
         try {
             loadContent();
         } catch (OXException e) {
@@ -522,7 +522,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @return The newly created byte array containing input stream's bytes
      * @throws IOException If reading input stream fails
      */
-    static byte[] copyStream(final InputStream inputStream) throws IOException {
+    static byte[] copyStream(InputStream inputStream) throws IOException {
         try {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SIZE);
             final byte[] buf = new byte[BUFSIZE];
@@ -542,7 +542,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param s The string
      * @return The converted string's byte array
      */
-    private static byte[] getBytes(final String s) {
+    private static byte[] getBytes(String s) {
         final int length = s.length();
         final byte[] bytes = new byte[length];
         for (int i = 0; i < length; i++) {
@@ -567,7 +567,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
      * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
+    private static int indexOf(byte[] data, byte[] pattern, int beginIndex, int endIndex, int[] computedFailures) {
         if (null == pattern) {
             throw new IllegalArgumentException("pattern is null");
         }
@@ -615,7 +615,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
      * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
+    private static int indexOf(byte[] data, byte[] pattern, int beginIndex, int endIndex) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -656,7 +656,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param pattern The pattern
      * @return The failures
      */
-    private static int[] computeFailure(final byte[] pattern) {
+    private static int[] computeFailure(byte[] pattern) {
         if (pattern == null) {
             return null;
         }
@@ -689,14 +689,14 @@ public final class MIMEMultipartMailPart extends MailPart {
 
         void prepareForCaching();
 
-        void writeTo(final OutputStream out) throws IOException;
+        void writeTo(OutputStream out) throws IOException;
     }
 
     private static final class BytaArrayDataAccess implements DataAccess {
 
         private final byte[] data;
 
-        public BytaArrayDataAccess(final byte[] data) {
+        public BytaArrayDataAccess(byte[] data) {
             super();
             this.data = data;
         }
@@ -712,12 +712,12 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public int read(final int index) {
+        public int read(int index) {
             return (data[index] & 0xff); // As unsigned integer
         }
 
         @Override
-        public byte[] subarray(final int off, final int len) {
+        public byte[] subarray(int off, int len) {
             final byte[] ret = new byte[len];
             System.arraycopy(data, off, ret, 0, len);
             return ret;
@@ -734,7 +734,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public void writeTo(final OutputStream out) throws IOException {
+        public void writeTo(OutputStream out) throws IOException {
             out.write(data, 0, data.length);
         }
 
@@ -748,7 +748,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
         private int length;
 
-        public RandomAccessDataAccess(final RandomAccessFile randomAccess) {
+        public RandomAccessDataAccess(RandomAccessFile randomAccess) {
             super();
             this.randomAccess = randomAccess;
             length = -1;
@@ -780,12 +780,12 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public int read(final int index) throws IOException {
+        public int read(int index) throws IOException {
             return (getByteBuffer().get(index) & 0xff); // As unsigned integer
         }
 
         @Override
-        public byte[] subarray(final int off, final int len) throws IOException {
+        public byte[] subarray(int off, int len) throws IOException {
             final byte[] ret = new byte[len];
             getByteBuffer().get(ret, off, len);
             return ret;
@@ -803,7 +803,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public void writeTo(final OutputStream out) throws IOException {
+        public void writeTo(OutputStream out) throws IOException {
             out.write(full());
         }
 
@@ -815,7 +815,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
         private DataAccess delegate;
 
-        public DataSourceDataAccess(final DataSource dataSource) {
+        public DataSourceDataAccess(DataSource dataSource) {
             super();
             this.dataSource = dataSource;
         }
@@ -838,12 +838,12 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public int read(final int index) throws IOException {
+        public int read(int index) throws IOException {
             return getDelegate().read(index);
         }
 
         @Override
-        public byte[] subarray(final int off, final int len) throws IOException {
+        public byte[] subarray(int off, int len) throws IOException {
             return getDelegate().subarray(off, len);
         }
 
@@ -858,7 +858,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
 
         @Override
-        public void writeTo(final OutputStream out) throws IOException {
+        public void writeTo(OutputStream out) throws IOException {
             final InputStream in = dataSource.getInputStream();
             if (null == in) {
                 return;

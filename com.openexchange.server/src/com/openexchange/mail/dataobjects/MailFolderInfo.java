@@ -148,7 +148,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param separator The separator to set
      */
-    public void setSeparator(final char separator) {
+    public void setSeparator(char separator) {
         this.separator = separator;
         cachedFullDisplayName = null;
     }
@@ -167,7 +167,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param displayName The display name to set
      */
-    public void setDisplayName(final String displayName) {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
         cachedFullDisplayName = null;
     }
@@ -186,7 +186,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param accountId The account identifier to set
      */
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
 
@@ -255,7 +255,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param fullname the full name to set
      */
-    public void setFullname(final String fullname) {
+    public void setFullname(String fullname) {
         this.fullname = fullname;
         b_fullname = true;
         cachedFullDisplayName = null;
@@ -292,7 +292,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param hasSubfolders the has-subfolders flag to set
      */
-    public void setSubfolders(final boolean hasSubfolders) {
+    public void setSubfolders(boolean hasSubfolders) {
         this.hasSubfolders = hasSubfolders;
         b_hasSubfolders = true;
     }
@@ -328,7 +328,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
-    public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
+    public void setSubscribedSubfolders(boolean hasSubscribedSubfolders) {
         this.hasSubscribedSubfolders = hasSubscribedSubfolders;
         b_hasSubscribedSubfolders = true;
     }
@@ -427,7 +427,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param name the name to set
      */
-    public void setDefaultFolderType(final MailFolder.DefaultFolderType defaulFolderType) {
+    public void setDefaultFolderType(MailFolder.DefaultFolderType defaulFolderType) {
         this.defaulFolderType = defaulFolderType;
         b_defaulFolderType = true;
     }
@@ -465,7 +465,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param name the name to set
      */
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
         b_name = true;
     }
@@ -505,7 +505,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param subscribed the subscription status to set
      */
-    public void setSubscribed(final boolean subscribed) {
+    public void setSubscribed(boolean subscribed) {
         this.subscribed = subscribed;
         b_subscribed = true;
     }
@@ -543,7 +543,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param parentFullname the parent full name to set
      */
-    public void setParentFullname(final String parentFullname) {
+    public void setParentFullname(String parentFullname) {
         this.parentFullname = parentFullname;
         b_parentFullname = true;
     }
@@ -579,7 +579,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
-    public void setHoldsMessages(final boolean holdsMessages) {
+    public void setHoldsMessages(boolean holdsMessages) {
         this.holdsMessages = holdsMessages;
         b_holdsMessages = true;
     }
@@ -615,7 +615,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
-    public void setHoldsFolders(final boolean holdsFolders) {
+    public void setHoldsFolders(boolean holdsFolders) {
         this.holdsFolders = holdsFolders;
         b_holdsFolders = true;
     }
@@ -651,7 +651,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param rootFolder the root folder flag to set
      */
-    public void setRootFolder(final boolean rootFolder) {
+    public void setRootFolder(boolean rootFolder) {
         this.rootFolder = rootFolder;
         b_rootFolder = true;
     }
@@ -687,7 +687,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param defaultFolder the default folder flag to set
      */
-    public void setDefaultFolder(final boolean defaultFolder) {
+    public void setDefaultFolder(boolean defaultFolder) {
         this.defaultFolder = defaultFolder;
         b_defaultFolder = true;
     }
@@ -724,7 +724,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      * @param numSubfolders The number of sub-folders.
      * @return This reference
      */
-    public MailFolderInfo setNumSubfolders(final int numSubfolders) {
+    public MailFolderInfo setNumSubfolders(int numSubfolders) {
         this.numSubfolders = numSubfolders;
         b_numSubfolders = true;
         return this;
@@ -761,7 +761,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param shared The shared flag to set
      */
-    public void setShared(final boolean shared) {
+    public void setShared(boolean shared) {
         this.shared = shared;
         b_shared = true;
     }
@@ -797,7 +797,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
      *
      * @param isPublic The public flag to set
      */
-    public void setPublic(final boolean isPublic) {
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
         b_public = true;
     }

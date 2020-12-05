@@ -84,12 +84,12 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetAttachmentTokenAction(final ServiceLookup services) {
+    public GetAttachmentTokenAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             ServerSession session = req.getSession();
 

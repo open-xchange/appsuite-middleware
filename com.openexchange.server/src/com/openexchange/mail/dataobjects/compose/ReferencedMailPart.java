@@ -112,7 +112,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * @param session The session used to store a possible temporary disc file
      * @throws OXException If a mail error occurs
      */
-    protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws OXException {
+    protected ReferencedMailPart(MailPart referencedPart, Session session) throws OXException {
         isMail = referencedPart.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
         int partLimit = TransportProperties.getInstance().getReferencedPartLimit();
         ThresholdFileHolder sink = partLimit <= 0 ? new ThresholdFileHolder() : new ThresholdFileHolder(partLimit);
@@ -131,7 +131,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * @param session The session used to store a possible temporary disc file
      * @throws OXException If a mail error occurs
      */
-    protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws OXException {
+    protected ReferencedMailPart(MailMessage referencedMail, Session session) throws OXException {
         isMail = true;
         int partLimit = TransportProperties.getInstance().getReferencedPartLimit();
         ThresholdFileHolder sink = partLimit <= 0 ? new ThresholdFileHolder() : new ThresholdFileHolder(partLimit);
@@ -164,7 +164,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         }
     }
 
-    private InputStream messageSource(final MailPart referencedPart) throws OXException {
+    private InputStream messageSource(MailPart referencedPart) throws OXException {
         if (referencedPart instanceof MailMessage) {
             // Copy to ByteArrayOutputStream
             return MimeMessageUtility.getStreamFromMailPart(referencedPart);
@@ -172,7 +172,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         return referencedPart.getInputStream();
     }
 
-    private void setHeaders(final MailPart referencedPart) {
+    private void setHeaders(MailPart referencedPart) {
         if (referencedPart.containsContentId()) {
             setContentId(referencedPart.getContentId());
         }
@@ -266,7 +266,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

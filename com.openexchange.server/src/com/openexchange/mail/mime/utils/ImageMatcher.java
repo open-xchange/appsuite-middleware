@@ -72,7 +72,7 @@ public final class ImageMatcher {
      * @param content The content
      * @return The appropriate matcher
      */
-    public static ImageMatcher matcher(final CharSequence content) {
+    public static ImageMatcher matcher(CharSequence content) {
         return new ImageMatcher(content);
     }
 
@@ -101,7 +101,7 @@ public final class ImageMatcher {
     /**
      * @param prefixService
      */
-    public static void setPrefixService(final DispatcherPrefixService prefixService) {
+    public static void setPrefixService(DispatcherPrefixService prefixService) {
         if (null == prefixService) {
             PATTERN_REF_IMG.set(null);
         } else {
@@ -122,7 +122,7 @@ public final class ImageMatcher {
     /**
      * Initializes a new {@link ImageMatcher}.
      */
-    private ImageMatcher(final CharSequence content) {
+    private ImageMatcher(CharSequence content) {
         super();
         final Pattern pattern = PATTERN_REF_IMG.get();
         if (null == pattern) {
@@ -150,7 +150,7 @@ public final class ImageMatcher {
      * @throws IllegalStateException If no match has yet been attempted, or if the previous match operation failed
      * @throws IndexOutOfBoundsException If there is no capturing group in the pattern with the given index
      */
-    public String group(final int group) {
+    public String group(int group) {
         return matcher.group(group);
     }
 
@@ -235,21 +235,21 @@ public final class ImageMatcher {
     /**
      * Implements a non-terminal append-and-replace step.
      */
-    public Matcher appendReplacement(final StringBuffer sb, final String replacement) {
+    public Matcher appendReplacement(StringBuffer sb, String replacement) {
         return matcher.appendReplacement(sb, replacement);
     }
 
     /**
      * Implements a non-terminal append-and-replace step.
      */
-    public Matcher appendLiteralReplacement(final StringBuffer sb, final String replacement) {
+    public Matcher appendLiteralReplacement(StringBuffer sb, String replacement) {
         return matcher.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(replacement));
     }
 
     /**
      * Implements a non-terminal append-and-replace step.
      */
-    public StringBuffer appendTail(final StringBuffer sb) {
+    public StringBuffer appendTail(StringBuffer sb) {
         return matcher.appendTail(sb);
     }
 

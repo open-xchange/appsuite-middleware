@@ -91,7 +91,7 @@ public class MsisdnUtility {
             try {
                 final Contact contact = contactService.getUser(session, session.getUserId());
                 final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
-                for (final String number : set) {
+                for (String number : set) {
                     try {
                         addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
                     } catch (Exception e) {

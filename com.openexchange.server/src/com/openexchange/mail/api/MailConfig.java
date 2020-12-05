@@ -190,7 +190,7 @@ public abstract class MailConfig {
 
         private final String str;
 
-        private BoolCapVal(final String str) {
+        private BoolCapVal(String str) {
             this.str = str;
         }
 
@@ -234,7 +234,7 @@ public abstract class MailConfig {
 
         private final String str;
 
-        private LoginSource(final String str) {
+        private LoginSource(String str) {
             this.str = str;
         }
 
@@ -276,7 +276,7 @@ public abstract class MailConfig {
 
         private final String str;
 
-        private PasswordSource(final String str) {
+        private PasswordSource(String str) {
             this.str = str;
         }
 
@@ -319,7 +319,7 @@ public abstract class MailConfig {
 
         private final String str;
 
-        private ServerSource(final String str) {
+        private ServerSource(String str) {
             this.str = str;
         }
 
@@ -365,7 +365,7 @@ public abstract class MailConfig {
      * @return The user-specific mail configuration
      * @throws OXException If user-specific mail configuration cannot be determined
      */
-    public static final <C extends MailConfig> C getConfig(final C mailConfig, final Session session, final int accountId) throws OXException {
+    public static final <C extends MailConfig> C getConfig(C mailConfig, Session session, int accountId) throws OXException {
         /*
          * Fetch mail account
          */
@@ -494,7 +494,7 @@ public abstract class MailConfig {
      * @return The appropriate mail server URL or <code>null</code>
      * @throws OXException If mail server URL cannot be returned
      */
-    public static final UrlInfo getMailServerURL(final Session session, final int accountId) throws OXException {
+    public static final UrlInfo getMailServerURL(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, isGuest(session)))) {
@@ -520,7 +520,7 @@ public abstract class MailConfig {
         final int userId;
         private final int hash;
 
-        protected UserID(final String pattern, final String serverUrl, int userId, final Context context) {
+        protected UserID(String pattern, String serverUrl, int userId, Context context) {
             super();
             this.pattern = pattern;
             this.serverUrl = serverUrl;
@@ -541,7 +541,7 @@ public abstract class MailConfig {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -626,7 +626,7 @@ public abstract class MailConfig {
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source for default account
      */
-    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final int iUserId, final Context ctx, final MailAccountStorageService storageService) throws OXException {
+    protected static int[] forDefaultAccount(String pattern, String serverUrl, int iUserId, Context ctx, MailAccountStorageService storageService) throws OXException {
         LoginSource loginSource = MailProperties.getInstance().getLoginSource(iUserId, ctx.getContextId());
         switch (loginSource) {
         case USER_IMAPLOGIN:
@@ -650,7 +650,7 @@ public abstract class MailConfig {
                 userIds.add(accounts[0].getUserId());
             } else {
                 userIds = new TIntHashSet(accounts.length);
-                for (final MailAccount candidate : accounts) {
+                for (MailAccount candidate : accounts) {
                     final String shouldMatch;
                     switch (MailProperties.getInstance().getMailServerSource(iUserId, ctx.getContextId(), MailAccounts.isGuestAccount(candidate))) {
                     case USER:
@@ -680,7 +680,7 @@ public abstract class MailConfig {
                 final TIntIterator iter = userIds.iterator();
                 for (int i = size; i-- > 0;) {
                     final int userId = iter.next();
-                    for (final MailAccount candidate : accounts) {
+                    for (MailAccount candidate : accounts) {
                         if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
                             notDefaultAccount.add(userId);
                         }
@@ -705,7 +705,7 @@ public abstract class MailConfig {
      * @return An array of {@link String} with length <code>2</code>. The first element is the protocol and the second the server. If no
      *         protocol pattern could be found <code>null</code> is returned; meaning no protocol is present in specified server string.
      */
-    public final static String[] parseProtocol(final String server) {
+    public final static String[] parseProtocol(String server) {
         final int len = server.length();
         char c = '\0';
         for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
@@ -739,7 +739,7 @@ public abstract class MailConfig {
         });
     }
 
-    private final static boolean isValidProtocol(final String protocol) {
+    private final static boolean isValidProtocol(String protocol) {
         final int len = protocol.length();
         if (len < 1) {
             return false;
@@ -783,7 +783,7 @@ public abstract class MailConfig {
      * @param login The login
      * @return The sane login
      */
-    public static final String saneLogin(final String login) {
+    public static final String saneLogin(String login) {
         if (false == doSaneLogin()) {
             return login;
         }
@@ -1161,7 +1161,7 @@ public abstract class MailConfig {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         } else if (obj == null) {
@@ -1286,7 +1286,7 @@ public abstract class MailConfig {
      *
      * @param accountId The account ID
      */
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
 
@@ -1295,7 +1295,7 @@ public abstract class MailConfig {
      *
      * @param session The session
      */
-    public void setSession(final Session session) {
+    public void setSession(Session session) {
         this.session = session;
     }
 
@@ -1304,7 +1304,7 @@ public abstract class MailConfig {
      *
      * @param login The login
      */
-    public void setLogin(final String login) {
+    public void setLogin(String login) {
         this.login = saneLogin(login);
     }
 
@@ -1313,7 +1313,7 @@ public abstract class MailConfig {
      *
      * @param password The password
      */
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -1337,7 +1337,7 @@ public abstract class MailConfig {
      * @throws OXException If custom parsing fails
      */
     @SuppressWarnings("unused")
-    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
+    protected boolean doCustomParsing(Account account, Session session) throws OXException {
         return false;
     }
 

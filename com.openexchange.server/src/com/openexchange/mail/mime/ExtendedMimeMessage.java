@@ -85,7 +85,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      * @param fullname The folder full name
      * @param msgnum The message number in folder
      */
-    public ExtendedMimeMessage(final String fullname, final int msgnum) {
+    public ExtendedMimeMessage(String fullname, int msgnum) {
         super(MimeDefaultSession.getDefaultSession());
         this.fullname = fullname;
         this.msgnum = msgnum;
@@ -97,7 +97,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      * @param in The input stream
      * @throws MessagingException If parsing the input stream fails
      */
-    public void parseStream(final InputStream in) throws MessagingException {
+    public void parseStream(InputStream in) throws MessagingException {
         contentType = null;
         priority = -1;
         parse(in);
@@ -136,7 +136,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         return hasAttachment.booleanValue();
     }
 
-    private boolean deepAttachmentCheck(final String subType) throws OXException, MessagingException, IOException {
+    private boolean deepAttachmentCheck(String subType) throws OXException, MessagingException, IOException {
         if (null != bodystructure) {
             /*
              * Body structure is available
@@ -159,7 +159,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param hasAttachment <code>true</code> to mark this message to hold attachments; otherwise <code>false</code>
      */
-    public void setHasAttachment(final boolean hasAttachment) {
+    public void setHasAttachment(boolean hasAttachment) {
         this.hasAttachment = Boolean.valueOf(hasAttachment);
     }
 
@@ -177,7 +177,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param threadLevel the thread level to set
      */
-    public void setThreadLevel(final int threadLevel) {
+    public void setThreadLevel(int threadLevel) {
         this.threadLevel = threadLevel;
     }
 
@@ -203,7 +203,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param bodystructure The body structure to set
      */
-    public void setBodystructure(final BODYSTRUCTURE bodystructure) {
+    public void setBodystructure(BODYSTRUCTURE bodystructure) {
         this.bodystructure = bodystructure;
     }
 
@@ -229,7 +229,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         return priority;
     }
 
-    private static int parsePriority(final String priorityStr) {
+    private static int parsePriority(String priorityStr) {
         if (null != priorityStr) {
             final String[] tmp = priorityStr.split(" +");
             try {
@@ -247,7 +247,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param priority The priority to set
      */
-    public void setPriority(final int priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
@@ -261,7 +261,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param receivedDate the received date to set
      */
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         this.receivedDate = receivedDate;
     }
 
@@ -283,7 +283,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param size the size to set
      */
-    public void setSize(final int size) {
+    public void setSize(int size) {
         this.size = Integer.valueOf(size);
     }
 
@@ -318,7 +318,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param contentType the content type to set
      */
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
     }
 
@@ -336,7 +336,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      *
      * @param uid The UID to set
      */
-    public void setUid(final long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 

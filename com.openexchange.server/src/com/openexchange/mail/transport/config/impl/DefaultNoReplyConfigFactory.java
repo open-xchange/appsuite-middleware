@@ -81,7 +81,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
     }
 
     @Override
-    public NoReplyConfig getNoReplyConfig(final int contextId) throws OXException {
+    public NoReplyConfig getNoReplyConfig(int contextId) throws OXException {
         return loadNoReplyConfig(contextId);
     }
 

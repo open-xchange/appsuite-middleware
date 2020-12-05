@@ -74,7 +74,7 @@ public final class MailPath implements Cloneable, Serializable {
     public static final Comparator<MailPath> COMPARATOR = new Comparator<MailPath>() {
 
         @Override
-        public int compare(final MailPath mailPath1, final MailPath mailPath2) {
+        public int compare(MailPath mailPath1, MailPath mailPath2) {
             final int accountComp = (mailPath1.getAccountId() < mailPath2.getAccountId() ? -1 : (mailPath1.getAccountId() == mailPath2.getAccountId() ? 0 : 1));
             if (accountComp == 0) {
                 final int folderComp = mailPath1.getFolder().compareTo(mailPath2.getFolder());
@@ -191,7 +191,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param mailPathStr The mail path's string representation
      * @throws OXException If mail path's string representation does not match expected pattern
      */
-    public MailPath(final String mailPathStr) throws OXException {
+    public MailPath(String mailPathStr) throws OXException {
         super();
         setMailIdentifierString(mailPathStr);
     }
@@ -203,7 +203,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param folder Folder full name
      * @param uid The mail's unique ID
      */
-    public MailPath(final int accountId, final String folder, final String uid) {
+    public MailPath(int accountId, String folder, String uid) {
         super();
         this.accountId = accountId;
         this.folder = folder;
@@ -217,7 +217,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param folderArgument The full name argument; e.g. &quot;default123/INBOX&quot;
      * @param uid The mail's unique ID
      */
-    public MailPath(final String folderArgument, final String uid) {
+    public MailPath(String folderArgument, String uid) {
         super();
         FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderArgument);
         this.accountId = fa.getAccountId();
@@ -233,7 +233,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @param folder Folder full name
      * @param uid The mail's unique ID
      */
-    public void set(final int accountId, final String folder, final String uid) {
+    public void set(int accountId, String folder, String uid) {
         this.accountId = accountId;
         this.folder = folder;
         mailID = uid;
@@ -353,7 +353,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @return The mail path itself
      * @throws OXException If mail path's string representation does not match expected pattern
      */
-    public MailPath setMailIdentifierString(final String mailPathStr) throws OXException {
+    public MailPath setMailIdentifierString(String mailPathStr) throws OXException {
         final int pos = mailPathStr.lastIndexOf(SEPERATOR);
         if (-1 == pos) {
             throw MailExceptionCode.INVALID_MAIL_IDENTIFIER.create(mailPathStr);

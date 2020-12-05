@@ -73,7 +73,7 @@ public final class Searcher {
      * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
      */
     @Deprecated
-    public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws OXException {
+    public static boolean matches(MailMessage mailMessage, SearchTerm<?> searchTerm) throws OXException {
         return searchTerm.matches(mailMessage);
     }
 
@@ -85,9 +85,9 @@ public final class Searcher {
      * @return The matching mail messages in order of appearance
      * @throws OXException If checking mail messages against search term fails
      */
-    public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm) throws OXException {
+    public static MailMessage[] matches(MailMessage[] mailMessages, SearchTerm<?> searchTerm) throws OXException {
         final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.length);
-        for (final MailMessage mailMessage : mailMessages) {
+        for (MailMessage mailMessage : mailMessages) {
             if (searchTerm.matches(mailMessage)) {
                 matched.add(mailMessage);
             }
@@ -103,9 +103,9 @@ public final class Searcher {
      * @return The matching mail messages in order of appearance
      * @throws OXException If checking mail messages against search term fails
      */
-    public static List<MailMessage> matches(final List<MailMessage> mailMessages, final SearchTerm<?> searchTerm) throws OXException {
+    public static List<MailMessage> matches(List<MailMessage> mailMessages, SearchTerm<?> searchTerm) throws OXException {
         final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.size());
-        for (final MailMessage mailMessage : mailMessages) {
+        for (MailMessage mailMessage : mailMessages) {
             if (searchTerm.matches(mailMessage)) {
                 matched.add(mailMessage);
             }

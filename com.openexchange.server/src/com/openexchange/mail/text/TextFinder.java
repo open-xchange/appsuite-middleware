@@ -110,7 +110,7 @@ public final class TextFinder {
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
     }
 
-    private String extractPlainText(final String content) throws OXException {
+    private String extractPlainText(String content) throws OXException {
         return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
     }
 
@@ -121,12 +121,12 @@ public final class TextFinder {
      * @return The primary text content or <code>null</code>
      * @throws OXException If primary text content cannot be returned
      */
-    public String getText(final MailPart p) throws OXException {
+    public String getText(MailPart p) throws OXException {
         textIsHtml = false;
         return getTextRecursive(p);
     }
 
-    private String getTextRecursive(final MailPart part) throws OXException {
+    private String getTextRecursive(MailPart part) throws OXException {
         if (null == part) {
             return null;
         }
@@ -211,7 +211,7 @@ public final class TextFinder {
         }
     }
 
-    private String handleTNEFPart(final MailPart part) throws OXException {
+    private String handleTNEFPart(MailPart part) throws OXException {
         return handleTNEFStream(part.getInputStream());
     }
 
@@ -226,7 +226,7 @@ public final class TextFinder {
      * @return The extracted plain text
      * @throws OXException If an OX error occurs
      */
-    public String handleTNEFStream(final InputStream inputStream) throws OXException {
+    public String handleTNEFStream(InputStream inputStream) throws OXException {
         try {
             final TNEFInputStream tnefInputStream = new TNEFInputStream(inputStream);
             /*
@@ -308,7 +308,7 @@ public final class TextFinder {
         }
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(MailPart mailPart, ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -320,7 +320,7 @@ public final class TextFinder {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    private static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

@@ -113,7 +113,7 @@ public final class MimeSmilFixer {
      * @return The message with fixed multipart structure
      * @throws OXException If fix attempt fails
      */
-    public MailMessage process(final MailMessage message) throws OXException {
+    public MailMessage process(MailMessage message) throws OXException {
         if (null == message) {
             return message;
         }
@@ -161,7 +161,7 @@ public final class MimeSmilFixer {
      * @return The MIME message with fixed multipart structure
      * @throws OXException If fix attempt fails
      */
-    public MimeMessage process(final MimeMessage mimeMessage) throws OXException {
+    public MimeMessage process(MimeMessage mimeMessage) throws OXException {
         if (null == mimeMessage) {
             return mimeMessage;
         }
@@ -174,7 +174,7 @@ public final class MimeSmilFixer {
         return process0(mimeMessage, contentType);
     }
 
-    private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
+    private MimeMessage process0(MimeMessage mimeMessage, ContentType contentType) throws OXException {
         try {
             // Start to check & fix multipart structure
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
@@ -203,7 +203,7 @@ public final class MimeSmilFixer {
 
     private static final String[] HEADER_NAMES = new String[] {"Content-Description", "Content-Location", "Content-Disposition", "Content-ID"};
 
-    private void handlePart(final Multipart multipart, final AtomicReference<MimeMultipart> newMultipartRef) throws MessagingException, IOException, OXException {
+    private void handlePart(Multipart multipart, AtomicReference<MimeMultipart> newMultipartRef) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
         final ContentType mpContentType = new ContentType(multipart.getContentType());
         if (mpContentType.startsWith("multipart/related")) {
@@ -318,7 +318,7 @@ public final class MimeSmilFixer {
         return sb.toString();
     }
 
-    private ContentType getContentType(final Part part) throws OXException {
+    private ContentType getContentType(Part part) throws OXException {
         try {
             final String[] tmp = part.getHeader(CONTENT_TYPE);
             return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
@@ -327,7 +327,7 @@ public final class MimeSmilFixer {
         }
     }
 
-    private String getContentId(final String sContentId) {
+    private String getContentId(String sContentId) {
         if (null == sContentId) {
             return null;
         }
@@ -345,7 +345,7 @@ public final class MimeSmilFixer {
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
      * @throws OXException If part's headers cannot be accessed or parsed
      */
-    private static boolean isInline(final Part part, final ContentType contentType) throws OXException {
+    private static boolean isInline(Part part, ContentType contentType) throws OXException {
         try {
             final ContentDisposition cd;
             final boolean hasDisposition;
@@ -365,7 +365,7 @@ public final class MimeSmilFixer {
         }
     }
 
-    private static boolean isEmpty(final String string) {
+    private static boolean isEmpty(String string) {
         if (null == string) {
             return true;
         }

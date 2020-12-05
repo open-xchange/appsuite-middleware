@@ -133,7 +133,7 @@ public final class MessageUtility {
      * @return A valid charset-encoding for specified textual part.
      * @throws OXException If part's input stream cannot be obtained
      */
-    public static String checkCharset(final MailPart p, final ContentType ct) throws OXException {
+    public static String checkCharset(MailPart p, ContentType ct) throws OXException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
             if (cs != null) {
@@ -153,7 +153,7 @@ public final class MessageUtility {
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
      */
-    public static String checkCharset(final Part p, final ContentType ct) {
+    public static String checkCharset(Part p, ContentType ct) {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
             if (cs != null) {
@@ -172,7 +172,7 @@ public final class MessageUtility {
      * @param p The part whose input stream shall be returned
      * @return The part's input stream.
      */
-    public static InputStream getPartInputStream(final Part p) {
+    public static InputStream getPartInputStream(Part p) {
         InputStream tmp = null;
         try {
             tmp = p.getInputStream();
@@ -187,7 +187,7 @@ public final class MessageUtility {
         }
     }
 
-    private static InputStream getPartRawInputStream(final Part p) {
+    private static InputStream getPartRawInputStream(Part p) {
         /*
          * Try to get raw input stream
          */
@@ -349,7 +349,7 @@ public final class MessageUtility {
      * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
+    public static String readMailPart(MailPart mailPart, String charset) throws IOException, OXException {
         return readMailPart(mailPart, charset, false, MailProperties.getInstance().getBodyDisplaySize());
     }
 
@@ -364,7 +364,7 @@ public final class MessageUtility {
      * @throws MaxBytesExceededIOException If specified maximum size is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static String readMailPart(final MailPart mailPart, String charset, boolean errorOnNoContent, long maxSize) throws IOException, OXException {
+    public static String readMailPart(MailPart mailPart, String charset, boolean errorOnNoContent, long maxSize) throws IOException, OXException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
 
             @Override
@@ -396,7 +396,7 @@ public final class MessageUtility {
      * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static String readBytes(final byte[] bytes, final String charset) throws IOException {
+    public static String readBytes(byte[] bytes, String charset) throws IOException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
 
             @Override
@@ -631,7 +631,7 @@ public final class MessageUtility {
         return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
     }
 
-    private static String readGB18030Bytes(final byte[] bytes) throws Error {
+    private static String readGB18030Bytes(byte[] bytes) throws Error {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
@@ -650,7 +650,7 @@ public final class MessageUtility {
         return new String(bytes, Charsets.forName(detectedCharset));
     }
 
-    private static String readBig5Bytes(final byte[] bytes) throws Error {
+    private static String readBig5Bytes(byte[] bytes) throws Error {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
@@ -676,7 +676,7 @@ public final class MessageUtility {
         }
     }
 
-    private static String readIso2022JpBytes(final byte[] bytes) throws Error {
+    private static String readIso2022JpBytes(byte[] bytes) throws Error {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
@@ -775,7 +775,7 @@ public final class MessageUtility {
         }
     }
 
-    private static String detectCharset(final byte[] bytes) {
+    private static String detectCharset(byte[] bytes) {
         String charset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
         if ("US-ASCII".equalsIgnoreCase(charset)) {
             charset = "ISO-8859-1";
@@ -795,7 +795,7 @@ public final class MessageUtility {
      * @param charset The character encoding to check
      * @return <code>true</code> if passed character encoding experienced some special handling; otherwise <code>false</code>
      */
-    public static boolean isSpecialCharset(final String charset) {
+    public static boolean isSpecialCharset(String charset) {
         if (isBig5(charset)) {
             return true;
         }
@@ -826,7 +826,7 @@ public final class MessageUtility {
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
      */
-    public static boolean isBig5(final String charset) {
+    public static boolean isBig5(String charset) {
         if (null == charset) {
             return false;
         }
@@ -846,7 +846,7 @@ public final class MessageUtility {
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as GB2312; otherwise <code>false</code>
      */
-    public static boolean isGB2312(final String charset) {
+    public static boolean isGB2312(String charset) {
         if (null == charset) {
             return false;
         }
@@ -861,7 +861,7 @@ public final class MessageUtility {
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as ISO-2022-JP; otherwise <code>false</code>
      */
-    public static boolean isISO2022JP(final String charset) {
+    public static boolean isISO2022JP(String charset) {
         if (null == charset) {
             return false;
         }
@@ -876,7 +876,7 @@ public final class MessageUtility {
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as <i>Shift-JIS</i>; otherwise <code>false</code>
      */
-    public static boolean isShiftJis(final String charset) {
+    public static boolean isShiftJis(String charset) {
         if (null == charset) {
             return false;
         }
@@ -961,7 +961,7 @@ public final class MessageUtility {
      * @param bytes The bytes to check
      * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
      */
-    public static boolean isAscii(final byte[] bytes) {
+    public static boolean isAscii(byte[] bytes) {
         if (null == bytes || 0 == bytes.length) {
             return true;
         }
@@ -981,7 +981,7 @@ public final class MessageUtility {
      * @param html The HTML content
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
-    public static String simpleHtmlDuplicateRemoval(final String html) {
+    public static String simpleHtmlDuplicateRemoval(String html) {
         if (com.openexchange.java.Strings.isEmpty(html)) {
             return html;
         }
@@ -1072,7 +1072,7 @@ public final class MessageUtility {
         return f;
     }
 
-    private static void setField(final Field field, final Object obj, final Object value, final String name) throws MessagingException {
+    private static void setField(Field field, Object obj, Object value, String name) throws MessagingException {
         try {
             if (null == field) {
                 throw new NoSuchFieldException(name);
@@ -1091,7 +1091,7 @@ public final class MessageUtility {
         }
     }
 
-    private static DataHandler setFields(final DataHandler dataHandler, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+    private static DataHandler setFields(DataHandler dataHandler, DataContentHandler dch, Object object, String objectMimeType) throws MessagingException {
         if (null == dataHandler) {
             return dataHandler;
         }
@@ -1113,7 +1113,7 @@ public final class MessageUtility {
     private static final com.sun.mail.handlers.text_html        DCH_TEXT_HTML   = new com.sun.mail.handlers.text_html();
     private static final com.sun.mail.handlers.text_xml         DCH_TEXT_XML    = new com.sun.mail.handlers.text_xml();
 
-    private static DataContentHandler dchFor(final String subtype) {
+    private static DataContentHandler dchFor(String subtype) {
         if (subtype.startsWith("plain")) {
             return DCH_TEXT_PLAIN;
         } else if (subtype.startsWith("htm")) {
@@ -1134,7 +1134,7 @@ public final class MessageUtility {
      * @return The resulting data handler
      * @throws MessagingException If creating such a data handler fail
      */
-    public static DataHandler dhFor(final DataSource dataSource, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+    public static DataHandler dhFor(DataSource dataSource, DataContentHandler dch, Object object, String objectMimeType) throws MessagingException {
         return setFields(new DataHandler(dataSource), dch, object, objectMimeType);
     }
 
@@ -1145,7 +1145,7 @@ public final class MessageUtility {
      * @param part The part
      * @throws MessagingException If setting content fails
      */
-    public static void setContent(final Message message, final Part part) throws MessagingException {
+    public static void setContent(Message message, Part part) throws MessagingException {
         if (null == message || null == part) {
             return;
         }
@@ -1159,7 +1159,7 @@ public final class MessageUtility {
      * @param part The part
      * @throws MessagingException If setting content fails
      */
-    public static void setContent(final Multipart multipart, final Part part) throws MessagingException {
+    public static void setContent(Multipart multipart, Part part) throws MessagingException {
         setContent(multipart, null, part);
     }
 
@@ -1171,7 +1171,7 @@ public final class MessageUtility {
      * @param part The part
      * @throws MessagingException If setting content fails
      */
-    public static void setContent(final Multipart multipart, final String contentType, final Part part) throws MessagingException {
+    public static void setContent(Multipart multipart, String contentType, Part part) throws MessagingException {
         if (null == multipart || null == part) {
             return;
         }
@@ -1186,7 +1186,7 @@ public final class MessageUtility {
      * @param charset The charset to use for the text
      * @exception MessagingException If an error occurs
      */
-    public static void setText(final String text, final Part part) throws MessagingException {
+    public static void setText(String text, Part part) throws MessagingException {
         setText(text, null, null, part);
     }
 
@@ -1200,7 +1200,7 @@ public final class MessageUtility {
      * @param charset The charset to use for the text
      * @exception MessagingException If an error occurs
      */
-    public static void setText(final String text, final String charset, final Part part) throws MessagingException {
+    public static void setText(String text, String charset, Part part) throws MessagingException {
         setText(text, charset, null, part);
     }
 
@@ -1218,7 +1218,7 @@ public final class MessageUtility {
      * @param subtype The MIME subtype to use (e.g., "html")
      * @exception MessagingException If an error occurs
      */
-    public static void setText(final String text, final String charset, final String subtype, final Part part) throws MessagingException {
+    public static void setText(String text, String charset, String subtype, Part part) throws MessagingException {
         if (null == text || null == part) {
             return;
         }

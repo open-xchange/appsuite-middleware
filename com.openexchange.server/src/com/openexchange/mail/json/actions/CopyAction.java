@@ -75,12 +75,12 @@ public final class CopyAction extends AbstractMailAction {
      *
      * @param services
      */
-    public CopyAction(final ServiceLookup services) {
+    public CopyAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             //Read in parameters
             String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);

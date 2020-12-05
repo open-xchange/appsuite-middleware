@@ -397,7 +397,7 @@ public final class HtmlProcessing {
      * @param maxLen The max. length or <code>-1</code>
      * @return The MD5 hash
      */
-    public static String getHash(final String str, final int maxLen) {
+    public static String getHash(String str, int maxLen) {
         if (isEmpty(str)) {
             return str;
         }
@@ -407,7 +407,7 @@ public final class HtmlProcessing {
         return abbreviate(HashUtility.getHash(str, "md5", "hex"), 0, maxLen);
     }
 
-    private static String abbreviate(final String str, int offset, final int maxWidth) {
+    private static String abbreviate(String str, int offset, int maxWidth) {
         if (str == null) {
             return null;
         }
@@ -628,7 +628,7 @@ public final class HtmlProcessing {
      * @param optHtmlService The optional HTML service
      * @return The HTML content with sanitized CSS style sheets
      */
-    public static String saneCss(final String htmlContent, final HtmlService optHtmlService, final String cssPrefix) {
+    public static String saneCss(String htmlContent, HtmlService optHtmlService, String cssPrefix) {
         if (null == htmlContent) {
             return null;
         }
@@ -683,7 +683,7 @@ public final class HtmlProcessing {
      * @param htmlContent The HTML content
      * @return The HTML content cleansed by CSS style sheet information
      */
-    private static String dropStyles(final String htmlContent) {
+    private static String dropStyles(String htmlContent) {
         final StringBuffer buf = new StringBuffer(htmlContent.length());
 
         Matcher matcher = PATTERN_STYLE.matcher(htmlContent);
@@ -711,7 +711,7 @@ public final class HtmlProcessing {
      *            <code>Link&nbsp;[www.somewhere.com]</code>
      * @return The plain text representation of specified HTML content
      */
-    public static String html2text(final String htmlContent, final boolean appendHref) {
+    public static String html2text(String htmlContent, boolean appendHref) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).html2text(htmlContent, appendHref);
     }
 
@@ -724,7 +724,7 @@ public final class HtmlProcessing {
      * @param content The content to search in
      * @return The given content with all non-HTML links converted to valid HTML links
      */
-    public static String formatHrefLinks(final String content) {
+    public static String formatHrefLinks(String content) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).formatHrefLinks(content);
     }
 
@@ -735,7 +735,7 @@ public final class HtmlProcessing {
      * @param contentType The corresponding content type (including charset parameter)
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final ContentType contentType) throws OXException {
+    public static String getConformHTML(String htmlContent, ContentType contentType) throws OXException {
         return getConformHTML(htmlContent, contentType.getCharsetParameter());
     }
 
@@ -746,7 +746,7 @@ public final class HtmlProcessing {
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
      */
-    public static String getConformHTML(final String htmlContent, final String charset) throws OXException {
+    public static String getConformHTML(String htmlContent, String charset) throws OXException {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).getConformHTML(htmlContent, charset);
     }
 
@@ -756,7 +756,7 @@ public final class HtmlProcessing {
      * @param string The XML/HTML string
      * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
      */
-    public static Document createDOMDocument(final String string) {
+    public static Document createDOMDocument(String string) {
         try {
             return XMLUtils.safeDbf(DocumentBuilderFactory.newInstance()).newDocumentBuilder().parse(new InputSource(new StringReader(string)));
         } catch (ParserConfigurationException e) {
@@ -777,7 +777,7 @@ public final class HtmlProcessing {
      * @param string The XML/HTML string to pretty-print
      * @return The pretty-printed XML/HTML string
      */
-    public static String prettyPrintXML(final String string) {
+    public static String prettyPrintXML(String string) {
         return prettyPrintXML(createDOMDocument(string), string);
     }
 
@@ -787,7 +787,7 @@ public final class HtmlProcessing {
      * @param node The XML/HTML node pretty-print
      * @return The pretty-printed XML/HTML node
      */
-    public static String prettyPrintXML(final Node node) {
+    public static String prettyPrintXML(Node node) {
         return prettyPrintXML(node, null);
     }
 
@@ -800,7 +800,7 @@ public final class HtmlProcessing {
      * @param fallback The fallback string to return on error
      * @return The pretty-printed XML/HTML string
      */
-    private static String prettyPrintXML(final Node node, final String fallback) {
+    private static String prettyPrintXML(Node node, String fallback) {
         if (null == node) {
             return fallback;
         }
@@ -834,7 +834,7 @@ public final class HtmlProcessing {
      * @param htmlContent The HTML content
      * @return Pretty printed HTML content
      */
-    public static String prettyPrint(final String htmlContent) {
+    public static String prettyPrint(String htmlContent) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).prettyPrint(htmlContent);
     }
 
@@ -844,7 +844,7 @@ public final class HtmlProcessing {
      * @param content The content
      * @return The content with HTML entities replaced
      */
-    public static String replaceHTMLEntities(final String content) {
+    public static String replaceHTMLEntities(String content) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).replaceHTMLEntities(content);
     }
 
@@ -854,7 +854,7 @@ public final class HtmlProcessing {
      * @param entity The HTML entity
      * @return The corresponding ASCII character or <code>null</code>
      */
-    public static Character getHTMLEntity(final String entity) {
+    public static Character getHTMLEntity(String entity) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).getHTMLEntity(entity);
     }
 
@@ -866,7 +866,7 @@ public final class HtmlProcessing {
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
      */
-    public static String htmlFormat(final String plainText, final boolean withQuote) {
+    public static String htmlFormat(String plainText, boolean withQuote) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).htmlFormat(plainText, withQuote);
     }
 
@@ -881,7 +881,7 @@ public final class HtmlProcessing {
      * @return properly escaped HTML content
      * @see #htmlFormat(String, boolean)
      */
-    public static String htmlFormat(final String plainText) {
+    public static String htmlFormat(String plainText) {
         return ServerServiceRegistry.getInstance().getService(HtmlService.class).htmlFormat(plainText);
     }
 
@@ -895,7 +895,7 @@ public final class HtmlProcessing {
      * @param quotelevel - the quote level
      * @return The color for given <code>quotelevel</code>
      */
-    private static String getLevelColor(final int quotelevel) {
+    private static String getLevelColor(int quotelevel) {
         final String[] colors = MailProperties.getInstance().getQuoteLineColors();
         return (colors != null) && (colors.length > 0) ? (quotelevel >= colors.length ? colors[colors.length - 1] : colors[quotelevel]) : DEFAULT_COLOR;
     }
@@ -915,7 +915,7 @@ public final class HtmlProcessing {
      * @param htmlText The HTML text
      * @return The HTML text with simple quotes replaced with block quotes
      */
-    private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
+    private static String replaceHTMLSimpleQuotesForDisplay(String htmlText) {
         final StringBuilder sb = new StringBuilder(htmlText.length());
         final String[] lines = htmlText.split(STR_SPLIT_BR);
         int levelBefore = 0;
@@ -978,7 +978,7 @@ public final class HtmlProcessing {
      * @param str The String to check
      * @return <code>true</code> if String matches (ignore-case) to <code>"\s*&amp;gt;\s*"</code>; otherwise <code>false</code>
      */
-    private static int startsWithQuote(final String str) {
+    private static int startsWithQuote(String str) {
         if (isEmpty(str)) {
             return -1;
         }
@@ -1107,7 +1107,7 @@ public final class HtmlProcessing {
         return tmp;
     }
 
-    private static String filterBackgroundCssInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
+    private static String filterBackgroundCssInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = BACKGROUND_CSS_PATTERN.matcher(reval);
@@ -1136,7 +1136,7 @@ public final class HtmlProcessing {
         return reval;
     }
 
-    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
+    private static String filterBackgroundInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
@@ -1183,7 +1183,7 @@ public final class HtmlProcessing {
      * @param generator
      * @return The HTML content with all inline images replaced with valid links
      */
-    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
+    private static String filterImgInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
         String reval = content;
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -1228,7 +1228,7 @@ public final class HtmlProcessing {
         return reval;
     }
 
-    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder, ImageUriGenerator generator) throws OXException {
+    private static boolean replaceImgSrc(Session session, MailPath msgUID, String imgTag, StringBuilder cidBuffer, StringBuilder linkBuilder, ImageUriGenerator generator) throws OXException {
         boolean retval = false;
         final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
         final MatcherReplacer cidReplacer = new MatcherReplacer(cidMatcher, imgTag);
@@ -1262,7 +1262,7 @@ public final class HtmlProcessing {
      * @param charset The character encoding to use; should be <code>UTF-8</code> according to W3C
      * @return The translated string or the string itself if any error occurred
      */
-    public static String urlEncodeSafe(final String text, final String charset) {
+    public static String urlEncodeSafe(String text, String charset) {
         try {
             return URLEncoder.encode(text, charset);
         } catch (UnsupportedEncodingException e) {
@@ -1271,7 +1271,7 @@ public final class HtmlProcessing {
         }
     }
 
-    private static void dumpToFile(final String content, final String fileName) {
+    private static void dumpToFile(String content, String fileName) {
         if (isEmpty(content)) {
             return;
         }
@@ -1289,7 +1289,7 @@ public final class HtmlProcessing {
         }
     }
 
-    private static boolean isEmpty(final CharSequence charSeq) {
+    private static boolean isEmpty(CharSequence charSeq) {
         if (null == charSeq) {
             return true;
         }

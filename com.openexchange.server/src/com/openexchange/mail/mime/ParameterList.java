@@ -116,7 +116,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      *
      * @param parameterList The parameter list's string representation
      */
-    public ParameterList(final String parameterList) {
+    public ParameterList(String parameterList) {
         this();
         parseParameterList(correctParamList(parameterList.trim()));
     }
@@ -131,7 +131,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param parameterList The parameter list's string representation to correct
      * @return The corrected parameter list's string representation.
      */
-    private static String correctParamList(final String parameterList) {
+    private static String correctParamList(String parameterList) {
         String toParse = parameterList;
         int len = toParse.length();
         if (len > 0 && ';' != toParse.charAt(0)) {
@@ -146,7 +146,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     @Override
-    public int compareTo(final ParameterList other) {
+    public int compareTo(ParameterList other) {
         if (this == other) {
             return 0;
         }
@@ -170,7 +170,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -214,7 +214,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     }
 
-    private void parseParameterList(final String parameterList) {
+    private void parseParameterList(String parameterList) {
         try {
             final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
             while (m.find()) {
@@ -242,7 +242,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
     }
 
-    private void parseParameter(final String name, final String value) {
+    private void parseParameter(String name, String value) {
         String val = Strings.isEmpty(value) ? "" : (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
         int pos = name.indexOf('*');
         if (pos < 0) {
@@ -309,7 +309,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param name The sole parameter name
      * @param value The parameter value
      */
-    public void setParameter(final String name, final String value) {
+    public void setParameter(String name, String value) {
         if ((null == name) || containsSpecial(name)) {
             LOG.warn("", MailExceptionCode.INVALID_PARAMETER.create(name));
             return;
@@ -324,7 +324,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param value The parameter value
      * @throws OXException If parameter name/value is invalid
      */
-    public void setParameterErrorAware(final String name, final String value) throws OXException {
+    public void setParameterErrorAware(String name, String value) throws OXException {
         if ((null == name) || containsSpecial(name)) {
             throw MailExceptionCode.INVALID_PARAMETER.create(name);
         }
@@ -337,7 +337,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param name The parameter name
      * @param value The parameter value to add
      */
-    public void addParameter(final String name, final String value) {
+    public void addParameter(String name, String value) {
         if ((null == name) || containsSpecial(name)) {
             final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
             LOG.error("", me);
@@ -361,7 +361,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param name The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String getParameter(final String name) {
+    public String getParameter(String name) {
         if (null == name) {
             return null;
         }
@@ -378,7 +378,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param name The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String removeParameter(final String name) {
+    public String removeParameter(String name) {
         if (null == name) {
             return null;
         }
@@ -395,7 +395,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param name the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
-    public boolean containsParameter(final String name) {
+    public boolean containsParameter(String name) {
         if (null == name) {
             return false;
         }
@@ -428,7 +428,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param sb The string builder to append to
      * @see #appendRFC2045String(StringBuilder, boolean)
      */
-    public void appendRFC2045String(final StringBuilder sb) {
+    public void appendRFC2045String(StringBuilder sb) {
         appendRFC2045String(sb, false);
     }
 
@@ -438,7 +438,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param sb The string builder to append to
      * @param skipEmptyParam <code>true</code> to skip empty parameters; otherwise <code>false</code>
      */
-    public void appendRFC2045String(final StringBuilder sb, final boolean skipEmptyParam) {
+    public void appendRFC2045String(StringBuilder sb, boolean skipEmptyParam) {
         int size = parameters.size();
         List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
@@ -470,7 +470,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         final List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
         Collections.sort(names);
-        for (final String name : names) {
+        for (String name : names) {
             parameters.get(name).appendRFC2045String(sb);
         }
 
@@ -486,7 +486,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final char[] SPECIALS = { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
 
-    private static boolean containsSpecial(final String str) {
+    private static boolean containsSpecial(String str) {
         final int length = str.length();
         boolean quote = false;
         for (int i = 0; (i < length) && !quote; i++) {
@@ -499,14 +499,14 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     private static final Pattern PAT_QUOTE = Pattern.compile("\"");
 
-    static String checkQuotation(final String str) {
+    static String checkQuotation(String str) {
         if (containsSpecial(str)) {
             return new StringBuilder(2 + str.length()).append('"').append(PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"")).append('"').toString();
         }
         return str;
     }
 
-    private static String unescape(final String escaped) {
+    private static String unescape(String escaped) {
         final StringBuilder sb = new StringBuilder(escaped.length());
 
         final int length = escaped.length();
@@ -561,7 +561,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
          * @param name The parameter name
          * @param value The parameter value
          */
-        public Parameter(final String name, final String value) {
+        public Parameter(String name, String value) {
             super();
             rfc2231 = false;
             this.name = name;
@@ -574,7 +574,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
 
         @Override
-        public int compareTo(final Parameter other) {
+        public int compareTo(Parameter other) {
             if (this == other) {
                 return 0;
             }
@@ -604,7 +604,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -659,7 +659,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             return null == value ? null : value.getValue();
         }
 
-        public void appendRFC2045String(final StringBuilder sb) {
+        public void appendRFC2045String(StringBuilder sb) {
             value.appendRFC2045String(name, sb);
         }
 
@@ -674,9 +674,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             super();
         }
 
-        abstract void addContiguousValue(final String contiguousValue);
+        abstract void addContiguousValue(String contiguousValue);
 
-        abstract void setContiguousValue(final int num, final String contiguousValue);
+        abstract void setContiguousValue(int num, String contiguousValue);
 
         abstract String getValue();
 
@@ -840,7 +840,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             }
         }
 
-        private int getNextValidPos(final int fromPos, final int size) {
+        private int getNextValidPos(int fromPos, int size) {
             for (int i = fromPos; i < size; i++) {
                 String val = encodedValues.get(i);
                 if (val != null && val.length() > 0) {

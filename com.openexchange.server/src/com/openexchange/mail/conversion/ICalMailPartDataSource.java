@@ -102,7 +102,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
     }
 
     @Override
-    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
+    public <D> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }
@@ -147,18 +147,18 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         }
     }
 
-    private boolean isCalendar(final ContentType contentType) {
+    private boolean isCalendar(ContentType contentType) {
         return null != contentType && (contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR) || contentType.startsWith(MimeTypes.MIME_APPLICATION_ICS));
     }
 
-    private void throwException(final ContentType contentType) throws OXException {
+    private void throwException(ContentType contentType) throws OXException {
         if (null == contentType) {
             throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
         }
         throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
     }
 
-    private MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session, DataProperties properties) throws OXException {
+    private MailPart getMailPart(int accountId, String fullname, String mailId, String sequenceId, Session session, DataProperties properties) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);

@@ -88,12 +88,12 @@ public final class GetReplyAllAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetReplyAllAction(final ServiceLookup services) {
+    public GetReplyAllAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return performGet(req);
@@ -101,7 +101,7 @@ public final class GetReplyAllAction extends AbstractMailAction {
         return performPut(req, paths);
     }
 
-    private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
+    private AJAXRequestResult performPut(MailRequest req, JSONArray paths) throws OXException {
         try {
             int length = paths.length();
             if (length != 1) {
@@ -132,7 +132,7 @@ public final class GetReplyAllAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performGet(final MailRequest req) throws OXException {
+    private AJAXRequestResult performGet(MailRequest req) throws OXException {
         try {
             ServerSession session = req.getSession();
             /*

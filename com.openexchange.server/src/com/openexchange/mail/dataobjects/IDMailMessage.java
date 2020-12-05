@@ -80,7 +80,7 @@ public final class IDMailMessage extends MailMessage {
     /**
      * Initializes a new {@link IDMailMessage}
      */
-    public IDMailMessage(final String mailId, final String folder) {
+    public IDMailMessage(String mailId, String folder) {
         this();
         this.mailId = mailId;
         if (null == mailId) {
@@ -119,7 +119,7 @@ public final class IDMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         mailId = id;
         if (null == id) {
             uid = -1L;
@@ -142,7 +142,7 @@ public final class IDMailMessage extends MailMessage {
      *
      * @param uid The UID to set or <code>-1</code> to indicate absence
      */
-    public void setUid(final long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
         if (uid > 0) {
             mailId = Long.toString(uid);
@@ -163,7 +163,7 @@ public final class IDMailMessage extends MailMessage {
      *
      * @param originalUid The original UID to set or <code>-1</code> to indicate absence
      */
-    public void setOriginalUid(final long originalUid) {
+    public void setOriginalUid(long originalUid) {
         this.originalUid = originalUid;
         if (originalUid > 0) {
             setOriginalId(Long.toString(originalUid));
@@ -184,12 +184,12 @@ public final class IDMailMessage extends MailMessage {
      *
      * @param seqnum The sequence number to set
      */
-    public void setSeqnum(final int seqnum) {
+    public void setSeqnum(int seqnum) {
         this.seqnum = seqnum;
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         this.unreadMessages = unreadMessages;
     }
 
@@ -209,7 +209,7 @@ public final class IDMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         throw new UnsupportedOperationException("IDMailMessage.getEnclosedMailPart() not supported");
     }
 

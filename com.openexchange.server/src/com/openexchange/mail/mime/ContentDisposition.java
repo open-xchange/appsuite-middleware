@@ -87,13 +87,13 @@ public final class ContentDisposition extends ParameterizedHeader {
      * @param contentDisposition The content disposition
      * @throws OXException If content disposition cannot be parsed
      */
-    public ContentDisposition(final String contentDisposition) throws OXException {
+    public ContentDisposition(String contentDisposition) throws OXException {
         super();
         parseContentDisp(contentDisposition);
     }
 
     @Override
-    public int compareTo(final ParameterizedHeader other) {
+    public int compareTo(ParameterizedHeader other) {
         if (this == other) {
             return 0;
         }
@@ -115,7 +115,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -136,11 +136,11 @@ public final class ContentDisposition extends ParameterizedHeader {
         return true;
     }
 
-    private void parseContentDisp(final String contentDisposition) throws OXException {
+    private void parseContentDisp(String contentDisposition) throws OXException {
         parseContentDisp(contentDisposition, true);
     }
 
-    private void parseContentDisp(final String contentDisposition, final boolean paramList) throws OXException {
+    private void parseContentDisp(String contentDisposition, boolean paramList) throws OXException {
         if ((null == contentDisposition) || (contentDisposition.length() == 0)) {
             /*
              * Nothing to parse
@@ -176,7 +176,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      *
      * @param contentDisp The content disposition to apply
      */
-    public void setContentDisposition(final ContentDisposition contentDisp) {
+    public void setContentDisposition(ContentDisposition contentDisp) {
         if (contentDisp == this) {
             return;
         }
@@ -194,7 +194,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     /**
      * Sets disposition
      */
-    public void setDisposition(final String disposition) {
+    public void setDisposition(String disposition) {
         this.disposition = disposition;
     }
 
@@ -215,7 +215,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     /**
      * Sets filename parameter
      */
-    public void setFilenameParameter(final String filename) {
+    public void setFilenameParameter(String filename) {
         setParameter(PARAM_FILENAME, filename);
     }
 
@@ -236,7 +236,7 @@ public final class ContentDisposition extends ParameterizedHeader {
     /**
      * Sets Content-Disposition
      */
-    public void setContentDisposition(final String contentDisp) throws OXException {
+    public void setContentDisposition(String contentDisp) throws OXException {
         parseContentDisp(contentDisp);
     }
 
@@ -269,7 +269,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content disposition
      */
-    public String toString(final boolean skipEmptyParams) {
+    public String toString(boolean skipEmptyParams) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(disposition);
         if (null != parameterList) {

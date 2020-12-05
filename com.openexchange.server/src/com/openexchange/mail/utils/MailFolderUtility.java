@@ -92,7 +92,7 @@ public final class MailFolderUtility {
      * @param string The string
      * @return <code>true</code> if input is null or empty; else <code>false</code>
      */
-    public static boolean isEmpty(final String string) {
+    public static boolean isEmpty(String string) {
         return Strings.isEmpty(string);
     }
 
@@ -102,7 +102,7 @@ public final class MailFolderUtility {
      * @param fullName The full name
      * @return The encoded full name
      */
-    public static String encode(final String fullName) {
+    public static String encode(String fullName) {
         return BASE64MailboxEncoder.encode(fullName);
     }
 
@@ -112,7 +112,7 @@ public final class MailFolderUtility {
      * @param encoded The encoded full name
      * @return The decoded full name
      */
-    public static String decode(final String encoded) {
+    public static String decode(String encoded) {
         return BASE64MailboxDecoder.decode(encoded);
     }
 
@@ -137,7 +137,7 @@ public final class MailFolderUtility {
      * @throws InvalidMailFolderIdentifierException If mail folder identifier is invalid
      * @see #optPrepareMailFolderParam(String)
      */
-    public static FullnameArgument prepareMailFolderParam(final String fullnameArgument) {
+    public static FullnameArgument prepareMailFolderParam(String fullnameArgument) {
         if (fullnameArgument == null) {
             return null;
         }
@@ -183,7 +183,7 @@ public final class MailFolderUtility {
      * @return The stripped mail folder full name argument
      * @throws IllegalArgumentException If mail account identifier cannot be parsed to an integer
      */
-    public static Optional<FullnameArgument> optPrepareMailFolderParam(final String fullnameArgument) {
+    public static Optional<FullnameArgument> optPrepareMailFolderParam(String fullnameArgument) {
         if (fullnameArgument == null) {
             return Optional.empty();
         }
@@ -233,7 +233,7 @@ public final class MailFolderUtility {
      * @param fullname The full name to compare with
      * @return <code>true</code> if specified full name argument's real full name equals given full name; otherwise <code>false</code>
      */
-    public static boolean equalsFullname(final String fullnameArgument, final String fullname) {
+    public static boolean equalsFullname(String fullnameArgument, String fullname) {
         if (fullnameArgument == null) {
             if (fullname == null) {
                 return true;
@@ -256,7 +256,7 @@ public final class MailFolderUtility {
      * @param fullname The folder full name
      * @return The groupware's mail folder full name
      */
-    public static String prepareFullname(final int accountId, final String fullname) {
+    public static String prepareFullname(int accountId, String fullname) {
         if (fullname == null) {
             return null;
         }

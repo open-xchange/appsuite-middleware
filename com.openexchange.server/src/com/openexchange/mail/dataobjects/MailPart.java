@@ -237,7 +237,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param contentType the contentType to set
      */
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
         b_contentType = true;
     }
@@ -248,7 +248,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param contentType the content type to parse
      * @throws OXException If content type is invalid or could not be parsed
      */
-    public void setContentType(final String contentType) throws OXException {
+    public void setContentType(String contentType) throws OXException {
         this.contentType = new ContentType(contentType);
         b_contentType = true;
     }
@@ -294,7 +294,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param disposition the disposition to set
      * @throws OXException If content disposition is invalid or could not be parsed
      */
-    public void setContentDisposition(final String disposition) throws OXException {
+    public void setContentDisposition(String disposition) throws OXException {
         contentDisposition = new ContentDisposition(disposition);
         b_disposition = true;
     }
@@ -304,7 +304,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param disposition the disposition to set
      */
-    public void setContentDisposition(final ContentDisposition disposition) {
+    public void setContentDisposition(ContentDisposition disposition) {
         contentDisposition = disposition;
         b_disposition = true;
     }
@@ -345,7 +345,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param fileName the fileName to set
      */
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
         if (null != this.fileName) {
             contentType.setNameParameter(fileName);
@@ -360,7 +360,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param name The header name
      * @param value The header value
      */
-    public void addHeader(final String name, final String value) {
+    public void addHeader(String name, String value) {
         if (null == value) {
             return;
         }
@@ -377,7 +377,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param name The header name
      * @param value The header value
      */
-    public void setHeader(final String name, final String value) {
+    public void setHeader(String name, String value) {
         if (null == value) {
             return;
         }
@@ -393,7 +393,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param headers The header collection
      */
-    public void addHeaders(final HeaderCollection headers) {
+    public void addHeaders(HeaderCollection headers) {
         if (null == headers || headers.isEmpty()) {
             return;
         } else if (null == this.headers) {
@@ -449,7 +449,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param name The header name
      * @return <code>true</code> if a header entry exists for specified header; otherwise <code>false</code>
      */
-    public boolean containsHeader(final String name) {
+    public boolean containsHeader(String name) {
         if (null == headers) {
             return false;
         }
@@ -462,7 +462,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param name The header name
      * @return The header values or <code>null</code>
      */
-    public String[] getHeader(final String name) {
+    public String[] getHeader(String name) {
         if (containsHeaders() && (null != headers)) {
             return headers.getHeader(name);
         }
@@ -477,7 +477,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param name The header name
      * @return The header's first value or <code>null</code>
      */
-    public String getFirstHeader(final String name) {
+    public String getFirstHeader(String name) {
         return getHeader(name, null);
     }
 
@@ -489,7 +489,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param delimiter The delimiter
      * @return The header values as a single String or <code>null</code>
      */
-    public String getHeader(final String name, final String delimiter) {
+    public String getHeader(String name, String delimiter) {
         if (containsHeaders() && (null != headers)) {
             return headers.getHeader(name, delimiter);
         }
@@ -504,7 +504,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param delimiter The delimiter character
      * @return The header values as a single String or <code>null</code>
      */
-    public String getHeader(final String name, final char delimiter) {
+    public String getHeader(String name, char delimiter) {
         if (containsHeaders() && (null != headers)) {
             return headers.getHeader(name, delimiter);
         }
@@ -529,7 +529,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param nonMatchingHeaders The non-matching headers
      * @return An iterator for non-matching headers
      */
-    public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+    public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(String[] nonMatchingHeaders) {
         if (containsHeaders() && (null != headers)) {
             return headers.getNonMatchingHeaders(nonMatchingHeaders);
         }
@@ -542,7 +542,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param matchingHeaders The matching headers
      * @return An iterator for matching headers or <code>null</code> if not exists
      */
-    public Iterator<Map.Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+    public Iterator<Map.Entry<String, String>> getMatchingHeaders(String[] matchingHeaders) {
         if (containsHeaders() && (null != headers)) {
             return headers.getMatchingHeaders(matchingHeaders);
         }
@@ -554,7 +554,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param name The header name
      */
-    public void removeHeader(final String name) {
+    public void removeHeader(String name) {
         if (containsHeaders() && (null != headers)) {
             headers.removeHeader(name);
         }
@@ -566,7 +566,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param names The names of the headers to check
      * @return <code>true</code> if this part contains all of specified headers; otherwise <code>false</code>
      */
-    public boolean hasHeaders(final String... names) {
+    public boolean hasHeaders(String... names) {
         boolean ret = true;
         for (int i = 0; ret && i < names.length; i++) {
             ret = headers.containsHeader(names[i]);
@@ -613,7 +613,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param size the size to set
      */
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
         b_size = true;
     }
@@ -654,7 +654,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param contentId the contentId to set
      */
-    public void setContentId(final String contentId) {
+    public void setContentId(String contentId) {
         this.contentId = contentId;
         b_contentId = true;
     }
@@ -688,7 +688,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param sequenceId the sequenceId to set
      */
-    public void setSequenceId(final String sequenceId) {
+    public void setSequenceId(String sequenceId) {
         this.sequenceId = sequenceId;
         b_sequenceId = true;
     }
@@ -740,7 +740,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      *
      * @param msgref the message reference to set
      */
-    public void setMsgref(final MailPath msgref) {
+    public void setMsgref(MailPath msgref) {
         this.msgref = msgref;
         b_msgref = true;
     }
@@ -818,7 +818,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param index The index of desired mail part or <code>null</code> if not applicable
      * @return The mail part
      */
-    public abstract MailPart getEnclosedMailPart(final int index) throws OXException;
+    public abstract MailPart getEnclosedMailPart(int index) throws OXException;
 
     /**
      * Ensures that the part's content is loaded, thus this part is independent of the original.
@@ -838,7 +838,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @param out The output stream to write to
      * @throws OXException If writing to output stream fails
      */
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         final InputStream in = getInputStream();
         if (null == in) {
             throw MailExceptionCode.NO_CONTENT.create();

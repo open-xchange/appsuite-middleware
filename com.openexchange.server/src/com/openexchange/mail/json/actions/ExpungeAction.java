@@ -73,12 +73,12 @@ public final class ExpungeAction extends AbstractMailAction {
      *
      * @param services
      */
-    public ExpungeAction(final ServiceLookup services) {
+    public ExpungeAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             //final ServerSession session = req.getSession();
             /*

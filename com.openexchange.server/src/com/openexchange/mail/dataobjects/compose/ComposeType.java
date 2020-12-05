@@ -93,7 +93,7 @@ public enum ComposeType {
 
     private final int type;
 
-    private ComposeType(final int type) {
+    private ComposeType(int type) {
         this.type = type;
     }
 
@@ -107,9 +107,9 @@ public enum ComposeType {
      * @param type The send type as <code>int</code>
      * @return The corresponding {@link ComposeType} or <code>null</code>
      */
-    public static final ComposeType getType(final int type) {
+    public static final ComposeType getType(int type) {
         final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
+        for (ComposeType composeType : types) {
             if (composeType.type == type) {
                 return composeType;
             }

@@ -195,12 +195,12 @@ public class Protocol implements Component, Serializable {
      * @return The max count or a value equal to or less than zero for no restrictions
      * @throws OXException If max-count setting could not be returned for specified host name
      */
-    public int getMaxCount(final String host, final boolean primary) throws OXException {
+    public int getMaxCount(String host, boolean primary) throws OXException {
         return -1;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -252,7 +252,7 @@ public class Protocol implements Component, Serializable {
      * @param protocolName The protocol name to check
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
-    public boolean isSupported(final String protocolName) {
+    public boolean isSupported(String protocolName) {
         String oName = Strings.asciiLowerCase(protocolName);
         if (name.equals(oName)) {
             return true;

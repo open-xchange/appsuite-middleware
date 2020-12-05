@@ -74,7 +74,7 @@ public final class ToTerm extends AbstractAddressTerm {
     /**
      * Initializes a new {@link ToTerm}
      */
-    public ToTerm(final String pattern) {
+    public ToTerm(String pattern) {
         super(pattern);
     }
 
@@ -92,12 +92,12 @@ public final class ToTerm extends AbstractAddressTerm {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.TO);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         if (containsWildcard()) {
             return toRegex(addr).matcher(getAllAddresses(mailMessage.getTo())).find();
         }
@@ -105,7 +105,7 @@ public final class ToTerm extends AbstractAddressTerm {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         try {
             /*
              * Get plain headers

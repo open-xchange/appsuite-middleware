@@ -78,7 +78,7 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
      *
      * @throws IllegalArgumentException If arguments are invalid
      */
-    public UserFlagTerm(final String userFlag, final boolean set) {
+    public UserFlagTerm(String userFlag, boolean set) {
         super();
         if (Strings.isEmpty(userFlag)) {
             throw new IllegalArgumentException("User flag must not be null or empty");
@@ -92,7 +92,7 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
      *
      * @throws IllegalArgumentException If arguments are invalid
      */
-    public UserFlagTerm(final String[] userFlags, final boolean set) {
+    public UserFlagTerm(String[] userFlags, boolean set) {
         super();
         if (null == userFlags || 0 == userFlags.length) {
             throw new IllegalArgumentException("User flags must not be null or empty");
@@ -131,12 +131,12 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.FLAGS);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         String[] userFlags = mailMessage.getUserFlags();
         if (null == userFlags) {
             return false;
@@ -152,7 +152,7 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         if (set) {
             Flags flagsObj = new Flags();
             String[] thisUserFlags = this.userFlags;

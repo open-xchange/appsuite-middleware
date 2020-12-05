@@ -82,7 +82,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
     }
 
     @Override
-    public int compareTo(final ParameterizedHeader other) {
+    public int compareTo(ParameterizedHeader other) {
         if (this == other) {
             return 0;
         }
@@ -106,7 +106,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -133,7 +133,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value to add
      */
-    public void addParameter(final String key, final String value) {
+    public void addParameter(String key, String value) {
         parameterList.addParameter(key, value);
     }
 
@@ -143,7 +143,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value
      */
-    public void setParameter(final String key, final String value) {
+    public void setParameter(String key, String value) {
         parameterList.setParameter(key, value);
     }
 
@@ -154,7 +154,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param value The parameter value
      * @throws OXException If parameter name/value is invalid
      */
-    public void setParameterErrorAware(final String key, final String value) throws OXException {
+    public void setParameterErrorAware(String key, String value) throws OXException {
         parameterList.setParameterErrorAware(key, value);
     }
 
@@ -164,7 +164,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String getParameter(final String key) {
+    public String getParameter(String key) {
         final String value = parameterList.getParameter(key);
         return null == value ? null : MimeMessageUtility.decodeMultiEncodedHeader(value);
     }
@@ -175,7 +175,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String removeParameter(final String key) {
+    public String removeParameter(String key) {
         final String value = parameterList.removeParameter(key);
         return null == value ? null : MimeMessageUtility.decodeMultiEncodedHeader(value);
     }
@@ -186,7 +186,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
-    public boolean containsParameter(final String key) {
+    public boolean containsParameter(String key) {
         return parameterList.containsParameter(key);
     }
 
@@ -219,7 +219,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param paramHdrArg The parameterized header string argument
      * @return The prepared parameterized header's string.
      */
-    protected static final String prepareParameterizedHeader(final String paramHdrArg) {
+    protected static final String prepareParameterizedHeader(String paramHdrArg) {
         if (paramHdrArg == null) {
             return paramHdrArg;
         }
@@ -260,7 +260,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    protected static String decodeUrl(final String s) {
+    protected static String decodeUrl(String s) {
         try {
             return com.openexchange.java.Strings.isEmpty(s) ? s : (URL_CODEC.decode(P_ENC.matcher(s).replaceAll("%$1")));
         } catch (DecoderException e) {

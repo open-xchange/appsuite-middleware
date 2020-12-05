@@ -89,7 +89,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
     /**
      * Constructor
      */
-    public ImageMessageHandler(final String cid) {
+    public ImageMessageHandler(String cid) {
         super();
         if (cid == null || cid.length() == 0) {
             throw new IllegalArgumentException("Image's Content-ID must not be null or empty");
@@ -105,7 +105,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleMultipartEnd(final MailPart mp, final String id) throws OXException {
+    public boolean handleMultipartEnd(MailPart mp, String id) throws OXException {
         return true;
     }
 
@@ -114,7 +114,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
     private static final String SUFFIX = "@" + VersionService.NAME;
 
     @Override
-    public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+    public boolean handleAttachment(MailPart part, boolean isInline, String baseContentType, String fileName, String id) throws OXException {
         if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MIME_APPL_OCTET)) {
             String cid = part.getContentId();
             if (com.openexchange.java.Strings.isEmpty(cid)) {
@@ -143,37 +143,37 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleBccRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleCcRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleColorLabel(final int colorLabel) throws OXException {
+    public boolean handleColorLabel(int colorLabel) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleContentId(final String contentId) throws OXException {
+    public boolean handleContentId(String contentId) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
+    public boolean handleFrom(InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
+    public boolean handleHeaders(int size, Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
+    public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, boolean isInline, String fileName, String id) throws OXException {
         if (imageCID == null) {
             /*
              * Compare with filename
@@ -201,36 +201,36 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleInlineHtml(final ContentProvider htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineHtml(ContentProvider htmlContent, ContentType contentType, long size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlinePlainText(String plainTextContent, ContentType contentType, long size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
+    public boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws OXException {
         return true;
     }
 
     @Override
-    public void handleMessageEnd(final MailMessage mail) throws OXException {
+    public void handleMessageEnd(MailMessage mail) throws OXException {
     }
 
     @Override
-    public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
+    public boolean handleMultipart(MailPart mp, int bodyPartCount, String id) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+    public boolean handleNestedMessage(MailPart mailPart, String id) throws OXException {
         final Object content = mailPart.getContent();
         final MailMessage nestedMail;
         if (content instanceof MailMessage) {
@@ -257,32 +257,32 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handlePriority(final int priority) throws OXException {
+    public boolean handlePriority(int priority) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleMsgRef(final String msgRef) throws OXException {
+    public boolean handleMsgRef(String msgRef) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean acknowledged) throws OXException {
+    public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean acknowledged) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
+    public boolean handleReceivedDate(Date receivedDate) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSentDate(final Date sentDate) throws OXException {
+    public boolean handleSentDate(Date sentDate) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
+    public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws OXException {
         return handleAttachment(
             part,
             !Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()),
@@ -292,22 +292,22 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     @Override
-    public boolean handleSubject(final String subject) throws OXException {
+    public boolean handleSubject(String subject) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleSystemFlags(final int flags) throws OXException {
+    public boolean handleSystemFlags(int flags) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
+    public boolean handleToRecipient(InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
     @Override
-    public boolean handleUserFlags(final String[] userFlags) throws OXException {
+    public boolean handleUserFlags(String[] userFlags) throws OXException {
         return true;
     }
 }

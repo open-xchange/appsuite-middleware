@@ -79,12 +79,12 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
      * @param session The session providing needed user information
      * @throws OXException If initialization fails
      */
-    public AbortAttachmentHandler(final Session session) throws OXException {
+    public AbortAttachmentHandler(Session session) throws OXException {
         super(session);
     }
 
     @Override
-    public void addAttachment(final MailPart attachment) throws OXException {
+    public void addAttachment(MailPart attachment) throws OXException {
         if (doAction && isFileMailPart(attachment)) {
             final long size = attachment.getSize();
             if (size <= 0) {
@@ -110,16 +110,16 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
     }
 
     @Override
-    public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source, List<OXException> warnings) throws OXException {
+    public ComposedMailMessage[] generateComposedMails(ComposedMailMessage source, List<OXException> warnings) throws OXException {
         source.setBodyPart(textPart);
-        for (final MailPart attachment : attachments) {
+        for (MailPart attachment : attachments) {
             source.addEnclosedPart(attachment);
         }
         return new ComposedMailMessage[] { source };
     }
 
     @Override
-    public void setTextPart(final TextBodyMailPart textPart) {
+    public void setTextPart(TextBodyMailPart textPart) {
         this.textPart = textPart;
     }
 

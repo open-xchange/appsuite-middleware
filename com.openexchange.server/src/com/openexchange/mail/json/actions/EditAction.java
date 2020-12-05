@@ -94,12 +94,12 @@ public final class EditAction extends AbstractMailAction {
      * Initializes a new {@link EditAction}.
      * @param services
      */
-    public EditAction(final ServiceLookup services) {
+    public EditAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         AJAXRequestData request = req.getRequest();
         List<OXException> warnings = new ArrayList<OXException>();
 

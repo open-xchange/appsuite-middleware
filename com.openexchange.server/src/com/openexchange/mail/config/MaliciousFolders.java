@@ -130,7 +130,7 @@ public class MaliciousFolders {
      * @return The malicious folders
      * @throws OXException If malicious folders cannot be returned
      */
-    public static MaliciousFolders instanceFor(final int userId, final int contextId) throws OXException {
+    public static MaliciousFolders instanceFor(int userId, int contextId) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         MaliciousFolders object = CACHE.getIfPresent(key);
         if (null != object) {

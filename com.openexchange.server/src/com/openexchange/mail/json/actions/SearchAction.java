@@ -99,12 +99,12 @@ public final class SearchAction extends AbstractMailAction {
      *
      * @param services
      */
-    public SearchAction(final ServiceLookup services) {
+    public SearchAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             /*
              * Read parameters

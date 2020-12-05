@@ -72,12 +72,12 @@ public final class AllSeenAction extends AbstractMailAction {
      *
      * @param services
      */
-    public AllSeenAction(final ServiceLookup services) {
+    public AllSeenAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             /*
              * Read in parameters

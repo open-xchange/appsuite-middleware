@@ -78,11 +78,11 @@ public class UUEncodedBodyPart {
     /**
      * Creates a new <code>UUEncodedBodyPart</code> instance with given part content
      */
-    public UUEncodedBodyPart(final String bodyPart) throws MessagingException {
+    public UUEncodedBodyPart(String bodyPart) throws MessagingException {
         this(bodyPart, true);
     }
 
-    private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
+    private UUEncodedBodyPart(String bodyPart, boolean initialize) throws MessagingException {
         this.bodyPart = bodyPart;
         if (initialize && findUUEncodedAttachmentPosition()) {
             final ByteArrayInputStream bStream = new ByteArrayInputStream(bodyPart.substring(headerIndex, endIndex + 3).getBytes(StandardCharsets.ISO_8859_1));
@@ -92,7 +92,7 @@ public class UUEncodedBodyPart {
         }
     }
 
-    public static final boolean findUUEncodedAttachmentPosition(final String bodyPart) throws MessagingException {
+    public static final boolean findUUEncodedAttachmentPosition(String bodyPart) throws MessagingException {
         return new UUEncodedBodyPart(bodyPart, false).findUUEncodedAttachmentPosition();
     }
 

@@ -71,7 +71,7 @@ public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAcc
     /**
      * Default constructor
      */
-    public MailAccessTimeoutListener2(final Object key, final TimeoutConcurrentSet<MailAccess<?, ?>> set, final ConcurrentMap<?, TimeoutConcurrentSet<MailAccess<?, ?>>> map) {
+    public MailAccessTimeoutListener2(Object key, TimeoutConcurrentSet<MailAccess<?, ?>> set, ConcurrentMap<?, TimeoutConcurrentSet<MailAccess<?, ?>>> map) {
         super();
         this.key = key;
         this.map = map;
@@ -79,7 +79,7 @@ public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAcc
     }
 
     @Override
-    public void onTimeout(final MailAccess<?, ?> mailAccess) {
+    public void onTimeout(MailAccess<?, ?> mailAccess) {
         mailAccess.close(false);
         if (set.isEmpty()) {
             final TimeoutConcurrentSet<MailAccess<?, ?>> remove = map.remove(key);

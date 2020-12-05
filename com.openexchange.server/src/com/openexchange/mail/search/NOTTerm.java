@@ -80,7 +80,7 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
     /**
      * Initializes a new {@link NOTTerm}
      */
-    public NOTTerm(final SearchTerm<?> term) {
+    public NOTTerm(SearchTerm<?> term) {
         super();
         this.term = term;
     }
@@ -105,13 +105,13 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
      *
      * @param term The search term
      */
-    public void setTerm(final SearchTerm term) {
+    public void setTerm(SearchTerm term) {
         this.term = term;
     }
 
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         term.addMailField(col);
     }
 
@@ -131,12 +131,12 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         return !term.matches(msg);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) throws OXException {
+    public boolean matches(MailMessage mailMessage) throws OXException {
         return !term.matches(mailMessage);
     }
 

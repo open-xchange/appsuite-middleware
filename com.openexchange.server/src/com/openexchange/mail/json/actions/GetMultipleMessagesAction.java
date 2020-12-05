@@ -93,12 +93,12 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetMultipleMessagesAction(final ServiceLookup services) {
+    public GetMultipleMessagesAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         List<IdFolderPair> pairs;
 
         // Parse pairs
@@ -286,7 +286,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         final String identifier;
         final String folderId;
 
-        IdFolderPair(final String identifier, final String folderId) {
+        IdFolderPair(String identifier, String folderId) {
             super();
             this.identifier = identifier;
             this.folderId = folderId;

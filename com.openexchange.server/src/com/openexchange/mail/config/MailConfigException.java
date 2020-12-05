@@ -71,21 +71,21 @@ public final class MailConfigException extends OXException {
     /**
      * Constructs a new exception with the given detail message and cause.
      */
-    public static OXException create(final String message, final Throwable cause) {
+    public static OXException create(String message, Throwable cause) {
         return MailExceptionCode.CONFIG_ERROR.create(cause, message);
     }
 
     /**
      * Constructs a new exception with the given detail message.
      */
-    public static OXException create(final String message) {
+    public static OXException create(String message) {
         return MailExceptionCode.CONFIG_ERROR.create(message);
     }
 
     /**
      * Constructs a new exception from the given <code>Exception</code> instance.
      */
-    public static OXException create(final Exception e) {
+    public static OXException create(Exception e) {
         return MailExceptionCode.CONFIG_ERROR.create(e, e.getMessage());
     }
 

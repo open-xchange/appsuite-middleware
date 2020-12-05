@@ -90,12 +90,12 @@ public final class ResendAction extends AbstractMailAction {
      *
      * @param services
      */
-    public ResendAction(final ServiceLookup services) {
+    public ResendAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return new AJAXRequestResult(performBounce(req, req.checkParameter(AJAXServlet.PARAMETER_FOLDERID), req.checkParameter(AJAXServlet.PARAMETER_ID)), "mail");
@@ -109,7 +109,7 @@ public final class ResendAction extends AbstractMailAction {
         return new AJAXRequestResult(ret, "mail");
     }
 
-    private MailMessage performBounce(final MailRequest req, final String folderPath, final String uid) throws OXException {
+    private MailMessage performBounce(MailRequest req, String folderPath, String uid) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*

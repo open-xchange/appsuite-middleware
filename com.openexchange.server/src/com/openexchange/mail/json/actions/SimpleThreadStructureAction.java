@@ -105,12 +105,12 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      *
      * @param services The service look-up
      */
-    public SimpleThreadStructureAction(final ServiceLookup services) {
+    public SimpleThreadStructureAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         /*
          * Try JSON cache
          */
@@ -213,7 +213,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         return perform0(req, getMailInterface(req), cache);
     }
 
-    private int getFetchLimit(final MailServletInterface mailInterface, ServerSession session) throws OXException {
+    private int getFetchLimit(MailServletInterface mailInterface, ServerSession session) throws OXException {
         if (null == mailInterface) {
             return MailProperties.getInstance().getMailFetchLimit(session.getUserId(), session.getContextId());
         }
@@ -227,7 +227,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
     /**
      * Performs the request w/o cache look-up.
      */
-    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
+    protected AJAXRequestResult perform0(MailRequest req, MailServletInterface mailInterface, boolean cache) throws OXException {
         try {
             // Read parameters
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
@@ -415,7 +415,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 for (Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
                     list = iterator.next();
                     foundUnseen = false;
-                    for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
+                    for (Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                         final MailMessage message = tmp.next();
                         if (message == null) {
                             // Ignore mail
@@ -468,7 +468,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
     }
 
     @Override
-    public String getSha1For(final MailRequest req) throws OXException {
+    public String getSha1For(MailRequest req) throws OXException {
         final String id = req.getRequest().getProperty("mail.sha1");
         if (null != id) {
             return id;

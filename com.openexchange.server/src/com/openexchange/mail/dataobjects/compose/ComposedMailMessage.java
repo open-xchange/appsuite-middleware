@@ -96,7 +96,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     /**
      * Default constructor
      */
-    protected ComposedMailMessage(final Session session, final Context ctx) {
+    protected ComposedMailMessage(Session session, Context ctx) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -208,7 +208,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
      */
-    private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         throw new NotSerializableException(ComposedMailMessage.class.getName());
     }
 
@@ -222,7 +222,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
-    private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         throw new NotSerializableException(ComposedMailMessage.class.getName());
     }
 
@@ -249,7 +249,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      *
      * @param recipient The recipient to add
      */
-    public void addRecipient(final InternetAddress recipient) {
+    public void addRecipient(InternetAddress recipient) {
         recipients.add(recipient);
     }
 
@@ -258,7 +258,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      *
      * @param recipients The recipients to add
      */
-    public void addRecipients(final InternetAddress[] recipients) {
+    public void addRecipients(InternetAddress[] recipients) {
         this.recipients.addAll(Arrays.asList(recipients));
     }
 
@@ -285,7 +285,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      *
      * @param filler The mail filler
      */
-    public void setFiller(final MimeMessageFiller filler) {
+    public void setFiller(MimeMessageFiller filler) {
         this.filler = filler;
     }
 
@@ -340,7 +340,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         throw new UnsupportedOperationException("ComposedMailMessage.setUnreadMessages() not supported");
     }
 
@@ -369,7 +369,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @return The mail part
      */
     @Override
-    public abstract MailPart getEnclosedMailPart(final int index) throws OXException;
+    public abstract MailPart getEnclosedMailPart(int index) throws OXException;
 
     /**
      * Sets this composed message's body part.

@@ -79,7 +79,7 @@ public final class MimeHeaderNameChecker {
      * @param bytes The RFC822 bytes to sanitize
      * @return The sanitized RFC822 bytes
      */
-    public static InputStream sanitizeHeaderNames(final byte[] bytes) {
+    public static InputStream sanitizeHeaderNames(byte[] bytes) {
         final int length = bytes.length;
         // Look-up double line break
         int index = indexOf(bytes, PATTERN_LFCRLF, 0, length);
@@ -122,7 +122,7 @@ public final class MimeHeaderNameChecker {
      * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
      * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
+    private static int indexOf(byte[] data, byte[] pattern, int beginIndex, int endIndex) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -163,7 +163,7 @@ public final class MimeHeaderNameChecker {
      * @param pattern The pattern
      * @return The failures
      */
-    private static int[] computeFailure(final byte[] pattern) {
+    private static int[] computeFailure(byte[] pattern) {
         if (pattern == null) {
             return null;
         }

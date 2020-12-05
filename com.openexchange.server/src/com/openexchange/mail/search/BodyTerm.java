@@ -86,7 +86,7 @@ public final class BodyTerm extends SearchTerm<String> {
     /**
      * Initializes a new {@link BodyTerm}
      */
-    public BodyTerm(final String pattern) {
+    public BodyTerm(String pattern) {
         super();
         this.pattern = pattern;
     }
@@ -102,12 +102,12 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.BODY);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) throws OXException {
+    public boolean matches(MailMessage mailMessage) throws OXException {
         final String text = getTextContent(mailMessage);
         if (text == null) {
             if (null == pattern) {
@@ -125,7 +125,7 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         try {
             final String text = getTextContent(msg);
             if (text == null) {
@@ -184,7 +184,7 @@ public final class BodyTerm extends SearchTerm<String> {
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails
      */
-    private static String getTextContent(final Part part) throws OXException {
+    private static String getTextContent(Part part) throws OXException {
         try {
             if (ContentType.isMimeType(part.getContentType(), "multipart/*")) {
                 final Multipart multipart = (Multipart) part.getContent();
@@ -218,7 +218,7 @@ public final class BodyTerm extends SearchTerm<String> {
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails
      */
-    private static String getTextContent(final MailPart mailPart) throws OXException {
+    private static String getTextContent(MailPart mailPart) throws OXException {
         final int count = mailPart.getEnclosedCount();
         if (count != MailPart.NO_ENCLOSED_PARTS) {
             /*
@@ -266,7 +266,7 @@ public final class BodyTerm extends SearchTerm<String> {
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails
      */
-    private static String getPartTextContent(final Part part) throws OXException {
+    private static String getPartTextContent(Part part) throws OXException {
         try {
             final ContentType ct = new ContentType(part.getContentType());
             if (!ct.startsWith("text/")) {

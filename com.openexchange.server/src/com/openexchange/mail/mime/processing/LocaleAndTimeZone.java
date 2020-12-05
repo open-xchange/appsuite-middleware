@@ -76,7 +76,7 @@ final class LocaleAndTimeZone {
      *
      * @param user The user
      */
-    LocaleAndTimeZone(final User user) {
+    LocaleAndTimeZone(User user) {
         this(user.getLocale(), user.getTimeZone());
     }
 
@@ -86,7 +86,7 @@ final class LocaleAndTimeZone {
      * @param locale The locale
      * @param timeZoneId The time zone ID
      */
-    LocaleAndTimeZone(final Locale locale, final String timeZoneId) {
+    LocaleAndTimeZone(Locale locale, String timeZoneId) {
         this(locale, TimeZoneUtils.getTimeZone(timeZoneId));
     }
 
@@ -96,7 +96,7 @@ final class LocaleAndTimeZone {
      * @param locale The locale
      * @param timeZone The time zone
      */
-    LocaleAndTimeZone(final Locale locale, final TimeZone timeZone) {
+    LocaleAndTimeZone(Locale locale, TimeZone timeZone) {
         super();
         this.locale = locale;
         this.timeZone = timeZone;

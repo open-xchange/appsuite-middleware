@@ -141,7 +141,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable forward mail
      * @throws OXException If forward mail cannot be composed
      */
-    public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session, final int accountID, boolean setFrom) throws OXException {
+    public static MailMessage getFowardMail(MailMessage[] originalMails, Session session, int accountID, boolean setFrom) throws OXException {
         return getFowardMail(originalMails, session, accountID, null, setFrom);
     }
 
@@ -361,7 +361,7 @@ public final class MimeForward extends AbstractMimeProcessing {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    static String replaceMetaEquiv(final String html, final ContentType contentType) {
+    static String replaceMetaEquiv(String html, ContentType contentType) {
         Matcher m = PAT_META_CT.matcher(html);
         if (!m.find()) {
             return html;
@@ -380,7 +380,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         return replaceBuffer.toString();
     }
 
-    private static MailMessage asInlineForward(final MailMessage originalMsg, final Session session, final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws OXException, MessagingException, IOException {
+    private static MailMessage asInlineForward(MailMessage originalMsg, Session session, Context ctx, UserSettingMail usm, MimeMessage forwardMsg) throws OXException, MessagingException, IOException {
         /*
          * Check for message reference
          */
@@ -453,7 +453,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                 handler.setImageContentIds(contentIds);
             }
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
-            for (final MailPart mailPart : handler.getNonInlineParts()) {
+            for (MailPart mailPart : handler.getNonInlineParts()) {
                 if (false == mailPart.getContentType().startsWith("application/pgp-signature")) {
                     mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
                     if (!isHtml) {
@@ -563,7 +563,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                     };
                     attachmentPart.setDataHandler(new DataHandler(new StreamDataSource(isp, originalContentType.toString())));
                 }
-                for (final Iterator<Map.Entry<String, String>> e = originalMsg.getHeadersIterator(); e.hasNext();) {
+                for (Iterator<Map.Entry<String, String>> e = originalMsg.getHeadersIterator(); e.hasNext();) {
                     final Map.Entry<String, String> header = e.next();
                     final String name = header.getKey();
                     if (name.toLowerCase(Locale.ENGLISH).startsWith("content-")) {
@@ -582,14 +582,14 @@ public final class MimeForward extends AbstractMimeProcessing {
         return forwardMail;
     }
 
-    private static User getUser(final Session session, final Context ctx) throws OXException {
+    private static User getUser(Session session, Context ctx) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
         return UserStorage.getInstance().getUser(session.getUserId(), ctx);
     }
 
-    private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, OXException {
+    private static MailMessage asAttachmentForward(MailMessage[] originalMsgs, MimeMessage forwardMsg) throws MessagingException, OXException {
         final CompositeMailMessage compositeMail;
         {
             final Multipart multipart = new MimeMultipart();
@@ -614,7 +614,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         /*
          * Attach messages
          */
-        for (final MailMessage originalMsg : originalMsgs) {
+        for (MailMessage originalMsg : originalMsgs) {
             final MailMessage nested;
             if (originalMsg instanceof MimeMailMessage) {
                 nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
@@ -637,7 +637,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    public static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
+    public static String getFirstSeenText(MailPart multipartPart, ContentType retvalContentType, UserSettingMail usm, MailMessage origMail, Session session, boolean alt) throws OXException, MessagingException, IOException {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
@@ -770,7 +770,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         return null;
     }
 
-    private static String getHtmlContent(final MailPart multipartPart, final int count) throws OXException, IOException {
+    private static String getHtmlContent(MailPart multipartPart, int count) throws OXException, IOException {
         boolean found = false;
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
@@ -855,7 +855,7 @@ public final class MimeForward extends AbstractMimeProcessing {
         return builder.toString();
     }
 
-    private static String quoteText(final String textContent) {
+    private static String quoteText(String textContent) {
         return textContent.replaceAll("(?m)^", "> ");
     }
 
@@ -869,7 +869,7 @@ public final class MimeForward extends AbstractMimeProcessing {
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
-    private static String quoteHtml(final String htmlContent) {
+    private static String quoteHtml(String htmlContent) {
         Matcher m = PATTERN_HTML.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);

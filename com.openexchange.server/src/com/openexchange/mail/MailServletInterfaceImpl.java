@@ -308,7 +308,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getSeparator(acccountId, session).charValue();
     }
 
-    private Character getSeparator(final int accountId, final Session session) throws OXException {
+    private Character getSeparator(int accountId, Session session) throws OXException {
         final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
         Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
         if (null == sep) {
@@ -3841,7 +3841,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private void triggerDataRetention(final MailTransport transport, final long startTransport, final MailMessage sentMail, final Collection<InternetAddress> recipients, final DataRetentionService retentionService) {
+    private void triggerDataRetention(MailTransport transport, long startTransport, MailMessage sentMail, Collection<InternetAddress> recipients, DataRetentionService retentionService) {
         /*
          * Create runnable task
          */
@@ -4743,7 +4743,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<ArchiveDataWrapper> archiveMail(final String folderID, List<String> ids, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+    public List<ArchiveDataWrapper> archiveMail(String folderID, List<String> ids, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException {
         Callable<List<ArchiveDataWrapper>> archiveMailCallable = new Callable<List<ArchiveDataWrapper>>() {
 
             @Override
@@ -4788,7 +4788,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<ArchiveDataWrapper> archiveMultipleMail(List<FolderAndId> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+    public List<ArchiveDataWrapper> archiveMultipleMail(List<FolderAndId> entries, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException {
         // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
         TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<>(2);
         for (FolderAndId obj : entries) {
@@ -4956,7 +4956,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @return The archive full name
      * @throws OXException If checking archive full name fails
      */
-    String checkArchiveFullNameFor(final ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
+    String checkArchiveFullNameFor(ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
         final int currentAccountId = mailAccess.getAccountId();
 
         MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);

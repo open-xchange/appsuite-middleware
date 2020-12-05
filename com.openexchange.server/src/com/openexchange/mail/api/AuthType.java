@@ -108,7 +108,7 @@ public enum AuthType {
      * @param authTypeStr The string to parse to an AuthType
      * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
      */
-    public static final AuthType parse(final String authTypeStr) {
+    public static final AuthType parse(String authTypeStr) {
         return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
     }
 

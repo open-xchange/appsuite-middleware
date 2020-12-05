@@ -87,7 +87,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
      *
      * @param capacity The queue's capacity or <code>-1</code> if unbounded
      */
-    public MailAccessQueueImpl(final int capacity) {
+    public MailAccessQueueImpl(int capacity) {
         super();
         deprecated = new AtomicBoolean();
         this.capacity = capacity;
@@ -147,7 +147,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean contains(final Object o) {
+    public boolean contains(Object o) {
         return priorityQueue.contains(o);
     }
 
@@ -157,7 +157,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -175,7 +175,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean addAll(final Collection<? extends PooledMailAccess> c) {
+    public boolean addAll(Collection<? extends PooledMailAccess> c) {
         if ((capacity > 0) && ((capacity - priorityQueue.size()) < c.size())) {
             return false;
         }
@@ -188,17 +188,17 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public <T> T[] toArray(final T[] a) {
+    public <T> T[] toArray(T[] a) {
         return priorityQueue.toArray(a);
     }
 
     @Override
-    public boolean containsAll(final Collection<?> c) {
+    public boolean containsAll(Collection<?> c) {
         return priorityQueue.containsAll(c);
     }
 
     @Override
-    public boolean offer(final PooledMailAccess o) {
+    public boolean offer(PooledMailAccess o) {
         if ((capacity > 0) && (capacity <= priorityQueue.size())) {
             return false;
         }
@@ -211,7 +211,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean add(final PooledMailAccess o) {
+    public boolean add(PooledMailAccess o) {
         if ((capacity > 0) && (capacity <= priorityQueue.size())) {
             return false;
         }
@@ -219,12 +219,12 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean removeAll(final Collection<?> c) {
+    public boolean removeAll(Collection<?> c) {
         return priorityQueue.removeAll(c);
     }
 
     @Override
-    public boolean remove(final Object o) {
+    public boolean remove(Object o) {
         return priorityQueue.remove(o);
     }
 
@@ -234,7 +234,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     }
 
     @Override
-    public boolean retainAll(final Collection<?> c) {
+    public boolean retainAll(Collection<?> c) {
         return priorityQueue.retainAll(c);
     }
 

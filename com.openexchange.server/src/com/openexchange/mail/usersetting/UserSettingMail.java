@@ -78,7 +78,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
         private String signature;
 
-        public Signature(final String id, final String signature) {
+        public Signature(String id, String signature) {
             this.id = id;
             this.signature = signature;
         }
@@ -339,7 +339,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * @param userId The user ID
      * @param cid The context ID
      */
-    public UserSettingMail(final int userId, final int cid) {
+    public UserSettingMail(int userId, int cid) {
         super();
         this.userId = userId;
         this.cid = cid;
@@ -392,7 +392,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param dropReplyForwardPrefix The dropReplyForwardPrefix to set
      */
-    public void setDropReplyForwardPrefix(final boolean dropReplyForwardPrefix) {
+    public void setDropReplyForwardPrefix(boolean dropReplyForwardPrefix) {
         this.dropReplyForwardPrefix = dropReplyForwardPrefix;
     }
 
@@ -833,7 +833,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param onOffOptions The bit pattern
      */
-    public void parseBits(final int onOffOptions) {
+    public void parseBits(int onOffOptions) {
         displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) > 0);
         useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) > 0);
         showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) > 0);
@@ -861,25 +861,25 @@ public final class UserSettingMail implements Cloneable, Serializable {
         suppressLinks = ((onOffOptions & INT_SUPPRESS_LINKS) > 0);
     }
 
-    public void setAppendVCard(final boolean appendVCard) {
+    public void setAppendVCard(boolean appendVCard) {
         this.appendVCard = appendVCard;
         modifiedDuringSession = true;
     }
 
-    public void setAutoLinebreak(final int autoLineBreak) {
+    public void setAutoLinebreak(int autoLineBreak) {
         autoLinebreak = autoLineBreak >= 0 ? autoLineBreak : 0;
         modifiedDuringSession = true;
     }
 
-    public void setConfirmedHam(final String confirmedHam) {
+    public void setConfirmedHam(String confirmedHam) {
         this.confirmedHam = confirmedHam;
     }
 
-    public void setConfirmedSpam(final String confirmedSpam) {
+    public void setConfirmedSpam(String confirmedSpam) {
         this.confirmedSpam = confirmedSpam;
     }
 
-    public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
+    public void setDisplayHtmlInlineContent(boolean htmlPreview) {
         displayHtmlInlineContent = htmlPreview;
         modifiedDuringSession = true;
     }
@@ -889,11 +889,11 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param suppressHTMLAlternativePart <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
      */
-    public void setSuppressHTMLAlternativePart(final boolean suppressHTMLAlternativePart) {
+    public void setSuppressHTMLAlternativePart(boolean suppressHTMLAlternativePart) {
         this.suppressHTMLAlternativePart = suppressHTMLAlternativePart;
     }
 
-    public void setDisplayMsgHeaders(final String[] displayMsgHeaders) {
+    public void setDisplayMsgHeaders(String[] displayMsgHeaders) {
         if (displayMsgHeaders == null) {
             this.displayMsgHeaders = null;
             modifiedDuringSession = true;
@@ -904,46 +904,46 @@ public final class UserSettingMail implements Cloneable, Serializable {
         modifiedDuringSession = true;
     }
 
-    public void setForwardAsAttachment(final boolean forwardAsAttachment) {
+    public void setForwardAsAttachment(boolean forwardAsAttachment) {
         this.forwardAsAttachment = forwardAsAttachment;
         modifiedDuringSession = true;
     }
 
-    public void setAttachOriginalMessage(final boolean attachOriginalMessage) {
+    public void setAttachOriginalMessage(boolean attachOriginalMessage) {
         this.attachOriginalMessage = attachOriginalMessage ? 1 : 0;
         modifiedDuringSession = true;
     }
 
-    public void setHardDeleteMsgs(final boolean hardDeleteMessages) {
+    public void setHardDeleteMsgs(boolean hardDeleteMessages) {
         hardDeleteMsgs = hardDeleteMessages;
         modifiedDuringSession = true;
     }
 
-    public void setIgnoreOriginalMailTextOnReply(final boolean appendOriginalMailTextToReply) {
+    public void setIgnoreOriginalMailTextOnReply(boolean appendOriginalMailTextToReply) {
         ignoreOriginalMailTextOnReply = appendOriginalMailTextToReply;
         modifiedDuringSession = true;
     }
 
-    void setModifiedDuringSession(final boolean modifiedDuringSession) {
+    void setModifiedDuringSession(boolean modifiedDuringSession) {
         this.modifiedDuringSession = modifiedDuringSession;
     }
 
-    public void setMsgFormat(final int msgFormat) {
+    public void setMsgFormat(int msgFormat) {
         this.msgFormat = msgFormat;
         modifiedDuringSession = true;
     }
 
-    public void setMsgPreview(final boolean msgPreview) {
+    public void setMsgPreview(boolean msgPreview) {
         this.msgPreview = msgPreview;
         modifiedDuringSession = true;
     }
 
-    public void setNoCopyIntoStandardSentFolder(final boolean noCopyIntoStandardSentFolder) {
+    public void setNoCopyIntoStandardSentFolder(boolean noCopyIntoStandardSentFolder) {
         this.noCopyIntoStandardSentFolder = noCopyIntoStandardSentFolder;
         modifiedDuringSession = true;
     }
 
-    public void setNotifyAppointments(final boolean notifyAppointments) {
+    public void setNotifyAppointments(boolean notifyAppointments) {
         this.notifyAppointments = notifyAppointments;
         modifiedDuringSession = true;
     }
@@ -951,32 +951,32 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets if the user is notified if a message contains a receipt acknowledgment.
      */
-    public void setDisplayReceiptNotification(final boolean displayReceiptNotification) {
+    public void setDisplayReceiptNotification(boolean displayReceiptNotification) {
         this.displayReceiptNotification = displayReceiptNotification;
         modifiedDuringSession = true;
     }
 
-    public void setNotifyTasks(final boolean notifyTasks) {
+    public void setNotifyTasks(boolean notifyTasks) {
         this.notifyTasks = notifyTasks;
         modifiedDuringSession = true;
     }
 
-    public void setReplyToAddr(final String replyToAddr) {
+    public void setReplyToAddr(String replyToAddr) {
         this.replyToAddr = IDNA.toIDN(replyToAddr);
         modifiedDuringSession = true;
     }
 
-    public void setSendAddr(final String sendAddr) {
+    public void setSendAddr(String sendAddr) {
         this.sendAddr = IDNA.toIDN(sendAddr);
         modifiedDuringSession = true;
     }
 
-    public void setShowGraphicEmoticons(final boolean showGraphicEmoticons) {
+    public void setShowGraphicEmoticons(boolean showGraphicEmoticons) {
         this.showGraphicEmoticons = showGraphicEmoticons;
         modifiedDuringSession = true;
     }
 
-    public void setSignatures(final Signature[] signatures) {
+    public void setSignatures(Signature[] signatures) {
         if (signatures == null) {
             this.signatures = null;
             modifiedDuringSession = true;
@@ -987,37 +987,37 @@ public final class UserSettingMail implements Cloneable, Serializable {
         modifiedDuringSession = true;
     }
 
-    public void setSpamEnabled(final boolean spamEnabled) {
+    public void setSpamEnabled(boolean spamEnabled) {
         this.spamEnabled = spamEnabled;
         modifiedDuringSession = true;
     }
 
-    public void setStdDraftsName(final String stdDraftsName) {
+    public void setStdDraftsName(String stdDraftsName) {
         this.stdDraftsName = stdDraftsName;
         modifiedDuringSession = true;
     }
 
-    public void setStdSentName(final String stdSentName) {
+    public void setStdSentName(String stdSentName) {
         this.stdSentName = stdSentName;
         modifiedDuringSession = true;
     }
 
-    public void setStdSpamName(final String stdSpamName) {
+    public void setStdSpamName(String stdSpamName) {
         this.stdSpamName = stdSpamName;
         modifiedDuringSession = true;
     }
 
-    public void setStdTrashName(final String stdTrashName) {
+    public void setStdTrashName(String stdTrashName) {
         this.stdTrashName = stdTrashName;
         modifiedDuringSession = true;
     }
 
-    public void setTextOnlyCompose(final boolean textOnlyCompose) {
+    public void setTextOnlyCompose(boolean textOnlyCompose) {
         this.textOnlyCompose = textOnlyCompose;
         modifiedDuringSession = true;
     }
 
-    public void setAllowHTMLImages(final boolean allowHTMLImages) {
+    public void setAllowHTMLImages(boolean allowHTMLImages) {
         this.allowHTMLImages = allowHTMLImages;
         modifiedDuringSession = true;
     }
@@ -1029,7 +1029,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * @param replyAllCc <code>true</code> if the reply-all method will put all recipients except the original sender in the Cc list;
      *            otherwise <code>false</code>.
      */
-    public void setReplyAllCc(final boolean replyAllCc) {
+    public void setReplyAllCc(boolean replyAllCc) {
         this.replyAllCc = replyAllCc;
     }
 
@@ -1042,17 +1042,17 @@ public final class UserSettingMail implements Cloneable, Serializable {
         this.suppressLinks = suppressLinks;
     }
 
-    public void setUploadQuota(final long uploadQuota) {
+    public void setUploadQuota(long uploadQuota) {
         this.uploadQuota = uploadQuota;
         modifiedDuringSession = true;
     }
 
-    public void setUploadQuotaPerFile(final long uploadQuotaPerFile) {
+    public void setUploadQuotaPerFile(long uploadQuotaPerFile) {
         this.uploadQuotaPerFile = uploadQuotaPerFile;
         modifiedDuringSession = true;
     }
 
-    public void setUseColorQuote(final boolean useColorQuote) {
+    public void setUseColorQuote(boolean useColorQuote) {
         this.useColorQuote = useColorQuote;
         modifiedDuringSession = true;
     }
@@ -1062,7 +1062,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param notifyAppointmentsConfirmOwner the notifyAppointmentsConfirmOwner to set
      */
-    public void setNotifyAppointmentsConfirmOwner(final boolean notifyAppointmentsConfirmOwner) {
+    public void setNotifyAppointmentsConfirmOwner(boolean notifyAppointmentsConfirmOwner) {
         this.notifyAppointmentsConfirmOwner = notifyAppointmentsConfirmOwner;
         modifiedDuringSession = true;
     }
@@ -1072,7 +1072,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param notifyAppointmentsConfirmParticipant the notifyAppointmentsConfirmParticipant to set
      */
-    public void setNotifyAppointmentsConfirmParticipant(final boolean notifyAppointmentsConfirmParticipant) {
+    public void setNotifyAppointmentsConfirmParticipant(boolean notifyAppointmentsConfirmParticipant) {
         this.notifyAppointmentsConfirmParticipant = notifyAppointmentsConfirmParticipant;
         modifiedDuringSession = true;
     }
@@ -1082,7 +1082,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param notifyTasksConfirmOwner the notifyTasksConfirmOwner to set
      */
-    public void setNotifyTasksConfirmOwner(final boolean notifyTasksConfirmOwner) {
+    public void setNotifyTasksConfirmOwner(boolean notifyTasksConfirmOwner) {
         this.notifyTasksConfirmOwner = notifyTasksConfirmOwner;
         modifiedDuringSession = true;
     }
@@ -1092,7 +1092,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param notifyTasksConfirmParticipant the notifyTasksConfirmParticipant to set
      */
-    public void setNotifyTasksConfirmParticipant(final boolean notifyTasksConfirmParticipant) {
+    public void setNotifyTasksConfirmParticipant(boolean notifyTasksConfirmParticipant) {
         this.notifyTasksConfirmParticipant = notifyTasksConfirmParticipant;
         modifiedDuringSession = true;
     }
@@ -1103,7 +1103,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *
      * @param noSave <code>true</code> to deny saving this instance of {@link UserSettingMail} to storage; otherwise <code>false</code>
      */
-    public void setNoSave(final boolean noSave) {
+    public void setNoSave(boolean noSave) {
         this.noSave = noSave;
     }
 

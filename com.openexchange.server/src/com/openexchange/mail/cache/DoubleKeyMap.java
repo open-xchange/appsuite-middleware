@@ -74,18 +74,18 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      *
      * @param clazz he class of the values
      */
-    public DoubleKeyMap(final Class<V> clazz) {
+    public DoubleKeyMap(Class<V> clazz) {
         super();
         map = new ConcurrentHashMap<K1, Map<K2, V>>();
         this.clazz = clazz;
     }
 
-    private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         out.flush();
     }
 
-    private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         // Read in size
         map = new ConcurrentHashMap<K1, Map<K2, V>>();
@@ -114,7 +114,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k1 The first key
      * @return <code>true</code> if first key is contained in this map; otherwise <code>false</code>
      */
-    public boolean containsKey(final K1 k1) {
+    public boolean containsKey(K1 k1) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return false;
@@ -129,7 +129,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k2 The second key
      * @return <code>true</code> if key pair is contained in this map; otherwise <code>false</code>
      */
-    public boolean containsKeyPair(final K1 k1, final K2 k2) {
+    public boolean containsKeyPair(K1 k1, K2 k2) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return false;
@@ -147,7 +147,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k1 The first key
      * @return All values associated with given first key or <code>null</code> if none found
      */
-    public V[] getValues(final K1 k1) {
+    public V[] getValues(K1 k1) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return null;
@@ -167,7 +167,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param keys The second keys
      * @return The values associated with given first key and given second keys
      */
-    public V[] getValues(final K1 k1, final K2[] keys) {
+    public V[] getValues(K1 k1, K2[] keys) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return null;
@@ -191,7 +191,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k2 The second key
      * @return The single value associated with given key pair or <code>null</code> if not present
      */
-    public V getValue(final K1 k1, final K2 k2) {
+    public V getValue(K1 k1, K2 k2) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return null;
@@ -210,7 +210,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param keys The second keys
      * @param values The values to insert
      */
-    public void putValues(final K1 k1, final K2[] keys, final V[] values) {
+    public void putValues(K1 k1, K2[] keys, V[] values) {
         if ((k1 == null) || (keys == null) || (values == null)) {
             throw new IllegalArgumentException("Argument must not be null");
         }
@@ -235,7 +235,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param value The value to insert
      * @return The value formerly bound to given key pair or <code>null</code> if none was bound before
      */
-    public V putValue(final K1 k1, final K2 k2, final V value) {
+    public V putValue(K1 k1, K2 k2, V value) {
         if (k1 == null) {
             throw new IllegalArgumentException("First key must not be null");
         } else if (k2 == null) {
@@ -257,7 +257,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      *
      * @param k1 The first key
      */
-    public void removeValues(final K1 k1) {
+    public void removeValues(K1 k1) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return;
@@ -271,7 +271,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k1 The first key
      * @param keys The second keys
      */
-    public void removeValues(final K1 k1, final K2[] keys) {
+    public void removeValues(K1 k1, K2[] keys) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return;
@@ -298,7 +298,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k2 The second key
      * @return The removed value or <code>null</code> if not present
      */
-    public V removeValue(final K1 k1, final K2 k2) {
+    public V removeValue(K1 k1, K2 k2) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return null;
@@ -323,7 +323,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @param k1 The first key
      * @return <code>true</code> if no values are bound to given first key; otherwise <code>false</code>
      */
-    public boolean isEmpty(final K1 k1) {
+    public boolean isEmpty(K1 k1) {
         final Map<K1, Map<K2, V>> m = map;
         if (null == m) {
             return false;

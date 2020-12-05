@@ -71,7 +71,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 
         private static final BooleanSearchTerm _FALSE = new BooleanSearchTerm(false);
 
-        public static BooleanSearchTerm getInstance(final boolean value) {
+        public static BooleanSearchTerm getInstance(boolean value) {
             return value ? _TRUE : _FALSE;
         }
 
@@ -79,13 +79,13 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 
         private final boolean value;
 
-        private BooleanSearchTerm(final boolean value) {
+        private BooleanSearchTerm(boolean value) {
             super();
             this.value = value;
         }
 
         @Override
-        public boolean match(final Message msg) {
+        public boolean match(Message msg) {
             return value;
         }
 
@@ -106,7 +106,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     /**
      * Initializes a new {@link BooleanTerm}
      */
-    private BooleanTerm(final boolean value) {
+    private BooleanTerm(boolean value) {
         super();
         this.value = value;
     }
@@ -122,7 +122,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         // Nothing
     }
 
@@ -142,12 +142,12 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         return value;
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         return value;
     }
 }

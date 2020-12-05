@@ -75,7 +75,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
     /**
      * Initializes a new {@link FlagTerm}
      */
-    public FlagTerm(final int flag, final boolean set) {
+    public FlagTerm(int flag, boolean set) {
         super();
         flags = flag;
         this.set = set;
@@ -97,12 +97,12 @@ public final class FlagTerm extends SearchTerm<Integer> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.FLAGS);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         if (set) {
             return ((mailMessage.getFlags() & flags) == flags);
         }
@@ -110,7 +110,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final Flags flagsObj = MimeMessageConverter.convertMailFlags(flags);
         final Flags msgFlags;
         try {

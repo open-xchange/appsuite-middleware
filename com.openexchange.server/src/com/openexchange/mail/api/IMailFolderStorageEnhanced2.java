@@ -65,6 +65,6 @@ public interface IMailFolderStorageEnhanced2 extends IMailFolderStorageEnhanced 
      * @return The total and unread counters
      * @throws OXException If an error occurs
      */
-    int[] getTotalAndUnreadCounter(final String fullName) throws OXException;
+    int[] getTotalAndUnreadCounter(String fullName) throws OXException;
 
 }

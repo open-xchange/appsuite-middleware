@@ -85,7 +85,7 @@ public final class MailLoginHandler implements LoginHandlerService {
 	}
 
 	@Override
-    public void handleLogin(final LoginResult login) throws OXException {
+    public void handleLogin(LoginResult login) throws OXException {
         /*
          * Track mail login in data retention service
          */
@@ -119,7 +119,7 @@ public final class MailLoginHandler implements LoginHandlerService {
     }
 
 	@Override
-    public void handleLogout(final LoginResult logout) throws OXException {
+    public void handleLogout(LoginResult logout) throws OXException {
 	    // Nothing
 	}
 }

@@ -79,7 +79,7 @@ public final class MimeTypeFileLineParser {
      *
      * @param entry The MIME type file entry; e.g. <code>type=magnus-internal/cgi&nbsp;&nbsp;&nbsp;&nbsp;exts=cgi,exe,bat</code>
      */
-    public MimeTypeFileLineParser(final String entry) {
+    public MimeTypeFileLineParser(String entry) {
         super();
         extensions = new ArrayList<String>();
         parse(entry);
@@ -89,7 +89,7 @@ public final class MimeTypeFileLineParser {
 
     private static final String STR_EXTS = "exts=";
 
-    private void parse(final String entry) {
+    private void parse(String entry) {
         int pos = -1;
         if ((pos = entry.toLowerCase(Locale.ENGLISH).indexOf(STR_TYPE)) != -1) {
             final Matcher m = PAT_VAL.matcher(entry);

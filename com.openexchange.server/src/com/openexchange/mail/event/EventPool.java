@@ -188,10 +188,10 @@ public final class EventPool implements Runnable {
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public void removeByUser(final int userId, final int contextId) {
+    public void removeByUser(int userId, int contextId) {
         blocker.acquire();
         try {
-            for (final Iterator<PooledEvent> queueIter = queue.iterator(); queueIter.hasNext();) {
+            for (Iterator<PooledEvent> queueIter = queue.iterator(); queueIter.hasNext();) {
                 final PooledEvent pooledEvent = queueIter.next();
                 if (pooledEvent.equalsByUser(userId, contextId)) {
                     map.remove(pooledEvent);
@@ -208,7 +208,7 @@ public final class EventPool implements Runnable {
      *
      * @param pooledEvent The pooled event to put.
      */
-    public void put(final PooledEvent pooledEvent) {
+    public void put(PooledEvent pooledEvent) {
         if ((null == timerTask) || (0 >= pooledEvent.getDelay(TimeUnit.MILLISECONDS))) {
             /*
              * Timer task not active or already elapsed, broadcast immediately
@@ -281,7 +281,7 @@ public final class EventPool implements Runnable {
         PushEventConstants.PROPERTY_USER,
         CommonEvent.PUBLISH_MARKER);
 
-    private void broadcastEvent(final PooledEvent pooledEvent) {
+    private void broadcastEvent(PooledEvent pooledEvent) {
         /*
          * Determine event topic
          */
@@ -316,7 +316,7 @@ public final class EventPool implements Runnable {
         final Map<String, Object> moreProps = pooledEvent.getProperties();
         if (null != moreProps && !moreProps.isEmpty()) {
             final Set<String> reservedNames = RESERVED_NAMES;
-            for (final Entry<String, Object> entry : moreProps.entrySet()) {
+            for (Entry<String, Object> entry : moreProps.entrySet()) {
                 final String name = entry.getKey();
                 if (!reservedNames.contains(name)) {
                     properties.put(name, entry.getValue());

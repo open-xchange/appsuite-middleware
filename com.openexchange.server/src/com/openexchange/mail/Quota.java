@@ -75,7 +75,7 @@ public final class Quota {
 
         private final String typeStr;
 
-        private Type(final String typeStr) {
+        private Type(String typeStr) {
             this.typeStr = typeStr;
         }
 
@@ -102,7 +102,7 @@ public final class Quota {
      * @param type The resource type
      * @return The constant for unlimited quota for specified resource type
      */
-    public static Quota getUnlimitedQuota(final Type type) {
+    public static Quota getUnlimitedQuota(Type type) {
         return type.getUnlimited();
     }
 
@@ -114,7 +114,7 @@ public final class Quota {
      * @param types The resource types
      * @return The constants for unlimited quota for specified resource types
      */
-    public static Quota[] getUnlimitedQuotas(final Type[] types) {
+    public static Quota[] getUnlimitedQuotas(Type[] types) {
         final Quota[] quotas = new Quota[types.length];
         for (int i = 0; i < quotas.length; i++) {
             quotas[i] = types[i].getUnlimited();
@@ -151,7 +151,7 @@ public final class Quota {
      * @param usage The quota's usage. Storage value is expected to be kilobytes.
      * @param type The quota's resource type to which this quota limitation applies
      */
-    public Quota(final long limit, final long usage, final Type type) {
+    public Quota(long limit, long usage, Type type) {
         super();
         this.limit = limit;
         this.usage = usage;
@@ -169,7 +169,7 @@ public final class Quota {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

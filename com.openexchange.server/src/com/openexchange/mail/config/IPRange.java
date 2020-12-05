@@ -97,7 +97,7 @@ public class IPRange {
      * @return The resulting IP range or <code>null</code> if passed string is empty
      * @throws IllegalArgumentException If parsing fails
      */
-    public static IPRange parseRange(final String string) {
+    public static IPRange parseRange(String string) {
         final com.openexchange.sessiond.impl.IPRange parsed = com.openexchange.sessiond.impl.IPRange.parseRange(string);
         return null == parsed ? null : new IPRange(parsed);
     }
@@ -109,7 +109,7 @@ public class IPRange {
     /**
      * Initializes a new {@link IPRange}.
      */
-    IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
+    IPRange(com.openexchange.sessiond.impl.IPRange delegate) {
         super();
         this.delegate = delegate;
     }
@@ -142,7 +142,7 @@ public class IPRange {
      * @param ipAddress The IP address to check
      * @return <code>true</code> if contained; else <code>false</code>
      */
-    public boolean contains(final String ipAddress) {
+    public boolean contains(String ipAddress) {
         return delegate.contains(ipAddress);
     }
 

@@ -84,7 +84,7 @@ public final class SearchUtility {
      * @param linkWithOR Whether to link with a logical OR; otherwise to link with a logical AND
      * @return An appropriate search term
      */
-    public static SearchTerm<?> parseFields(final int[] searchFields, final String[] patterns, final boolean linkWithOR) {
+    public static SearchTerm<?> parseFields(int[] searchFields, String[] patterns, boolean linkWithOR) {
         final MailField[] fields = MailField.getFields(searchFields);
         SearchTerm<?> retval = null;
         for (int i = 0; i < fields.length; i++) {

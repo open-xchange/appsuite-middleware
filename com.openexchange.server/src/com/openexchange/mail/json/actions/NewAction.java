@@ -150,7 +150,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
      *
      * @param services
      */
-    public NewAction(final ServiceLookup services) {
+    public NewAction(ServiceLookup services) {
         super(services);
         draftTypes = EnumSet.of(ComposeType.DRAFT, ComposeType.DRAFT_DELETE_ON_TRANSPORT, ComposeType.DRAFT_EDIT, ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT);
     }
@@ -230,7 +230,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             AJAXRequestData request = req.getRequest();
             if (hasUploads(request, req.getSession()) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
@@ -606,7 +606,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
      * @param warnings The warnings to fill
      * @return The request result
      */
-    protected AJAXRequestResult performWithoutUploads(final MailRequest req) throws OXException, MessagingException, JSONException {
+    protected AJAXRequestResult performWithoutUploads(MailRequest req) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
          */
@@ -679,7 +679,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
         return new AJAXRequestResult(responseObj, "json");
     }
 
-    private MimeMessage loadMimeMessageFrom(final MailRequest req) throws OXException {
+    private MimeMessage loadMimeMessageFrom(MailRequest req) throws OXException {
         HttpServletRequest httpRequest = req.getRequest().optHttpServletRequest();
         if (null == httpRequest) {
             return MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
@@ -727,7 +727,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
         }
     }
 
-    private AJAXRequestResult transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m, AJAXRequestData request) throws OXException, JSONException {
+    private AJAXRequestResult transportMessage(ServerSession session, int flags, boolean force, InternetAddress from, MailMessage m, AJAXRequestData request) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */

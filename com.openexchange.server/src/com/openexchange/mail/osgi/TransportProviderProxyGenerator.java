@@ -72,7 +72,7 @@ public final class TransportProviderProxyGenerator {
      * @param context The bundle context (needed to get/unget the service)
      * @return A new proxy object for mail provider
      */
-    public static TransportProvider newTransportProviderProxy(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+    public static TransportProvider newTransportProviderProxy(ServiceReference mailProviderServiceReference, BundleContext context) {
         return (TransportProvider) java.lang.reflect.Proxy.newProxyInstance(
             TransportProvider.class.getClassLoader(),
             new Class<?>[] { TransportProvider.class },
@@ -95,14 +95,14 @@ public final class TransportProviderProxyGenerator {
         /**
          * Initializes a new {@link TransportProviderProxyGenerator}
          */
-        private MailProviderInvocationHandler(final ServiceReference transportProviderServiceReference, final BundleContext context) {
+        private MailProviderInvocationHandler(ServiceReference transportProviderServiceReference, BundleContext context) {
             super();
             this.transportProviderServiceReference = transportProviderServiceReference;
             this.context = context;
         }
 
         @Override
-        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Object result;
             try {
                 final TransportProvider provider = (TransportProvider) context.getService(transportProviderServiceReference);

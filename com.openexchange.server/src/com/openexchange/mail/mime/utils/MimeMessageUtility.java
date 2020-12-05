@@ -264,7 +264,7 @@ public final class MimeMessageUtility {
      * @param address The address
      * @return The prepared address
      */
-    public static String prepareAddress(final String address) {
+    public static String prepareAddress(String address) {
         String decoded = toIDN(decodeMultiEncodedHeader(address));
         // Check for slash character -- the delimiting character for MSISDN addresses
         int pos = decoded.indexOf('@');
@@ -284,7 +284,7 @@ public final class MimeMessageUtility {
      * @param e The exception to check
      * @return <code>true</code> to retry; otherwise <code>false</code>
      */
-    public static boolean shouldRetry(final OXException e) {
+    public static boolean shouldRetry(OXException e) {
         if (null == e) {
             return false;
         }
@@ -342,7 +342,7 @@ public final class MimeMessageUtility {
      * @return The {@link MailDateFormat} for specified session
      * @throws OXException If {@link MailDateFormat} cannot be returned
      */
-    public static MailDateFormat getMailDateFormat(final Session session) throws OXException {
+    public static MailDateFormat getMailDateFormat(Session session) throws OXException {
         final User user;
         if (session instanceof ServerSession) {
             user = ((ServerSession) session).getUser();
@@ -371,7 +371,7 @@ public final class MimeMessageUtility {
      * @return The {@link MailDateFormat} for specified time zone identifier
      * @throws OXException If {@link MailDateFormat} cannot be returned
      */
-    public static MailDateFormat getMailDateFormat(final String timeZoneId) throws OXException {
+    public static MailDateFormat getMailDateFormat(String timeZoneId) throws OXException {
         Future<MailDateFormat> future = MDF_MAP.get(timeZoneId);
         if (null == future) {
             final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
@@ -407,7 +407,7 @@ public final class MimeMessageUtility {
      * @param headers The values for a certain header
      * @return <code>true</code> if specified headers are empty; otherwise <code>false</code>
      */
-    public static boolean isEmptyHeader(final String[] headers) {
+    public static boolean isEmptyHeader(String[] headers) {
         if (null == headers || 0 == headers.length) {
             return true;
         }
@@ -418,7 +418,7 @@ public final class MimeMessageUtility {
         return isEmpty;
     }
 
-    private static boolean isEmpty(final String string) {
+    private static boolean isEmpty(String string) {
         return com.openexchange.java.Strings.isEmpty(string);
     }
 
@@ -438,7 +438,7 @@ public final class MimeMessageUtility {
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains inlined images; otherwise <code>false</code>
      */
-    public static boolean hasEmbeddedImages(final CharSequence htmlContent) {
+    public static boolean hasEmbeddedImages(CharSequence htmlContent) {
         return PATTERN_EMBD_IMG.matcher(htmlContent).find() || PATTERN_EMBD_IMG_ALT.matcher(htmlContent).find();
     }
 
@@ -451,7 +451,7 @@ public final class MimeMessageUtility {
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
-    public static List<String> getContentIDs(final CharSequence htmlContent) {
+    public static List<String> getContentIDs(CharSequence htmlContent) {
         final List<String> retval = new LinkedList<String>();
         Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
         while (m.find()) {
@@ -471,9 +471,9 @@ public final class MimeMessageUtility {
      * @param contentIds The collection
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
-    public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
+    public static boolean containsContentId(String contentId, Collection<String> contentIds) {
         boolean contains = false;
-        for (final Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
             contains = equalsCID(contentId, iterator.next());
         }
         return contains;
@@ -485,7 +485,7 @@ public final class MimeMessageUtility {
      * @param contentId The Content-Id value to process
      * @return The plain Content-Id value
      */
-    public static String getPlainContentId(final String contentId) {
+    public static String getPlainContentId(String contentId) {
         if ((null == contentId) || (0 >= contentId.length())) {
             return contentId;
         }
@@ -508,7 +508,7 @@ public final class MimeMessageUtility {
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
      */
-    public static boolean equalsCID(final String contentId1, final String contentId2) {
+    public static boolean equalsCID(String contentId1, String contentId2) {
         return equalsCID(contentId1, contentId2, null);
     }
 
@@ -521,7 +521,7 @@ public final class MimeMessageUtility {
      * @param ignorableSuffix The optional ignorable suffix; e.g. <code>"@Open-Xchange"</code>
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
      */
-    public static boolean equalsCID(final String contentId1, final String contentId2, final String ignorableSuffix) {
+    public static boolean equalsCID(String contentId1, String contentId2, String ignorableSuffix) {
         final String cid1 = trimContentId(contentId1, ignorableSuffix);
         final String cid2 = trimContentId(contentId2, ignorableSuffix);
         if (null == cid1) {
@@ -548,7 +548,7 @@ public final class MimeMessageUtility {
         return trimContentId(contentId, null);
     }
 
-    private static String trimContentId(final String contentId, final String ignorableSuffix) {
+    private static String trimContentId(String contentId, String ignorableSuffix) {
         if (null == contentId) {
             return null;
         }
@@ -601,7 +601,7 @@ public final class MimeMessageUtility {
      * @param imageTag The &lt;img&gt; tag
      * @return The &lt;img&gt; tag with a blank <code>src</code> attribute
      */
-    public static String blankSrc(final String imageTag) {
+    public static String blankSrc(String imageTag) {
         if (isEmpty(imageTag)) {
             return imageTag;
         }
@@ -682,7 +682,7 @@ public final class MimeMessageUtility {
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
      */
-    public static boolean hasReferencedLocalImages(final CharSequence htmlContent) {
+    public static boolean hasReferencedLocalImages(CharSequence htmlContent) {
         final ImageMatcher m = ImageMatcher.matcher(htmlContent);
         if (m.find()) {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -703,7 +703,7 @@ public final class MimeMessageUtility {
      * @param part The part whose filename shall be determined
      * @return The part's real filename or <code>null</code> if none present
      */
-    public static String getRealFilename(final MailPart part) {
+    public static String getRealFilename(MailPart part) {
         if (part.getFileName() != null) {
             return part.getFileName();
         }
@@ -724,7 +724,7 @@ public final class MimeMessageUtility {
 
     private static final String PARAM_NAME = "name";
 
-    private static String getContentTypeFilename(final MailPart part) {
+    private static String getContentTypeFilename(MailPart part) {
         if (part.containsContentType()) {
             return part.getContentType().getParameter(PARAM_NAME);
         }
@@ -750,7 +750,7 @@ public final class MimeMessageUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final MailPart mp, final String subtype) throws MessagingException, OXException, IOException {
+    public static boolean hasAttachments(MailPart mp, String subtype) throws MessagingException, OXException, IOException {
         if (null == mp) {
             return false;
         }
@@ -893,7 +893,7 @@ public final class MimeMessageUtility {
      * @param bodystructure The BODYSTRUCTURE item
      * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
-    public static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+    public static boolean hasAttachments(BODYSTRUCTURE bodystructure) {
         // The value determined by this routine will outsmart exact examination
         // See bug 42695 & 42862
         if (bodystructure.isMulti()) {
@@ -916,7 +916,7 @@ public final class MimeMessageUtility {
         return MimeTypes.isConsideredAttachment(bodystructure.type + "/" + bodystructure.subtype);
     }
 
-    private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
+    private static boolean hasAttachments0(BODYSTRUCTURE bodystructure) {
         boolean found = false;
 
         BODYSTRUCTURE[] bodies = bodystructure.bodies;
@@ -935,7 +935,7 @@ public final class MimeMessageUtility {
      * @param subject The subject obtained from ENVELOPE fetch item
      * @return The decoded subject value
      */
-    public static String decodeEnvelopeSubject(final String subject) {
+    public static String decodeEnvelopeSubject(String subject) {
         if (null == subject) {
             return "";
         }
@@ -985,7 +985,7 @@ public final class MimeMessageUtility {
      * @param value The header value
      * @return The decoded header value
      */
-    public static String decodeEnvelopeHeader(final String value) {
+    public static String decodeEnvelopeHeader(String value) {
         return decodeEnvelopeHeader0(checkNonAscii(value));
     }
 
@@ -995,7 +995,7 @@ public final class MimeMessageUtility {
      * @param value The header value
      * @return The decoded header value
      */
-    private static String decodeEnvelopeHeader0(final String value) {
+    private static String decodeEnvelopeHeader0(String value) {
         /*
          * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
          */
@@ -1036,7 +1036,7 @@ public final class MimeMessageUtility {
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
-    public static String decodeMultiEncodedHeader(final String headerValue) {
+    public static String decodeMultiEncodedHeader(String headerValue) {
         if ((null == headerValue) || (headerValue.indexOf("=?") < 0)) {
             // In case of null, no "=?" marker
             return unfold(headerValue);
@@ -1125,7 +1125,7 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
+    private static String decodeMultiEncodedHeader0(String headerValue, boolean unfold) {
         if (headerValue == null) {
             return null;
         }
@@ -1345,7 +1345,7 @@ public final class MimeMessageUtility {
      * @param rawHeader The raw header
      * @return The proper unicode string
      */
-    public static String checkNonAscii(final String rawHeader) {
+    public static String checkNonAscii(String rawHeader) {
         return rawHeader;
     }
 
@@ -1355,7 +1355,7 @@ public final class MimeMessageUtility {
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
-    private static boolean isAscii(final String s) {
+    private static boolean isAscii(String s) {
         final int length = s.length();
         boolean isAscci = true;
         for (int i = length; isAscci && i-- > 0;) {
@@ -1370,7 +1370,7 @@ public final class MimeMessageUtility {
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
-    private static String decodeMultiEncodedHeaderSafe(final String headerValue) {
+    private static String decodeMultiEncodedHeaderSafe(String headerValue) {
         if (headerValue == null) {
             return null;
         }
@@ -1436,7 +1436,7 @@ public final class MimeMessageUtility {
      * @param charset The charset
      * @return The prepared encoded word which won't cause a {@link ParseException parse error} during decoding
      */
-    private static String prepareQEncodedValue(final String eword, final String charset) {
+    private static String prepareQEncodedValue(String eword, String charset) {
         final int len = eword.length();
         int pos = eword.indexOf('=');
         if (pos == -1) {
@@ -1483,11 +1483,11 @@ public final class MimeMessageUtility {
         return sb.toString();
     }
 
-    private static boolean isHex(final char c) {
+    private static boolean isHex(char c) {
         return ('0' <= c && c <= '9') || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
     }
 
-    private static String qencode(final char toEncode, final String charset) {
+    private static String qencode(char toEncode, String charset) {
         if (!CharsetDetector.isValid(charset)) {
             LOG.warn("Illegal or unsupported charset name: {}", charset);
             return String.valueOf(toEncode);
@@ -1514,7 +1514,7 @@ public final class MimeMessageUtility {
      * @param mailPart The mail part whose filename shall be returned
      * @return The mail part's decoded filename or <code>null</code>.
      */
-    public static String getFileName(final MailPart mailPart) {
+    public static String getFileName(MailPart mailPart) {
         // First look-up content-disposition
         String fileName = mailPart.getContentDisposition().getFilenameParameter();
         if (isEmpty(fileName)) {
@@ -1549,7 +1549,7 @@ public final class MimeMessageUtility {
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return An array of <code>InternetAddress</code> objects
      */
-    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) {
+    public static InternetAddress[] parseAddressList(String addresslist, boolean strict) {
         try {
             return parseAddressList(addresslist, strict, false);
         } catch (AddressException e) {
@@ -1568,14 +1568,14 @@ public final class MimeMessageUtility {
      * @param addrs The address list
      * @return The splitted addresses
      */
-    public static List<String> splitAddrs(final String addrs) {
+    public static List<String> splitAddrs(String addrs) {
         if (isEmpty(addrs)) {
             return Collections.<String> emptyList();
         }
         final String[] sa = SPLITS.split(addrs, 0);
         final List<String> ret = new ArrayList<String>(sa.length);
         final StringBuilder tmp = new StringBuilder(24);
-        for (final String string : sa) {
+        for (String string : sa) {
             if (string.isEmpty()) {
                 continue;
             }
@@ -1618,7 +1618,7 @@ public final class MimeMessageUtility {
      * @return An array of <code>InternetAddress</code> objects
      * @throws AddressException If parsing fails and <code>failOnError</code> is <code>true</code>
      */
-    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict, final boolean failOnError) throws AddressException {
+    public static InternetAddress[] parseAddressList(String addresslist, boolean strict, boolean failOnError) throws AddressException {
         if (null == addresslist) {
             return new InternetAddress[0];
         }
@@ -1634,7 +1634,7 @@ public final class MimeMessageUtility {
             }
             try {
                 final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
-                for (final String sAddr : sAddrs) {
+                for (String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                     LOG.trace(tmp.toString());
                     addrList.add(tmp);
@@ -1643,7 +1643,7 @@ public final class MimeMessageUtility {
                 return addrList.toArray(new InternetAddress[0]);
             } catch (AddressException e1) {
                 if (failOnError) {
-                    for (final String sAddr : sAddrs) {
+                    for (String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                         LOG.trace(tmp.toString());
                     }
@@ -1655,7 +1655,7 @@ public final class MimeMessageUtility {
             }
         }
         try {
-            for (final InternetAddress addr : addrs) {
+            for (InternetAddress addr : addrs) {
                 if (null != addr) {
                     addr.setPersonal(addr.getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
                 }
@@ -1713,7 +1713,7 @@ public final class MimeMessageUtility {
      * @param addressList The address list
      * @return The sanitized address list
      */
-    public static String replaceWithComma(final String addressList) {
+    public static String replaceWithComma(String addressList) {
         if (null == addressList) {
             return null;
         }
@@ -1744,7 +1744,7 @@ public final class MimeMessageUtility {
      * @param s The string to be literalized
      * @return A literal string replacement
      */
-    public static String quoteReplacement(final String s) {
+    public static String quoteReplacement(String s) {
         if (isEmpty(s) || ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1))) {
             return s;
         }
@@ -1789,7 +1789,7 @@ public final class MimeMessageUtility {
      * @param personal The personal's string representation
      * @return The properly quoted personal for building an Internet address according to RFC 822 syntax
      */
-    public static String quotePersonal(final String personal) {
+    public static String quotePersonal(String personal) {
         return quotePhrase(personal, true);
     }
 
@@ -1800,7 +1800,7 @@ public final class MimeMessageUtility {
      * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
      * @return The quoted phrase
      */
-    public static String quotePhrase(final String phrase, final boolean encode) {
+    public static String quotePhrase(String phrase, boolean encode) {
         return quotePhrase(phrase, encode, true);
     }
 
@@ -1815,7 +1815,7 @@ public final class MimeMessageUtility {
      * @param allowNonAscii Whether non-ascci characters need quoting or not
      * @return The quoted phrase
      */
-    public static String quotePhrase(final String phrase, final boolean encode, final boolean allowNonAscii) {
+    public static String quotePhrase(String phrase, boolean encode, boolean allowNonAscii) {
         if (null == phrase) {
             return phrase;
         }
@@ -1856,7 +1856,7 @@ public final class MimeMessageUtility {
      * @param contentDisposition The <code>Content-Type</code> value
      * @return The folded <code>Content-Type</code> value
      */
-    public static String foldContentType(final String contentType) {
+    public static String foldContentType(String contentType) {
         return fold(USED_CT, contentType);
     }
 
@@ -1868,7 +1868,7 @@ public final class MimeMessageUtility {
      * @param contentDisposition The <code>Content-Disposition</code> value
      * @return The folded <code>Content-Disposition</code> value
      */
-    public static String foldContentDisposition(final String contentDisposition) {
+    public static String foldContentDisposition(String contentDisposition) {
         return fold(USED_CD, contentDisposition);
     }
 
@@ -1902,7 +1902,7 @@ public final class MimeMessageUtility {
      * @param foldMe The string to fold
      * @return The folded string
      */
-    public static String fold(final int used, final String foldMe) {
+    public static String fold(int used, String foldMe) {
         return MimeUtility.fold(used, foldMe);
     }
 
@@ -1951,7 +1951,7 @@ public final class MimeMessageUtility {
      * @param headerLine The header line to unfold
      * @return The unfolded string
      */
-    public static String unfold(final String headerLine) {
+    public static String unfold(String headerLine) {
         if (null == headerLine) {
             return null;
         }
@@ -2067,7 +2067,7 @@ public final class MimeMessageUtility {
      * @param encodedWords The possibly folded encoded-words
      * @return The unfolded encoded-words
      */
-    private static String unfoldEncodedWords(final String encodedWords) {
+    private static String unfoldEncodedWords(String encodedWords) {
         return PAT_ENC_WORDS.matcher(encodedWords).replaceAll("$1$2");
     }
 
@@ -2082,7 +2082,7 @@ public final class MimeMessageUtility {
      * @return The value of first appeared matching header
      * @throws IOException If reading input stream fails
      */
-    public static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
+    public static String extractHeader(String headerName, InputStream inputStream, boolean closeStream) throws IOException {
         boolean close = closeStream;
         final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
         try {
@@ -2171,7 +2171,7 @@ public final class MimeMessageUtility {
      * @param os The output stream
      * @throws OXException If an I/O error occurs
      */
-    public static void writeHeaders(final MailPart p, final OutputStream os) throws OXException {
+    public static void writeHeaders(MailPart p, OutputStream os) throws OXException {
         if (p instanceof MimeMailMessage) {
             writeHeaders(((MimeMailMessage) p).getMimeMessage(), os);
             return;
@@ -2191,7 +2191,7 @@ public final class MimeMessageUtility {
              * Write headers
              */
             final StringBuilder sb = new StringBuilder(256);
-            for (final Iterator<Entry<String, String>> it = p.getHeadersIterator(); it.hasNext();) {
+            for (Iterator<Entry<String, String>> it = p.getHeadersIterator(); it.hasNext();) {
                 final Entry<String, String> entry = it.next();
                 sb.setLength(0);
                 sb.append(entry.getKey()).append(": ");
@@ -2218,7 +2218,7 @@ public final class MimeMessageUtility {
      * @param os The output stream
      * @throws OXException If an error occurs
      */
-    public static void writeHeaders(final Part p, final OutputStream os) throws OXException {
+    public static void writeHeaders(Part p, OutputStream os) throws OXException {
         if (p instanceof MimePart) {
             writeHeaders((MimePart) p, os);
             return;
@@ -2264,7 +2264,7 @@ public final class MimeMessageUtility {
      * @param os The output stream
      * @throws OXException If an error occurs
      */
-    public static void writeHeaders(final MimePart p, final OutputStream os) throws OXException {
+    public static void writeHeaders(MimePart p, OutputStream os) throws OXException {
         try {
             final LineOutputStream los;
             if (os instanceof LineOutputStream) {
@@ -2275,7 +2275,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            for (final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
+            for (Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
                 los.writeln(hdrLines.nextElement());
             }
             /*
@@ -2297,11 +2297,11 @@ public final class MimeMessageUtility {
 
         private static final byte[] newline = { (byte) '\r', (byte) '\n' };
 
-        protected LineOutputStream(final OutputStream out) {
+        protected LineOutputStream(OutputStream out) {
             super(out);
         }
 
-        protected void writeln(final CharSequence s) throws IOException {
+        protected void writeln(CharSequence s) throws IOException {
             out.write(getBytes(s));
             out.write(newline);
         }
@@ -2310,7 +2310,7 @@ public final class MimeMessageUtility {
             out.write(newline);
         }
 
-        private static byte[] getBytes(final CharSequence s) {
+        private static byte[] getBytes(CharSequence s) {
             if (null == s) {
                 return new byte[0];
             }
@@ -2332,7 +2332,7 @@ public final class MimeMessageUtility {
      * @return The header value or <code>defaultValue</code>
      * @throws MessagingException If returning header fails
      */
-    public static String getHeader(final String name, final String defaultValue, final Part part) throws MessagingException {
+    public static String getHeader(String name, String defaultValue, Part part) throws MessagingException {
         if (null == name || null == part) {
             return defaultValue;
         }
@@ -2354,7 +2354,7 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if inline; otherwise <code>false</code>
      * @throws MessagingException If check fails
      */
-    public static boolean isInline(final Part part) throws MessagingException {
+    public static boolean isInline(Part part) throws MessagingException {
         if (null == part) {
             return false;
         }
@@ -2376,7 +2376,7 @@ public final class MimeMessageUtility {
      * @param newTempFile The new file (to write cleansed content to)
      * @return The resulting file
      */
-    public static File dropInvalidHeaders(final File file, final File newTempFile) {
+    public static File dropInvalidHeaders(File file, File newTempFile) {
         InputStream in = null;
         BufferedOutputStream out = null;
         try {
@@ -2457,7 +2457,7 @@ public final class MimeMessageUtility {
      * @return The appropriate charset
      * @throws OXException If detecting charset fails
      */
-    public static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    public static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         if (null == mailPart) {
             return null;
         }
@@ -2502,7 +2502,7 @@ public final class MimeMessageUtility {
      * @throws OXException If reading content fails
      * @throws IOException If reading content fails with an I/O error
      */
-    public static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    public static String readContent(MailPart mailPart, ContentType contentType) throws OXException, IOException {
         return readContent(mailPart, contentType, false);
     }
 
@@ -2591,11 +2591,11 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate) throws OXException {
+    public static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate) throws OXException {
         return newMimeMessage(is, optReceivedDate, false);
     }
 
-    private static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate, final boolean retainDate) throws OXException {
+    private static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate, boolean retainDate) throws OXException {
         InputStream msgSrc = is;
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
@@ -2706,7 +2706,7 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage cloneMessage(Message original, final Date optReceivedDate) throws OXException {
+    public static MimeMessage cloneMessage(Message original, Date optReceivedDate) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {
@@ -2778,7 +2778,7 @@ public final class MimeMessageUtility {
      * @return The stream of specified part's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
      */
-    public static InputStream getStreamFromPart(final Part part) throws IOException {
+    public static InputStream getStreamFromPart(Part part) throws IOException {
         if (null == part) {
             return null;
         }
@@ -2811,7 +2811,7 @@ public final class MimeMessageUtility {
      * @return The stream of specified part's raw data (with the optional empty starting line omitted)
      * @throws OXException If an I/O error occurs
      */
-    public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
+    public static InputStream getStreamFromMailPart(MailPart part) throws OXException {
         if (null == part) {
             return null;
         }
@@ -2851,7 +2851,7 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static Multipart getMultipartContentFrom(final Part part) throws MessagingException, IOException {
+    public static Multipart getMultipartContentFrom(Part part) throws MessagingException, IOException {
         if (null == part) {
             return null;
         }
@@ -2871,7 +2871,7 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+    public static Multipart getMultipartContentFrom(Part part, String contentType) throws MessagingException, IOException {
         if (null == part) {
             return null;
         }
@@ -2889,11 +2889,11 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static Multipart multipartFrom(final Part part) throws MessagingException, IOException {
+    public static Multipart multipartFrom(Part part) throws MessagingException, IOException {
         return multipartFrom(part, null);
     }
 
-    private static Multipart multipartFrom(final Part part, final String contentType) throws MessagingException, IOException {
+    private static Multipart multipartFrom(Part part, String contentType) throws MessagingException, IOException {
         try {
             final Object content = part.getContent();
             if (content instanceof Multipart) {
@@ -2928,7 +2928,7 @@ public final class MimeMessageUtility {
      * @return The detected part's charset
      * @throws MessagingException If an error occurs in part's getter methods
      */
-    public static String detectPartCharset(final Part p) throws MessagingException {
+    public static String detectPartCharset(Part p) throws MessagingException {
         if (null == p) {
             return null;
         }
@@ -2962,7 +2962,7 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static MimeMessage mimeMessageFrom(final Message msg) throws MessagingException, IOException {
+    public static MimeMessage mimeMessageFrom(Message msg) throws MessagingException, IOException {
         ThresholdFileHolder sink = null;
         boolean closeSink = true;
         try {
@@ -3004,7 +3004,7 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static MimeMessage mimeMessageFrom(final MailMessage msg) throws MessagingException, IOException {
+    public static MimeMessage mimeMessageFrom(MailMessage msg) throws MessagingException, IOException {
         ThresholdFileHolder sink = null;
         boolean closeSink = true;
         try {
@@ -3105,7 +3105,7 @@ public final class MimeMessageUtility {
         }
 
         @Override
-        public boolean equals(final Object address) {
+        public boolean equals(Object address) {
             return (this == address);
         }
     };
@@ -3162,7 +3162,7 @@ public final class MimeMessageUtility {
         saveChanges(mimeMessage, true);
     }
 
-    private static void saveChanges(MimeMessage mimeMessage, final boolean trySanitizeMultipart) throws OXException {
+    private static void saveChanges(MimeMessage mimeMessage, boolean trySanitizeMultipart) throws OXException {
         if (null == mimeMessage) {
             return;
         }
@@ -3233,7 +3233,7 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
+    private static void sanitizeContentTypeHeaders(Part part, ContentType sanitizer) throws OXException {
         final DataHandler dh;
         try {
             dh = part.getDataHandler();
@@ -3302,7 +3302,7 @@ public final class MimeMessageUtility {
      * @return The decoded header
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getSubject(final Message message) throws MessagingException {
+    public static String getSubject(Message message) throws MessagingException {
         final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
         return decodeSubject(valueArr);
     }
@@ -3318,12 +3318,12 @@ public final class MimeMessageUtility {
      * @param message The message providing the header
      * @return The decoded header
      */
-    public static String getSubject(final MailMessage message) {
+    public static String getSubject(MailMessage message) {
         final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
         return decodeSubject(valueArr);
     }
 
-    private static String decodeSubject(final String[] valueArr) {
+    private static String decodeSubject(String[] valueArr) {
         if (null == valueArr || valueArr.length == 0) {
             return null;
         }
@@ -3336,7 +3336,7 @@ public final class MimeMessageUtility {
      * @param priorityStr The header value
      * @param mailMessage The mail message to fill
      */
-    public static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
+    public static void parsePriority(String priorityStr, MailMessage mailMessage) {
         mailMessage.setPriority(parsePriority(priorityStr));
     }
 
@@ -3345,7 +3345,7 @@ public final class MimeMessageUtility {
      *
      * @param priorityStr The header value
      */
-    public static int parsePriority(final String priorityStr) {
+    public static int parsePriority(String priorityStr) {
         int priority = MailMessage.PRIORITY_NORMAL;
         if (null != priorityStr) {
             final String[] tmp = priorityStr.split(" +");
@@ -3365,7 +3365,7 @@ public final class MimeMessageUtility {
      * @param importance The header value
      * @param mailMessage The mail message to fill
      */
-    public static void parseImportance(final String importance, final MailMessage mailMessage) {
+    public static void parseImportance(String importance, MailMessage mailMessage) {
         mailMessage.setPriority(parseImportance(importance));
     }
 
@@ -3374,7 +3374,7 @@ public final class MimeMessageUtility {
      *
      * @param importance The header value
      */
-    public static int parseImportance(final String importance) {
+    public static int parseImportance(String importance) {
         int priority = MailMessage.PRIORITY_NORMAL;
         if (null != importance) {
             final String imp = importance.trim();
@@ -3401,7 +3401,7 @@ public final class MimeMessageUtility {
      * @param mailMessage The mail to apply the flags to
      * @throws OXException If a mail error occurs
      */
-    public static void parseFlags(final Flags flags, final MailMessage mailMessage) throws OXException {
+    public static void parseFlags(Flags flags, MailMessage mailMessage) throws OXException {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
@@ -3430,7 +3430,7 @@ public final class MimeMessageUtility {
              * Mark message to contain user flags
              */
             mailMessage.addUserFlags(EMPTY_STRS);
-            for (final String userFlag : userFlags) {
+            for (String userFlag : userFlags) {
                 if (MailMessage.isColorLabel(userFlag)) {
                     mailMessage.setColorLabel(MailMessage.getColorLabelIntValue(userFlag));
                 } else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlag)) {
@@ -3459,7 +3459,7 @@ public final class MimeMessageUtility {
      * @return The parsed address headers as an array of {@link InternetAddress} instances
      * @throws MessagingException If a messaging error occurs
      */
-    public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
+    public static InternetAddress[] getAddressHeader(String name, Message message) throws MessagingException {
         final String[] addressArray = message.getHeader(name);
         return getAddresses(addressArray);
     }
@@ -3474,12 +3474,12 @@ public final class MimeMessageUtility {
      * @param message The message providing the address header
      * @return The parsed address headers as an array of {@link InternetAddress} instances
      */
-    public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
+    public static InternetAddress[] getAddressHeader(String name, MailMessage message) {
         final String[] addressArray = message.getHeader(name);
         return getAddresses(addressArray);
     }
 
-    private static InternetAddress[] getAddresses(final String[] addressArray) {
+    private static InternetAddress[] getAddresses(String[] addressArray) {
         if (null == addressArray || addressArray.length == 0) {
             return null;
         }
@@ -3500,11 +3500,11 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static InternetAddress[] getAddressHeaderNonStrict(final String addressStrings, final String[] addressArray) {
+    private static InternetAddress[] getAddressHeaderNonStrict(String addressStrings, String[] addressArray) {
         try {
             final InternetAddress[] addresses = QuotedInternetAddress.parseHeader(addressStrings, false);
             final List<InternetAddress> addressList = new ArrayList<InternetAddress>(addresses.length);
-            for (final InternetAddress internetAddress : addresses) {
+            for (InternetAddress internetAddress : addresses) {
                 try {
                     addressList.add(new QuotedInternetAddress(internetAddress.toString()));
                 } catch (AddressException e) {
@@ -3524,7 +3524,7 @@ public final class MimeMessageUtility {
      * @param addresses The address header value
      * @return The parsed addresses
      */
-    public static InternetAddress[] getAddressHeader(final String addresses) {
+    public static InternetAddress[] getAddressHeader(String addresses) {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (AddressException e) {
@@ -3533,7 +3533,7 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
+    private static InternetAddress[] getAddressesOnParseError(String[] addrs) {
         List<InternetAddress> list = new LinkedList<InternetAddress>();
         for (int i = 0; i < addrs.length; i++) {
             InternetAddress[] plainAddresses = PlainTextAddress.parseAddresses(addrs[i]);
@@ -3551,7 +3551,7 @@ public final class MimeMessageUtility {
      * @param part The mail part
      * @return The sent Date
      */
-    public static Date getSentDate(final MailPart part) {
+    public static Date getSentDate(MailPart part) {
         final String dateString = part.getHeader("Date", null);
         return parseDate(dateString);
     }
@@ -3590,7 +3590,7 @@ public final class MimeMessageUtility {
      * @return The parsed Content-Type
      * @throws OXException If parsing fails
      */
-    public static ContentType getContentType(final Part part) throws OXException {
+    public static ContentType getContentType(Part part) throws OXException {
         try {
             final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
@@ -3607,11 +3607,11 @@ public final class MimeMessageUtility {
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
      */
-    public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
+    public static Multipart multipartFor(MimeMessage message, ContentType contentType) throws OXException {
         return multipartFor(message, contentType, true);
     }
 
-    private static Multipart multipartFor(final MimeMessage message, final ContentType contentType, final boolean reparse) throws OXException {
+    private static Multipart multipartFor(MimeMessage message, ContentType contentType, boolean reparse) throws OXException {
         try {
             return multipartFor(message.getContent(), contentType);
         } catch (IOException e) {
@@ -3647,7 +3647,7 @@ public final class MimeMessageUtility {
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
      */
-    private static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+    private static Multipart multipartFor(Object content, ContentType contentType) throws OXException {
         if (null == content) {
             return null;
         }
@@ -3730,7 +3730,7 @@ public final class MimeMessageUtility {
      * @param messageSrc The message source
      * @return The parsed headers as a {@link HeaderCollection collection}.
      */
-    public static HeaderCollection loadHeaders(final String messageSrc) {
+    public static HeaderCollection loadHeaders(String messageSrc) {
         /*
          * Determine position of double line break
          */

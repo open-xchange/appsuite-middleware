@@ -190,7 +190,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     }
 
     @Override
-    public int numberOfMailAccesses(final Session session, final int accountId) throws OXException {
+    public int numberOfMailAccesses(Session session, int accountId) throws OXException {
         return null == timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) ? 0 : 1;
     }
 
@@ -202,7 +202,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
     @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(Session session, int accountId) {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
         if (null == mailAccess) {
             return null;
@@ -220,7 +220,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
     @Override
-    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+    public boolean putMailAccess(Session session, int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleTime = mailAccess.getCacheIdleSeconds();
         if (idleTime <= 0) {
             idleTime = defaultIdleSeconds;
@@ -240,7 +240,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
     @Override
-    public boolean containsMailAccess(final Session session, final int accountId) {
+    public boolean containsMailAccess(Session session, int accountId) {
         return (timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) != null);
     }
 
@@ -248,12 +248,12 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     public void clearUserEntries(int userId, int contextId) throws OXException {
         MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId);
-        for (final MailAccount mailAccount : accounts) {
+        for (MailAccount mailAccount : accounts) {
             timeoutMap.timeout(getUserKey(userId, mailAccount.getId(), contextId));
         }
     }
 
-    private static Key getUserKey(final int user, final int accountId, final int cid) {
+    private static Key getUserKey(int user, int accountId, int cid) {
         return new Key(user, cid, accountId);
     }
 
@@ -264,7 +264,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         private final int accountId;
         private final int hash;
 
-        Key(final int user, final int cid, final int accountId) {
+        Key(int user, int cid, int accountId) {
             super();
             this.user = user;
             this.cid = cid;
@@ -284,7 +284,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

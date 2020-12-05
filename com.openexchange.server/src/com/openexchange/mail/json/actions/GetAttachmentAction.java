@@ -191,7 +191,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private static final String WRITE_SCOPE = Type.WRITE.getScope(AbstractMailAction.MODULE);
 
     @OAuthScopeCheck
-    public boolean accessAllowed(final AJAXRequestData request, @SuppressWarnings("unused") final ServerSession session, final OAuthAccess access) throws OXException {
+    public boolean accessAllowed(AJAXRequestData request, @SuppressWarnings("unused") final ServerSession session, OAuthAccess access) throws OXException {
         if (request.getData() != null) {
 
             if (access.getScope().has(WRITE_SCOPE) == false) {
@@ -227,7 +227,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      * @return The result
      * @throws OXException If something fails
      */
-    public AJAXRequestResult performGET(final MailRequest req) throws OXException {
+    public AJAXRequestResult performGET(MailRequest req) throws OXException {
         AJAXRequestData requestData = req.getRequest();
         IFileHolder fileHolder = null;
         try {
@@ -580,7 +580,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return new StringBuilder("file.").append(fileExtension).toString();
     }
 
-    private AJAXRequestResult performPUT(final MailRequest req, final JSONObject jsonFileObject) throws OXException {
+    private AJAXRequestResult performPUT(MailRequest req, JSONObject jsonFileObject) throws OXException {
         try {
             ServerSession session = req.getSession();
 

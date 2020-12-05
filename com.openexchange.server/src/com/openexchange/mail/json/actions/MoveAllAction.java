@@ -77,12 +77,12 @@ public final class MoveAllAction extends AbstractMailAction {
      *
      * @param services
      */
-    public MoveAllAction(final ServiceLookup services) {
+    public MoveAllAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // Read in parameters
             JSONObject jBody = (JSONObject) req.getRequest().requireData();

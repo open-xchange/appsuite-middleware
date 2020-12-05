@@ -386,7 +386,7 @@ public interface IMailMessageStorage extends IMailStorage {
      * @return All new and modified messages in specified folder
      * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException;
+    public MailMessage[] getNewAndModifiedMessages(String folder, MailField[] fields) throws OXException;
 
     /**
      * Gets all deleted messages in specified folder.
@@ -396,7 +396,7 @@ public interface IMailMessageStorage extends IMailStorage {
      * @return All deleted messages in specified folder
      * @throws OXException If mails cannot be returned
      */
-    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException;
+    public MailMessage[] getDeletedMessages(String folder, MailField[] fields) throws OXException;
 
     /**
      * Gets the number of unread messages in the given folder which match the given search term.

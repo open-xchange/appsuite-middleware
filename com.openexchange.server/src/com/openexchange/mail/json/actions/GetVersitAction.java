@@ -85,12 +85,12 @@ public final class GetVersitAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetVersitAction(final ServiceLookup services) {
+    public GetVersitAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -132,7 +132,7 @@ public final class GetVersitAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             final JSONObject jo = new JSONObject();
-            for (final CommonObject current : insertedObjs) {
+            for (CommonObject current : insertedObjs) {
                 jo.reset();
                 jo.put(DataFields.ID, current.getObjectID());
                 jo.put(FolderChildFields.FOLDER_ID, current.getParentFolderID());

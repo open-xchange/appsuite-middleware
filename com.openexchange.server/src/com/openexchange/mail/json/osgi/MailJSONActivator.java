@@ -347,7 +347,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         }
 
         @Override
-        public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        public void decorate(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
             Object resultObject = result.getResultObject();
             if (null == resultObject) {
                 LOG.warn("Result object is null.");
@@ -402,7 +402,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
          * @param contact The contact to generate the image URL for
          * @return The image URL, or <code>null</code> if not available or something went wrong
          */
-        private String getImageURL(final ServerSession session, final Contact contact) {
+        private String getImageURL(ServerSession session, Contact contact) {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                 try {
                     return ContactUtil.generateImageUrl(session, contact);
@@ -413,7 +413,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             return null;
         }
 
-        private ContactSearchObject createContactSearchObject(final InternetAddress from) {
+        private ContactSearchObject createContactSearchObject(InternetAddress from) {
             final ContactSearchObject searchObject = new ContactSearchObject();
             // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
             searchObject.setOrSearch(true);

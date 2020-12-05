@@ -73,7 +73,7 @@ public final class StreamDataSource implements DataSource {
      *
      * @param provider The input stream provider
      */
-    public StreamDataSource(final InputStreamProvider provider) {
+    public StreamDataSource(InputStreamProvider provider) {
         this(provider, null);
     }
 
@@ -84,7 +84,7 @@ public final class StreamDataSource implements DataSource {
      * @param provider The input stream provider
      * @param contentType The content type
      */
-    public StreamDataSource(final InputStreamProvider provider, final String contentType) {
+    public StreamDataSource(InputStreamProvider provider, String contentType) {
         super();
         this.provider = provider;
         this.contentType = contentType == null ? "application/octet-stream" : contentType;
@@ -118,7 +118,7 @@ public final class StreamDataSource implements DataSource {
      *
      * @param contentType The content type.
      */
-    public void setContentType(final String contentType) {
+    public void setContentType(String contentType) {
         this.contentType = contentType;
     }
 

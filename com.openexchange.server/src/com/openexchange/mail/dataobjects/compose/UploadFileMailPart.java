@@ -99,7 +99,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * @param uploadFile The upload file
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected UploadFileMailPart(final UploadFile uploadFile) throws OXException {
+    protected UploadFileMailPart(UploadFile uploadFile) throws OXException {
         super();
         this.uploadFile = uploadFile.getTmpFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
@@ -145,7 +145,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         setContentDisposition(cd);
     }
 
-    private static String prepareContentType(final String contentType, final String preparedFileName) {
+    private static String prepareContentType(String contentType, String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
             return MimeTypes.MIME_APPL_OCTET;
         }
@@ -253,7 +253,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

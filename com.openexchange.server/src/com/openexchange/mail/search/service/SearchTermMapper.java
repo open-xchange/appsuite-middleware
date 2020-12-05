@@ -86,7 +86,7 @@ public final class SearchTermMapper {
      * @return An appropriate mail search term
      * @throws IllegalArgumentException If an appropriate mail search term cannot be generated
      */
-    public static SearchTerm<?> map(final com.openexchange.search.SearchTerm<?> searchTerm) {
+    public static SearchTerm<?> map(com.openexchange.search.SearchTerm<?> searchTerm) {
         final Operation operation = searchTerm.getOperation();
         if (CompositeOperation.AND.equals(operation)) {
             final com.openexchange.search.SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
@@ -157,7 +157,7 @@ public final class SearchTermMapper {
 
     }
 
-    private static SingleOperation getSingleOperation(final Operation operation) {
+    private static SingleOperation getSingleOperation(Operation operation) {
         if (SingleOperation.EQUALS.equals(operation)) {
             return SingleOperation.EQUALS;
         }
