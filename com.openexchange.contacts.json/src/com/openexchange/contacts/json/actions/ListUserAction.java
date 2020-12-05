@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
 public class ListUserAction extends ContactAction {
 
     /**

@@ -81,7 +81,7 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.WRITE)
 public class CopyAction extends IDBasedContactAction {
 
     /**

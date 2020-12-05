@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.WRITE)
 public class UpdateAction extends IDBasedContactAction {
 
     /**
