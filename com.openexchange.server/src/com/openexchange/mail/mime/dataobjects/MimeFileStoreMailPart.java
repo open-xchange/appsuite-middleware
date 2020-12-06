@@ -113,7 +113,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MimeFileStoreMailPart(final DataSource dataSource, final long size, final Session session) throws OXException {
+    protected MimeFileStoreMailPart(DataSource dataSource, long size, Session session) throws OXException {
         super();
         try {
             final File file = new DefaultFile();
@@ -201,7 +201,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
         }
     }
 
-    private static Context getContextFrom(final Session session) throws OXException {
+    private static Context getContextFrom(Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
@@ -217,7 +217,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
         return sessions.iterator().next();
     }
 
-    private static String prepareContentType(final String contentType, final String preparedFileName) {
+    private static String prepareContentType(String contentType, String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
             return MimeTypes.MIME_APPL_OCTET;
         }
@@ -309,7 +309,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

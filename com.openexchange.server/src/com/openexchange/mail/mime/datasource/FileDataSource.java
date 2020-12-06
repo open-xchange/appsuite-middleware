@@ -75,7 +75,7 @@ public final class FileDataSource implements DataSource {
      * @return The generated file data source (Content-Type and name still need to be set appropriately)
      * @throws IOException If an I/O error occurs
      */
-    public static FileDataSource valueOf(final InputStream inputStream) throws IOException {
+    public static FileDataSource valueOf(InputStream inputStream) throws IOException {
         if (null == inputStream) {
             return null;
         }
@@ -100,7 +100,7 @@ public final class FileDataSource implements DataSource {
         return new FileDataSource(tmpFile);
     }
 
-    private static void closeQuietly(final Closeable closeable) {
+    private static void closeQuietly(Closeable closeable) {
         Streams.close(closeable);
     }
 
@@ -118,7 +118,7 @@ public final class FileDataSource implements DataSource {
      *
      * @param file The file
      */
-    public FileDataSource(final File file) {
+    public FileDataSource(File file) {
         this(file, MimeType2ExtMap.getContentType(file.getName()));
     }
 
@@ -129,7 +129,7 @@ public final class FileDataSource implements DataSource {
      * @param file The file
      * @param contentType The content type
      */
-    public FileDataSource(final File file, final String contentType) {
+    public FileDataSource(File file, String contentType) {
         super();
         this.file = file; // save the file Object...
         this.contentType = contentType == null ? "application/octet-stream" : contentType;
@@ -144,7 +144,7 @@ public final class FileDataSource implements DataSource {
      *
      * @param name The system-dependent file name.
      */
-    public FileDataSource(final String name) {
+    public FileDataSource(String name) {
         this(new File(name)); // use the file constructor
     }
 
@@ -157,7 +157,7 @@ public final class FileDataSource implements DataSource {
      * @param name The system-dependent file name.
      * @param contentType The content type
      */
-    public FileDataSource(final String name, final String contentType) {
+    public FileDataSource(String name, String contentType) {
         this(new File(name), contentType); // use the file constructor
     }
 
@@ -195,7 +195,7 @@ public final class FileDataSource implements DataSource {
      *
      * @param contentType The content type.
      */
-    public void setContentType(final String contentType) {
+    public void setContentType(String contentType) {
         this.contentType = contentType;
     }
 
@@ -204,7 +204,7 @@ public final class FileDataSource implements DataSource {
      *
      * @param name The name to set
      */
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name == null ? file.getName() : name;
         this.contentType = MimeType2ExtMap.getContentType(this.name);
     }

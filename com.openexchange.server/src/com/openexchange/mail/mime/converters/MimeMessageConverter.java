@@ -178,25 +178,25 @@ public final class MimeMessageConverter {
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail related error occurs
          */
-        public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException;
+        public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException;
     }
 
     private static final class HeaderFieldFiller implements MailMessageFieldFiller {
 
         private final String headerName;
 
-        HeaderFieldFiller(final String headerName) {
+        HeaderFieldFiller(String headerName) {
             super();
             this.headerName = headerName;
         }
 
         @Override
-        public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+        public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
             final String[] header = msg.getHeader(headerName);
             if (null == header || 0 == header.length) {
                 return;
             }
-            for (final String value : header) {
+            for (String value : header) {
                 mailMessage.addHeader(headerName, checkNonAscii(value));
             }
         }
@@ -218,7 +218,7 @@ public final class MimeMessageConverter {
      * @param mailPart The instance of {@link MailPart}
      * @return Appropriate instance of {@link Part}
      */
-    public static Part convertMailPart(final MailPart mailPart) throws OXException {
+    public static Part convertMailPart(MailPart mailPart) throws OXException {
         try {
             if (mailPart instanceof MailMessage) {
                 return convertMailMessage((MailMessage) mailPart);
@@ -251,7 +251,7 @@ public final class MimeMessageConverter {
      * @return JavaMail-conform {@link Message} objects.
      * @throws OXException If conversion fails
      */
-    public static Message[] convertMailMessages(final MailMessage[] mails) throws OXException {
+    public static Message[] convertMailMessages(MailMessage[] mails) throws OXException {
         return convertMailMessages(mails, true);
     }
 
@@ -266,7 +266,7 @@ public final class MimeMessageConverter {
      * @return JavaMail-conform {@link Message} objects.
      * @throws OXException If conversion fails
      */
-    public static Message[] convertMailMessages(final MailMessage[] mails, final boolean clone) throws OXException {
+    public static Message[] convertMailMessages(MailMessage[] mails, boolean clone) throws OXException {
         if (null == mails) {
             return null;
         }
@@ -292,7 +292,7 @@ public final class MimeMessageConverter {
      * @see #BEHAVIOR_CLONE
      * @see #BEHAVIOR_STREAM2FILE
      */
-    public static Message[] convertMailMessages(final MailMessage[] mails, final int behavior) throws OXException {
+    public static Message[] convertMailMessages(MailMessage[] mails, int behavior) throws OXException {
         if (null == mails) {
             return null;
         }
@@ -312,7 +312,7 @@ public final class MimeMessageConverter {
      * @return A JavaMail-conform {@link Message} object
      * @throws OXException If conversion fails
      */
-    public static Message convertMailMessage(final MailMessage mail) throws OXException {
+    public static Message convertMailMessage(MailMessage mail) throws OXException {
         return convertMailMessage(mail, true);
     }
 
@@ -324,7 +324,7 @@ public final class MimeMessageConverter {
      * @return A JavaMail-conform {@link Message} object
      * @throws OXException If conversion fails
      */
-    public static Message convertMailMessage(final MailMessage mail, final boolean clone) throws OXException {
+    public static Message convertMailMessage(MailMessage mail, boolean clone) throws OXException {
         return convertMailMessage(mail, clone ? BEHAVIOR_CLONE : 0);
     }
 
@@ -415,7 +415,7 @@ public final class MimeMessageConverter {
                     flags = new Flags();
                 }
                 final String[] userFlags = mail.getUserFlags();
-                for (final String userFlag : userFlags) {
+                for (String userFlag : userFlags) {
                     flags.add(userFlag);
                 }
             }
@@ -445,7 +445,7 @@ public final class MimeMessageConverter {
 
     }
 
-    private static File checkForFile(final MailMessage mail) {
+    private static File checkForFile(MailMessage mail) {
         if (mail instanceof MimeMailMessage) {
             final MimeMessage mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
             if (mimeMessage instanceof ManagedMimeMessage) {
@@ -462,7 +462,7 @@ public final class MimeMessageConverter {
      * @return A JavaMail-conform {@link Message} object
      * @throws OXException If conversion fails
      */
-    public static Message convertComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
+    public static Message convertComposedMailMessage(ComposedMailMessage composedMail) throws OXException {
         try {
             final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
@@ -509,7 +509,7 @@ public final class MimeMessageConverter {
      * @return A filled instance of {@link MailMessage} ready for further usage
      * @throws OXException If mail cannot be filled.
      */
-    public static MailMessage fillComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
+    public static MailMessage fillComposedMailMessage(ComposedMailMessage composedMail) throws OXException {
         try {
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
@@ -560,7 +560,7 @@ public final class MimeMessageConverter {
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
      */
-    public static Multipart multipartFor(final MimeMessage message) throws OXException {
+    public static Multipart multipartFor(MimeMessage message) throws OXException {
         return multipartFor(message, getContentType(message));
     }
 
@@ -574,7 +574,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
+    public static Multipart multipartFor(MimeMessage message, ContentType contentType) throws OXException {
         return MimeMessageUtility.multipartFor(message, contentType);
     }
 
@@ -587,7 +587,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static ContentType getContentType(final Part part) throws OXException {
+    public static ContentType getContentType(Part part) throws OXException {
         return MimeMessageUtility.getContentType(part);
     }
 
@@ -599,7 +599,7 @@ public final class MimeMessageConverter {
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
      */
-    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+    public static Multipart multipartFor(Object content, ContentType contentType) throws OXException {
         if (null == content) {
             return null;
         }
@@ -665,7 +665,7 @@ public final class MimeMessageConverter {
      * @param msg The message to fill
      * @throws MessagingException If a messaging error occurs
      */
-    public static void parseMimeFlags(final int flags, final Message msg) throws MessagingException {
+    public static void parseMimeFlags(int flags, Message msg) throws MessagingException {
         final Flags flagsObj = new Flags();
         if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
             flagsObj.add(Flags.Flag.ANSWERED);
@@ -711,7 +711,7 @@ public final class MimeMessageConverter {
      * @deprecated use {@link MimeMessageConverter#convertMessages(Message[], MailField[], String[], boolean, MailConfig)} instead
      */
     @Deprecated
-    public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields) throws OXException {
+    public static MailMessage[] convertMessages(Message[] msgs, MailField[] fields) throws OXException {
         return convertMessages(msgs, fields, null, false);
     }
 
@@ -731,7 +731,7 @@ public final class MimeMessageConverter {
      * @deprecated use {@link MimeMessageConverter#convertMessages(Message[], MailField[], String[], boolean, MailConfig)} instead
      */
     @Deprecated
-    public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws OXException {
+    public static MailMessage[] convertMessages(Message[] msgs, MailField[] fields, String[] headerNames, boolean includeBody) throws OXException {
         return convertMessages(msgs, fields, headerNames, includeBody, null);
     }
 
@@ -750,13 +750,13 @@ public final class MimeMessageConverter {
      * @return The converted array of {@link Message} instances
      * @throws OXException If conversion fails
      */
-    public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody, MailConfig mailConfig) throws OXException {
+    public static MailMessage[] convertMessages(Message[] msgs, MailField[] fields, String[] headerNames, boolean includeBody, MailConfig mailConfig) throws OXException {
         try {
             final MailMessageFieldFiller[] fillers;
             {
                 final List<MailMessageFieldFiller> tmp = new ArrayList<MailMessageFieldFiller>(Arrays.asList(createFieldFillers(fields)));
                 if (null != headerNames) {
-                    for (final String headerName : headerNames) {
+                    for (String headerName : headerNames) {
                         tmp.add(new HeaderFieldFiller(headerName));
                     }
                 }
@@ -790,11 +790,11 @@ public final class MimeMessageConverter {
      * @return The converted array of {@link Message} instances
      * @throws OXException If conversion fails
      */
-    public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody) throws OXException {
+    public static MailMessage[] convertMessages(Message[] msgs, Folder folder, MailField[] fields, boolean includeBody) throws OXException {
         return convertMessages(msgs, folder, fields, includeBody, null);
     }
 
-    public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody, MailConfig mailConfig) throws OXException {
+    public static MailMessage[] convertMessages(Message[] msgs, Folder folder, MailField[] fields, boolean includeBody, MailConfig mailConfig) throws OXException {
         try {
             final MailMessageFieldFiller[] fillers = createFieldFillers(new DefaultFolderInfo(folder), fields);
             final MailMessage[] mails = new MimeMailMessage[msgs.length];
@@ -813,8 +813,8 @@ public final class MimeMessageConverter {
         }
     }
 
-    private static void fillMessage(final MailConfig mailConfig, final MailMessageFieldFiller[] fillers, final MailMessage mailMessage, final Message msg) throws OXException, MessagingException {
-        for (final MailMessageFieldFiller filler : fillers) {
+    private static void fillMessage(MailConfig mailConfig, MailMessageFieldFiller[] fillers, MailMessage mailMessage, Message msg) throws OXException, MessagingException {
+        for (MailMessageFieldFiller filler : fillers) {
             if (null != filler) {
                 filler.fillField(mailConfig, mailMessage, msg);
             }
@@ -833,8 +833,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.FROM, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsFrom()) {
                         mailMessage.addFrom(empty);
                     }
@@ -842,8 +842,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsFrom()) {
                         mailMessage.addFrom(empty);
                     }
@@ -853,8 +853,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.TO, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsTo()) {
                         mailMessage.addTo(empty);
                     }
@@ -862,8 +862,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsTo()) {
                         mailMessage.addTo(empty);
                     }
@@ -873,8 +873,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.CC, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsCc()) {
                         mailMessage.addCc(empty);
                     }
@@ -882,8 +882,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsCc()) {
                         mailMessage.addCc(empty);
                     }
@@ -893,8 +893,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.BCC, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsBcc()) {
                         mailMessage.addBcc(empty);
                     }
@@ -902,8 +902,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsBcc()) {
                         mailMessage.addBcc(empty);
                     }
@@ -913,8 +913,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.SUBJECT, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSubject()) {
                         mailMessage.setSubject(null);
                     }
@@ -922,8 +922,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSubject()) {
                         mailMessage.setSubject(null);
                     }
@@ -933,8 +933,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.SENT_DATE, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSentDate()) {
                         mailMessage.setSentDate(null);
                     }
@@ -942,8 +942,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSentDate()) {
                         mailMessage.setSentDate(null);
                     }
@@ -953,8 +953,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
                         mailMessage.setDispositionNotification(null);
                     }
@@ -962,8 +962,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
                         mailMessage.setDispositionNotification(null);
                     }
@@ -973,8 +973,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.PRIORITY, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsPriority()) {
                         mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
                     }
@@ -982,8 +982,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsPriority()) {
                         mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
                     }
@@ -993,8 +993,8 @@ public final class MimeMessageConverter {
         CHECKER_MAP.put(MailField.THREAD_LEVEL, new ExistenceChecker() {
 
             @Override
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(MailMessage... mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsThreadLevel()) {
                         mailMessage.setThreadLevel(0);
                     }
@@ -1002,8 +1002,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
+            public void check(Collection<MailMessage> mailMessages) {
+                for (MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsThreadLevel()) {
                         mailMessage.setThreadLevel(0);
                     }
@@ -1014,7 +1014,7 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
                 /*
                  * From
@@ -1092,7 +1092,7 @@ public final class MimeMessageConverter {
                 /*
                  * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
+                for (Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
                     final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
@@ -1105,14 +1105,14 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.ID, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setMailId(Long.toString(((ExtendedMimeMessage) msg).getUid()));
             }
         });
         FILLER_MAP_EXT.put(MailField.FOLDER_ID, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
             }
         });
@@ -1121,7 +1121,7 @@ public final class MimeMessageConverter {
             MailMessageFieldFiller filler = new MailMessageFieldFiller() {
 
                 @Override
-                public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws OXException, MessagingException {
+                public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws OXException, MessagingException {
                     try {
                         mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
                     } catch (OXException e) {
@@ -1138,7 +1138,7 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.ATTACHMENT, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
             }
         });
@@ -1146,77 +1146,77 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.FROM, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addFrom(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.TO, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addTo(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.CC, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addCc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.BCC, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addBcc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSubject(MimeMessageUtility.getSubject(msg), true);
             }
         });
         FILLER_MAP_EXT.put(MailField.SIZE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSize(((ExtendedMimeMessage) msg).getSize());
             }
         });
         FILLER_MAP_EXT.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSentDate(((ExtendedMimeMessage) msg).getSentDate());
             }
         });
         FILLER_MAP_EXT.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setReceivedDate(((ExtendedMimeMessage) msg).getReceivedDate());
             }
         });
         FILLER_MAP_EXT.put(MailField.FLAGS, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                 parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
             }
         });
         FILLER_MAP_EXT.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setThreadLevel(((ExtendedMimeMessage) msg).getThreadLevel());
             }
         });
         FILLER_MAP_EXT.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
                     final String dispNot = val[0];
@@ -1234,7 +1234,7 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
                 if (val != null && (val.length > 0)) {
                     MimeMessageUtility.parseImportance(val[0], mailMessage);
@@ -1251,7 +1251,7 @@ public final class MimeMessageConverter {
         FILLER_MAP_EXT.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                 parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
@@ -1267,7 +1267,7 @@ public final class MimeMessageConverter {
      * @return An array of appropriate {@link MailMessageFieldFiller} implementations
      * @throws OXException If field fillers cannot be created
      */
-    private static MailMessageFieldFiller[] createFieldFillers(final MailField[] fields) throws OXException {
+    private static MailMessageFieldFiller[] createFieldFillers(MailField[] fields) throws OXException {
         final MailField[] arr;
         {
             final List<MailField> list = Arrays.asList(fields);
@@ -1303,7 +1303,7 @@ public final class MimeMessageConverter {
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 /*
                  * From
                  */
@@ -1401,7 +1401,7 @@ public final class MimeMessageConverter {
                 /*
                  * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
+                for (Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
                     final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
@@ -1416,7 +1416,7 @@ public final class MimeMessageConverter {
             MailMessageFieldFiller filler = new MailMessageFieldFiller() {
 
                 @Override
-                public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+                public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                     ContentType ct = null;
                     try {
                         final String[] tmp = msg.getHeader(CONTENT_TYPE);
@@ -1453,7 +1453,7 @@ public final class MimeMessageConverter {
                 private static final String multipart = "multipart/";
 
                 @Override
-                public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+                public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                     if (null != mailConfig && mailConfig.getCapabilities().hasAttachmentMarker()) {
                         // Try to determine has-attachment flag by user flags
                         String[] userFlags = mailMessage.getUserFlags();
@@ -1526,70 +1526,70 @@ public final class MimeMessageConverter {
         FILLER_MAP.put(MailField.FROM, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addFrom(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP.put(MailField.TO, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addTo(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP.put(MailField.CC, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addCc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP.put(MailField.BCC, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.addBcc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSubject(MimeMessageUtility.getSubject(msg), true);
             }
         });
         FILLER_MAP.put(MailField.SIZE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSize(msg.getSize());
             }
         });
         FILLER_MAP.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setSentDate(msg.getSentDate());
             }
         });
         FILLER_MAP.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 mailMessage.setReceivedDate(msg.getReceivedDate());
             }
         });
         FILLER_MAP.put(MailField.FLAGS, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                 parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
             }
         });
         FILLER_MAP.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 /*
                  * TODO: Thread level
                  */
@@ -1599,7 +1599,7 @@ public final class MimeMessageConverter {
         FILLER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
                     final String dispNot = val[0];
@@ -1617,7 +1617,7 @@ public final class MimeMessageConverter {
         FILLER_MAP.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                 if (msg instanceof ExtendedMimeMessage) {
                     ExtendedMimeMessage extended = (ExtendedMimeMessage) msg;
                     String[] val = extended.getHeader(MessageHeaders.HDR_IMPORTANCE);
@@ -1637,7 +1637,7 @@ public final class MimeMessageConverter {
         FILLER_MAP.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
 
             @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+            public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException, OXException {
                 parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
@@ -1652,11 +1652,11 @@ public final class MimeMessageConverter {
      * @param mails The mails to checks
      * @param fields The field to check for
      */
-    public static void checkFieldExistence(final MailMessage[] mails, final MailField[] fields) {
+    public static void checkFieldExistence(MailMessage[] mails, MailField[] fields) {
         if (null == mails) {
             return;
         }
-        for (final MailField field : fields) {
+        for (MailField field : fields) {
             final ExistenceChecker checker = CHECKER_MAP.get(field);
             if (null != checker) {
                 checker.check(mails);
@@ -1748,7 +1748,7 @@ public final class MimeMessageConverter {
      * @return An array of appropriate {@link MailMessageFieldFiller} implementations
      * @throws OXException If field fillers cannot be created
      */
-    private static MailMessageFieldFiller[] createFieldFillers(final FolderInfo folderInfo, final MailField[] fields) throws OXException {
+    private static MailMessageFieldFiller[] createFieldFillers(FolderInfo folderInfo, MailField[] fields) throws OXException {
         final MailField[] arr;
         {
             final List<MailField> list = Arrays.asList(fields);
@@ -1768,7 +1768,7 @@ public final class MimeMessageConverter {
                     fillers[i] = new MailMessageFieldFiller() {
 
                         @Override
-                        public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+                        public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                             mailMessage.setMailId(folderInfo.getUid(msg));
                         }
                     };
@@ -1776,7 +1776,7 @@ public final class MimeMessageConverter {
                     fillers[i] = new MailMessageFieldFiller() {
 
                         @Override
-                        public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException {
+                        public void fillField(MailConfig mailConfig, MailMessage mailMessage, Message msg) throws MessagingException {
                             mailMessage.setFolder(folderInfo.getFullName());
                         }
 
@@ -1811,7 +1811,7 @@ public final class MimeMessageConverter {
      * @return An instance of <code>{@link MailMessage}</code>
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final InputStream in) throws OXException {
+    public static MailMessage convertMessage(InputStream in) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), in));
         } catch (MessagingException e) {
@@ -1826,7 +1826,7 @@ public final class MimeMessageConverter {
      * @return An instance of <code>{@link MailMessage}</code>
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final byte[] asciiBytes) throws OXException {
+    public static MailMessage convertMessage(byte[] asciiBytes) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(asciiBytes)));
         } catch (MessagingException e) {
@@ -1841,7 +1841,7 @@ public final class MimeMessageConverter {
      * @return An instance of <code>{@link MailMessage}</code> containing the attributes from given MIME message
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg) throws OXException {
+    public static MailMessage convertMessage(MimeMessage msg) throws OXException {
         return convertMessage(msg, true);
     }
 
@@ -1853,7 +1853,7 @@ public final class MimeMessageConverter {
      * @return An instance of <code>{@link MailMessage}</code> containing the attributes from given MIME message
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg, final boolean considerFolder) throws OXException {
+    public static MailMessage convertMessage(MimeMessage msg, boolean considerFolder) throws OXException {
         return convertMessage(msg, new DefaultConverterConfig(DummyMailConfig.getInstance(), considerFolder, false));
     }
 
@@ -1865,7 +1865,7 @@ public final class MimeMessageConverter {
      * @return An instance of <code>{@link MailMessage}</code> containing the attributes from given MIME message
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg, ConverterConfig config) throws OXException {
+    public static MailMessage convertMessage(MimeMessage msg, ConverterConfig config) throws OXException {
         /*
          * Create with reference to content
          */
@@ -2080,7 +2080,7 @@ public final class MimeMessageConverter {
         }
     }
 
-    private static String[] getFolderAndIdSafe(final MimeMessage msg) {
+    private static String[] getFolderAndIdSafe(MimeMessage msg) {
         try {
             final Folder f = msg.getFolder();
             if (f != null) {
@@ -2105,7 +2105,7 @@ public final class MimeMessageConverter {
         return null;
     }
 
-    private static void setId(final MimeMessage msg, final Folder f, String[] ret) throws MessagingException {
+    private static void setId(MimeMessage msg, Folder f, String[] ret) throws MessagingException {
         if (f instanceof UIDFolder) {
             ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
         } else if (f instanceof POP3Folder) {
@@ -2124,7 +2124,7 @@ public final class MimeMessageConverter {
      * @return An instance of {@link MailMessage} filled with desired fields
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final byte[] asciiBytes, final String uid, final String fullname, final char separator, final MailField[] fields) throws OXException {
+    public static MailMessage convertMessage(byte[] asciiBytes, String uid, String fullname, char separator, MailField[] fields) throws OXException {
         try {
             return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(asciiBytes)), uid, fullname, separator, fields);
         } catch (MessagingException e) {
@@ -2143,7 +2143,7 @@ public final class MimeMessageConverter {
      * @return An instance of {@link MailMessage} filled with desired fields
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg, final String uid, final String fullname, final char separator, final MailField[] fields) throws OXException {
+    public static MailMessage convertMessage(MimeMessage msg, String uid, String fullname, char separator, MailField[] fields) throws OXException {
         return convertMessage(msg, uid, fullname, separator, fields, DummyMailConfig.getInstance());
     }
 
@@ -2159,7 +2159,7 @@ public final class MimeMessageConverter {
      * @return An instance of {@link MailMessage} filled with desired fields
      * @throws OXException If conversion fails
      */
-    public static MailMessage convertMessage(final MimeMessage msg, final String uid, final String fullname, final char separator, final MailField[] fields, MailConfig mailConfig) throws OXException {
+    public static MailMessage convertMessage(MimeMessage msg, String uid, String fullname, char separator, MailField[] fields, MailConfig mailConfig) throws OXException {
         final MailFields set = new MailFields(fields);
         if (set.contains(MailField.FULL)) {
             final MailMessage mail = convertMessage(msg);
@@ -2184,7 +2184,7 @@ public final class MimeMessageConverter {
      * @return A MIME mail part object
      * @throws OXException If creating MIME mail part object fails
      */
-    public static MailPart convertPart(final byte[] asciiBytes) throws OXException {
+    public static MailPart convertPart(byte[] asciiBytes) throws OXException {
         try {
             return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)), false);
         } catch (MessagingException e) {
@@ -2203,7 +2203,7 @@ public final class MimeMessageConverter {
      * @param part The part
      * @return an instance of <code>{@link MailPart}</code> containing the attributes from given part
      */
-    public static MailPart convertPart(final Part part) throws OXException {
+    public static MailPart convertPart(Part part) throws OXException {
         return convertPart(part, true);
     }
 
@@ -2215,7 +2215,7 @@ public final class MimeMessageConverter {
      *            input stream is examined which might unnecessarily load data from backend.
      * @return an instance of <code>{@link MailPart}</code> containing the attributes from given part
      */
-    public static MailPart convertPart(final Part part, final boolean enforeSize) throws OXException {
+    public static MailPart convertPart(Part part, boolean enforeSize) throws OXException {
         try {
             /*
              * Create with reference to content
@@ -2349,7 +2349,7 @@ public final class MimeMessageConverter {
         return MimeMessageUtility.convertMailFlags(flags);
     }
 
-    private static int estimateSize(final InputStream in, final String tansferEnc) throws IOException {
+    private static int estimateSize(InputStream in, String tansferEnc) throws IOException {
         try {
             if (ENC_BASE64.equalsIgnoreCase(tansferEnc)) {
                 return (int) (in.available() * 0.65);
@@ -2370,7 +2370,7 @@ public final class MimeMessageConverter {
      * @param mailMessage The mail to apply the flags to
      * @throws OXException If a mail error occurs
      */
-    public static void parseFlags(final Flags flags, boolean examineHasAttachmentUserFlags, final MailMessage mailMessage) throws OXException {
+    public static void parseFlags(Flags flags, boolean examineHasAttachmentUserFlags, MailMessage mailMessage) throws OXException {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
@@ -2399,7 +2399,7 @@ public final class MimeMessageConverter {
              * Mark message to contain user flags
              */
             mailMessage.addUserFlags(EMPTY_STRS);
-            for (final String userFlag : userFlags) {
+            for (String userFlag : userFlags) {
                 if (MailMessage.isColorLabel(userFlag)) {
                     mailMessage.setColorLabel(MailMessage.getColorLabelIntValue(userFlag));
                 } else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlag)) {
@@ -2423,14 +2423,14 @@ public final class MimeMessageConverter {
 
     private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
-    private static void setHeaders(final Part part, final MailPart mailPart) throws OXException {
+    private static void setHeaders(Part part, MailPart mailPart) throws OXException {
         /*
          * HEADERS
          */
         HeaderCollection headers = null;
         try {
             headers = new HeaderCollection(128);
-            for (final Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
+            for (Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
                 final Header h = e.nextElement();
                 final String value = h.getValue();
                 if (value == null || isEmpty(value)) {
@@ -2502,7 +2502,7 @@ public final class MimeMessageConverter {
      * @return The parsed headers as a {@link HeaderCollection collection}.
      * @throws IOException If an I/O error occurs.
      */
-    public static HeaderCollection loadHeaders(final InputStream inputStream) throws IOException {
+    public static HeaderCollection loadHeaders(InputStream inputStream) throws IOException {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
         try {
             final byte[] bbuf = new byte[DEFAULT_MESSAGE_SIZE];
@@ -2524,7 +2524,7 @@ public final class MimeMessageConverter {
      * @param bytes The headers' <code>byte</code> array
      * @return The parsed headers as a {@link HeaderCollection collection}.
      */
-    public static HeaderCollection loadHeaders(final byte[] bytes) {
+    public static HeaderCollection loadHeaders(byte[] bytes) {
         return MimeMessageUtility.loadHeaders(new String(bytes, Charsets.ISO_8859_1));
     }
 
@@ -2536,11 +2536,11 @@ public final class MimeMessageConverter {
      * @Deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static HeaderCollection loadHeaders(final String messageSrc) {
+    public static HeaderCollection loadHeaders(String messageSrc) {
         return MimeMessageUtility.loadHeaders(messageSrc);
     }
 
-    private static boolean isEmpty(final String value) {
+    private static boolean isEmpty(String value) {
         final int length = value.length();
         boolean empty = true;
         for (int i = 0; empty && i < length; i++) {
@@ -2562,7 +2562,7 @@ public final class MimeMessageConverter {
      * @return The decoded header
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getStringHeader(final String name, final Message message) throws MessagingException {
+    public static String getStringHeader(String name, Message message) throws MessagingException {
         return getStringHeader(name, message, '\0');
     }
 
@@ -2577,7 +2577,7 @@ public final class MimeMessageConverter {
      * @param message The message providing the header
      * @return The decoded header
      */
-    public static String getStringHeader(final String name, final MailMessage message) {
+    public static String getStringHeader(String name, MailMessage message) {
         return getStringHeader(name, message, '\0');
     }
 
@@ -2595,7 +2595,7 @@ public final class MimeMessageConverter {
      * @return The decoded header
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getStringHeader(final String name, final Message message, final char delimiter) throws MessagingException {
+    public static String getStringHeader(String name, Message message, char delimiter) throws MessagingException {
         final String[] valueArr = message.getHeader(name);
         if (null == valueArr || valueArr.length == 0) {
             return null;
@@ -2626,7 +2626,7 @@ public final class MimeMessageConverter {
      *            one
      * @return The decoded header
      */
-    public static String getStringHeader(final String name, final MailMessage message, final char delimiter) {
+    public static String getStringHeader(String name, MailMessage message, char delimiter) {
         final String[] valueArr = message.getHeader(name);
         if (null == valueArr || valueArr.length == 0) {
             return null;
@@ -2658,7 +2658,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static String getSubject(final Message message) throws MessagingException {
+    public static String getSubject(Message message) throws MessagingException {
         return MimeMessageUtility.getSubject(message);
     }
 
@@ -2675,7 +2675,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static String getSubject(final MailMessage message) {
+    public static String getSubject(MailMessage message) {
         return MimeMessageUtility.getSubject(message);
     }
 
@@ -2692,7 +2692,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
+    public static InternetAddress[] getAddressHeader(String name, Message message) throws MessagingException {
         return MimeMessageUtility.getAddressHeader(name, message);
     }
 
@@ -2708,7 +2708,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
+    public static InternetAddress[] getAddressHeader(String name, MailMessage message) {
         return MimeMessageUtility.getAddressHeader(name, message);
     }
 
@@ -2720,7 +2720,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static InternetAddress[] getAddressHeader(final String addresses) {
+    public static InternetAddress[] getAddressHeader(String addresses) {
         return MimeMessageUtility.getAddressHeader(addresses);
     }
 
@@ -2733,7 +2733,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static Date getSentDate(final MailPart part) {
+    public static Date getSentDate(MailPart part) {
         return MimeMessageUtility.getSentDate(part);
     }
 
@@ -2759,7 +2759,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
+    public static void parsePriority(String priorityStr, MailMessage mailMessage) {
         MimeMessageUtility.parsePriority(priorityStr, mailMessage);
     }
 
@@ -2771,7 +2771,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static void parseImportance(final String importance, final MailMessage mailMessage) {
+    public static void parseImportance(String importance, MailMessage mailMessage) {
         MimeMessageUtility.parsePriority(importance, mailMessage);
     }
 
@@ -2782,7 +2782,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static int parsePriority(final String priorityStr) {
+    public static int parsePriority(String priorityStr) {
         return MimeMessageUtility.parsePriority(priorityStr);
     }
 
@@ -2793,7 +2793,7 @@ public final class MimeMessageConverter {
      * @deprecated Use {@link MimeMessageUtility} instead
      */
     @Deprecated
-    public static int parseImportance(final String importance) {
+    public static int parseImportance(String importance) {
         return MimeMessageUtility.parseImportance(importance);
     }
 }

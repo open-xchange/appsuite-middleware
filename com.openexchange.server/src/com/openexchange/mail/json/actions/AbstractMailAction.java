@@ -146,7 +146,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Initializes a new {@link AbstractMailAction}.
      */
-    protected AbstractMailAction(final ServiceLookup services) {
+    protected AbstractMailAction(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -162,7 +162,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
-    protected <S> S getService(final Class<? extends S> clazz) {
+    protected <S> S getService(Class<? extends S> clazz) {
         return services.getService(clazz);
     }
 
@@ -246,7 +246,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param mailRequest The mail request
      * @return The closeables or <code>null</code> if state is absent
      */
-    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) {
+    protected Collection<Closeable> getCloseables(MailRequest mailRequest) {
         final AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
             return null;
@@ -263,7 +263,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
@@ -322,7 +322,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param ignoreDeleted <code>true</code> to ignore \Deleted ones that are \Seen; otherwise <code>false</code>
      * @return <code>true</code> if mail should be discarded according to filter flags; otherwise <code>false</code>
      */
-    protected static boolean discardMail(final MailMessage m, final boolean ignoreSeen, final boolean ignoreDeleted) {
+    protected static boolean discardMail(MailMessage m, boolean ignoreSeen, boolean ignoreDeleted) {
         if (null == m) {
             return true;
         }
@@ -384,7 +384,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param usm The user mail settings
      * @return The display mode
      */
-    public static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usm) {
+    public static DisplayMode detectDisplayMode(boolean modifyable, String view, UserSettingMail usm) {
         final DisplayMode displayMode;
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
@@ -441,15 +441,15 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @return The account identifier
      * @throws OXException If address cannot be resolved
      */
-    protected static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
+    protected static int resolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport, boolean checkFrom) throws OXException {
         return MimeMessageFiller.resolveFrom2Account(session, from, checkTransportSupport, checkFrom);
     }
 
-    protected static String getDefaultSendAddress(final ServerSession session) {
+    protected static String getDefaultSendAddress(ServerSession session) {
         return session.getUserSettingMail().getSendAddr();
     }
 
-    protected static boolean isEmpty(final String string) {
+    protected static boolean isEmpty(String string) {
         return com.openexchange.java.Strings.isEmpty(string);
     }
 

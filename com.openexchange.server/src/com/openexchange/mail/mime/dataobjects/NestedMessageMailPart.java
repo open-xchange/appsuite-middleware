@@ -75,7 +75,7 @@ public final class NestedMessageMailPart extends MailPart {
      * @param mailMessage The nested message
      * @throws OXException If initialization fails
      */
-    public NestedMessageMailPart(final MailMessage mailMessage) throws OXException {
+    public NestedMessageMailPart(MailMessage mailMessage) throws OXException {
         super();
         this.mailMessage = mailMessage;
         setContentType(MimeTypes.MIME_MESSAGE_RFC822);
@@ -98,7 +98,7 @@ public final class NestedMessageMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 
@@ -108,7 +108,7 @@ public final class NestedMessageMailPart extends MailPart {
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         throw new UnsupportedOperationException("NestedMessageMailPart.writeTo()");
     }
 

@@ -74,7 +74,7 @@ public final class HeaderExistenceTerm extends SearchTerm<String> {
     /**
      * Initializes a new {@link HeaderExistenceTerm}
      */
-    public HeaderExistenceTerm(final String headerName) {
+    public HeaderExistenceTerm(String headerName) {
         super();
         this.headerName = headerName;
     }
@@ -95,18 +95,18 @@ public final class HeaderExistenceTerm extends SearchTerm<String> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.HEADERS);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         String val = mailMessage.getHeader(headerName, ", ");
         return val != null;
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         String[] val;
         try {
             val = msg.getHeader(headerName);

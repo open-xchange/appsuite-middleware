@@ -67,6 +67,6 @@ public interface IMailFolderStorageTrashAware {
      * @return The fullName of the new folder or null
      * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String trashFolder(final String fullName) throws OXException;
+    public String trashFolder(String fullName) throws OXException;
 
 }

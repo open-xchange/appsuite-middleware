@@ -89,7 +89,7 @@ public final class Conversations {
      * @return The unfolded conversations
      * @throws OXException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final String fullName, final int limit, final MailFields mailFields, final IMailMessageStorage messageStorage) throws OXException {
+    public static List<Conversation> conversationsFor(String fullName, int limit, MailFields mailFields, IMailMessageStorage messageStorage) throws OXException {
         final IndexRange indexRange = limit > 0 ? new IndexRange(0, limit) : null;
         mailFields.addAll(FIELDS_HEADERS);
         final MailMessage[] messages = messageStorage.searchMessages(fullName, indexRange, RECEIVED_DATE, ASC, null, mailFields.toArray());
@@ -124,7 +124,7 @@ public final class Conversations {
      * @return The unfolded conversations
      * @throws OXException If a messaging error occurs
      */
-    public static List<MailMessage> messagesFor(final String fullName, final int limit, final MailFields mailFields, final IMailMessageStorage messageStorage) throws OXException {
+    public static List<MailMessage> messagesFor(String fullName, int limit, MailFields mailFields, IMailMessageStorage messageStorage) throws OXException {
         final IndexRange indexRange = limit > 0 ? new IndexRange(0, limit) : null;
         mailFields.addAll(FIELDS_HEADERS);
         final MailMessage[] messages = messageStorage.searchMessages(fullName, indexRange, RECEIVED_DATE, ASC, null, mailFields.toArray());
@@ -155,7 +155,7 @@ public final class Conversations {
      * @param toFold The conversations to fold
      * @return The folded conversations
      */
-    public static List<Conversation> fold(final List<Conversation> toFold) {
+    public static List<Conversation> fold(List<Conversation> toFold) {
         int lastProcessed = -1;
         Iterator<Conversation> iter = toFold.iterator();
         int i = 0;
@@ -174,7 +174,7 @@ public final class Conversations {
         return toFold;
     }
 
-    private static void foldInto(final Conversation conversation, final Iterator<Conversation> iter) {
+    private static void foldInto(Conversation conversation, Iterator<Conversation> iter) {
         while (iter.hasNext()) {
             final Conversation other = iter.next();
             if (conversation.referencesOrIsReferencedBy(other)) {

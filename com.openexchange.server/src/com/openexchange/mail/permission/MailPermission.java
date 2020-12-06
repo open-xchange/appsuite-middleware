@@ -108,7 +108,7 @@ public abstract class MailPermission extends OCLPermission {
      * @return A new mail permission instance
      * @throws OXException If instantiation fails
      */
-    public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws OXException {
+    public static <P extends MailPermission> P newInstance(Class<? extends P> clazz) throws OXException {
         /*
          * Create a new mail permission
          */

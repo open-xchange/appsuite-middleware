@@ -91,7 +91,7 @@ public final class SessionCompositionParameters implements CompositionParameters
     private final UserSettingMail usm;
     private int accountId = MailAccount.DEFAULT_ID;
 
-    public SessionCompositionParameters(final Session session, final Context ctx, final UserSettingMail usm) {
+    public SessionCompositionParameters(Session session, Context ctx, UserSettingMail usm) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -163,7 +163,7 @@ public final class SessionCompositionParameters implements CompositionParameters
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             final User user = userService.getUser(session.getUserId(), ctx);
             aliases = new LinkedHashSet<InternetAddress>();
-            for (final String alias : user.getAliases()) {
+            for (String alias : user.getAliases()) {
                 aliases.add(new QuotedInternetAddress(alias));
             }
             if (MailProperties.getInstance().isSupportMsisdnAddresses()) {

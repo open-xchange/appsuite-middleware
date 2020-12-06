@@ -90,7 +90,7 @@ public final class DefaultFolderNamesProvider {
      * @param cid The context ID
      * @throws OXException If initialization fails
      */
-    public DefaultFolderNamesProvider(final int accountId, final int user, final int cid) throws OXException {
+    public DefaultFolderNamesProvider(int accountId, int user, int cid) throws OXException {
         super();
         if (MailAccount.DEFAULT_ID == accountId) {
             fallbackProvider = DEFAULT_PROVIDER;
@@ -108,7 +108,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      */
-    public String[] getDefaultFolderNames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderNames(MailAccount mailAccount, boolean isSpamEnabled) {
         return getDefaultFolderNames(
             mailAccount.getTrash(),
             mailAccount.getSent(),
@@ -127,7 +127,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      */
-    public String[] getDefaultFolderNames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderNames(MailAccountDescription mailAccount, boolean isSpamEnabled) {
         return getDefaultFolderNames(
             mailAccount.getTrash(),
             mailAccount.getSent(),
@@ -146,7 +146,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      */
-    public String[] getDefaultFolderNames(final MailConfig mailConfig, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderNames(MailConfig mailConfig, boolean isSpamEnabled) {
         final String[] standardNames = mailConfig.getStandardNames();
         return getDefaultFolderNames(
             standardNames[StorageUtility.INDEX_TRASH],
@@ -171,7 +171,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
      */
-    public String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderNames(String trash, String sent, String drafts, String spam, String confirmedSpam, String confirmedHam, boolean isSpamEnabled) {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getDrafts()));
@@ -222,7 +222,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder full names as an array of {@link String}
      */
-    public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderFullnames(MailAccount mailAccount, boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
             extractFullname(mailAccount.getTrashFullname()),
             extractFullname(mailAccount.getSentFullname()),
@@ -241,7 +241,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder full names as an array of {@link String}
      */
-    public String[] getDefaultFolderFullnames(final MailAccountDescription mailAccount, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderFullnames(MailAccountDescription mailAccount, boolean isSpamEnabled) {
         return getDefaultFolderFullnames(
             extractFullname(mailAccount.getTrashFullname()),
             extractFullname(mailAccount.getSentFullname()),
@@ -258,7 +258,7 @@ public final class DefaultFolderNamesProvider {
      * @param fullnameParameter The full name parameter
      * @return The extracted full name
      */
-    public static String extractFullname(final String fullnameParameter) {
+    public static String extractFullname(String fullnameParameter) {
         return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParamOrElseReturn(fullnameParameter);
     }
 
@@ -270,7 +270,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder full names as an array of {@link String}
      */
-    public String[] getDefaultFolderFullnames(final MailConfig mailConfig, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderFullnames(MailConfig mailConfig, boolean isSpamEnabled) {
         final String[] standardFullNames = mailConfig.getStandardFullNames();
         return getDefaultFolderFullnames(
             standardFullNames[StorageUtility.INDEX_TRASH],
@@ -295,7 +295,7 @@ public final class DefaultFolderNamesProvider {
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder full names as an array of {@link String}
      */
-    public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) {
+    public String[] getDefaultFolderFullnames(String trashFullname, String sentFullname, String draftsFullname, String spamFullname, String confirmedSpamFullname, String confirmedHamFullname, boolean isSpamEnabled) {
         final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
         if (isEmpty(draftsFullname)) {
             fullnames[INDEX_DRAFTS] = null;
@@ -361,7 +361,7 @@ public final class DefaultFolderNamesProvider {
 
         private final MailAccount defaultAccount;
 
-        public DefaultAccountFallbackProvider(final MailAccount defaultAccount) {
+        public DefaultAccountFallbackProvider(MailAccount defaultAccount) {
             super();
             this.defaultAccount = defaultAccount;
         }

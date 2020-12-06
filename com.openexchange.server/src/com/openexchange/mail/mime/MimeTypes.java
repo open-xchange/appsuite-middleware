@@ -244,7 +244,7 @@ public final class MimeTypes {
      * @param contentType The MIME type string
      * @return The primary type or string itself
      */
-    public static String getPrimaryType(final String contentType) {
+    public static String getPrimaryType(String contentType) {
         if (isEmpty(contentType)) {
             return contentType;
         }
@@ -258,7 +258,7 @@ public final class MimeTypes {
      * @param fileName The file name; e.g. <code>"image001.jpg"</code>
      * @return The file extension (e.g. <code>"image001"</code>) or <code>fileName</code> itself
      */
-    public static String getFilePrefix(final String fileName) {
+    public static String getFilePrefix(String fileName) {
         if (isEmpty(fileName)) {
             return fileName;
         }
@@ -272,7 +272,7 @@ public final class MimeTypes {
      * @param fileName The file name; e.g. <code>"image001.jpg"</code>
      * @return The file extension (e.g. <code>"jpg"</code>) or <code>fileName</code> itself
      */
-    public static String getFileExtension(final String fileName) {
+    public static String getFileExtension(String fileName) {
         if (isEmpty(fileName)) {
             return fileName;
         }
@@ -286,7 +286,7 @@ public final class MimeTypes {
      * @param mimeType The MIME type; e.g. <code>"text/plain; name=doc001.txt; charset=us-ascii"</code>
      * @return The base type (e.g. <code>"text/plain"</code>)
      */
-    public static String getBaseType(final String mimeType) {
+    public static String getBaseType(String mimeType) {
         if (isEmpty(mimeType)) {
             return null;
         }
@@ -303,7 +303,7 @@ public final class MimeTypes {
      * @param mimeType The MIME type; e.g. <code>"text/plain; name=doc001.txt; charset=us-ascii"</code>
      * @return The parameter list (e.g. <code>"; name=doc001.txt; charset=us-ascii"</code>) or <code>null</code>
      */
-    public static String getParameterList(final String mimeType) {
+    public static String getParameterList(String mimeType) {
         if (isEmpty(mimeType)) {
             return null;
         }
@@ -319,7 +319,7 @@ public final class MimeTypes {
      * @param contentType2 The second MIME type string
      * @return <code>true</code> if primary types are equal; otherwise <code>false</code>
      */
-    public static boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+    public static boolean equalPrimaryTypes(String contentType1, String contentType2) {
         if (null == contentType1 || null == contentType2) {
             return false;
         }
@@ -337,7 +337,7 @@ public final class MimeTypes {
      * @see #checkedMimeType(String, String, Set)
      * @see #INVALIDS
      */
-    public static String checkedMimeType(final String givenMimeType, final String fileName) {
+    public static String checkedMimeType(String givenMimeType, String fileName) {
         return checkedMimeType(givenMimeType, fileName, null);
     }
 
@@ -362,7 +362,7 @@ public final class MimeTypes {
      * @return The checked MIME type
      * @see #INVALIDS
      */
-    public static String checkedMimeType(final String givenMimeType, final String fileName, final Set<String> invalids) {
+    public static String checkedMimeType(String givenMimeType, String fileName, Set<String> invalids) {
         if (isEmpty(fileName)) {
             return givenMimeType;
         }
@@ -382,7 +382,7 @@ public final class MimeTypes {
         return isEmpty(parameterList) ? contentTypeByFileName : new StringBuilder(contentTypeByFileName).append(parameterList).toString();
     }
 
-    private static boolean consideredAsInvalid(final String givenMimeType, final Set<String> invalids) {
+    private static boolean consideredAsInvalid(String givenMimeType, Set<String> invalids) {
         return null == invalids || invalids.isEmpty() ? false : invalids.contains(toLowerCase(getBaseType(givenMimeType)));
     }
 
@@ -395,7 +395,7 @@ public final class MimeTypes {
      * @param baseType The base MIME type
      * @return The checked file name
      */
-    public static String checkedFileName(final String givenFileName, final String baseType) {
+    public static String checkedFileName(String givenFileName, String baseType) {
         if (isEmpty(baseType)) {
             return givenFileName;
         }

@@ -78,7 +78,7 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
     private final BundleContext context;
     private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
 
-    private VersionService versionService;
+    private final VersionService versionService;
 
     /**
      * Initializes a new {@link DBMigrationMonitorTracker}.
@@ -100,6 +100,7 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
         if (migrationMonitor != null) {
             final BundleContext context = this.context;
             final AtomicReference<ServiceRegistration<SignalStartedService>> serviceRegistrationRef = this.signalStartedRegistrationRef;
+            final VersionService versionService = this.versionService;
             Executors.newSingleThreadExecutor().execute(new Runnable() {
 
                 @Override
@@ -138,9 +139,9 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                         }
 
                         if (null == message) {
-                            LOG.error("{}\tFailed to initialize Open-Xchange Server!{}", sep, sep);
+                            LOG.error("{}\tFailed to initialize Open-Xchange Server v{}!{}", sep, versionService.getVersionString(), sep);
                         } else {
-                            LOG.error("{}\tFailed to initialize Open-Xchange Server: '{}'{}", sep, message, sep);
+                            LOG.error("{}\tFailed to initialize Open-Xchange Server v{}: '{}'{}", sep, versionService.getVersionString(), message, sep);
                         }
                     }
 

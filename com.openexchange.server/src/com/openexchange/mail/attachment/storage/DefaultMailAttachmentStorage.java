@@ -148,7 +148,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         return UserStorage.getInstance().getUser(session.getUserId(), context).getLocale();
     }
 
-    private static ServerSession getServerSessionFrom(final Session session, final Context context) {
+    private static ServerSession getServerSessionFrom(Session session, Context context) {
         if (session instanceof ServerSession) {
             return (ServerSession) session;
         }
@@ -502,15 +502,15 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         }
     }
 
-    private static boolean isOwner(final int sessionUser, final int createdBy) {
+    private static boolean isOwner(int sessionUser, int createdBy) {
         return (sessionUser == createdBy);
     }
 
-    private static boolean isElapsed(final long now, final long creationDate, final long ttl) {
+    private static boolean isElapsed(long now, long creationDate, long ttl) {
         return ((now - creationDate) > ttl);
     }
 
-    private int createIfAbsent(final Session session, final Context ctx, final String name, final FolderObject defaultInfoStoreFolder) throws SQLException, OXException {
+    private int createIfAbsent(Session session, Context ctx, String name, FolderObject defaultInfoStoreFolder) throws SQLException, OXException {
         final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
         if (-1 == lookUpFolder) {
             /*
@@ -522,7 +522,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         return lookUpFolder;
     }
 
-    private FolderObject createNewInfostoreFolder(final int adminId, final String name, final int parent) {
+    private FolderObject createNewInfostoreFolder(int adminId, String name, int parent) {
         final FolderObject newFolder = new FolderObject();
         newFolder.setFolderName(name);
         newFolder.setParentFolderID(parent);

@@ -87,7 +87,7 @@ public abstract class MailPartDataSource implements DataSource {
         super();
     }
 
-    protected final MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session) throws OXException {
+    protected final MailPart getMailPart(int accountId, String fullname, String mailId, String sequenceId, Session session) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -114,7 +114,7 @@ public abstract class MailPartDataSource implements DataSource {
         }
     }
 
-    private MailPart loadPart(final String fullname, final String mailId, final String sequenceId, MailAccess<?, ?> mailAccess) throws OXException {
+    private MailPart loadPart(String fullname, String mailId, String sequenceId, MailAccess<?, ?> mailAccess) throws OXException {
         final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
         mailPart.loadContent();
         return mailPart;

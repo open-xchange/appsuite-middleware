@@ -74,7 +74,7 @@ public final class FromTerm extends AbstractAddressTerm {
     /**
      * Initializes a new {@link FromTerm}
      */
-    public FromTerm(final String pattern) {
+    public FromTerm(String pattern) {
         super(pattern);
     }
 
@@ -92,12 +92,12 @@ public final class FromTerm extends AbstractAddressTerm {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.FROM);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         if (containsWildcard()) {
             return toRegex(addr).matcher(getAllAddresses(mailMessage.getFrom())).find();
         }
@@ -105,7 +105,7 @@ public final class FromTerm extends AbstractAddressTerm {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         try {
             /*
              * Get plain headers

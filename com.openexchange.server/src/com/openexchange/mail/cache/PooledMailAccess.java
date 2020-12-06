@@ -69,7 +69,7 @@ public final class PooledMailAccess implements Delayed {
      * @param ttlMillis The time-to-live milliseconds
      * @return The pooled value
      */
-    public static PooledMailAccess valueFor(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final long ttlMillis) {
+    public static PooledMailAccess valueFor(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, long ttlMillis) {
         return new PooledMailAccess(mailAccess, ttlMillis);
     }
 
@@ -83,21 +83,21 @@ public final class PooledMailAccess implements Delayed {
      * @param mailAccess The mail access
      * @param ttlMillis The time-to-live milliseconds
      */
-    private PooledMailAccess(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final long ttlMillis) {
+    private PooledMailAccess(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, long ttlMillis) {
         super();
         timeoutStamp = System.currentTimeMillis() + ttlMillis;
         this.mailAccess = mailAccess;
     }
 
     @Override
-    public long getDelay(final TimeUnit unit) {
+    public long getDelay(TimeUnit unit) {
         return TimeUnit.MILLISECONDS.equals(unit) ? (timeoutStamp - System.currentTimeMillis()) : unit.convert(
             timeoutStamp - System.currentTimeMillis(),
             TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public int compareTo(final Delayed o) {
+    public int compareTo(Delayed o) {
         final long thisStamp = timeoutStamp;
         final long otherStamp = ((PooledMailAccess) o).timeoutStamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));

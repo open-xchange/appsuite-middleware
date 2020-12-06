@@ -78,7 +78,7 @@ public class MailAccessDelayQueue extends AbstractQueue<MailAccessDelayElement> 
          * @param element The expired element
          * @return <code>true</code> if allowed being polled; otherwise <code>false</code>
          */
-        boolean accept(final MailAccessDelayElement element);
+        boolean accept(MailAccessDelayElement element);
     }
 
     transient final ReentrantLock lock = new ReentrantLock();

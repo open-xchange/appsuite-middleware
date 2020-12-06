@@ -78,21 +78,21 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from an input stream
      */
-    public MessageDataSource(final InputStream inputStream, final String contentType) throws IOException {
+    public MessageDataSource(InputStream inputStream, String contentType) throws IOException {
         this(inputStream, contentType, null);
     }
 
     /**
      * Create a data source from an input stream
      */
-    public MessageDataSource(final InputStream inputStream, final ContentType contentType) throws IOException {
+    public MessageDataSource(InputStream inputStream, ContentType contentType) throws IOException {
         this(inputStream, contentType, null);
     }
 
     /**
      * Create a data source from an input stream
      */
-    public MessageDataSource(final InputStream inputStream, final String contentType, final String name) throws IOException {
+    public MessageDataSource(InputStream inputStream, String contentType, String name) throws IOException {
         this.contentType = contentType;
         data = Streams.stream2bytes(inputStream);
         this.name = name;
@@ -101,14 +101,14 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from an input stream
      */
-    public MessageDataSource(final InputStream inputStream, final ContentType contentType, final String name) throws IOException {
+    public MessageDataSource(InputStream inputStream, ContentType contentType, String name) throws IOException {
         this(inputStream, contentType.toString(), name);
     }
 
     /**
      * Create a data source from a byte array
      */
-    public MessageDataSource(final byte[] data, final String contentType) {
+    public MessageDataSource(byte[] data, String contentType) {
         this.contentType = contentType;
         this.data = new byte[data.length];
         System.arraycopy(data, 0, this.data, 0, data.length);
@@ -117,7 +117,7 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from a String
      */
-    public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException, OXException {
+    public MessageDataSource(String data, String contentType) throws UnsupportedEncodingException, OXException {
         final ContentType ct = new ContentType(contentType);
         if (!ct.containsCharsetParameter()) {
             ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
@@ -129,7 +129,7 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from a String
      */
-    public MessageDataSource(final String data, final ContentType contentType) {
+    public MessageDataSource(String data, ContentType contentType) {
         final ContentType ct;
         if (contentType.containsCharsetParameter()) {
             ct = contentType;
@@ -185,7 +185,7 @@ public final class MessageDataSource implements DataSource {
      *
      * @param contentType The contentType to set
      */
-    public void setContentType(final String contentType) {
+    public void setContentType(String contentType) {
         this.contentType = contentType;
     }
 

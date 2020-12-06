@@ -75,7 +75,7 @@ public final class StructureJSONBinary implements JSONBinary {
      *
      * @throws OXException If initialization fails
      */
-    public StructureJSONBinary(final InputStream in) throws OXException {
+    public StructureJSONBinary(InputStream in) throws OXException {
         this(in, true);
     }
 
@@ -84,7 +84,7 @@ public final class StructureJSONBinary implements JSONBinary {
      *
      * @throws OXException If initialization fails
      */
-    public StructureJSONBinary(final InputStream in, final boolean copy) throws OXException {
+    public StructureJSONBinary(InputStream in, boolean copy) throws OXException {
         super();
         if (null == in) {
             final NullPointerException e = new NullPointerException("Input stream is null.");

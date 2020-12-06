@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE, type = RestrictedAction.Type.READ)
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
 public abstract class ContactAction implements AJAXActionService {
 
     protected static final String MODULE = ContactActionFactory.MODULE;

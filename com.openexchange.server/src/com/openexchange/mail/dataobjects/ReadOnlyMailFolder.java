@@ -69,7 +69,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
     /**
      * Initializes a new {@link ReadOnlyMailFolder}
      */
-    public ReadOnlyMailFolder(final MailFolder delegate) {
+    public ReadOnlyMailFolder(MailFolder delegate) {
         super();
         this.delegate = delegate;
     }
@@ -90,7 +90,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
     }
 
     @Override
-    public void setFullname(final String fullname) {
+    public void setFullname(String fullname) {
         throw new UnsupportedOperationException();
     }
 
@@ -128,7 +128,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param hasSubfolders the has-subfolders flag to set
      */
     @Override
-    public void setSubfolders(final boolean hasSubfolders) {
+    public void setSubfolders(boolean hasSubfolders) {
         throw new UnsupportedOperationException();
     }
 
@@ -166,7 +166,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
     @Override
-    public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
+    public void setSubscribedSubfolders(boolean hasSubscribedSubfolders) {
         throw new UnsupportedOperationException();
     }
 
@@ -206,7 +206,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param name the name to set
      */
     @Override
-    public void setName(final String name) {
+    public void setName(String name) {
         throw new UnsupportedOperationException();
     }
 
@@ -248,7 +248,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param subscribed the subscription status to set
      */
     @Override
-    public void setSubscribed(final boolean subscribed) {
+    public void setSubscribed(boolean subscribed) {
         throw new UnsupportedOperationException();
     }
 
@@ -287,7 +287,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param deletedMessageCount The number of messages marked for deletion or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
-    public void setDeletedMessageCount(final int deletedMessageCount) {
+    public void setDeletedMessageCount(int deletedMessageCount) {
         throw new UnsupportedOperationException();
     }
 
@@ -325,7 +325,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
     @Override
-    public void setExists(final boolean exists) {
+    public void setExists(boolean exists) {
         throw new UnsupportedOperationException();
     }
 
@@ -364,7 +364,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param messageCount The number of messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
-    public void setMessageCount(final int messageCount) {
+    public void setMessageCount(int messageCount) {
         throw new UnsupportedOperationException();
     }
 
@@ -403,7 +403,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param newMessageCount The number of new messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
-    public void setNewMessageCount(final int newMessageCount) {
+    public void setNewMessageCount(int newMessageCount) {
         throw new UnsupportedOperationException();
     }
 
@@ -442,7 +442,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param unreadMessageCount The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
-    public void setUnreadMessageCount(final int unreadMessageCount) {
+    public void setUnreadMessageCount(int unreadMessageCount) {
         throw new UnsupportedOperationException();
     }
 
@@ -483,7 +483,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param separator the separator to set
      */
     @Override
-    public void setSeparator(final char separator) {
+    public void setSeparator(char separator) {
         throw new UnsupportedOperationException();
     }
 
@@ -523,7 +523,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param parentFullname the parent fullname to set
      */
     @Override
-    public void setParentFullname(final String parentFullname) {
+    public void setParentFullname(String parentFullname) {
         throw new UnsupportedOperationException();
     }
 
@@ -561,7 +561,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
     @Override
-    public void setHoldsMessages(final boolean holdsMessages) {
+    public void setHoldsMessages(boolean holdsMessages) {
         throw new UnsupportedOperationException();
     }
 
@@ -599,7 +599,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
     @Override
-    public void setHoldsFolders(final boolean holdsFolders) {
+    public void setHoldsFolders(boolean holdsFolders) {
         throw new UnsupportedOperationException();
     }
 
@@ -646,7 +646,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param ownPermission the own permission to set
      */
     @Override
-    public void setOwnPermission(final MailPermission ownPermission) {
+    public void setOwnPermission(MailPermission ownPermission) {
         throw new UnsupportedOperationException();
     }
 
@@ -684,7 +684,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * @param rootFolder the root folder flag to set
      */
     @Override
-    public void setRootFolder(final boolean rootFolder) {
+    public void setRootFolder(boolean rootFolder) {
         throw new UnsupportedOperationException();
     }
 
@@ -714,22 +714,22 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
     }
 
     @Override
-    public void setDefaultFolder(final boolean defaultFolder) {
+    public void setDefaultFolder(boolean defaultFolder) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addPermission(final MailPermission permission) {
+    public void addPermission(MailPermission permission) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addPermissions(final MailPermission[] permissions) {
+    public void addPermissions(MailPermission[] permissions) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addPermissions(final Collection<? extends MailPermission> permissions) {
+    public void addPermissions(Collection<? extends MailPermission> permissions) {
         throw new UnsupportedOperationException();
     }
 
@@ -764,7 +764,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
     }
 
     @Override
-    public void setSupportsUserFlags(final boolean supportsUserFlags) {
+    public void setSupportsUserFlags(boolean supportsUserFlags) {
         throw new UnsupportedOperationException();
     }
 

@@ -103,12 +103,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
      *
      * @param services The service look-up
      */
-    public AllAction(final ServiceLookup services) {
+    public AllAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
@@ -201,7 +201,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         return perform0(req, getMailInterface(req), false);
     }
 
-    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
+    protected AJAXRequestResult perform0(MailRequest req, MailServletInterface mailInterface, boolean cache) throws OXException {
         try {
             // Read parameters
             String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
@@ -409,7 +409,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
     }
 
     @Override
-    public String getSha1For(final MailRequest req) throws OXException {
+    public String getSha1For(MailRequest req) throws OXException {
         final String id = req.getRequest().getProperty("mail.sha1");
         if (null != id) {
             return id;

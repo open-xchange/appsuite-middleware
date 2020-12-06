@@ -84,12 +84,12 @@ public final class DeleteAction extends AbstractMailAction {
      *
      * @param services
      */
-    public DeleteAction(final ServiceLookup services) {
+    public DeleteAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // Read in parameters
             boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));

@@ -90,7 +90,7 @@ public abstract class MailTransport {
      * @return A proper instance of {@link MailTransport}
      * @throws OXException If instantiation fails
      */
-    public static final MailTransport getInstance(final Session session) throws OXException {
+    public static final MailTransport getInstance(Session session) throws OXException {
         return getInstance(session, MailAccount.DEFAULT_ID);
     }
 
@@ -113,7 +113,7 @@ public abstract class MailTransport {
      * @return A proper instance of {@link MailTransport}
      * @throws OXException If instantiation fails
      */
-    public static final MailTransport getInstance(final Session session, final int accountId) throws OXException {
+    public static final MailTransport getInstance(Session session, int accountId) throws OXException {
         /*
          * Check for proper initialization
          */
@@ -153,7 +153,7 @@ public abstract class MailTransport {
      * @return The sent mail message
      * @throws OXException If transport fails
      */
-    public MailMessage sendMailMessage(final ComposedMailMessage transportMail, final ComposeType sendType) throws OXException {
+    public MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType) throws OXException {
         return sendMailMessage(transportMail, sendType, null);
     }
 
@@ -180,7 +180,7 @@ public abstract class MailTransport {
      * @return The sent mail message
      * @throws OXException If transport fails
      */
-    public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients, final MtaStatusInfo mtaStatusInfo) throws OXException {
+    public MailMessage sendMailMessage(ComposedMailMessage composedMail, ComposeType sendType, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
         return sendMailMessage(composedMail, sendType, allRecipients);
     }
 
@@ -195,7 +195,7 @@ public abstract class MailTransport {
      * @return The sent mail message
      * @throws OXException If sending fails
      */
-    public MailMessage sendRawMessage(final byte[] asciiBytes) throws OXException {
+    public MailMessage sendRawMessage(byte[] asciiBytes) throws OXException {
         return sendRawMessage(asciiBytes, (Address[]) null);
     }
 

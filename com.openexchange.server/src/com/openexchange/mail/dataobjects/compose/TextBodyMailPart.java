@@ -83,7 +83,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param mailBody The mail body as HTML content
      */
-    public TextBodyMailPart(final String mailBody) {
+    public TextBodyMailPart(String mailBody) {
         super();
         this.mailBody = null == mailBody ? null : new StringBuilder(mailBody);
     }
@@ -103,7 +103,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param newInstance The new instance to fill
      */
-    protected final void fillInstance(final TextBodyMailPart newInstance) {
+    protected final void fillInstance(TextBodyMailPart newInstance) {
         newInstance.mailBody = null == mailBody ? null : new StringBuilder(mailBody.toString());
         newInstance.plainText = null == plainText ? null : new StringBuilder(plainText.toString());
         newInstance.dataSource = null;
@@ -122,7 +122,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param mailBody The mail body as HTML content
      */
-    public void setText(final String mailBody) {
+    public void setText(String mailBody) {
         if (null == mailBody) {
             this.mailBody = null;
             return;
@@ -140,7 +140,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param html The HTML text to append
      */
-    public void append(final String html) {
+    public void append(String html) {
         if (null == html) {
             return;
         }
@@ -156,7 +156,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param text The mail body as plain text
      */
-    public void setPlainText(final String text) {
+    public void setPlainText(String text) {
         if (null == text) {
             plainText = null;
         } else if (null == plainText) {
@@ -190,7 +190,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      *
      * @param text The plain text to append
      */
-    public void appendPlainText(final String text) {
+    public void appendPlainText(String text) {
         if (null == plainText) {
             plainText = new StringBuilder(text);
         } else {
@@ -235,7 +235,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

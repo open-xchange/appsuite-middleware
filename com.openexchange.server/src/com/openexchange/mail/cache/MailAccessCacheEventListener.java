@@ -80,7 +80,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
     }
 
     @Override
-    public void handleEvent(final Event event) {
+    public void handleEvent(Event event) {
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
             Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
@@ -102,7 +102,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
     }
 
     @Override
-    public void registerService(final BundleContext context) {
+    public void registerService(BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_LAST_SESSION });
         serviceRegistration = context.registerService(EventHandler.class, this, serviceProperties);

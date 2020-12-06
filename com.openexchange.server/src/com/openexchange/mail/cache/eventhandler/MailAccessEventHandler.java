@@ -77,25 +77,25 @@ public final class MailAccessEventHandler implements ElementEventHandler {
     }
 
     @Override
-    public void onExceededIdletimeBackground(final ElementEvent event) {
+    public void onExceededIdletimeBackground(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
     @Override
-    public void onExceededMaxlifeBackground(final ElementEvent event) {
+    public void onExceededMaxlifeBackground(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
     @Override
-    public void onSpooledDiskNotAvailable(final ElementEvent event) {
+    public void onSpooledDiskNotAvailable(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
     @Override
-    public void onSpooledNotAllowed(final ElementEvent event) {
+    public void onSpooledNotAllowed(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
@@ -103,29 +103,29 @@ public final class MailAccessEventHandler implements ElementEventHandler {
     /**
      * Closes given instance of {@link MailAccess}
      */
-    private void close(final MailAccess<?, ?> mailAccess) {
+    private void close(MailAccess<?, ?> mailAccess) {
         mailAccess.close(false);
     }
 
     @Override
-    public void handleElementEvent(final ElementEvent event) {
+    public void handleElementEvent(ElementEvent event) {
         LOG.error("Unknown event type: {}", event.getElementEvent());
     }
 
     @Override
-    public void onExceededIdletimeOnRequest(final ElementEvent event) {
+    public void onExceededIdletimeOnRequest(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
     @Override
-    public void onExceededMaxlifeOnRequest(final ElementEvent event) {
+    public void onExceededMaxlifeOnRequest(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }
 
     @Override
-    public void onSpooledDiskAvailable(final ElementEvent event) {
+    public void onSpooledDiskAvailable(ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         close((MailAccess<?, ?>) cacheElem.getVal());
     }

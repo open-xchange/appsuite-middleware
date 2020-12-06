@@ -114,18 +114,18 @@ public class ContentType extends ParameterizedHeader {
          *
          * @param contentType The backing content type
          */
-        public UnmodifiableContentType(final ContentType contentType) {
+        public UnmodifiableContentType(ContentType contentType) {
             super();
             this.contentType = contentType;
         }
 
         @Override
-        public void addParameter(final String key, final String value) {
+        public void addParameter(String key, String value) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.addParameter()");
         }
 
         @Override
-        public int compareTo(final ParameterizedHeader other) {
+        public int compareTo(ParameterizedHeader other) {
             return contentType.compareTo(other);
         }
 
@@ -140,12 +140,12 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public boolean containsParameter(final String key) {
+        public boolean containsParameter(String key) {
             return contentType.containsParameter(key);
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             return contentType.equals(obj);
         }
 
@@ -165,7 +165,7 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public String getParameter(final String key) {
+        public String getParameter(String key) {
             return contentType.getParameter(key);
         }
 
@@ -190,57 +190,57 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public boolean isMimeType(final String pattern) {
+        public boolean isMimeType(String pattern) {
             return contentType.isMimeType(pattern);
         }
 
         @Override
-        public String removeParameter(final String key) {
+        public String removeParameter(String key) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.removeParameter()");
         }
 
         @Override
-        public ContentType setBaseType(final String baseType) throws OXException {
+        public ContentType setBaseType(String baseType) throws OXException {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setCharsetParameter()");
         }
 
         @Override
-        public ContentType setCharsetParameter(final String charset) {
+        public ContentType setCharsetParameter(String charset) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setCharsetParameter()");
         }
 
         @Override
-        public void setContentType(final ContentType contentType) {
+        public void setContentType(ContentType contentType) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setContentType()");
         }
 
         @Override
-        public void setContentType(final String contentType) throws OXException {
+        public void setContentType(String contentType) throws OXException {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setContentType()");
         }
 
         @Override
-        public ContentType setNameParameter(final String filename) {
+        public ContentType setNameParameter(String filename) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setNameParameter()");
         }
 
         @Override
-        public void setParameter(final String key, final String value) {
+        public void setParameter(String key, String value) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setParameter()");
         }
 
         @Override
-        public ContentType setPrimaryType(final String primaryType) {
+        public ContentType setPrimaryType(String primaryType) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setPrimaryType()");
         }
 
         @Override
-        public ContentType setSubType(final String subType) {
+        public ContentType setSubType(String subType) {
             throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setSubType()");
         }
 
         @Override
-        public boolean startsWith(final String prefix) {
+        public boolean startsWith(String prefix) {
             return contentType.startsWith(prefix);
         }
 
@@ -250,7 +250,7 @@ public class ContentType extends ParameterizedHeader {
         }
 
         @Override
-        public String toString(final boolean skipEmptyParams) {
+        public String toString(boolean skipEmptyParams) {
             return contentType.toString(skipEmptyParams);
         }
 
@@ -287,14 +287,14 @@ public class ContentType extends ParameterizedHeader {
 
     private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+*]*");
 
-    private static boolean isInvalidToken(final String token) {
+    private static boolean isInvalidToken(String token) {
         if (null == token) {
             return true;
         }
         return !PATTERN_TOKEN.matcher(token).matches();
     }
 
-    private static String clearWhitespaces(final String str) {
+    private static String clearWhitespaces(String str) {
         if (null == str) {
             return null;
         }
@@ -371,7 +371,7 @@ public class ContentType extends ParameterizedHeader {
      * @param contentType The content type
      * @throws OXException If content type cannot be parsed
      */
-    public ContentType(final String contentType) throws OXException {
+    public ContentType(String contentType) throws OXException {
         this(contentType, false);
     }
 
@@ -382,7 +382,7 @@ public class ContentType extends ParameterizedHeader {
      * @param strict <code>true</code> for strict parsing; otherwise <code>false</code>
      * @throws OXException If content type cannot be parsed
      */
-    public ContentType(final String contentType, final boolean strict) throws OXException {
+    public ContentType(String contentType, boolean strict) throws OXException {
         super();
         parseContentType(contentType, strict);
     }
@@ -399,7 +399,7 @@ public class ContentType extends ParameterizedHeader {
     }
 
     @Override
-    public int compareTo(final ParameterizedHeader other) {
+    public int compareTo(ParameterizedHeader other) {
         if (this == other) {
             return 0;
         }
@@ -422,7 +422,7 @@ public class ContentType extends ParameterizedHeader {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -457,11 +457,11 @@ public class ContentType extends ParameterizedHeader {
         return lcBaseType;
     }
 
-    private void parseContentType(final String contentType, final boolean strict) throws OXException {
+    private void parseContentType(String contentType, boolean strict) throws OXException {
         parseContentType(contentType, true, strict);
     }
 
-    private void parseContentType(final String contentType, final boolean paramList, final boolean strict) throws OXException {
+    private void parseContentType(String contentType, boolean paramList, boolean strict) throws OXException {
         if ((null == contentType) || (contentType.length() == 0)) {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
@@ -647,7 +647,7 @@ public class ContentType extends ParameterizedHeader {
         }
     }
 
-    private void parseBaseType(final String baseType) throws OXException {
+    private void parseBaseType(String baseType) throws OXException {
         parseContentType(baseType, false);
         if (parameterList == null) {
             parameterList = new ParameterList();
@@ -659,7 +659,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @param contentType The content type to apply
      */
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         if (contentType == this) {
             return;
         }
@@ -682,7 +682,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @return This content type with new primary type applied
      */
-    public ContentType setPrimaryType(final String primaryType) {
+    public ContentType setPrimaryType(String primaryType) {
         this.primaryType = primaryType;
         baseType = null;
         lcBaseType = null;
@@ -701,7 +701,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @return This content type with new sub-type applied
      */
-    public ContentType setSubType(final String subType) {
+    public ContentType setSubType(String subType) {
         this.subType = subType;
         baseType = null;
         lcBaseType = null;
@@ -714,7 +714,7 @@ public class ContentType extends ParameterizedHeader {
      * @param baseType The base type; e.g. <code>"text/plain"</code>
      * @return <code>true</code> if equals given base type; otherwise <code>false</code>
      */
-    public boolean isBaseType(final String baseType) {
+    public boolean isBaseType(String baseType) {
         if (null == baseType) {
             throw new IllegalArgumentException("baseType is null");
         }
@@ -728,7 +728,7 @@ public class ContentType extends ParameterizedHeader {
      * @param subType The secondary type; e.g. <code>"plain"</code>
      * @return <code>true</code> if equals given base type; otherwise <code>false</code>
      */
-    public boolean isBaseType(final String primaryType, final String subType) {
+    public boolean isBaseType(String primaryType, String subType) {
         if (null == this.primaryType) {
             if (null != primaryType) {
                 return false;
@@ -753,7 +753,7 @@ public class ContentType extends ParameterizedHeader {
      * @param subTypeExpression The expression for secondary type; e.g. <code>"*"</code>
      * @return <code>true</code> if matches given base type; otherwise <code>false</code>
      */
-    public boolean matchesBaseType(final String primaryType, final String subTypeExpression) {
+    public boolean matchesBaseType(String primaryType, String subTypeExpression) {
         if (null == this.primaryType) {
             if (null != primaryType) {
                 return false;
@@ -786,7 +786,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @return This content type with new base type applied
      */
-    public ContentType setBaseType(final String baseType) throws OXException {
+    public ContentType setBaseType(String baseType) throws OXException {
         parseBaseType(baseType);
         return this;
     }
@@ -797,7 +797,7 @@ public class ContentType extends ParameterizedHeader {
      * @param charset The charset parameter value; e.g. <code>"UTF-8"</code>
      * @return This content type with new <code>"charset"</code> parameter applied
      */
-    public ContentType setCharsetParameter(final String charset) {
+    public ContentType setCharsetParameter(String charset) {
         setParameter(PARAM_CHARSET, charset);
         return this;
     }
@@ -829,7 +829,7 @@ public class ContentType extends ParameterizedHeader {
      * @param filename The name parameter
      * @return This content type with new <code>"name"</code> parameter applied
      */
-    public ContentType setNameParameter(final String filename) {
+    public ContentType setNameParameter(String filename) {
         setParameter(PARAM_NAME, filename);
         return this;
     }
@@ -875,7 +875,7 @@ public class ContentType extends ParameterizedHeader {
      * @param contentType The content type string
      * @throws OXException If specified content type string cannot be parsed
      */
-    public void setContentType(final String contentType) throws OXException {
+    public void setContentType(String contentType) throws OXException {
         setContentType(contentType, false);
     }
 
@@ -886,7 +886,7 @@ public class ContentType extends ParameterizedHeader {
      * @param strict <code>true</code> for strict parsing; otherwise <code>false</code>
      * @throws OXException If specified content type string cannot be parsed
      */
-    public void setContentType(final String contentType, final boolean strict) throws OXException {
+    public void setContentType(String contentType, boolean strict) throws OXException {
         parseContentType(contentType, strict);
     }
 
@@ -895,7 +895,7 @@ public class ContentType extends ParameterizedHeader {
      *
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
-    public boolean isMimeType(final String pattern) {
+    public boolean isMimeType(String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType()).matches();
     }
 
@@ -906,7 +906,7 @@ public class ContentType extends ParameterizedHeader {
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified string is <code>null</code>
      */
-    public boolean contains(final String string) {
+    public boolean contains(String string) {
         if (null == string) {
             throw new IllegalArgumentException("String is null");
         }
@@ -919,12 +919,12 @@ public class ContentType extends ParameterizedHeader {
      * @param s The strings
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
      */
-    public boolean containsAny(final String... strings) {
+    public boolean containsAny(String... strings) {
         if (null == strings) {
             return false;
         }
         final String lowerCase = getLowerCaseBaseType();
-        for (final String string : strings) {
+        for (String string : strings) {
             if (null != string && lowerCase.indexOf(Strings.asciiLowerCase(string)) >= 0) {
                 return true;
             }
@@ -939,7 +939,7 @@ public class ContentType extends ParameterizedHeader {
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
      */
-    public boolean startsWith(final String prefix) {
+    public boolean startsWith(String prefix) {
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
@@ -952,12 +952,12 @@ public class ContentType extends ParameterizedHeader {
      * @param prefixes The prefixes
      * @return <code>true</code> if Content-Type's base type ignore-case starts with any of specified prefixes; otherwise <code>false</code>
      */
-    public boolean startsWithAny(final String... prefixes) {
+    public boolean startsWithAny(String... prefixes) {
         if (null == prefixes) {
             return false;
         }
         final String lowerCase = getLowerCaseBaseType();
-        for (final String prefix : prefixes) {
+        for (String prefix : prefixes) {
             if (null != prefix && lowerCase.startsWith(Strings.asciiLowerCase(prefix), 0)) {
                 return true;
             }
@@ -972,7 +972,7 @@ public class ContentType extends ParameterizedHeader {
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
      * @throws OXException If parsing content-type string fails
      */
-    public static String prepareContentTypeString(final String contentType) throws OXException {
+    public static String prepareContentTypeString(String contentType) throws OXException {
         return MimeMessageUtility.foldContentType(new ContentType(contentType).toString());
     }
 
@@ -985,7 +985,7 @@ public class ContentType extends ParameterizedHeader {
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
      * @throws OXException If parsing content-type string fails
      */
-    public static String prepareContentTypeString(final String contentType, final String name) throws OXException {
+    public static String prepareContentTypeString(String contentType, String name) throws OXException {
         final ContentType ct = new ContentType(contentType);
         if (name != null && !ct.containsNameParameter()) {
             ct.setNameParameter(name);
@@ -1001,7 +1001,7 @@ public class ContentType extends ParameterizedHeader {
      * @return <code>true</code> if pattern matches; otherwise <code>false</code>
      * @throws OXException If an invalid MIME type is detected
      */
-    public static boolean isMimeType(final String mimeType, final String pattern) throws OXException {
+    public static boolean isMimeType(String mimeType, String pattern) throws OXException {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType(mimeType)).matches();
     }
 
@@ -1012,7 +1012,7 @@ public class ContentType extends ParameterizedHeader {
      * @return the base type
      * @throws OXException If an invalid MIME type is detected
      */
-    public static String getBaseType(final String mimeType) throws OXException {
+    public static String getBaseType(String mimeType) throws OXException {
         final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
         if (m.find()) {
             String subType = m.group(2);
@@ -1030,7 +1030,7 @@ public class ContentType extends ParameterizedHeader {
      * @param wildcard The wild-card string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern#compile(String) pattern}
      */
-    private static String wildcardToRegex(final String wildcard) {
+    private static String wildcardToRegex(String wildcard) {
         if (null == wildcard) {
             // Accept all if null
             return "^.*$";

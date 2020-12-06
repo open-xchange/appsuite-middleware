@@ -97,7 +97,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @param delegate The delegate mail
      * @throws OXException If invocation of {@link MailMessage#getEnclosedCount()} fails
      */
-    public CompositeMailMessage(final MailMessage delegate) throws OXException {
+    public CompositeMailMessage(MailMessage delegate) throws OXException {
         super();
         if (!delegate.getContentType().startsWith(MULTIPART)) {
             throw new IllegalArgumentException("Specified delegate mail must be of MIME type multipart/*");
@@ -196,7 +196,7 @@ public final class CompositeMailMessage extends MailMessage {
      *
      * @param mailPart The mail part to add
      */
-    public void addAdditionalParts(final MailPart mailPart) {
+    public void addAdditionalParts(MailPart mailPart) {
         additionalParts.add(mailPart);
     }
 
@@ -207,7 +207,7 @@ public final class CompositeMailMessage extends MailMessage {
      * @param index The index
      * @return The mail part that was removed.
      */
-    public MailPart removeAdditionalParts(final int index) {
+    public MailPart removeAdditionalParts(int index) {
         return additionalParts.remove(index);
     }
 
@@ -227,7 +227,7 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         if (delegateEnclosedCount > 0) {
             /*
              * Delegate mail holds enclosed parts
@@ -269,7 +269,7 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         delegate.setMailId(id);
     }
 
@@ -279,12 +279,12 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         delegate.setUnreadMessages(unreadMessages);
     }
 
     @Override
-    public boolean hasHeaders(final String... names) {
+    public boolean hasHeaders(String... names) {
         return delegate.hasHeaders(names);
     }
 
@@ -309,12 +309,12 @@ public final class CompositeMailMessage extends MailMessage {
     }
 
     @Override
-    public void setRecentCount(final int recentCount) {
+    public void setRecentCount(int recentCount) {
         delegate.setRecentCount(recentCount);
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         if (additionalParts.isEmpty()) {
             delegate.writeTo(out);
             return;
@@ -380,7 +380,7 @@ public final class CompositeMailMessage extends MailMessage {
             /*
              * Add additional parts
              */
-            for (final MailPart mp : additionalParts) {
+            for (MailPart mp : additionalParts) {
                 final MimeBodyPart bodyPart = new MimeBodyPart();
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {

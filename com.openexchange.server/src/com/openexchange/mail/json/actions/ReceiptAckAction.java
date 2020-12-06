@@ -74,12 +74,12 @@ public final class ReceiptAckAction extends AbstractMailAction {
      *
      * @param services
      */
-    public ReceiptAckAction(final ServiceLookup services) {
+    public ReceiptAckAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             /*
              * Read in parameters

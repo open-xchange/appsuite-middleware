@@ -79,12 +79,12 @@ public final class GetStructureAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetStructureAction(final ServiceLookup services) {
+    public GetStructureAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*

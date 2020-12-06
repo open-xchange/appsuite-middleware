@@ -93,7 +93,7 @@ public interface IMailMessageStorageMimeSupport extends IMailMessageStorage {
      * @return The denoted MIME message
      * @throws OXException If MIME message cannot be returned
      */
-    Message getMimeMessage(String fullName, final String id, boolean markSeen) throws OXException;
+    Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException;
 
     /**
      * Output the denoted message as an RFC 822 format stream.
@@ -103,7 +103,7 @@ public interface IMailMessageStorageMimeSupport extends IMailMessageStorage {
      * @param os The stream to write to
      * @throws OXException If an error occurs writing to the stream
      */
-    default void writeMimeMessage(String fullName, final String id, OutputStream os) throws OXException {
+    default void writeMimeMessage(String fullName, String id, OutputStream os) throws OXException {
         Message mimeMessage = getMimeMessage(fullName, id, false);
         if (mimeMessage == null) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
@@ -126,7 +126,7 @@ public interface IMailMessageStorageMimeSupport extends IMailMessageStorage {
      * @return The MIME format stream
      * @exception OXException for failures
      */
-    default InputStream getMimeStream(String fullName, final String id) throws OXException {
+    default InputStream getMimeStream(String fullName, String id) throws OXException {
         Message mimeMessage = getMimeMessage(fullName, id, false);
         if (mimeMessage == null) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);

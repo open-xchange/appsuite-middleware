@@ -72,7 +72,7 @@ public final class SourcedImage {
      * @param contentId The content identifier
      * @param data The (encoded) image data
      */
-    protected SourcedImage(final String contentType, final String transferEncoding, final String contentId, final String data) {
+    protected SourcedImage(String contentType, String transferEncoding, String contentId, String data) {
         super();
         this.contentType = contentType;
         this.transferEncoding = transferEncoding;

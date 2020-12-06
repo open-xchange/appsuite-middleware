@@ -88,7 +88,7 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
+    public PooledEvent(int contextId, int userId, int accountId, String fullname, boolean contentRelated, boolean immediateDelivery, boolean remote, Session session) {
         this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, remote, session);
     }
 
@@ -103,7 +103,7 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
+    public PooledEvent(String topic, int contextId, int userId, int accountId, String fullname, boolean contentRelated, boolean immediateDelivery, boolean remote, Session session) {
         super();
         properties = new HashMap<String, Object>(4);
         async = true;
@@ -137,7 +137,7 @@ public final class PooledEvent implements Delayed {
      * @param value The property value
      * @return This pooled event with property applied
      */
-    public PooledEvent putProperty(final String name, final Object value) {
+    public PooledEvent putProperty(String name, Object value) {
         properties.put(name, value);
         return this;
     }
@@ -147,7 +147,7 @@ public final class PooledEvent implements Delayed {
      *
      * @param name The property name
      */
-    public Object getProperty(final String name) {
+    public Object getProperty(String name) {
         return properties.get(name);
     }
 
@@ -156,7 +156,7 @@ public final class PooledEvent implements Delayed {
      *
      * @param name The property name
      */
-    public void removesProperty(final String name) {
+    public void removesProperty(String name) {
         properties.remove(name);
     }
 
@@ -178,7 +178,7 @@ public final class PooledEvent implements Delayed {
      * @param async <code>true</code> to deliver asynchronously; otherwise <code>false</code>
      * @return This pooled event with new behavior applied
      */
-    public PooledEvent setAsync(final boolean async) {
+    public PooledEvent setAsync(boolean async) {
         this.async = async;
         return this;
     }
@@ -196,12 +196,12 @@ public final class PooledEvent implements Delayed {
     }
 
     @Override
-    public long getDelay(final TimeUnit unit) {
+    public long getDelay(TimeUnit unit) {
         return immediateDelivery ? 0L : unit.convert(EventPool.MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public int compareTo(final Delayed o) {
+    public int compareTo(Delayed o) {
         final long thisStamp = stamp;
         final long otherStamp = ((PooledEvent) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
@@ -239,7 +239,7 @@ public final class PooledEvent implements Delayed {
      * @param contextId The context ID
      * @return <code>true</code> this pooled events matches; otherwise <code>false</code>
      */
-    public boolean equalsByUser(final int userId, final int contextId) {
+    public boolean equalsByUser(int userId, int contextId) {
         return this.userId == userId && this.contextId == contextId;
     }
 
@@ -249,7 +249,7 @@ public final class PooledEvent implements Delayed {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

@@ -81,7 +81,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      * @param session The session providing needed user data
      * @throws OXException If document cannot be loaded
      */
-    public InfostoreDocumentMailPart(final String documentId, final Session session) throws OXException {
+    public InfostoreDocumentMailPart(String documentId, Session session) throws OXException {
         super();
         this.documentId = documentId;
         this.session = session;
@@ -129,7 +129,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

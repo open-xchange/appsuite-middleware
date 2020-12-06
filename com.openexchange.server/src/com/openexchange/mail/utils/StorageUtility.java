@@ -134,7 +134,7 @@ public final class StorageUtility {
         return service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
     }
 
-    public static String getAllAddresses(final InternetAddress[] internetAddrs) {
+    public static String getAllAddresses(InternetAddress[] internetAddrs) {
         if ((internetAddrs == null) || (internetAddrs.length == 0)) {
             return "";
         }
@@ -153,7 +153,7 @@ public final class StorageUtility {
      * @param headers The headers as raw bytes
      * @return An instance of {@link Map} containing the headers
      */
-    public static Map<HeaderName, String> parseHeaders(final byte[] headers) {
+    public static Map<HeaderName, String> parseHeaders(byte[] headers) {
         try {
             return parseHeaders(Charsets.toAsciiString(headers));
         } catch (UnsupportedCharsetException e) {
@@ -173,7 +173,7 @@ public final class StorageUtility {
      * @param headers The headers as {@link String}
      * @return An instance of {@link Map} containing the headers
      */
-    public static Map<HeaderName, String> parseHeaders(final String headers) {
+    public static Map<HeaderName, String> parseHeaders(String headers) {
         final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(headers));
         final Map<HeaderName, String> retval = new HashMap<HeaderName, String>();
         final StringBuilder valBuilder = new StringBuilder(256);
@@ -199,7 +199,7 @@ public final class StorageUtility {
      * @return The default folder names as an array of {@link String}
      * @throws OXException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm) throws OXException {
+    public static String[] getDefaultFolderNames(int accountId, UserSettingMail usm) throws OXException {
         return getDefaultFolderNames(accountId, usm, usm.isSpamEnabled());
     }
 
@@ -213,7 +213,7 @@ public final class StorageUtility {
      * @return The default folder names as an array of {@link String}
      * @throws OXException If spam enablement/disablement cannot be determined
      */
-    public static String[] getDefaultFolderNames(final int accountId, final UserSettingMail usm, final boolean isSpamEnabled) throws OXException {
+    public static String[] getDefaultFolderNames(int accountId, UserSettingMail usm, boolean isSpamEnabled) throws OXException {
         return new DefaultFolderNamesProvider(accountId, usm.getUserId(), usm.getCid()).getDefaultFolderNames(
             usm.getStdTrashName(),
             usm.getStdSentName(),
@@ -240,7 +240,7 @@ public final class StorageUtility {
      * @deprecated Use {@link DefaultFolderNamesProvider} instead
      */
     @Deprecated
-    public static String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) throws MailConfigException {
+    public static String[] getDefaultFolderNames(String trash, String sent, String drafts, String spam, String confirmedSpam, String confirmedHam, boolean isSpamEnabled) throws MailConfigException {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
             final OXException e = MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(MailStrings.DRAFTS);
@@ -315,7 +315,7 @@ public final class StorageUtility {
      * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
      *         <code>long</code>.
      */
-    public static long parseUnsignedLong(final String s) {
+    public static long parseUnsignedLong(String s) {
         return Tools.getUnsignedLong(s);
     }
 

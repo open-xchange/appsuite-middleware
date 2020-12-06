@@ -424,7 +424,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
-        public void setLocalIp(final String ip) {
+        public void setLocalIp(String ip) {
             // Nothing to do
         }
 
@@ -434,12 +434,12 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
-        public boolean containsParameter(final String name) {
+        public boolean containsParameter(String name) {
             return parameters.containsKey(name);
         }
 
         @Override
-        public Object getParameter(final String name) {
+        public Object getParameter(String name) {
             return parameters.get(name);
         }
 
@@ -479,7 +479,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
-        public void setParameter(final String name, final Object value) {
+        public void setParameter(String name, Object value) {
             if (null == value) {
                 parameters.remove(name);
             } else {
@@ -498,7 +498,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
-        public void setHash(final String hash) {
+        public void setHash(String hash) {
             // Nope
         }
 
@@ -508,7 +508,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
-        public void setClient(final String client) {
+        public void setClient(String client) {
             // Nothing to do
         }
 

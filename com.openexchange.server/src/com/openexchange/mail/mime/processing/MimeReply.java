@@ -156,7 +156,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId) throws OXException {
+    public static MailMessage getReplyMail(MailMessage originalMail, boolean replyAll, Session session, int accountId) throws OXException {
         return getReplyMail(originalMail, replyAll, session, accountId, null, false);
     }
 
@@ -171,7 +171,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final boolean setFrom) throws OXException {
+    public static MailMessage getReplyMail(MailMessage originalMail, boolean replyAll, Session session, int accountId, boolean setFrom) throws OXException {
         return getReplyMail(originalMail, replyAll, session, accountId, null, setFrom);
     }
 
@@ -186,7 +186,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws OXException {
+    public static MailMessage getReplyMail(MailMessage originalMail, boolean replyAll, Session session, int accountId, UserSettingMail usm) throws OXException {
         return getReplyMail(originalMail, replyAll, session, accountId, usm, false);
     }
 
@@ -202,7 +202,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final boolean setFrom) throws OXException {
+    public static MailMessage getReplyMail(MailMessage originalMail, boolean replyAll, Session session, int accountId, UserSettingMail usm, boolean setFrom) throws OXException {
         return getReplyMail(originalMail, replyAll, session, accountId, usm, setFrom ? FromAddressProvider.byAccountId() : FromAddressProvider.none());
     }
 
@@ -218,7 +218,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final FromAddressProvider fromAddressProvider) throws OXException {
+    public static MailMessage getReplyMail(MailMessage originalMail, boolean replyAll, Session session, int accountId, UserSettingMail usm, FromAddressProvider fromAddressProvider) throws OXException {
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
         MailPath msgref = null;
@@ -260,7 +260,7 @@ public final class MimeReply extends AbstractMimeProcessing {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+    private static String replaceMetaEquiv(String html, ContentType contentType) {
         final Matcher m = PAT_META_CT.matcher(html);
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
@@ -290,7 +290,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final FromAddressProvider fromAddressProvider) throws OXException {
+    private static MailMessage getReplyMail(MailMessage originalMsg, MailPath msgref, boolean replyAll, boolean preferToAsRecipient, Session session, int accountId, javax.mail.Session mailSession, UserSettingMail userSettingMail, FromAddressProvider fromAddressProvider) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
             MailMessage origMsg;
@@ -690,7 +690,7 @@ public final class MimeReply extends AbstractMimeProcessing {
 
     }
 
-    private static void addUserAddresses(final Set<InternetAddress> filter, final javax.mail.Session mailSession, final Session session, final Context ctx) throws OXException {
+    private static void addUserAddresses(Set<InternetAddress> filter, javax.mail.Session mailSession, Session session, Context ctx) throws OXException {
         if (InternetAddress.getLocalAddress(mailSession) != null) {
             filter.add(InternetAddress.getLocalAddress(mailSession));
         }
@@ -707,11 +707,11 @@ public final class MimeReply extends AbstractMimeProcessing {
         MimeProcessingUtility.addUserAliases(filter, session, ctx);
     }
 
-    private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws OXException {
+    private static void appendInlineContent(MailMessage originalMail, CompositeMailMessage replyMail, List<String> cids) throws OXException {
         final InlineContentHandler handler = new InlineContentHandler(cids);
         new MailMessageParser().parseMailMessage(originalMail, handler);
         final Map<String, MailPart> inlineContents = handler.getInlineContents();
-        for (final String cid : cids) {
+        for (String cid : cids) {
             final MailPart part = inlineContents.get(cid);
             if (null != part) {
                 replyMail.addAdditionalParts(part);
@@ -727,7 +727,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @param addrs The address list to filter
      * @return The filtered set of addresses
      */
-    private static Set<InternetAddress> filter(final Set<InternetAddress> filter, final InternetAddress[] addrs) {
+    private static Set<InternetAddress> filter(Set<InternetAddress> filter, InternetAddress[] addrs) {
         if (addrs == null) {
             return new HashSet<InternetAddress>(0);
         }
@@ -762,7 +762,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
+    static boolean generateReplyText(MailMessage msg, ContentType retvalContentType, StringHelper strHelper, LocaleAndTimeZone ltz, UserSettingMail usm, Session session, int accountId, List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
@@ -857,13 +857,13 @@ public final class MimeReply extends AbstractMimeProcessing {
     }
 
     private static final Pattern PATTERN_BODY_TAG = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
-    private static int getBodyTagEndPos(final CharSequence textBuilder) {
+    private static int getBodyTagEndPos(CharSequence textBuilder) {
         final Matcher m = PATTERN_BODY_TAG.matcher(textBuilder);
         return m.find() ? m.end() : 0;
     }
 
     private static final Pattern PATTERN_BLOCKQUOTE_TAG = Pattern.compile("<blockquote[^>]*?>", Pattern.CASE_INSENSITIVE);
-    private static int getBlockquoteTagStartPos(final CharSequence textBuilder) {
+    private static int getBlockquoteTagStartPos(CharSequence textBuilder) {
         final Matcher m = PATTERN_BLOCKQUOTE_TAG.matcher(textBuilder);
         return m.find() ? m.start() : 0;
     }
@@ -876,7 +876,7 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final int accountId, final ParameterContainer pc) throws OXException, MessagingException, IOException {
+    private static boolean gatherAllTextContents(MailPart multipartPart, ContentType mpContentType, int accountId, ParameterContainer pc) throws OXException, MessagingException, IOException {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         final boolean htmlPreferred = pc.usm.isDisplayHtmlInlineContent();
@@ -947,7 +947,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         return found;
     }
 
-    private static boolean getTextContent(final boolean preferHTML, final boolean avoidHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final int accountId, final ParameterContainer pc) throws OXException, MessagingException, IOException {
+    private static boolean getTextContent(boolean preferHTML, boolean avoidHTML, MailPart multipartPart, int count, ContentType partContentType, int accountId, ParameterContainer pc) throws OXException, MessagingException, IOException {
         boolean found = false;
         if (preferHTML) {
             for (int i = 0; !found && i < count; i++) {
@@ -1094,7 +1094,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         return found;
     }
 
-    private static String getHtmlContent(final MailPart multipartPart, final int count) throws OXException, IOException {
+    private static String getHtmlContent(MailPart multipartPart, int count) throws OXException, IOException {
         boolean found = false;
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
@@ -1113,7 +1113,7 @@ public final class MimeReply extends AbstractMimeProcessing {
 
     private static final Pattern PATTERN_TEXT_CITE = Pattern.compile("^", Pattern.MULTILINE);
 
-    private static String citeText(final String textContent) {
+    private static String citeText(String textContent) {
         return PATTERN_TEXT_CITE.matcher(textContent).replaceAll("> ");
     }
 
@@ -1131,7 +1131,7 @@ public final class MimeReply extends AbstractMimeProcessing {
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
-    private static String citeHtml(final String htmlContent) {
+    private static String citeHtml(String htmlContent) {
         StringBuffer sb = new StringBuffer(htmlContent.length());
 
         // Inject blockquote start
@@ -1193,7 +1193,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         final LocaleAndTimeZone ltz;
         final List<String> replyTexts;
 
-        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final Session session, final MailMessage origMail, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
+        ParameterContainer(ContentType retvalContentType, StringBuilder textBuilder, StringHelper strHelper, UserSettingMail usm, Session session, MailMessage origMail, LocaleAndTimeZone ltz, List<String> replyTexts) {
             super();
             this.origMail = origMail;
             this.session = session;
@@ -1208,7 +1208,7 @@ public final class MimeReply extends AbstractMimeProcessing {
 
     private static final Pattern PATTERN_CONTENT = Pattern.compile("(<[a-zA-Z]+[^>]*?>)?\\p{L}+");
 
-    private static boolean hasContent(final String html) {
+    private static boolean hasContent(String html) {
         return PATTERN_CONTENT.matcher(html).find();
     }
 

@@ -159,7 +159,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         convert2JSON(requestData, result, session);
         final Response response = new Response(session);
         response.setData(result.getResultObject());
@@ -167,7 +167,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         response.setProperties(result.getResponseProperties());
         final Collection<OXException> warnings = result.getWarnings();
         if (null != warnings && !warnings.isEmpty()) {
-            for (final OXException warning : warnings) {
+            for (OXException warning : warnings) {
                 response.addWarning(warning);
             }
         }
@@ -182,7 +182,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
      * @param session The associated session
      * @throws OXException If an error occurs
      */
-    public void convert2JSON(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+    public void convert2JSON(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
         try {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {
@@ -217,7 +217,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
     }
 
-    private void convertMailThreads(final MailThreads mailThreads, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+    private void convertMailThreads(MailThreads mailThreads, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
@@ -323,7 +323,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
     }
 
-    private void convertThreadStructure(final ThreadedStructure structure, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+    private void convertThreadStructure(ThreadedStructure structure, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         /*-
          * The data UI needs looks like this:
          *
@@ -364,7 +364,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         try {
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
-            for (final List<MailMessage> mails : structure.getMails()) {
+            for (List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject(32);
                     writeThreadSortedMail(mails, jo, writers, mailFields, containsMultipleFolders, writeThreadAsObjects, userId, contextId, timeZone);
@@ -400,9 +400,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
     }
 
-    private static boolean containsMultipleFolders(final ThreadedStructure structure, final Set<String> fullNames) {
-        for (final List<MailMessage> mails : structure.getMails()) {
-            for (final MailMessage mailMessage : mails) {
+    private static boolean containsMultipleFolders(ThreadedStructure structure, Set<String> fullNames) {
+        for (List<MailMessage> mails : structure.getMails()) {
+            for (MailMessage mailMessage : mails) {
                 if (fullNames.add(mailMessage.getFolder()) && fullNames.size() > 1) {
                     return true;
                 }
@@ -430,7 +430,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         // Add child nodes
         final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
-            for (final MailMessage child : mails) {
+            for (MailMessage child : mails) {
                 if (seemsValid(child, mailFields)) {
                     JSONObject jChild = new JSONObject(writers.size());
                     accountId = child.getAccountId();
@@ -450,7 +450,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             if (containsMultipleFolders) {
                 final StringBuilder sb = new StringBuilder(16);
                 final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
-                for (final MailMessage child : mails) {
+                for (MailMessage child : mails) {
                     if (seemsValid(child, mailFields)) {
                         sb.setLength(0);
                         jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
@@ -463,7 +463,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     }
                 }
             } else {
-                for (final MailMessage child : mails) {
+                for (MailMessage child : mails) {
                     if (seemsValid(child, mailFields)) {
                         jChildMessages.put(child.getMailId());
                         /*
@@ -480,7 +480,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         jMail.put("unreadCount", unreadCount);
     }
 
-    private void convertMultiple4List(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+    private void convertMultiple4List(Collection<MailMessage> mails, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
         TimeZone timeZone = com.openexchange.java.Strings.isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
@@ -514,7 +514,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         try {
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
-            for (final MailMessage mail : mails) {
+            for (MailMessage mail : mails) {
                 if (seemsValid(mail, mailFields)) {
                     JSONArray ja = new JSONArray(writers.size());
                     int accountId = mail.getAccountId();
@@ -530,7 +530,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
-    private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
+    private void convertMultiple4All(Collection<MailMessage> mails, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         List<Column> columns = MailRequest.requireColumnsAndHeaders(requestData, false).getColumns();
         String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
@@ -567,11 +567,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              * Check for thread-sort
              */
             if (("thread".equalsIgnoreCase(sort))) {
-                for (final MailMessage mail : mails) {
+                for (MailMessage mail : mails) {
                     if (seemsValid(mail, mailFields)) {
                         final JSONArray ja = new JSONArray(writers.size());
                         final int accountId = mail.getAccountId();
-                        for (final MailFieldWriter writer : writers) {
+                        for (MailFieldWriter writer : writers) {
                             writer.writeField(ja, mail, mail.getThreadLevel(), false, accountId, userId, contextId, timeZone);
                         }
                         jsonWriter.value(ja);
@@ -581,11 +581,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 /*
                  * Get iterator
                  */
-                for (final MailMessage mail : mails) {
+                for (MailMessage mail : mails) {
                     if (seemsValid(mail, mailFields)) {
                         final JSONArray ja = new JSONArray(writers.size());
                         final int accountId = mail.getAccountId();
-                        for (final MailFieldWriter writer : writers) {
+                        for (MailFieldWriter writer : writers) {
                             writer.writeField(ja, mail, 0, false, accountId, userId, contextId, timeZone);
                         }
                         jsonWriter.value(ja);
@@ -843,7 +843,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         return jMail;
     }
 
-    private void convertSingle(final MailMessage mail, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+    private void convertSingle(MailMessage mail, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
         String view = requestData.getParameter(Mail.PARAMETER_VIEW);
         view = null == view ? null : view.toLowerCase(Locale.US);
         String tmp = requestData.getParameter("embedded");
@@ -895,7 +895,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonObject, "json");
     }
 
-    private MailServletInterface getMailInterface(final AJAXRequestData request, final ServerSession session) throws OXException {
+    private MailServletInterface getMailInterface(AJAXRequestData request, ServerSession session) throws OXException {
         /*
          * Get mail interface
          */

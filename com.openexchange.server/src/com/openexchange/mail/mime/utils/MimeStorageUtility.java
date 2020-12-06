@@ -111,15 +111,15 @@ public final class MimeStorageUtility {
      * @param toClone The fetch profile to clone
      * @return The clone fetch profile
      */
-    public static FetchProfile cloneFetchProfile(final FetchProfile toClone) {
+    public static FetchProfile cloneFetchProfile(FetchProfile toClone) {
         if (null == toClone) {
             return null;
         }
         final FetchProfile clone = new FetchProfile();
-        for (final Item item : toClone.getItems()) {
+        for (Item item : toClone.getItems()) {
             clone.add(item);
         }
-        for (final String headerName : toClone.getHeaderNames()) {
+        for (String headerName : toClone.getHeaderNames()) {
             clone.add(headerName);
         }
         return clone;
@@ -594,7 +594,7 @@ public final class MimeStorageUtility {
 
         List<String> headerNames = FIELD2HEADERNAMES.get(field);
         if (null != headerNames) {
-            for (final String headerName : headerNames) {
+            for (String headerName : headerNames) {
                 fp.add(headerName);
             }
         }

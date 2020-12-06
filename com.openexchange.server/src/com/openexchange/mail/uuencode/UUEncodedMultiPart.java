@@ -76,7 +76,7 @@ public class UUEncodedMultiPart {
      * @param content The content
      * @return <code>true</code> if UUEncoded; otherwise <code>false</code>
      */
-    public static boolean isUUEncoded(final String content) {
+    public static boolean isUUEncoded(String content) {
         return possiblyUUEncoded(content) && PAT_UUENCODED.matcher(content).find();
     }
 
@@ -134,7 +134,7 @@ public class UUEncodedMultiPart {
      *
      * @param content The text content which is possibly uuencoded
      */
-    private UUEncodedMultiPart(final String content) {
+    private UUEncodedMultiPart(String content) {
         this();
         setContent(content);
     }
@@ -144,7 +144,7 @@ public class UUEncodedMultiPart {
      *
      * @param content Set the content of this UUEncodeMultiPart.
      */
-    private final void setContent(final String content) {
+    private final void setContent(String content) {
         findUUEncodedAttachmentCount(content);
         count = uuencodeParts.size();
         // now we should separate normal text from attachments
@@ -175,7 +175,7 @@ public class UUEncodedMultiPart {
      * end
      * </pre>
      */
-    private final void findUUEncodedAttachmentCount(final String sBodyPart) {
+    private final void findUUEncodedAttachmentCount(String sBodyPart) {
         final Matcher m = PAT_UUENCODED.matcher(sBodyPart);
         while (m.find()) {
             try {
@@ -188,7 +188,7 @@ public class UUEncodedMultiPart {
         }
     }
 
-    private static final int examineBeginToken(final String beginToken) {
+    private static final int examineBeginToken(String beginToken) {
         int count = 0;
         for (char c = beginToken.charAt(count); Strings.isWhitespace(c);) {
             c = beginToken.charAt(++count);
@@ -196,7 +196,7 @@ public class UUEncodedMultiPart {
         return count;
     }
 
-    private static final String cleanAtom(final String atom) {
+    private static final String cleanAtom(String atom) {
         int length = atom.length();
         if (length <= 0) {
             return atom;
@@ -246,7 +246,7 @@ public class UUEncodedMultiPart {
      * @param index The index of the desired part
      * @return The part
      */
-    public UUEncodedPart getBodyPart(final int index) {
+    public UUEncodedPart getBodyPart(int index) {
         return (uuencodeParts.get(index));
     }
 
@@ -255,7 +255,7 @@ public class UUEncodedMultiPart {
      *
      * @param index The index of the part to remove
      */
-    public void removeBodyPart(final int index) {
+    public void removeBodyPart(int index) {
         uuencodeParts.remove(index);
     }
 

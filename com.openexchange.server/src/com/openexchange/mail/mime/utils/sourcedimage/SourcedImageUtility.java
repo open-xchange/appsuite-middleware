@@ -86,7 +86,7 @@ public final class SourcedImageUtility {
      * @param htmlContent The HTML content
      * @return The parsed with-source images
      */
-    public static Map<String, SourcedImage> hasSourcedImages(final StringBuilder htmlContent) {
+    public static Map<String, SourcedImage> hasSourcedImages(StringBuilder htmlContent) {
         final String toParse = htmlContent.toString();
         final Matcher m = PATTERN_SOURCED_IMG.matcher(toParse);
         if (!m.find()) {

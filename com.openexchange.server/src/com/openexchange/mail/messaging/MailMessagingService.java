@@ -91,7 +91,7 @@ public final class MailMessagingService implements MessagingService {
     }
 
     @Override
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
+    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws OXException {
         // Nothing to do
         return null;
     }
@@ -103,7 +103,7 @@ public final class MailMessagingService implements MessagingService {
     }
 
     @Override
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
+    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws OXException {
         // Nothing to do
         return null;
     }

@@ -95,7 +95,7 @@ public final class FolderParser {
      * @param accountId The account ID
      * @throws OXException If parsing fails
      */
-    public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session, final int accountId) throws OXException {
+    public static void parse(JSONObject jsonObj, MailFolderDescription mailFolder, Session session, int accountId) throws OXException {
         try {
             if (jsonObj.has(FolderFields.TITLE)) {
                 mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
@@ -168,7 +168,7 @@ public final class FolderParser {
 
     private static final int[] mapping = { 0, 2, 4, -1, 8 };
 
-    private static int[] parsePermissionBits(final int bitsArg) {
+    private static int[] parsePermissionBits(int bitsArg) {
         int bits = bitsArg;
         final int[] retval = new int[5];
         for (int i = retval.length - 1; i >= 0; i--) {

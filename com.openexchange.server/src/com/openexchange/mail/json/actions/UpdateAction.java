@@ -84,14 +84,14 @@ public final class UpdateAction extends AbstractMailAction {
      *
      * @param services
      */
-    public UpdateAction(final ServiceLookup services) {
+    public UpdateAction(ServiceLookup services) {
         super(services);
     }
 
     private static final String SYSTEM_PREFIX = "\\";
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             /*
              * Read in parameters

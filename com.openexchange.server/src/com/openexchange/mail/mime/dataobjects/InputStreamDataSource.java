@@ -71,7 +71,7 @@ public final class InputStreamDataSource implements DataSource {
      *
      * @param inputStream The input stream
      */
-    public InputStreamDataSource(final InputStream inputStream) {
+    public InputStreamDataSource(InputStream inputStream) {
         super();
         this.inStream = inputStream;
     }
@@ -82,7 +82,7 @@ public final class InputStreamDataSource implements DataSource {
      * @param type The MIME type
      * @return Theis reference
      */
-    public InputStreamDataSource setType(final String type) {
+    public InputStreamDataSource setType(String type) {
         this.type = type;
         return this;
     }

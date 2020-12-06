@@ -74,7 +74,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      * @throws OXException If existence cannot be checked
      */
-    public boolean exists(final String fullName) throws OXException;
+    public boolean exists(String fullName) throws OXException;
 
     /**
      * Gets the folder identified through given full name
@@ -83,7 +83,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return The corresponding instance of {@link MailFolder}
      * @throws OXException If either folder does not exist or could not be fetched
      */
-    public MailFolder getFolder(final String fullName) throws OXException;
+    public MailFolder getFolder(String fullName) throws OXException;
 
     /**
      * Gets the first level subfolders located below the folder whose fullName matches given parameter <code>parentFullName</code>.
@@ -96,7 +96,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return An array of {@link MailFolder} representing the subfolders
      * @throws OXException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException;
+    public MailFolder[] getSubfolders(String parentFullName, boolean all) throws OXException;
 
     /**
      * Gets the mailbox's root folder.
@@ -189,7 +189,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return The new fullName
      * @throws OXException If either folder does not exist or cannot be renamed
      */
-    public String renameFolder(final String fullName, final String newName) throws OXException;
+    public String renameFolder(String fullName, String newName) throws OXException;
 
     /**
      * Deletes an existing mail folder identified through given full name.
@@ -201,7 +201,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return The fullName of the deleted mail folder
      * @throws OXException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(final String fullName) throws OXException;
+    public String deleteFolder(String fullName) throws OXException;
 
     /**
      * Deletes an existing mail folder identified through given full name.
@@ -229,7 +229,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @param fullName The full name of the mail folder whose content should be cleared
      * @throws OXException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(final String fullName) throws OXException;
+    public void clearFolder(String fullName) throws OXException;
 
     /**
      * Deletes the content of the folder identified through given full name.
@@ -248,7 +248,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return All occurring folders in reverse order as an array of {@link MailFolder} instances.
      * @throws OXException If either folder does not exist or path cannot be determined
      */
-    public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException;
+    public MailFolder[] getPath2DefaultFolder(String fullName) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of STORAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
@@ -261,7 +261,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return The quota of STORAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getStorageQuota(final String fullName) throws OXException;
+    public Quota getStorageQuota(String fullName) throws OXException;
 
     /**
      * Detects both quota limit and quota usage of MESSAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
@@ -272,7 +272,7 @@ public interface IMailFolderStorage extends IMailStorage {
      * @return The quota of MESSAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getMessageQuota(final String fullName) throws OXException;
+    public Quota getMessageQuota(String fullName) throws OXException;
 
     /**
      * Detects both quotas' limit and usage on given mailbox folder's quota-root for specified resource types. If the folder denoted by

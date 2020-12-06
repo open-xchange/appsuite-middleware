@@ -94,7 +94,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
      * @param detailNumber
      * @param errorCode
      */
-    private OAuthMailErrorCodes(final String message, final Category category, final int detailNumber, final int errorCode) {
+    private OAuthMailErrorCodes(String message, Category category, int detailNumber, int errorCode) {
         this(message, category, detailNumber, errorCode, null);
     }
 
@@ -107,7 +107,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
      * @param statuscode
      * @param displayMessage
      */
-    private OAuthMailErrorCodes(final String message, final Category category, final int detailNumber, final int statuscode, final String displayMessage) {
+    private OAuthMailErrorCodes(String message, Category category, int detailNumber, int statuscode, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
@@ -150,7 +150,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -169,7 +169,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return addStatusCode(OXExceptionFactory.getInstance().create(this, (Throwable) null, args));
     }
 
@@ -180,7 +180,7 @@ public enum OAuthMailErrorCodes implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return addStatusCode(OXExceptionFactory.getInstance().create(this, cause, args));
     }
 

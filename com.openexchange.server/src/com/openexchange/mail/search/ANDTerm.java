@@ -77,7 +77,7 @@ public final class ANDTerm extends CatenatingTerm {
     /**
      * Initializes a new {@link ANDTerm}
      */
-    public ANDTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
+    public ANDTerm(SearchTerm<?> firstTerm, SearchTerm<?> secondTerm) {
         super(firstTerm, secondTerm);
     }
 
@@ -87,7 +87,7 @@ public final class ANDTerm extends CatenatingTerm {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         terms[0].addMailField(col);
         terms[1].addMailField(col);
     }
@@ -129,12 +129,12 @@ public final class ANDTerm extends CatenatingTerm {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         return terms[0].matches(msg) && terms[1].matches(msg);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) throws OXException {
+    public boolean matches(MailMessage mailMessage) throws OXException {
         return terms[0].matches(mailMessage) && terms[1].matches(mailMessage);
     }
 

@@ -92,7 +92,7 @@ public final class RFC2231Tools {
      * @param toCheck The string to check
      * @return <code>true</code> for RFC2231 value; otherwise <code>false</code>
      */
-    public static boolean containsRFC2231Value(final String toCheck) {
+    public static boolean containsRFC2231Value(String toCheck) {
         return PAT_CL.matcher(toCheck).find();
     }
 
@@ -109,7 +109,7 @@ public final class RFC2231Tools {
      * @return An array of {@link String} containing charset, language, and rfc2231-encoded value or <code>null</code> if value does not
      *         match pattern.
      */
-    public static String[] parseRFC2231Value(final String rfc2231Value) {
+    public static String[] parseRFC2231Value(String rfc2231Value) {
         final Matcher m = PAT_CL.matcher(rfc2231Value);
         if (!m.matches()) {
             return null;
@@ -130,7 +130,7 @@ public final class RFC2231Tools {
      * @param encoded The encoded string
      * @return The decoded string
      */
-    public static String rfc2231Decode(final String encoded) {
+    public static String rfc2231Decode(String encoded) {
         final Matcher m = PAT_CL.matcher(encoded);
         if (!m.matches()) {
             return encoded;
@@ -148,7 +148,7 @@ public final class RFC2231Tools {
      * @param charset The charset name
      * @return The decoded string
      */
-    public static String rfc2231Decode(final String encoded, final String charset) {
+    public static String rfc2231Decode(String encoded, String charset) {
         if ((encoded == null) || (encoded.length() == 0)) {
             return encoded;
         } else if (null == charset || !CharsetDetector.isValid(charset)) {
@@ -191,7 +191,7 @@ public final class RFC2231Tools {
      * @param bb The allocated byte buffer
      * @return The decoded string
      */
-    private static String rfc2231DecodeRetry(final Charset cs, final ByteBuffer bb) {
+    private static String rfc2231DecodeRetry(Charset cs, ByteBuffer bb) {
         try {
             /*
              * Set position back to zero
@@ -240,7 +240,7 @@ public final class RFC2231Tools {
         }
     }
 
-    private static boolean isHexDigit(final char c) {
+    private static boolean isHexDigit(char c) {
         final char ch = Character.toLowerCase(c);
         return ((ch >= '0') && (ch <= '9')) || ((ch >= 'a') && (ch <= 'f'));
     }
@@ -255,7 +255,7 @@ public final class RFC2231Tools {
      * @param prepend <code>true</code> to prepend charset and language information; otherwise <code>false</code>
      * @return The encoded string
      */
-    public static String rfc2231Encode(final String toEncode, final String charset, final String language, final boolean prepend) {
+    public static String rfc2231Encode(String toEncode, String charset, String language, boolean prepend) {
         return rfc2231Encode(toEncode, charset, language, prepend, false);
     }
 
@@ -271,7 +271,7 @@ public final class RFC2231Tools {
      *            <code>false</code>
      * @return The encoded string
      */
-    public static String rfc2231Encode(final String toEncode, final String charset, final String language, final boolean prepend, final boolean force) {
+    public static String rfc2231Encode(String toEncode, String charset, String language, boolean prepend, boolean force) {
         if ((toEncode == null) || (toEncode.length() == 0)) {
             return toEncode;
         } else if (!force && isAscii(toEncode)) {
@@ -313,7 +313,7 @@ public final class RFC2231Tools {
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
-    public static boolean isAscii(final String s) {
+    public static boolean isAscii(String s) {
         if (null == s) {
             return true;
         }
@@ -334,7 +334,7 @@ public final class RFC2231Tools {
      * @param c The character to check
      * @return <code>true</code> if character is ASCII 7 bit; otherwise <code>false</code>
      */
-    public static boolean isAscii(final char c) {
+    public static boolean isAscii(char c) {
         return (c < 128);
     }
 

@@ -394,7 +394,7 @@ public final class MimeProcessingUtility {
             InternetAddress[] toAddrs = null;
             if (hdrVal != null) {
                 toAddrs = parseAddressList(hdrVal, true);
-                for (final InternetAddress addr : toAddrs) {
+                for (InternetAddress addr : toAddrs) {
                     if (fromCandidates.contains(addr)) {
                         from = addr;
                         break;
@@ -405,7 +405,7 @@ public final class MimeProcessingUtility {
                 hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     toAddrs = parseAddressList(unfold(hdrVal), true);
-                    for (final InternetAddress addr : toAddrs) {
+                    for (InternetAddress addr : toAddrs) {
                         if (fromCandidates.contains(addr)) {
                             from = addr;
                             break;
@@ -417,7 +417,7 @@ public final class MimeProcessingUtility {
                 hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
                     toAddrs = parseAddressList(unfold(hdrVal), true);
-                    for (final InternetAddress addr : toAddrs) {
+                    for (InternetAddress addr : toAddrs) {
                         if (fromCandidates.contains(addr)) {
                             from = addr;
                             break;
@@ -460,7 +460,7 @@ public final class MimeProcessingUtility {
      * @param session The session
      * @return The owner or <code>null</code>
      */
-    public static final String getFolderOwnerIfShared(final String fullName, final int accountId, final Session session) {
+    public static final String getFolderOwnerIfShared(String fullName, int accountId, Session session) {
         if (null == fullName) {
             return null;
         }
@@ -490,7 +490,7 @@ public final class MimeProcessingUtility {
      * @param session The session identifying the user, may be <code>null</code>
      * @return The formatted date
      */
-    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
+    public static final String getFormattedDate(Date date, int style, Locale locale, TimeZone timeZone, Session session) {
         DateFormat dateFormat;
         if (null != session) {
             RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
@@ -517,7 +517,7 @@ public final class MimeProcessingUtility {
      * @param session The session identifying the user, may be <code>null</code>
      * @return The formatted time
      */
-    public static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone, Session session) {
+    public static final String getFormattedTime(Date date, int style, Locale locale, TimeZone timeZone, Session session) {
         DateFormat dateFormat;
         if (null != session) {
             RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
@@ -542,7 +542,7 @@ public final class MimeProcessingUtility {
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
      * @throws OXException If part's headers cannot be accessed or parsed
      */
-    static boolean isInline(final MailPart part, final ContentType contentType) throws OXException {
+    static boolean isInline(MailPart part, ContentType contentType) throws OXException {
         final ContentDisposition cd;
         final boolean hasDisposition;
         {
@@ -567,7 +567,7 @@ public final class MimeProcessingUtility {
      * @return <code>true</code> if part's filename is not absent and ends with given suffix; otherwise <code>false</code>
      * @throws OXException If part's filename cannot be determined
      */
-    static boolean fileNameEndsWith(final String suffix, final MailPart part, final ContentType contentType) throws OXException {
+    static boolean fileNameEndsWith(String suffix, MailPart part, ContentType contentType) throws OXException {
         final String filename = getFileName(part, contentType);
         return null == filename ? false : filename.toLowerCase(Locale.ENGLISH).endsWith(suffix);
     }
@@ -580,7 +580,7 @@ public final class MimeProcessingUtility {
      * @return The filename or <code>null</code>
      * @throws OXException If part's filename cannot be returned
      */
-    private static String getFileName(final MailPart part, final ContentType contentType) throws OXException {
+    private static String getFileName(MailPart part, ContentType contentType) throws OXException {
         final ContentDisposition cd;
         {
             final String[] hdr = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
@@ -606,7 +606,7 @@ public final class MimeProcessingUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    static String handleInlineTextPart(final MailPart textPart, final ContentType contentType, final boolean allowHTML) throws IOException, OXException {
+    static String handleInlineTextPart(MailPart textPart, ContentType contentType, boolean allowHTML) throws IOException, OXException {
         final String charset = getCharset(textPart, contentType);
         if (contentType.startsWith("text/") && Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
             if (allowHTML) {
@@ -647,14 +647,14 @@ public final class MimeProcessingUtility {
      * @param contentType The content type
      * @return <code>true</code> if content type matches special; otherwise <code>false</code>
      */
-    public static boolean isSpecial(final String contentType) {
+    public static boolean isSpecial(String contentType) {
         if (null == contentType) {
             return false;
         }
         final String ct = contentType.toLowerCase(Locale.US);
         if (ct.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_SPECIAL2) {
+            for (String subtype : SUB_SPECIAL2) {
                 if (ct.startsWith(subtype, off)) {
                     return true;
                 }
@@ -672,7 +672,7 @@ public final class MimeProcessingUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    static String readContent(final MailPart mailPart, final String charset) throws OXException, IOException {
+    static String readContent(MailPart mailPart, String charset) throws OXException, IOException {
         try {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (java.io.CharConversionException e) {
@@ -685,7 +685,7 @@ public final class MimeProcessingUtility {
 
     private static final String TEXT = "text/";
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    private static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
@@ -717,7 +717,7 @@ public final class MimeProcessingUtility {
      * @param addrs The array of {@link InternetAddress} instances
      * @return A comma-separated list of addresses as a {@link String}
      */
-    public static String addrs2String(final InternetAddress[] addrs) {
+    public static String addrs2String(InternetAddress[] addrs) {
         final StringBuilder tmp = new StringBuilder(addrs.length << 4);
         boolean first = true;
         for (InternetAddress addr : addrs) {
@@ -740,7 +740,7 @@ public final class MimeProcessingUtility {
      * @param addr The {@link InternetAddress} instance
      * @return The address string
      */
-    static String addr2String(final InternetAddress addr) {
+    static String addr2String(InternetAddress addr) {
         if (null == addr) {
             return "";
         }
@@ -774,7 +774,7 @@ public final class MimeProcessingUtility {
      * @param text The text content
      * @param textBuilder The text builder to append to
      */
-    static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text, final StringBuilder textBuilder) {
+    static void appendRightVersion(ContentType rootType, ContentType contentType, String text, StringBuilder textBuilder) {
         if (rootType.getBaseType().equalsIgnoreCase(contentType.getBaseType())) {
             textBuilder.append(text);
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
@@ -791,7 +791,7 @@ public final class MimeProcessingUtility {
      * @param personal The personal
      * @return The prepared personal
      */
-    static String preparePersonal(final String personal) {
+    static String preparePersonal(String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
     }
 

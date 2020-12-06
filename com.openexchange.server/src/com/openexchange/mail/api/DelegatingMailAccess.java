@@ -77,7 +77,7 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
      * @param delegate The mail access to delegate to
      * @param session The associated session
      */
-    protected DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session) {
+    protected DelegatingMailAccess(MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, Session session) {
         super(session);
         this.delegate = delegate;
     }
@@ -89,7 +89,7 @@ public abstract class DelegatingMailAccess extends MailAccess<IMailFolderStorage
      * @param session The associated session
      * @param accountId The account identifier
      */
-    protected DelegatingMailAccess(final MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, final Session session, final int accountId) {
+    protected DelegatingMailAccess(MailAccess<IMailFolderStorage,IMailMessageStorage> delegate, Session session, int accountId) {
         super(session,accountId);
         this.delegate = delegate;
     }

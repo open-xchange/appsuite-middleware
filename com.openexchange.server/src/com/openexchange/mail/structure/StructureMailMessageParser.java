@@ -153,7 +153,7 @@ public final class StructureMailMessageParser {
     private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
 
         @Override
-        public boolean isInline(final String disposition, final String fileName) {
+        public boolean isInline(String disposition, String fileName) {
             return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
         }
     };
@@ -165,7 +165,7 @@ public final class StructureMailMessageParser {
     private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
 
         @Override
-        public boolean isInline(final String disposition, final String fileName) {
+        public boolean isInline(String disposition, String fileName) {
             return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
         }
     };
@@ -207,7 +207,7 @@ public final class StructureMailMessageParser {
      * @param neverTreatMessageAsAttachment whether to treat a message part as an attachment
      * @return This parser with new behavior applied
      */
-    public StructureMailMessageParser setNeverTreatMessageAsAttachment(final boolean neverTreatMessageAsAttachment) {
+    public StructureMailMessageParser setNeverTreatMessageAsAttachment(boolean neverTreatMessageAsAttachment) {
         this.neverTreatMessageAsAttachment = neverTreatMessageAsAttachment;
         return this;
     }
@@ -218,7 +218,7 @@ public final class StructureMailMessageParser {
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
-    public StructureMailMessageParser setInlineDetectorBehavior(final boolean strict) {
+    public StructureMailMessageParser setInlineDetectorBehavior(boolean strict) {
         inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
         return this;
     }
@@ -229,7 +229,7 @@ public final class StructureMailMessageParser {
      * @param parseTNEFParts <code>true</code> to parse TNEF parts; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
-    public StructureMailMessageParser setParseTNEFParts(final boolean parseTNEFParts) {
+    public StructureMailMessageParser setParseTNEFParts(boolean parseTNEFParts) {
         this.parseTNEFParts = parseTNEFParts;
         return this;
     }
@@ -240,7 +240,7 @@ public final class StructureMailMessageParser {
      * @param parseUUEncodedParts <code>true</code> to parse UUEncoded parts; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
-    public StructureMailMessageParser setParseUUEncodedParts(final boolean parseUUEncodedParts) {
+    public StructureMailMessageParser setParseUUEncodedParts(boolean parseUUEncodedParts) {
         this.parseUUEncodedParts = parseUUEncodedParts;
         return this;
     }
@@ -264,7 +264,7 @@ public final class StructureMailMessageParser {
      * @param handler The call-back handler
      * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final StructureHandler handler) throws OXException {
+    public void parseMailMessage(MailMessage mail, StructureHandler handler) throws OXException {
         parseMailMessage(mail, handler, null);
     }
 
@@ -303,7 +303,7 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private void parseMailContent(final MailPart mailPart, final StructureHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(MailPart mailPart, StructureHandler handler, String prefix, int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
@@ -812,7 +812,7 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private MailPart extractTextFrom(final MailPart mailPart, final int altLevel) throws OXException {
+    private MailPart extractTextFrom(MailPart mailPart, int altLevel) throws OXException {
         if (!mailPart.containsContentType()) {
             return null;
         }
@@ -848,7 +848,7 @@ public final class StructureMailMessageParser {
         return null;
     }
 
-    private byte[] extractBodyFrom(final byte[] bytes) {
+    private byte[] extractBodyFrom(byte[] bytes) {
         int pos = MIMEMultipartMailPart.getHeaderEnd(bytes);
         if (pos <= 0) {
             return bytes;
@@ -860,7 +860,7 @@ public final class StructureMailMessageParser {
         return body;
     }
 
-    private void parseEnvelope(final MailMessage mail, final StructureHandler handler) throws OXException {
+    private void parseEnvelope(MailMessage mail, StructureHandler handler) throws OXException {
         /*
          * SUBJECT
          */
@@ -902,7 +902,7 @@ public final class StructureMailMessageParser {
      * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
      * @return An appropriate filename
      */
-    public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
+    public static String getFileName(String rawFileName, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
         if ((filename == null) || com.openexchange.java.Strings.isEmpty(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
@@ -926,7 +926,7 @@ public final class StructureMailMessageParser {
      * @param partCount The part count
      * @return The sequence ID
      */
-    public static String getSequenceId(final String prefix, final int partCount) {
+    public static String getSequenceId(String prefix, int partCount) {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
@@ -940,11 +940,11 @@ public final class StructureMailMessageParser {
      * @param baseMimeType The base MIME type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
      * @return The generated filename
      */
-    public static String generateFilename(final String sequenceId, final String baseMimeType) {
+    public static String generateFilename(String sequenceId, String baseMimeType) {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(MailPart mailPart, ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             if (contentType.startsWith("text/htm")) {
@@ -960,7 +960,7 @@ public final class StructureMailMessageParser {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    private static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
@@ -1001,10 +1001,10 @@ public final class StructureMailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
-    private static boolean isText(final String contentType) {
+    private static boolean isText(String contentType) {
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_TEXT) {
+            for (String subtype : SUB_TEXT) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
@@ -1021,7 +1021,7 @@ public final class StructureMailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
      */
-    private static boolean isMultipart(final String contentType) {
+    private static boolean isMultipart(String contentType) {
         return contentType.startsWith(PRIMARY_MULTI, 0);
     }
 
@@ -1063,7 +1063,7 @@ public final class StructureMailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
      */
-    private static boolean isMultipartSigned(final ContentType contentType) {
+    private static boolean isMultipartSigned(ContentType contentType) {
         if (contentType.startsWith("application/pkcs7-mime")) {
             return true;
         }
@@ -1084,7 +1084,7 @@ public final class StructureMailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */
-    private static boolean isMessage(final String contentType) {
+    private static boolean isMessage(String contentType) {
         return contentType.startsWith(PRIMARY_RFC822, 0);
     }
 }

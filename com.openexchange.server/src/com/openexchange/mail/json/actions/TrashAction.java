@@ -88,13 +88,13 @@ public final class TrashAction extends AbstractMailAction {
      *
      * @param services
      */
-    public TrashAction(final ServiceLookup services) {
+    public TrashAction(ServiceLookup services) {
         super(services);
         emptyJsonArray = ImmutableJSONArray.immutableFor(new JSONArray(0));
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // Read in parameters
             boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));

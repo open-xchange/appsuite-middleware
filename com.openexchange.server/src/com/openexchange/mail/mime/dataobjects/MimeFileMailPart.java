@@ -95,7 +95,7 @@ public abstract class MimeFileMailPart extends MailPart {
      * @param fileDataSource The file data source
      * @throws OXException If upload file's content type cannot be parsed
      */
-    protected MimeFileMailPart(final com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
+    protected MimeFileMailPart(com.openexchange.mail.mime.datasource.FileDataSource fileDataSource) throws OXException {
         super();
         this.file = fileDataSource.getFile();
         final String preparedFileName = fileDataSource.getName();
@@ -121,7 +121,7 @@ public abstract class MimeFileMailPart extends MailPart {
         }
     }
 
-    private static String prepareContentType(final String contentType, final String preparedFileName) {
+    private static String prepareContentType(String contentType, String preparedFileName) {
         if (null == contentType || contentType.length() == 0) {
             return MimeTypes.MIME_APPL_OCTET;
         }
@@ -219,7 +219,7 @@ public abstract class MimeFileMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

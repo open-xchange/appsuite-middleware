@@ -147,7 +147,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
      * @param names The character sequences
      * @return The header names
      */
-    public static HeaderName[] valuesOf(final CharSequence... names) {
+    public static HeaderName[] valuesOf(CharSequence... names) {
         if (null == names) {
             return null;
         }
@@ -166,7 +166,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
      * @param s The character sequence
      * @return The new header name.
      */
-    public static HeaderName valueOf(final CharSequence s) {
+    public static HeaderName valueOf(CharSequence s) {
         final String key = s.toString();
         final HeaderName cached = CACHE.get(key);
         if (cached == null) {
@@ -182,7 +182,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     /**
      * No direct instantiation
      */
-    private HeaderName(final String s) {
+    private HeaderName(String s) {
         super();
         this.s = s;
         hashcode = Strings.asciiLowerCase(s).hashCode();
@@ -201,7 +201,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     }
 
     @Override
-    public boolean equals(final Object other) {
+    public boolean equals(Object other) {
         if (other == this) {
             return true;
         }
@@ -225,12 +225,12 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     }
 
     @Override
-    public int compareTo(final HeaderName other) {
+    public int compareTo(HeaderName other) {
         return s.compareToIgnoreCase(other.s);
     }
 
     @Override
-    public char charAt(final int index) {
+    public char charAt(int index) {
         return s.charAt(index);
     }
 
@@ -240,7 +240,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     }
 
     @Override
-    public CharSequence subSequence(final int start, final int end) {
+    public CharSequence subSequence(int start, int end) {
         return s.subSequence(start, end);
     }
 

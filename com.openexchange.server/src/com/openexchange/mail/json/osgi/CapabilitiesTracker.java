@@ -106,7 +106,7 @@ public class CapabilitiesTracker implements ServiceTrackerCustomizer<CapabilityS
     }
 
     @Override
-    public synchronized CapabilityService addingService(final ServiceReference<CapabilityService> reference) {
+    public synchronized CapabilityService addingService(ServiceReference<CapabilityService> reference) {
         CapabilityService service = context.getService(reference);
 
         {
@@ -161,12 +161,12 @@ public class CapabilitiesTracker implements ServiceTrackerCustomizer<CapabilityS
     }
 
     @Override
-    public void modifiedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
+    public void modifiedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
         // Ignore
     }
 
     @Override
-    public synchronized void removedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
+    public synchronized void removedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
         List<ServiceRegistration<CapabilityChecker>> serviceRegistrations = this.serviceRegistrations;
         if (null != serviceRegistrations) {
             this.serviceRegistrations = null;

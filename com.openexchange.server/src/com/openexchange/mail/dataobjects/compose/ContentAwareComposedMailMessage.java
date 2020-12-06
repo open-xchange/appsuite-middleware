@@ -81,7 +81,7 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
      * @param contextId The context identifier
      * @throws OXException If initialization fails
      */
-    public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final int contextId) throws OXException {
+    public ContentAwareComposedMailMessage(MimeMessage content, Session session, int contextId) throws OXException {
         this(content, session, ContextStorage.getStorageContext(contextId));
     }
 
@@ -92,7 +92,7 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
      * @param session The session
      * @param ctx The context
      */
-    public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final Context ctx) {
+    public ContentAwareComposedMailMessage(MimeMessage content, Session session, Context ctx) {
         super(session, ctx);
         this.content = content;
     }
@@ -106,12 +106,12 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
      * @param contextId The context identifier
      * @throws OXException If initialization fails
      */
-    public ContentAwareComposedMailMessage(final MimeMessage content, final int contextId) throws OXException {
+    public ContentAwareComposedMailMessage(MimeMessage content, int contextId) throws OXException {
         super(null, ContextStorage.getStorageContext(contextId));
         this.content = content;
     }
 
-    private static InternetAddress[] convert(final Address[] a) {
+    private static InternetAddress[] convert(Address[] a) {
         if (null == a) {
             return null;
         }
@@ -180,12 +180,12 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setBodyPart(final TextBodyMailPart mailPart) {
+    public void setBodyPart(TextBodyMailPart mailPart) {
         // Nope
     }
 
@@ -195,12 +195,12 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
     }
 
     @Override
-    public MailPart removeEnclosedPart(final int index) {
+    public MailPart removeEnclosedPart(int index) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addEnclosedPart(final MailPart part) {
+    public void addEnclosedPart(MailPart part) {
         // Nope
     }
 
@@ -210,7 +210,7 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         // Nope
     }
 

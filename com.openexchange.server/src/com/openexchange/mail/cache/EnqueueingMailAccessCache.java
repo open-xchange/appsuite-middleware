@@ -106,7 +106,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @return The singleton instance
      * @throws OXException If instance initialization fails
      */
-    public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws OXException {
+    public static EnqueueingMailAccessCache getInstance(int queueCapacity) throws OXException {
         EnqueueingMailAccessCache tmp = singleton;
         if (null == tmp) {
             synchronized (EnqueueingMailAccessCache.class) {
@@ -184,7 +184,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @param fallbackQueueCapacity The max. queue capacity
      * @throws OXException If an error occurs
      */
-    private EnqueueingMailAccessCache(final int fallbackQueueCapacity) throws OXException {
+    private EnqueueingMailAccessCache(int fallbackQueueCapacity) throws OXException {
         super();
         this.fallbackQueueCapacity = fallbackQueueCapacity;
         map = new NonBlockingHashMap<UserAndContext, AccountMap>();
@@ -237,7 +237,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
     @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(Session session, int accountId) {
         AccountMap accounts = map.get(UserAndContext.newInstance(session));
         if (accounts == null) {
             return null;
@@ -278,7 +278,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
     @Override
-    public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+    public boolean putMailAccess(Session session, int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleSeconds = mailAccess.getCacheIdleSeconds();
         if (idleSeconds <= 0) {
             idleSeconds = defaultIdleSeconds;
@@ -339,7 +339,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
     @Override
-    public boolean containsMailAccess(final Session session, final int accountId) {
+    public boolean containsMailAccess(Session session, int accountId) {
         AccountMap accounts = map.get(UserAndContext.newInstance(session));
         if (accounts == null) {
             return false;
@@ -452,7 +452,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
         private final ConcurrentMap<UserAndContext, AccountMap> map;
 
-        PurgeExpiredRunnable(final ConcurrentMap<UserAndContext, AccountMap> map) {
+        PurgeExpiredRunnable(ConcurrentMap<UserAndContext, AccountMap> map) {
             super();
             this.map = map;
         }

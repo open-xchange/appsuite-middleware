@@ -111,7 +111,7 @@ public final class PlainTextAddress extends InternetAddress {
      *
      * @param address The plain text address
      */
-    public PlainTextAddress(final String address) {
+    public PlainTextAddress(String address) {
         this.plainAddress = QuotedInternetAddress.init(MimeMessageUtility.decodeMultiEncodedHeader(address));
         hashCode = Strings.asciiLowerCase(address).hashCode();
     }
@@ -137,7 +137,7 @@ public final class PlainTextAddress extends InternetAddress {
     }
 
     @Override
-    public boolean equals(final Object address) {
+    public boolean equals(Object address) {
         if (address instanceof InternetAddress) {
             final InternetAddress ia = (InternetAddress) address;
             return this.plainAddress.equalsIgnoreCase(ia.getAddress());

@@ -98,7 +98,7 @@ public final class MailRequest {
      * @param session The session
      * @param request The request
      */
-    public MailRequest(final AJAXRequestData request, final ServerSession session) {
+    public MailRequest(AJAXRequestData request, ServerSession session) {
         super();
         this.requestData = request;
         this.session = session;
@@ -153,7 +153,7 @@ public final class MailRequest {
      * @throws NullPointerException If name is <code>null</code>
      * @throws OXException If no such parameter exists
      */
-    public String checkParameter(final String name) throws OXException {
+    public String checkParameter(String name) throws OXException {
         return requestData.nonEmptyParameter(name);
     }
 
@@ -164,7 +164,7 @@ public final class MailRequest {
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
      */
-    public String getParameter(final String name) {
+    public String getParameter(String name) {
         return requestData.getParameter(name);
     }
 
@@ -174,7 +174,7 @@ public final class MailRequest {
      * @param name The parameter name
      * @return The <code>boolean</code>
      */
-    public boolean optBool(final String name) {
+    public boolean optBool(String name) {
         return AJAXRequestDataTools.parseBoolParameter(requestData.getParameter(name));
     }
 
@@ -185,7 +185,7 @@ public final class MailRequest {
      * @param def The default value to return if such a parameter is absent
      * @return The <code>boolean</code>
      */
-    public boolean optBool(final String name, final boolean def) {
+    public boolean optBool(String name, boolean def) {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return def;
@@ -200,7 +200,7 @@ public final class MailRequest {
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
      */
-    public int optInt(final String name) throws OXException {
+    public int optInt(String name) throws OXException {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return NOT_FOUND;
@@ -294,7 +294,7 @@ public final class MailRequest {
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
      */
-    public int[] checkIntArray(final String name) throws OXException {
+    public int[] checkIntArray(String name) throws OXException {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -355,7 +355,7 @@ public final class MailRequest {
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
      */
-    public String[] checkStringArray(final String name) throws OXException {
+    public String[] checkStringArray(String name) throws OXException {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -369,7 +369,7 @@ public final class MailRequest {
      * @param name The parameter name
      * @return The <code>String</code> array
      */
-    public String[] optStringArray(final String name) {
+    public String[] optStringArray(String name) {
         final String parameter = requestData.getParameter(name);
         if (null == parameter) {
             return null;

@@ -80,17 +80,17 @@ public final class MailServiceImpl implements MailService {
     }
 
     @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final Session session, final int accountId) throws OXException {
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(Session session, int accountId) throws OXException {
         return MailAccess.getInstance(session, accountId);
     }
 
     @Override
-    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final int userId, final int contextId, final int accountId) throws OXException {
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(int userId, int contextId, int accountId) throws OXException {
         return MailAccess.getInstance(userId, contextId, accountId);
     }
 
     @Override
-    public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
+    public MailTransport getMailTransport(Session session, int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId);
     }
 

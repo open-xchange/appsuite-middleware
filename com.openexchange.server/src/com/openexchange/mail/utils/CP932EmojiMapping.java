@@ -103,7 +103,7 @@ public class CP932EmojiMapping {
      * @param content The content
      * @return The replaced content
      */
-    public String replaceIn(final String content) {
+    public String replaceIn(String content) {
         if (null == content) {
             return content;
         }
@@ -124,7 +124,7 @@ public class CP932EmojiMapping {
      * @param c The character to map
      * @return The mapped character or '\ufffd'
      */
-    public char mappingFor(final char c) {
+    public char mappingFor(char c) {
         return (char) map.get(c);
     }
 

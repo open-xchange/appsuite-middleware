@@ -75,14 +75,14 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
     /**
      * Initializes a new {@link MailProviderServiceTracker}
      */
-    public MailProviderServiceTracker(final BundleContext context) {
+    public MailProviderServiceTracker(BundleContext context) {
         super();
         registrations = new ConcurrentHashMap<String, ServiceRegistration<MailProviderRegistration>>(4, 0.9F, 1);
         this.context = context;
     }
 
     @Override
-    public MailProvider addingService(final ServiceReference<MailProvider> reference) {
+    public MailProvider addingService(ServiceReference<MailProvider> reference) {
         final MailProvider provider = context.getService(reference);
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
@@ -113,12 +113,12 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
     }
 
     @Override
-    public void modifiedService(final ServiceReference<MailProvider> reference, final MailProvider service) {
+    public void modifiedService(ServiceReference<MailProvider> reference, MailProvider service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference<MailProvider> reference, final MailProvider service) {
+    public void removedService(ServiceReference<MailProvider> reference, MailProvider service) {
         if (null != service) {
             try {
                 MailProvider provider = service;

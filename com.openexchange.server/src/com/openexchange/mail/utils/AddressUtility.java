@@ -81,7 +81,7 @@ public class AddressUtility {
      * @return The addresses
      * @throws OXException If addresses cannot be returned
      */
-    public static Set<InternetAddress> getAddresses(final MailMessage mail, final ServerSession session) throws OXException {
+    public static Set<InternetAddress> getAddresses(MailMessage mail, ServerSession session) throws OXException {
         if (mail == null) {
             return Collections.emptySet();
         }
@@ -110,7 +110,7 @@ public class AddressUtility {
             final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
             knownAddresses.add(new QuotedInternetAddress(user.getMail()));
             final String[] aliases = user.getAliases();
-            for (final String alias : aliases) {
+            for (String alias : aliases) {
                 knownAddresses.add(new QuotedInternetAddress(alias));
             }
             return knownAddresses;

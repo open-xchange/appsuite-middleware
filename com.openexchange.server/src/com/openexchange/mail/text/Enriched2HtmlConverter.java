@@ -71,7 +71,7 @@ public class Enriched2HtmlConverter {
 
         public final String str;
 
-        private ParaType(final int type, final String str) {
+        private ParaType(int type, String str) {
             this.type = type;
             this.str = str;
         }
@@ -117,7 +117,7 @@ public class Enriched2HtmlConverter {
      * @param enrichedText The enriched text
      * @return The HTML content
      */
-    public static final String convertEnriched2Html(final String enrichedText) {
+    public static final String convertEnriched2Html(String enrichedText) {
         return new Enriched2HtmlConverter().convert(enrichedText);
     }
 
@@ -181,7 +181,7 @@ public class Enriched2HtmlConverter {
 
     private static final String HTML_BOLD = "b";
 
-    public final String convert(final String enrichedText) {
+    public final String convert(String enrichedText) {
         try {
             if (doReset) {
                 reset();
@@ -321,7 +321,7 @@ public class Enriched2HtmlConverter {
 
     private static final String ENRICHED_PREFIX = "x-tad-";
 
-    private final void handleEnrichedTag(final String tagArg, final StringBuilder sb) {
+    private final void handleEnrichedTag(String tagArg, StringBuilder sb) {
         String tag;
         final boolean isEndTag = tagArg.charAt(0) == CHAR_SLASH;
         if (isEndTag) {
@@ -417,7 +417,7 @@ public class Enriched2HtmlConverter {
         }
     }
 
-    private static final void mapSimpleTag(final String rpl, final boolean isEndTag, final StringBuilder sb) {
+    private static final void mapSimpleTag(String rpl, boolean isEndTag, StringBuilder sb) {
         sb.append(CHAR_LT);
         if (isEndTag) {
             sb.append(CHAR_SLASH);
@@ -435,7 +435,7 @@ public class Enriched2HtmlConverter {
 
     private static final String FONT_FACE = " face=\"";
 
-    private static final void openFont(final int size, final String font, final String color, final StringBuilder sb) {
+    private static final void openFont(int size, String font, String color, StringBuilder sb) {
         sb.append(FONT_PREFIX);
         if (size > 0) {
             sb.append(FONT_SIZE_PLUS).append(size);
@@ -453,11 +453,11 @@ public class Enriched2HtmlConverter {
 
     private static final String FONT_CLOSE_TAG = "</font>";
 
-    private static final void closeFont(final StringBuilder sb) {
+    private static final void closeFont(StringBuilder sb) {
         sb.append(FONT_CLOSE_TAG);
     }
 
-    private static final String getTagName(final int firstChar, final Reader r) throws IOException {
+    private static final String getTagName(int firstChar, Reader r) throws IOException {
         /*
          * Assume last read character was '<'
          */

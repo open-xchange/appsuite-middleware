@@ -76,13 +76,13 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
      *
      * @param services
      */
-    public ArchiveFolderAction(final ServiceLookup services) {
+    public ArchiveFolderAction(ServiceLookup services) {
         super(services);
     }
 
     @SuppressWarnings("null")
     @Override
-    protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
+    protected AJAXRequestResult performArchive(MailRequest req) throws OXException {
         ServerSession session = req.getSession();
         int days;
         {

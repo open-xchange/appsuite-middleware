@@ -69,7 +69,7 @@ public abstract class AbstractAddressTerm extends SearchTerm<String> {
     /**
      * Initializes a new {@link AbstractAddressTerm}
      */
-    protected AbstractAddressTerm(final String pattern) {
+    protected AbstractAddressTerm(String pattern) {
         super();
         String addr;
         try {

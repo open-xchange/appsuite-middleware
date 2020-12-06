@@ -79,7 +79,7 @@ public abstract class MailProvider {
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
         } else if (obj == null) {
@@ -118,7 +118,7 @@ public abstract class MailProvider {
      *
      * @param deprecated <code>true</code> if deprecated; otherwise <code>false</code>
      */
-    public void setDeprecated(final boolean deprecated) {
+    public void setDeprecated(boolean deprecated) {
         this.deprecated = deprecated;
     }
 
@@ -170,7 +170,7 @@ public abstract class MailProvider {
      * @param accountId The account identifier
      * @return A newly created {@link MailPermission mail permission}.
      */
-    public MailPermission createNewMailPermission(final Session session, final int accountId) {
+    public MailPermission createNewMailPermission(Session session, int accountId) {
         return new DefaultMailPermission();
     }
 
@@ -210,7 +210,7 @@ public abstract class MailProvider {
      * @param protocol The protocol
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
-    public final boolean supportsProtocol(final String protocol) {
+    public final boolean supportsProtocol(String protocol) {
         return getProtocol().isSupported(protocol);
     }
 

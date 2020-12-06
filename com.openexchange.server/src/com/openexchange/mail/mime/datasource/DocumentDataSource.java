@@ -88,7 +88,7 @@ public final class DocumentDataSource implements DataSource {
         this.session = session;
     }
 
-    private static IDBasedFileAccess fileAccess(final Session session) throws OXException {
+    private static IDBasedFileAccess fileAccess(Session session) throws OXException {
         return ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true).createAccess(session);
     }
 

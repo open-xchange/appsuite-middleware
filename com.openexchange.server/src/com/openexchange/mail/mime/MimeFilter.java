@@ -82,7 +82,7 @@ public class MimeFilter {
      * @param alias The alias
      * @return The appropriate MIME filter or <code>null</code> if alias is unknown
      */
-    public static MimeFilter filterFor(final String alias) {
+    public static MimeFilter filterFor(String alias) {
         if ("ics".equalsIgnoreCase(alias)) {
             return IcsMimeFilter.getInstance();
         }
@@ -95,7 +95,7 @@ public class MimeFilter {
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
-    public static MimeFilter filterFor(final String... ignorableContentTypes) {
+    public static MimeFilter filterFor(String... ignorableContentTypes) {
         return new MimeFilter(Arrays.asList(ignorableContentTypes));
     }
 
@@ -105,7 +105,7 @@ public class MimeFilter {
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
-    public static MimeFilter filterFor(final List<String> ignorableContentTypes) {
+    public static MimeFilter filterFor(List<String> ignorableContentTypes) {
         return new MimeFilter(ignorableContentTypes);
     }
 
@@ -118,7 +118,7 @@ public class MimeFilter {
     /**
      * Initializes a new {@link MimeFilter}.
      */
-    protected MimeFilter(final List<String> ignorableContentTypes) {
+    protected MimeFilter(List<String> ignorableContentTypes) {
         super();
         this.ignorableContentTypes = ignorableContentTypes;
     }
@@ -139,7 +139,7 @@ public class MimeFilter {
      * @return The filtered MIME message
      * @throws OXException If filter operation fails
      */
-    public MimeMessage filter(final MimeMessage mimeMessage) throws OXException {
+    public MimeMessage filter(MimeMessage mimeMessage) throws OXException {
         if (null == mimeMessage) {
             return null;
         }
@@ -181,8 +181,8 @@ public class MimeFilter {
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>
      */
-    public boolean ignorable(final String contentType, @SuppressWarnings("unused") final BodyPart bodyPart) {
-        for (final String baseType : ignorableContentTypes) {
+    public boolean ignorable(String contentType, @SuppressWarnings("unused") final BodyPart bodyPart) {
+        for (String baseType : ignorableContentTypes) {
             if (contentType.startsWith(baseType)) {
                 return true;
             }
@@ -197,8 +197,8 @@ public class MimeFilter {
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>
      */
-    public boolean ignorable(final String contentType, @SuppressWarnings("unused") final MailPart bodyPart) {
-        for (final String baseType : ignorableContentTypes) {
+    public boolean ignorable(String contentType, @SuppressWarnings("unused") final MailPart bodyPart) {
+        for (String baseType : ignorableContentTypes) {
             if (contentType.startsWith(baseType)) {
                 return true;
             }
@@ -206,7 +206,7 @@ public class MimeFilter {
         return false;
     }
 
-    private void handlePart(final Multipart multipart, final MimeMultipart newMultipart) throws MessagingException, IOException, OXException {
+    private void handlePart(Multipart multipart, MimeMultipart newMultipart) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
         for (int i = 0; i < count; i++) {
             final BodyPart bodyPart = multipart.getBodyPart(i);
@@ -252,7 +252,7 @@ public class MimeFilter {
         }
     }
 
-    private static String getSubType(final String contentType, final String defaultType) {
+    private static String getSubType(String contentType, String defaultType) {
         try {
             return new ContentType(contentType).getSubType();
         } catch (Exception e) {

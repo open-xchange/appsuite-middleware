@@ -112,7 +112,7 @@ public final class JSONObjectConverter {
      * @param ctx The context
      * @throws OXException If initialization fails
      */
-    public JSONObjectConverter(final JSONObject rawJSONMailObject, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws OXException {
+    public JSONObjectConverter(JSONObject rawJSONMailObject, DisplayMode displayMode, Session session, UserSettingMail usm, Context ctx) throws OXException {
         super();
         this.rawJSONMailObject = rawJSONMailObject;
         // this.accountId = accountId;
@@ -168,7 +168,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void raw2JsonMail0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws OXException {
+    private void raw2JsonMail0(JSONObject rawJSONMailObject, JSONObject jsonObject) throws OXException {
         try {
             copyValue(DataFields.ID, rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), rawJSONMailObject, jsonObject);
@@ -181,7 +181,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void raw2Json0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws OXException {
+    private void raw2Json0(JSONObject rawJSONMailObject, JSONObject jsonObject) throws OXException {
         try {
             copyValue(MailJSONField.RECIPIENT_BCC.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.RECIPIENT_CC.getKey(), rawJSONMailObject, jsonObject);
@@ -327,7 +327,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void handleTextPart(final JSONObject textObject, final JSONArray attachmentsArr) throws OXException, JSONException {
+    private void handleTextPart(JSONObject textObject, JSONArray attachmentsArr) throws OXException, JSONException {
         // Text part found
         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
             final String displayVersion =
@@ -348,7 +348,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void handleHTMLPart(final JSONObject htmlObject, final JSONArray attachmentsArr) throws OXException {
+    private void handleHTMLPart(JSONObject htmlObject, JSONArray attachmentsArr) throws OXException {
         // HTML part found
         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
             // Prepare HTML content
@@ -362,7 +362,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void asPlainText(final JSONObject textObject, final String content, final JSONArray attachmentsArr) throws OXException {
+    private void asPlainText(JSONObject textObject, String content, JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), textObject, jsonObject);
@@ -376,7 +376,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void asDisplayHtml(final JSONObject htmlObject, final JSONArray attachmentsArr) throws OXException {
+    private void asDisplayHtml(JSONObject htmlObject, JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
@@ -401,7 +401,7 @@ public final class JSONObjectConverter {
         }
     }
 
-    private void asDisplayText(final JSONObject htmlObject, final String htmlContent, final boolean addAttachment, final JSONArray attachmentsArr) throws OXException {
+    private void asDisplayText(JSONObject htmlObject, String htmlContent, boolean addAttachment, JSONArray attachmentsArr) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
             copyValue(MailListField.ID.getKey(), htmlObject, jsonObject);
@@ -444,7 +444,7 @@ public final class JSONObjectConverter {
 
     private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
 
-    private String getHtmlDisplayVersion(final ContentType contentType, final String src) throws OXException {
+    private String getHtmlDisplayVersion(ContentType contentType, String src) throws OXException {
         final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
         if (baseType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT)) {
             return HtmlProcessing.formatHTMLForDisplay(
@@ -472,7 +472,7 @@ public final class JSONObjectConverter {
         return HtmlProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
-    private static JSONObject extractObject(final JSONArray bodyArr, final String... contentTypes) throws JSONException {
+    private static JSONObject extractObject(JSONArray bodyArr, String... contentTypes) throws JSONException {
         JSONObject retval = null;
         final int bodyLen = bodyArr.length();
         for (int i = 0; null == retval && i < bodyLen; i++) {
@@ -492,7 +492,7 @@ public final class JSONObjectConverter {
      * @param prefixes The prefixes
      * @return <code>true</code> if specified string starts with either of passed prefixes; otherwise <code>false</code>
      */
-    private static boolean startsWithEither(final String s, final String[] prefixes) {
+    private static boolean startsWithEither(String s, String[] prefixes) {
         boolean startsWith = false;
         for (int i = 0; !startsWith && i < prefixes.length; i++) {
             startsWith = s.startsWith(prefixes[i]);
@@ -524,7 +524,7 @@ public final class JSONObjectConverter {
      * @param dst The destination JSON object
      * @throws JSONException If a JSON error occurs
      */
-    private static void copyValue(final String key, final JSONObject src, final JSONObject dst) throws JSONException {
+    private static void copyValue(String key, JSONObject src, JSONObject dst) throws JSONException {
         if (src.hasAndNotNull(key)) {
             dst.put(key, src.opt(key));
         }

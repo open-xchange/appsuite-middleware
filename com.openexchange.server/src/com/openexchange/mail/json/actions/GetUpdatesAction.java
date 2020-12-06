@@ -83,14 +83,14 @@ public final class GetUpdatesAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetUpdatesAction(final ServiceLookup services) {
+    public GetUpdatesAction(ServiceLookup services) {
         super(services);
     }
 
     private final transient MailFieldWriter WRITER_ID = MessageWriter.getMailFieldWriters(new MailListField[] { MailListField.ID })[0];
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -122,10 +122,10 @@ public final class GetUpdatesAction extends AbstractMailAction {
                 if (!bIgnoreModified) {
                     final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
                     final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
-                    for (final MailMessage mail : modified) {
+                    for (MailMessage mail : modified) {
                         final JSONArray ja = new JSONArray();
                         if (mail != null) {
-                            for (final MailFieldWriter writer : writers) {
+                            for (MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                             }
                             jsonWriter.value(ja);
@@ -134,7 +134,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
                 }
                 if (!bIgnoreDelete) {
                     final MailMessage[] deleted = mailInterface.getDeletedMessages(folderId, columns);
-                    for (final MailMessage mail : deleted) {
+                    for (MailMessage mail : deleted) {
                         final JSONArray ja = new JSONArray();
                         WRITER_ID.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                         jsonWriter.value(ja);

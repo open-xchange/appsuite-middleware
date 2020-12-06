@@ -114,7 +114,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @return <code>true</code> if specified mail message matches this search term; otherwise <code>false</code>
      * @throws OXException If checking mail message against search term fails
      */
-    public abstract boolean matches(final MailMessage mailMessage) throws OXException;
+    public abstract boolean matches(MailMessage mailMessage) throws OXException;
 
     /**
      * Generates the corresponding <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> instance of
@@ -163,7 +163,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param filter An array containing unsupported classes of {@link SearchTerm} to filter against
      * @return A new search term with the unsupported search terms removed
      */
-    public SearchTerm<?> filter(final Class<? extends SearchTerm>[] filter) {
+    public SearchTerm<?> filter(Class<? extends SearchTerm>[] filter) {
         return filter(new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
     }
 
@@ -224,7 +224,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param s The string to check
      * @return <code>true</code> if string only consists of ASCII 7 bit characters; otherwise <code>false</code>
      */
-    protected static final boolean isAscii(final String s) {
+    protected static final boolean isAscii(String s) {
         final int length = s.length();
         boolean isAscii = true;
         for (int i = 0; i < length && isAscii; i++) {
@@ -246,7 +246,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param pattern The pattern possibly containing wildcard characters
      * @return The largest non-wildcard part
      */
-    protected static final String getNonWildcardPart(final String pattern) {
+    protected static final String getNonWildcardPart(String pattern) {
         final String[] parts = PAT_SPLIT.split(pattern);
         if (parts.length == 0) {
             // Only consists of wildcard characters
@@ -276,7 +276,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param pattern The wildcard pattern
      * @return The corresponding regular expression
      */
-    protected static Pattern toRegex(final String pattern) {
+    protected static Pattern toRegex(String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
     }
 
@@ -286,7 +286,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
-    private static String wildcardToRegex(final String wildcard) {
+    private static String wildcardToRegex(String wildcard) {
         final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();

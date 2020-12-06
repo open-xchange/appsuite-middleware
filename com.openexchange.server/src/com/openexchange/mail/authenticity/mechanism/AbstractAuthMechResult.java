@@ -74,7 +74,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      * @param clientIP The optional client IP used to send the e-mail
      * @param result The {@link AuthenticityMechanismResult}
      */
-    public AbstractAuthMechResult(final String domain, final String clientIP, final AuthenticityMechanismResult result) {
+    public AbstractAuthMechResult(String domain, String clientIP, AuthenticityMechanismResult result) {
         super();
         this.domain = domain;
         this.clientIP = clientIP;
@@ -108,7 +108,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      * @param key The name of the property
      * @param value The value of the property
      */
-    public void addProperty(final String key, final String value) {
+    public void addProperty(String key, String value) {
         properties.put(key, value);
     }
 
@@ -122,7 +122,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      *
      * @param reason the reason to set
      */
-    public void setReason(final String reason) {
+    public void setReason(String reason) {
         this.reason = reason;
     }
 
@@ -141,7 +141,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      *
      * @param domainMatch The domainMatch to set
      */
-    public void setDomainMatch(final boolean domainMatch) {
+    public void setDomainMatch(boolean domainMatch) {
         this.domainMatch = domainMatch;
     }
 
@@ -159,7 +159,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

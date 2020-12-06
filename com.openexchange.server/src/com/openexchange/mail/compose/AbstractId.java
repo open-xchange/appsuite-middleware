@@ -175,7 +175,7 @@ public abstract class AbstractId {
         PRINTABLE_CHARS = bitSet;
     }
 
-    private static String encodeQP(final String string) {
+    private static String encodeQP(String string) {
         try {
             return Charsets.toAsciiString(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)));
         } catch (UnsupportedCharsetException e) {
@@ -184,7 +184,7 @@ public abstract class AbstractId {
         }
     }
 
-    private static String decodeQP(final String string) {
+    private static String decodeQP(String string) {
         try {
             return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(string)), com.openexchange.java.Charsets.UTF_8);
         } catch (DecoderException e) {

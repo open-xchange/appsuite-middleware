@@ -90,7 +90,7 @@ public final class MailSessionEventHandler implements EventHandler {
     }
 
     @Override
-    public void handleEvent(final Event event) {
+    public void handleEvent(Event event) {
         final Runnable r = new CustomRunnable(event);
         /*
          * Delegate to thread pool if present
@@ -107,7 +107,7 @@ public final class MailSessionEventHandler implements EventHandler {
 
         private final Event event;
 
-        CustomRunnable(final Event event) {
+        CustomRunnable(Event event) {
             super();
             this.event = event;
         }
@@ -121,7 +121,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                         (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                    for (final Session session : sessionContainer.values()) {
+                    for (Session session : sessionContainer.values()) {
                         dropSessionCaches(session);
                     }
                 } else if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
@@ -142,7 +142,7 @@ public final class MailSessionEventHandler implements EventHandler {
             }
         }
 
-        private static void dropSessionCaches(final Session session) {
+        private static void dropSessionCaches(Session session) {
             if (null == session || session.isTransient()) {
                 return;
             }

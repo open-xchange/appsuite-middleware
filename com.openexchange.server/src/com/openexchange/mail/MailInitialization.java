@@ -164,7 +164,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         } catch (OXException e) {
             started.set(false);
             // Revoke
-            for (final Initialization startedInit : startedStack) {
+            for (Initialization startedInit : startedStack) {
                 try {
                     startedInit.stop();
                 } catch (Exception e1) {
@@ -175,7 +175,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         }
     }
 
-    private void startUp(final Initialization initialization, final Stack<Initialization> startedStack) throws OXException {
+    private void startUp(Initialization initialization, Stack<Initialization> startedStack) throws OXException {
         initialization.start();
         startedStack.push(initialization);
     }

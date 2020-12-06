@@ -62,7 +62,7 @@ public enum OrderDirection {
 
     private final int order;
 
-    private OrderDirection(final int order) {
+    private OrderDirection(int order) {
         this.order = order;
     }
 
@@ -79,9 +79,9 @@ public enum OrderDirection {
      * @param order The order <code>int</code> value
      * @return The corresponding order direction
      */
-    public static final OrderDirection getOrderDirection(final int order) {
+    public static final OrderDirection getOrderDirection(int order) {
         final OrderDirection[] orderDirections = OrderDirection.values();
-        for (final OrderDirection direction : orderDirections) {
+        for (OrderDirection direction : orderDirections) {
             if (direction.order == order) {
                 return direction;
             }

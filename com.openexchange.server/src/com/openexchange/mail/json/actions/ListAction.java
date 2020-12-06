@@ -84,12 +84,12 @@ public final class ListAction extends AbstractMailAction {
      *
      * @param services
      */
-    public ListAction(final ServiceLookup services) {
+    public ListAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // Read in parameters
             ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
@@ -137,7 +137,7 @@ public final class ListAction extends AbstractMailAction {
         }
     }
 
-    private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, OXException {
+    private static final Map<String, List<String>> fillMapByArray(JSONArray idArray) throws JSONException, OXException {
         if (null == idArray) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
@@ -176,14 +176,14 @@ public final class ListAction extends AbstractMailAction {
         return idMap;
     }
 
-    private static String ensureString(final String key, final JSONObject jo) throws OXException {
+    private static String ensureString(String key, JSONObject jo) throws OXException {
         if (!jo.hasAndNotNull(key)) {
             throw MailExceptionCode.MISSING_PARAMETER.create(key);
         }
         return jo.optString(key);
     }
 
-    private static String[] toArray(final Collection<String> c) {
+    private static String[] toArray(Collection<String> c) {
         return c.toArray(new String[c.size()]);
     }
 
