@@ -209,7 +209,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         boolean acquired = acquireCleanUpTaskLockForSchema(representativeContextId, databaseService);
         if (acquired == false) {
             if (optSchema.isPresent()) {
-                LOG.debug("Another process currently deletes expired composition spaces for schems {}", optSchema.get());
+                LOG.debug("Another process currently deletes expired composition spaces for schemas {}", optSchema.get());
             } else {
                 LOG.debug("Another process currently deletes expired composition spaces for schema association with context {}", I(representativeContextId));
             }
