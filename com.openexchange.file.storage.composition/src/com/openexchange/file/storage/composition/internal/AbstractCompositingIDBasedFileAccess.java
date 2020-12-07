@@ -964,7 +964,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              */
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
 
-            warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, sourceIDTuple, fileAccess, getFileMetaData(fileAccess, sourceIDTuple)));
+            warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, fileAccess, getFileMetaData(fileAccess, sourceIDTuple)));
             if (0 < warnings.size()) {
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
@@ -1052,20 +1052,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      *
      * @param sourceFileID The file id of the file to move.
      * @param targetFolderID The id of the target folder.
-     * @param sourceIDTuple The id tuple of the source file (optional).
      * @param fileAccess The FileStorageFileAccess of the source file.
      * @param file The file to move.
      * @return The warnings, or an empty list if there are none.
      * @throws OXException
      */
-    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, final FolderID targetFolderID, final IDTuple sourceIDTuple, FileStorageFileAccess fileAccess, File file) throws OXException {
-        IDTuple fileIdTuple = sourceIDTuple;
-        if (fileIdTuple == null) {
-            fileIdTuple = new IDTuple();
-            fileIdTuple.setId(sourceFileID.getFileId());
-            fileIdTuple.setFolder(sourceFileID.getFolderId());
-        }
-
+    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, final FolderID targetFolderID, FileStorageFileAccess fileAccess, File file) throws OXException {
         FileStorageFolder sourceFolder = fileAccess.getAccountAccess().getFolderAccess().getFolder(sourceFileID.getFolderId());
         List<FileStoragePermission> sourceFolderPermissions = sourceFolder.getPermissions();
 
@@ -2156,7 +2148,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
 
-        warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, null, sourceFileAccess, sourceFile));
+        warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, sourceFileAccess, sourceFile));
         return warnings;
     }
 
