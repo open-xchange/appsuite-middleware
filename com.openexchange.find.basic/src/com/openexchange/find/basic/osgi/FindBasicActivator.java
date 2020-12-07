@@ -109,7 +109,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), withRanking(0));
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), withRanking(0));
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), withRanking(0));
-        registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
+        registerService(PreferencesItemService.class, new AutocompleteFields());
 
         // Register the 'showDepartment' jslob
         registerService(JSlobEntry.class, new ShowDepartmentJSlobEntry());
