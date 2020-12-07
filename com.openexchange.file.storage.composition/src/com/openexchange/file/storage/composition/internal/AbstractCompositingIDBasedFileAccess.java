@@ -1476,7 +1476,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FileStorageFolder targetFolder = destFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
         List<FileStoragePermission> destPermissions = targetFolder.getPermissions();
 
-        List<String> potentialConflictings = new ArrayList<String>();
         String lastSourceFolderId = "-1";
         FileStorageFolder sourceFolder = null;
         for (String sourceId : sourceIds) {
@@ -1495,14 +1494,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             IDTuple fileIdTuple = new IDTuple();
             fileIdTuple.setId(sourceID.getFileId());
             fileIdTuple.setFolder(sourceID.getFolderId());
-            SearchIterator<File> fileMetaDataResult = sourceFileAccess.getDocuments(Arrays.asList(fileIdTuple), Arrays.asList(Field.ID, Field.FOLDER_ID, Field.FILENAME, Field.OBJECT_PERMISSIONS)).results();
-            File fileMetaData = null;
-            if (fileMetaDataResult.hasNext()) {
-                fileMetaData = fileMetaDataResult.next();
-            }
-            fileMetaDataResult.close();
+            File fileMetaData = getFileMetaData(sourceFileAccess, fileIdTuple);
 
-            potentialConflictings.add(sourceId);
             warnings.addAll(checkFileMoveForPermissionChangeWarnings(sourceId, fileMetaData, sourceID.getFolderId(), sourcePermissions, destFolderId, destPermissions, sourceFileAccess, destFileAccess));
         }
         return warnings;
