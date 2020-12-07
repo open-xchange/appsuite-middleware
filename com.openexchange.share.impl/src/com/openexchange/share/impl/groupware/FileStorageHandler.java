@@ -76,17 +76,21 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.HandlerParameters;
 import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.ConnectionHolder;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -380,7 +384,7 @@ public class FileStorageHandler implements ModuleHandler {
         /*
          * use target as-is if possible
          */
-        if (requestUserId == targetUserId || isVisible(contextId, targetUserId, target.getFolder())) {
+        if (requestUserId == targetUserId || isVisibleInFolder(contextId, targetUserId, target.getFolder(), target.getItem())) {
             return target;
         }
         /*
@@ -419,7 +423,7 @@ public class FileStorageHandler implements ModuleHandler {
         /*
          * check if user can access file in its physical location, otherwise fall back to virtual shared files folder
          */
-        if (false == isVisible(contextId, userId, folderId)) {
+        if (false == isVisibleInFolder(contextId, userId, folderId, file)) {
             folderId = SHARED_FILES_FOLDER_ID;
         }
         FolderID folderID = new FolderID(folderId);
@@ -428,11 +432,44 @@ public class FileStorageHandler implements ModuleHandler {
         return new ShareTarget(FolderObject.INFOSTORE, folderID.toUniqueID(), fileID.toUniqueID());
     }
 
-    private boolean isVisible(int contextId, int userId, String folderId) throws OXException {
-        if (SHARED_FILES_FOLDER_ID.equals(folderId)) {
+    private boolean isVisibleInFolder(int contextId, int userId, String folder, String item) throws OXException {
+        if (SHARED_FILES_FOLDER_ID.equals(folder)) {
             return true; // always visible in shared files
         }
-        return requireService(ModuleSupport.class, services).isVisible(FolderObject.INFOSTORE, folderId, null, contextId, userId);
+        EffectivePermission effectivePermission = getEffectivePermission(contextId, userId, folder);
+        if (effectivePermission.canReadAllObjects()) {
+            return true; // can read all files in folder
+        }
+        if (effectivePermission.canReadOwnObjects()) {
+            IDBasedAdministrativeFileAccess fileAccess = requireService(IDBasedFileAccessFactory.class, services).createAccess(contextId);
+            File file = fileAccess.getFileMetadata(item, FileStorageFileAccess.CURRENT_VERSION);
+            if (file.getCreatedBy() == userId) {
+                return true; // can read own file in folder
+            }
+        }
+        return false;
+    }
+
+    private boolean isVisibleInFolder(int contextId, int userId, String folder, File file) throws OXException {
+        if (SHARED_FILES_FOLDER_ID.equals(folder)) {
+            return true; // always visible in shared files
+        }
+        EffectivePermission effectivePermission = getEffectivePermission(contextId, userId, folder);
+        if (effectivePermission.canReadAllObjects()) {
+            return true; // can read all files in folder
+        }
+        if (effectivePermission.canReadOwnObjects()) {
+            if (file.getCreatedBy() == userId) {
+                return true; // can read own file in folder
+            }
+        }
+        return false;
+    }
+
+    private EffectivePermission getEffectivePermission(int contextId, int userId, String folder) throws OXException {
+        TargetProxy targetProxy = requireService(ModuleSupport.class, services).resolveTarget(new ShareTargetPath(FolderObject.INFOSTORE, folder, null), contextId, userId);
+        UserPermissionBits permissionBits = requireService(UserPermissionService.class, services).getUserPermissionBits(userId, contextId);
+        return ((AdministrativeFolderTargetProxy) targetProxy).getFolder().getEffectiveUserPermission(userId, permissionBits);
     }
 
 }
