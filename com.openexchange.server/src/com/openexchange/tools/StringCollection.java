@@ -150,9 +150,7 @@ public final class StringCollection {
             // Escape every backslash and single-quote character
             value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
         }
-        value = value.replaceAll("%", quoteReplacement("\\%")).replaceAll("_", quoteReplacement("\\_")).replaceAll(
-            "\\*",
-            quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
+        value = value.replace("%", quoteReplacement("\\%")).replace("_", quoteReplacement("\\_")).replace('*', '%').replace('?', '_');
         if (surroundWithWildcard) {
             if (value.length() > 0) {
                 if (value.charAt(0) != '%') {
@@ -593,12 +591,12 @@ public final class StringCollection {
      * Pattern to check whether a string contains escaped REGEX wildcards or not
      */
     private static final Pattern ESCAPED_REGEX_WILDCARD_PATTERN = Pattern.compile("(([\\\\]+)(\\*|\\?))");
-    
+
     private static final Pattern REGEX_WILDCARD_PATTERN = Pattern.compile("((\\*|\\?))");
 
     /**
      * Determines whether the specified string contains any REGEX wildcard characters '*' or '?' that are not escaped
-     * 
+     *
      * @param s The string to check
      * @return true if the specified string contains REGEX wildcards '*' or '?' that are not escaped; false otherwise
      */
