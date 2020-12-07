@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Mon Dec 07 2020 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2020-12-14 (5924)
 * Mon Nov 16 2020 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2020-11-23 (5905)
 * Wed Nov 04 2020 Marcus Klein <jenkins@hudson-slave-1.netline.de>
