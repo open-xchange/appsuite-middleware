@@ -164,6 +164,9 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
                 throw e;
             }
             try {
+                if (targetPath == null) {
+                    return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
+                }
                 CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
                 ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
                 return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
