@@ -70,6 +70,11 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     static final String DYNAMIC_ATTR_PREFIX = "config/";
 
+    /**
+     * Initializes a new {@link ContextConfigProvider}.
+     *
+     * @param services The service look-up
+     */
     public ContextConfigProvider(ServiceLookup services) {
         super(services);
     }
@@ -80,12 +85,12 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
     }
 
     @Override
-    public BasicProperty get(String property, Context ctx, int user) throws OXException {
-        return new BasicPropertyImpl(property, ctx, services);
+    protected BasicProperty get(String propertyName, Context ctx, int user) throws OXException {
+        return new BasicPropertyImpl(propertyName, ctx, services);
     }
 
     @Override
-    public Collection<String> getAllPropertyNamesFor(Context ctx, int userId) {
+    protected Collection<String> getAllPropertyNamesFor(Context ctx, int userId) {
         Map<String, List<String>> attributes = ctx.getAttributes();
         Set<String> allNames = new HashSet<String>();
 
