@@ -83,11 +83,22 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
+
         ContextService contextService = services.getService(ContextService.class);
         if (contextService == null) {
             return NO_PROPERTY;
         }
-        return get(property, contextService.loadContext(contextId), userId);
+
+        try {
+            return get(property, contextService.loadContext(contextId), userId);
+        } catch (OXException e) {
+            if (false == e.equalsCode(2, "CTX")) {
+                throw e;
+            }
+
+            // "CTX-0002" --> No such context
+            return NO_PROPERTY;
+        }
     }
 
     @Override
@@ -95,11 +106,22 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextId == NO_CONTEXT) {
             return Collections.emptyList();
         }
+
         ContextService contextService = services.getService(ContextService.class);
         if (contextService == null) {
             return Collections.emptyList();
         }
-        return getAllPropertyNamesFor(contextService.loadContext(contextId), userId);
+
+        try {
+            return getAllPropertyNamesFor(contextService.loadContext(contextId), userId);
+        } catch (OXException e) {
+            if (false == e.equalsCode(2, "CTX")) {
+                throw e;
+            }
+
+            // "CTX-0002" --> No such context
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -115,12 +137,12 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
     /**
      * Gets the denoted property
      *
-     * @param property The property name
+     * @param propertyName The property name
      * @param context The associated context
      * @param user The identifier for the associated user
      * @return The property
      * @throws OXException If property cannot be returned
      */
-    protected abstract BasicProperty get(String property, Context context, int user) throws OXException;
+    protected abstract BasicProperty get(String propertyName, Context context, int user) throws OXException;
 
 }

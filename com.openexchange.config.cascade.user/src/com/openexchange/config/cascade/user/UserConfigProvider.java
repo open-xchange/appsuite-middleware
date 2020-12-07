@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.user;
 
+import static com.openexchange.user.UserExceptionCode.USER_NOT_FOUND;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -138,7 +139,18 @@ public class UserConfigProvider implements ConfigProviderService {
         PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
         BasicProperty basicProperty = propertyMap.get(property);
         if (null == basicProperty) {
-            BasicProperty loaded = new BasicPropertyImpl(property, userId, contextId, services);
+            BasicProperty loaded;
+            try {
+                loaded = new BasicPropertyImpl(property, userId, contextId, services);
+            } catch (OXException e) {
+                if (false == USER_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+
+                // "USR-0010" --> No such user
+                loaded = NO_PROPERTY;
+            }
+
             basicProperty = propertyMap.putIfAbsent(property, loaded);
             if (null == basicProperty) {
                 basicProperty = loaded;
@@ -152,19 +164,30 @@ public class UserConfigProvider implements ConfigProviderService {
         if (userId == NO_USER) {
             return Collections.emptyList();
         }
-        Map<String, String> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
-        Set<String> allNames = new HashSet<String>(attributes.size());
 
-        String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;
-        int snip = dynamicAttrPrefix.length();
-
-        for (String name : attributes.keySet()) {
-            if (name.startsWith(dynamicAttrPrefix)) {
-                allNames.add(name.substring(snip));
+        try {
+            Map<String, String> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
+            if (attributes.isEmpty()) {
+                return Collections.emptyList();
             }
-        }
 
-        return allNames;
+            String dynamicAttrPrefix = DYNAMIC_ATTR_PREFIX;
+            int snip = dynamicAttrPrefix.length();
+            Set<String> allNames = new HashSet<String>(attributes.size());
+            for (String name : attributes.keySet()) {
+                if (name.startsWith(dynamicAttrPrefix)) {
+                    allNames.add(name.substring(snip));
+                }
+            }
+            return allNames;
+        } catch (OXException e) {
+            if (false == USER_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            // "USR-0010" --> No such user
+            return Collections.emptyList();
+        }
     }
 
 }
