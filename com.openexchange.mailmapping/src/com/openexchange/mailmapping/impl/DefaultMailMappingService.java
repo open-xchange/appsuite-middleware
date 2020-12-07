@@ -54,9 +54,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServices;
 import com.openexchange.context.ContextService;
@@ -102,10 +103,15 @@ public class DefaultMailMappingService implements MultipleMailResolver {
         this.services = services;
         ConfigurationService service = services.getService(ConfigurationService.class);
         lookUpByDomain = service.getBoolProperty("com.openexchange.mailmapping.lookUpByDomain", false);
-        Set<Object> set = ConfigurationServices.loadPropertiesFrom(service.getFileByName("external-domains.properties")).keySet();
-        this.externalDomains = new HashSet<>(set.size(), 0.9f);
-        for (Object domain : set) {
-            externalDomains.add(domain.toString());
+        Properties externalDomainsProps = ConfigurationServices.loadPropertiesFrom(service.getFileByName("external-domains.properties"));
+        if (externalDomainsProps == null || externalDomainsProps.isEmpty()) {
+            externalDomains = ImmutableSet.of();
+        } else {
+            ImmutableSet.Builder<String> externalDomains = ImmutableSet.builderWithExpectedSize(externalDomainsProps.size());
+            for (Object domain : externalDomainsProps.keySet()) {
+                externalDomains.add(domain.toString());
+            }
+            this.externalDomains = externalDomains.build();
         }
     }
 
