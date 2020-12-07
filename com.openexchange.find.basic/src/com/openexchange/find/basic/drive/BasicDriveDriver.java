@@ -287,9 +287,11 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                         }
                     } else {
                         // No folders found, check if folders were skipped due to paging
-                        folders = searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, 0, searchRequest.getStart());
-                        if (null != folders && folders.length > 0) {
-                            skippedResults = folders.length;
+                        if (searchRequest.getStart() > 0) {
+                            folders = searchableFolderAccess.searchFolderByName(query, folderId, date, includeSubfolders, all, 0, searchRequest.getStart());
+                            if (null != folders && folders.length > 0) {
+                                skippedResults = folders.length;
+                            }
                         }
                     }
                 } else {
