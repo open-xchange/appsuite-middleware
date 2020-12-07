@@ -3169,7 +3169,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(
                     parentId, user.getId(), user.getGroups(), storageParameters.getContext(), userPermissionBits, null, con);
                 while (searchIterator.hasNext()) {
-                    visibleFolders.add(searchIterator.next());
+                    FolderObject fo = searchIterator.next();
+                    if (fo.getModule() == module) {
+                        visibleFolders.add(fo);
+                    }
                 }
             } finally {
                 SearchIterators.close(searchIterator);
