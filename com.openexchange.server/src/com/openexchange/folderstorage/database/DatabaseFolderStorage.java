@@ -3159,52 +3159,47 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
         User user = storageParameters.getUser();
 
-        if (parentId < 0) {
-            // Querying all folders of that module
-            List<FolderObject> folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), module, storageParameters.getContext(), con)).asList();
-            TIntList nonDefaultFolders = new TIntArrayList(folderList.size());
-            TIntList defaultFolders = null;
-            for (FolderObject folderObject : folderList) {
-                if (folderObject.isDefaultFolder()) {
-                    if (defaultFolders == null) {
-                        defaultFolders = new TIntArrayList();
-                    }
-                    defaultFolders.add(folderObject.getObjectID());
-                } else {
-                    nonDefaultFolders.add(folderObject.getObjectID());
+        VisibleFolders visibleFolders = new VisibleFolders();
+        if (false == includeSubfolders) {
+            /*
+             * only consider direct ancestor folders
+             */
+            SearchIterator<FolderObject> searchIterator = null;
+            try {
+                searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    parentId, user.getId(), user.getGroups(), storageParameters.getContext(), userPermissionBits, null, con);
+                while (searchIterator.hasNext()) {
+                    visibleFolders.add(searchIterator.next());
                 }
+            } finally {
+                SearchIterators.close(searchIterator);
             }
-            return new VisibleFolders(nonDefaultFolders, defaultFolders);
-        }
-
-        List<FolderObject> folderList = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, user.getId(), user.getGroups(), storageParameters.getContext(), userPermissionBits, null, con)).asList();
-        TIntList regularFolders = new TIntArrayList(folderList.size());
-        TIntList specialFolders = null;
-        for (FolderObject folderObject : folderList) {
-            int folderId = folderObject.getObjectID();
-            if (folderObject.isDefaultFolder() || folderId < FolderObject.MIN_FOLDER_ID) {
-                if (specialFolders == null) {
-                    specialFolders = new TIntArrayList();
+        } else {
+            /*
+             * gather all visible infostore folders
+             */
+            Map<Integer, FolderObject> foldersById = new HashMap<Integer, FolderObject>();
+            SearchIterator<FolderObject> searchIterator = null;
+            try {
+                searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                    user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), FolderObject.INFOSTORE, storageParameters.getContext(), con);
+                while (searchIterator.hasNext()) {
+                    FolderObject folder = searchIterator.next();
+                    foldersById.put(I(folder.getObjectID()), folder);
                 }
-                specialFolders.add(folderId);
-            } else {
-                regularFolders.add(folderId);
+            } finally {
+                SearchIterators.close(searchIterator);
             }
-            if (includeSubfolders && folderObject.hasSubfolders()) {
-                VisibleFolders visibleFolders = getVisibleFolders(folderId, module, true, storageParameters, con);
-                regularFolders.add(visibleFolders.getRegularFolders());
-                int[] subDefaultFolders = visibleFolders.getSpecialFolders();
-                visibleFolders = null;
-                if (subDefaultFolders.length > 0) {
-                    if (specialFolders == null) {
-                        specialFolders = new TIntArrayList();
-                    }
-                    specialFolders.add(subDefaultFolders);
+            /*
+             * if parent folder is specified, filter accordingly
+             */
+            for (FolderObject folder : foldersById.values()) {
+                if (0 > parentId || isBelow(parentId, folder.getObjectID(), foldersById)) {
+                    visibleFolders.add(folder);
                 }
-                subDefaultFolders = null;
             }
         }
-        return new VisibleFolders(regularFolders, specialFolders);
+        return visibleFolders;
     }
 
     /**
@@ -3226,13 +3221,27 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     /** The result of <code>getVisibleFolders()</code> call */
     private static class VisibleFolders {
 
-        private final int[] regularFolders;
-        private final int[] specialFolders;
+        private final TIntList regularFolders;
+        private final TIntList specialFolders;
 
-        VisibleFolders(TIntList regularFolders, TIntList specialFolders) {
+        VisibleFolders() {
             super();
-            this.specialFolders = specialFolders == null ? new int[0] : specialFolders.toArray();
-            this.regularFolders = regularFolders == null ? new int[0] : regularFolders.toArray();
+            this.specialFolders = new TIntArrayList();
+            this.regularFolders = new TIntArrayList();
+        }
+
+        /**
+         * Adds the identifier of a folder to one of the internal lists.
+         *
+         * @param folder The folder whose id should be added
+         */
+        void add(FolderObject folder) {
+            int folderId = folder.getObjectID();
+            if (folder.isDefaultFolder() || folderId < FolderObject.MIN_FOLDER_ID) {
+                specialFolders.add(folderId);
+            } else {
+                regularFolders.add(folderId);
+            }
         }
 
         /**
@@ -3241,7 +3250,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
          * @return The identifiers of regular folders
          */
         public int[] getRegularFolders() {
-            return regularFolders;
+            return regularFolders.toArray();
         }
 
         /**
@@ -3250,8 +3259,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
          * @return The identifiers of special folders
          */
         public int[] getSpecialFolders() {
-            return specialFolders;
+            return specialFolders.toArray();
         }
+    }
+
+    private static boolean isBelow(int parentFolderId, int folderId, Map<Integer, FolderObject> foldersById) {
+        FolderObject folder = foldersById.get(I(folderId));
+        if (null == folder || FolderObject.SYSTEM_ROOT_FOLDER_ID == folder.getObjectID()) {
+            return false;
+        }
+        return folder.getParentFolderID() == parentFolderId || isBelow(parentFolderId, folder.getParentFolderID(), foldersById);
     }
 
 }
