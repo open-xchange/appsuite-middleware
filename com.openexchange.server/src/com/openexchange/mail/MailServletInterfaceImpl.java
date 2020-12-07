@@ -175,7 +175,6 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.InvalidMailFolderIdentifierException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
@@ -5187,9 +5186,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             Throwable t = cause == null ? e : cause;
             throw MailExceptionCode.UNEXPECTED_ERROR.create(t, t.getMessage());
-        } catch (InvalidMailFolderIdentifierException e) {
-            // Apparently, passed folder identifier is invalid
-            throw MailExceptionCode.INVALID_FOLDER_IDENTIFIER.create(e, e.getInvalidIdentifier());
+        } catch (IllegalArgumentException e) {
+            String message = e.getMessage();
+            if (message != null && message.startsWith("Invalid fully-qualifying mail folder identifier: ")) {
+                // Apparently, passed folder identifier is invalid
+                throw MailExceptionCode.INVALID_FOLDER_IDENTIFIER.create(e, message.substring(50));
+            }
+            // Unchecked exception occurred
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             // Unchecked exception occurred
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
