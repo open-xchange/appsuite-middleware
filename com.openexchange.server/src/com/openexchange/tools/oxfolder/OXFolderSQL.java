@@ -3410,16 +3410,12 @@ public final class OXFolderSQL {
 
         // Compile SQL query
         StringBuilder sb = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = ?");
-        sb.append(" AND fuid IN (");
-        for (int i = 0; i < folderIds.length; i++) {
-            sb.append("?,");
+        sb.append(" AND fuid IN (?");
+        for (int i = folderIds.length - 1; i-- > 0;) {
+            sb.append(",?");
         }
-        sb.deleteCharAt(sb.length() - 1);
         sb.append(")");
         sb.append(" AND UPPER(fname) LIKE UPPER(?) ");
-        StringBuilder queryBuilder = new StringBuilder(query.length() + 2);
-        queryBuilder.append("%").append(hasWildcards(query) ? StringCollection.prepareForSearch(query.trim()) : query).append("%");
-        String sqlQuery = trimPercentCharacters(queryBuilder.toString());
         if (date >= 0) {
             sb.append("AND creating_date > ? ");
         }
@@ -3440,7 +3436,7 @@ public final class OXFolderSQL {
             for (int folderId : folderIds) {
                 stmt.setInt(pos++, folderId);
             }
-            stmt.setString(pos++, sqlQuery);
+            stmt.setString(pos++, StringCollection.prepareForSearch(query.trim(), true, true));
             if (date > -1) {
                 stmt.setLong(pos++, date);
             }
@@ -3461,28 +3457,6 @@ public final class OXFolderSQL {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-    }
-
-    private static boolean hasWildcards(String query) {
-        return Strings.isNotEmpty(query) && (query.indexOf('*') >= 0 || query.indexOf('?') >= 0);
-    }
-
-    private static String trimPercentCharacters(String query) {
-        int len = query.length();
-        int st = 0;
-
-        while ((st < len) && (query.charAt(st) == '%')) {
-            st++;
-        }
-
-        while ((st < len) && (query.charAt(len - 1) == '%')) {
-            len--;
-        }
-
-        if (st > 1) {
-            return (len < query.length() - 1) ? query.substring(st - 1, len + 1) : query.substring(st - 1);
-        }
-        return (len < query.length() - 1) ? query.substring(0, len + 1) : query;
     }
 
 }
