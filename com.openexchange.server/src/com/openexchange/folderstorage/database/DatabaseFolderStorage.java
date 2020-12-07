@@ -3191,7 +3191,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 regularFolders.add(folderId);
             }
             if (includeSubfolders && folderObject.hasSubfolders()) {
-                VisibleFolders visibleFolders = getVisibleFolders(folderId, module, true, storageParameters);
+                VisibleFolders visibleFolders = getVisibleFolders(folderId, module, true, storageParameters, con);
                 regularFolders.add(visibleFolders.getRegularFolders());
                 int[] subDefaultFolders = visibleFolders.getSpecialFolders();
                 visibleFolders = null;
