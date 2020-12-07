@@ -64,12 +64,12 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.Links;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
@@ -137,10 +137,10 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         try {
             UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
             folder = getRootFolder(session, folderService, folder);
-            int module = folder.getContentType().getModule();
-
+            
             Builder builder = new Builder();
-            builder.infos(new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId));
+            String moduleName = getModuleName(folder.getContentType().getModule());
+            builder.infos(new ShareSubscriptionInformation(folder.getAccountID(), moduleName, folderId));
             if (folder.isSubscribed()) {
                 builder.state(SUBSCRIBED);
             } else {
@@ -164,13 +164,13 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         }
         FolderService folderService = services.getServiceSafe(FolderService.class);
         UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
-        int module = folder.getContentType().getModule();
+        String moduleName = getModuleName(folder.getContentType().getModule());
 
         /*
          * Check if already subscribed
          */
         if (folder.isSubscribed()) {
-            return new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId);
+            return new ShareSubscriptionInformation(folder.getAccountID(), moduleName, folderId);
         }
         /*
          * Check if subscribe is allowed
@@ -190,7 +190,7 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
             throw ShareSubscriptionExceptions.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
 
-        return new ShareSubscriptionInformation(folder.getAccountID(), Module.getForFolderConstant(module).getName(), folderId);
+        return new ShareSubscriptionInformation(folder.getAccountID(), moduleName, folderId);
     }
 
     @Override
@@ -338,6 +338,16 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
             }
         }
         return folder;
+    }
+
+    /**
+     * Get the correct module name
+     *
+     * @param module The module
+     * @return The name of the module
+     */
+    private String getModuleName(int module) {
+        return ShareModuleMapping.moduleMapping2String(module);
     }
 
 }
