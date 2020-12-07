@@ -216,7 +216,7 @@ public class DataExportCleanUpTask implements Runnable {
             for (DataExportWorkItem item : task.getWorkItems()) {
                 storageService.markWorkItemPending(task.getId(), item.getModuleId(), task.getUserId(), task.getContextId());
             }
-            storageService.deleteResultFiles(task.getId(), task.getUserId(), task.getContextId());
+            storageService.deleteResultFiles(task.getId(), task.getContextId());
         }
     }
 
@@ -329,7 +329,7 @@ public class DataExportCleanUpTask implements Runnable {
         // Check for possible configured file storage identifiers for reseller scope
         try {
             ResellerService resellerService = services.getOptionalService(ResellerService.class);
-            if (resellerService != null && resellerService.isEnabled()) {
+            if (resellerService != null) {
                 Set<Integer> resellerFileStoreIds = determineResellerFileStoreIds(databaseService);
                 if (resellerFileStoreIds.isEmpty() == false) {
                     if (fileStoreIds == null) {
