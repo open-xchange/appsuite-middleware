@@ -3075,7 +3075,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             int[] filteredFolders = OXFolderSQL.searchInfostoreFoldersByName(query, visibleFolders.getRegularFolders(), date, start, end, context, con);
 
             // Remember reference to special ones
-            int[] defaultFolders = visibleFolders.getSpecialFolders();
+            int[] specialFolders = visibleFolders.getSpecialFolders();
             visibleFolders = null;
 
             // Load folders by identifiers
@@ -3096,12 +3096,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             filteredFolders = null;
 
             // Check for special folders (personal, trash, documents, music, pictures, videos, ...)
-            if (defaultFolders.length > 0) {
+            if (specialFolders.length > 0) {
                 Locale locale = storageParameters.getUser().getLocale();
                 String lowerCaseQuery = query.toLowerCase(locale);
-                for (int defaultFolderId : defaultFolders) {
-                    if (ids.add(defaultFolderId)) {
-                        DatabaseFolder folder = loadFolder(Integer.toString(defaultFolderId), StorageType.WORKING, storageParameters, con, treeId);
+                for (int specialFolderId : specialFolders) {
+                    if (ids.add(specialFolderId)) {
+                        DatabaseFolder folder = loadFolder(Integer.toString(specialFolderId), StorageType.WORKING, storageParameters, con, treeId);
                         if (localizedNameMatchesQuery(folder, lowerCaseQuery, locale)) {
                             if (storageParameters.getUser().isAnonymousGuest()) {
                                 handleAnonymousUser(folder, treeId, StorageType.WORKING, storageParameters, con);
@@ -3114,7 +3114,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     }
                 }
             }
-            defaultFolders = null;
+            specialFolders = null;
 
             return result;
         } catch (SQLException e) {
