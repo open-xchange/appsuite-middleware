@@ -198,180 +198,23 @@ With OAuth you can access a subset of the existing [HTTP API](https://documentat
 
 Find the OAuth-enabled modules and actions below. Every action is bound to a specific scope. However some actions are available implicitly if access for any scope is granted. E.g. you may always request a users details or configuration if any kind of OAuth access is granted, but you may only change a users configuration, if the `write_userconfig` scope is granted. The view on the folder tree is always limited by the granted scope. E.g. if you were granted `read_contacts` you can also perform all read-only requests that target contact folders. In turn you may only create/modify/delete contact folders if obtained the `write_contacts` scope.
 
+Within the middleware core, the following restricted scopes are predefined for the HTTP API modules:
 
-### reminder
-
-| Name | Scope |
-|--------|-------|
-| delete | write_reminder |
-| remindAgain | write_reminder |
-| range | read_reminder |
-| updates | read_reminder |
-
-
-### config
-
-| Name       | Scope            |
-|------------|------------------|
-| path (GET) | <any>            |
-| path (PUT) | write_userconfig |
+| Module                                       | Scopes                         |
+-----------------------------------------------|--------------------------------|
+|config                                        | write_userconfig               |
+|folders                                       | read_folders, write_folders    |
+|mail / mailcompose                            | read_mail, write_mail          |
+|calendar / chronos                            | read_calendar, write_calendar  |
+|contacts                                      | read_contacts, write_contacts  |
+|infostore / files / fileaccount / fileservice | read_files, write_files        |
+|drive                                         | read_drive, write_drive        |
+|tasks                                         | read_tasks, write_tasks        |
+|reminder                                      | read_reminder, write_reminder  |
+|snippets                                      | write_userconfig               |
+|user/me                                       | <any>                          |
 
 
-### user/me
-
-| Name | Scope |
-|------|-------|
-| GET  | <any> |
-
-
-
-
-
-### folders
-
-| Name       | Scope     |
-|------------|-----------|
-| clear      | <depends> |
-| update     | <depends> |
-| new        | <depends> |
-| updates    | <depends> |
-| get        | <depends> |
-| root       | <depends> |
-| allVisible | <depends> |
-| path       | <depends> |
-| delete     | <depends> |
-| list       | <depends> |
-
-
-### tasks
-
-| Name    | Scope       |
-|---------|-------------|
-| delete  | write_tasks |
-| copy    | write_tasks |
-| get     | read_tasks  |
-| search  | read_tasks  |
-| updates | read_tasks  |
-| new     | write_tasks |
-| list    | read_tasks  |
-| update  | write_tasks |
-| confirm | write_tasks |
-| all     | read_tasks  |
-
-
-### contact
-
-| Name            | Scope          |
-|-----------------|----------------|
-| delete          | write_contacts |
-| listuser        | read_contacts  |
-| birthdays       | read_contacts  |
-| autocomplete    | read_contacts  |
-| advanchedSearch | read_contacts  |
-| copy            | write_contacts |
-| anniversaries   | read_contacts  |
-| get             | read_contacts  |
-| search          | read_contacts  |
-| updates         | read_contacts  |
-| new             | write_contacts |
-| getuser         | read_contacts  |
-| list            | read_contacts  |
-| update          | write_contacts |
-| all             | read_contacts  |
-
-
-### calendar
-
-| Name                | Scope          |
-|---------------------|----------------|
-| delete              | write_calendar |
-| resolveuid          | read_calendar  |
-| copy                | write_calendar |
-| get                 | read_calendar  |
-| getChangeExceptions | read_calendar  |
-| search              | read_calendar  |
-| updates             | read_calendar  |
-| freebusy            | read_calendar  |
-| newappointments     | read_calendar  |
-| has                 | read_calendar  |
-| new                 | write_calendar |
-| list                | read_calendar  |
-| update              | write_calendar |
-| all                 | read_calendar  |
-| confirm             | write_calendar |
-
-### mail
-
-| Name                      | Scope      |
-|---------------------------|------------|
-| all 						| read_mail  |
-| threadedAll 				| read_mail  |
-| get 						| read_mail  |
-| get_structure 			    | read_mail  |
-| count 					    | read_mail  |
-| copy 						| write_mail |
-| move_all 					| write_mail |
-| archive 					| write_mail |
-| archive_folder 			| write_mail |
-| reply 					    | read_mail  |
-| replyall 					| read_mail  |
-| updates 					| read_mail  |
-| forward 					| read_mail  |
-| bounce 					| write_mail |
-| resend 					| write_mail |
-| attachment 				| read_mail  |
-| attachmentToken 			| read_mail  |
-| zip_attachments 			| read_mail  |
-| zip_messages 				| read_mail  |
-| saveVersit 				| write_mail |
-| list 						| read_mail  |
-| search 					| read_mail  |
-| update 					| write_mail |
-| delete 					| write_mail |
-| transport 				    | write_mail |
-| receipt_ack 				| write_mail |
-| clear 						| write_mail |
-| expunge 					| write_mail |
-| new 						| write_mail |
-| send_data 					| write_mail |
-| import 					| write_mail |
-| edit 						| write_mail |
-| autosave 					| write_mail |
-| all_seen 					| write_mail |
-| resolve_share_reference 	| read_mail  |
-| examine 					| read_mail  |
-| thread_references 			| read_mail  |
-| trash 						| write_mail |
-
-### snippet
-
-| Name                      | Scope            |
-|---------------------------|------------------|
-| all 						| <any>            |
-| getattachment  			| <any>            |
-| list 						| <any>            |
-| get 						| <any>            |
-| update						| write_userconfig |
-| detach						| write_userconfig |
-| attach						| write_userconfig |
-| import						| write_userconfig |
-| new   						| write_userconfig |
-| delete   					| write_userconfig |
-
-
-### filestorage
-
-| Name                      | Scope            |
-|---------------------------|------------------|
-| getAllFileServices 		| read_files       |
-| getFileService 			| read_files       |
-| getFileAccount 			| read_files       |
-| deleteFileAccount 			| write_files      |
-| updateFileAccount 			| write_files      |
-| createFileAccount 			| write_files      |
-| getAllFileAccounts 		| read_files       |
-
-
-## Card- and CalDAV
+**Card- and CalDAV**
 
 If installed, the interfaces for Card- and CalDAV are also available via OAuth. Clients can notice it based on the `WWW-Authenticate` headers of responses to unauthorized requests. If OAuth is supported, a header declaring `Bearer` as supported auth scheme will be present. The according scope values are `carddav` and `caldav`. The interfaces support OAuth natively so there is no extra servlet path or the like.

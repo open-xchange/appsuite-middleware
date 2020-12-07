@@ -52,14 +52,12 @@ package com.openexchange.authentication.application.impl.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.authentication.application.AppAuthenticatorService;
 import com.openexchange.authentication.application.AppPasswordApplication;
 import com.openexchange.authentication.application.AppPasswordMailOauthService;
 import com.openexchange.authentication.application.AppPasswordService;
-import com.openexchange.authentication.application.impl.AppPasswordAnnotationProcessor;
 import com.openexchange.authentication.application.impl.AppPasswordProperty;
 import com.openexchange.authentication.application.impl.AppPasswordServiceImpl;
 import com.openexchange.authentication.application.impl.AppPasswordSessionStorageParameterNamesProvider;
@@ -174,9 +172,6 @@ public class ApplicationPasswordActivator extends AJAXModuleActivator {
         registerService(AppPasswordService.class, appPasswordService);
         registerService(AppAuthenticatorService.class, appPasswordService);
         registerService(Reloadable.class, appPasswordService);
-
-        // Inspector
-        registerService(AJAXActionAnnotationProcessor.class, new AppPasswordAnnotationProcessor());
 
         // Track plugin services
         trackService(AppPasswordMailOauthService.class);

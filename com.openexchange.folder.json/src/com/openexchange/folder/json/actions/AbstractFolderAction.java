@@ -75,6 +75,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.parser.FolderParser;
@@ -92,7 +93,7 @@ import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.contact.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactsContentType;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -407,11 +408,23 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (isOAuthRequest(request)) {
             oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthAccess(request));
         }
-        if (oAuthWhitelist != null && !oAuthWhitelist.contains(contentType)) {
+        if (oAuthWhitelist != null && !containsContentTypeName(oAuthWhitelist, contentType)) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(contentType));
         }
 
         return contentType;
+    }
+
+    /**
+     * Checks whether operations are permitted for the given folder content type.
+     * Therefore it is checked if the content type is contained in the list of allowed content types.
+     *
+     * @param oAuthWhitelist
+     * @param contentType
+     * @return True if the content type is present. Otherwise false.
+     */
+    private static boolean containsContentTypeName(Set<ContentType> oAuthWhitelist, ContentType contentType){
+        return oAuthWhitelist.stream().filter(o -> o.toString().equals(contentType.toString())).findFirst().isPresent();
     }
 
     static final class OAuthContentTypes {
@@ -452,6 +465,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                     mailContentTypes.add(SpamContentType.getInstance());
                     return mailContentTypes;
 
+                //Infostore
+                case AbstractFileAction.MODULE:
+                    return Collections.singleton((ContentType) InfostoreContentType.getInstance());
+
                 default:
                     return Collections.emptySet();
             }
@@ -490,6 +507,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                     mailContentTypes.add(SpamContentType.getInstance());
                     return mailContentTypes;
 
+                //Infostore
+                case AbstractFileAction.MODULE:
+                    return Collections.singleton((ContentType) InfostoreContentType.getInstance());
+
                 default:
                     return Collections.emptySet();
             }
@@ -510,6 +531,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                        contentType == SpamContentType.getInstance() ||
                        contentType == TrashContentType.getInstance()) {
                 return Type.READ.getScope(MailActionFactory.MODULE);
+            } else if (contentType == InfostoreContentType.getInstance()) {
+                return Type.READ.getScope(AbstractFileAction.MODULE);
             }
 
             return null;
@@ -530,6 +553,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                         contentType == SpamContentType.getInstance() ||
                         contentType == TrashContentType.getInstance()) {
                 return Type.WRITE.getScope(MailActionFactory.MODULE);
+            } else if (contentType == InfostoreContentType.getInstance()) {
+                return Type.WRITE.getScope(AbstractFileAction.MODULE);
             }
 
             return null;

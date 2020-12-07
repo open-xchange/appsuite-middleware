@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
@@ -271,6 +272,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
+        registerService(AJAXActionAnnotationProcessor.class, new RestrictedActionAnnotationProcessor());
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
         final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix, true);
