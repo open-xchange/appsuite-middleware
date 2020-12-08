@@ -237,7 +237,7 @@ public class LdapConfig {
         String derefAliasesValue = getProperty(properties, "derefAliases", "always");
         derefAliases = null != derefAliasesValue ? DerefAliases.valueOf(derefAliasesValue.toUpperCase()) : null;
         trustAllCerts = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "false"));
-        excludeEmptyLists = Boolean.parseBoolean(getProperty(properties, "trustAllCerts", "true"));
+        excludeEmptyLists = Boolean.parseBoolean(getProperty(properties, "excludeEmptyLists", "true"));
     }
 
     private static String getProperty(Properties properties, String propertyName, String defaultValue) {
