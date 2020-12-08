@@ -68,7 +68,8 @@ import org.junit.runners.Suite.SuiteClasses;
     HzStateManagementTest.class,
     MultiSAMLTest.class,
     SignatureHelperTest.class,
-    SAMLLoginRequestHandlerTest.class
+    SAMLLoginRequestHandlerTest.class,
+    SAMLLoginToolsTest.class
 })
 public class UnitTests {
 

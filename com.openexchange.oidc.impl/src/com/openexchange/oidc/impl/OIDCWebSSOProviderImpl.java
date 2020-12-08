@@ -424,14 +424,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName, Session session) {
         String redirectURI = "";
-        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
+        String location = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), OIDCTools.getDeepLink(request));
         URIBuilder redirectLocation = new URIBuilder()
             .setScheme(OIDCTools.getRedirectScheme(request))
-            .setHost(domainName)
-            .setPath(path);
+            .setHost(domainName);
         Tools.disableCaching(response);
         try {
-            redirectURI = redirectLocation.build().toString();
+            redirectURI = redirectLocation.build().toString() + location;
         } catch (URISyntaxException e) {
             //should not happen
             LOG.error("", e);
