@@ -121,6 +121,7 @@ import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
@@ -303,11 +304,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
                 if (httpService != null) {
                     while (!registeredServlets.isEmpty()) {
                         String alias = registeredServlets.pop();
-                        try {
-                            httpService.unregister(alias);
-                        } catch (Exception e) {
-                            LOG.error("Could not unregister servlet '{}'", alias, e);
-                        }
+                        HttpServices.unregister(alias, httpService);
                     }
                 }
             } finally {

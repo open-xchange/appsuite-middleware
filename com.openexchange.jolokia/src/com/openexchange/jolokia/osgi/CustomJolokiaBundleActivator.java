@@ -65,6 +65,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.jolokia.JolokiaConfig;
 import com.openexchange.jolokia.http.OXJolokiaServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link CustomJolokiaBundleActivator} - An OSGi {@link BundleActivator} that will start Jolokia.
@@ -179,7 +180,7 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator implemen
             String usedServletName = this.usedServletName;
             if (null != usedServletName) {
                 this.usedServletName = null;
-                httpService.unregister(usedServletName);
+                HttpServices.unregister(usedServletName, httpService);
             }
         }
     }

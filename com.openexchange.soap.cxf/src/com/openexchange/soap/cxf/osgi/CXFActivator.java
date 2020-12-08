@@ -69,7 +69,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.soap.cxf.ExceptionUtils;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.soap.cxf.custom.CXFOsgiServlet;
 import com.openexchange.soap.cxf.interceptor.DropDeprecatedElementsInterceptor;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
@@ -280,11 +280,7 @@ public class CXFActivator extends HousekeepingActivator {
 
     static void unregisterHttpAlias(String alias, HttpService httpService) {
         if (alias != null) {
-            try {
-                httpService.unregister(alias);
-            } catch (Throwable t) {
-                ExceptionUtils.handleThrowable(t);
-            }
+            HttpServices.unregister(alias, httpService);
         }
     }
 

@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServlet;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link AbstractServletActivator}
@@ -124,7 +125,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
         if (null != httpService) {
             for (String alias : servlets) {
                 try {
-                    httpService.unregister(alias);
+                    HttpServices.unregister(alias, httpService);
                 } catch (Exception e) {
                     org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
                     logger.warn("Failed to unregister servlet alias: {}", alias, e);
@@ -143,7 +144,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
         if (servlets.remove(alias)) {
             HttpService httpService = getService(HttpService.class);
             if (null != httpService) {
-                httpService.unregister(alias);
+                HttpServices.unregister(alias, httpService);
             }
         }
     }

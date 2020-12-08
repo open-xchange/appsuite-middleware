@@ -55,6 +55,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.spamsettings.generic.preferences.SpamSettingsModulePreferences;
 import com.openexchange.spamsettings.generic.servlet.SpamSettingsServlet;
 
@@ -80,16 +81,16 @@ public class SpamSettingsServletRegisterer {
     }
 
     public void registerServlet() {
-        final HttpService http_service;
+        final HttpService httpService;
         try {
-            http_service = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+            httpService = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
         } catch (OXException e) {
             LOG.error("Error registering spam settings servlet!", e);
             return;
         }
         try {
             String alias = PREFIX.get().getPrefix() + SERVLET_PATH_APPENDIX;
-            http_service.registerServlet(alias, new SpamSettingsServlet(), null, null);
+            httpService.registerServlet(alias, new SpamSettingsServlet(), null, null);
             this.alias = alias;
             LOG.info("Servlet {} registered.", alias);
             SpamSettingsModulePreferences.setModule(true);
@@ -101,9 +102,9 @@ public class SpamSettingsServletRegisterer {
     }
 
     public void unregisterServlet() {
-        final HttpService http_service;
+        final HttpService httpService;
         try {
-            http_service = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+            httpService = SpamSettingsServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
         } catch (OXException e) {
             LOG.error("Error unregistering spam settings servlet!", e);
             return;
@@ -111,7 +112,7 @@ public class SpamSettingsServletRegisterer {
         String alias = this.alias;
         if (null != alias) {
             this.alias = null;
-            http_service.unregister(alias);
+            HttpServices.unregister(alias, httpService);
             LOG.info("Servlet {}unregistered.", alias);
         }
     }

@@ -65,6 +65,7 @@ import com.openexchange.metrics.micrometer.internal.RegistryInitializer;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerFilterProperty;
 import com.openexchange.metrics.micrometer.internal.property.MicrometerProperty;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.MetricsServlet;
@@ -151,7 +152,7 @@ public class MicrometerActivator extends HousekeepingActivator implements Reload
         if (httpService == null) {
             return;
         }
-        httpService.unregister(SERVLET_BIND_POINT);
+        HttpServices.unregister(SERVLET_BIND_POINT, httpService);
     }
 
     /**

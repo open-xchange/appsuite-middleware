@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.share.servlet.internal.PasswordResetServlet;
 
 /**
@@ -155,7 +156,7 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
     }
 
     private void unregisterServlet(String alias, HttpService httpService) {
-        httpService.unregister(alias);
+        HttpServices.unregister(alias, httpService);
         LOG.info("PasswordResetServlet successfully unregistered");
     }
 

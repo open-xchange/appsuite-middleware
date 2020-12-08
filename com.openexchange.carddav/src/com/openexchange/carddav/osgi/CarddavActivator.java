@@ -75,6 +75,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
@@ -90,6 +91,9 @@ public class CarddavActivator extends HousekeepingActivator {
 
     private OSGiPropertyMixin mixin;
 
+    private String httpAliasCardDAV;
+    private String httpAliasPhotos;
+
     /**
      * Initializes a new {@link CarddavActivator}.
      */
@@ -104,7 +108,7 @@ public class CarddavActivator extends HousekeepingActivator {
             ResourceService.class, VCardService.class, GroupService.class, CapabilityService.class
         };
     }
-    
+
     @Override
     protected Class<?>[] getOptionalServices() {
         return new Class[] { ContactTombstoneStorage.class };
@@ -125,7 +129,8 @@ public class CarddavActivator extends HousekeepingActivator {
              * register CardDAV servlet & WebDAV path
              */
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            getService(HttpService.class).registerServlet(getInternalPath(configViewFactory, "/carddav"), new CardDAV(performer), null, null);
+            httpAliasCardDAV = getInternalPath(configViewFactory, "/carddav");
+            getService(HttpService.class).registerServlet(httpAliasCardDAV, new CardDAV(performer), null, null);
             getService(HttpService.class).registerServlet("/.well-known/carddav", new WellKnownServlet(getExternalPath(configViewFactory, "/carddav"), Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
 
@@ -137,7 +142,8 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register Photo performer for referenced contact images in vCards
              */
-            getService(HttpService.class).registerServlet(getInternalPath(configViewFactory, "/photos"), new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            httpAliasPhotos = getInternalPath(configViewFactory, "/photos");
+            getService(HttpService.class).registerServlet(httpAliasPhotos, new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
             /*
              * track optional services
              */
@@ -167,9 +173,16 @@ public class CarddavActivator extends HousekeepingActivator {
          */
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            String carddavPath = getInternalPath(configViewFactory, "/carddav");
-            httpService.unregister(carddavPath);
+            String alias = httpAliasCardDAV;
+            if (alias != null) {
+                httpAliasCardDAV = null;
+                HttpServices.unregister(alias, httpService);
+            }
+            alias = httpAliasPhotos;
+            if (alias != null) {
+                httpAliasPhotos = null;
+                HttpServices.unregister(alias, httpService);
+            }
         }
         super.stopBundle();
     }

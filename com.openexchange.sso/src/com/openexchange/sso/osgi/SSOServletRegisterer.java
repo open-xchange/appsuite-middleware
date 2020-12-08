@@ -56,6 +56,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.sso.services.SSOServiceRegistry;
 import com.openexchange.sso.servlet.SSOServlet;
@@ -65,7 +66,7 @@ import com.openexchange.sso.servlet.SSOServlet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SSOServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
+public final class SSOServletRegisterer implements ServiceTrackerCustomizer<HttpService, HttpService> {
 
     private final BundleContext context;
     private volatile String alias;
@@ -106,7 +107,7 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer<Http
 
         String alias = this.alias;
         if (null != httpService) {
-            httpService.unregister(alias);
+            HttpServices.unregister(alias, httpService);
             this.alias = null;
         }
 

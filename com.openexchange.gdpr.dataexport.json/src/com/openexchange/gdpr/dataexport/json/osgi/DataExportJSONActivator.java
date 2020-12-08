@@ -62,6 +62,7 @@ import com.openexchange.gdpr.dataexport.json.DataExportActionFactory;
 import com.openexchange.gdpr.dataexport.json.converter.DataExportJSONResultConverter;
 import com.openexchange.gdpr.dataexport.json.rest.DataExportRestServlet;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link DataExportJSONActivator} - Activator for the GDPR data export JSON interface.
@@ -99,7 +100,7 @@ public class DataExportJSONActivator extends AJAXModuleActivator {
 
             @Override
             public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
-                service.unregister(prefix + "gdpr/dataexport");
+                HttpServices.unregister(prefix + "gdpr/dataexport", service);
             }
         });
         openTrackers();

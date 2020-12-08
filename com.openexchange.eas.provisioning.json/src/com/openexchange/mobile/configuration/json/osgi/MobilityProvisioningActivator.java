@@ -56,6 +56,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  *
@@ -83,20 +84,20 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	}
 
 	@Override
-	protected void handleAvailability(final Class<?> clazz) {
+	protected void handleAvailability(Class<?> clazz) {
 	    LOG.info("Re-available service: {}", clazz.getName());
 		getInstance().addService(clazz, this.<Object>getService(clazz));
 	}
 
 	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
+	protected void handleUnavailability(Class<?> clazz) {
 	    LOG.warn("Absent service: {}", clazz.getName());
 		getInstance().removeService(clazz);
 	}
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        final MobilityProvisioningServiceRegistry registry = getInstance();
+        MobilityProvisioningServiceRegistry registry = getInstance();
         registry.clearRegistry();
         registry.clearActionServices();
         final Class<?>[] classes = getNeededServices();
@@ -117,12 +118,12 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        final HttpService service = getService(HttpService.class);
+        HttpService service = getService(HttpService.class);
         if (null != service) {
             String alias = this.alias;
             if (null != alias) {
-                service.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, service);
             }
         }
         /*

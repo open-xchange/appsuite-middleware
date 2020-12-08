@@ -59,6 +59,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.proxy.servlet.Constants;
 import com.openexchange.proxy.servlet.ProxyServlet;
 
@@ -109,7 +110,8 @@ public class ServletRegisterer implements ServiceTrackerCustomizer<HttpService,H
 
     @Override
     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
-        service.unregister(Constants.PATH);
+        HttpServices.unregister(Constants.PATH, service);
         context.ungetService(reference);
     }
+
 }

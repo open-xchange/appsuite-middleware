@@ -53,6 +53,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.noop.NoopServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link NoopActivator} - Activator for NOOP servlet.
@@ -83,8 +84,8 @@ public class NoopActivator extends HousekeepingActivator{
 		if (null != service) {
             final String alias = this.alias;
             if (null != alias) {
-                service.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, service);
             }
         }
         super.stopBundle();

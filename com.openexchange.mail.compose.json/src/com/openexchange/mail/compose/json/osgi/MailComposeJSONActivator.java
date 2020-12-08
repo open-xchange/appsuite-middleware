@@ -63,6 +63,7 @@ import com.openexchange.mail.compose.json.converter.AttachmentJSONResultConverte
 import com.openexchange.mail.compose.json.converter.CompositionSpaceJSONResultConverter;
 import com.openexchange.mail.compose.json.rest.MailComposeRestServlet;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -102,7 +103,7 @@ public class MailComposeJSONActivator extends AJAXModuleActivator {
 
             @Override
             public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
-                service.unregister(prefix + "mail/compose");
+                HttpServices.unregister(prefix + "mail/compose", service);
             }
         });
         openTrackers();
