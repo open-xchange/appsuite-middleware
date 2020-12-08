@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -251,4 +252,18 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      */
     void updateDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    
+    /**
+     * Retrieves all capabilities for the reseller with the specified identifier
+     * 
+     * @param admin the reseller admin
+     * @param credentials {@link Credentials} of the reseller admin
+     * @return The capabilities
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws OXResellerException
+     * @throws InvalidDataException
+     */
+    Set<String> getCapabilities(ResellerAdmin admin, Credentials credentials) throws RemoteException, StorageException, InvalidDataException, InvalidCredentialsException, OXResellerException;
 }
