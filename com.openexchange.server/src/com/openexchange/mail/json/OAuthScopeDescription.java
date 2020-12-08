@@ -12,5 +12,5 @@ public final class OAuthScopeDescription implements LocalizableStrings {
     /**
      * The description of the writable scope for OAuth requests
      */
-    public static final String OAUTH_WRITE_SCOPE = "Create, modify, delete, import and sent mails";
+    public static final String OAUTH_WRITE_SCOPE = "Create, modify, delete, import and send mails";
 }
