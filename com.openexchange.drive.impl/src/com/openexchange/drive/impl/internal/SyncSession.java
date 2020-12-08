@@ -90,12 +90,14 @@ public class SyncSession {
 
     private final DriveSession session;
     private final Tracer tracer;
+    private final DriveConfig config;
     private ChecksumStore checksumStore;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
     private CapabilitySet capabilities;
     private DriveTemp temp;
     private PermissionResolver permissionResolver;
+
 
     /**
      * Initializes a new {@link SyncSession}.
@@ -105,6 +107,7 @@ public class SyncSession {
     public SyncSession(DriveSession session) {
         super();
         this.session = session;
+        this.config = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         this.tracer = new Tracer(session.isDiagnostics());
         if (isTraceEnabled()) {
             trace("Initializing sync session for user " + session.getServerSession().getLoginName() + " (" +
@@ -142,6 +145,15 @@ public class SyncSession {
             storage = new DriveStorage(this);
         }
         return storage;
+    }
+
+    /**
+     * Gets the drive configuration.
+     *
+     * @return The drive config
+     */
+    public DriveConfig getConfig() {
+        return config;
     }
 
     /**
@@ -290,7 +302,7 @@ public class SyncSession {
     public List<ServerFileVersion> getServerFiles(String path, int limit) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
         List<File> files = getStorage().getFilesInFolder(folder.getId());
-        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory(getServerSession().getContextId(), getServerSession().getUserId());
+        int maxFilesPerDirectory = getConfig().getMaxFilesPerDirectory();
         if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
             throw DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path);
         }
@@ -337,7 +349,7 @@ public class SyncSession {
             }
         });
     }
-    
+
     /**
      * Gets a single directory version from the server. Only synchronized folders are taken into account, i.e. invalid and ignored
      * directories are excluded. Missing directory checksums will be calculated on demand, and the folder is created implicitly in case
@@ -374,7 +386,7 @@ public class SyncSession {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());
-            } else if (false == DriveUtils.isSynchronizable(folderID, session)) {
+            } else if (false == DriveUtils.isSynchronizable(folderID, getConfig())) {
                 trace("Skipping not synchronizable server directory: " + entry.getKey());
             } else {
                 folderIDs.add(entry.getValue().getId());
@@ -431,11 +443,10 @@ public class SyncSession {
      * @return The optimistic save threshold in bytes
      */
     public long getOptimisticSaveThreshold() {
-        ServerSession serverSession = session.getServerSession();
         if (null != session.getClientType() && session.getClientType().isDesktop()) {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop(serverSession.getContextId(), serverSession.getUserId());
+            return getConfig().getOptimisticSaveThresholdDesktop();
         }
-        return DriveConfig.getInstance().getOptimisticSaveThresholdMobile(serverSession.getContextId(), serverSession.getUserId());
+        return getConfig().getOptimisticSaveThresholdMobile();
     }
 
     @Override

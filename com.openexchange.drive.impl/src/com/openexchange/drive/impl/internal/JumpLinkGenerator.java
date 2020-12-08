@@ -49,9 +49,6 @@
 
 package com.openexchange.drive.impl.internal;
 
-import com.openexchange.drive.impl.management.DriveConfig;
-import com.openexchange.tools.session.ServerSession;
-
 /**
  * {@link JumpLinkGenerator}
  *
@@ -96,11 +93,10 @@ public class JumpLinkGenerator {
     }
 
     public String getJumpLink(String folderId, String fileId, String method, String mimeType) {
-        ServerSession serverSession = session.getServerSession();
-        String redirectUrl = DriveConfig.getInstance().getJumpLink(serverSession.getContextId(), serverSession.getUserId())
+        String redirectUrl = session.getConfig().getJumpLink()
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
-            .replaceAll("\\[uiwebpath\\]", trimSlashes(DriveConfig.getInstance().getUiWebPath()))
+            .replaceAll("\\[uiwebpath\\]", trimSlashes(session.getConfig().getUiWebPath()))
             .replaceAll("\\[folder\\]", "folder=" + folderId);
 
         if (null != mimeType && null != fileId) {
