@@ -186,14 +186,14 @@ public class SAMLLoginRequestHandlerTest {
         handler.setResult(loginResult);
 
         String sessionToken = sessionReservationService.reserveSessionFor(1, 1, 10, TimeUnit.SECONDS, Collections.emptyMap());
-        String deepLinkParams = "app=io.ox/mail&folder=default0/INBOX";
+        String deepLinkParams = "!!&app=io.ox/mail&folder=default0/INBOX";
         URI uri = new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
             .setPath("/appsuite/api/login")
             .setParameter("action", "samlLogin")
             .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken)
-            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, "!!&" + deepLinkParams)
+            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, deepLinkParams)
             .build();
         SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", uri);
 
@@ -215,14 +215,14 @@ public class SAMLLoginRequestHandlerTest {
 
         String sessionToken = sessionReservationService.reserveSessionFor(1, 1, 10, TimeUnit.SECONDS, Collections.emptyMap());
 
-        String deepLinkParams = "app=io.ox/mail&folder=default0/INBOX";
+        String deepLinkParams = "!!&app=io.ox/mail&folder=default0/INBOX";
         URI uri = new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
             .setPath("/appsuite/api/login")
             .setParameter("action", "samlLogin")
             .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken)
-            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, "!!&" + deepLinkParams)
+            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, deepLinkParams)
             .build();
         SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", uri);
 
@@ -261,14 +261,14 @@ public class SAMLLoginRequestHandlerTest {
         Map<String, String> params = ImmutableMap.<String, String>builder().put(SAMLSessionParameters.SESSION_INDEX, samlSessionIndex).build();
         String sessionToken = sessionReservationService.reserveSessionFor(1, 1, 10, TimeUnit.SECONDS, params);
 
-        String deepLinkParams = "app=io.ox/mail&folder=default0/INBOX";
+        String deepLinkParams = "!!&app=io.ox/mail&folder=default0/INBOX";
         URI uri = new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
             .setPath("/appsuite/api/login")
             .setParameter("action", "samlLogin")
             .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken)
-            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, "!!&" + deepLinkParams)
+            .setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, deepLinkParams)
             .build();
         SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", uri);
         String cookieHash = HashCalculator.getInstance().getHash(
