@@ -171,9 +171,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException {
         return syncFolders(session, originalVersions, clientVersions, (SyncSession syncSession) -> {
-            ServerSession serverSession = syncSession.getServerSession();
-            int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
-            return syncSession.getServerDirectories(maxDirectories);
+            return syncSession.getServerDirectories(syncSession.getConfig().getMaxDirectories());
         });
     }
 
@@ -182,7 +180,8 @@ public class DriveServiceImpl implements DriveService {
         /*
          * check (hard) version restrictions
          */
-        if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion(serverSession.getContextId(), serverSession.getUserId())) {
+        DriveConfig driveConfig = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
+        if (session.getApiVersion() < driveConfig.getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
             LOG.debug("Client synchronization aborted for {}", session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
@@ -191,7 +190,7 @@ public class DriveServiceImpl implements DriveService {
         }
         DriveClientVersion clientVersion = session.getClientVersion();
         if (null != clientVersion) {
-            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType(), serverSession);
+            DriveClientVersion hardVersionLimit = driveConfig.getHardMinimumVersion(session.getClientType(), serverSession);
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
                 OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
                 LOG.debug("Client synchronization aborted for {}", session, error);
@@ -200,14 +199,14 @@ public class DriveServiceImpl implements DriveService {
                 return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
             }
         }
-        if (false == DriveUtils.isSynchronizable(session.getRootFolderID(), session)) {
+        if (false == DriveUtils.isSynchronizable(session.getRootFolderID(), driveConfig)) {
             OXException error = DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID());
             LOG.debug("Client synchronization aborted for {}", session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
             return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
         }
-        int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
+        int maxDirectories = driveConfig.getMaxDirectories();
         if (-1 != maxDirectories && null != clientVersions && maxDirectories < clientVersions.size()) {
             OXException error = DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(maxDirectories));
             LOG.debug("Client synchronization aborted for {}", session, error);
@@ -286,7 +285,7 @@ public class DriveServiceImpl implements DriveService {
              * check (soft) version restrictions
              */
             if (null != clientVersion) {
-                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType(), serverSession);
+                DriveClientVersion softVersionLimit = driveConfig.getSoftMinimumVersion(session.getClientType(), serverSession);
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
                     LOG.trace("Client upgrade available for {}", session, error);
@@ -314,8 +313,7 @@ public class DriveServiceImpl implements DriveService {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
-        ServerSession serverSession = session.getServerSession();
-        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory(serverSession.getContextId(), serverSession.getUserId());
+        int maxFilesPerDirectory = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId()).getMaxFilesPerDirectory();
         if (-1 != maxFilesPerDirectory && null != clientVersions && maxFilesPerDirectory < clientVersions.size()) {
             OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path);
             LOG.debug("Client synchronization aborted for {}", session, error);
@@ -489,6 +487,7 @@ public class DriveServiceImpl implements DriveService {
         /*
          * collect settings
          */
+        DriveConfig driveConfig = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         DriveSettings settings = new DriveSettings();
         ServerSession serverSession = session.getServerSession();
         DriveStorage storage = syncSession.getStorage();
@@ -497,17 +496,17 @@ public class DriveServiceImpl implements DriveService {
         settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
         settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
         settings.setServerVersion(DriveServiceLookup.getService(VersionService.class, true).getVersionString());
-        settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion(serverSession.getContextId(), serverSession.getUserId())));
+        settings.setMinApiVersion(String.valueOf(driveConfig.getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
         settings.setHasTrashFolder(storage.hasTrashFolder());
         settings.setPathToRoot(storage.getInternalPath(session.getRootFolderID()));
-        settings.setMaxConcurrentSyncFiles(DriveConfig.getInstance().getMaxConcurrentSyncFiles(serverSession.getContextId(), serverSession.getUserId()));
+        settings.setMaxConcurrentSyncFiles(driveConfig.getMaxConcurrentSyncFiles());
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
         Map<String, String> localizedFolders = new HashMap<String, String>();
-        int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
+        int maxDirectories = driveConfig.getMaxDirectories();
         Map<String, FileStorageFolder> folders = storage.getFolders(maxDirectories, 2);
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String localizedName = entry.getValue().getLocalizedName(session.getLocale());

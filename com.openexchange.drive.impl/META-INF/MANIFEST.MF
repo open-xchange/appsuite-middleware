@@ -10,6 +10,8 @@ Bundle-Activator: com.openexchange.drive.impl.osgi.DriveActivator
 Bundle-ClassPath: .,
  lib/jacksum.jar
 Import-Package: com.fasterxml.jackson.core,
+ com.google.common.base,
+ com.google.common.cache,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.fileholder,

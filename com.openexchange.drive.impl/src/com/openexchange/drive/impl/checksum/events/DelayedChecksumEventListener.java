@@ -71,6 +71,7 @@ import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.composition.FileID;
@@ -177,7 +178,8 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 String folderID = FileStorageEventHelper.extractFolderId(event);
                 String objectID = FileStorageEventHelper.extractObjectId(event);
                 String fileName = (String)event.getProperty(FILE_NAME);
-                if (Strings.isNotEmpty(fileName) && (FilenameValidationUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName, session))) {
+                if (Strings.isNotEmpty(fileName) && (FilenameValidationUtils.isInvalidFileName(fileName) ||
+                    DriveUtils.isIgnoredFileName(fileName, new DriveConfig(contextID, session.getUserId())))) {
                     LOG.trace("Skipping event processing for ignored file: {}", fileName);
                     return;
                 }

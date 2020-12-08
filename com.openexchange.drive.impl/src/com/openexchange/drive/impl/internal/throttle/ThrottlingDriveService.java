@@ -181,7 +181,7 @@ public class ThrottlingDriveService implements DriveService {
 
     private void enterSyncOperation(DriveSession session) throws OXException {
         ServerSession serverSession = session.getServerSession();
-        int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations(serverSession.getContextId(), serverSession.getUserId());
+        int maxConcurrentSyncOperations = new DriveConfig(serverSession.getContextId(), serverSession.getUserId()).getMaxConcurrentSyncOperations();
         if (0 < maxConcurrentSyncOperations && maxConcurrentSyncOperations < currentSyncOperations.incrementAndGet()) {
             throw DriveExceptionCodes.SERVER_BUSY.create();
         }

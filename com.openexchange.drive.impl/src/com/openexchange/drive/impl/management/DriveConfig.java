@@ -53,9 +53,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.ServerConfig;
@@ -86,24 +90,30 @@ public class DriveConfig {
 
     private static final long MILLIS_PER_HOUR = 1000 * 60 * 60;
 
-    private static final DriveConfig INSTANCE = new DriveConfig();
+    /** Small local cache for compiled file/directory exclusion patterns */
+    private static final LoadingCache<String, Pattern> EXCLUSION_PATTERN_CACHE = CacheBuilder.newBuilder().maximumSize(20L).expireAfterAccess(1, TimeUnit.DAYS)
+        .build(CacheLoader.from(key -> Pattern.compile(key, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)));
 
-    /**
-     * Gets the drive configuration instance.
-     *
-     * @return The drive config instance
-     */
-    public static DriveConfig getInstance() {
-        return INSTANCE;
-    }
+    private final int userId;
+    private final int contextId;
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
+    private Set<String> enabledServices;
+    private Set<String> excludedFolders;
+    private Pattern excludedFilenamesPattern;
+    private Pattern excludedDirectoriesPattern;
+    private int[] thumbnailImageSize;
+    private int[] previewImageSize;
 
     /**
      * Initializes a new {@link DriveConfig}.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      */
-    private DriveConfig() {
+    public DriveConfig(int contextId, int userId) {
         super();
+        this.contextId = contextId;
+        this.userId = userId;
     }
 
     /**
@@ -113,7 +123,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The useTempFolder
      */
-    public boolean isUseTempFolder(int contextId, int userId) {
+    public boolean isUseTempFolder() {
         return getConfigService().getBooleanProperty(userId, contextId, DriveProperty.USE_TEMP_FOLDER);
     }
 
@@ -124,7 +134,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The cleanerInterval
      */
-    public long getCleanerInterval(int contextId, int userId) throws OXException {
+    public long getCleanerInterval() throws OXException {
         String cleanerIntervalValue = getConfigService().getProperty(userId, contextId, DriveProperty.CLEANER_INTERVAL);
         return parseTimeSpan(cleanerIntervalValue, 1);
     }
@@ -136,7 +146,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The cleanerMaxAge
      */
-    public long getCleanerMaxAge(int contextId, int userId) throws OXException {
+    public long getCleanerMaxAge() throws OXException {
         String cleanerMaxAgeValue = getConfigService().getProperty(userId, contextId, DriveProperty.CLEANER_MAX_AGE);
         return parseTimeSpan(cleanerMaxAgeValue, 1);
     }
@@ -168,7 +178,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxConcurrentSyncOperations
      */
-    public int getMaxConcurrentSyncOperations(int contextId, int userId) {
+    public int getMaxConcurrentSyncOperations() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_CONCURRENT_SYNC_OPERATIONS);
     }
 
@@ -179,7 +189,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkQuota
      */
-    public String getDirectLinkQuota(int contextId, int userId) {
+    public String getDirectLinkQuota() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_QUOTA);
     }
 
@@ -190,7 +200,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkHelp
      */
-    public String getDirectLinkHelp(int contextId, int userId) {
+    public String getDirectLinkHelp() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_HELP);
     }
 
@@ -201,13 +211,16 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The excludedFilenamesPattern
      */
-    public Pattern getExcludedFilenamesPattern(int contextId, int userId) {
-        try {
-            return Pattern.compile(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FILES_PATTERN), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        } catch (PatternSyntaxException e) {
-            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_FILES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
-            return Pattern.compile(DriveProperty.EXCLUDED_FILES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    public Pattern getExcludedFilenamesPattern() {
+        if (null == excludedFilenamesPattern) {
+            try {
+                excludedFilenamesPattern = EXCLUSION_PATTERN_CACHE.get(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FILES_PATTERN));
+            } catch (ExecutionException e) {
+                LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                excludedFilenamesPattern = Pattern.compile(DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+            }
         }
+        return excludedFilenamesPattern;
     }
 
     /**
@@ -217,13 +230,16 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The excludedDirectoriesPattern
      */
-    public Pattern getExcludedDirectoriesPattern(int contextId, int userId) {
-        try {
-            return Pattern.compile(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_DIRECTORIES_PATTERN), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        } catch (PatternSyntaxException e) {
-            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
-            return Pattern.compile(DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    public Pattern getExcludedDirectoriesPattern() {
+        if (null == excludedDirectoriesPattern) {
+            try {
+                excludedDirectoriesPattern = EXCLUSION_PATTERN_CACHE.get(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_DIRECTORIES_PATTERN));
+            } catch (ExecutionException e) {
+                LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                excludedDirectoriesPattern = Pattern.compile(DriveProperty.EXCLUDED_DIRECTORIES_PATTERN.getDefaultValue(String.class), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+            }
         }
+        return excludedDirectoriesPattern;
     }
 
     /**
@@ -233,7 +249,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The shortProductName
      */
-    public String getShortProductName(int contextId, int userId) {
+    public String getShortProductName() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.SHORT_PRODUCT_NAME);
     }
 
@@ -244,7 +260,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The minApiVersion
      */
-    public int getMinApiVersion(int contextId, int userId) {
+    public int getMinApiVersion() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MIN_API_VERSION);
     }
 
@@ -255,7 +271,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxDirectoryActions
      */
-    public int getMaxDirectoryActions(int contextId, int userId) {
+    public int getMaxDirectoryActions() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_DIRECTORY_ACTIONS);
     }
 
@@ -266,7 +282,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxFileActions
      */
-    public int getMaxFileActions(int contextId, int userId) {
+    public int getMaxFileActions() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_FILE_ACTIONS);
     }
 
@@ -277,7 +293,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkFragmentsFile
      */
-    public String getDirectLinkFragmentsFile(int contextId, int userId) {
+    public String getDirectLinkFragmentsFile() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FRAGMENTS_FILE);
     }
 
@@ -288,11 +304,11 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkFile
      */
-    public String getDirectLinkFile(int contextId, int userId) {
+    public String getDirectLinkFile() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FILE);
     }
 
-    public String getJumpLink(int contextId, int userId) {
+    public String getJumpLink() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.JUMP_LINK);
     }
 
@@ -303,14 +319,17 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The thumbnailImageSize
      */
-    public int[] getThumbnailImageSize(int contextId, int userId) {
-        String value = getConfigService().getProperty(userId, contextId, DriveProperty.THUMBNAIL_IMAGE_SIZE);
-        try {
-            return parseDimensions(value);
-        } catch (OXException e) {
-            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.THUMBNAIL_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
-            return new int[] { 250, 100 };
+    public int[] getThumbnailImageSize() {
+        if (null == thumbnailImageSize) {
+            String value = getConfigService().getProperty(userId, contextId, DriveProperty.THUMBNAIL_IMAGE_SIZE);
+            try {
+                thumbnailImageSize = parseDimensions(value);
+            } catch (OXException e) {
+                LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.THUMBNAIL_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                thumbnailImageSize = new int[] { 250, 100 };
+            }
         }
+        return thumbnailImageSize;
     }
 
     /**
@@ -320,14 +339,17 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The previewImageSize
      */
-    public int[] getPreviewImageSize(int contextId, int userId) {
-        String value = getConfigService().getProperty(userId, contextId, DriveProperty.PREVIEW_IMAGE_SIZE);
-        try {
-            return parseDimensions(value);
-        } catch (OXException e) {
-            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.PREVIEW_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
-            return new int[] { 1600, 1600 };
+    public int[] getPreviewImageSize() {
+        if (null == previewImageSize) {
+            String value = getConfigService().getProperty(userId, contextId, DriveProperty.PREVIEW_IMAGE_SIZE);
+            try {
+                previewImageSize = parseDimensions(value);
+            } catch (OXException e) {
+                LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.PREVIEW_IMAGE_SIZE.getFQPropertyName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                previewImageSize = new int[] { 1600, 1600 };
+            }
         }
+        return previewImageSize;
     }
 
     /**
@@ -337,7 +359,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The imageLinkDocumentFile
      */
-    public String getImageLinkDocumentFile(int contextId, int userId) {
+    public String getImageLinkDocumentFile() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_DOCUMENT_FILE);
     }
 
@@ -348,7 +370,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkDirectory
      */
-    public String getDirectLinkDirectory(int contextId, int userId) {
+    public String getDirectLinkDirectory() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_DIRECTORY);
     }
 
@@ -359,7 +381,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The directLinkFragmentsDirectory
      */
-    public String getDirectLinkFragmentsDirectory(int contextId, int userId) {
+    public String getDirectLinkFragmentsDirectory() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.DIRECT_LINK_FRAGMENTS_DIRECTORY);
     }
 
@@ -370,7 +392,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The imageLinkAudioFile
      */
-    public String getImageLinkAudioFile(int contextId, int userId) {
+    public String getImageLinkAudioFile() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_AUDIO_FILE);
     }
 
@@ -381,7 +403,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The imageLinkImageFile
      */
-    public String getImageLinkImageFile(int contextId, int userId) {
+    public String getImageLinkImageFile() {
         return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_IMAGE_FILE);
     }
 
@@ -414,7 +436,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxDirectories
      */
-    public int getMaxDirectories(int contextId, int userId) {
+    public int getMaxDirectories() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_DIRECTORIES);
     }
 
@@ -425,7 +447,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxConcurrentSyncFiles
      */
-    public int getMaxConcurrentSyncFiles(int contextId, int userId) {
+    public int getMaxConcurrentSyncFiles() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_CONCURRENT_SYNCFILES);
     }
 
@@ -436,7 +458,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The maxFilesPerDirectory
      */
-    public int getMaxFilesPerDirectory(int contextId, int userId) {
+    public int getMaxFilesPerDirectory() {
         return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_FILES_PER_DIRECTORY);
     }
 
@@ -448,9 +470,11 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return <code>true</code> if synchronization is enabled, <code>false</code>, otherwise
      */
-    public boolean isEnabledService(String serviceID, int contextId, int userId) {
-        String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.ENABLED_SERVICES));
-        Set<String> enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
+    public boolean isEnabledService(String serviceID) {
+        if (null == enabledServices) {
+            String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.ENABLED_SERVICES));
+            enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
+        }
         return Strings.isNotEmpty(serviceID) && enabledServices.contains(serviceID);
     }
 
@@ -462,8 +486,8 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
      */
-    public boolean isExcludedFolder(String folderID, int contextId, int userId) {
-        return Strings.isNotEmpty(folderID) && getExcludedFolders(contextId, userId).contains(folderID);
+    public boolean isExcludedFolder(String folderID) {
+        return Strings.isNotEmpty(folderID) && getExcludedFolders().contains(folderID);
     }
 
     /**
@@ -473,9 +497,12 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The excluded folders
      */
-    public Set<String> getExcludedFolders(int contextId, int userId) {
-        String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FOLDERS));
-        return ((null == exclduedFoldersValue) || (0 == exclduedFoldersValue.length)) ? Collections.emptySet() : new HashSet<String>(Arrays.asList(exclduedFoldersValue));
+    public Set<String> getExcludedFolders() {
+        if (null == excludedFolders) {
+            String[] excludedFoldersValue = Strings.splitByCommaNotInQuotes(getConfigService().getProperty(userId, contextId, DriveProperty.EXCLUDED_FOLDERS));
+            excludedFolders = ((null == excludedFoldersValue) || (0 == excludedFoldersValue.length)) ? Collections.emptySet() : new HashSet<String>(Arrays.asList(excludedFoldersValue));
+        }
+        return excludedFolders;
     }
 
     /**
@@ -515,7 +542,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The optimisticSaveThresholdMobile
      */
-    public long getOptimisticSaveThresholdMobile(int contextId, int userId) {
+    public long getOptimisticSaveThresholdMobile() {
         return parseBytes(getConfigService().getProperty(userId, contextId, DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_MOBILE));
     }
 
@@ -526,7 +553,7 @@ public class DriveConfig {
      * @param userId The user identifier
      * @return The optimisticSaveThresholdDesktop
      */
-    public long getOptimisticSaveThresholdDesktop(int contextId, int userId) {
+    public long getOptimisticSaveThresholdDesktop() {
         return parseBytes(getConfigService().getProperty(userId, contextId, DriveProperty.OPTIMISTIC_SAVE_THRESHOLD_DESKTOP));
     }
 

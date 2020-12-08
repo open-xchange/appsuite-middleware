@@ -57,7 +57,6 @@ import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -98,7 +97,7 @@ public class TempCleaner implements Runnable {
             if (null != parameter && Long.class.isInstance(parameter)) {
                 long lastCleanerRun = ((Long) parameter).longValue();
                 LOG.debug("Last cleaner run for session {} at: {}", session, DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
-                long interval = DriveConfig.getInstance().getCleanerInterval(serverSession.getContextId(), serverSession.getUserId());
+                long interval = session.getConfig().getCleanerInterval();
                 if (MILLIS_PER_HOUR > interval) {
                     LOG.warn("The configured interval of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", Long.valueOf(interval));
                     interval = MILLIS_PER_HOUR;
@@ -116,7 +115,7 @@ public class TempCleaner implements Runnable {
                 LOG.debug("No '.drive' folder found, nothing to do.");
                 return;
             }
-            long maxAge = DriveConfig.getInstance().getCleanerMaxAge(serverSession.getContextId(), serverSession.getUserId());
+            long maxAge = session.getConfig().getCleanerMaxAge();
             if (MILLIS_PER_HOUR > maxAge) {
                 LOG.warn("The configured maximum age of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", Long.valueOf(maxAge));
                 maxAge = MILLIS_PER_HOUR;
