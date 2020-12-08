@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -71,6 +72,7 @@ import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
 import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyzer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.reseller.ResellerService;
@@ -185,51 +187,34 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected BasicProperty get(final String property, Context context, int user) throws OXException {
+    protected BasicProperty get(String propertyName, Context context, int user) throws OXException {
         if (user == NO_USER) {
             return NO_PROPERTY;
         }
-        List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserPermissionBits(context, user)));
 
-        final String value = findFirst(config, property);
-        return new BasicProperty() {
+        Optional<UserPermissionBits> optionalUserPermissionBits = getUserPermissionBits(context, user);
+        if (optionalUserPermissionBits.isPresent() == false) {
+            return NO_PROPERTY;
+        }
 
-            @Override
-            public String get() {
-                return value;
-            }
+        List<Map<String, Object>> config = getConfigData(getSpecification(context, optionalUserPermissionBits.get()));
 
-            @Override
-            public String get(final String metadataName) {
-                return null;
-            }
-
-            @Override
-            public boolean isDefined() {
-                return value != null;
-            }
-
-            @Override
-            public void set(String value) throws OXException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, SCOPE);
-            }
-
-            @Override
-            public void set(String metadataName, String value) throws OXException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, SCOPE);
-            }
-
-            @Override
-            public List<String> getMetadataNames() throws OXException {
-                return Collections.emptyList();
-            }
-
-        };
+        final String value = findFirst(config, propertyName);
+        return new ContextSetBasicProperty(propertyName, value, SCOPE);
     }
 
-    private UserPermissionBits getUserPermissionBits(Context ctx, int user) throws OXException {
-        UserPermissionService userPermissions = services.getService(UserPermissionService.class);
-        return userPermissions.getUserPermissionBits(user, ctx);
+    private Optional<UserPermissionBits> getUserPermissionBits(Context ctx, int user) throws OXException {
+        try {
+            UserPermissionService userPermissions = services.getService(UserPermissionService.class);
+            return Optional.ofNullable(userPermissions.getUserPermissionBits(user, ctx));
+        } catch (OXException e) {
+            if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            // No such user
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -238,8 +223,13 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             return Collections.emptyList();
         }
 
+        Optional<UserPermissionBits> optionalUserPermissionBits = getUserPermissionBits(context, userId);
+        if (optionalUserPermissionBits.isPresent() == false) {
+            return Collections.emptyList();
+        }
+
+        Set<String> tags = getSpecification(context, optionalUserPermissionBits.get());
         Set<String> allNames = new HashSet<>();
-        Set<String> tags = getSpecification(context, getUserPermissionBits(context, userId));
         boolean somethingAdded = false;
         for (ContextSetConfig c : contextSetConfigs) {
             if (c.matches(tags)) {
@@ -254,9 +244,9 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return allNames;
     }
 
-    protected String findFirst(List<Map<String, Object>> configData, String property) {
+    protected String findFirst(List<Map<String, Object>> configData, String propertyName) {
         for (Map<String, Object> map : configData) {
-            Object object = map.get(property);
+            Object object = map.get(propertyName);
             if (object != null) {
                 return object.toString();
             }
@@ -329,7 +319,50 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return ConfigViewScope.CONTEXT_SETS.getScopeName();
     }
 
-    // -----------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class ContextSetBasicProperty implements BasicProperty {
+
+        private final String value;
+        private final String scope;
+        private final String propertyName;
+
+        ContextSetBasicProperty(String propertyName, String value, String scope) {
+            this.value = value;
+            this.scope = scope;
+            this.propertyName = propertyName;
+        }
+
+        @Override
+        public String get() {
+            return value;
+        }
+
+        @Override
+        public String get(final String metadataName) {
+            return null;
+        }
+
+        @Override
+        public boolean isDefined() {
+            return value != null;
+        }
+
+        @Override
+        public void set(String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(propertyName, scope);
+        }
+
+        @Override
+        public void set(String metadataName, String value) throws OXException {
+            throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, scope);
+        }
+
+        @Override
+        public List<String> getMetadataNames() throws OXException {
+            return Collections.emptyList();
+        }
+    }
 
     private static class ContextSetConfig {
 

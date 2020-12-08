@@ -3,16 +3,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-13 10:29+0200\n"
+"PO-Revision-Date: 2020-12-03 11:57+0100\n"
 "Last-Translator: Jolanta Kasprzak-Śliwinska <jolanta@workshop-chapina.com>\n"
 "Language-Team: Polish <pl@workshop-chapina.com>\n"
 "Language: pl_PL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 2.1.1\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -77,8 +77,13 @@ msgstr "Klient kalendarza (CalDAV)"
 msgid "Addressbook Client (CardDAV)"
 msgstr "Klient książki adresowej (CardDav)"
 
-#. The display name used for a WebDAV Client / id "webdav"
+#. The display name used for a Calendar and Addressbook Client (CalDAV/CardDAV) / id "calcarddav"
 #: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:75
+msgid "Calendar and Addressbook Client (CalDAV/CardDAV)"
+msgstr "Klient kalendarza i książki adresowej (CalDAV/CardDAV)"
+
+#. The display name used for a WebDAV Client / id "webdav"
+#: com.openexchange.authentication.application.impl/src/com/openexchange/authentication/application/impl/AppPasswordStrings.java:78
 msgid "WebDAV Client"
 msgstr "Klient WebDAV"
 
@@ -689,13 +694,12 @@ msgid "You have been invited to an appointment by %1$s:"
 msgstr "Masz zaproszenie na spotkanie od użytkownika %1$s:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
-msgid ""
-"You have been invited to an appointment organized by %1$s on behalf of %2$s"
-msgstr "Masz zaproszenie na spotkanie organizowane przez użytkownika %1$s w imieniu użytkownika %2$s"
+msgid "You have been invited to an appointment by %1$s on behalf of %2$s:"
+msgstr "Masz zaproszenie na spotkanie od użytkownika %1$s w imieniu użytkownika %2$s:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
-msgid "%1$s is organizing an appointment on your behalf."
-msgstr "Użytkownik %1$s organizuje spotkanie w Twoim imieniu."
+msgid "%1$s is organizing an appointment on your behalf:"
+msgstr "%1$s organizuje spotkanie w Twoim imieniu:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
@@ -1635,6 +1639,10 @@ msgstr "Spotkanie zawiera zbyt wiele konferencji."
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:172
 msgid "The method \"%1$s\" is not supported."
 msgstr "Metoda %1$s nie jest obsługiwana."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:174
+msgid "The event %1$s was not canceled for the user %2$s and won't be deleted."
+msgstr "Wydarzenie %1$s nie zostało anulowane przez użytkownika %2$s i nie zostanie usunięte."
 
 #. Your selection is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
@@ -3121,6 +3129,13 @@ msgstr "Plik o tej nazwie już istnieje."
 msgid "Restore from trash is not supported"
 msgstr "Przywracanie z kosza nie jest obsługiwane"
 
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr "Nazwa konta jest za długa. Ogranicz nazwę konta do maksymalnie %1$s znaków."
+
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3332,7 +3347,7 @@ msgstr "Żądana usługa jest tymczasowo niedostępna. Spróbuj ponownie późni
 msgid ""
 "A filter for field '%1$s' is missing but is required to search in module "
 "%2$s."
-msgstr "Brak filtru w polu \"%1$s\", a jest on wymagany do wyszukiwania w module %2$s."
+msgstr "Brak filtra w polu \"%1$s\", a jest on wymagany do wyszukiwania w module %2$s."
 
 #. A search filter did not contain a field to filter on.
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:72
@@ -4226,20 +4241,22 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "Aktualizacja atrybutów nie powiodła się w kontekście %1$d dla użytkownika %2$d."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Nieprawidłowa długość hasła. Minimalna długość hasła: %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
+msgstr "Nieprawidłowa długość hasła. Minimalna liczba znaków w haśle: %1$d."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Nieprawidłowa długość hasła. Maksymalna długość hasła: %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
+msgstr "Nieprawidłowa długość hasła. Maksymalna liczba znaków w haśle: %1$d."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -4891,6 +4908,24 @@ msgstr "Nie masz uprawnień do zmiany nazwy kategorii %1$s."
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:83
 msgid "You are not allowed to enable or disable the category %1$s."
 msgstr "Nie masz uprawnień do włączenia lub wyłączenia kategorii %1$s."
+
+#. The prefix used when creating the folder, which carries the file attachments that are published via share link to recipients
+#. E.g. "[Draft] My mail for Bob"
+#: com.openexchange.mail.compose.mailstorage/src/com/openexchange/mail/compose/mailstorage/MailStorageCompositionSpaceStrings.java:72
+msgid "Draft"
+msgstr "Wersja robocza"
+
+#. The fall-back folder name that is used in case user has not yet specified a subject for E-Mail in composition, but decided to create
+#. a Drive Mail.
+#.
+#. Supports the following placeholders:
+#. #DATE# is replaced with the date when user started mail composition
+#. #TIME# is replaced with time of the date when user started mail composition
+#.
+#. E.g. "E-Mail from 2020-09-08 at 8:35am"
+#: com.openexchange.mail.compose.mailstorage/src/com/openexchange/mail/compose/mailstorage/MailStorageCompositionSpaceStrings.java:82
+msgid "E-Mail from #DATE# at #TIME#"
+msgstr "Wiadomość e-mail z #DATE#, #TIME#"
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
@@ -5548,18 +5583,19 @@ msgid ""
 "No password mechanism available for identifier '%s'. Cannot handle password."
 msgstr "Brak mechanizmu haseł dla identyfikatora \"%s\". Nie można obsłużyć hasła."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Nie udało się zmienić hasła z nieznanego powodu."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr "Wprowadzone hasło jest za krótkie. Spróbuj ponownie, wpisując dłuższe hasło."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -8630,7 +8666,7 @@ msgstr "Nie udało się znaleźć przesyłanego pliku o identyfikatorze %1$s."
 msgid ""
 "Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
 "\"."
-msgstr "Typ zawartości przesyłanego pliku \"%1$s\" nie pasuje do podanego filtru plików \"%2$s\"."
+msgstr "Typ zawartości przesyłanego pliku \"%1$s\" nie pasuje do podanego filtra plików \"%2$s\"."
 
 #. Upload file is invalid or illegal
 #. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
@@ -9211,6 +9247,18 @@ msgstr "Wpisane adresy UDW są za długie."
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:105
 msgid "The entered \"Reply-To\" address is too long."
 msgstr "Wpisany adres Odpowiedź do jest za długi."
+
+#. The user started a Drive Mail once and re-accesses the associated composition space. However, the folder containing the attachments to share (via a share link) does no more exist.
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:108
+msgid "The folder containing the attachments to share no longer exists."
+msgstr "Folder zawierający załączniki do udostępnienia już nie istnieje."
+
+#. The user started a Drive Mail once and re-accesses the associated composition space. However, there are either attachments not existing in composition space or there are references to attachments that do not exist
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:111
+msgid ""
+"Available attachments in the folder containing the attachments to share are "
+"inconsistent."
+msgstr "Dostępne załączniki w folderze zawierającym załączniki do udostępnienia są niespójne."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10972,14 +11020,19 @@ msgstr "Wykryto nieprawidłowe lub uszkodzone dane obrazu"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "Obraz podpisu przekracza maksymalny dozwolony rozmiar: %1$s."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "Rozmiar podpisu przekracza maksymalny rozmiar: %1$s."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Osiągnięto maksymalną liczbę obrazów w podpisie: '%1$s'."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "Nie możesz modyfikować podpisu"
 
@@ -11062,6 +11115,31 @@ msgstr "Usługodawca poprosił o potwierdzenie tożsamości. Dzieje się tak w p
 msgid "You already have such a subscription."
 msgstr "Masz już taką subskrypcję."
 
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr "Spotkania przez platformę Zoom nie są dostępne w spotkaniach całodniowych. Wprowadź określoną godzinę rozpoczęcia i zakończenia, a następnie spróbuj ponownie."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr "Spotkania przez platformę Zoom nie są dostępne w spotkaniach o ruchomej godzinie rozpoczęcia i zakończenia. Wprowadź określoną godzinę rozpoczęcia i zakończenia, a następnie spróbuj ponownie."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr "Spotkania przez platformę Zoom nie są dostępne w spotkaniach cyklicznych o czasie trwania przekraczającym jeden rok. Skróć regułę cykliczności i spróbuj ponownie."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr "Nie udało się użyć tego samego spotkania Zoom przy zmianie ze spotkania cyklicznego na jednorazowe lub na odwrót. Wygeneruj nowe spotkanie Zoom i spróbuj ponownie."
+
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
@@ -11126,12 +11204,12 @@ msgstr "Ujednolicona poczta nie obsługuje aktualizacji folderu."
 #. Unified Mail does not support to move messages.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:79
 msgid "Unified Mail does not support to move messages."
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje przenoszenia wiadomości."
+msgstr "Ujednolicona poczta nie obsługuje przenoszenia wiadomości."
 
 #. Unified Mail does not support to copy messages.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:82
 msgid "Unified Mail does not support to copy messages."
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje kopiowania wiadomości."
+msgstr "Ujednolicona poczta nie obsługuje kopiowania wiadomości."
 
 #. Append messages failed.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:85
@@ -11141,22 +11219,22 @@ msgstr "Dołączenie wiadomości nie powiodło się."
 #. Unified Mail does not support draft messages.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:88
 msgid "Unified Mail does not support draft messages."
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje wiadomości roboczych."
+msgstr "Ujednolicona poczta nie obsługuje wersji roboczych wiadomości."
 
 #. Unified Mail does not support to move folders.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:91
 msgid "Unified Mail does not support to move folders."
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje przenoszenia folderów."
+msgstr "Ujednolicona poczta nie obsługuje przenoszenia folderów."
 
 #. Unified Mail does not support mail folder creation
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:94
 msgid "Unified Mail does not support mail folder creation"
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje tworzenia folderu pocztowego"
+msgstr "Ujednolicona poczta nie obsługuje tworzenia folderu poczty."
 
 #. Unified Mail does not support to clear INBOX folder.
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:97
 msgid "Unified Mail does not support to clear INBOX folder."
-msgstr "Ujednolicona skrzynka odbiorcza nie obsługuje czyszczenia folderu skrzynki odbiorczej."
+msgstr "Ujednolicona poczta nie obsługuje czyszczenia folderu skrzynki odbiorczej."
 
 #. No connection available to access mailbox
 #: com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
@@ -12849,648 +12927,665 @@ msgid "Canada/Central"
 msgstr "Kanada/Centralna"
 
 #: TimeZones.java:374
-msgid "Canada/East-Saskatchewan"
-msgstr "Kanada/Saskatchewan, wschód"
-
-#: TimeZones.java:375
 msgid "Canada/Eastern"
 msgstr "Kanada/Wschód"
 
-#: TimeZones.java:376
+#: TimeZones.java:375
 msgid "Canada/Mountain"
 msgstr "Kanada/Góry"
 
-#: TimeZones.java:377
+#: TimeZones.java:376
 msgid "Canada/Newfoundland"
 msgstr "Kanada/Nowa Fundlandia"
 
-#: TimeZones.java:378
+#: TimeZones.java:377
 msgid "Canada/Pacific"
 msgstr "Kanada/Pacyfik"
 
-#: TimeZones.java:379
+#: TimeZones.java:378
 msgid "Canada/Saskatchewan"
 msgstr "Kanada/Saskatchewan"
 
-#: TimeZones.java:380
+#: TimeZones.java:379
 msgid "Canada/Yukon"
 msgstr "Kanada/Jukon"
 
-#: TimeZones.java:381
+#: TimeZones.java:380
 msgid "Chile/Continental"
 msgstr "Chile/Kontynentalne"
 
-#: TimeZones.java:382
+#: TimeZones.java:381
 msgid "Chile/EasterIsland"
 msgstr "Chile/Wyspa Wielkanocna"
 
-#: TimeZones.java:383
+#: TimeZones.java:382
 msgid "Cuba"
 msgstr "Kuba"
 
-#: TimeZones.java:384
+#: TimeZones.java:383
 msgid "Egypt"
 msgstr "Egipt"
 
-#: TimeZones.java:385
+#: TimeZones.java:384
 msgid "Eire"
 msgstr "Republika Irlandii"
 
-#: TimeZones.java:386
+#: TimeZones.java:385
 msgid "Europe/Amsterdam"
 msgstr "Europa/Amsterdam"
 
-#: TimeZones.java:387
+#: TimeZones.java:386
 msgid "Europe/Andorra"
 msgstr "Europa/Andora"
 
-#: TimeZones.java:388
+#: TimeZones.java:387
 msgid "Europe/Astrakhan"
 msgstr "Europa/Astrachań"
 
-#: TimeZones.java:389
+#: TimeZones.java:388
 msgid "Europe/Athens"
 msgstr "Europa/Ateny"
 
-#: TimeZones.java:390
+#: TimeZones.java:389
 msgid "Europe/Belfast"
 msgstr "Europa/Belfast"
 
-#: TimeZones.java:391
+#: TimeZones.java:390
 msgid "Europe/Belgrade"
 msgstr "Europa/Belgrad"
 
-#: TimeZones.java:392
+#: TimeZones.java:391
 msgid "Europe/Berlin"
 msgstr "Europa/Berlin"
 
-#: TimeZones.java:393
+#: TimeZones.java:392
 msgid "Europe/Bratislava"
 msgstr "Europe/Bratysława"
 
-#: TimeZones.java:394
+#: TimeZones.java:393
 msgid "Europe/Brussels"
 msgstr "Europa/Bruksela"
 
-#: TimeZones.java:395
+#: TimeZones.java:394
 msgid "Europe/Bucharest"
 msgstr "Europa/Bukareszt"
 
-#: TimeZones.java:396
+#: TimeZones.java:395
 msgid "Europe/Budapest"
 msgstr "Europa/Budapeszt"
 
-#: TimeZones.java:397
+#: TimeZones.java:396
 msgid "Europe/Busingen"
 msgstr "Europa/Busingen"
 
-#: TimeZones.java:398
+#: TimeZones.java:397
 msgid "Europe/Chisinau"
 msgstr "Europa/Kiszyniów"
 
-#: TimeZones.java:399
+#: TimeZones.java:398
 msgid "Europe/Copenhagen"
 msgstr "Europa/Kopenhaga"
 
-#: TimeZones.java:400
+#: TimeZones.java:399
 msgid "Europe/Dublin"
 msgstr "Europa/Dublin"
 
-#: TimeZones.java:401
+#: TimeZones.java:400
 msgid "Europe/Gibraltar"
 msgstr "Europa/Gibraltar"
 
-#: TimeZones.java:402
+#: TimeZones.java:401
 msgid "Europe/Guernsey"
 msgstr "Europa/Guernsey"
 
-#: TimeZones.java:403
+#: TimeZones.java:402
 msgid "Europe/Helsinki"
 msgstr "Europa/Helsinki"
 
-#: TimeZones.java:404
+#: TimeZones.java:403
 msgid "Europe/Isle of Man"
 msgstr "Europa/Wyspa Man"
 
-#: TimeZones.java:405
+#: TimeZones.java:404
 msgid "Europe/Istanbul"
 msgstr "Europa/Istambuł"
 
-#: TimeZones.java:406
+#: TimeZones.java:405
 msgid "Europe/Jersey"
 msgstr "Europa/Jersey"
 
-#: TimeZones.java:407
+#: TimeZones.java:406
 msgid "Europe/Kaliningrad"
 msgstr "Europa/Kaliningrad"
 
-#: TimeZones.java:408
+#: TimeZones.java:407
 msgid "Europe/Kiev"
 msgstr "Europa/Kijów"
 
-#: TimeZones.java:409
+#: TimeZones.java:408
 msgid "Europe/Kirov"
 msgstr "Europa/Kirow"
 
-#: TimeZones.java:410
+#: TimeZones.java:409
 msgid "Europe/Lisbon"
 msgstr "Europa/Lizbona"
 
-#: TimeZones.java:411
+#: TimeZones.java:410
 msgid "Europe/Ljubljana"
 msgstr "Europa/Ljubljana"
 
-#: TimeZones.java:412
+#: TimeZones.java:411
 msgid "Europe/London"
 msgstr "Europa/Londyn"
 
-#: TimeZones.java:413
+#: TimeZones.java:412
 msgid "Europe/Luxembourg"
 msgstr "Europa/Luksemburg"
 
-#: TimeZones.java:414
+#: TimeZones.java:413
 msgid "Europe/Madrid"
 msgstr "Europa/Madryt"
 
-#: TimeZones.java:415
+#: TimeZones.java:414
 msgid "Europe/Malta"
 msgstr "Europa/Malta"
 
-#: TimeZones.java:416
+#: TimeZones.java:415
 msgid "Europe/Mariehamn"
 msgstr "Europa/Mariehamn"
 
-#: TimeZones.java:417
+#: TimeZones.java:416
 msgid "Europe/Minsk"
 msgstr "Europa/Mińsk"
 
-#: TimeZones.java:418
+#: TimeZones.java:417
 msgid "Europe/Monaco"
 msgstr "Europa/Monaco"
 
-#: TimeZones.java:419
+#: TimeZones.java:418
 msgid "Europe/Moscow"
 msgstr "Europa/Moskwa"
 
-#: TimeZones.java:420
+#: TimeZones.java:419
 msgid "Europe/Nicosia"
 msgstr "Europa/Nikozja"
 
-#: TimeZones.java:421
+#: TimeZones.java:420
 msgid "Europe/Oslo"
 msgstr "Europa/Oslo"
 
-#: TimeZones.java:422
+#: TimeZones.java:421
 msgid "Europe/Paris"
 msgstr "Europa/Paryż"
 
-#: TimeZones.java:423
+#: TimeZones.java:422
 msgid "Europe/Podgorica"
 msgstr "Europa/Podgorica"
 
-#: TimeZones.java:424
+#: TimeZones.java:423
 msgid "Europe/Prague"
 msgstr "Europa/Praga"
 
-#: TimeZones.java:425
+#: TimeZones.java:424
 msgid "Europe/Riga"
 msgstr "Europa/Ryga"
 
-#: TimeZones.java:426
+#: TimeZones.java:425
 msgid "Europe/Rome"
 msgstr "Europa/Rzym"
 
-#: TimeZones.java:427
+#: TimeZones.java:426
 msgid "Europe/Samara"
 msgstr "Europa/Samara"
 
-#: TimeZones.java:428
+#: TimeZones.java:427
 msgid "Europe/San Marino"
 msgstr "Europa/San Marino"
 
-#: TimeZones.java:429
+#: TimeZones.java:428
 msgid "Europe/Sarajevo"
 msgstr "Europa/Sarajewo"
 
-#: TimeZones.java:430
+#: TimeZones.java:429
 msgid "Europe/Saratov"
 msgstr "Europa/Saratów"
 
-#: TimeZones.java:431
+#: TimeZones.java:430
 msgid "Europe/Simferopol"
 msgstr "Europa/Symferopol"
 
-#: TimeZones.java:432
+#: TimeZones.java:431
 msgid "Europe/Skopje"
 msgstr "Europa/Skopje"
 
-#: TimeZones.java:433
+#: TimeZones.java:432
 msgid "Europe/Sofia"
 msgstr "Europa/Sofia"
 
-#: TimeZones.java:434
+#: TimeZones.java:433
 msgid "Europe/Stockholm"
 msgstr "Europa/Sztokholm"
 
-#: TimeZones.java:435
+#: TimeZones.java:434
 msgid "Europe/Tallinn"
 msgstr "Europa/Tallin"
 
-#: TimeZones.java:436
+#: TimeZones.java:435
 msgid "Europe/Tirane"
 msgstr "Europa/Tirana"
 
-#: TimeZones.java:437
+#: TimeZones.java:436
 msgid "Europe/Tiraspol"
 msgstr "Europa/Tiraspol"
 
-#: TimeZones.java:438
+#: TimeZones.java:437
 msgid "Europe/Ulyanovsk"
 msgstr "Europa/Uljanowsk"
 
-#: TimeZones.java:439
+#: TimeZones.java:438
 msgid "Europe/Uzhgorod"
 msgstr "Europa/Użhorod"
 
-#: TimeZones.java:440
+#: TimeZones.java:439
 msgid "Europe/Vaduz"
 msgstr "Europa/Vaduz"
 
-#: TimeZones.java:441
+#: TimeZones.java:440
 msgid "Europe/Vatican"
 msgstr "Europa/Watykan"
 
-#: TimeZones.java:442
+#: TimeZones.java:441
 msgid "Europe/Vienna"
 msgstr "Europa/Wiedeń"
 
-#: TimeZones.java:443
+#: TimeZones.java:442
 msgid "Europe/Vilnius"
 msgstr "Europa/Wilno"
 
-#: TimeZones.java:444
+#: TimeZones.java:443
 msgid "Europe/Volgograd"
 msgstr "Europa/Wołgograd"
 
-#: TimeZones.java:445
+#: TimeZones.java:444
 msgid "Europe/Warsaw"
 msgstr "Europa/Warszawa"
 
-#: TimeZones.java:446
+#: TimeZones.java:445
 msgid "Europe/Zagreb"
 msgstr "Europa/Zagrzeb"
 
-#: TimeZones.java:447
+#: TimeZones.java:446
 msgid "Europe/Zaporozhye"
 msgstr "Europa/Zaporoże"
 
-#: TimeZones.java:448
+#: TimeZones.java:447
 msgid "Europe/Zurich"
 msgstr "Europa/Zurych"
 
-#: TimeZones.java:449
+#: TimeZones.java:448
 msgid "Greenwich"
 msgstr "Greenwich"
 
-#: TimeZones.java:450
+#: TimeZones.java:449
 msgid "Hongkong"
 msgstr "Hongkong"
 
-#: TimeZones.java:451
+#: TimeZones.java:450
 msgid "Iceland"
 msgstr "Islandia"
 
-#: TimeZones.java:452
+#: TimeZones.java:451
 msgid "Indian/Antananarivo"
 msgstr "Ocean Indyjski/Antananarywa"
 
-#: TimeZones.java:453
+#: TimeZones.java:452
 msgid "Indian/Chagos"
 msgstr "Ocean Indyjski/Chagos"
 
-#: TimeZones.java:454
+#: TimeZones.java:453
 msgid "Indian/Christmas"
 msgstr "Ocean Indyjski/Wyspa Bożego Narodzenia"
 
-#: TimeZones.java:455
+#: TimeZones.java:454
 msgid "Indian/Cocos"
 msgstr "Ocean Indyjski/Wyspy Kokosowe"
 
-#: TimeZones.java:456
+#: TimeZones.java:455
 msgid "Indian/Comoro"
 msgstr "Ocean Indyjski/Komory"
 
-#: TimeZones.java:457
+#: TimeZones.java:456
 msgid "Indian/Kerguelen"
 msgstr "Ocean Indyjski/Wyspy Kerguelena"
 
-#: TimeZones.java:458
+#: TimeZones.java:457
 msgid "Indian/Mahe"
 msgstr "Ocean Indyjski/Mahe"
 
-#: TimeZones.java:459
+#: TimeZones.java:458
 msgid "Indian/Maldives"
 msgstr "Ocean Indyjski/Malediwy"
 
-#: TimeZones.java:460
+#: TimeZones.java:459
 msgid "Indian/Mauritius"
 msgstr "Ocean Indyjski/Mauritius"
 
-#: TimeZones.java:461
+#: TimeZones.java:460
 msgid "Indian/Mayotte"
 msgstr "Ocean Indyjski/Majotta"
 
-#: TimeZones.java:462
+#: TimeZones.java:461
 msgid "Indian/Reunion"
 msgstr "Ocean Indyjski/Reunion"
 
-#: TimeZones.java:463
+#: TimeZones.java:462
 msgid "Iran"
 msgstr "Iran"
 
-#: TimeZones.java:464
+#: TimeZones.java:463
 msgid "Israel"
 msgstr "Izrael"
 
-#: TimeZones.java:465
+#: TimeZones.java:464
 msgid "Jamaica"
 msgstr "Jamajka"
 
-#: TimeZones.java:466
+#: TimeZones.java:465
 msgid "Japan"
 msgstr "Japonia"
 
-#: TimeZones.java:467
+#: TimeZones.java:466
 msgid "Kwajalein"
 msgstr "Kwajalein"
 
-#: TimeZones.java:468
+#: TimeZones.java:467
 msgid "Libya"
 msgstr "Libia"
 
-#: TimeZones.java:469
+#: TimeZones.java:468
 msgid "Mexico/BajaNorte"
 msgstr "Meksyk/Baja Norte"
 
-#: TimeZones.java:470
+#: TimeZones.java:469
 msgid "Mexico/BajaSur"
 msgstr "Meksyk/Baja Sur"
 
-#: TimeZones.java:471
+#: TimeZones.java:470
 msgid "Mexico/General"
 msgstr "Meksyk/Ogólna"
 
-#: TimeZones.java:472
+#: TimeZones.java:471
 msgid "Navajo"
 msgstr "Navajo"
 
-#: TimeZones.java:473
+#: TimeZones.java:472
 msgid "Pacific/Apia"
 msgstr "Pacyfik/Apia"
 
-#: TimeZones.java:474
+#: TimeZones.java:473
 msgid "Pacific/Auckland"
 msgstr "Pacyfik/Auckland"
 
-#: TimeZones.java:475
+#: TimeZones.java:474
 msgid "Pacific/Bougainville"
 msgstr "Pacyfik/Bougainville"
 
-#: TimeZones.java:476
+#: TimeZones.java:475
 msgid "Pacific/Chatham"
 msgstr "Pacyfik/Wyspy Chatham"
 
-#: TimeZones.java:477
+#: TimeZones.java:476
 msgid "Pacific/Chuuk"
 msgstr "Pacyfik/Chuuk"
 
-#: TimeZones.java:478
+#: TimeZones.java:477
 msgid "Pacific/Easter"
 msgstr "Pacyfik/Wyspa Wielkanocna"
 
-#: TimeZones.java:479
+#: TimeZones.java:478
 msgid "Pacific/Efate"
 msgstr "Pacyfik/Efate"
 
-#: TimeZones.java:480
+#: TimeZones.java:479
 msgid "Pacific/Enderbury"
 msgstr "Pacyfik/Enderbury"
 
-#: TimeZones.java:481
+#: TimeZones.java:480
 msgid "Pacific/Fakaofo"
 msgstr "Pacyfik/Fakaofo"
 
-#: TimeZones.java:482
+#: TimeZones.java:481
 msgid "Pacific/Fiji"
 msgstr "Pacyfik/Fidżi"
 
-#: TimeZones.java:483
+#: TimeZones.java:482
 msgid "Pacific/Funafuti"
 msgstr "Pacyfik/Funafuti"
 
-#: TimeZones.java:484
+#: TimeZones.java:483
 msgid "Pacific/Galapagos"
 msgstr "Pacyfik/Galapagos"
 
-#: TimeZones.java:485
+#: TimeZones.java:484
 msgid "Pacific/Gambier"
 msgstr "Pacyfik/Wyspy Gambier"
 
-#: TimeZones.java:486
+#: TimeZones.java:485
 msgid "Pacific/Guadalcanal"
 msgstr "Pacyfik/Guadalcanal"
 
-#: TimeZones.java:487
+#: TimeZones.java:486
 msgid "Pacific/Guam"
 msgstr "Pacyfik/Guam"
 
-#: TimeZones.java:488
+#: TimeZones.java:487
 msgid "Pacific/Honolulu"
 msgstr "Pacyfik/Honolulu"
 
-#: TimeZones.java:489
+#: TimeZones.java:488
 msgid "Pacific/Johnston"
 msgstr "Pacyfik/Johnston"
 
-#: TimeZones.java:490
+#: TimeZones.java:489
 msgid "Pacific/Kiritimati"
 msgstr "Pacyfik/Kiritimati"
 
-#: TimeZones.java:491
+#: TimeZones.java:490
 msgid "Pacific/Kosrae"
 msgstr "Pacyfik/Kosrae"
 
-#: TimeZones.java:492
+#: TimeZones.java:491
 msgid "Pacific/Kwajalein"
 msgstr "Pacyfik/Kwajalein"
 
-#: TimeZones.java:493
+#: TimeZones.java:492
 msgid "Pacific/Majuro"
 msgstr "Pacyfik/Majuro"
 
-#: TimeZones.java:494
+#: TimeZones.java:493
 msgid "Pacific/Marquesas"
 msgstr "Pacyfik/Markizy"
 
-#: TimeZones.java:495
+#: TimeZones.java:494
 msgid "Pacific/Midway"
 msgstr "Pacyfik/Midway"
 
-#: TimeZones.java:496
+#: TimeZones.java:495
 msgid "Pacific/Nauru"
 msgstr "Pacyfik/Nauru"
 
-#: TimeZones.java:497
+#: TimeZones.java:496
 msgid "Pacific/Niue"
 msgstr "Pacyfik/Niue"
 
-#: TimeZones.java:498
+#: TimeZones.java:497
 msgid "Pacific/Norfolk"
 msgstr "Pacyfik/Norfolk"
 
-#: TimeZones.java:499
+#: TimeZones.java:498
 msgid "Pacific/Noumea"
 msgstr "Pacyfik/Numea"
 
-#: TimeZones.java:500
+#: TimeZones.java:499
 msgid "Pacific/Pago Pago"
 msgstr "Pacyfik/Pago Pago"
 
-#: TimeZones.java:501
+#: TimeZones.java:500
 msgid "Pacific/Palau"
 msgstr "Pacyfik/Palau"
 
-#: TimeZones.java:502
+#: TimeZones.java:501
 msgid "Pacific/Pitcairn"
 msgstr "Pacyfik/Pitcairn"
 
-#: TimeZones.java:503
+#: TimeZones.java:502
 msgid "Pacific/Pohnpei"
 msgstr "Pacyfik/Pohnpei"
 
-#: TimeZones.java:504
+#: TimeZones.java:503
 msgid "Pacific/Ponape"
 msgstr "Pacyfik/Ponape"
 
-#: TimeZones.java:505
+#: TimeZones.java:504
 msgid "Pacific/Port Moresby"
 msgstr "Pacyfik/Port Moresby"
 
-#: TimeZones.java:506
+#: TimeZones.java:505
 msgid "Pacific/Rarotonga"
 msgstr "Pacyfik/Rarotonga"
 
-#: TimeZones.java:507
+#: TimeZones.java:506
 msgid "Pacific/Saipan"
 msgstr "Pacyfik/Saipan"
 
-#: TimeZones.java:508
+#: TimeZones.java:507
 msgid "Pacific/Samoa"
 msgstr "Pacyfik/Samoa"
 
-#: TimeZones.java:509
+#: TimeZones.java:508
 msgid "Pacific/Tahiti"
 msgstr "Pacyfik/Tahiti"
 
-#: TimeZones.java:510
+#: TimeZones.java:509
 msgid "Pacific/Tarawa"
 msgstr "Pacyfik/Tarawa"
 
-#: TimeZones.java:511
+#: TimeZones.java:510
 msgid "Pacific/Tongatapu"
 msgstr "Pacyfik/Tongatapu"
 
-#: TimeZones.java:512
+#: TimeZones.java:511
 msgid "Pacific/Truk"
 msgstr "Pacyfik/Truk"
 
-#: TimeZones.java:513
+#: TimeZones.java:512
 msgid "Pacific/Wake"
 msgstr "Pacyfik/Wake"
 
-#: TimeZones.java:514
+#: TimeZones.java:513
 msgid "Pacific/Wallis"
 msgstr "Pacyfik/Wallis"
 
-#: TimeZones.java:515
+#: TimeZones.java:514
 msgid "Pacific/Yap"
 msgstr "Pacyfik/Yap"
 
-#: TimeZones.java:516
+#: TimeZones.java:515
 msgid "Poland"
 msgstr "Polska"
 
-#: TimeZones.java:517
+#: TimeZones.java:516
 msgid "Portugal"
 msgstr "Portugalia"
 
-#: TimeZones.java:518
+#: TimeZones.java:517
 msgid "Singapore"
 msgstr "Singapur"
 
-#: TimeZones.java:519
+#: TimeZones.java:518
 msgid "Turkey"
 msgstr "Turcja"
 
-#: TimeZones.java:520
+#: TimeZones.java:519
 msgid "US/Alaska"
 msgstr "Stany Zjednoczone/Alaska"
 
-#: TimeZones.java:521
+#: TimeZones.java:520
 msgid "US/Aleutian"
 msgstr "Stany Zjednoczone/Aleuty"
 
-#: TimeZones.java:522
+#: TimeZones.java:521
 msgid "US/Arizona"
 msgstr "Stany Zjednoczone/Arizona"
 
-#: TimeZones.java:523
+#: TimeZones.java:522
 msgid "US/Central"
 msgstr "Stany Zjednoczone/Środek"
 
-#: TimeZones.java:524
+#: TimeZones.java:523
 msgid "US/East-Indiana"
 msgstr "Stany Zjednoczona/Indiana, wschód"
 
-#: TimeZones.java:525
+#: TimeZones.java:524
 msgid "US/Eastern"
 msgstr "Stany Zjednoczone/Wschód"
 
-#: TimeZones.java:526
+#: TimeZones.java:525
 msgid "US/Hawaii"
 msgstr "Stany Zjednoczone/Hawaje"
 
-#: TimeZones.java:527
+#: TimeZones.java:526
 msgid "US/Indiana-Starke"
 msgstr "Stany Zjednoczone/Indiana-Starke"
 
-#: TimeZones.java:528
+#: TimeZones.java:527
 msgid "US/Michigan"
 msgstr "Stany Zjednoczone/Michigan"
 
-#: TimeZones.java:529
+#: TimeZones.java:528
 msgid "US/Mountain"
 msgstr "Stany Zjednoczone/Góry"
 
-#: TimeZones.java:530
+#: TimeZones.java:529
 msgid "US/Pacific"
 msgstr "Stany Zjednoczone/Pacyfik"
 
-#: TimeZones.java:531
+#: TimeZones.java:530
 msgid "US/Pacific-New"
 msgstr "Stany Zjednoczone/Pacyfik - nowe"
 
-#: TimeZones.java:532
+#: TimeZones.java:531
 msgid "US/Samoa"
 msgstr "Stany Zjednoczone/Samoa"
 
-#: TimeZones.java:533
+#: TimeZones.java:532
 msgid "UTC"
 msgstr "UTC"
 
-#: TimeZones.java:534
+#: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You have been invited to an appointment organized by %1$s on behalf of "
+#~ "%2$s"
+#~ msgstr ""
+#~ "Masz zaproszenie na spotkanie organizowane przez użytkownika %1$s w "
+#~ "imieniu użytkownika %2$s"
+
+#~ msgid "%1$s is organizing an appointment on your behalf."
+#~ msgstr "Użytkownik %1$s organizuje spotkanie w Twoim imieniu."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr "Nieprawidłowa długość hasła. Minimalna długość hasła: %1$d."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr "Nieprawidłowa długość hasła. Maksymalna długość hasła: %1$d."
+
+#~ msgid "Canada/East-Saskatchewan"
+#~ msgstr "Kanada/Saskatchewan, wschód"
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "Grupa %1$s została zaproszona na spotkanie"

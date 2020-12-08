@@ -235,7 +235,7 @@ public class SAMLLoginTools {
             return "";
         }
 
-        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&')) {
             uriFragment = uriFragment.substring(1);
         }
 

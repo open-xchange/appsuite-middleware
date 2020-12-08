@@ -182,4 +182,24 @@ public class InMemoryPushMatch implements PushMatch {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId);
+        if (client != null) {
+            builder.append(", ").append("client=").append(client);
+        }
+        if (transportId != null) {
+            builder.append(", ").append("transportId=").append(transportId);
+        }
+        if (token != null) {
+            builder.append(", ").append("token=").append(token);
+        }
+        if (topic != null) {
+            builder.append(", ").append("topic=").append(topic);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }

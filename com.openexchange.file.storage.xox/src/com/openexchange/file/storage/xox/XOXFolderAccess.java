@@ -285,7 +285,7 @@ public class XOXFolderAccess implements FileStorageFolderAccess, UserCreatedFile
                     subscribedFolders.removeIf(f -> f == folderToUnsubscibe.get());
                     if(subscribedFolders.isEmpty()) {
                         //The last folder is going to be unsubscribed
-                        if (ignoreWarnings == Boolean.TRUE) {
+                        if (Boolean.TRUE.equals(ignoreWarnings)) {
                             //Delete
                             accountAccess.getService().getAccountManager().deleteAccount(accountAccess.getAccount(), session);
                         }
