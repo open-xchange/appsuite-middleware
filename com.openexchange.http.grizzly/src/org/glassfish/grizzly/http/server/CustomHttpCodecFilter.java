@@ -131,7 +131,7 @@ public class CustomHttpCodecFilter extends org.glassfish.grizzly.http.HttpServer
         int statusCode = HttpStatus.BAD_REQUEST_400.getStatusCode();
         String msg = "Request Header Or Cookie Too Large";
 
-        StringBuilder sb = new StringBuilder(512);
+        StringBuilder sb = new StringBuilder(2300);
         String lineSep = System.getProperty("line.separator");
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
