@@ -7,7 +7,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 
 %changelog
+* Wed Dec 09 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2020-12-14 (5924)
 * Mon Nov 16 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2020-11-23 (5905)
 * Wed Nov 04 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
