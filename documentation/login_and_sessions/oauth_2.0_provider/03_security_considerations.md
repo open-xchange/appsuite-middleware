@@ -3,6 +3,7 @@ title: Security Considerations
 icon: fa-lock
 tags: OAuth, Security
 ---
+**Note**: The following information mainly refers to the use of the built-in authorization server. General security considerations related to OAuth 2.0 can be found [here](https://tools.ietf.org/html/rfc6819#section-5).
 
 # Authorization
 
