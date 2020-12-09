@@ -158,7 +158,7 @@ all changes performed in the guest account are effectively performed by the gues
 original context. This is why it is only possible to subscribe to shares that are addressed to the user's email directly (or one of its registered 
 aliases), and these options won't be available for forwarded invitation mails for example. 
 
-The data from the remove context or server is always requested directly and no synchronization takes place, so that any changes performed on the 
+The data from the remote context or server is always requested directly and no synchronization takes place, so that any changes performed on the 
 one side will directly appear at the other. That also means that no additional quota is accounted for subscribed shares, and the same limitations as
 when opening the share in the guest interface of App Suite apply.
 
