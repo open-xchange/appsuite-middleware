@@ -94,6 +94,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
+import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -691,10 +692,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * <li>invited guest permissions must be read-only depending on the folder module</li>
      * </ul>
      *
+     * @param folder The folder being created/updated
      * @param comparedPermissions The compared permissions
+     * @param transactionManager The underlying transaction manager, or <code>null</code> if not available
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkGuestPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
+    protected void checkGuestPermissions(Folder folder, ComparedFolderPermissions comparedPermissions, TransactionManager transactionManager) throws OXException {
         /*
          * check added guest permissions
          */
@@ -707,7 +710,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
-                checkGuestPermission(session, folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo, transactionManager);
                 if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
                     throw invalidPermissions(folder, guestPermission);
                 }
@@ -739,7 +742,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
-                checkGuestPermission(session, folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo, transactionManager);
                 if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
                     throw invalidPermissions(folder, guestPermission);
                 }
@@ -820,16 +823,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folder The folder where the permission should be applied to
      * @param permission The guest permission
      * @param guestInfo The guest information for the added permission
+     * @param transactionManager The underlying transaction manager, or <code>null</code> if not available
      * @throws OXException
      */
-    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
+    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo, TransactionManager transactionManager) throws OXException {
         if (isAnonymous(guestInfo)) {
             /*
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
             // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
-            if (permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
+            if (false == FolderPermissionType.INHERITED.equals(permission.getType()) &&
+                isNotEqualsTarget(session, folder, guestInfo.getLinkTarget(), null != transactionManager ? transactionManager.getConnection() : null)) {
                 throw invalidPermissions(folder, permission);
             }
         } else {
@@ -930,7 +935,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target) throws OXException {
+    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target, Connection connection) throws OXException {
         ShareTarget folderTarget = new ShareTarget(folder.getContentType().getModule(), folder.getID());
         if (folderTarget.equals(target)) {
             return false;
@@ -938,7 +943,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         /*
          * also try adjusted share target & underlying real folder
          */
-        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId());
+        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId(), connection);
         if (adjustedTarget.equals(target)) {
             return false;
         }

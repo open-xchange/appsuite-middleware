@@ -224,7 +224,19 @@ public interface ModuleSupport {
      * @param session The requesting users session
      * @param targetUserId The ID of the user to adjust the target for
      */
-    ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException;
+    default ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+        return adjustTarget(target, session, targetUserId, null);
+    }
+
+    /**
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
+     *
+     * @param target The target from the sharing users point of view
+     * @param session The requesting users session
+     * @param targetUserId The ID of the user to adjust the target for
+     * @param connection The underlying shared database connection, or <code>null</code> to acquire one dynamically if needed
+     */
+    ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId, Connection connection) throws OXException;
 
     /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
@@ -234,7 +246,20 @@ public interface ModuleSupport {
      * @param requestUserId The requesting users ID
      * @param targetUserId The ID of the user to adjust the target for
      */
-    ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException;
+    default ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+        return adjustTarget(target, contextId, requestUserId, targetUserId, null);
+    }
+
+    /**
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
+     *
+     * @param target The target from the sharing users point of view
+     * @param contextId The context ID
+     * @param requestUserId The requesting users ID
+     * @param targetUserId The ID of the user to adjust the target for
+     * @param connection The underlying shared database connection, or <code>null</code> to acquire one dynamically if needed
+     */
+    ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId, Connection connection) throws OXException;
 
     /**
      * Checks whether a given share target is public, i.e. a public folder oder an item located within a public folder.

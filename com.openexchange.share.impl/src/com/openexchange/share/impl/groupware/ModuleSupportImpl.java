@@ -315,27 +315,27 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId, Connection connection) throws OXException {
         if (target.isFolder()) {
            ModuleAdjuster adjuster = adjusters.opt(target.getModule());
            if (null == adjuster) {
                return new ShareTarget(target);
            }
-           return adjuster.adjustTarget(target, session, targetUserId);
+           return adjuster.adjustTarget(target, session, targetUserId, connection);
         }
-        return handlers.get(target.getModule()).adjustTarget(target, session, targetUserId);
+       return handlers.get(target.getModule()).adjustTarget(target, session, targetUserId, connection);
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId, Connection connection) throws OXException {
         if (target.isFolder()) {
             ModuleAdjuster adjuster = adjusters.opt(target.getModule());
             if (null == adjuster) {
                 return new ShareTarget(target);
             }
-            return adjuster.adjustTarget(target, contextId, requestUserId, targetUserId);
+            return adjuster.adjustTarget(target, contextId, requestUserId, targetUserId, connection);
         }
-        return handlers.get(target.getModule()).adjustTarget(target, contextId, requestUserId, targetUserId);
+        return handlers.get(target.getModule()).adjustTarget(target, contextId, requestUserId, targetUserId, connection);
     }
 
     @Override
