@@ -287,6 +287,9 @@ public class GuestClient extends AJAXClient {
             folder = shareResponse.getFolder();
             item = shareResponse.getItem();
         }
+        if (getSession().getId() == null) {
+            Assert.fail("Guest client has no session id.");
+        }
     }
 
     private static AJAXSession getOrCreateSession(ClientConfig config) {

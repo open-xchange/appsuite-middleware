@@ -141,7 +141,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             if (folder.hasSubfolders()) {
                 jsonObject.put("has_subfolders", true);
             }
-            if (false == DriveUtils.isSynchronizable(folderID, session.getDriveSession())) {
+            if (false == DriveUtils.isSynchronizable(folderID, session.getConfig())) {
                 jsonObject.put("not_synchronizable", true);
             }
             if (TypeAware.class.isInstance(folder)) {

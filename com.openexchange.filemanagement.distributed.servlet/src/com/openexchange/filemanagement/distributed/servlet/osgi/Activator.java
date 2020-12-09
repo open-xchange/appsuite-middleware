@@ -55,6 +55,7 @@ import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * Activator for "com.openexchange.filemanagement.distributed.servlet" bundle.
@@ -83,7 +84,7 @@ public class Activator extends HousekeepingActivator {
             String alias = this.alias;
             if (null != alias) {
                 this.alias = null;
-                service.unregister(alias);
+                HttpServices.unregister(alias, service);
             }
         }
         super.stopBundle();

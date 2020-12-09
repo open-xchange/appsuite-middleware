@@ -26,9 +26,11 @@ Import-Package: com.google.common.annotations,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.framework.wiring,
+ org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.osgi,
  com.openexchange.osgi.console,
+ com.openexchange.osgi.service.http,
  com.openexchange.osgi.util
 Bundle-Activator: com.openexchange.osgi.osgi.OsgiActivator

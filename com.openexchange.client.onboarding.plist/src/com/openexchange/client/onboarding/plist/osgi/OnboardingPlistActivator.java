@@ -62,6 +62,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.user.UserService;
@@ -117,10 +118,12 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        String downloadServletAlias = this.downloadServletAlias;
         if (downloadServletAlias != null) {
+            this.downloadServletAlias = null;
             HttpService httpService = getService(HttpService.class);
             if (httpService != null) {
-                httpService.unregister(downloadServletAlias);
+                HttpServices.unregister(downloadServletAlias, httpService);
             }
         }
         removeService(PListSigner.class);

@@ -474,21 +474,21 @@ public final class SessionUtility {
             /*
              * Throw an error...
              */
-            {
-                final StringBuilder sb = new StringBuilder(32);
-                sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found");
-                if (LOG.isDebugEnabled()) {
-                    sb.append(": ");
-                    final Enumeration<?> enm = req.getParameterNames();
-                    while (enm.hasMoreElements()) {
-                        sb.append(enm.nextElement());
-                        sb.append(',');
-                    }
-                    if (sb.length() > 0) {
-                        sb.setCharAt(sb.length() - 1, '.');
-                    }
+            if (LOG.isDebugEnabled()) {
+                Enumeration<?> enm = req.getParameterNames();
+                if (enm.hasMoreElements()) {
+                    StringBuilder sb = new StringBuilder(32);
+                    sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found: ");
+                    do {
+                        sb.append(enm.nextElement()).append(',');
+                    } while (enm.hasMoreElements());
+                    sb.setCharAt(sb.length() - 1, '.');
+                    LOG.info(sb.toString());
+                } else {
+                    LOG.info("Parameter \"{}\" not found.", PARAMETER_SESSION);
                 }
-                LOG.info(sb.toString());
+            } else {
+                LOG.info("Parameter \"{}\" not found.", PARAMETER_SESSION);
             }
             throw SessionExceptionCodes.SESSION_PARAMETER_MISSING.create();
         }

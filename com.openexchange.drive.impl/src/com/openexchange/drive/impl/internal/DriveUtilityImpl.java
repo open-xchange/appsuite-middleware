@@ -80,6 +80,7 @@ import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DirectoryMetadataParser;
 import com.openexchange.drive.impl.metadata.FileMetadataParser;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
@@ -161,7 +162,7 @@ public class DriveUtilityImpl implements DriveUtility {
 
     @Override
     public boolean isIgnoredFileName(String fileName, Session session) throws OXException {
-        return DriveUtils.isIgnoredFileName(fileName, session);
+        return DriveUtils.isIgnoredFileName(fileName, new DriveConfig(session.getContextId(), session.getUserId()));
     }
 
     @Override
@@ -404,7 +405,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 if (FilenameValidationUtils.isInvalidFileName(targetName)) {
                     throw DriveExceptionCodes.INVALID_FILENAME.create(targetName);
                 }
-                if (DriveUtils.isIgnoredFileName(session, path, targetName)) {
+                if (DriveUtils.isIgnoredFileName(syncSession, path, targetName)) {
                     throw DriveExceptionCodes.IGNORED_FILENAME.create(targetName);
                 }
                 if (null != syncSession.getStorage().getFileByName(targetPath, targetName, true)) {

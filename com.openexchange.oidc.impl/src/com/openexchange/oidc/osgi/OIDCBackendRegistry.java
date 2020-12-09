@@ -86,6 +86,7 @@ import com.openexchange.oidc.impl.OIDCLogoutRequestHandler;
 import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.state.impl.CoreStateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.session.Session;
@@ -178,7 +179,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         } finally {
             if (error) {
                 while (!servlets.isEmpty()) {
-                    httpService.unregister(servlets.pop());
+                    HttpServices.unregister(servlets.pop(), httpService);
                 }
                 while (!serviceRegistrations.isEmpty()) {
                     ServiceRegistration<?> pop = serviceRegistrations.pop();
@@ -262,7 +263,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                     HttpService httpService = services.getService(HttpService.class);
                     while (!servlets.isEmpty()) {
                         String pop = servlets.pop();
-                        httpService.unregister(pop);
+                        HttpServices.unregister(pop, httpService);
                     }
                 }
             } catch (Exception e) {
@@ -294,7 +295,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             if (null != servlets) {
                 HttpService httpService = services.getService(HttpService.class);
                 while (!servlets.isEmpty()) {
-                    httpService.unregister(servlets.pop());
+                    HttpServices.unregister(servlets.pop(), httpService);
                 }
             }
         } catch (Exception e) {

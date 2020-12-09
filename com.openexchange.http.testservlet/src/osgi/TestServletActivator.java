@@ -1,6 +1,7 @@
 
 package osgi;
 
+import static com.openexchange.osgi.service.http.HttpServices.unregister;
 import org.osgi.service.http.HttpService;
 import com.openexchange.diagnostics.DiagnosticService;
 import com.openexchange.http.testservlet.DiagnosticServlet;
@@ -51,9 +52,9 @@ public class TestServletActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         HttpService service = getService(HttpService.class);
         if (service != null) {
-            service.unregister(SERVLET_TEST_SERVLET);
-            service.unregister(SERVLET_PING);
-            service.unregister(STATS_DIAGNOSTIC);
+            unregister(SERVLET_TEST_SERVLET, service);
+            unregister(SERVLET_PING, service);
+            unregister(STATS_DIAGNOSTIC, service);
         }
         super.stopBundle();
     }

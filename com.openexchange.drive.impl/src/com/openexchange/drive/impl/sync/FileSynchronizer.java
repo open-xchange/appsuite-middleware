@@ -73,7 +73,6 @@ import com.openexchange.drive.impl.comparison.VersionMapper;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.internal.UploadHelper;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -81,7 +80,6 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 
 
@@ -180,8 +178,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     @Override
     protected int getMaxActions() {
-        ServerSession serverSession = session.getServerSession();
-        return DriveConfig.getInstance().getMaxFileActions(serverSession.getContextId(), serverSession.getUserId());
+        return session.getConfig().getMaxFileActions();
     }
 
     @Override
@@ -347,7 +344,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
                     return 1;
-                } else if (DriveUtils.isIgnoredFileName(session.getDriveSession(), path, comparison.getClientVersion().getName())) {
+                } else if (DriveUtils.isIgnoredFileName(session, path, comparison.getClientVersion().getName())) {
                     /*
                      * ignored file, indicate as error with quarantine flag
                      */

@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -78,15 +77,6 @@ public class DriveTokenBucket implements TokenBucket {
     private final int overallBytesPerSecond;
     private final int clientBytesPerSecond;
     private final ScheduledTimerTask bucketFillerTask;
-
-    /**
-     * Initializes a new {@link DriveTokenBucket}.
-     *
-     * @throws OXException
-     */
-    public DriveTokenBucket() {
-        this(DriveConfig.getInstance().getMaxBandwidth(), DriveConfig.getInstance().getMaxBandwidthPerClient());
-    }
 
     /**
      * Initializes a new {@link DriveTokenBucket}.

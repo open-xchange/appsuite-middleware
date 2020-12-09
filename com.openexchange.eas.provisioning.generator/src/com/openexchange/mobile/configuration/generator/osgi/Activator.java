@@ -61,6 +61,7 @@ import com.openexchange.mobile.configuration.generator.configuration.Configurati
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -161,8 +162,8 @@ public class Activator extends HousekeepingActivator {
         if (null != service) {
             boolean registered = this.registered;
             if (registered) {
-                service.unregister(ALIAS);
                 this.registered = false;
+                HttpServices.unregister(ALIAS, service);
             }
         }
     }

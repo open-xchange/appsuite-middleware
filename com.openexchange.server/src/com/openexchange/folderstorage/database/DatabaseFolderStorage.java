@@ -1985,21 +1985,24 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                     serverSession = ServerSessionAdapter.valueOf(session);
                 }
 
-                MoveFolderPermissionMode mode = new FolderMoveWarningCollector(serverSession, storageParameters).getMoveFolderPermissionMode(folder.getParentID());
+                // Check folder update is a move operation and change permission according to MoveFolderPermissionMode
+                if (updateMe.getParentFolderID() != originalFolder.getParentFolderID()) {
+                    MoveFolderPermissionMode mode = new FolderMoveWarningCollector(serverSession, storageParameters).getMoveFolderPermissionMode(folder.getParentID());
 
-                switch (mode) {
-                    case INHERIT:
-                        inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, false);
-                        changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
-                        break;
-                    case MERGE:
-                        inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, true);
-                        changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
-                        break;
-                    case KEEP:
-                    default:
-                        cascadeInheritedPermissions(context, con, folderManager, storageParameters, updateMe, parent, millis);
-                        break;
+                    switch (mode) {
+                        case INHERIT:
+                            inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, false);
+                            changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
+                            break;
+                        case MERGE:
+                            inheritFolderPermissions(updateMe, parent, context, con, storageParameters, folderManager, millis, true);
+                            changedFolder = changedFolder || false == updateMe.getPermissions().equals(originalFolder.getPermissions());
+                            break;
+                        case KEEP:
+                        default:
+                            cascadeInheritedPermissions(context, con, folderManager, storageParameters, updateMe, parent, millis);
+                            break;
+                    }
                 }
             }
 

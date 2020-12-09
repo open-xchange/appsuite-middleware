@@ -80,6 +80,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLSessionParameters;
@@ -177,7 +178,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
             } catch (NamespaceException | ServletException | IllegalArgumentException e) {
                 LOG.error("Exception while registering SAML Backend", e);
                 while (!servlets.isEmpty()) {
-                    httpService.unregister(servlets.pop());
+                    HttpServices.unregister(servlets.pop(), httpService);
                 }
                 while (!serviceRegistrations.isEmpty()) {
                     ServiceRegistration<?> pop = serviceRegistrations.pop();
@@ -342,7 +343,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
             if (null != servlets) {
                 HttpService httpService = services.getService(HttpService.class);
                 while (!servlets.isEmpty()) {
-                    httpService.unregister(servlets.pop());
+                    HttpServices.unregister(servlets.pop(), httpService);
                 }
             }
         } catch (Exception e) {
@@ -370,7 +371,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     HttpService httpService = services.getService(HttpService.class);
                     while (!servlets.isEmpty()) {
                         String pop = servlets.pop();
-                        httpService.unregister(pop);
+                        HttpServices.unregister(pop, httpService);
                     }
                 }
             } catch (Exception e) {

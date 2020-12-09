@@ -9452,15 +9452,15 @@ msgstr ""
 #. *
 #. * The description of the read-only scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:65
 msgid "Read all your mails"
 msgstr ""
 
 #. *
 #. * The description of the writable scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
-msgid "Create, modify, delete, import and sent mails"
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:70
+msgid "Create, modify, delete, import and send mails"
 msgstr ""
 
 #. The default name for a file

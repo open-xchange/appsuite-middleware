@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -676,6 +677,28 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             oxresell.updateRestrictions();
         } catch (Throwable e) {
             enhanceAndLogException(e, creds);
+            throw e;
+        }
+    }
+
+    @Override
+    public Set<String> getCapabilities(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
+        try {
+            doNullCheck(LOGGER, credentials, admin);
+            checkIdOrName(admin);
+            if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+            }
+
+            resellerauth.doAuthentication(credentials);
+            ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { admin });
+            Set<String> c = new HashSet<>();
+            for (ResellerAdmin d : data) {
+                c.addAll(d.getCapabilities());
+            }
+            return c;
+        } catch (Throwable e) {
+            enhanceAndLogException(e, credentials);
             throw e;
         }
     }

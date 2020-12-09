@@ -87,7 +87,6 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DriveUtils}
@@ -155,8 +154,7 @@ public class DriveUtils {
                 return true; // no temp path
             }
         }
-        ServerSession serverSession = session.getServerSession();
-        if (DriveConfig.getInstance().getExcludedDirectoriesPattern(serverSession.getContextId(), serverSession.getUserId()).matcher(path).matches()) {
+        if (session.getConfig().getExcludedDirectoriesPattern().matcher(path).matches()) {
             return true; // no (server-side) excluded paths
         }
         List<DirectoryPattern> directoryExclusions = session.getDriveSession().getDirectoryExclusions();
@@ -168,8 +166,7 @@ public class DriveUtils {
             }
         }
         if (session.getStorage().hasTrashFolder()) {
-            FileStorageFolder trashFolder = session.getStorage().getTrashFolder();
-            String trashPath = session.getStorage().getPath(trashFolder.getId());
+            String trashPath = session.getStorage().getTrashPath();
             if (null != trashPath && trashPath.equals(path)) {
                 return true; // no trash path
             }
@@ -181,14 +178,14 @@ public class DriveUtils {
      * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
      *
      * @param fileName The filename to check
-     * @param session The session
+     * @param config The drive config
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
      */
-    public static boolean isIgnoredFileName(String fileName, Session session) {
+    public static boolean isIgnoredFileName(String fileName, DriveConfig config) {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return true; // no temporary upload files
         }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern(session.getContextId(), session.getUserId()).matcher(fileName).matches()) {
+        if (config.getExcludedFilenamesPattern().matcher(fileName).matches()) {
             return true; // no (server-side) excluded files
         }
         return false;
@@ -205,10 +202,34 @@ public class DriveUtils {
      * @throws OXException
      */
     public static boolean isIgnoredFileName(DriveSession session, String path, String fileName) {
-        if (isIgnoredFileName(fileName, session.getServerSession())) {
+        if (isIgnoredFileName(fileName, new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId()))) {
             return true;
         }
         List<FilePattern> fileExclusions = session.getFileExclusions();
+        if (null != fileExclusions && 0 < fileExclusions.size()) {
+            for (FilePattern pattern : fileExclusions) {
+                if (pattern.matches(path, fileName)) {
+                    return true; // no (client-side) excluded files
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Static /
+     * global exclusions are considered, as well as client-defined filters based on path and filename.
+     *
+     * @param session The sync session
+     * @param path The directory path, relative to the root directory
+     * @param fileName The filename to check
+     * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
+     */
+    public static boolean isIgnoredFileName(SyncSession session, String path, String fileName) {
+        if (isIgnoredFileName(fileName, session.getConfig())) {
+            return true;
+        }
+        List<FilePattern> fileExclusions = session.getDriveSession().getFileExclusions();
         if (null != fileExclusions && 0 < fileExclusions.size()) {
             for (FilePattern pattern : fileExclusions) {
                 if (pattern.matches(path, fileName)) {
@@ -516,10 +537,10 @@ public class DriveUtils {
      * Gets a value indicating whether a specific folder is synchronizable or not.
      *
      * @param folderID The folder identifier to check
-     * @param session The Drive session
+     * @param driveConfig The drive config
      * @return <code>true</code> if the folder is synchronizable, <code>false</code>, otherwise
      */
-    public static boolean isSynchronizable(String folderID, DriveSession session) {
+    public static boolean isSynchronizable(String folderID, DriveConfig driveConfig) {
         if (null != folderID) {
             /*
              * check for numerical folder identifier, only allowing specific system folders if smaller than 20
@@ -540,11 +561,7 @@ public class DriveUtils {
             /*
              * check for blacklisted folders / disabled services
              */
-            ServerSession serverSession = session.getServerSession();
-            if (DriveConfig.getInstance().isExcludedFolder(folderID, serverSession.getContextId(), serverSession.getUserId())) {
-                return false;
-            }
-            if (false == DriveConfig.getInstance().isEnabledService(new FolderID(folderID).getService(), serverSession.getContextId(), serverSession.getUserId())) {
+            if (driveConfig.isExcludedFolder(folderID) || false == driveConfig.isEnabledService(new FolderID(folderID).getService())) {
                 return false;
             }
             /*
@@ -593,7 +610,7 @@ public class DriveUtils {
 
     /**
      * Checks that a (client-supplied) content type is allowed, throwing an appropriate exception in case validation is not passed.
-     * 
+     *
      * @param contentType The content type to check
      * @return The checked content type string
      * @throws OXException {@link FileStorageExceptionCodes#DENIED_MIME_TYPE} if content type validation fails

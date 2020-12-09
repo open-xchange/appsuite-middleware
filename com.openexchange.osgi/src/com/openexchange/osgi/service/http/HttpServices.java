@@ -47,42 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.redirect.osgi;
+package com.openexchange.osgi.service.http;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.ajax.redirect.RedirectServlet;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.service.http.HttpServices;
+import org.slf4j.Logger;
+import com.openexchange.java.Strings;
 
-public class RedirectActivator extends HousekeepingActivator{
+/**
+ * {@link HttpServices} - Utility class for OSGi HTTP service.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
+ */
+public class HttpServices {
 
-    private volatile String alias;
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServices.class);
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{HttpService.class, DispatcherPrefixService.class};
-	}
+    /**
+     * Initializes a new {@link HttpServices}.
+     */
+    private HttpServices() {
+        super();
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		final HttpService service = getService(HttpService.class);
-		final String alias = getService(DispatcherPrefixService.class).getPrefix() + "redirect";
-        service.registerServlet(alias, new RedirectServlet(), null, null);
-        this.alias = alias;
-	}
-
-	@Override
-	protected void stopBundle() throws Exception {
-		final HttpService service = getService(HttpService.class);
-		if (null != service) {
-            final String alias = this.alias;
-            if (null != alias) {
-                this.alias = null;
-                HttpServices.unregister(alias, service);
+    /**
+     * (Safely) Unregisters a previous registration done by <code>HttpService</code>'s <code>registerServlet()</code> or
+     * <code>registerResources()</code> methods.
+     *
+     * @param alias The name in the URI name-space of the registration to unregister
+     * @param httpService The HTTP service to use
+     */
+    public static void unregister(String alias, HttpService httpService) {
+        if (Strings.isNotEmpty(alias) && httpService != null) {
+            try {
+                httpService.unregister(alias);
+            } catch (Exception e) {
+                LoggerHolder.LOG.error("Failed to unregister HTTP servlet (or resource) associated with alias: {}", alias, e);
             }
         }
-        super.stopBundle();
-	}
+    }
 
 }

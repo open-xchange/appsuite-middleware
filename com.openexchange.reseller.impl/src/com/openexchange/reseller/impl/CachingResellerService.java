@@ -414,7 +414,7 @@ public class CachingResellerService implements ResellerService {
      */
     private ResellerValue optResellerValue(int contextId) throws OXException {
         ResellerAdmin resellerAdmin = optReseller(contextId);
-        return null == resellerAdmin ? null : new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId());
+        return new ResellerValue(resellerAdmin.getId(), resellerAdmin.getParentId());
     }
 
     /**

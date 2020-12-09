@@ -54,6 +54,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  *
@@ -72,18 +73,21 @@ public class ServletRegisterer {
     // friend to be able to test
     final static String SERVLET_PATH_APPENDIX = "messaging/sms";
 
-    private volatile String alias;
+    private String alias;
 
+    /**
+     * Initializes a new {@link ServletRegisterer}.
+     */
     public ServletRegisterer () {
         super();
     }
 
-    public void registerServlet() {
+    public synchronized void registerServlet() {
         final HttpService http_service;
         try {
             http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
         } catch (OXException e) {
-            LOG.error("Error registering messaging sms servlet!", e);
+            LOG.error("Error registering messaging SMS servlet!", e);
             return;
         }
         try {
@@ -91,23 +95,23 @@ public class ServletRegisterer {
             http_service.registerServlet(alias, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
             this.alias = alias;
         } catch (ServletException e) {
-            LOG.error("Error registering messaging sms servlet!", e);
+            LOG.error("Error registering messaging SMS servlet!", e);
         } catch (NamespaceException e) {
-            LOG.error("Error registering messaging sms servlet!", e);
+            LOG.error("Error registering messaging SMS servlet!", e);
         }
     }
 
-    public void unregisterServlet() {
+    public synchronized void unregisterServlet() {
         final HttpService http_service;
         try {
             http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
         } catch (OXException e) {
-            LOG.error("Error unregistering messaging sms servlet!", e);
+            LOG.error("Error unregistering messaging SMS servlet!", e);
             return;
         }
         String alias = this.alias;
         if (null != alias) {
-            http_service.unregister(PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX);
+            HttpServices.unregister(PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX, http_service);
             this.alias = null;
         }
     }

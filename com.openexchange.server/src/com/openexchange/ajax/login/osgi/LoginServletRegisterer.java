@@ -78,6 +78,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link LoginServletRegisterer}
@@ -251,8 +252,8 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             LOG.info("Unregistering login servlet.");
             String alias = this.alias;
             if (null != alias) {
-                unregister.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, unregister);
             }
 
             ServiceRegistration<SessionServletInterceptor> interceptorRegistration = this.interceptorRegistration;

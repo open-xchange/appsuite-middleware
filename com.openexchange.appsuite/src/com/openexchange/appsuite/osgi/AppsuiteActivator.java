@@ -66,6 +66,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -103,7 +104,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         // Track FileCacheProvider
         final RankingAwareNearRegistryServiceTracker<FileCacheProvider> fileCacheProviderTracker = new RankingAwareNearRegistryServiceTracker<FileCacheProvider>(context, FileCacheProvider.class);
         rememberTracker(fileCacheProviderTracker);
-        
+
         openTrackers();
 
         // Initialize Servlet
@@ -139,8 +140,8 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         if (null != httpService) {
             String alias = this.alias;
             if (null != alias) {
-                httpService.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, httpService);
             }
         }
         super.stopBundle();

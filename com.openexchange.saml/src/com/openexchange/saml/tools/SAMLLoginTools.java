@@ -54,7 +54,6 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -114,14 +113,9 @@ public class SAMLLoginTools {
      * @param deepLinkFragment The requested uri fragment to add after the session parameter or <code>null</code>
      */
     public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String deepLinkFragment) {
-        String retval = uiWebPath;
-        // Prevent HTTP response splitting.
-        retval = retval.replaceAll("[\n\r]", "");
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-
-        deepLinkFragment = sanitizeDeepLinkFragment(deepLinkFragment);
-        retval = retval + deepLinkFragment;
-        return retval;
+        URIBuilder location = new URIBuilder();
+        setRedirectLocation(location, session, uiWebPath, deepLinkFragment);
+        return location.toString();
     }
 
     /**
@@ -142,12 +136,8 @@ public class SAMLLoginTools {
             hostname = httpRequest.getServerName();
         }
 
-        location.setHost(hostname).setPath(uiWebPath);
-
-        StringBuilder fragment = new StringBuilder(AJAXUtility.encodeUrl(PARAMETER_SESSION)).append("=").append(AJAXUtility.encodeUrl(session.getSessionID()));
-        fragment.append(sanitizeDeepLinkFragment(httpRequest.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT)));
-        location.setFragment(fragment.toString());
-
+        location.setHost(hostname);
+        setRedirectLocation(location, session, uiWebPath, httpRequest.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT));
         return location.toString();
     }
 
@@ -230,11 +220,32 @@ public class SAMLLoginTools {
         return hostname;
     }
 
+    /**
+     * Sets path, query and fragment at the passed {@link URIBuilder} instance to create
+     * an URI that can be used to bootstrap a frontend session with optional deep link.
+     *
+     * Path and deep link are sanitized before being appended. They are expected to be raw
+     * (non-URI-encoded) Strings.
+     *
+     * @param uri The URI builder
+     * @param session The session to jump into
+     * @param path The URI path
+     * @param deepLink The deep link argument which is appended to the URI fragment as <code>&[deepLink]</code>
+     */
+    private static void setRedirectLocation(URIBuilder uri, Session session, String path, String deepLink) {
+        uri.setPath(path.replaceAll("[\n\r]", ""));
+
+        StringBuilder fragment = new StringBuilder(PARAMETER_SESSION).append('=').append(session.getSessionID());
+        fragment.append(sanitizeDeepLinkFragment(deepLink));
+        uri.setFragment(fragment.toString());
+    }
+
     private static final String sanitizeDeepLinkFragment(String uriFragment) {
         if (uriFragment == null) {
             return "";
         }
 
+        uriFragment = uriFragment.replaceAll("[\n\r]", "");
         while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&')) {
             uriFragment = uriFragment.substring(1);
         }

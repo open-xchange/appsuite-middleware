@@ -55,7 +55,6 @@ import java.util.List;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.SyncSession;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -184,7 +183,7 @@ public class DriveTemp {
         /*
          * check configuration first
          */
-        if (false == DriveConfig.getInstance().isUseTempFolder(session.getServerSession().getContextId(), session.getServerSession().getUserId())) {
+        if (false == session.getConfig().isUseTempFolder()) {
             session.trace("Temporary folder for upload is disabled by configuration.");
             return null;
         }

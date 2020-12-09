@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import com.openexchange.osgi.service.http.HttpServices;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
@@ -103,14 +104,14 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
 
     @Override
     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
-        service.unregister(alias);
+        HttpServices.unregister(alias, service);
         super.removedService(reference, service);
     }
 
     private void unregister0() {
         final HttpService service = getService();
         if (service != null) {
-            service.unregister(alias);
+            HttpServices.unregister(alias, service);
         }
     }
 

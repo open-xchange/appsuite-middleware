@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -167,16 +168,10 @@ public class OIDCTools {
      * @param deeplink The deeplink, can be <code>null</code>
      */
     public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String deeplink) {
-        LOG.trace("buildFrontendRedirectLocation(Session session: {}, String uiWebPath: {})", session.getSessionID(), uiWebPath);
-        String retval = uiWebPath;
-
-        // Prevent HTTP response splitting.
-        retval = retval.replaceAll("[\n\r]", "");
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-
-        deeplink = sanitizeDeepLinkFragment(deeplink);
-        retval = retval + deeplink;
-        return retval;
+        LOG.trace("buildFrontendRedirectLocation(Session session: {}, String uiWebPath: {}, String deeplink: {})", session.getSessionID(), uiWebPath, deeplink);
+        URIBuilder location = new URIBuilder();
+        setRedirectLocation(location, session, uiWebPath, deeplink);
+        return location.toString();
     }
 
     /**
@@ -598,11 +593,32 @@ public class OIDCTools {
         return new Date(System.currentTimeMillis() + (expiresIn * 1000));
     }
 
+    /**
+     * Sets path, query and fragment at the passed {@link URIBuilder} instance to create
+     * an URI that can be used to bootstrap a frontend session with optional deep link.
+     *
+     * Path and deep link are sanitized before being appended. They are expected to be raw
+     * (non-URI-encoded) Strings.
+     *
+     * @param uri The URI builder
+     * @param session The session to jump into
+     * @param path The URI path
+     * @param deepLink The deep link argument which is appended to the URI fragment as <code>&[deepLink]</code>
+     */
+    private static void setRedirectLocation(URIBuilder uri, Session session, String path, String deepLink) {
+        uri.setPath(path.replaceAll("[\n\r]", ""));
+
+        StringBuilder fragment = new StringBuilder(PARAMETER_SESSION).append('=').append(session.getSessionID());
+        fragment.append(sanitizeDeepLinkFragment(deepLink));
+        uri.setFragment(fragment.toString());
+    }
+
     private static final String sanitizeDeepLinkFragment(String uriFragment) {
         if (uriFragment == null) {
             return "";
         }
 
+        uriFragment = uriFragment.replaceAll("[\n\r]", "");
         while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&')) {
             uriFragment = uriFragment.substring(1);
         }
