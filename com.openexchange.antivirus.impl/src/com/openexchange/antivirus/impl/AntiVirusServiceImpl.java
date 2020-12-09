@@ -174,6 +174,8 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     }
     /////////////////////////////////////// HELPERS ////////////////////////////////////////
 
+    private static final long MEGABYTE = 1024L * 1024L;
+
     /**
      * Performs the Anti-Virus scan for the specified InputStream by executing an {@link ICAPRequest}
      * via the {@link ICAPClient}.
@@ -184,13 +186,18 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      * @return The {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-
     private AntiVirusResult performScan(InputStreamClosure stream, String uniqueId, long contentLength) throws OXException {
         LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
-        int maxFileSize = leanConfigurationService.getIntProperty(AntiVirusProperty.maxFileSize);
-        long max = (long) (maxFileSize * Math.pow(1024, 2));
-        if (contentLength > max) {
-            throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(I(maxFileSize));
+        {
+            int maxFileSize = leanConfigurationService.getIntProperty(AntiVirusProperty.maxFileSize);
+            if (maxFileSize == 0) {
+                throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(I(maxFileSize));
+            } else if (maxFileSize > 0) {
+                long max = maxFileSize * MEGABYTE;
+                if (contentLength > max) {
+                    throw AntiVirusServiceExceptionCodes.FILE_TOO_BIG.create(I(maxFileSize));
+                }
+            }
         }
         String server = leanConfigurationService.getProperty(AntiVirusProperty.server);
         int port = leanConfigurationService.getIntProperty(AntiVirusProperty.port);
