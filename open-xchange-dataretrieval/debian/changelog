@@ -1,3 +1,9 @@
+open-xchange-dataretrieval (7.10.3-29) stable; urgency=medium
+
+  * Build for patch 2020-12-14 (5923)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 09 Dec 2020 11:54:06 +0000
+
 open-xchange-dataretrieval (7.10.3-28) stable; urgency=medium
 
   * Build for patch 2020-11-23 (5904)
