@@ -661,7 +661,7 @@ public class OXHttpServer extends HttpServer {
             // Passing null value for the delayed executor, because IdleTimeoutFilter should
             // handle idle connections for us
             final org.glassfish.grizzly.http.HttpServerFilter httpServerCodecFilter =
-                    new org.glassfish.grizzly.http.HttpServerFilter(listener.isChunkingEnabled(),
+                    new CustomHttpCodecFilter(listener.isChunkingEnabled(),
                                          maxHeaderSize,
                                          null,
                                          listener.getKeepAlive(),
