@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.database;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -481,93 +480,62 @@ public final class DatabaseFolderConverter {
                  */
                 databaseFolder.setParentID(Integer.toString(parent, 10));
             }
+        } else if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
+            /*
+             * Enforce subfolders are retrieved from appropriate file storage & mark for user-sensitive cache
+             */
+            databaseFolder.setSubfolderIDs(null);
+            databaseFolder.setSubscribedSubfolders(true);
+            databaseFolder.setCacheable(true);
+            databaseFolder.setGlobal(false);
+        } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+            /*
+             * Enforce subfolders are retrieved from appropriate file storage
+             */
+            databaseFolder.setSubfolderIDs(null);
+            databaseFolder.setSubscribedSubfolders(true);
+            /*
+             * Mark for user-sensitive cache if alternative default account present
+             */
+            if (!InfostoreFacades.isInfoStoreAvailable()) {
+                if (session == null) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                }
+                if (null != getDefaultFileStorageAccess(session)) {
+                    databaseFolder.setCacheable(true);
+                    databaseFolder.setGlobal(false);
+                }
+            }
         } else {
             /*
              * Set subfolders for folder.
              */
-            if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                if (!InfostoreFacades.isInfoStoreAvailable()) {
-                    if (session == null) {
-                        throw FolderExceptionErrorMessage.MISSING_SESSION.create();
-                    }
-                    final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                    if (null != defaultAccount) {
-                        /*
-                         * Enforce subfolders are retrieved from appropriate file storage
-                         */
-                        databaseFolder.setSubfolderIDs(null);
-                    }
+            List<Integer> subfolderIds = fo.containsSubfolderIds() ? fo.getSubfolderIds() : OXFolderLoader.getSubfolderIds(folderId, ctx, con);
+            if (subfolderIds.isEmpty()) {
+                databaseFolder.setSubfolderIDs(new String[0]);
+                databaseFolder.setSubscribedSubfolders(false);
+            } else {
+                String[] ids = new String[subfolderIds.size()];
+                for (int i = 0; i < subfolderIds.size(); i++) {
+                    ids[i] = Integer.toString(subfolderIds.get(i), 10);
                 }
-                databaseFolder.setSubfolderIDs(null);
+                databaseFolder.setSubfolderIDs(ids);
                 databaseFolder.setSubscribedSubfolders(true);
-                /*
-                 * Mark for user-sensitive cache
-                 */
+            }
+            /*
+             * Mark default infostore folders of users for user-sensitive cache (possible altNames)
+             */
+            if (FolderObject.INFOSTORE == fo.getModule() && FolderObject.PUBLIC == fo.getType() && fo.isDefaultFolder()) {
                 databaseFolder.setCacheable(true);
                 databaseFolder.setGlobal(false);
-            } else {
-                /*
-                 * Any folder different from private and user-store folder
-                 */
-                boolean setChildren = true;
-                if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-                    if (!InfostoreFacades.isInfoStoreAvailable()) {
-                        if (session == null) {
-                            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
-                        }
-                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                        if (null != defaultAccount) {
-                            /*
-                             * Mark for user-sensitive cache
-                             */
-                            databaseFolder.setCacheable(true);
-                            databaseFolder.setGlobal(false);
-                            setChildren = false;
-                        }
-                    }
-                    /*
-                     * Enforce subfolders are retrieved from appropriate file storage
-                     */
-                    databaseFolder.setSubfolderIDs(null);
-                    databaseFolder.setSubscribedSubfolders(true);
-                    setChildren = false;
-                }
-                if (setChildren) {
-                    if (fo.containsSubfolderIds()) {
-                        final List<Integer> subfolderIds = fo.getSubfolderIds();
-                        if (subfolderIds.isEmpty()) {
-                            databaseFolder.setSubfolderIDs(new String[0]);
-                            databaseFolder.setSubscribedSubfolders(false);
-                        } else {
-                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                            for (final Integer id : subfolderIds) {
-                                tmp.add(Integer.toString(id.intValue(), 10));
-                            }
-                            databaseFolder.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                            databaseFolder.setSubscribedSubfolders(true);
-                        }
-                    } else {
-                        final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
-                        if (subfolderIds.isEmpty()) {
-                            databaseFolder.setSubfolderIDs(new String[0]);
-                            databaseFolder.setSubscribedSubfolders(false);
-                        } else {
-                            final int len = subfolderIds.size();
-                            final String[] arr = new String[len];
-                            for (int i = 0; i < len; i++) {
-                                arr[i] = Integer.toString(subfolderIds.get(i), 10);
-                            }
-                            databaseFolder.setSubfolderIDs(arr);
-                            databaseFolder.setSubscribedSubfolders(true);
-                        }
-                    }
-                }
             }
         }
         /*
-         * assume all supported capabilities for database folders
+         * assume all supported file storage capabilities for database folders
          */
-        databaseFolder.addSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        if (FolderObject.INFOSTORE == fo.getModule()) {
+            databaseFolder.addSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        }
         return databaseFolder;
     }
 
