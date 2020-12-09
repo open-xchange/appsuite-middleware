@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -107,7 +108,9 @@ public class ConfigJump extends SessionServlet {
                 if (Strings.isEmpty(sessionId)) {
                     response.setException(SessionExceptionCodes.SESSION_PARAMETER_MISSING.create());
                 } else {
-                    response.setException(SessionExceptionCodes.SESSION_EXPIRED.create(sessionId));
+                    OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                    response.setException(oxe);
                 }
             } else {
                 Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());

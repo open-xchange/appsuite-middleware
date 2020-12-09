@@ -74,6 +74,7 @@ import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -168,7 +169,9 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             session = service.getSession(sessionId);
             if (null == session) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                throw oxe;
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
@@ -177,7 +180,9 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+                throw oxe;
             }
             checkMailfilterAvailable(session);
 
@@ -241,7 +246,9 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             session = service.getSession(sessionId);
             if (null == session) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                throw oxe;
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
@@ -250,7 +257,9 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create();
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+                throw oxe;
             }
             checkMailfilterAvailable(session);
 

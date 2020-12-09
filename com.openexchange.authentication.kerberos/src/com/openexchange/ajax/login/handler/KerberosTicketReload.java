@@ -75,6 +75,7 @@ import com.openexchange.kerberos.KerberosUtils;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -132,7 +133,9 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         ServerSession session = result.getSession();
         if (null == session) {
             // No such session
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+            throw oxe;
         }
         verifySession(req, sessiondService, sessionId, session);
         if (session.containsParameter(SESSION_PRINCIPAL)) {

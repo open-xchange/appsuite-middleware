@@ -49,14 +49,20 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.PUBLIC_SESSION_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
+import static com.openexchange.ajax.SessionUtility.SECRET_PREFIX;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -70,6 +76,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.servlet.Constants;
@@ -78,9 +85,11 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.session.ThreadLocalSessionHolder;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -238,8 +247,8 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
-            } catch (Exception e2) {
-                LOG.error("Cookies could not be removed.", e2);
+            } catch (Exception x) {
+                LOG.error("Cookies could not be removed.", x);
             } finally {
                 LogProperties.removeSessionProperties();
             }
@@ -498,7 +507,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return SessionUtility.getSessionObject(req, mayUseFallbackSession);
     }
 
-    // --------------------------------------------------------------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static volatile Integer maxConcurrentRequests;
     private static int getMaxConcurrentRequests(final ServerSession session) {

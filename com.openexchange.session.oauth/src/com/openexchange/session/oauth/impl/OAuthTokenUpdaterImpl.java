@@ -186,7 +186,7 @@ public class OAuthTokenUpdaterImpl {
     private RefreshResult handleError(OAuthTokens oldTokens, Error error) {
         switch (error.getType()) {
             case INVALID_REFRESH_TOKEN:
-                LOG.info("Token refresh failed for due to invalid refresh token for session '{}'", session.getSessionID());
+                LOG.info("Token refresh failed due to invalid refresh token for session '{}'", session.getSessionID());
                 return handleInvalidRefreshToken(oldTokens);
             case TEMPORARY:
                 if (error.hasException()) {

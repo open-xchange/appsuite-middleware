@@ -97,6 +97,7 @@ import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -333,7 +334,9 @@ public class DispatcherServlet extends SessionServlet {
             session = result.getSession();
             if (null == session) {
                 // Should not occur
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                throw oxe;
             }
             SessionUtility.verifySession(req, sessiondService, sessionId, session);
             SessionUtility.rememberSession(req, session);

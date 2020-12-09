@@ -90,6 +90,7 @@ import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.session.oauth.OAuthTokens;
 import com.openexchange.session.oauth.TokenRefreshConfig;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -224,9 +225,16 @@ public class OIDCTools {
         SessionUtility.checkIP(session, request.getRemoteAddr());
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
-        if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
+        if (secretCookie == null) {
             LOG.debug("No secret cookie found for session: {}", session);
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_EXPECTED_SECRET_COOKIE.getIdentifier());
+            throw oxe;
+        } else if (!session.getSecret().equals(secretCookie.getValue())) {
+            LOG.debug("No secret cookie found for session: {}", session);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+            throw oxe;
         }
     }
 

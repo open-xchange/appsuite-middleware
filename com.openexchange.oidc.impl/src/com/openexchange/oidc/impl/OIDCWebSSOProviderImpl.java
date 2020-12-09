@@ -115,6 +115,7 @@ import com.openexchange.session.oauth.RefreshResult;
 import com.openexchange.session.oauth.SessionOAuthTokenService;
 import com.openexchange.session.oauth.TokenRefreshConfig;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -496,7 +497,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         //logout user
         Session session = this.getSessionFromId(sessionId);
         if (null == session) {
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+            throw oxe;
         }
         return this.getRedirectForLogoutFromOXServer(session, request, response, logoutRequestInfo);
     }

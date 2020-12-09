@@ -19,6 +19,7 @@ import com.openexchange.session.oauth.RefreshResult;
 import com.openexchange.session.oauth.RefreshResult.FailReason;
 import com.openexchange.session.oauth.SessionOAuthTokenService;
 import com.openexchange.session.oauth.TokenRefreshConfig;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 
@@ -91,7 +92,9 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
             }
             SessiondService sessiondService = Services.getService(SessiondService.class);
             sessiondService.removeSession(session.getSessionID());
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.OAUTH_TOKEN_REFRESH_FAILED.getIdentifier());
+            throw oxe;
         }
 
         // try to perform request anyway on best effort

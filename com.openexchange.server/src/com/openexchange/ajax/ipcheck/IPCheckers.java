@@ -50,6 +50,7 @@
 package com.openexchange.ajax.ipcheck;
 
 import static com.openexchange.ajax.SessionUtility.isWhitelistedFromIPCheck;
+import static com.openexchange.sessiond.ExpirationReason.IP_CHECK_FAILED;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -202,9 +203,6 @@ public class IPCheckers {
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
-    /** Name of the property that annotates OXException instance to be raised due to an IP check error */
-    public static final String OXEXCEPTION_PROPERTY_IP_CHECK = "com.openexchange.ajax.ipcheck";
-
     /**
      * Kicks the specified session.
      *
@@ -215,8 +213,8 @@ public class IPCheckers {
     public static void kick(String current, Session session) throws OXException {
         // kick client with changed IP address
         LOG.info("Request to server denied (IP check activated) for session: {}. Client login IP changed from {} to {} and is not covered by IP white-list or netmask.", session.getSessionID(), session.getLocalIp(), (null == current ? "<missing>" : current));
-        OXException error = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
-        error.setProperty(OXEXCEPTION_PROPERTY_IP_CHECK, "true");
-        throw error;
+        OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+        oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, IP_CHECK_FAILED.getIdentifier());
+        throw oxe;
     }
 }
