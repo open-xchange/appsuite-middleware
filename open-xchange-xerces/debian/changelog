@@ -1,9 +1,3 @@
-open-xchange-xerces (7.10.3-29) stable; urgency=medium
-
-  * Build for patch 2020-12-14 (5923)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Dec 2020 08:52:05 +0000
-
 open-xchange-xerces (7.10.3-28) stable; urgency=medium
 
   * Build for patch 2020-11-23 (5904)
