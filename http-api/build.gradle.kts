@@ -11,6 +11,7 @@ repositories {
 
 val openapiTools = configurations.create("openapiTools")
 val openapiGenConfig = configurations.create("openapi")
+val apiVersion = "7.10.5";
 
 dependencies {
     openapiTools("com.openexchange.appsuite.mw", "documentation-tools", "1.+")
@@ -36,15 +37,17 @@ var libPath = "../openexchange-test/lib"
 var libSrcPath = "../openexchange-test/lib/source"
 
 tasks.register("copyJars", Copy::class){
-    from("$httpApiPath/http_api_client-1.0-SNAPSHOT.jar")
-    from("$restApiPath/rest_api_client-1.0-SNAPSHOT.jar")
+    from("$httpApiPath/http_api_client-"+apiVersion+".jar")
+    from("$restApiPath/rest_api_client-"+apiVersion+".jar")
     into(libPath)
+    rename("(.+)-"+apiVersion+"(.+)", "$1.jar")
 }
 
 tasks.register("copySources", Copy::class){
-    from("$httpApiPath/http_api_client-1.0-SNAPSHOT-sources.jar")
-    from("$restApiPath/rest_api_client-1.0-SNAPSHOT-sources.jar")
+    from("$httpApiPath/http_api_client-"+apiVersion+"-sources.jar")
+    from("$restApiPath/rest_api_client-"+apiVersion+"-sources.jar")
     into(libSrcPath)
+    rename("(.+)-"+apiVersion+"(.+)", "$1-sources.jar")
 }
 
 tasks.register("copyDep", Copy::class){
@@ -93,7 +96,7 @@ fun extractSources(projectName: String): MutableList<File> {
 
 allprojects {
     group = "com.openexchange.appsuite.mw"
-    version = "1.0-SNAPSHOT"
+    version = apiVersion
 }
 
 subprojects {
