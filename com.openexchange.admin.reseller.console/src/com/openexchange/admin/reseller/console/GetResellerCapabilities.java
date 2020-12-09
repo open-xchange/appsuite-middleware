@@ -65,7 +65,7 @@ public class GetResellerCapabilities extends ResellerAbstraction {
 
     /**
      * Entry point
-     * 
+     *
      * @param args command line arguments
      */
     public static void main(String[] args) {
@@ -92,9 +92,14 @@ public class GetResellerCapabilities extends ResellerAbstraction {
             parser.ownparse(args);
             ResellerAdmin admin = new ResellerAdmin();
             parseAndSetAdminId(parser, admin);
+            parseAndSetAdminname(parser, admin);
             Credentials credentials = credentialsparsing(parser);
             OXResellerInterface rsi = getResellerInterface();
-
+            if (admin.getId() == null && admin.getName() == null) {
+                System.out.println("Either adminid or adminname must be specified");
+                parser.printUsage();
+                sysexit(1);
+            }
             Set<String> capabilities = rsi.getCapabilities(admin, credentials);
             if (capabilities.isEmpty()) {
                 System.out.println("There are no capabilities set for reseller with id " + admin.getId());
