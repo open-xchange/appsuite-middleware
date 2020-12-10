@@ -99,9 +99,9 @@ public class TrashTests extends AbstractAPIClientSession {
         FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(rootId, "1,319", I(1), "0", "infostore", null, Boolean.FALSE);
         String trashId = getFolderId("Trash", subFolders);
         driveApi = new DriveApi(client);
-        driveApi.emptyTrash(folderApi.getSession(), rootId);
+        driveApi.emptyTrash(client.getSession(), rootId);
         byte[] body = new byte[4];
-        DriveUploadResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
+        DriveUploadResponse uploadFile = driveApi.uploadFile(client.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");
@@ -110,7 +110,7 @@ public class TrashTests extends AbstractAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-        driveApi.emptyTrash(folderApi.getSession(), rootId);
+        driveApi.emptyTrash(client.getSession(), rootId);
     }
 
     private String getFolderId(String name, FoldersResponse folders) {
@@ -130,7 +130,7 @@ public class TrashTests extends AbstractAPIClientSession {
 
     @Test
     public void testTrashContent() throws ApiException {
-        TrashFolderResponse trashContent = driveApi.getTrashContent(folderApi.getSession(), String.valueOf(infostoreFolder));
+        TrashFolderResponse trashContent = driveApi.getTrashContent(client.getSession(), String.valueOf(infostoreFolder));
         assertNull(trashContent.getError());
         assertNotNull(trashContent.getData());
         TrashContent data = trashContent.getData();
@@ -144,15 +144,15 @@ public class TrashTests extends AbstractAPIClientSession {
 
     @Test
     public void testDeleteFromTrash() throws ApiException {
-        TrashFolderResponse trashContent = driveApi.getTrashContent(folderApi.getSession(), String.valueOf(infostoreFolder));
+        TrashFolderResponse trashContent = driveApi.getTrashContent(client.getSession(), String.valueOf(infostoreFolder));
         TrashContent data = trashContent.getData();
 
         TrashTargetsBody body = new TrashTargetsBody();
         body.addFilesItem(data.getFiles().get(0).getName());
-        TrashFolderResponse removeFromTrash = driveApi.deleteFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
+        TrashFolderResponse removeFromTrash = driveApi.deleteFromTrash(client.getSession(), String.valueOf(infostoreFolder), body);
         assertNull(removeFromTrash.getErrorDesc(), removeFromTrash.getError());
 
-        trashContent = driveApi.getTrashContent(folderApi.getSession(), "/");
+        trashContent = driveApi.getTrashContent(client.getSession(), "/");
         assertNull(trashContent.getError());
         assertNotNull(trashContent.getData());
         data = trashContent.getData();
@@ -165,19 +165,19 @@ public class TrashTests extends AbstractAPIClientSession {
 
     @Test
     public void testRestoreFromTrash() throws ApiException {
-        TrashFolderResponse trashContent = driveApi.getTrashContent(folderApi.getSession(), String.valueOf(infostoreFolder));
+        TrashFolderResponse trashContent = driveApi.getTrashContent(client.getSession(), String.valueOf(infostoreFolder));
         TrashContent data = trashContent.getData();
 
         TrashTargetsBody body = new TrashTargetsBody();
         body.addFilesItem(data.getFiles().get(0).getName());
-        TrashFolderResponse restoredFromTrash = driveApi.restoreFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
+        TrashFolderResponse restoredFromTrash = driveApi.restoreFromTrash(client.getSession(), String.valueOf(infostoreFolder), body);
         assertNull(restoredFromTrash.getErrorDesc(), restoredFromTrash.getError());
         assertNotNull(restoredFromTrash.getData());
         TrashContent restoreData = restoredFromTrash.getData();
         assertNotNull(restoreData.getFiles());
         assertEquals(0, restoreData.getFiles().size());
 
-        trashContent = driveApi.getTrashContent(folderApi.getSession(), String.valueOf(infostoreFolder));
+        trashContent = driveApi.getTrashContent(client.getSession(), String.valueOf(infostoreFolder));
         assertNull(trashContent.getError());
         assertNotNull(trashContent.getData());
         data = trashContent.getData();
