@@ -50,12 +50,12 @@
 package com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import com.openexchange.admin.soap.reseller.service.soap.dataobjects.SOAPStringMap;
 
 /**
  * <p>SOAP mapping class for ResellerAdmin complex type.
@@ -127,10 +127,10 @@ public class ResellerAdmin {
     protected Set<String> taxonomiesToRemove;
 
     @XmlElement(nillable = true)
-    protected Map<String, String> configuration;
+    protected SOAPStringMap configuration;
 
     @XmlElement(nillable = true)
-    protected Map<String, String> configurationToAdd;
+    protected SOAPStringMap configurationToAdd;
 
     @XmlElement(nillable = true)
     protected Set<String> configurationToRemove;
@@ -322,7 +322,7 @@ public class ResellerAdmin {
      *
      * @return The configuration
      */
-    public Map<String, String> getConfiguration() {
+    public SOAPStringMap getConfiguration() {
         return configuration;
     }
 
@@ -331,7 +331,7 @@ public class ResellerAdmin {
      *
      * @param configuration The configuration to set
      */
-    public void setConfiguration(Map<String, String> configuration) {
+    public void setConfiguration(SOAPStringMap configuration) {
         this.configuration = configuration;
     }
 
@@ -340,7 +340,7 @@ public class ResellerAdmin {
      *
      * @return The configurationToAdd
      */
-    public Map<String, String> getConfigurationToAdd() {
+    public SOAPStringMap getConfigurationToAdd() {
         return configurationToAdd;
     }
 
@@ -349,7 +349,7 @@ public class ResellerAdmin {
      *
      * @param configurationToAdd The configurationToAdd to set
      */
-    public void setConfigurationToAdd(Map<String, String> configurationToAdd) {
+    public void setConfigurationToAdd(SOAPStringMap configurationToAdd) {
         this.configurationToAdd = configurationToAdd;
     }
 
