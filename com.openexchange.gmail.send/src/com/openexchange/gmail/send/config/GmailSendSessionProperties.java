@@ -49,11 +49,11 @@
 
 package com.openexchange.gmail.send.config;
 
-import java.util.Map;
 import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link GmailSendSessionProperties} - Default properties for an Gmail Send session established via <code>JavaMail</code> API
@@ -106,7 +106,6 @@ public final class GmailSendSessionProperties {
     /**
      * This method can only be exclusively accessed
      */
-    @SuppressWarnings("unchecked")
     private static void initializeGmailSendProperties() {
         /*
          * Define Gmail Send properties
@@ -116,7 +115,7 @@ public final class GmailSendSessionProperties {
          * Set some global JavaMail properties
          */
         final Properties properties = sessionProperties;
-        properties.putAll((Map<? extends Object, ? extends Object>) System.getProperties().clone());
+        properties.putAll(SystemPropertiesUtils.cloneSystemProperties());
         if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
             properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");

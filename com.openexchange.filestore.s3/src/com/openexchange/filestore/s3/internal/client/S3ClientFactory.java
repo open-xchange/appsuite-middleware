@@ -93,6 +93,7 @@ import com.openexchange.filestore.s3.internal.config.S3EncryptionConfig;
 import com.openexchange.filestore.s3.metrics.PerClientMetricCollector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * Creates new S3 client instances.
@@ -338,21 +339,21 @@ public class S3ClientFactory {
             }
         }
 
-        String proxyHost = System.getProperty("http.proxyHost");
+        String proxyHost = SystemPropertiesUtils.getProperty("http.proxyHost");
         if (proxyHost != null) {
             clientConfiguration.setProxyHost(proxyHost);
-            String proxyPort = System.getProperty("http.proxyPort");
+            String proxyPort = SystemPropertiesUtils.getProperty("http.proxyPort");
             if (proxyPort != null) {
                 clientConfiguration.setProxyPort(Integer.parseInt(proxyPort));
             }
 
-            String nonProxyHosts = System.getProperty("http.nonProxyHosts");
+            String nonProxyHosts = SystemPropertiesUtils.getProperty("http.nonProxyHosts");
             if (Strings.isNotEmpty(nonProxyHosts)) {
                 clientConfiguration.setNonProxyHosts(nonProxyHosts);
             }
 
-            String login = System.getProperty("http.proxyUser");
-            String password = System.getProperty("http.proxyPassword");
+            String login = SystemPropertiesUtils.getProperty("http.proxyUser");
+            String password = SystemPropertiesUtils.getProperty("http.proxyPassword");
 
             if (login != null && password != null) {
                 clientConfiguration.setProxyUsername(login);

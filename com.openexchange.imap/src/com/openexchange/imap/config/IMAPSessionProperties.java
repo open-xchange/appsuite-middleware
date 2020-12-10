@@ -54,6 +54,7 @@ import java.util.Properties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link IMAPSessionProperties} - Default properties for an IMAP session established via <code>JavaMail</code> API
@@ -173,8 +174,7 @@ public final class IMAPSessionProperties {
         /*
          * Take over system properties related to "mail."
          */
-        final Properties systemProperties = System.getProperties();
-        for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+        for (Map.Entry<Object, Object> systemProperty : SystemPropertiesUtils.getSystemProperties().entrySet()) {
             String propName = systemProperty.getKey().toString();
             if (propName.startsWith("mail.")) {
                 properties.put(propName, systemProperty.getValue());

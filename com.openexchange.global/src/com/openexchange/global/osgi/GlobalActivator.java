@@ -74,6 +74,7 @@ import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.inspector.internal.ServiceSet;
 import com.openexchange.session.inspector.internal.SessionInspectorChainImpl;
 import com.openexchange.startup.CloseableControlService;
+import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.startup.impl.ThreadControl;
 import com.openexchange.startup.impl.ThreadLocalCloseableControl;
@@ -128,6 +129,7 @@ public final class GlobalActivator implements BundleActivator {
             }
 
             trackers.add(new ServiceTracker<>(context, I18nService.class, new I18nServiceTracker(I18nServiceRegistryImpl.getInstance(), context)));
+            trackers.add(new ServiceTracker<>(context, SignalStartedService.class, new SignalStartedTracker(context)));
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
@@ -229,10 +231,10 @@ public final class GlobalActivator implements BundleActivator {
         try {
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {
+                this.trackers = null;
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();
                 }
-                this.trackers = null;
             }
             ServiceHolderInit.getInstance().stop();
 
