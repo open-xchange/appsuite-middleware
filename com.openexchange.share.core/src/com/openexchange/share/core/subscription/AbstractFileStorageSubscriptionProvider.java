@@ -205,7 +205,13 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         try {
             accountAccess = fileStorageService.getAccountAccess(storageAccount.getId(), session);
             accountAccess.connect();
-            setSubscribed(accountAccess, shareLink, false);
+            String folderId = setSubscribed(accountAccess, shareLink, false);
+            if (Strings.isEmpty(folderId)) {
+                /*
+                 * Last folder was unsubscribed, account was deleted. Skip further checks
+                 */
+                return true;
+            }
             FileStorageFolder rootFolder = getShareRootFolder(accountAccess, getFolderFrom(shareLink));
             if (rootFolder.isSubscribed()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsubscribe was not successful");
@@ -609,9 +615,10 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
      * @param shareLink The share link to set the subscribed flag for
      * @param accountId The file storage account ID
      * @param subscribed <code>true</code> to subscribe, <code>false</code> to unsubscribe
+     * @return The folder ID of the updated folder
      * @throws OXException In case it can't be (un-)subscribed
      */
-    private void setSubscribed(FileStorageAccountAccess accountAccess, String shareLink, boolean subscribed) throws OXException {
+    private String setSubscribed(FileStorageAccountAccess accountAccess, String shareLink, boolean subscribed) throws OXException {
         String folderId = getFolderFrom(shareLink);
 
         /*
@@ -628,7 +635,7 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
         DefaultFileStorageFolder update = new DefaultFileStorageFolder();
         update.setId(rootFolder.getId());
         update.setSubscribed(subscribed);
-        accountAccess.getFolderAccess().updateFolder(rootFolder.getId(), update);
+        return accountAccess.getFolderAccess().updateFolder(rootFolder.getId(), update);
     }
 
     /**
