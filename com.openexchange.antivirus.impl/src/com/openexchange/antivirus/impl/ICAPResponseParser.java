@@ -142,6 +142,8 @@ class ICAPResponseParser {
                 return builder.withInfected(Boolean.valueOf(!checkHttpResponse(response))).build();
             case 204:
                 return builder.withInfected(Boolean.FALSE).build();
+            case 418:
+                throw AntiVirusServiceExceptionCodes.REMOTE_SERVER_ERROR.create(response.getStatusLine());
             case 500:
                 throw AntiVirusServiceExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(response.getStatusLine());
             default:
@@ -174,6 +176,8 @@ class ICAPResponseParser {
                 return true;
             case 403:
                 return false;
+            case 418:
+                throw AntiVirusServiceExceptionCodes.REMOTE_SERVER_ERROR.create(response.getStatusLine());
             case 500:
                 throw AntiVirusServiceExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(response.getStatusLine());
             default:
