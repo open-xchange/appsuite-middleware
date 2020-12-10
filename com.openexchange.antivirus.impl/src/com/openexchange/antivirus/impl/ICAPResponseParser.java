@@ -49,6 +49,7 @@
 
 package com.openexchange.antivirus.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.antivirus.AntiVirusResponseHeader;
 import com.openexchange.antivirus.AntiVirusResult;
@@ -144,7 +145,7 @@ class ICAPResponseParser {
             case 500:
                 throw AntiVirusServiceExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(response.getStatusLine());
             default:
-                return builder.build();
+                throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(String.format("unecpected response code: %s - %s", I(response.getStatusCode()), response.getStatusLine()));
         }
     }
 
