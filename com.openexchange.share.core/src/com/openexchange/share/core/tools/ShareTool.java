@@ -68,14 +68,18 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -513,6 +517,31 @@ public class ShareTool {
         ShareToken shareToken1 = getShareToken(shareUrl1);
         ShareToken shareToken2 = getShareToken(shareUrl2);
         return null == shareToken1 ? null == shareToken2 : shareToken1.equals(shareToken2);
+    }
+
+    /**
+     * Check if share target was shared by the user who created the guest user it is shared to
+     *
+     * @param targetProxy The target proxy for share target
+     * @param guestInfo The guest user information
+     * @return <code>true</code> if share was created by guest user's creator, <code>false</code> if not
+     */
+    public static boolean checkShareAndGuestCreator(TargetProxy targetProxy, GuestInfo guestInfo) {
+        if (targetProxy.getTargetPath().isFolder()) {
+            List<TargetPermission> permissions = targetProxy.getPermissions();
+            if (null != permissions) {
+                for (TargetPermission perm : permissions) {
+                    int[] parsedPermissions = Permissions.parsePermissionBits(perm.getBits());
+                    if (parsedPermissions[4] > 0 && perm.getEntity() != guestInfo.getCreatedBy()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Not possible to check for files for now
+        return false;
     }
 
 }
