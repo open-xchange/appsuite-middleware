@@ -1168,7 +1168,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         // 3. Create alarm as second user
         ApiClient apiClient2 = generateApiClient(testUser2);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
-        UserApi userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, false);
+        UserApi userApi2 = new UserApi(apiClient2, enhancedClient, testUser2);
         String folder2 = getDefaultFolder(apiClient2);
         EventManager eventManager2 = new EventManager(userApi2, folder2);
 

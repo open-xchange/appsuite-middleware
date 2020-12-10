@@ -194,7 +194,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
         enhancedApiClientC2 = generateEnhancedClient(testUser);
         rememberClient(enhancedApiClientC2);
-        eventManagerC2 = new EventManager(new com.openexchange.ajax.chronos.UserApi(apiClientC2, enhancedApiClientC2, testUserC2, false), folderIdC2);
+        eventManagerC2 = new EventManager(new com.openexchange.ajax.chronos.UserApi(apiClientC2, enhancedApiClientC2, testUserC2), folderIdC2);
 
         eventManager.setIgnoreConflicts(true);
         eventManagerC2.setIgnoreConflicts(true);

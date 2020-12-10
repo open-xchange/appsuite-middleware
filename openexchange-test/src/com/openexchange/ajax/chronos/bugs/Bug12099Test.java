@@ -145,7 +145,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         rememberClient(apiClient3);
         EnhancedApiClient enhancedApiClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedApiClient3);
-        UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3, true);
+        UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3);
         EventManager eventManager3 = new EventManager(userApi3, sharedFolder);
 
         String summary = "Bug12099Test";
