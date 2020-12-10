@@ -10685,7 +10685,7 @@ msgid "You don't have sufficient permissions to subscribe to a share."
 msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
-msgid "Subscribing to a single file is not allowed"
+msgid "Subscribing to a single file is not supported"
 msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
