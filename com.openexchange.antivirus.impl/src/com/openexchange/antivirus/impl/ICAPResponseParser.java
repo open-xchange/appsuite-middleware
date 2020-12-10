@@ -145,7 +145,7 @@ class ICAPResponseParser {
             case 500:
                 throw AntiVirusServiceExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(response.getStatusLine());
             default:
-                throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(String.format("unecpected response code: %s - %s", I(response.getStatusCode()), response.getStatusLine()));
+                throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(String.format("Unexpected response code: %s - %s", I(response.getStatusCode()), response.getStatusLine()));
         }
     }
 
