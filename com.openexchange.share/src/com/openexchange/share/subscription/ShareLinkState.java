@@ -94,7 +94,19 @@ public enum ShareLinkState {
     UNRESOLVABLE,
 
     /**
-     * State to indicate that the subscription of the link is not allowed.
+     * State to indicate that the subscription of the share is not supported,
+     * i.e. a single file in an unknown folder is shared or the share belongs to
+     * an anonymous guest
+     * <p>
+     * This state describes technical limitations
+     */
+    UNSUPPORTED,
+
+    /**
+     * State to indicate that the subscription of the link is not allowed,
+     * i.e. when the share belongs not to the current user.
+     * <p>
+     * This state describes permissions limitations
      */
     FORBIDDEN,
 

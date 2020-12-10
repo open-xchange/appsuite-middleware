@@ -60,6 +60,7 @@ import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUPPORTED;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
@@ -151,7 +152,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          * re-check if supported & allowed
          */
         if (false == isSupported(session, shareLink)) {
-            return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
+            return new Builder().state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
         }
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
         if (null == targetPath || Module.CALENDAR.getFolderConstant() != targetPath.getModule() || false == targetPath.isFolder()) {
@@ -366,7 +367,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
                 /*
                  * Do not support anonymous shares
                  */
-                return builder.state(ShareLinkState.FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                return builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
             case GUEST_PASSWORD:
                 return builder.state(ADDABLE_WITH_PASSWORD);
             case GUEST:

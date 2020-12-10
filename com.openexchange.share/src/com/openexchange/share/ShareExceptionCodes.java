@@ -153,7 +153,7 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** You don't have sufficient permissions to subscribe to a share. */
     NO_SUBSCRIBE_SHARE_PERMISSION(ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, ShareExceptionMessages.NO_SUBSCRIBE_SHARE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 25),
 
-    /** Subscribing to a single file is not allowed */
+    /** Subscribing to a single file is not supported */
     NO_FILE_SUBSCRIBE(ShareExceptionMessages.NO_FILE_SUBSCRIBE_MSG, ShareExceptionMessages.NO_FILE_SUBSCRIBE_MSG, Category.CATEGORY_ERROR, 26),
 
     /** You are not allowed to subscribe to a share for %1$s */

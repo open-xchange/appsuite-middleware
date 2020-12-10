@@ -52,12 +52,12 @@ package com.openexchange.share.core.subscription;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.share.core.tools.ShareLinks.extractHostName;
 import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REFRESH;
-import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
 import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUPPORTED;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -678,14 +678,13 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             /*
              * Unknown share
              */
-            return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+            return new ShareLinkAnalyzeResult(UNSUPPORTED, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
         }
         ShareTargetPath path = ShareTool.getShareTarget(shareLink);
         if (null == path) {
             // Should not happen since checked by precondition in isSupported()
             return new ShareLinkAnalyzeResult(UNRESOLVABLE, ShareSubscriptionExceptions.UNEXPECTED_ERROR.create("Unable to get share path from link"), getModuleInfo());
         }
-
 
         /*
          * Check if the file is already in a known folder
@@ -694,20 +693,22 @@ public abstract class AbstractFileStorageSubscriptionProvider implements ShareSu
             String folderId = path.getFolder();
             accountAccess.connect();
             FileStorageFolder folder = accountAccess.getFolderAccess().getFolder(folderId);
-            if (SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(folder.getParentId()) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(folder.getParentId())) {
+            if (SYSTEM_USER_INFOSTORE_FOLDER_ID.equals(folder.getId()) || SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID.equals(folder.getId())) {
                 /*
                  * Do not allow to subscribe to files under the root folder of "shared" or "public" folder
                  */
-                return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+                return new ShareLinkAnalyzeResult(UNSUPPORTED, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
             }
             String item = getItemID(path);
             if (accountAccess.getFileAccess().exists(folder.getId(), item, FileStorageFileAccess.CURRENT_VERSION)) {
                 return new ShareLinkAnalyzeResult(SUBSCRIBED, generateInfos(folderId, accountAccess));
             }
+        } catch (OXException e) {
+            return new ShareLinkAnalyzeResult(UNSUPPORTED, e, getModuleInfo());
         } finally {
             accountAccess.close();
         }
-        return new ShareLinkAnalyzeResult(FORBIDDEN, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
+        return new ShareLinkAnalyzeResult(UNSUPPORTED, ShareExceptionCodes.NO_FILE_SUBSCRIBE.create(), getModuleInfo());
     }
 
     private String getItemID(ShareTargetPath path) {

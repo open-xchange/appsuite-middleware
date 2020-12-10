@@ -54,6 +54,7 @@ import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUPPORTED;
 import com.openexchange.api.client.ApiClient;
 import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.ApiClientService;
@@ -159,17 +160,17 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                     /*
                      * Only anonymous guests have no mail address
                      */
-                    builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                    builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                } else if (Strings.isNotEmpty(loginInformation.getLoginType()) && false == loginInformation.getLoginType().startsWith("guest")) {
+                    /*
+                     * No guest
+                     */
+                    builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
                 } else if (false == UserAliasUtility.isAlias(loginInformation.getRemoteMailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
                     /*
                      * Share is not for the current user
                      */
                     builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(loginInformation.getRemoteMailAddress()));
-                } else if (Strings.isNotEmpty(loginInformation.getLoginType()) && false == loginInformation.getLoginType().startsWith("guest")) {
-                    /*
-                     * No guest
-                     */
-                    builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
                 } else {
                     /*
                      * Try to access the folder
@@ -179,6 +180,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                         RemoteFolder remoteFolder = apiClient.execute(new GetFolderCall(folder));
                         if (folder.equals(remoteFolder.getID())) {
                             builder.state(ADDABLE);
+                            builder.error(null);
                         }
                     }
                 }
