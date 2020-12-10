@@ -52,12 +52,10 @@ package com.openexchange.ajax.chronos;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FindApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.JSlobApi;
-import com.openexchange.testing.httpclient.modules.LoginApi;
 
 /**
  * {@link UserApi}
@@ -67,8 +65,6 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
  * @since v7.10.0
  */
 public class UserApi {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserApi.class);
 
     private String session;
     private Integer calUser;
@@ -108,23 +104,6 @@ public class UserApi {
         this.enhancedCalUser = enhancedApiClient.getUserId().intValue();
         this.enhancedSession = enhancedApiClient.getSession();
         enhancedApiClient.setApiKey(enhancedSession);
-    }
-
-    /**
-     *
-     * @param login
-     * @param password
-     * @param client
-     * @return
-     * @throws Exception
-     */
-    protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null, null);
-        if (doLogin.getError() == null) {
-            LOG.info("Login succesfull for user " + login);
-            return doLogin;
-        }
-        throw new Exception("Error during login: " + doLogin.getError());
     }
 
     /**
