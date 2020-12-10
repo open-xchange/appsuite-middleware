@@ -49,6 +49,8 @@
 
 package com.openexchange.i18n;
 
+import com.openexchange.java.Strings;
+
 /**
  * This class contains text pattern that can be used in classes implementing {@link LocalizableStrings}.
  *
@@ -60,6 +62,6 @@ public final class TextPattern {
         super();
     }
 
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    public static final String LINE_SEPARATOR = Strings.getLineSeparator();
 
 }

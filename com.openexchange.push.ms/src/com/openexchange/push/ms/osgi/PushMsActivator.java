@@ -59,6 +59,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.ms.MsService;
@@ -104,7 +105,7 @@ public class PushMsActivator extends HousekeepingActivator {
         {
             final ConfigurationService service = getService(ConfigurationService.class);
             if (service.getBoolProperty("com.openexchange.push.udp.pushEnabled", false)) {
-                final String ls = System.getProperty("line.separator");
+                final String ls = Strings.getLineSeparator();
                 final String message = "Start-up of bundle \"com.openexchange.push.ms\" denied, because UDP-based push is enabled." + ls + "Please disable it via \"com.openexchange.push.udp.pushEnabled\" option.";
                 LOG.warn(message);
                 // throw new BundleException(message, BundleException.ACTIVATOR_ERROR);

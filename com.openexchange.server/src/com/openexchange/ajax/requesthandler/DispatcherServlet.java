@@ -256,7 +256,7 @@ public class DispatcherServlet extends SessionServlet {
         super();
         this.prefix = prefix;
         defaultRequestDataTools = AJAXRequestDataTools.getInstance();
-        lineSeparator = System.getProperty("line.separator");
+        lineSeparator = Strings.getLineSeparator();
     }
 
     /**

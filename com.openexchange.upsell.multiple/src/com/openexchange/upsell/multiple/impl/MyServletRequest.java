@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -493,10 +494,9 @@ public final class MyServletRequest {
         BufferedReader input = null;
         try {
             input = new BufferedReader(new InputStreamReader(new FileInputStream(file), com.openexchange.java.Charsets.UTF_8));
-            String line = null;
-            while ((line = input.readLine()) != null) {
+            for (String line = null; (line = input.readLine()) != null;) {
                 stringBuilder.append(line);
-                stringBuilder.append(System.getProperty("line.separator"));
+                stringBuilder.append(Strings.getLineSeparator());
             }
         } catch (IOException e) {
             LOG.error("", e);

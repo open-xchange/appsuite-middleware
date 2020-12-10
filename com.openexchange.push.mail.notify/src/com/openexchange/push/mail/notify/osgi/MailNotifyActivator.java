@@ -59,6 +59,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.java.Strings;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
@@ -188,7 +189,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     }
 
     private Config readConfiguration() throws OXException {
-        final String ls = System.getProperty("line.separator");
+        final String ls = Strings.getLineSeparator();
         final StringBuilder sb = new StringBuilder();
         sb.append(ls);
         sb.append("Properties for mail push:").append(ls);

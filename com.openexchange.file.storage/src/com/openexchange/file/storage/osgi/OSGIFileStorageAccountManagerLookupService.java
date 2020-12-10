@@ -61,6 +61,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -144,7 +145,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             }
             if (null == accountManager) {
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.class);
-                final String ls = System.getProperty("line.separator");
+                final String ls = Strings.getLineSeparator();
                 logger.warn("{}    There is no file storage service available that provides account \"{}\".{}    Please ensure the appropriate {} is up and running.{}    Refer to /opt/open-xchange/sbin/listservices", ls, accountId, ls, FileStorageService.class.getSimpleName(), ls);
                 return null;
             }

@@ -52,6 +52,7 @@ package com.openexchange.threadpool.internal;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CustomUncaughtExceptionhandler} - A custom {@link UncaughtExceptionHandler}.
@@ -89,7 +90,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
          */
         final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
         final StringBuilder sb = new StringBuilder(256);
-        final String lineSeparator = System.getProperty("line.separator");
+        final String lineSeparator = Strings.getLineSeparator();
         for (final Entry<Thread, StackTraceElement[]> threadEntry : stackMap.entrySet()) {
             Thread thread = threadEntry.getKey();
             sb.append(thread.getName()).append(" ID:").append(thread.getId());

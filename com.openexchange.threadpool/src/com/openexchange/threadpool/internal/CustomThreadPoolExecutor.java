@@ -1273,7 +1273,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         ActiveTaskWatcher(long maxRunningTime, long minWaitTime) {
             super();
-            lineSeparator = System.getProperty("line.separator");
+            lineSeparator = Strings.getLineSeparator();
             tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
             this.minWaitTime = minWaitTime;
             this.maxRunningTime = maxRunningTime;

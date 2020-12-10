@@ -70,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -1122,7 +1123,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      */
     public void logTrace(StringBuilder sBuilder, org.slf4j.Logger log) {
-        String lineSeparator = System.getProperty("line.separator");
+        String lineSeparator = Strings.getLineSeparator();
         Thread usingThread = this.usingThread;
         if (null != usingThread) {
             Map<String, String> taskProps = usingThreadProperties;
@@ -1181,7 +1182,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        String lineSeparator = System.getProperty("line.separator");
+        String lineSeparator = Strings.getLineSeparator();
         StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Map<String, String> taskProps = usingThreadProperties;

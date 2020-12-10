@@ -64,6 +64,7 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumType;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
@@ -91,7 +92,7 @@ public class LogbackLogConfigurationService implements LogConfigurationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogbackLogConfigurationService.class);
     private static final String WHITELIST_PROPERTY = "com.openexchange.logging.filter.loggerWhitelist";
-    private static final String lineSeparator = System.getProperty("line.separator");
+    private static final String lineSeparator = Strings.getLineSeparator();
 
     // -------------------------------------------------------------------------------------------- //
 

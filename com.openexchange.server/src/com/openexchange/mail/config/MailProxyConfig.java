@@ -52,6 +52,7 @@ package com.openexchange.mail.config;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link MailProxyConfig}
@@ -77,11 +78,11 @@ public class MailProxyConfig {
     private static final String POP3_NON_PROXY_HOST = "mail.pop3.proxy.nonProxyHosts";
 
     // -------------------------------------------------------------------------------------------------------------------------------------
-    
+
     private static enum Protocol {
         IMAP, SMTP, POP3;
     }
-    
+
    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final AtomicReference<HostList> imapHostList;
@@ -105,7 +106,7 @@ public class MailProxyConfig {
     public HostList getSmtpNonProxyHostList() {
         return getHostListFrom(Protocol.SMTP);
     }
-    
+
     public HostList getPop3NonProxyHostList() {
         return getHostListFrom(Protocol.POP3);
     }
@@ -145,7 +146,7 @@ public class MailProxyConfig {
                         default:
                             throw new IllegalStateException("Unknown protocol: " + proto);
                     }
-                    String property = System.getProperty(propertyName);
+                    String property = SystemPropertiesUtils.getProperty(propertyName);
                     hostList = Strings.isEmpty(property) ? HostList.EMPTY : HostList.valueOf(property.replace('|', ','));
                     hostListReference.set(hostList);
                 }

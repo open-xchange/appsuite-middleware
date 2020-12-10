@@ -62,6 +62,7 @@ import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.memory.ByteBufferWrapper;
 import org.glassfish.grizzly.utils.DelayedExecutor;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CustomHttpCodecFilter}
@@ -132,7 +133,7 @@ public class CustomHttpCodecFilter extends org.glassfish.grizzly.http.HttpServer
         String msg = "Request Header Or Cookie Too Large";
 
         StringBuilder sb = new StringBuilder(2300);
-        String lineSep = System.getProperty("line.separator");
+        String lineSep = Strings.getLineSeparator();
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
 

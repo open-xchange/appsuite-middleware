@@ -493,7 +493,7 @@ public final class Tools {
      */
     public static String logHeaderForError(final HttpServletRequest req) {
         final StringBuilder message = new StringBuilder();
-        final String sep = System.getProperty("line.separator");
+        final String sep = Strings.getLineSeparator();
         message.append("|").append(sep);
         message.append(HEADER_AGENT);
         message.append(": ");
@@ -960,7 +960,7 @@ public final class Tools {
         String msg0 = null == msg ? EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, null) : msg;
 
         StringBuilder sb = new StringBuilder(512);
-        String lineSep = System.getProperty("line.separator");
+        String lineSep = Strings.getLineSeparator();
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
         {
@@ -997,7 +997,7 @@ public final class Tools {
      */
     public static String getEmptyPage() {
         StringBuilder sb = new StringBuilder(128);
-        String lineSep = System.getProperty("line.separator");
+        String lineSep = Strings.getLineSeparator();
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
         sb.append("<title>A blank HTML page</title>").append(lineSep);

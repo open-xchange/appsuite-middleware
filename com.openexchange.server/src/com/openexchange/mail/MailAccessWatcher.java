@@ -51,6 +51,7 @@ package com.openexchange.mail;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.watcher.MailAccessDelayElement;
@@ -197,7 +198,7 @@ public final class MailAccessWatcher {
             super();
             queue = mailAccesses;
             this.logger = logger;
-            final String lineSeparator = System.getProperty("line.separator");
+            final String lineSeparator = Strings.getLineSeparator();
             this.lineSeparator = lineSeparator;
             // Specify filter expression
             filter = new MailAccessDelayQueue.ElementFilter() {
