@@ -157,6 +157,19 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar","Subscribe","Share"]
+    - key: com.openexchange.calendar.xctx2.enableFreeBusy
+      description: |
+        Enables or disables free/busy lookups within integrated federated shares. Once activated, free/busy data will also be collected
+        from contexts the user has a subscribed cross-context account in. The value can be specified through the config-cascade, and is 
+        evaluated for the context/user where the lookup is initiated from.    
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
     - key: com.openexchange.calendar.maxEventResults
       description: |
         Defines a maximum number of event in event results. The intention of this limit is to prevent out of memory situations.

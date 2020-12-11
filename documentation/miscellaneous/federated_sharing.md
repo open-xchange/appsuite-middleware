@@ -177,7 +177,7 @@ However, there are a few limitations:
 * Drive data from integrated federated shares won't be available when accessing the server via WebDAV
 * Drive data from integrated federated shares won't be available for Drive synchronization clients
 * No real-time collaboration is possible when editing *remote* documents located in subscribed federated shares
-* Free/busy lookups and conflict checks cannot be performed in subscribed calendars for users/resources from the remote context
+* The implicit conflict check prior creating/updating events will only be performed for attendees in the targeted remote context
 * It is not possible to add *local* resource or group attendees to events created in *remote* calendars of federated shares 
 * Calendars from integrated federated shares won't be available when accessing the server via CalDAV
 * No re-sharing of subscribed shares is possible, since guest users don't have *invite_guests* capability

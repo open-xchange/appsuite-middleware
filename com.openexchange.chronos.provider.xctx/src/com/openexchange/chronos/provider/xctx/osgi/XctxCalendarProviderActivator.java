@@ -52,8 +52,10 @@ package com.openexchange.chronos.provider.xctx.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.xctx.XctxCalendarProvider;
+import com.openexchange.chronos.provider.xctx.XctxFreeBusyProvider;
 import com.openexchange.chronos.provider.xctx.XctxShareSubscriptionProvider;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -69,6 +71,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
 import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link XctxCalendarProviderActivator}
@@ -88,9 +91,9 @@ public class XctxCalendarProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, CalendarAccountService.class, 
+            FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, CalendarAccountService.class,
             CalendarStorageFactory.class, CalendarUtilities.class, LeanConfigurationService.class, XctxSessionManager.class, CapabilityService.class,
-            GroupService.class, ShareService.class, DispatcherPrefixService.class
+            GroupService.class, ShareService.class, DispatcherPrefixService.class, UserPermissionService.class
         };
     }
 
@@ -101,6 +104,7 @@ public class XctxCalendarProviderActivator extends HousekeepingActivator {
             XctxCalendarProvider calendarProvider = new XctxCalendarProvider(this);
             registerService(CalendarProvider.class, calendarProvider);
             registerService(ShareSubscriptionProvider.class, new XctxShareSubscriptionProvider(this, calendarProvider));
+            registerService(FreeBusyProvider.class, new XctxFreeBusyProvider(this, calendarProvider));
         } catch (Exception e) {
             getLogger(XctxCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
