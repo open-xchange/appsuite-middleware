@@ -167,6 +167,11 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_EXCLUDEUSERS_LONG = "excludeusers";
     protected static final String OPT_NAME_EXCLUDEUSERS_DESCRIPTION = "Exclude users, only show guests";
 
+    protected static final String OPT_NAME_LENTH_LONG = "length";
+    protected static final String OPT_NAME_LENGTH_DESCRIPTION = "Limit result size";
+    protected static final String OPT_NAME_OFFSET_LONG = "offset";
+    protected static final String OPT_NAME_OFFSET_DESCRIPTION = "Set offset for limited result size";
+
     private static final String[] ENV_OPTIONS = new String[] { "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
 
     protected static String RMI_HOSTNAME = "rmi://localhost:1099/";
@@ -185,6 +190,9 @@ public abstract class BasicCommandlineOptions {
     protected CLIOption csvOutputOption = null;
     protected CLIOption includeGuestsOption = null;
     protected CLIOption excludeUsersOption = null;
+
+    protected CLIOption lengthOption = null;
+    protected CLIOption offsetOption = null;
 
     // Used for right error output
     protected Integer ctxid = null;
@@ -482,6 +490,24 @@ public abstract class BasicCommandlineOptions {
 
     protected void setAdminUserOption(final AdminParser admp, final String nameAdminUserLong, final String description) {
         this.adminUserOption = setShortLongOpt(admp, OPT_NAME_ADMINUSER_SHORT, nameAdminUserLong, description, true, NeededQuadState.possibly);
+    }
+
+    // ------------------------------------------------------------------------------------- //
+
+    protected void setLengthOption(final AdminParser admp) {
+        setLengthOption(admp, false);
+    }
+
+    protected void setOffsetOption(final AdminParser admp) {
+        setOffsetOption(admp, false);
+    }
+
+    protected void setLengthOption(final AdminParser admp, boolean required) {
+        this.lengthOption = setLongOpt(admp, OPT_NAME_LENTH_LONG, OPT_NAME_LENGTH_DESCRIPTION, true, required);
+    }
+
+    protected void setOffsetOption(final AdminParser admp, boolean required) {
+        this.offsetOption = setLongOpt(admp, OPT_NAME_OFFSET_LONG, OPT_NAME_OFFSET_DESCRIPTION, true, required);
     }
 
     // ------------------------------------------------------------------------------------- //

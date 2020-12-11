@@ -299,32 +299,41 @@ public abstract class OXUserStorageInterface {
      * Retrieve all user objects for a given context. Which match the given search_pattern
      *
      * @param ctx numerical context identifier
+     * @param search_pattern The search pattern
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] containing user ids.
      * @throws StorageException
      *
      */
-    public abstract User[] list(final Context ctx, final String search_pattern) throws StorageException;
+    public abstract User[] list(final Context ctx, final String search_pattern, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Retrieve all user objects for a given context. Which match the given search_pattern
      *
      * @param ctx numerical context identifier
+     * @param search_pattern The search pattern
      * @param includeGuests List guest users too
      * @param excludeUsers List only guest users
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] containing user ids.
      * @throws StorageException
      *
      */
-    public abstract User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
+    public abstract User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
      *
      * @param ctx The context
+     * @param search_pattern The search pattern
+     * @param length Maximum length of the result list
+     * @param offset Offset of the result list
      * @return User[] containing user identifier
      * @throws StorageException
      */
-    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException;
+    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
@@ -332,10 +341,12 @@ public abstract class OXUserStorageInterface {
      * @param ctx The context
      * @param includeGuests List guest users too
      * @param excludeUsers List only guest users
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] containing user identifier
      * @throws StorageException
      */
-    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
+    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Retrieve all user objects with given filestore for a given context.
@@ -343,20 +354,24 @@ public abstract class OXUserStorageInterface {
      *
      * @param context The context
      * @param filestore_id The id of the filestore or null
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] containing user identifier
      * @throws StorageException
      */
-    public abstract User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id) throws StorageException;
+    public abstract User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Retrieve all users with given alias domain
      *
      * @param context The context
      * @param aliasDomain The alias domain
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return The users
      * @throws StorageException
      */
-    public abstract User[] listUsersByAliasDomain(final Context context, String aliasDomain) throws StorageException;
+    public abstract User[] listUsersByAliasDomain(final Context context, String aliasDomain, final Integer length, final Integer offset) throws StorageException;
 
     /**
      * Delete an user or multiple from given context in given connection

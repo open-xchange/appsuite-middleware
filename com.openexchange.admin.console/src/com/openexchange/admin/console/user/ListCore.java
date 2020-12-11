@@ -75,7 +75,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * {@link ListCore}
  *
@@ -104,7 +103,17 @@ public abstract class ListCore extends UserAbstraction {
             // get rmi ref
             final OXUserInterface oxusr = getUserInterface();
 
-            User[] allusers = maincall(parser, oxusr, ctx, auth);
+            Integer length = null;
+            if (parser.hasOption(this.lengthOption)) {
+                length = Integer.valueOf((String) parser.getOptionValue(this.lengthOption));
+            }
+
+            Integer offset = null;
+            if (parser.hasOption(this.offsetOption)) {
+                offset = Integer.valueOf((String) parser.getOptionValue(this.offsetOption));
+            }
+
+            User[] allusers = maincall(parser, oxusr, ctx, auth, length, offset);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
@@ -125,7 +134,7 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception;
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception;
 
     /**
      * This methods collects the information from the user object and calls the
@@ -282,8 +291,7 @@ public abstract class ListCore extends UserAbstraction {
 
     protected final String maptostring(final Map<?, ?> map) {
         if (null != map && map.size() > 0) {
-            @SuppressWarnings("unchecked")
-            final HashMap<String, String> hashMap = (HashMap<String, String>) map;
+            @SuppressWarnings("unchecked") final HashMap<String, String> hashMap = (HashMap<String, String>) map;
             final Iterator<Entry<String, String>> i = hashMap.entrySet().iterator();
             final StringBuilder sb = new StringBuilder();
             while (i.hasNext()) {
@@ -309,8 +317,7 @@ public abstract class ListCore extends UserAbstraction {
         }
 
         //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l", "l", "l" },
-            new String[] { "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
+        doOutput(new String[] { "r", "l", "l", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
     }
 
     private ArrayList<String> makeStandardData(final User user) {

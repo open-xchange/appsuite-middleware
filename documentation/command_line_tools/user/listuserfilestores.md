@@ -49,6 +49,12 @@ This command line tool lists all user objects with given filestore for a given c
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--length**
+: Limits the result size.
+
+**--offset**
+: The beginning offset of the result list.
+
 # EXAMPLES
 
 **listuserfilestores -A masterAdmin -P secret -c 1138 -f 137**

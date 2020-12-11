@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
@@ -66,14 +67,14 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class ListCoreExtended extends ListCore {
 
     @Override
-    protected final void setOptions(final AdminParser parser) {
+    protected void setOptions(final AdminParser parser) {
         super.setOptions(parser);
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededQuadState.notneeded);
         this.ignoreCaseOption = setShortLongOpt(parser, OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", false, NeededQuadState.notneeded);
     }
 
     @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws Exception {
+    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth, final Integer length, final Integer offset) throws Exception {
         try {
             String pattern = (String) parser.getOptionValue(this.searchOption);
             if (null == pattern) {
@@ -95,7 +96,7 @@ public abstract class ListCoreExtended extends ListCore {
                 excludeUsers = Boolean.FALSE;
             }
 
-            return maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth, includeGuests.booleanValue(), excludeUsers.booleanValue());
+            return maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth, includeGuests.booleanValue(), excludeUsers.booleanValue(), length, offset);
         } catch (Exception e) {
             throw e;
         }
@@ -103,9 +104,5 @@ public abstract class ListCoreExtended extends ListCore {
 
     protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
-
-
-
-
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 }

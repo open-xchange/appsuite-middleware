@@ -46,6 +46,12 @@ This command line tool lists all users with an alias within the given domain.
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--length**
+: Limits the result size.
+
+**--offset**
+: The beginning offset of the result list.
+
 # EXAMPLES
 
 **listusersbyaliasdomain -A contextAdmin -P secret -c 1138 -d foobar.io**

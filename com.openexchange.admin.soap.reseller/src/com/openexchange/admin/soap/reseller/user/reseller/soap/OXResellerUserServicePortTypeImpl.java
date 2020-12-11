@@ -55,10 +55,8 @@ import com.openexchange.tools.net.URIParser;
                       targetNamespace = "http://soap.reseller.admin.openexchange.com",
 
                       endpointInterface = "com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType")
-
+@SuppressWarnings("deprecation")
 public class OXResellerUserServicePortTypeImpl implements OXResellerUserServicePortType {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXResellerUserServicePortTypeImpl.class);
 
     public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<>();
 
@@ -439,7 +437,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final java.lang.String searchPattern, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final java.lang.String searchPattern, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, Boolean includeGuests, Boolean excludeUsers, Integer length, Integer offset) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         if (null == includeGuests) {
             includeGuests = Boolean.FALSE;
@@ -449,7 +447,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             excludeUsers = Boolean.FALSE;
         }
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests.booleanValue(), excludeUsers.booleanValue());
+            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests.booleanValue(), excludeUsers.booleanValue(), length, offset);
             if (null == list) {
                 return null;
             }
@@ -761,12 +759,12 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listByAliasDomain(ResellerContext ctx, String aliasDomain, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+    public List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listByAliasDomain(ResellerContext ctx, String aliasDomain, Credentials auth, Integer length, Integer offset) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         OXUserInterface iface = getUserInterface();
 
         User[] listAll;
         try {
-            listAll = iface.listByAliasDomain(soap2Context(ctx), aliasDomain, soap2Credentials(auth));
+            listAll = iface.listByAliasDomain(soap2Context(ctx), aliasDomain, soap2Credentials(auth), length, offset);
 
             if (null == listAll) {
                 return null;
@@ -996,10 +994,10 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, Integer length, Integer offset) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), length, offset);
             final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<>(listCaseInsensitive.length);
             for (final User user : listCaseInsensitive) {
                 l.add(user2Soap(user));

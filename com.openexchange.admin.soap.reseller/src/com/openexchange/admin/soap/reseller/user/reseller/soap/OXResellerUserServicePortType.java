@@ -107,7 +107,9 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
         @WebParam(name = "include_guests", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean includeGuests,
-        @WebParam(name = "exclude_users", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean excludeUsers
+        @WebParam(name = "exclude_users", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean excludeUsers,
+        @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer length,
+        @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer offset
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -189,7 +191,9 @@ public interface OXResellerUserServicePortType {
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listByAliasDomain(
         @WebParam(name = "ctx", targetNamespace = "http://soap.reseller.admin.openexchange.com") com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,
         @WebParam(name = "alias_domain", targetNamespace = "http://soap.reseller.admin.openexchange.com") java.lang.String aliasDomain,
-        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com") com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
+        @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com") com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer length,
+        @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer offset
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
@@ -253,7 +257,9 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "search_pattern", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         java.lang.String searchPattern,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer length,
+        @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer offset
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")

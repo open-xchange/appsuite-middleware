@@ -43,6 +43,12 @@ This command line tool lists all contexts. Optionally, with the use of '-s' you 
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--length**
+: Limits the result size.
+
+**--offset**
+: The beginning offset of the result list.
+
 # EXAMPLES
 
 **listcontext -A masterAdmin -P secret**

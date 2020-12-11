@@ -179,7 +179,7 @@ public class UserManager extends AbstractManager {
      */
     public User[] search(Context context, String searchPattern, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
-        return userInterface.list(context, searchPattern, contextAdminCredentials);
+        return userInterface.list(context, searchPattern, contextAdminCredentials, null, null);
     }
 
     /**
@@ -271,7 +271,7 @@ public class UserManager extends AbstractManager {
      */
     public User[] listUsersWithOwnFilestore(Context context, Integer filestoreId, Credentials contextAdminCredentials) throws Exception {
         OXUserInterface userInterface = getUserInterface();
-        return userInterface.listUsersWithOwnFilestore(context, contextAdminCredentials, filestoreId);
+        return userInterface.listUsersWithOwnFilestore(context, contextAdminCredentials, filestoreId, null, null);
     }
 
     /**

@@ -81,9 +81,9 @@ public class ListUsersByAliasDomain extends ListCore {
     }
 
     @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         String domain = (String) parser.getOptionValue(alias_domain_cli_option);
-        User[] ids = oxusr.listByAliasDomain(ctx, domain, auth);
+        User[] ids = oxusr.listByAliasDomain(ctx, domain, auth, length, offset);
         if (ids.length == 0) {
             return new User[0];
         }
@@ -93,6 +93,8 @@ public class ListUsersByAliasDomain extends ListCore {
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
         alias_domain_cli_option = setShortLongOpt(parser, ALIAS_DOMAIN_SHORT, ALIAS_DOMAIN, "The domain of the user aliases.", true, NeededQuadState.needed);
+        setLengthOption(parser);
+        setOffsetOption(parser);
     }
 
     @Override

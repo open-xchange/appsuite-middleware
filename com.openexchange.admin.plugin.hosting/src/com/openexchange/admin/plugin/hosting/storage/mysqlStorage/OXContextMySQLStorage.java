@@ -2987,7 +2987,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void downgrade(final Context ctx) throws StorageException {
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        final User[] users = oxu.list(ctx, "*");
+        final User[] users = oxu.list(ctx, "*", null, null);
         final DowngradeRegistry registry = DowngradeRegistry.getInstance();
         final UserConfigurationStorage uConfStorage = UserConfigurationStorage.getInstance();
         final ContextStorage cStor = ContextStorage.getInstance();

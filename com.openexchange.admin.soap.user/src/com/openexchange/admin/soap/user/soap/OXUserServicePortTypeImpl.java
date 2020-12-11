@@ -58,6 +58,7 @@ import com.openexchange.tools.net.URIParser;
 @javax.jws.WebService(serviceName = "OXUserService", portName = "OXUserServiceHttpsEndpoint", targetNamespace = "http://soap.admin.openexchange.com",
 // wsdlLocation = "null",
 endpointInterface = "com.openexchange.admin.soap.user.soap.OXUserServicePortType")
+@SuppressWarnings("deprecation")
 public class OXUserServicePortTypeImpl implements OXUserServicePortType {
 
     public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<>();
@@ -1098,7 +1099,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public java.util.List<User> list(final Context ctx, final java.lang.String searchPattern, final Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public java.util.List<User> list(final Context ctx, final java.lang.String searchPattern, final Credentials auth, Boolean includeGuests, Boolean excludeUsers, final Integer length, final Integer offset) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
 
         if (null == includeGuests) {
@@ -1115,7 +1116,9 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                 com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
                 soap2Credentials(auth),
                 includeGuests.booleanValue(),
-                excludeUsers.booleanValue());
+                excludeUsers.booleanValue(),
+                length,
+                offset);
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -1160,13 +1163,15 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public java.util.List<User> listCaseInsensitive(final Context ctx, final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public java.util.List<User> listCaseInsensitive(final Context ctx, final java.lang.String searchPattern, final Credentials auth, Integer length, Integer offset) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listCaseInsensitive(
                 soap2Context(ctx),
                 com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
-                soap2Credentials(auth));
+                soap2Credentials(auth),
+                length, 
+                offset);
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -2297,30 +2302,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         return soapUser;
     }
 
-    private static com.openexchange.admin.rmi.dataobjects.Group soap2Group(final Group soapGroup) {
-        if (null == soapGroup) {
-            return null;
-        }
-        final com.openexchange.admin.rmi.dataobjects.Group group = new com.openexchange.admin.rmi.dataobjects.Group();
-        final String displayname = soapGroup.getDisplayname();
-        if (null != displayname) {
-            group.setDisplayname(displayname);
-        }
-        final Integer id = soapGroup.getId();
-        if (null != id) {
-            group.setId(id);
-        }
-        final List<Integer> members = soapGroup.getMembers();
-        if (null != members) {
-            group.setMembers(members.toArray(new Integer[0]));
-        }
-        final String name = soapGroup.getName();
-        if (null != name) {
-            group.setName(name);
-        }
-        return group;
-    }
-
     private static Group group2Soap(final com.openexchange.admin.rmi.dataobjects.Group group) {
         if (null == group) {
             return null;
@@ -2720,10 +2701,10 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public List<User> listByAliasDomain(Context ctx, String aliasDomain, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+    public List<User> listByAliasDomain(Context ctx, String aliasDomain, Credentials auth, Integer length, Integer offset) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listByAliasDomain(soap2Context(ctx), aliasDomain, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listByAliasDomain(soap2Context(ctx), aliasDomain, soap2Credentials(auth), length, offset);
             if (null == users) {
                 return Collections.emptyList();
             }

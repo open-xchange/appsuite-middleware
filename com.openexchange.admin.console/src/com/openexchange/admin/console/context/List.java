@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.console.context;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -78,15 +80,15 @@ public class List extends ListCore {
     }
 
     @Override
-    protected Context[] maincall(AdminParser parser, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
-        OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+    protected Context[] maincall(AdminParser parser, String search_pattern, Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
+        OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
         boolean csv = null != parser.getOptionValue(this.csvOutputOption);
 
         boolean first = true;
-        int offset = 0;
-        int length = 10000;
+        int len = (length == null) ? 10000 : i(length);
+        int off = (offset == null) ? 0 : i(offset);
         Context[] ctxs;
-        for (; (ctxs = oxctx.list(search_pattern, offset, length, auth)).length == length; offset = offset + length) {
+        for (; (ctxs = oxctx.list(search_pattern, off, len, auth)).length == len; off = off + len) {
             if (first) {
                 if (csv) {
                     precsvinfos(ctxs, parser);
@@ -123,6 +125,8 @@ public class List extends ListCore {
     @Override
     protected void setFurtherOptions(AdminParser parser) {
         setSearchPatternOption(parser);
+        setLengthOption(parser);
+        setOffsetOption(parser);
     }
 
     @Override

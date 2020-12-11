@@ -69,6 +69,7 @@ public abstract class ListCore extends ContextAbstraction {
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
 
     private interface GetterClosureInterface {
+
         public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException;
     }
 
@@ -99,7 +100,18 @@ public abstract class ListCore extends ContextAbstraction {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
-            ctxs = maincall(parser, pattern, auth);
+
+            Integer length = null;
+            if (parser.hasOption(this.lengthOption)) {
+                length = Integer.valueOf((String) parser.getOptionValue(this.lengthOption));
+            }
+
+            Integer offset = null;
+            if (parser.hasOption(this.offsetOption)) {
+                offset = Integer.valueOf((String) parser.getOptionValue(this.offsetOption));
+            }
+
+            ctxs = maincall(parser, pattern, auth, length, offset);
         } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
@@ -125,7 +137,7 @@ public abstract class ListCore extends ContextAbstraction {
 
     protected abstract String getSearchPattern(final AdminParser parser);
 
-    protected abstract Context[] maincall(final AdminParser parser, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, NoSuchContextException;
+    protected abstract Context[] maincall(final AdminParser parser, final String search_pattern, final Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, NoSuchContextException;
 
     @Override
     protected final String getObjectName() {
@@ -135,6 +147,7 @@ public abstract class ListCore extends ContextAbstraction {
     @Override
     protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
+
             @Override
             public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException {
                 return commonex.getCSVData(ctx);
@@ -145,6 +158,7 @@ public abstract class ListCore extends ContextAbstraction {
     @Override
     protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
+
             @Override
             public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException {
                 return commonex.getHumanReadableData(ctx);
@@ -155,6 +169,7 @@ public abstract class ListCore extends ContextAbstraction {
     @Override
     protected ArrayList<String> getCSVColumnsOfAllExtensions(final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
+
             @Override
             public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesCSV();
@@ -165,6 +180,7 @@ public abstract class ListCore extends ContextAbstraction {
     @Override
     protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
+
             @Override
             public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesHumanReadable();

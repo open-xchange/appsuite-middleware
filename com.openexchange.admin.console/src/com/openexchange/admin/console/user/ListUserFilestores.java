@@ -108,15 +108,28 @@ public class ListUserFilestores extends BasicCommandlineOptions {
         AdminParser parser = new AdminParser("listuserfilestores");
         try {
             setOptions(parser);
+            setLengthOption(parser);
+            setOffsetOption(parser);
             parser.ownparse(args);
 
             Context ctx = contextparsing(parser);
             Credentials auth = credentialsparsing(parser);
             OXUserInterface oxusr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
 
-            String fid_str = String.class.cast(parser.getOptionValue(filestore_id, null, false));
+            String fid_str = (String) parser.getOptionValue(filestore_id, null, false);
             Integer fid = fid_str != null ? Integer.valueOf(fid_str) : null;
-            User[] users = oxusr.listUsersWithOwnFilestore(ctx, auth, fid);
+
+            Integer length = null;
+            if (parser.hasOption(this.lengthOption)) {
+                length = Integer.valueOf((String) parser.getOptionValue(this.lengthOption));
+            }
+
+            Integer offset = null;
+            if (parser.hasOption(this.offsetOption)) {
+                offset = Integer.valueOf((String) parser.getOptionValue(this.offsetOption));
+            }
+
+            User[] users = oxusr.listUsersWithOwnFilestore(ctx, auth, fid, length, offset);
 
             if (null == users || users.length == 0) {
                 printNothingFound(fid);
@@ -216,11 +229,9 @@ public class ListUserFilestores extends BasicCommandlineOptions {
      * @param data The data
      */
     private void processAll(User[] users, User user, final ArrayList<ArrayList<String>> data) {
+        int userId = user.getId().intValue();
         for (User tmp : users) {
-            if (tmp.getId().intValue() == user.getId().intValue()) {
-                continue;
-            }
-            if (tmp.getFilestoreOwner().intValue() == user.getId().intValue()) {
+            if (tmp.getId().intValue() != userId && tmp.getFilestoreOwner() != null && tmp.getFilestoreOwner().intValue() == userId) {
                 data.add(makeStandardData(tmp, false));
             }
         }

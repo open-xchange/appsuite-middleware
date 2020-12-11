@@ -595,6 +595,8 @@ public interface OXUserInterface extends Remote {
      * @param context Context object.
      * @param auth Credentials for authenticating against server.
      * @param filestore_id The identifier of the file storage
+     * @param length The result size
+     * @param offset The offset in overall collection
      *
      * @return User[] with currently ONLY id set in each User.
      *
@@ -605,7 +607,7 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    User[] listUsersWithOwnFilestore(final Context context, final Credentials auth, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    User[] listUsersWithOwnFilestore(final Context context, final Credentials auth, final Integer filestore_id, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context.
@@ -613,12 +615,11 @@ public interface OXUserInterface extends Remote {
      * a * is transformed into a %<br>
      * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
      *
-     * @param ctx
-     *            Context object.
-     * @param search_pattern
-     *            A pattern to search for
-     * @param auth
-     *            Credentials for authenticating against server.
+     * @param ctx The context
+     * @param search_pattern A pattern to search for
+     * @param auth The credentials for authenticating against server.
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] with currently ONLY id set in each User.
      *
      * @throws RemoteException
@@ -628,7 +629,53 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException
      * @throws DatabaseUpdateException
      */
-    public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User[] list(final Context ctx, final String search_pattern, final Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
+     *
+     * @param ctx The context
+     * @param search_pattern A pattern to search for
+     * @param auth The credentials for authenticating against server
+     * @param includeGuests Whether to list guest users too
+     * @param excludeUsers Whether to list only guest users
+     * @param length The result size
+     * @param offset The offset in overall collection
+     * @return User[] with currently ONLY id set in each User.
+     *
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] list(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers, Integer length, Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
+     *
+     * @param ctx The context
+     * @param search_pattern A pattern to search for
+     * @param auth The credentials for authenticating against server
+     * @param length The result size
+     * @param offset The offset in overall collection
+     * @return User[] with currently ONLY id set in each User.
+     *
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context.
@@ -646,6 +693,8 @@ public interface OXUserInterface extends Remote {
      *            List guest users too
      * @param excludeUsers
      *            List only guest users
+     * @param length The result size
+     * @param offset The offset in overall collection
      * @return User[] with currently ONLY id set in each User.
      *
      * @throws RemoteException
@@ -655,57 +704,7 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException
      * @throws DatabaseUpdateException
      */
-    public User[] list(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-
-    /**
-     * Retrieve all users for a given context.
-     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
-     * a * is transformed into a %<br>
-     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
-     *
-     * @param ctx
-     *            Context object.
-     * @param search_pattern
-     *            A pattern to search for
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @return User[] with currently ONLY id set in each User.
-     *
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws InvalidDataException
-     * @throws DatabaseUpdateException
-     */
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-
-    /**
-     * Retrieve all users for a given context.
-     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
-     * a * is transformed into a %<br>
-     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
-     *
-     * @param ctx
-     *            Context object.
-     * @param search_pattern
-     *            A pattern to search for
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @param includeGuests
-     *            List guest users too
-     * @param excludeUsers
-     *            List only guest users
-     * @return User[] with currently ONLY id set in each User.
-     *
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws InvalidDataException
-     * @throws DatabaseUpdateException
-     */
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"
@@ -803,6 +802,6 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException
      * @throws InvalidDataException
      */
-    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException;
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials auth, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException;
 
 }

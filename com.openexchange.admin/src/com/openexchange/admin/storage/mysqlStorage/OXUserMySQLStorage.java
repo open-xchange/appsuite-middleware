@@ -346,10 +346,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             Databases.closeSQLStuff(stmt);
             if (rollback > 0) {
-            if (rollback == 1) {
-                rollback(con);
-            }
-            autocommit(con);
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
             releaseWriteContextConnection(con, ctx, cache);
         }
@@ -1698,8 +1698,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id) throws StorageException {
+    public User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id, final Integer length, final Integer offset) throws StorageException {
         int contextId = context.getId().intValue();
+        boolean withLimit = checkLimits(length, offset);
+        if (withLimit && length.intValue() == 0) {
+            return new User[0];
+        }
 
         Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
@@ -1712,6 +1716,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 sb.append("AND us.filestore_id = ?");
             } else {
                 sb.append("AND us.filestore_id != 0");
+            }
+
+            if (withLimit) {
+                sb.append(" ORDER BY us.id LIMIT " + offset + ", " + length);
             }
 
             String query = sb.toString();
@@ -1739,26 +1747,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public User[] list(final Context ctx, final String search_pattern) throws StorageException {
-        return list(ctx, search_pattern, false, false);
+    public User[] list(final Context ctx, final String search_pattern, final Integer length, final Integer offset) throws StorageException {
+        return list(ctx, search_pattern, false, false, length, offset);
     }
 
     @Override
-    public User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
-        return listInternal(ctx, search_pattern, false, includeGuests, excludeUsers);
+    public User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws StorageException {
+        return listInternal(ctx, search_pattern, false, includeGuests, excludeUsers, length, offset);
     }
 
     @Override
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException {
-        return listCaseInsensitive(ctx, search_pattern, false, false);
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Integer length, final Integer offset) throws StorageException {
+        return listCaseInsensitive(ctx, search_pattern, false, false, length, offset);
     }
 
     @Override
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
-        return listInternal(ctx, search_pattern, true, includeGuests, excludeUsers);
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws StorageException {
+        return listInternal(ctx, search_pattern, true, includeGuests, excludeUsers, length, offset);
     }
 
-    private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase, final boolean includeGuests, final boolean excludeUsers) throws StorageException {
+    private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws StorageException {
         int contextId = ctx.getId().intValue();
         String new_search_pattern = null;
         boolean pattern = false;
@@ -1767,11 +1775,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             pattern = !"%".equals(new_search_pattern);
         }
 
+        boolean withLimit = checkLimits(length, offset);
+        if (withLimit && length.intValue() == 0) {
+            return new User[0];
+        }
+
         Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            String sql = buildQuery(new_search_pattern, ignoreCase, includeGuests, excludeUsers);
+            String sql = buildQuery(new_search_pattern, ignoreCase, includeGuests, excludeUsers, withLimit, length, offset);
             stmt = read_ox_con.prepareStatement(sql);
             stmt.setInt(1, contextId);
             if (pattern) {
@@ -1796,7 +1809,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private String buildQuery(String search_pattern, boolean ignoreCase, boolean includeGuests, boolean excludeUsers) {
+    private String buildQuery(String search_pattern, boolean ignoreCase, boolean includeGuests, boolean excludeUsers, boolean withLimit, Integer length, Integer offset) {
         StringBuilder sb = new StringBuilder();
         if (includeGuests) {
             sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ");
@@ -1811,6 +1824,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     sb.append(" AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
                 }
             }
+            if (withLimit) {
+                sb.append(" ORDER BY us.id LIMIT ").append(offset).append(", ").append(length);
+            }
         } else {
             sb.append("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid ");
             sb.append("JOIN user us ON con.userid = us.id AND us.cid = con.cid ");
@@ -1824,6 +1840,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 } else {
                     sb.append(" AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
                 }
+            }
+            if (withLimit) {
+                sb.append(" ORDER BY con.userid LIMIT ").append(offset).append(", ").append(length);
             }
         }
         return sb.toString();
@@ -1939,7 +1958,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtusm.setInt(1, contextId);
             stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname, name FROM user_mail_account WHERE cid = ? and id = " + MailAccount.DEFAULT_ID + " and user = ?");
             stmtacc.setInt(1, contextId);
-            stmtuseraliases= read_ox_con.prepareStatement("SELECT alias FROM user_alias WHERE cid=? AND user=?;");
+            stmtuseraliases = read_ox_con.prepareStatement("SELECT alias FROM user_alias WHERE cid=? AND user=?;");
             stmtuseraliases.setInt(1, contextId);
             ResultSet rs = null;
             for (final User user : users) {
@@ -2247,7 +2266,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     } catch (OXException e) {
                         LOG.error("", e);
                     } finally {
-                        if(rs != null) {
+                        if (rs != null) {
                             rs.close();
                             rs = null;
                         }
@@ -2874,8 +2893,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public User[] listUsersByAliasDomain(Context context, String aliasDomain) throws StorageException {
+    public User[] listUsersByAliasDomain(Context context, String aliasDomain, final Integer length, final Integer offset) throws StorageException {
         int contextId = context.getId().intValue();
+        boolean withLimit = checkLimits(length, offset);
+        if (withLimit && length.intValue() == 0) {
+            return new User[0];
+        }
 
         Connection read_ox_con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
@@ -2884,6 +2907,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             StringBuilder sb = new StringBuilder();
             sb.append("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid ");
             sb.append("WHERE us.cid = ? and la.alias LIKE ?");
+
+            if (withLimit) {
+                sb.append(" ORDER BY us.id LIMIT ").append(offset).append(", ").append(length);
+            }
 
             String query = sb.toString();
             stmt = read_ox_con.prepareStatement(query);
@@ -3061,5 +3088,29 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         Cache cache = cacheService.getCache("Capabilities");
         cache.removeFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+    }
+
+    /**
+     * Checks if passed pagination arguments are valid.
+     *
+     * @param length The number of items/elements to retrieve
+     * @param offset The starting offset in the collection of all items/elements (according to a certain order)
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    private boolean checkLimits(Integer length, Integer offset) {
+        boolean withLimit = true;
+        if (length == null || offset == null) {
+            return false;
+        }
+        if (offset.intValue() < 0 || length.intValue() < 0) {
+            return false;
+        }
+        if (withLimit && length.intValue() < 0) {
+            throw new IllegalArgumentException("Invalid length: " + length);
+        }
+        if (withLimit && (offset.intValue() + length.intValue()) < 0) {
+            throw new IllegalArgumentException("Invalid offset/length: " + offset + ", " + length);
+        }
+        return withLimit;
     }
 }

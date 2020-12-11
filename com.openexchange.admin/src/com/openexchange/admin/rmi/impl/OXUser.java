@@ -2090,12 +2090,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public User[] list(final Context ctx, final String search_pattern, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        return list(ctx, search_pattern, credentials, false, false);
+    public User[] list(final Context ctx, final String search_pattern, final Credentials credentials, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        return list(ctx, search_pattern, credentials, false, false, length, offset);
     }
 
     @Override
-    public User[] list(final Context ctx, final String search_pattern, final Credentials credentials, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User[] list(final Context ctx, final String search_pattern, final Credentials credentials, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             final Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -2115,7 +2115,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkContextAndSchema(ctx);
 
-            final User[] retval = oxu.list(ctx, search_pattern, includeGuests, excludeUsers);
+            final User[] retval = oxu.list(ctx, search_pattern, includeGuests, excludeUsers, length, offset);
 
             return retval;
         } catch (Throwable e) {
@@ -2125,12 +2125,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        return listCaseInsensitive(ctx, search_pattern, credentials, false, false);
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials credentials, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        return listCaseInsensitive(ctx, search_pattern, credentials, false, false, length, offset);
     }
 
     @Override
-    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials credentials, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials credentials, final boolean includeGuests, final boolean excludeUsers, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             final Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -2150,7 +2150,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkContextAndSchema(ctx);
 
-            final User[] retval = oxu.listCaseInsensitive(ctx, search_pattern, includeGuests, excludeUsers);
+            final User[] retval = oxu.listCaseInsensitive(ctx, search_pattern, includeGuests, excludeUsers, length, offset);
 
             return retval;
         } catch (Throwable e) {
@@ -2160,7 +2160,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public User[] listUsersWithOwnFilestore(final Context context, final Credentials credentials, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User[] listUsersWithOwnFilestore(final Context context, final Credentials credentials, final Integer filestore_id, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             final Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             try {
@@ -2178,9 +2178,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkContextAndSchema(context);
             if (null == filestore_id || filestore_id.intValue() <= 0) {
-                return oxu.listUsersWithOwnFilestore(context, null);
+                return oxu.listUsersWithOwnFilestore(context, null, length, offset);
             }
-            return oxu.listUsersWithOwnFilestore(context, filestore_id);
+            return oxu.listUsersWithOwnFilestore(context, filestore_id, length, offset);
         } catch (Throwable e) {
             logAndEnhanceException(e, credentials, context, null);
             throw e;
@@ -2189,12 +2189,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        return list(ctx, "*", auth);
+        return list(ctx, "*", auth, null, null);
     }
 
     @Override
     public User[] listAll(final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        return list(ctx, "*", auth, includeGuests, excludeUsers);
+        return list(ctx, "*", auth, includeGuests, excludeUsers, null, null);
     }
 
     private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final List<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
@@ -2582,7 +2582,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials credentials, final Integer length, final Integer offset) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
         try {
             if (aliasDomain == null) {
                 throw new InvalidDataException("Invalid alias domain");
@@ -2594,7 +2594,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
             basicauth.doAuthentication(auth, context);
             contextcheck(context);
-            return oxu.listUsersByAliasDomain(context, aliasDomain);
+            return oxu.listUsersByAliasDomain(context, aliasDomain, length, offset);
         } catch (Throwable e) {
             logAndEnhanceException(e, credentials, context, null);
             throw e;

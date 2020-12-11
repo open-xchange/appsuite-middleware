@@ -55,6 +55,12 @@ This command line tool lists all users within a context. Optionally, with the us
 **--responsetimeout**
 : The optional response timeout in seconds when reading data from server (default: 0s; infinite).
 
+**--length**
+: Limits the result size.
+
+**--offset**
+: The beginning offset of the result list.
+
 # EXAMPLES
 
 **listuser -A contextAdmin -P secret -c 1138**
