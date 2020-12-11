@@ -77,6 +77,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     protected ApiClient apiClient2;
 
     private final Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
+    private final Set<CleanableResourceManager> resources2clean = new ConcurrentHashSet<>(1);
 
     /**
      * Default constructor.
@@ -106,20 +107,42 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         rememberClient(apiClient2);
     }
 
+    /**
+     * Remembers a generated {@link ApiClient} so that it can be loged out after the test run
+     *
+     * @param client The {@link ApiClient} to remember
+     */
     protected void rememberClient(ApiClient client) {
         apiClients.add(client);
+    }
+
+    /**
+     * Remembers a {@link CleanableResourceManager} so that it can be cleaned up after the test run
+     *
+     * @param cleanable The {@link CleanableResourceManager} to remember
+     */
+    protected void remember(CleanableResourceManager cleanable) {
+        if (cleanable != null) {
+            resources2clean.add(cleanable);
+        }
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            Iterator<ApiClient> iterator = apiClients.iterator();
-            while (iterator.hasNext()) {
-                ApiClient client = iterator.next();
-                if (client.getSession() != null) {
-                    logoutClient(client, true);
+            try {
+                for (CleanableResourceManager cleanable : resources2clean) {
+                    cleanable.cleanUp();
                 }
-                iterator.remove();
+            } finally {
+                Iterator<ApiClient> iterator = apiClients.iterator();
+                while (iterator.hasNext()) {
+                    ApiClient client = iterator.next();
+                    if (client.getSession() != null) {
+                        logoutClient(client, true);
+                    }
+                    iterator.remove();
+                }
             }
         } finally {
             super.tearDown();

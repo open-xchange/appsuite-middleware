@@ -86,6 +86,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         ApiClient client = getApiClient();
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
+        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
         infostoreRoot = "1";
 
@@ -112,7 +113,6 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         C = null;
         D = null;
         E = null;
-        folderManager.cleanUp();
         super.tearDown();
     }
 

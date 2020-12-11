@@ -134,7 +134,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     private Integer userId1;
     private Integer userId2;
     private Integer userId3;
-    private List<String> foldersToDelete;
 
     @Override
     @Before
@@ -149,18 +148,11 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         userId3 = apiClient3.getUserId();
 
         folderManager = new FolderManager(new FoldersApi(getApiClient()), "1");
+        remember(folderManager);
         folderManager2 = new FolderManager(new FoldersApi(getApiClient2()), "1");
-        foldersToDelete = new ArrayList<String>();
+        remember(folderManager2);
 
         file = File.createTempFile("FileMovePermissionWarningTest", ".txt");
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        for (String folder : foldersToDelete) {
-            deleteFolder(folder, Boolean.TRUE);
-        }
-        super.tearDown();
     }
 
     /**
@@ -595,7 +587,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         FolderPermission p = createPermissionFor(I(0), BITS_REVIEWER, Boolean.TRUE);
         perm.add(p);
         String id = folderManager.createFolder(SHARED_FOLDER_ID, "FileMovePermissionWarningTest" + UUID.randomUUID().toString(), perm);
-        foldersToDelete.add(id);
         return id;
     }
 
@@ -606,7 +597,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         FolderPermission p2 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
         perm.add(p2);
         String id = folderManager2.createFolder(getPrivateInfostoreFolder(getApiClient2()), "FolderPermissionTest_" + UUID.randomUUID().toString(), perm);
-        foldersToDelete.add(id);
         return id;
     }
 

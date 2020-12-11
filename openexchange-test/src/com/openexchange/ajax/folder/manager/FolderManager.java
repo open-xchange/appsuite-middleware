@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.openexchange.ajax.framework.CleanableResourceManager;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
@@ -80,7 +81,7 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class FolderManager {
+public class FolderManager implements CleanableResourceManager {
 
     /** The {@value #INFOSTORE} module identifier */
     public final static String INFOSTORE = "infostore";
@@ -128,6 +129,7 @@ public class FolderManager {
         foldersToDelete.remove(folderId);
     }
 
+    @Override
     public void cleanUp() throws ApiException {
         deleteFolder(foldersToDelete.stream().sorted(Collections.reverseOrder()).collect(Collectors.toList()));
     }
