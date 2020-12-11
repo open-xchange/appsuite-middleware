@@ -317,9 +317,9 @@ public class FolderManager implements CleanableResourceManager {
     public void moveFolder(String folderId, String newParent, Boolean ignoreWarnings) throws ApiException {
         FolderBody body = new FolderBody();
         FolderData folder = new FolderData();
-        folder.setId(folderId);
         folder.setFolderId(newParent);
         folder.setPermissions(null);
+        folder.setComOpenexchangeShareExtendedPermissions(null);
         body.setFolder(folder);
         FolderUpdateResponse updateFolder = foldersApi.updateFolder(folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, null, ignoreWarnings);
         checkFolderMoveResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData(), ignoreWarnings);
