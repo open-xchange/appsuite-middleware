@@ -609,12 +609,13 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "RECENT", "UNSEEN" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("MESSAGES");
+                    itemArgs.writeAtom("RECENT");
+                    itemArgs.writeAtom("UNSEEN");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
@@ -865,12 +866,11 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "UNSEEN" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("UNSEEN");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
@@ -931,12 +931,11 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "RECENT" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("RECENT");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
@@ -997,12 +996,12 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("MESSAGES");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
@@ -1061,12 +1060,12 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "UNSEEN"};
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("MESSAGES");
+                    itemArgs.writeAtom("UNSEEN");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
@@ -1127,12 +1126,12 @@ public final class IMAPCommandsCollection {
                 /*
                  * Item arguments
                  */
-                final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "UNSEEN" };
-                for (int i = 0, len = items.length; i < len; i++) {
-                    itemArgs.writeAtom(items[i]);
+                {
+                    Argument itemArgs = new Argument();
+                    itemArgs.writeAtom("MESSAGES");
+                    itemArgs.writeAtom("UNSEEN");
+                    args.writeArgument(itemArgs);
                 }
-                args.writeArgument(itemArgs);
                 /*
                  * Perform command
                  */
