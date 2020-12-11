@@ -45,8 +45,9 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-3098
-    ox_add_property com.openexchange.oauth.provider.isAuthorizationServer true /opt/open-xchange/etc/oauth-provider.properties
+    # SCR-759
+    ox_remove_property com.openexchange.oauth.provider.isAuthorizationServer /opt/open-xchange/etc/oauth-provider.properties
+    ox_add_property com.openexchange.oauth.provider.mode auth_server /opt/open-xchange/etc/oauth-provider.properties
 fi
 
 %clean
