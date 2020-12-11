@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.java.Strings;
 import com.openexchange.test.pool.TestContext;
@@ -191,9 +192,11 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         TestUser sharingUser = context2.acquireUser();
         sharingClient = generateApiClient(sharingUser);
         sharingFoldersApi = new FoldersApi(sharingClient);
+        FolderManager folderManager = new FolderManager(sharingFoldersApi, "0");
+        remember(folderManager);
 
         //The sharing user create a folder which is shared to the actual user
-        FolderData sharedFolder = createFolder(sharingFoldersApi, getPrivateInfostoreFolderID(sharingClient), getRandomFolderName());
+        FolderData sharedFolder = createFolder(folderManager, getPrivateInfostoreFolderID(sharingClient), getRandomFolderName());
         sharedFolderId = sharedFolder.getId();
 
         //Share it

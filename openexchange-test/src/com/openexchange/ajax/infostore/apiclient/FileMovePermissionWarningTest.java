@@ -605,8 +605,16 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     private Object[] getFileWarningArguments(String fileId, String sourceFolderId, String destinationFolderId, FolderType sourceType, FolderType destinationType) throws ApiException {
-        String sourceFolderPath = sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") + (sourceType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") + folderManager.getFolderName(sourceFolderId);
-        String destinationFolderPath = destinationType.getRootPath() + (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") + (destinationType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") + folderManager.getFolderName(destinationFolderId);
+        // @formatter:off
+        String sourceFolderPath = sourceType.getRootPath() +
+                                 (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                 (sourceType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
+                                 folderManager.getFolderName(sourceFolderId);
+        String destinationFolderPath = destinationType.getRootPath() +
+                                      (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                      (destinationType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
+                                      folderManager.getFolderName(destinationFolderId);
+        // @formatter:on
         Object[] args = { file.getName(), sourceFolderPath, destinationFolderPath, fileId, destinationFolderId };
         return args;
     }

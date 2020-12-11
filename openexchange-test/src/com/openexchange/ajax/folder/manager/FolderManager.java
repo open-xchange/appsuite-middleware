@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.manager;
 
+import static com.openexchange.exception.OXExceptionConstants.CATEGORY_WARNING;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
@@ -131,21 +132,26 @@ public class FolderManager implements CleanableResourceManager {
 
     @Override
     public void cleanUp() throws ApiException {
-        deleteFolder(foldersToDelete.stream().sorted(Collections.reverseOrder()).collect(Collectors.toList()));
+        deleteFolder(foldersToDelete.stream().sorted(Collections.reverseOrder()).collect(Collectors.toList()), true);
     }
 
     /**
      * Checks if a folder move response doesn't contain any errors
      *
+     * @param category The category or null
      * @param error The error element of the response
      * @param errorDesc The error description element of the response
      * @param data The data element of the response
+     * @param ignoreWarnings Whether to ignore warnings or not
      * @return The data
      */
-    <T> T checkFolderMoveResponse(String error, String errorDesc, T data, Boolean ignoreWarnings) {
-        if (ignoreWarnings == null || ignoreWarnings.booleanValue() == false) {
-            assertNull(errorDesc, error);
+    <T> T checkFolderMoveResponse(String category, String error, String errorDesc, T data, Boolean ignoreWarnings) {
+        if (ignoreWarnings != null && ignoreWarnings.booleanValue() && category != null && category.equals(CATEGORY_WARNING.getType().getName())) {
+            assertNotNull(data);
+            return data;
         }
+
+        assertNull(errorDesc, error);
         assertNotNull(data);
         return data;
     }
@@ -261,8 +267,16 @@ public class FolderManager implements CleanableResourceManager {
      * @throws ApiException In case deletion fails
      */
     public List<String> deleteFolder(List<String> foldersToDelete) throws ApiException {
+        return deleteFolder(foldersToDelete, false);
+    }
+
+    private List<String> deleteFolder(List<String> foldersToDelete, boolean ignoreFolderNotFound) throws ApiException {
         FoldersCleanUpResponse deleteFolders = foldersApi.deleteFolders(foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null);
         lastTimestamp = deleteFolders.getTimestamp();
+        if (ignoreFolderNotFound && ("FLD-0008".equals(deleteFolders.getCode()) || "FILE_STORAGE-0007".equals(deleteFolders.getCode()))) {
+            // ignore FLD-0008 / FILE_STORAGE-0007 errors
+            return checkResponse(null, null, deleteFolders.getData());
+        }
         return checkResponse(deleteFolders.getError(), deleteFolders.getErrorDesc(), deleteFolders.getData());
     }
 
@@ -310,11 +324,11 @@ public class FolderManager implements CleanableResourceManager {
 
     }
 
-    public void moveFolder(String folderId, String newParent) throws ApiException {
-        moveFolder(folderId, newParent, null);
+    public String moveFolder(String folderId, String newParent) throws ApiException {
+        return moveFolder(folderId, newParent, null);
     }
 
-    public void moveFolder(String folderId, String newParent, Boolean ignoreWarnings) throws ApiException {
+    public String moveFolder(String folderId, String newParent, Boolean ignoreWarnings) throws ApiException {
         FolderBody body = new FolderBody();
         FolderData folder = new FolderData();
         folder.setFolderId(newParent);
@@ -322,8 +336,9 @@ public class FolderManager implements CleanableResourceManager {
         folder.setComOpenexchangeShareExtendedPermissions(null);
         body.setFolder(folder);
         FolderUpdateResponse updateFolder = foldersApi.updateFolder(folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null, null, ignoreWarnings);
-        checkFolderMoveResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData(), ignoreWarnings);
+        checkFolderMoveResponse(updateFolder.getCategories(), updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData(), ignoreWarnings);
         lastTimestamp = updateFolder.getTimestamp();
+        return updateFolder.getData();
     }
 
     /**
