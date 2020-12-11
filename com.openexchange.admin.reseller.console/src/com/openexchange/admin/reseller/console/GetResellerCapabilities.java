@@ -54,6 +54,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GetResellerCapabilities}
@@ -86,13 +87,15 @@ public class GetResellerCapabilities extends ResellerAbstraction {
      */
     private void execute(String[] args) {
         AdminParser parser = new AdminParser("getresellercapabilities");
-        setOptions(parser);
+        setNameAndIdOptions(parser);
 
         try {
             parser.ownparse(args);
+
             ResellerAdmin admin = new ResellerAdmin();
             parseAndSetAdminId(parser, admin);
             parseAndSetAdminname(parser, admin);
+
             Credentials credentials = credentialsparsing(parser);
             OXResellerInterface rsi = getResellerInterface();
             if (admin.getId() == null && admin.getName() == null) {
@@ -100,14 +103,27 @@ public class GetResellerCapabilities extends ResellerAbstraction {
                 parser.printUsage();
                 sysexit(1);
             }
+
             Set<String> capabilities = rsi.getCapabilities(admin, credentials);
             if (capabilities.isEmpty()) {
-                System.out.println("There are no capabilities set for reseller with id " + admin.getId());
+                if (admin.getId() != null) {
+                    System.out.println("There are no capabilities set for reseller with id " + admin.getId());
+                } else if (Strings.isNotEmpty(admin.getName())) {
+                    System.out.println("There are no capabilities set for reseller with name " + admin.getName());
+                } else {
+                    System.out.println("There are no capabilities for the specified reseller");
+                }
                 return;
             }
             String lf = System.getProperty("line.separator");
             StringBuilder sb = new StringBuilder(2048);
-            sb.append("Capabilities for reseller with id ").append(admin.getId()).append(":").append(lf);
+            sb.append("Capabilities for reseller ");
+            if (admin.getId() != null) {
+                sb.append("with id ").append(admin.getId());
+            } else if (Strings.isNotEmpty(admin.getName())) {
+                sb.append("with name ").append(admin.getName());
+            }
+            sb.append(":").append(lf);
             for (String capa : capabilities) {
                 sb.append(capa).append(lf);
             }
@@ -116,16 +132,5 @@ public class GetResellerCapabilities extends ResellerAbstraction {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
-    }
-
-    /**
-     * Sets the extra options for the clt
-     *
-     * @param parser The {@link AdminParser}
-     */
-    private void setOptions(final AdminParser parser) {
-        setNameAndIdOptions(parser);
-        parser.allowDynamicOptions();
-        parser.allowFlexibleDynamicOptions();
     }
 }

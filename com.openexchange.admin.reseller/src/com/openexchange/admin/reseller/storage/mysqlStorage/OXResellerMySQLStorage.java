@@ -2346,7 +2346,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
             }
             // Insert new ones
-            if (!capsToInsert.isEmpty() && capsToAdd != null && false == capsToAdd.isEmpty()) {
+            if (!capsToInsert.isEmpty() && capsToAdd != null) {
                 for (String capToAdd : capsToAdd) {
                     String minusCap = "-" + capToAdd;
                     if (existing.contains(minusCap)) {
