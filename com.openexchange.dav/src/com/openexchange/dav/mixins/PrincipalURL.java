@@ -115,6 +115,9 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
                 } catch (URISyntaxException e) {
                     // ignore
                 }
+                if (null == principalURL) {
+                    return null;
+                }
             }
             String path = getExternalPath(configViewFactory, "/principals/");
             if (principalURL.startsWith(path)) {
