@@ -107,8 +107,8 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
         folderManager.cleanUp();
+        super.tearDown();
     }
 
     @Test
