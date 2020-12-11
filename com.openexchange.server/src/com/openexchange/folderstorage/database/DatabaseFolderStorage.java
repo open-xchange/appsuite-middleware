@@ -2196,6 +2196,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 // use original instead
                 cloned = p;
             }
+            int entity = cloned.getEntity();
+            Optional<OCLPermission> existingPermission = perms.stream().filter(e -> entity == e.getEntity()).findAny();
+            if (existingPermission.isPresent()) {
+                // Permission needs to be removed as it will be replaced by inherited permission
+                perms.remove(existingPermission.get());
+            }
             cloned.setType(FolderPermissionType.INHERITED);
             if (FolderPermissionType.LEGATOR.equals(p.getType())) {
                 cloned.setPermissionLegator(String.valueOf(parent.getObjectID()));
