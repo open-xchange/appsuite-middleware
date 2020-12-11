@@ -37,19 +37,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    # SCR-759
-    ox_remove_property com.openexchange.oauth.provider.isAuthorizationServer /opt/open-xchange/etc/oauth-provider.properties
-    ox_add_property com.openexchange.oauth.provider.mode auth_server /opt/open-xchange/etc/oauth-provider.properties
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
