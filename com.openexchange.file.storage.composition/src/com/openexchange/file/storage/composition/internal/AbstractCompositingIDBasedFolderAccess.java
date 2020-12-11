@@ -296,7 +296,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                     }
                 }
             } else {
-                newID = folderAccess.moveFolder(folderId, newParentId, newName);
+                newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
             }
 
             FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
