@@ -153,7 +153,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
 
         Calendar end = getEnd();
 
@@ -171,7 +171,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
@@ -191,7 +191,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
@@ -216,7 +216,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
@@ -239,7 +239,7 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         rememberClient(client3);
         EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3, false);
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));

@@ -96,6 +96,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -1189,7 +1190,7 @@ public final class UploadUtility {
          */
         private String getSystemProperty(String property) {
             try {
-                return System.getProperty(property);
+                return SystemPropertiesUtils.getProperty(property);
             } catch (SecurityException ex) {
                 logger.warn("Encountered a SecurityException reading the system property '{}'; returning null instead.", property, ex);
                 return null;

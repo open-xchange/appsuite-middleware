@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Marker;
+import com.openexchange.java.Strings;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
@@ -161,7 +162,7 @@ public class RankingAwareTurboFilterList extends TurboFilter {
             nameBuilder.append(name);
             added = true;
         }
-        final String sep = System.getProperty("line.separator");
+        final String sep = Strings.getLineSeparator();
         for (int i = 1; i < size; i++) {
             name = list.get(i).getName();
             if (name != null) {

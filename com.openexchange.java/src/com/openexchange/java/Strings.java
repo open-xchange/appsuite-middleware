@@ -436,6 +436,29 @@ public class Strings {
     }
 
     /**
+     * High speed test for hex character.
+     *
+     * @param c The character to check
+     * @return <code>true</code> if the indicated character is hex character; otherwise <code>false</code>
+     */
+    public static boolean isHex(char c) {
+        return isHex(c, true);
+    }
+
+    /**
+     * High speed test for hex character.
+     *
+     * @param c The character to check
+     * @return <code>true</code> if the indicated character is hex character; otherwise <code>false</code>
+     */
+    public static boolean isHex(char c, boolean considerUpperCase) {
+        if (considerUpperCase) {
+            return isDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        }
+        return isDigit(c) || (c >= 'a' && c <= 'f');
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param cs The string

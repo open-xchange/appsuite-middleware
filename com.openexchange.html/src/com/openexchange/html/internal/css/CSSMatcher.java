@@ -837,7 +837,7 @@ public final class CSSMatcher {
             cssBuilder.append(tail);
             return modified;
         } catch (RuntimeException unchecked) {
-            LOG.debug("Unchecked exception while processing CSS content:{}{}", System.getProperty("line.separator"), css, unchecked);
+            LOG.debug("Unchecked exception while processing CSS content:{}{}", Strings.getLineSeparator(), css, unchecked);
             throw unchecked;
         }
     }

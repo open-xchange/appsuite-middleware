@@ -71,6 +71,12 @@ public class ShareServletStrings implements LocalizableStrings {
     // John Doe has shared the folder "Photos" with you. Please enter your password to view it.
     public static final String SHARE_WITH_TARGET_AND_GUEST_PASSWORD = "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to view it.";
 
+    // The folder "Photos" is shared with you. Please enter the share password to view it.
+    public static final String SHARE_WITH_TARGET_UNKNOWN_SHARING_USER = "The %1$s \"%2$s\" is shared with you. Please enter the share password to view it.";
+
+    // The folder "Photos" is shared with you. Please enter your password to view it.
+    public static final String SHARE_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER = "The %1$s \"%2$s\" is shared with you. Please enter your password to view it.";
+
     // Login when opening a share protected with a password
     public static final String SHARE_PASSWORD = "Please enter your password to log into this account.";
 

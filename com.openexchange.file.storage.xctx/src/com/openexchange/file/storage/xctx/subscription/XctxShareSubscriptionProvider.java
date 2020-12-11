@@ -53,6 +53,7 @@ import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUPPORTED;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -222,7 +223,7 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
                 /*
                  * Do not support anonymous shares
                  */
-                return builder.state(ShareLinkState.FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                return builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
             case GUEST_PASSWORD:
                 return builder.state(ADDABLE_WITH_PASSWORD);
             case GUEST:
@@ -249,6 +250,13 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             .build(); // @formatter:on
     }
 
+    /**
+     * Create a response for a forbidden action, e.g. when the current
+     * user tries to subscribe to a share she is not the target user of
+     *
+     * @param exception The exception to send
+     * @return The response
+     */
     private ShareLinkAnalyzeResult forbidden(OXException exception) {
         return new Builder() // @formatter:off
             .state(FORBIDDEN)

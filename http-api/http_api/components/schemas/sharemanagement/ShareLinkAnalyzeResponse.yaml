@@ -15,6 +15,7 @@ properties:
               * `INACCESSIBLE` - State to indicate that the link belongs to a known share but is inaccessible at the moment.
               * `REMOVED` - State to indicate that the link belongs to a known share but can no longer be accessed.
               * `UNRESOLVABLE` - State to indicate that the share link can't be resolved at all and thus can't be subscribed.
+              * `UNSUPPORTED` - State to indicate that the subscription of the share is not supported.
               * `FORBIDDEN` - State to indicate that the subscription of the link is not allowed.
               * `UNSUBSCRIBED` - State to indicate that the link belongs to a known share but is not subscribed at the moment.
           enum:
@@ -25,6 +26,7 @@ properties:
             - INACCESSIBLE
             - REMOVED
             - UNRESOLVABLE
+            - UNSUPPORTED
             - FORBIDDEN
             - UNSUBSCRIBED
         error:

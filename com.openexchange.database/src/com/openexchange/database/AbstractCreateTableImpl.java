@@ -57,6 +57,7 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * Abstract class for easily implementing {@link CreateTableService} services.
@@ -89,7 +90,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                         try {
                             stmt.execute(create);
                         } catch (SQLException e) {
-                            final String sep = System.getProperty("line.separator");
+                            final String sep = Strings.getLineSeparator();
                             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
                         }
                     }
@@ -102,7 +103,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                         try {
                             stmt.execute(create);
                         } catch (SQLException e) {
-                            final String sep = System.getProperty("line.separator");
+                            final String sep = Strings.getLineSeparator();
                             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
                         }
                     }

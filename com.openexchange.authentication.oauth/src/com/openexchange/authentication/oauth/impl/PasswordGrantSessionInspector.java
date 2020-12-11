@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication.oauth.impl;
 
+import static com.openexchange.sessiond.ExpirationReason.OAUTH_TOKEN_REFRESH_FAILED;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -121,19 +122,21 @@ public class PasswordGrantSessionInspector implements SessionInspectorService {
         RefreshResult.FailReason failReason = result.getFailReason();
         if (failReason == FailReason.INVALID_REFRESH_TOKEN || failReason == FailReason.PERMANENT_ERROR) {
             if (result.hasException()) {
-                LOG.info("Terminating session '{}' due to oauth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc(), result.getException());
+                LOG.info("Terminating session '{}' due to OAuth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc(), result.getException());
             } else {
-                LOG.info("Terminating session '{}' due to oauth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc());
+                LOG.info("Terminating session '{}' due to OAuth token refresh error: {} ({})", session.getSessionID(), failReason.name(), result.getErrorDesc());
             }
             services.getServiceSafe(SessiondService.class).removeSession(session.getSessionID());
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, OAUTH_TOKEN_REFRESH_FAILED.getIdentifier());
+            throw oxe;
         }
 
         // try to perform request anyway on best effort
         if (result.hasException()) {
-            LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc(), result.getException());
+            LOG.warn("Error while refreshing OAuth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc(), result.getException());
         } else {
-            LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc());
+            LOG.warn("Error while refreshing OAuth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc());
         }
         return Reply.NEUTRAL;
     }

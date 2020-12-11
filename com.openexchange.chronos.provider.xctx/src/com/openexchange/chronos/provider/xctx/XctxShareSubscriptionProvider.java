@@ -54,8 +54,13 @@ import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.share.core.tools.ShareLinks.extractHostName;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE;
 import static com.openexchange.share.subscription.ShareLinkState.ADDABLE_WITH_PASSWORD;
+import static com.openexchange.share.subscription.ShareLinkState.CREDENTIALS_REFRESH;
 import static com.openexchange.share.subscription.ShareLinkState.FORBIDDEN;
+import static com.openexchange.share.subscription.ShareLinkState.REMOVED;
+import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import static com.openexchange.share.subscription.ShareLinkState.UNRESOLVABLE;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
+import static com.openexchange.share.subscription.ShareLinkState.UNSUPPORTED;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
@@ -73,6 +78,7 @@ import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
@@ -129,7 +135,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
             return false;
         }
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
-        if (null == targetPath || Module.CALENDAR.getFolderConstant() != targetPath.getModule()) {
+        if (null == targetPath || Module.CALENDAR.getFolderConstant() != targetPath.getModule() || false == targetPath.isFolder()) {
             return false;
         }
         try {
@@ -146,6 +152,10 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          * re-check if supported & allowed
          */
         if (false == isSupported(session, shareLink)) {
+            return new Builder().state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
+        }
+        ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
+        if (null == targetPath || Module.CALENDAR.getFolderConstant() != targetPath.getModule() || false == targetPath.isFolder()) {
             return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
         }
         /*
@@ -153,23 +163,27 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
          */
         CalendarAccount existingAccount = lookupExistingAccount(session, shareLink);
         if (null != existingAccount) {
-            ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
             XctxCalendarAccess calendarAccess;
             try {
                 calendarAccess = provider.connect(session, existingAccount, null);
             } catch (OXException e) {
                 if (LoginExceptionCodes.INVALID_GUEST_PASSWORD.equals(e)) {
-                    return new ShareLinkAnalyzeResult.Builder().state(ShareLinkState.CREDENTIALS_REFRESH).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+                    return new Builder().error(e).state(CREDENTIALS_REFRESH).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
                 }
                 throw e;
             }
+            /*
+             * probe referenced folder
+             */
             try {
-                if (targetPath == null) {
-                    return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
-                }
                 CalendarFolder folder = calendarAccess.getFolder(getRelativeFolderId(targetPath.getFolder()));
-                ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? ShareLinkState.UNSUBSCRIBED : ShareLinkState.SUBSCRIBED;
-                return new ShareLinkAnalyzeResult.Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+                ShareLinkState state = Boolean.FALSE.equals(folder.isSubscribed()) ? UNSUBSCRIBED : SUBSCRIBED;
+                return new Builder().state(state).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+            } catch (OXException e) {
+                if (FolderExceptionErrorMessage.NOT_FOUND.equals(e) || FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                    return new Builder().error(e).state(REMOVED).infos(getSubscriptionInfo(existingAccount, targetPath)).build();
+                }
+                throw e;
             } finally {
                 calendarAccess.close();
             }
@@ -353,7 +367,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
                 /*
                  * Do not support anonymous shares
                  */
-                return builder.state(ShareLinkState.FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                return builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
             case GUEST_PASSWORD:
                 return builder.state(ADDABLE_WITH_PASSWORD);
             case GUEST:

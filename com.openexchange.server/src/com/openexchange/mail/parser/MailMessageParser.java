@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.parser;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -358,7 +359,7 @@ public final class MailMessageParser {
                     final String mailId = mail.getMailId();
                     final String folder = mail.getFolder();
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, I(mail.getAccountId()), Strings.getLineSeparator(), mail.getSource());
                     }
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
@@ -388,7 +389,7 @@ public final class MailMessageParser {
                 final String mailId = mail.getMailId();
                 final String folder = mail.getFolder();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, I(mail.getAccountId()), Strings.getLineSeparator(), mail.getSource());
                 }
             }
             throw e;

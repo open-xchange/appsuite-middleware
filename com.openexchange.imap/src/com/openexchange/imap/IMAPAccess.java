@@ -127,6 +127,7 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -350,7 +351,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(Session session) {
         super(session);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     /**
@@ -361,7 +362,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected IMAPAccess(Session session, int accountId) {
         super(session, accountId);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     @Override

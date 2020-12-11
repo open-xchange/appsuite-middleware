@@ -62,6 +62,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -290,7 +291,7 @@ public final class Cookies {
             return "";
         }
         final StringBuilder sb = new StringBuilder(cookies.length << 4);
-        final String sep = System.getProperty("line.separator");
+        final String sep = Strings.getLineSeparator();
         for (int i = 0; i < cookies.length; i++) {
             final Cookie cookie = cookies[i];
             sb.append(i + 1).append(": ").append(cookie.getName());

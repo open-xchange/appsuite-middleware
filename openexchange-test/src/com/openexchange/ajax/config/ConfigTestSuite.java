@@ -55,7 +55,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Suite for all config tests.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(ParallelSuite.class)
@@ -68,7 +68,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ModulesTest.class,
     BugTests.class,
     Bug15354Test.class,
-    Bug21619Test.class, // This test hammers 1 minute on the backend to try to reproduce an endless loop.
+    // Bug21619Test.class, // This test hammers 1 minute on the backend to try to reproduce an endless loop.
     Bug22389Test.class,
 
 })

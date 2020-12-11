@@ -85,7 +85,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
 
-        user2 = new UserApi(client, enhancedClient, testUser2, false);
+        user2 = new UserApi(client, enhancedClient, testUser2);
         folderId2 = getDefaultFolder(client);
         eventManager2 = new EventManager(user2, getDefaultFolder(client));
     }

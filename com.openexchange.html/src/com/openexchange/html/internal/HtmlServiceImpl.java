@@ -198,7 +198,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        lineSeparator = System.getProperty("line.separator");
+        lineSeparator = Strings.getLineSeparator();
         {
             TIntObjectMap<String> tmp = new TIntObjectHashMap<String>(htmlCharMap.size());
             for (Map.Entry<Character, String> entry : htmlCharMap.entrySet()) {

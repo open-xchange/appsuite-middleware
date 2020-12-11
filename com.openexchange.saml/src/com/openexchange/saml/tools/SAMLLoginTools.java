@@ -62,6 +62,7 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -173,8 +174,11 @@ public class SAMLLoginTools {
      * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
     public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, @SuppressWarnings("unused") LoginConfiguration loginConfiguration) throws OXException {
-        if (!isValidSession(httpRequest, session, cookieHash)) {
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+        ExpirationReason optExpirationReason = getExpirationReasonOrNull(httpRequest, session, cookieHash);
+        if (optExpirationReason != null) {
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, optExpirationReason.getIdentifier());
+            throw oxe;
         }
     }
 
@@ -188,17 +192,27 @@ public class SAMLLoginTools {
      * @throws OXException
      */
     public static boolean isValidSession(HttpServletRequest httpRequest, Session session, String cookieHash) {
+        return getExpirationReasonOrNull(httpRequest, session, cookieHash) == null;
+    }
+
+    private static ExpirationReason getExpirationReasonOrNull(HttpServletRequest httpRequest, Session session, String cookieHash) {
         // IP check
         try {
             SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
         } catch (OXException e) {
-            return false;
+            return ExpirationReason.IP_CHECK_FAILED;
         }
 
         // Check secret cookie
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash);
-        return secretCookie != null && session.getSecret().equals(secretCookie.getValue());
+        if (secretCookie == null) {
+            return ExpirationReason.NO_EXPECTED_SECRET_COOKIE;
+        }
+        if (session.getSecret().equals(secretCookie.getValue()) == false) {
+            return ExpirationReason.SECRET_MISMATCH;
+        }
+        return null;
     }
 
     /**

@@ -57,6 +57,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -118,7 +119,7 @@ public class WebdavLogAction extends AbstractAction {
             /*
              * log headers
              */
-            String lineSeparator = System.getProperty("line.separator");
+            String lineSeparator = Strings.getLineSeparator();
             {
                 StringBuilder stringBuilder = new StringBuilder(8192);
                 stringBuilder.append("URL: ").append(request.getUrl()).append(lineSeparator);

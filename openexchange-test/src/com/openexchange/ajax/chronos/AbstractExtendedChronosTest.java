@@ -94,7 +94,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
         rememberClient(apiClient2);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
-        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2, true);
+        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2);
 
         folderId2 = getDefaultFolder(apiClient2);
         eventManager2 = new EventManager(userApi2, folderId2);

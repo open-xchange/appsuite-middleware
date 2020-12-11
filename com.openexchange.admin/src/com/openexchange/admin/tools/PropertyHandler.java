@@ -78,10 +78,10 @@ public class PropertyHandler {
     private static final String RESOURCE_PROPERTIES = "Resource.properties";
 
     protected Hashtable<String, Object> allPropValues = null;
-    private Hashtable<String, String> userPropValues = null;
+    private final Hashtable<String, String> userPropValues = null;
     protected Hashtable<String, String> groupPropValues = null;
-    private Hashtable<String, String> resPropValues = null;
-    private Hashtable<String, String> rmiPropValues = null;
+    private final Hashtable<String, String> resPropValues = null;
+    private final Hashtable<String, String> rmiPropValues = null;
     protected Hashtable<String, String> sqlPropValues = null;
 
     private String configDirName;
@@ -96,7 +96,7 @@ public class PropertyHandler {
 
     /**
      * Initializes a new {@link PropertyHandler}.
-     * 
+     *
      * @param sysprops the system properties
      */
     public PropertyHandler(Properties sysprops) {
@@ -136,8 +136,7 @@ public class PropertyHandler {
      */
     public String getSysProp(String key, String fallBack) {
         String retString = fallBack;
-        Properties syprops = new Properties(this.sysprops);
-        retString = syprops.getProperty(key);
+        retString = this.sysprops.getProperty(key);
         if (retString == null) {
             LOGGER.debug("Property '{}' not found in the run script! Using fallback :{}", key, fallBack);
             return fallBack;
@@ -353,7 +352,7 @@ public class PropertyHandler {
      * Retrieves the specified integer property from the specified properties' file
      * If the property is absent or cannot be retrieved,
      * the supplied fallback is returned
-     * 
+     *
      * @param cachedValues The cached values
      * @param propertiesFile The properties file
      * @param key The property key
@@ -369,7 +368,7 @@ public class PropertyHandler {
      * Retrieves the specified property from the specified properties' file
      * If the property is absent or cannot be retrieved,
      * the supplied fallback is returned
-     * 
+     *
      * @param cachedValues The cached values, if <code>null</code> will be initialised and all properties will be cached in that {@link Hashtable}
      * @param propertiesFile The properties file
      * @param key The property key

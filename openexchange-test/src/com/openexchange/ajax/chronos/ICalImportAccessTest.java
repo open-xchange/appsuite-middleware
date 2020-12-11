@@ -95,8 +95,8 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
     public void testImportCalendarAccess() throws Exception {
         String errorResponse = getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS);
         assertNotNull(errorResponse);
-        assertTrue(errorResponse.contains("error\":\"You do not have appropriate permissions to view the folder.\""));
-        assertTrue(errorResponse.contains("categories\":\"PERMISSION_DENIED"));
+        assertTrue("Wrong error:" + errorResponse, errorResponse.contains("Missing capability [calendar_chronos]"));
+        assertTrue("Wrong error:" + errorResponse, errorResponse.contains("Categories=PERMISSION_DENIED"));
     }
 
     private void setModuleAccess(boolean hasAccess) throws Exception {

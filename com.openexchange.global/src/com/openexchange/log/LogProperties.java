@@ -896,7 +896,7 @@ public final class LogProperties {
         final StringBuilder logBuilder = new StringBuilder(1024);
         // Sort the properties for readability
         final Map<String, String> sorted = new TreeMap<String, String>();
-        final String sep = System.getProperty("line.separator");
+        final String sep = Strings.getLineSeparator();
         for (final Entry<String, String> propertyEntry : getPropertyMap().entrySet()) {
             final String propertyName = propertyEntry.getKey();
             if (null == nonMatchingNames || !nonMatchingNames.contains(propertyName)) {

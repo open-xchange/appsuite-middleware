@@ -286,7 +286,7 @@ public class ReadFileFormat {
 //        final StringBuffer sbuff = new StringBuffer();
 //        while ((nextLine = br.readLine()) != null) {
 //            sbuff.append(nextLine);
-//            sbuff.append(System.getProperty("line.separator"));
+//            sbuff.append(Strings.getLineSeparator());
 //        }
 //        return sbuff.toString();
 //    }

@@ -16,6 +16,8 @@ All calls towards the authorization or token endpoint enforce HTTPS. Plain HTTP 
 
 # Authorization Flow
 
+**Note**: The following information about authorization flow only refers to the use of the built-in authorization server.
+
 ## Step 1: Request an authorization code
 
 `GET https://ox.example.com/appsuite/api/oauth/provider/authorization`
@@ -198,12 +200,12 @@ With OAuth you can access a subset of the existing [HTTP API](https://documentat
 
 Find the OAuth-enabled modules and actions below. Every action is bound to a specific scope. However some actions are available implicitly if access for any scope is granted. E.g. you may always request a users details or configuration if any kind of OAuth access is granted, but you may only change a users configuration, if the `write_userconfig` scope is granted. The view on the folder tree is always limited by the granted scope. E.g. if you were granted `read_contacts` you can also perform all read-only requests that target contact folders. In turn you may only create/modify/delete contact folders if obtained the `write_contacts` scope.
 
-Within the middleware core, the following restricted scopes are predefined for the HTTP API modules:
+More detailed information about the required scopes for each action can be found in the [HTTP API](https://documentation.open-xchange.com/components/middleware/http/7.10.5/index.html) documentation.
 
 | Module                                       | Scopes                         |
 -----------------------------------------------|--------------------------------|
 |config                                        | write_userconfig               |
-|folders                                       | read_folders, write_folders    |
+|folders                                       | \<depends\>                    |
 |mail / mailcompose                            | read_mail, write_mail          |
 |calendar / chronos                            | read_calendar, write_calendar  |
 |contacts                                      | read_contacts, write_contacts  |
@@ -212,7 +214,7 @@ Within the middleware core, the following restricted scopes are predefined for t
 |tasks                                         | read_tasks, write_tasks        |
 |reminder                                      | read_reminder, write_reminder  |
 |snippets                                      | write_userconfig               |
-|user/me                                       | <any>                          |
+|user/me                                       | \<any\>                        |
 
 
 **Card- and CalDAV**

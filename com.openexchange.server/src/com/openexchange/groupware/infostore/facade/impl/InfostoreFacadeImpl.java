@@ -390,7 +390,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             return null == optSuccessor ? document : optSuccessor.handle(document);
         }
-        
+
     }
 
     /** The document customizer caring about triggering media metadata extraction dependent on the media status */
@@ -721,7 +721,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * Load created/modifiedFrom data
          */
-        
+
         CreatedFromLoader createdFromLoader = new CreatedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
         ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(Collections.singletonMap(I(document.getId()), document), entityInfoLoader, session);
         /*
@@ -4356,13 +4356,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             if (addNumberOfVersions) {
                 timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
             }
-            if (addCreatedFrom && null != optSession) {
-                CreatedFromLoader createdFromLoader = new CreatedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, optSession);
-                timedResult = createdFromLoader.add(timedResult, context, objectIDs);
-            }
-            if (addModifiedFrom && null != optSession) {
-                ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(documents.stream().collect(Collectors.toMap(DocumentMetadata::getId, document -> document)), entityInfoLoader, optSession);
-                timedResult = modifiedFromLoader.add(timedResult, context, objectIDs);
+            {
+                Map<Integer, DocumentMetadata> id2document = null;
+                if (addCreatedFrom && null != optSession) {
+                    id2document = new LinkedHashMap<>(documents.size());
+                    for (DocumentMetadata document : documents) {
+                        id2document.putIfAbsent(I(document.getId()), document);
+                    }
+                    CreatedFromLoader createdFromLoader = new CreatedFromLoader(id2document, entityInfoLoader, optSession);
+                    timedResult = createdFromLoader.add(timedResult, context, objectIDs);
+                }
+                if (addModifiedFrom && null != optSession) {
+                    if (id2document == null) {
+                        id2document = new LinkedHashMap<>(documents.size());
+                        for (DocumentMetadata document : documents) {
+                            id2document.putIfAbsent(I(document.getId()), document);
+                        }
+                    }
+                    ModifiedFromLoader modifiedFromLoader = new ModifiedFromLoader(id2document, entityInfoLoader, optSession);
+                    timedResult = modifiedFromLoader.add(timedResult, context, objectIDs);
+                }
             }
             if (addShareable) {
                 final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();

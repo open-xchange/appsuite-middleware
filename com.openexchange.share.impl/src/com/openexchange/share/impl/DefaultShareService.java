@@ -520,7 +520,7 @@ public class DefaultShareService implements ShareService {
                     }
                     if (ShareTool.isAnonymousGuest(user)) {
                         moduleSupport = requireService(ModuleSupport.class, moduleSupport);
-                        ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId());
+                        ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId(), null != connectionHelper ? connectionHelper.getConnection() : null);
                         ShareTargetPath path = moduleSupport.getPath(dstTarget, session);
                         return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, path, entry.getValue().booleanValue());
                     }
@@ -946,19 +946,14 @@ public class DefaultShareService implements ShareService {
         /*
          * pre-adjust share target to ensure having the current session user's point of view
          */
-        ShareTarget target = moduleSupport.adjustTarget(shareTarget, session, session.getUserId());
+        ShareTarget target = moduleSupport.adjustTarget(shareTarget, session, session.getUserId(), connectionHelper.getConnection());
         if (RecipientType.GROUP.equals(recipient.getType())) {
             /*
              * prepare pseudo share infos for group recipient
              */
             Group group = requireService(GroupService.class).getGroup(context, ((InternalRecipient) recipient).getEntity());
-            int[] members = group.getMember();
-            ShareTarget dstTarget;
-            if (members.length == 0) {
-                dstTarget = moduleSupport.adjustTarget(target, session, context.getMailadmin()); // fallback
-            } else {
-                dstTarget = moduleSupport.adjustTarget(target, session, members[0]);
-            }
+            int targetUserId = null != group.getMember() && 0 < group.getMember().length ? group.getMember()[0] : context.getMailadmin();
+            ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUserId, connectionHelper.getConnection());
             return new Pair<>(Boolean.FALSE, new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, true));
         }
         /*
@@ -968,7 +963,7 @@ public class DefaultShareService implements ShareService {
         Pair<Boolean, User> userPair = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
         User targetUser = userPair.getSecond();
 
-        ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
+        ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId(), connectionHelper.getConnection());
         if (false == targetUser.isGuest()) {
             return new Pair<>(Boolean.FALSE, new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, true));
         }

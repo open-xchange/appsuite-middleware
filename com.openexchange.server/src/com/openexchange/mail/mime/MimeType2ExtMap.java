@@ -75,6 +75,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link MimeType2ExtMap} - Maps MIME types to file extensions and vice versa.
@@ -159,7 +160,7 @@ public final class MimeType2ExtMap {
                     StringBuilder sb = new StringBuilder(128);
                     boolean debugEnabled = LOG.isDebugEnabled();
                     {
-                        String homeDir = System.getProperty("user.home");
+                        String homeDir = SystemPropertiesUtils.getProperty("user.home");
                         if (homeDir != null) {
                             File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
                             if (file.exists()) {
@@ -172,7 +173,7 @@ public final class MimeType2ExtMap {
                         }
                     }
                     {
-                        String javaHome = System.getProperty("java.home");
+                        String javaHome = SystemPropertiesUtils.getProperty("java.home");
                         if (javaHome != null) {
                             sb.setLength(0);
                             File file =

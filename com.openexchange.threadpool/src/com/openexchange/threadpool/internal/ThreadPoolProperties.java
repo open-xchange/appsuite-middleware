@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ThreadPoolProperties} - Initialization of thread pool bundle.
@@ -91,7 +92,7 @@ public final class ThreadPoolProperties {
      * @param configurationService The configuration service to use
      * @return This instance with properties applied from configuration service
      */
-    public ThreadPoolProperties init(final ConfigurationService configurationService) {
+    public ThreadPoolProperties init(ConfigurationService configurationService) {
         if (null != configurationService) {
 
             corePoolSize = 3;
@@ -245,8 +246,8 @@ public final class ThreadPoolProperties {
             watcherMaxRunningTime = 60000L;
             watcherMinWaitTime = 20000L;
         }
-        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
-        final String ls = System.getProperty("line.separator");
+        org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
+        String ls = Strings.getLineSeparator();
         LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tenforceCorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", I(corePoolSize), ls, B(enforceCorePoolSize), ls, B(prestartAllCoreThreads), ls, L(keepAliveTime), ls, workQueue, ls, refusedExecutionBehavior);
         return this;
     }

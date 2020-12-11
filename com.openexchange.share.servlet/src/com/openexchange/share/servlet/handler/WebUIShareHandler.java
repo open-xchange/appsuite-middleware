@@ -61,6 +61,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
@@ -144,9 +145,16 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 return  t -> String.format(t.translate(ShareServletStrings.SHARE_PASSWORD));
             // Other share
             default: 
+                if (null != sharingUser) {
+                    return t -> String.format(
+                        t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD),
+                        FullNameBuilder.buildFullName(sharingUser, t),
+                        t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
+                        shareRequest.getTargetProxy().getLocalizedTitle(t));
+                }
                 return t -> String.format(
-                    t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD),
-                    FullNameBuilder.buildFullName(sharingUser, t),
+                    t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET_UNKNOWN_SHARING_USER
+                        : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER),
                     t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
                     shareRequest.getTargetProxy().getLocalizedTitle(t));
         }
@@ -182,7 +190,10 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 return ShareHandlerReply.ACCEPT;
             }
 
-            User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
+            User sharingUser = null;
+            if (ShareTool.checkShareAndGuestCreator(shareRequest.getTargetProxy(), guestInfo)) {
+                sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
+            }
             LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())

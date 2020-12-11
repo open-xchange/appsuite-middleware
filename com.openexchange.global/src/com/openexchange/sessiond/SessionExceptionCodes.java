@@ -59,11 +59,11 @@ import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER
 import static com.openexchange.sessiond.SessionExceptionMessages.NO_SESSION_FOR_TOKENS_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
-import java.util.regex.Pattern;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SessionExceptionCodes}
@@ -162,9 +162,6 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String PREFIX = "SES";
 
-    /** The pattern to match the expected format of the generated session identifiers */
-    private static final Pattern UUID_SESSION_PATTERN = Pattern.compile("^[0-9a-f]{32}\\z");
-
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
      *
@@ -187,12 +184,16 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
         return PREFIX;
     }
 
+    /**
+     * The special name of the OXExceotion property signaling the session expiration reason.
+     */
+    public static final String OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON = "com.openexchange.session.expiration.reason";
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final String message;
-
     private final String displayMessage;
-
     private final Category category;
-
     private final int number;
 
     private SessionExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
@@ -296,16 +297,39 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
     }
 
     /**
-     * Sanitizes the session id parameter to ensure it is at least in the expected format.
+     * Sanitizes the session identifier parameter to ensure it is at least in the expected format.
      *
      * @param sessionIdParameter The parameter to sanitize
      * @return The parameter, or a sane string if not in expected format
      */
     private static Object sanitizeSessionIdParamter(Object sessionIdParameter) {
-        if (null != sessionIdParameter && String.class.isInstance(sessionIdParameter) && false == UUID_SESSION_PATTERN.matcher((String) sessionIdParameter).matches()) {
+        if (null != sessionIdParameter && String.class.isInstance(sessionIdParameter) && isNoValidSessionId((String) sessionIdParameter)) {
             return "<invalid_sessionid>";
         }
         return sessionIdParameter;
+    }
+
+    private static boolean isNoValidSessionId(String sessionId) {
+        return isValidSessionId(sessionId) == false;
+    }
+
+    private static boolean isValidSessionId(String sessionId) {
+        if (Strings.isEmpty(sessionId)) {
+            return false;
+        }
+
+        int length = sessionId.length();
+        if (length != 32) {
+            return false;
+        }
+
+        for (int i = length; i-- > 0;) {
+            char ch = sessionId.charAt(i);
+            if (Strings.isHex(ch, false) == false) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

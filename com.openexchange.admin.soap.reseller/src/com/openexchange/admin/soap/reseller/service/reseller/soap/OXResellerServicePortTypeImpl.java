@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -560,13 +561,13 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         }
 
         // Configuration
-        Map<String, String> tmpMap = soapResellerAdmin.getConfiguration();
+        SOAPStringMap tmpMap = soapResellerAdmin.getConfiguration();
         if (tmpMap != null) {
-            resellerAdmin.setConfiguration(tmpMap);
+            resellerAdmin.setConfiguration(soap2Map(tmpMap));
         }
         tmpMap = soapResellerAdmin.getConfigurationToAdd();
         if (tmpMap != null) {
-            resellerAdmin.setConfigurationToAdd(tmpMap);
+            resellerAdmin.setConfigurationToAdd(soap2Map(tmpMap));
         }
         tmpSet = soapResellerAdmin.getConfigurationToRemove();
         if (tmpSet != null) {
@@ -605,8 +606,8 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         soapResellerAdmin.setCapabilitiesToAdd(resellerAdmin.getCapabilitiesToAdd());
         soapResellerAdmin.setCapabilitiesToRemove(resellerAdmin.getCapabilitiesToRemove());
         soapResellerAdmin.setCapabilitiesToDrop(resellerAdmin.getCapabilitiesToDrop());
-        soapResellerAdmin.setConfiguration(resellerAdmin.getConfiguration());
-        soapResellerAdmin.setConfigurationToAdd(resellerAdmin.getConfigurationToAdd());
+        soapResellerAdmin.setConfiguration(map2Soap(resellerAdmin.getConfiguration()));
+        soapResellerAdmin.setConfigurationToAdd(map2Soap(resellerAdmin.getConfigurationToAdd()));
         soapResellerAdmin.setConfigurationToRemove(resellerAdmin.getConfigurationToRemove());
         soapResellerAdmin.setTaxonomies(resellerAdmin.getTaxonomies());
         soapResellerAdmin.setTaxonomiesToAdd(resellerAdmin.getTaxonomiesToAdd());
@@ -928,7 +929,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         soapMapMap.setEntries(entries);
         return soapMapMap;
     }
-
+    
     private static SOAPStringMap map2Soap(final Map<String, String> map) {
         if (null == map) {
             return null;

@@ -55,6 +55,7 @@ import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessiondService;
@@ -86,7 +87,7 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
         final StringBuilder info = new StringBuilder(8192);
         final SessiondService service = sessiondServiceTracker.getService();
         final Map<String, Set<Thread>> threads = counter.getThreads(threshold);
-        final String lineSeparator = System.getProperty("line.separator");
+        final String lineSeparator = Strings.getLineSeparator();
         for (final Entry<String, Set<Thread>> entry : threads.entrySet()) {
             final Set<Thread> set = entry.getValue();
             info.append(lineSeparator).append(lineSeparator).append(set.size()).append(" threads belonging to session \"").append(entry.getKey());

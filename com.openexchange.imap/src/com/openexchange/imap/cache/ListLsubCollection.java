@@ -80,6 +80,7 @@ import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -269,7 +270,7 @@ final class ListLsubCollection implements Serializable {
      */
     public String toString(boolean lsub) {
         StringBuilder builder = new StringBuilder(1024);
-        String lf = System.getProperty("line.separator");
+        String lf = SystemPropertiesUtils.getProperty("line.separator");
         builder.append("ListLsubCollection:");
 
         SortedMap<String, ListLsubEntry> sm = new TreeMap<String, ListLsubEntry>(lsub ? lsubMap : listMap);

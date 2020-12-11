@@ -28,7 +28,7 @@ OX App Suite 7.10.5 introduces the new concept of "*Federated Sharing*" which al
 or another server into his own account and access these data in the same way as regular data.
 This provides a seamless integration of data shared from a different context or server without using the guest interface.
 
-The new *Federated Sharing* feature is part of of the ``open-xchange-subscribe`` package which needs to be installed in order to use it.
+The new *Federated Sharing* feature is part of of the ``open-xchange-subscribe`` package which needs to be installed in order to use it, and comes with integrations for the modules *Drive* and *Calendar*.
 
 OX App Suite can handle two different share modes: The **cross-context** mode and the **cross-ox** mode.
 The **cross-context** mode is chosen when a share comes from a different context on the same OX server.
@@ -47,10 +47,8 @@ The following properties needs to be set in order to enable the **cross-ox** fea
 
 * <code>[com.openexchange.capability.filestorage_xox](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xox)=true</code>
 
-
-See [Federated-Sharing](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of configuration options related to Federated Sharing.
-
-See [Sharing and Guest Mode](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/sharing_and_guest_mode.html) for more information about sharing and federated sharing features.
+See [here](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of relevant configuration options, as well as 
+[Federated Sharing](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/federated_sharing.html) for further details.
 
 
 ## Reseller Scope in Config-Cascade

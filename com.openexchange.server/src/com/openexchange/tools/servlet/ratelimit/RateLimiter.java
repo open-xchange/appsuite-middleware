@@ -343,7 +343,7 @@ public final class RateLimiter {
 
     private static final Set<String> LOCALS = ImmutableSet.of("localhost", "127.0.0.1", "::1");
 
-    private static final String LINE_SEP = System.getProperty("line.separator");
+    private static final String LINE_SEP = Strings.getLineSeparator();
     private static final long LAST_RATE_LIMIT_LOG_THRESHOLD = 60000L;
     private static final AtomicLong PROCESSED_REQUESTS = new AtomicLong();
 

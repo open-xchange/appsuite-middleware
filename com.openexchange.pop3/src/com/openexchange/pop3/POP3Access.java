@@ -52,7 +52,6 @@ package com.openexchange.pop3;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Properties;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -87,6 +86,7 @@ import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
 import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.pop3.util.POP3StorageUtil;
 import com.openexchange.session.Session;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -245,7 +245,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private POP3Access(final Session session) {
         super(session);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     /**
@@ -256,7 +256,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private POP3Access(final Session session, final int accountId) {
         super(session, accountId);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     @Override

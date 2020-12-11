@@ -318,7 +318,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * restore inherited/legator permission type from original folder's permissions as needed
              */
-            if ((false == folder instanceof PermissionTypeAwareFolder) && 
+            if ((false == folder instanceof PermissionTypeAwareFolder) &&
                 (storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) ||
                 (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
                 restorePermissionType(folder, storageFolder);
@@ -517,7 +517,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * Check permissions of anonymous guest users
          */
-        checkGuestPermissions(storageFolder, comparedPermissions);
+        checkGuestPermissions(storageFolder, comparedPermissions, transactionManager);
         /*
          * prepare new shares for added guest permissions
          */

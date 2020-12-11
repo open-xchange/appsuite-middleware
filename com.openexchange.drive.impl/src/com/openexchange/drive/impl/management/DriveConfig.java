@@ -103,6 +103,9 @@ public class DriveConfig {
     private Pattern excludedDirectoriesPattern;
     private int[] thumbnailImageSize;
     private int[] previewImageSize;
+    private String imageLinkDocumentFile;
+    private String imageLinkAudioFile;
+    private String imageLinkImageFile;
 
     /**
      * Initializes a new {@link DriveConfig}.
@@ -360,7 +363,10 @@ public class DriveConfig {
      * @return The imageLinkDocumentFile
      */
     public String getImageLinkDocumentFile() {
-        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_DOCUMENT_FILE);
+        if (null == imageLinkDocumentFile) {
+            imageLinkDocumentFile = getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_DOCUMENT_FILE);
+        }
+        return imageLinkDocumentFile;
     }
 
     /**
@@ -393,7 +399,10 @@ public class DriveConfig {
      * @return The imageLinkAudioFile
      */
     public String getImageLinkAudioFile() {
-        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_AUDIO_FILE);
+        if (null == imageLinkAudioFile) {
+            imageLinkAudioFile = getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_AUDIO_FILE);
+        }
+        return imageLinkAudioFile;
     }
 
     /**
@@ -404,7 +413,10 @@ public class DriveConfig {
      * @return The imageLinkImageFile
      */
     public String getImageLinkImageFile() {
-        return getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_IMAGE_FILE);
+        if (null == imageLinkImageFile) {
+            imageLinkImageFile = getConfigService().getProperty(userId, contextId, DriveProperty.IMAGE_LINK_IMAGE_FILE);
+        }
+        return imageLinkImageFile;
     }
 
     /**

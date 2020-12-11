@@ -69,6 +69,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestTrace;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -176,7 +177,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
          */
         Watcher(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
             super();
-            this.lineSeparator = System.getProperty("line.separator");
+            this.lineSeparator = Strings.getLineSeparator();
             this.requestRegistry = requestRegistry;
             this.requestMaxAge = requestMaxAge;
         }
@@ -278,7 +279,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         private boolean interrupt(StackTraceElement[] trace, RequestRegistryEntry entry) {
             /*-
             StackTraceElement traceElement = trace[0];
-            
+
             // Kept in socket read and exceeded doubled max. request age
             if (traceElement.isNativeMethod() && "socketRead0".equals(traceElement.getMethodName()) && entry.getAge() > (requestMaxAge << 1)) {
                 return true;

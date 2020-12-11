@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.internal.share;
 
 import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -82,12 +83,12 @@ public class CalendarModuleAdjuster implements ModuleAdjuster {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId, Connection connection) throws OXException {
         return adjustTarget(target);
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId, Connection connection) throws OXException {
         return adjustTarget(target);
     }
 

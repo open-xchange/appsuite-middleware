@@ -87,6 +87,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DefaultErrorAwareCalendarResult;
@@ -689,9 +690,14 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, merge, this);
             if (null != resultsForProvider && 0 < resultsForProvider.size()) {
                 for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsForProvider.entrySet()) {
+                    Attendee attendee = CalendarUtils.find(attendees, resultsForAttendee.getKey());
+                    if (null == attendee) {
+                        LOG.debug("Skipping unexpected attendee {} in free/busy results from provider {}", attendee, freeBusyProvider);
+                        continue;
+                    }
                     for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
                         FreeBusyResult result = withUniqueID(resultsForAccount.getValue(), i(resultsForAccount.getKey()));
-                        com.openexchange.tools.arrays.Collections.put(results, resultsForAttendee.getKey(), result);
+                        com.openexchange.tools.arrays.Collections.put(results, attendee, result);
                     }
                 }
             }

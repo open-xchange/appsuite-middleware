@@ -616,7 +616,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      */
     private void checkIdOrName(final ResellerAdmin adm) throws InvalidDataException {
         if (adm.getId() == null && adm.getName() == null) {
-            throw new InvalidDataException("either ID or name must be specified");
+            throw new InvalidDataException("Either ID or name must be specified");
         }
     }
 
