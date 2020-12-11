@@ -102,7 +102,7 @@ import com.openexchange.password.mechanism.PasswordDetails;
 
 /**
  * {@link OXResellerMySQLStorage}
- * 
+ *
  * @author choeger
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -303,7 +303,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             oxcon.commit();
             rollback = false;
 
-
             return adm;
         } catch (DataTruncation dt) {
             LOGGER.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -376,7 +375,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-            
+
             invalidateResellerCaches(adm.getId().intValue(), cids);
         } catch (DataTruncation dt) {
             LOGGER.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -626,6 +625,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
             }
 
+            invalidateResellerCaches(subadmin, ImmutableList.of(ctx.getId()));
+
             oxcon.commit();
             rollback = 2;
         } catch (DataTruncation dt) {
@@ -679,6 +680,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, adm.getId().intValue());
             prep.setInt(2, ctx.getId().intValue());
             prep.executeUpdate();
+
+            invalidateResellerCaches(adm.getId().intValue(), ImmutableList.of(ctx.getId()));
 
             oxcon.commit();
             rollback = 2;
@@ -754,6 +757,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = 2;
+
+            invalidateResellerCaches(subadminId, ImmutableList.of(ctx.getId()));
 
             return subadminId;
         } catch (DataTruncation dt) {
@@ -2485,7 +2490,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * Invalidates reseller cache regions
-     * 
+     *
      * @param resellerId The reseller identifier
      */
     private void invalidateResellerCaches(int resellerId) {
@@ -2493,7 +2498,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     /**
-     * 
+     *
      *
      * @param resellerId
      * @param contextIds
@@ -2519,12 +2524,12 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } catch (OXException e) {
             LOGGER.error("", e);
         }
-        
+
     }
 
     /**
      * Retrieves all configuration properties for the specified reseller admin
-     * 
+     *
      * @param adm The reseller admin
      * @param con The connection
      * @return The configuration map
@@ -2554,7 +2559,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * Retrieves all taxonomies for the specified reseller admin
-     * 
+     *
      * @param adm The reseller admin
      * @param con The connection
      * @return The taxonomies set
@@ -2585,7 +2590,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /**
      * Retrieves all capabilities for the specified reseller admin
-     * 
+     *
      * @param adm The reseller admin
      * @param con The connection
      * @return The capabilities set
