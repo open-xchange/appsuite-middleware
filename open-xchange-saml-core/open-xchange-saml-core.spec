@@ -55,12 +55,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     PFILE=/opt/open-xchange/etc/saml.properties
 
-    # SoftwareChange_Request-2673
-    ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
-
-    # SoftwareChange_Request-3548
-    ox_add_property com.openexchange.saml.allowUnsolicitedResponses true /opt/open-xchange/etc/saml.properties
-
     # SCR-678
     VALUE=$(ox_read_property com.openexchange.saml.enabled /opt/open-xchange/etc/saml.properties)
     if [ "false" = "${VALUE//[[:space:]]/}" ]; then
