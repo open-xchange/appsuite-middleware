@@ -138,7 +138,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         Assert.assertNull(applyPredefinedRule.getErrorDesc(), applyPredefinedRule.getError());
         Assert.assertNotNull(applyPredefinedRule.getData());
         applyPredefinedRule.getData().stream().forEach(result -> assertNull("Expected no error but found: " + result.getErrors(), result.getErrors()));
-        Assert.assertEquals("Invalid size of results", 1, applyPredefinedRule.getData().size());
+        Assert.assertEquals("Invalid size of results: " + applyPredefinedRule.getData().toString(), 1, applyPredefinedRule.getData().size());
         applyPredefinedRule.getData().stream().forEach(m -> assertEquals(ResultEnum.OK, m.getResult()));
         // Check one mail is properly marked as deleted
         allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);

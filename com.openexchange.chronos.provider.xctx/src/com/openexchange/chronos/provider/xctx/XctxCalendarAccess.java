@@ -58,14 +58,17 @@ import static com.openexchange.chronos.provider.xctx.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.xctx.Constants.TREE_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.dmfs.rfc5545.DateTime;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -78,6 +81,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -103,6 +107,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -385,6 +390,39 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         warnings.addAll(guestSessionWarnings);
         warnings.addAll(thisWarnings);
         return warnings;
+    }
+
+    /**
+     * Gets free/busy information in a certain interval for one ore more attendees.
+     * <p/>
+     * Optionally, the resulting data is pre-processed and sorted by time, so that any overlapping intervals each of the attendee's
+     * free/busy time are merged implicitly to the most conflicting busy times.
+     *
+     * @param attendees The attendees to get the free/busy data for
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
+     * @return The free/busy times for each of the requested attendees, wrapped within a free/busy result structure
+     */
+    public Map<Attendee, FreeBusyResult> getFreeBusy(List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
+        List<Attendee> unmangledAttendees = entityHelper.unmangleLocalAttendees(attendees);
+        Map<Attendee, FreeBusyResult> result = guestSession.getFreeBusyService().getFreeBusy(guestSession, unmangledAttendees, from, until, merge);
+        if (null == result || result.isEmpty()) {
+            return result;
+        }
+        Map<Attendee, FreeBusyResult> mangledResult = new HashMap<Attendee, FreeBusyResult>(result.size());
+        for (Entry<Attendee, FreeBusyResult> entry : result.entrySet()) {
+            /*
+             * attendee may have been resolved to internal user in remote context; check
+             */
+            Attendee attendee = CalendarUtils.find(attendees, entityHelper.mangleRemoteAttendee(entry.getKey()));
+            if (null == attendee) {
+                LOG.debug("Skipping unexpected attendee {} in free/busy results from account {}", attendee, I(account.getAccountId()));
+                continue;
+            }
+            mangledResult.put(attendee, entry.getValue());
+        }
+        return mangledResult;
     }
 
     private List<CalendarFolder> getVisibleFolders(boolean all) throws OXException {

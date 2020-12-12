@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.UUID;
@@ -85,30 +86,27 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         ApiClient client = getApiClient();
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
+        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
         infostoreRoot = folderManager.findInfostoreRoot();
 
+        // @formatter:off
         /*
          * Create the following folder structure:
          * root
-         * - A
-         * - B
-         * - C
-         * - D
-         * - E
+         *  - A
+         *    - B
+         *      - C
+         *  - D
+         *    - E
          */
+        // @formatter:on
         A = folderManager.createFolder(infostoreRoot, "A_" + UUID.randomUUID(), INFOSTORE);
         D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), INFOSTORE);
 
         B = folderManager.createFolder(A, "B_" + UUID.randomUUID(), INFOSTORE);
         C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), INFOSTORE);
         E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), INFOSTORE);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        folderManager.cleanUp();
     }
 
     @Test
@@ -233,8 +231,8 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
      */
     private void checkFolderPermissions(String folderId, int permSize, int extendedPermSize, Integer... optGuestIds) throws ApiException {
         FolderData folder = folderManager.getFolder(folderId);
-        assertTrue(folder.getPermissions().size() == permSize);
-        assertTrue(folder.getComOpenexchangeShareExtendedPermissions().size() == extendedPermSize);
+        assertEquals("Unexpected permission size", permSize, folder.getPermissions().size());
+        assertEquals("Unexpected extended permission size", extendedPermSize, folder.getComOpenexchangeShareExtendedPermissions().size());
         if (optGuestIds != null) {
             for (Integer guestId : optGuestIds) {
                 checkExtendedPermission(folder, guestId, true);

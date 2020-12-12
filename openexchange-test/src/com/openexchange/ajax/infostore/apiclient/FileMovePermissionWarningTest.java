@@ -134,7 +134,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     private Integer userId1;
     private Integer userId2;
     private Integer userId3;
-    private List<String> foldersToDelete;
 
     @Override
     @Before
@@ -149,18 +148,11 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         userId3 = apiClient3.getUserId();
 
         folderManager = new FolderManager(new FoldersApi(getApiClient()), "1");
+        remember(folderManager);
         folderManager2 = new FolderManager(new FoldersApi(getApiClient2()), "1");
-        foldersToDelete = new ArrayList<String>();
+        remember(folderManager2);
 
         file = File.createTempFile("FileMovePermissionWarningTest", ".txt");
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        for (String folder : foldersToDelete) {
-            deleteFolder(folder, Boolean.TRUE);
-        }
-        super.tearDown();
     }
 
     /**
@@ -595,7 +587,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         FolderPermission p = createPermissionFor(I(0), BITS_REVIEWER, Boolean.TRUE);
         perm.add(p);
         String id = folderManager.createFolder(SHARED_FOLDER_ID, "FileMovePermissionWarningTest" + UUID.randomUUID().toString(), perm);
-        foldersToDelete.add(id);
         return id;
     }
 
@@ -606,7 +597,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         FolderPermission p2 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
         perm.add(p2);
         String id = folderManager2.createFolder(getPrivateInfostoreFolder(getApiClient2()), "FolderPermissionTest_" + UUID.randomUUID().toString(), perm);
-        foldersToDelete.add(id);
         return id;
     }
 
@@ -615,8 +605,16 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     }
 
     private Object[] getFileWarningArguments(String fileId, String sourceFolderId, String destinationFolderId, FolderType sourceType, FolderType destinationType) throws ApiException {
-        String sourceFolderPath = sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") + (sourceType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") + folderManager.getFolderName(sourceFolderId);
-        String destinationFolderPath = destinationType.getRootPath() + (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") + (destinationType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") + folderManager.getFolderName(destinationFolderId);
+        // @formatter:off
+        String sourceFolderPath = sourceType.getRootPath() +
+                                 (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                 (sourceType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
+                                 folderManager.getFolderName(sourceFolderId);
+        String destinationFolderPath = destinationType.getRootPath() +
+                                      (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                      (destinationType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
+                                      folderManager.getFolderName(destinationFolderId);
+        // @formatter:on
         Object[] args = { file.getName(), sourceFolderPath, destinationFolderPath, fileId, destinationFolderId };
         return args;
     }

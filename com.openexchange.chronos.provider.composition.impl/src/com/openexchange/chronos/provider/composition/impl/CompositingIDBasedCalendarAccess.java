@@ -138,6 +138,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -685,26 +686,28 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         if (freeBusyProviders.isEmpty()) {
             return Collections.emptyMap();
         }
-        Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>();
-        for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
-            Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, merge, this);
-            if (null != resultsForProvider && 0 < resultsForProvider.size()) {
-                for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsForProvider.entrySet()) {
-                    Attendee attendee = CalendarUtils.find(attendees, resultsForAttendee.getKey());
-                    if (null == attendee) {
-                        LOG.debug("Skipping unexpected attendee {} in free/busy results from provider {}", attendee, freeBusyProvider);
-                        continue;
-                    }
-                    for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
-                        FreeBusyResult result = withUniqueID(resultsForAccount.getValue(), i(resultsForAccount.getKey()));
-                        com.openexchange.tools.arrays.Collections.put(results, attendee, result);
-                    }
-                }
+        Map<Attendee, List<FreeBusyResult>> results;
+        if (1 == freeBusyProviders.size()) {
+            results = queryFreeBusy(freeBusyProviders.get(0), attendees, from, until, merge);
+        } else {
+            CompletionService<Map<Attendee, List<FreeBusyResult>>> completionService = getCompletionService();
+            for (FreeBusyProvider freeBusyProvider : freeBusyProviders) {
+                completionService.submit(() -> queryFreeBusy(freeBusyProvider, attendees, from, until, merge));
             }
+            results = collectFreeBusyResults(completionService, freeBusyProviders.size());
         }
-        Map<Attendee, FreeBusyResult> combinedResults = new HashMap<Attendee, FreeBusyResult>(results.size());
-        for (Entry<Attendee, List<FreeBusyResult>> entry : results.entrySet()) {
-            combinedResults.put(entry.getKey(), merge ? FreeBusyUtils.merge(entry.getValue()) : FreeBusyUtils.combine(entry.getValue()));
+        /*
+         * build combined results, maintaining client-supplied order of attendees
+         */
+        Map<Attendee, FreeBusyResult> combinedResults = new LinkedHashMap<Attendee, FreeBusyResult>(results.size());
+        for (Attendee attendee : attendees) {
+            List<FreeBusyResult> freeBusyResults = results.get(attendee);
+            if (null == freeBusyResults) {
+                OXException e = CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), Autoboxing.I(attendee.getEntity()), attendee.getCuType());
+                combinedResults.put(attendee, new FreeBusyResult(null, Collections.singletonList(e)));
+            } else {
+                combinedResults.put(attendee, merge ? FreeBusyUtils.merge(freeBusyResults) : FreeBusyUtils.combine(freeBusyResults));
+            }
         }
         return combinedResults;
     }
@@ -965,6 +968,57 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     /**
+     * Performs a free/busy time lookup for a list of attendees using a specific free/busy provider. Potential errors are placed in the
+     * results as warnings implicitly.
+     *
+     * @param provider The provider to use
+     * @param attendees The queried attendees
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
+     * @return The free/busy results per attendee, already adjusted to contains unqiue composite identifiers
+     */
+    private Map<Attendee, List<FreeBusyResult>> queryFreeBusy(FreeBusyProvider provider, List<Attendee> attendees, Date from, Date until, boolean merge) {
+        if (null == attendees || attendees.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        /*
+         * query free/busy data
+         */
+        Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>(attendees.size());
+        Map<Attendee, Map<Integer, FreeBusyResult>> resultsInAccounts;
+        try {
+            resultsInAccounts = provider.query(session, attendees, from, until, merge, this);
+        } catch (OXException e) {
+            /*
+             * create appropriate error result
+             */
+            FreeBusyResult errorResult = new FreeBusyResult(Collections.emptyList(), Collections.singletonList(e));
+            for (Attendee attendee : attendees) {
+                results.put(attendee, Collections.singletonList(errorResult));
+            }
+            return results;
+        }
+        /*
+         * collect results for attendee from all accounts, enhanced by fully qualified identifiers
+         */
+        if (null != resultsInAccounts && 0 < resultsInAccounts.size()) {
+            for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsInAccounts.entrySet()) {
+                Attendee attendee = CalendarUtils.find(attendees, resultsForAttendee.getKey());
+                if (null == attendee) {
+                    LOG.debug("Skipping unexpected attendee {} in free/busy results from provider {}", attendee, provider);
+                    continue;
+                }
+                for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
+                    FreeBusyResult result = withUniqueID(resultsForAccount.getValue(), i(resultsForAccount.getKey()));
+                    com.openexchange.tools.arrays.Collections.put(results, attendee, result);
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
      * Takes a specific number of event list results from the completion service, and adds them to a single resulting, sorted list of
      * events.
      *
@@ -988,6 +1042,27 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             Check.resultSizeNotExceeded(getSelfProtection(), results, get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+        }
+        return results;
+    }
+
+    private Map<Attendee, List<FreeBusyResult>> collectFreeBusyResults(CompletionService<Map<Attendee, List<FreeBusyResult>>> completionService, int count) throws OXException {
+        Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>();
+        for (int i = 0; i < count; i++) {
+            try {
+                for (Entry<Attendee, List<FreeBusyResult>> entry : completionService.take().get().entrySet()) {
+                    com.openexchange.tools.arrays.Collections.put(results, entry.getKey(), entry.getValue());
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (null != cause && OXException.class.isInstance(e.getCause())) {
+                    throw (OXException) cause;
+                }
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
         return results;
     }

@@ -685,21 +685,61 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     public Set<String> getCapabilities(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             doNullCheck(LOGGER, credentials, admin);
+
+            ResellerAdmin parent = null;
+            Credentials masterCredentials = cache.getMasterCredentials();
+            boolean isMaster = false;
+            if (null != masterCredentials && masterCredentials.getLogin().equals(credentials.getLogin())) {
+                basicauth.doAuthentication(credentials);
+                isMaster = true;
+            } else {
+                resellerauth.doAuthentication(credentials);
+                parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(credentials.getLogin(), credentials.getPassword()) })[0];
+                if (admin.getParentId() != null) {
+                    throw new OXResellerException(Code.SUBADMIN_IS_NOT_AUTHORIZED_TO_LIST_DATA);
+                }
+            }
+
             checkIdOrName(admin);
             if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
             }
-
-            resellerauth.doAuthentication(credentials);
-            ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { admin });
-            Set<String> c = new HashSet<>();
-            for (ResellerAdmin d : data) {
-                c.addAll(d.getCapabilities());
+            
+            if (isMaster || null == parent || parent.getId().equals(admin.getId())) {
+                return getCapabilities(admin);
             }
-            return c;
+            
+            GenericChecks.checkChangeValidPasswordMech(admin);
+            ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
+            if (false == dbAdmin.getParentId().equals(parent.getId())) {
+                LOGGER.error("Unathorized access to {} by {}", dbAdmin.getName(), credentials.getLogin());
+                throw new InvalidCredentialsException("Authentication failed");
+            }
+            // if no password mech supplied, use the old one as set in db
+            if (admin.getPasswordMech() == null) {
+                admin.setPasswordMech(dbAdmin.getPasswordMech());
+            }
+
+            return getCapabilities(admin);
         } catch (Throwable e) {
             enhanceAndLogException(e, credentials);
             throw e;
         }
+    }
+
+    /**
+     * Returns the capabilities for the specified admin
+     *
+     * @param admin
+     * @return The capabilities
+     * @throws StorageException
+     */
+    private Set<String> getCapabilities(ResellerAdmin admin) throws StorageException {
+        ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { admin });
+        Set<String> c = new HashSet<>();
+        for (ResellerAdmin d : data) {
+            c.addAll(d.getCapabilities());
+        }
+        return c;
     }
 }

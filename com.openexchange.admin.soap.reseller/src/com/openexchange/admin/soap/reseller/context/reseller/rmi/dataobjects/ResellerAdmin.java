@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import com.openexchange.admin.soap.reseller.service.soap.dataobjects.SOAPStringMap;
+import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SOAPStringMap;
 
 /**
  * <p>SOAP mapping class for ResellerAdmin complex type.

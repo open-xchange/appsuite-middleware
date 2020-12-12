@@ -359,7 +359,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Check expected output format
-        if (isJsonResponseExpected(req, true) || Dispatchers.isApiOutputExpectedFor(req)) {
+        if (isJsonResponseExpected(req, false) || Dispatchers.isApiOutputExpectedFor(req)) {
             // First, try to obtain the writer
             PrintWriter writer = getWriterFrom(resp, false);
 

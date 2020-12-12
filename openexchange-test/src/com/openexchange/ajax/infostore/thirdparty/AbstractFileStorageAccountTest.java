@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.thirdparty;
 
+import static java.lang.Boolean.TRUE;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
@@ -75,8 +76,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -84,11 +85,9 @@ import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
 import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
 import com.openexchange.testing.httpclient.models.FileAccountsResponse;
-import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderResponse;
-import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersCleanUpResponse;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
@@ -96,8 +95,6 @@ import com.openexchange.testing.httpclient.models.InfoItemResponse;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemsResponse;
-import com.openexchange.testing.httpclient.models.NewFolderBody;
-import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
@@ -112,6 +109,7 @@ import com.openexchange.testing.httpclient.modules.InfostoreApi;
 public abstract class AbstractFileStorageAccountTest extends AbstractConfigAwareAPIClientSession {
 
     private String privateInfostoreFolder;
+    private FolderManager folderManager;
 
     protected FilestorageApi filestorageApi;
     protected InfostoreApi infostoreApi;
@@ -131,7 +129,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         }
     }
 
-    protected final byte[] testContent = "This is a test content".getBytes();;
+    protected final byte[] testContent = "This is a test content".getBytes();
 
     /**
      * Returns the ID of the account's root folder to test
@@ -167,18 +165,23 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
         infostoreApi = new InfostoreApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
         configApi = new ConfigApi(getApiClient());
+        folderManager = new FolderManager(foldersApi, "0");
     }
 
     @After
     @Override
     public void tearDown() throws Exception {
         try {
-            //Cleanup: Delete the created FileAccount
-            FileAccountData accountToClean = getAccountData();
-            if (accountToClean != null && accountToClean.getId() != null) {
-                FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(accountToClean.getFilestorageService(), accountToClean.getId());
-                Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-                Assert.assertThat(responseData, is(I(1)));
+            try {
+                folderManager.cleanUp();
+            } finally {
+                //Cleanup: Delete the created FileAccount
+                FileAccountData accountToClean = getAccountData();
+                if (accountToClean != null && accountToClean.getId() != null) {
+                    FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(accountToClean.getFilestorageService(), accountToClean.getId());
+                    Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+                    Assert.assertThat(responseData, is(I(1)));
+                }
             }
         } finally {
             super.tearDown();
@@ -356,44 +359,35 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws ApiException
      */
     protected FolderData createFolder(String parentFolder, String title) throws ApiException {
-        return createFolder(this.foldersApi, parentFolder, title, null);
+        return createFolder(this.folderManager, parentFolder, title, null);
     }
 
     /**
      * Creates a folder
      *
-     * @param foldersApi the FoldersApi to use
+     * @param folderManager The {@link FolderManager} to use
      * @param parentFolder The parent folder of the new folder
      * @param title The title of the new folder
      * @return The data for the new folder
      * @throws ApiException
      */
-    protected FolderData createFolder(FoldersApi foldersApi, String parentFolder, String title) throws ApiException {
-        return createFolder(foldersApi, parentFolder, title, null);
+    protected FolderData createFolder(FolderManager folderManager, String parentFolder, String title) throws ApiException {
+        return createFolder(folderManager, parentFolder, title, null);
     }
 
     /**
      * Creates a folder
      *
-     * @param foldersApi The FoldersApi to use
+     * @param folderManager The {@link FolderManager} to use
      * @param parentFolder The parent folder of the new folder
      * @param title The title of the new folder
      * @param permissions The permissions to set
      * @return The data for the new folder
      * @throws ApiException
      */
-    protected FolderData createFolder(FoldersApi foldersApi, String parentFolder, String title, List<FolderPermission> permissions) throws ApiException {
-        NewFolderBody body = new NewFolderBody();
-        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setModule(Module.INFOSTORE.getName());
-        folder.setTitle(title);
-        folder.setId(title);
-        folder.setPermissions(permissions);
-        body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(parentFolder, body, null, null, null, null);
-
-        String folderId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-        return getFolder(foldersApi, folderId);
+    protected FolderData createFolder(FolderManager folderManager, String parentFolder, String title, List<FolderPermission> permissions) throws ApiException {
+        String folderId = folderManager.createFolder(parentFolder, title, permissions);
+        return folderManager.getFolder(folderId);
     }
 
     /**
@@ -674,7 +668,6 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     }
 
     /**
-     *
      * Tests to move a folder into another folder
      *
      * @throws Exception
@@ -682,26 +675,20 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     @Test
     public void testMoveFolder() throws Exception {
 
-        //Create a folder
+        // Create a folder
         FolderData folder = createFolder(getRootFolderId(), getRandomFolderName());
 
-        //Create a 2nd folder
+        // Create a 2nd folder
         FolderData newFolder2 = createFolder(getRootFolderId(), getRandomFolderName());
 
-        //Move the 2nd folder into the first one
-        FolderBody folderBody = new FolderBody();
-        FolderData folderData = new FolderData();
-        folderData.setFolderId(folder.getId());
-        folderBody.setFolder(folderData);
-        final Boolean ignoreWarnings = Boolean.TRUE;
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(newFolder2.getId(), folderBody, null, null, null, null, null, null, null, ignoreWarnings);
-        String movedFolderId = updateResponse.getData();
+        // Move the 2nd folder into the first one
+        String movedFolderId = folderManager.moveFolder(newFolder2.getId(), folder.getId(), TRUE);
 
-        //Folder present?
+        // Folder present?
         FolderResponse checkResponse = foldersApi.getFolder(movedFolderId, null, null, null);
         FolderData checkedFolderData = checkResponse(checkResponse.getError(), checkResponse.getErrorDesc(), checkResponse.getData());
         assertThat(checkedFolderData.getId(), is(movedFolderId));
-        //Check that the folder has the new parent folder set
+        // Check that the folder has the new parent folder set
         assertThat(checkedFolderData.getFolderId(), is(folder.getId()));
 
         final boolean hardDelete = true;
