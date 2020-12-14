@@ -68,7 +68,6 @@ import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -255,20 +254,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             final boolean ignoreSeen = req.optBool("unseen");
             final boolean ignoreDeleted = getIgnoreDeleted(req, false);
             final boolean filterApplied = (ignoreSeen || ignoreDeleted);
-            if (filterApplied) {
-                // Ensure flags is contained in provided columns
-                final int fieldFlags = MailListField.FLAGS.getField();
-                boolean found = false;
-                for (int i = 0; !found && i < columns.length; i++) {
-                    found = fieldFlags == columns[i];
-                }
-                if (!found) {
-                    final int[] tmp = columns;
-                    columns = new int[columns.length + 1];
-                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
-                    columns[tmp.length] = fieldFlags;
-                }
-            }
             columns = prepareColumns(columns);
             /*
              * Get mail interface
@@ -301,7 +286,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     SearchTerm<?> searchTerm;
                     {
                         SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                        SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted) : null;
+                        SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, false) : null;
                         searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                         // Check if mail categories are enabled
