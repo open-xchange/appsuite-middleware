@@ -3105,8 +3105,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             filteredFolders = null;
 
             // Check for special folders (personal, trash, documents, music, pictures, videos, ...)
+            Locale locale = storageParameters.getUser().getLocale();
             if (specialFolders.length > 0) {
-                Locale locale = storageParameters.getUser().getLocale();
                 String lowerCaseQuery = query.toLowerCase(locale);
                 for (int specialFolderId : specialFolders) {
                     if (ids.add(specialFolderId)) {
@@ -3125,12 +3125,39 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
             specialFolders = null;
 
+            if (1 < result.size()) {
+                Collections.sort(result, new FolderComparator(locale));
+            }
+
             return result;
         } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             provider.close();
         }
+    }
+
+    private static final class FolderComparator implements Comparator<Folder> {
+
+        private final Locale locale;
+        private final Collator collator;
+
+        /**
+         * Initializes a new {@link FolderComparator}.
+         *
+         * @param locale The locale to use, or <code>null</code> to fall back to the default locale
+         */
+        public FolderComparator(Locale locale) {
+            super();
+            this.locale = locale;
+            collator = Collators.getSecondaryInstance(null == locale ? Locale.US : locale);
+        }
+
+        @Override
+        public int compare(Folder folder1, Folder folder2) {
+            return collator.compare(folder1.getLocalizedName(locale), folder2.getLocalizedName(locale));
+        }
+
     }
 
     /**
