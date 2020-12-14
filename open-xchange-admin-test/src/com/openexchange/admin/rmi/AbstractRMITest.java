@@ -101,7 +101,7 @@ public abstract class AbstractRMITest {
     protected User contextAdmin;
 
     @Rule
-    public Timeout globalTimeout = new Timeout(30, TimeUnit.SECONDS); // 30 seconds max per method tested
+    public Timeout globalTimeout = new Timeout(3000, TimeUnit.SECONDS); // 30 seconds max per method tested
 
     /**
      * Initialises the test configuration and creates one context for the tests
@@ -131,6 +131,7 @@ public abstract class AbstractRMITest {
         getMaintenanceReasonManager().cleanUp();
     }
 
+    @SuppressWarnings("unused")
     @Before
     public void setUp() throws Exception {
         contextAdminCredentials = getContextAdminCredentials();

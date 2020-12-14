@@ -383,6 +383,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if (oxresell.ownsContext(null, dbadm.getId().intValue())) {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE, dbadm.getId().toString());
             }
+            
+            ResellerAdmin[] list = oxresell.list("*", i(adm.getId()));
+            if (list.length != 0) {
+                throw new OXResellerException(Code.UNABLE_TO_DELETE_OWNS_SUBADMINS, dbadm.getId().toString());
+            }
 
             dbadm.setParentName(parent.isPresent() ? parent.get().getName() : null);
 

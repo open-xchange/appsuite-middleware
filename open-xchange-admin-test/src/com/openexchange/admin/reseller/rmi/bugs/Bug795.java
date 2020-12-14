@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,55 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.reseller.rmi.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.reseller.rmi.AdminResellerRmiTestSuite;
-import com.openexchange.admin.rmi.AdditionalRMITests;
-import com.openexchange.admin.rmi.Bug16865Test;
-import com.openexchange.admin.rmi.Bug19379Test;
-import com.openexchange.admin.rmi.Bug27065Test;
-import com.openexchange.admin.rmi.Bug62360Test;
-import com.openexchange.admin.rmi.ContextTest;
-import com.openexchange.admin.rmi.GroupTest;
-import com.openexchange.admin.rmi.PermissionCapabilityTest;
-import com.openexchange.admin.rmi.ResourceTest;
-import com.openexchange.admin.rmi.UserTest;
-import com.openexchange.admin.rmi.UtilDatabaseTest;
-import com.openexchange.admin.rmi.UtilTest;
-import com.openexchange.admin.user.copy.rmi.UserCopyTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import com.openexchange.admin.reseller.rmi.AbstractOXResellerTest;
+import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
+import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 
 /**
- * {@link AdminRMITestSuite}
+ * {@link Bug795}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @since v7.10.5
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    //@formatter:off
-    AdminResellerRmiTestSuite.class,
-    AdditionalRMITests.class,
-    Bug16865Test.class,
-    Bug19379Test.class,
-    Bug27065Test.class,
-    Bug62360Test.class,
-    ContextTest.class,
-    GroupTest.class,
-    ResourceTest.class,
-    UtilDatabaseTest.class,
-    UtilTest.class,
-    UserCopyTest.class,
-    UserTest.class,
-    PermissionCapabilityTest.class
-    //@formatter:on
-})
-public class AdminRMITestSuite {
+public class Bug795 extends AbstractOXResellerTest {
 
+    private static final String ERROR_MESSAGE = "Unable to delete %1$s, still owns Subadmin(s)";
+
+    /**
+     * Initializes a new {@link Bug795}.
+     */
+    public Bug795() {
+        super();
+    }
+
+    @Test
+    public void testDeleteSubadminThatStillOwnsSubsubAdmins() throws Exception {
+        ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin("reseller-mwb-795");
+        adm.setRestrictions(new Restriction[] { CanCreateSubAdmin() });
+
+        ResellerAdmin admin = getResellerManager().create(adm);
+        ResellerAdmin subAdmin = getResellerManager().create(admin, ResellerAdminFactory.createResellerAdmin("subreseller-mwb-795"));
+
+        try {
+            getResellerManager().delete(admin);
+            fail("The parent admin should not be deletable when there are subadmins bound to the parent.");
+        } catch (Exception e) {
+            // Expected
+            assertTrue("Unexpected error", e instanceof OXResellerException);
+            String expected = String.format(ERROR_MESSAGE, admin.getId());
+            String actual = String.format(OXResellerException.Code.UNABLE_TO_DELETE_OWNS_SUBADMINS.getText(), admin.getId());
+            assertEquals("Wrong message", expected, actual);
+        }
+
+        getResellerManager().delete(subAdmin);
+        getResellerManager().delete(admin);
+    }
 }
