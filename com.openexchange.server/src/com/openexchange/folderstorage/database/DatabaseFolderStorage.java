@@ -2216,7 +2216,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     private void inheritFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis, boolean mergePermissions) throws OXException {
         // Only merge/inherit permission for infostore folders
-        if (folder.getModule() != FolderObject.INFOSTORE) {
+        if (parent.getModule() != FolderObject.INFOSTORE) {
             return;
         }
         if (mergePermissions) {
