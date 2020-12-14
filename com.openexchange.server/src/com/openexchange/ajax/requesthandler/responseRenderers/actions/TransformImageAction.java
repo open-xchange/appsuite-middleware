@@ -245,6 +245,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 } else {
                     ret = new FileHolder(inputStm, cachedResource.getSize(), cachedMimeType, cachedResource.getFileName());
                 }
+
+                LOG.debug("Returning cached image (MW)");
             }
         }
 
@@ -360,6 +362,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
         if (transformParams.isCompress()) {
             transformations.compress();
         }
+
+        LOG.debug("Returning transformed image (MW)");
 
         // return transformed image
         return transformations.getTransformedImage(transformParams.getImageType().getShortName());
@@ -503,8 +507,12 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
                 if (resultFile != repetitiveFile) {
                     Streams.close(repetitiveFile);
+                } else {
+                    LOG.debug("Returning original image (MW)");
                 }
             }
+        } else {
+            LOG.debug("Returning original image (MW)");
         }
 
         return resultFile;
