@@ -93,7 +93,7 @@ case "$BNAME" in
     "updaterestrictions")
     ACTION="UpdateRestrictions"
     ;;
-	"getresellercapabilities")
+    "getresellercapabilities")
     ACTION="GetResellerCapabilities"
     ;;
 esac
