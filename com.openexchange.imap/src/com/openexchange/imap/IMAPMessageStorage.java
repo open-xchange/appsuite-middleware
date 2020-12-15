@@ -2027,7 +2027,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
-            MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
+            MailFields effectiveFields = new MailFields(mailFields);
             prepareMailFieldsForVirtualFolder(effectiveFields, fullName, session);
             SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
             MailMessage[] mailMessages;
@@ -2082,16 +2082,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private boolean searchViaIMAP(MailFields fields) throws MessagingException {
-        int msgCount = imapFolder.getMessageCount();
-        if (fields.contains(MailField.BODY) || fields.contains(MailField.FULL)) {
-            if (imapConfig.forceImapSearch() || (msgCount >= getIMAPProperties().getMailFetchLimit())) {
+        if (!fields.contains(MailField.BODY) && !fields.contains(MailField.FULL)) {
+            if (imapConfig.isImapSearch()) {
                 return true;
             }
-        } else {
-            return imapConfig.isImapSearch() || (msgCount >= getIMAPProperties().getMailFetchLimit());
+
+            int msgCount = imapFolder.getMessageCount();
+            return (msgCount >= getIMAPProperties().getMailFetchLimit());
         }
 
-        return false;
+        if (imapConfig.forceImapSearch()) {
+            return true;
+        }
+
+        int msgCount = imapFolder.getMessageCount();
+        return (msgCount >= getIMAPProperties().getMailFetchLimit());
     }
 
     private MailMessage[] performIMAPSearch(MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailFields fields, IndexRange indexRange, String[] headerNames, int messageCount) throws MessagingException, OXException {
@@ -2148,9 +2153,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // Check for special sort field
+        fields = prepareMailFieldsForSearch(fields, sortField);
         if (hasSort && MailSortField.isFlagSortField(sortField) && null == searchTerm) {
-
-
             int[] seqNumsToFetch = getSeqNumsToFetch(sortField, order, indexRange, fallbackOnFailedSORT);
             if (seqNumsToFetch == null) {
                 // no messages with the given flag

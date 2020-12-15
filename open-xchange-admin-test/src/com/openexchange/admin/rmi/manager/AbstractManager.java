@@ -167,6 +167,6 @@ abstract class AbstractManager {
      * @throws Exception if an error is occurred during RMI look-up
      */
     OXUtilInterface getUtilInterface() throws Exception {
-        return (OXUtilInterface) getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
+        return getRemoteInterface(OXUtilInterface.RMI_NAME, OXUtilInterface.class);
     }
 }

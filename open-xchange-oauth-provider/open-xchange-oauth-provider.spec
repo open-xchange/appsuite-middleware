@@ -49,7 +49,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %config(noreplace) /opt/open-xchange/etc/hazelcast/authcode.properties
-%config(noreplace) /opt/open-xchange/etc/oauth-provider.properties
 
 %changelog
 * Fri Nov 27 2020 Steffen Templin <steffen.templin@open-xchange.com>

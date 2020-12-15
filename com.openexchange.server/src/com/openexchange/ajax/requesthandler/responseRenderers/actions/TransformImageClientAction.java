@@ -158,6 +158,7 @@ public class TransformImageClientAction extends TransformImageAction {
                 final InputStream imageInputStm = imageClient.getImage(icCacheKey, requestFormatString, Integer.toString(session.getContext().getContextId()));
 
                 if (null != imageInputStm) {
+                    LOG.debug("Returning cached image (IC)");
                     return new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), icCacheKey);
                 }
             } catch (ImageConverterException e) {
@@ -195,6 +196,7 @@ public class TransformImageClientAction extends TransformImageAction {
                                 imageData.setName(icCacheKey);
                                 BasicTransformedImage ret = new FileHolderBasicTransformedImage(imageData, xformParams);
                                 imageData = null; // Avoid premature closing
+                                LOG.debug("Returning transformed image (IC)");
                                 return ret;
                             } finally {
                                 Streams.close(imageData);

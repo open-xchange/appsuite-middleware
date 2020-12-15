@@ -306,6 +306,22 @@ public final class StorageUtility {
     }
 
     /**
+     * Gets the prepared mail fields for search.
+     *
+     * @param mailFields The requested mail fields by client
+     * @param sortField The sort field
+     * @return The prepared mail fields for search
+     */
+    public static MailFields prepareMailFieldsForSearch(MailFields mailFields, MailSortField sortField) {
+        final MailFields usedFields = new MailFields(mailFields);
+        usedFields.add(MailField.toField(sortField.getListField()));
+
+        // Second-level sort field
+        usedFields.add(MailField.RECEIVED_DATE);
+        return usedFields;
+    }
+
+    /**
      * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
      * <p>
      * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
