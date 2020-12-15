@@ -111,7 +111,7 @@ public final class FolderMapManagement {
      */
     private FolderMapManagement() {
         super();
-        cache = CacheBuilder.newBuilder().initialCapacity(64).maximumSize(5000).build();
+        cache = CacheBuilder.newBuilder().initialCapacity(64).expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
     /**
@@ -186,7 +186,7 @@ public final class FolderMapManagement {
             final Integer us = Integer.valueOf(userId);
             FolderMap folderMap = contextMap.get(us);
             if (null == folderMap) {
-                final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS, userId, contextId);
+                final FolderMap newFolderMap = new FolderMap(300, TimeUnit.SECONDS, userId, contextId);
                 folderMap = contextMap.putIfAbsent(us, newFolderMap);
                 if (null == folderMap) {
                     folderMap = newFolderMap;
