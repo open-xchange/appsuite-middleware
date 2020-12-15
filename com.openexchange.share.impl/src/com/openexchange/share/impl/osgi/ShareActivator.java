@@ -219,7 +219,8 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
         registerService(ShareSubscriptionProvider.class, new ContextInternalSubscriptionProvider(this));
         XctxSessionCache xctxSessionCache = new XctxSessionCache(this);
-        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_REMOVE_SESSION));
+        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
+            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
         registerService(XctxSessionManager.class, xctxSessionCache);
 
         trackService(ModuleSupport.class);

@@ -83,7 +83,8 @@ public class ApiClientActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         ApiClientServiceImpl apiClientService = new ApiClientServiceImpl(this);
         registerService(ApiClientService.class, apiClientService);
-        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_REMOVE_SESSION));
+        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
+            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
         registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
     }
 
