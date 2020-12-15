@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import com.google.common.cache.CacheBuilder;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.config.cascade.BasicProperty;
@@ -67,36 +68,35 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class PropertyMap {
 
-    private final ConcurrentMap<String, Wrapper> map;
+    private final com.google.common.cache.Cache<String, Wrapper> map;
     private final int maxLifeMillis;
 
     /**
      * Initializes a new {@link PropertyMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
      */
-    public PropertyMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
+    public PropertyMap(int maxLifeUnits, final TimeUnit unit) {
         super();
-        map = new ConcurrentLinkedHashMap.Builder<String, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
+        map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
     }
 
     /**
      * Initializes a new {@link PropertyMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
-    public PropertyMap(final int maxCapacity, final int maxLifeMillis) {
-        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
+    public PropertyMap(int maxLifeMillis) {
+        this(maxLifeMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Removes elapsed entries from map.
      */
     public void shrink() {
+        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final List<String> removeKeys = new ArrayList<String>(16);
         final long minStamp = System.currentTimeMillis() - maxLifeMillis;
         for (final Entry<String, Wrapper> entry : map.entrySet()) {
@@ -116,6 +116,7 @@ public final class PropertyMap {
      * @return The property
      */
     public BasicProperty putIfAbsent(final String propertyName, final BasicProperty property) {
+        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = wrapperOf(property);
         Wrapper prev = map.putIfAbsent(propertyName, wrapper);
         if (null == prev) {
@@ -143,7 +144,7 @@ public final class PropertyMap {
      * @return The size
      */
     public int size() {
-        return map.size();
+        return (int) map.size();
     }
 
     /**
@@ -152,7 +153,7 @@ public final class PropertyMap {
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
-        return map.isEmpty();
+        return size() <= 0;
     }
 
     /**
@@ -162,7 +163,7 @@ public final class PropertyMap {
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
     public boolean contains(final String propertyName) {
-        return map.containsKey(propertyName);
+        return map.getIfPresent(propertyName) != null;
     }
 
     /**
@@ -172,13 +173,13 @@ public final class PropertyMap {
      * @return The property or <code>null</code> if absent
      */
     public BasicProperty get(final String propertyName) {
-        final Wrapper wrapper = map.get(propertyName);
+        final Wrapper wrapper = map.getIfPresent(propertyName);
         if (null == wrapper) {
             return null;
         }
         if (wrapper.elapsed(maxLifeMillis)) {
-            map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
+            map.invalidate(propertyName);
+            ThreadPools.submitElseExecute(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -192,6 +193,7 @@ public final class PropertyMap {
      * @return The previous property or <code>null</code>
      */
     public BasicProperty put(final String propertyName, final BasicProperty property) {
+        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = map.put(propertyName, wrapperOf(property));
         if (null == wrapper) {
             return null;
@@ -211,6 +213,7 @@ public final class PropertyMap {
      * @return The removed property or <code>null</code>
      */
     public BasicProperty remove(final String propertyName) {
+        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = map.remove(propertyName);
         if (null == wrapper) {
             return null;
@@ -227,7 +230,7 @@ public final class PropertyMap {
      * Clears this map.
      */
     public void clear() {
-        map.clear();
+        map.invalidateAll();
     }
 
     @Override
@@ -258,6 +261,7 @@ public final class PropertyMap {
             return (System.currentTimeMillis() - stamp) > maxLifeMillis;
         }
 
+        @SuppressWarnings("unused")
         public BasicProperty getIfNotElapsed(final int maxLifeMillis) {
             return elapsed(maxLifeMillis) ? null : value;
         }
