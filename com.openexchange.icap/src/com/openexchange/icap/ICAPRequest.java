@@ -51,6 +51,7 @@ package com.openexchange.icap;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.icap.header.ICAPRequestHeader;
@@ -65,11 +66,14 @@ import com.openexchange.java.Strings;
 public class ICAPRequest {
 
     private Map<String, String> headers;
-    private Map<String, String> bodyHeaders;
+    private Map<String, String> originalRequestHeaders;
+    private Map<String, String> originalResponseHeaders;
     private ICAPMethod method;
     private OperationMode clientMode;
     private String service;
     private String server;
+    private String originalRequest;
+    private String originalStatus;
     private int port;
     private InputStream body;
 
@@ -86,6 +90,8 @@ public class ICAPRequest {
         this.method = builder.method;
         this.port = builder.port < 0 ? ICAPCommons.DEFAULT_PORT : builder.port;
         this.service = builder.service;
+        this.originalRequest = builder.originalRequest;
+        this.originalStatus = builder.originalStatus;
 
         if (builder.body != null) {
             this.body = builder.body;
@@ -97,14 +103,15 @@ public class ICAPRequest {
         }
         if (builder.headers.containsKey(ICAPRequestHeader.PREVIEW)) {
             long previewSize = Long.parseLong(builder.headers.get(ICAPRequestHeader.PREVIEW));
-            String cts = builder.bodyHeaders.get(ICAPRequestHeader.CONTENT_LENGTH);
+            String cts = builder.originalRequestHeaders.get(ICAPRequestHeader.CONTENT_LENGTH);
             long contentLength = Long.parseLong(cts == null ? "-1" : cts);
             if (contentLength > previewSize || contentLength < 0 || previewSize < 0) {
                 builder.headers.remove(ICAPRequestHeader.PREVIEW);
             }
         }
         this.headers = ImmutableMap.copyOf(builder.headers);
-        this.bodyHeaders = ImmutableMap.copyOf(builder.bodyHeaders);
+        this.originalRequestHeaders = ImmutableMap.copyOf(builder.originalRequestHeaders);
+        this.originalResponseHeaders = ImmutableMap.copyOf(builder.originalResponseHeaders);
     }
 
     /**
@@ -135,12 +142,12 @@ public class ICAPRequest {
     }
 
     /**
-     * Gets the body headers
+     * Gets the original request headers
      *
-     * @return an unmodifiable {@link Map} with the body headers
+     * @return an unmodifiable {@link Map} with the original request headers
      */
-    public Map<String, String> getBodyHeaders() {
-        return bodyHeaders;
+    public Map<String, String> getOriginalRequestHeaders() {
+        return originalRequestHeaders;
     }
 
     /**
@@ -159,6 +166,33 @@ public class ICAPRequest {
      */
     public String getServer() {
         return server;
+    }
+
+    /**
+     * Gets the original request
+     *
+     * @return The request
+     */
+    public String getOriginalRequest() {
+        return originalRequest;
+    }
+
+    /**
+     * Gets the original status
+     *
+     * @return The status
+     */
+    public String getOriginalStatus() {
+        return originalStatus;
+    }
+
+    /**
+     * Gets the original response headers
+     *
+     * @return The original response headers
+     */
+    public Map<String, String> getOriginalResponseHeaders() {
+        return originalResponseHeaders;
     }
 
     /**
@@ -213,17 +247,21 @@ public class ICAPRequest {
         ICAPMethod method = ICAPMethod.OPTIONS;
         String service;
         String server;
+        String originalRequest;
+        String originalStatus;
         int port = -1;
         InputStream body;
         Map<String, String> headers = ImmutableMap.of();
-        Map<String, String> bodyHeaders = ImmutableMap.of();
+        Map<String, String> originalRequestHeaders;
+        Map<String, String> originalResponseHeaders;
 
         /**
          * Initialises a new {@link ICAPRequest.Builder}.
          */
         public Builder() {
             super();
-            bodyHeaders = new HashMap<>(4);
+            originalRequestHeaders = new LinkedHashMap<>(4);
+            originalResponseHeaders = new LinkedHashMap<>(4);
             headers = new HashMap<>(4);
             headers.put(ICAPRequestHeader.USER_AGENT, ICAPCommons.USER_AGENT);
         }
@@ -295,14 +333,40 @@ public class ICAPRequest {
         }
 
         /**
-         * Adds a header to the request's body.
+         * Adds the original request's header.
          * 
          * @param headerName The header's name
          * @param headerValue The header's value
          * @return this instance for chained calls
          */
-        public Builder withBodyHeader(String headerName, String headerValue) {
-            bodyHeaders.put(headerName, headerValue);
+        public Builder withOriginalRequestHeader(String headerName, String headerValue) {
+            originalRequestHeaders.put(headerName, headerValue);
+            return this;
+        }
+
+        public Builder withOriginalRequestHeaders(Map<String, String> headers) {
+            originalRequestHeaders = headers;
+            return this;
+        }
+
+        public Builder withOriginalResponseHeaders(Map<String, String> headers) {
+            originalResponseHeaders = headers;
+            return this;
+        }
+
+        /**
+         * Adds the original request
+         *
+         * @param request The request
+         * @return this instance for chained calls
+         */
+        public Builder withOriginalRequest(String request) {
+            this.originalRequest = request;
+            return this;
+        }
+
+        public Builder withOriginalStatus(String status) {
+            this.originalStatus = status;
             return this;
         }
 

@@ -63,11 +63,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -394,7 +396,8 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         if (false == mayScan(request)) {
             return false;
         }
-        AntiVirusResult result = getAntiVirusService().scan(fileHolder, getUniqueId(metadata, request.getSession().getContextId()));
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(request.getRequestData().optHttpServletRequest(), request.getRequestData().optHttpServletResponse());
+        AntiVirusResult result = getAntiVirusService().scan(fileHolder, getUniqueId(metadata, request.getSession().getContextId()), content);
         getAntiVirusResultEvaluatorService().evaluate(result, metadata.getFileName());
         return result.isStreamScanned();
     }
@@ -413,7 +416,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         if (false == mayScan(request)) {
             return;
         }
-        scan(isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
+        scan(request, isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
     }
 
     /**
@@ -513,20 +516,22 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      *             or if the file is infected, or if a timeout or any other error is occurred
      */
     private void scanFile(InfostoreRequest request, InputStreamClosure isClosure, File metadata) throws OXException {
-        scan(isClosure, metadata.getFileName(), getUniqueId(metadata, request.getSession().getContextId()), metadata.getFileSize());
+        scan(request, isClosure, metadata.getFileName(), getUniqueId(metadata, request.getSession().getContextId()), metadata.getFileSize());
     }
 
     /**
      * Checks whether the {@link InputStream} in the specified closure should be scanned
-     *
+     * @param request The {@link InfostoreRequest}
      * @param closure The InputStreamClosure
      * @param uniqueId the unique identifier of the stream
      * @param filesize The file size of the stream
+     *
      * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
      *             or if the file is infected, or if a timeout or any other error is occurred
      */
-    private void scan(InputStreamClosure closure, String filename, String uniqueId, long filesize) throws OXException {
-        AntiVirusResult result = getAntiVirusService().scan(closure, uniqueId, filesize);
+    private void scan(InfostoreRequest request, InputStreamClosure closure, String filename, String uniqueId, long filesize) throws OXException {
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(request.getRequestData().optHttpServletRequest(), request.getRequestData().optHttpServletResponse());
+        AntiVirusResult result = getAntiVirusService().scan(closure, uniqueId, filesize, content);
         getAntiVirusResultEvaluatorService().evaluate(result, filename);
     }
 

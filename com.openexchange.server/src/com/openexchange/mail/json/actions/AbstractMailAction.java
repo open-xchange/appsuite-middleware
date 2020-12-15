@@ -76,6 +76,8 @@ import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedActi
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
@@ -557,15 +559,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (false == antiVirusService.isEnabled(request.getSession())) {
             return;
         }
+        AntiVirusEncapsulatedContent content = encapsulateContent(request);
         if (sequenceIds == null) {
             for (MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
-                scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+                scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService, content);
             }
             return;
         }
         for (String sequenceId : sequenceIds) {
             MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-            scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+            scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService, content);
         }
     }
 
@@ -593,8 +596,18 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (false == antiVirusService.isEnabled(request.getSession())) {
             return;
         }
-        AntiVirusResult result = antiVirusService.scan(fileHolder, mailId);
+        AntiVirusResult result = antiVirusService.scan(fileHolder, mailId, encapsulateContent(request));
         services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
+    }
+    
+    /**
+     * Encapsulates the HTTP content from the specified request
+     *
+     * @param request The request
+     * @return The content
+     */
+    private AntiVirusEncapsulatedContent encapsulateContent(MailRequest request) {
+        return AntiVirusEncapsulationUtil.encapsulate(request.getRequest().optHttpServletRequest(), request.getRequest().optHttpServletResponse());
     }
 
     /**
@@ -604,11 +617,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param mailId The unique mail identifier
      * @param contentSize The content size of the mail part
      * @param antiVirusService The anti virus service
+     * @param content The encapsulated content
      * @throws OXException if the mail part is too large, or if the {@link AntiVirusService} is absent,
      *             or if the mail part is infected, or if a timeout or any other error is occurred
      */
-    private void scan(MailPart mailPart, String mailId, long contentSize, AntiVirusService antiVirusService) throws OXException {
-        AntiVirusResult result = antiVirusService.scan(() -> mailPart.getInputStream(), mailId, contentSize);
+    private void scan(MailPart mailPart, String mailId, long contentSize, AntiVirusService antiVirusService, AntiVirusEncapsulatedContent content) throws OXException {
+        AntiVirusResult result = antiVirusService.scan(() -> mailPart.getInputStream(), mailId, contentSize, content);
         String filename = mailPart.getFileName();
         if (Strings.isEmpty(filename)) {
             List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());

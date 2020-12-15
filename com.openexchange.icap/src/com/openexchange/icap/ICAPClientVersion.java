@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,29 +50,22 @@
 package com.openexchange.icap;
 
 /**
- * {@link ICAPCommons}
+ * {@link ICAPClientVersion}
+ * </p>
+ * 
+ * <b>Version 1.0</b>
+ * <p>Initial release. Rudimentary ICAP protocol.</p>
+ * 
+ * <b>Version 1.1</b>
+ * <p>Enhanced client's <code>RESPMOD</code> requests over the original HTTP request/response's headers</p>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.2
+ * @since v7.10.5
  */
-public final class ICAPCommons {
+public class ICAPClientVersion {
 
     /**
-     * The current ICAP version.
-     * 
-     * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.3.2">RFC-3507, Section 4.3.2</a>
+     * Defines the current client's version
      */
-    public static final String ICAP_VERSION = "1.0";
-
-    /**
-     * The user agent
-     */
-    public static final String USER_AGENT = "Open-Xchange ICAP Client/" + ICAPClientVersion.CLIENT_VERSION;
-
-    /**
-     * The default ICAP server port.
-     * 
-     * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.1">RFC-3507, Section 4.1</a>
-     */
-    public static final int DEFAULT_PORT = 1344;
+    public static final String CLIENT_VERSION = "1.1";
 }

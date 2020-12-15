@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,49 @@
  *
  */
 
-package com.openexchange.icap;
+package com.openexchange.antivirus;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * {@link ICAPCommons}
+ * {@link AntiVirusEncapsulatedContent} - Used to encapsulate additional HTTP content, such
+ * as the original HTTP request/response headers to the ICAP request.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.2
+ * @since v7.10.5
+ * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.4">RFC-3507, Section 4.4</a>
  */
-public final class ICAPCommons {
+public interface AntiVirusEncapsulatedContent {
 
     /**
-     * The current ICAP version.
-     * 
-     * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.3.2">RFC-3507, Section 4.3.2</a>
+     * Returns the optional original HTTP request, e.g. <code>GET /api/files/someFile.jpg HTTP/1.1</code>
+     *
+     * @return the optional original HTTP request
      */
-    public static final String ICAP_VERSION = "1.0";
+    Optional<String> getOriginalRequest();
 
     /**
-     * The user agent
+     * Returns a map with the original request headers
+     *
+     * @return a map with the original request headers
+     *         or an empty map
      */
-    public static final String USER_AGENT = "Open-Xchange ICAP Client/" + ICAPClientVersion.CLIENT_VERSION;
+    Map<String, String> getOriginalRequestHeaders();
 
     /**
-     * The default ICAP server port.
-     * 
-     * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.1">RFC-3507, Section 4.1</a>
+     * Returns (if available) the original response's status line,
+     * e.g. <code>HTTP/1.1 200 OK</code>
+     *
+     * @return The optional response's status line
      */
-    public static final int DEFAULT_PORT = 1344;
+    Optional<String> getOriginalResponseLine();
+
+    /**
+     * Returns the optional original response's headers
+     *
+     * @return The optional original response's headers
+     *         or an empty map
+     */
+    Map<String, String> getOriginalResponseHeaders();
 }

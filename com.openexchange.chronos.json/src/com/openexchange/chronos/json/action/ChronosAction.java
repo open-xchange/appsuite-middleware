@@ -67,6 +67,8 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
@@ -461,7 +463,8 @@ public abstract class ChronosAction extends AbstractChronosAction {
         if (false == antiVirusService.isEnabled(requestData.getSession())) {
             return false;
         }
-        AntiVirusResult result = antiVirusService.scan(fileHolder, uniqueId);
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(requestData.optHttpServletRequest(), requestData.optHttpServletResponse());
+        AntiVirusResult result = antiVirusService.scan(fileHolder, uniqueId, content);
         services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
         return result.isStreamScanned();
     }

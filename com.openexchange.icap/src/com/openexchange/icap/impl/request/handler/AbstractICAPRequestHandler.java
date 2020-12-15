@@ -82,6 +82,7 @@ abstract class AbstractICAPRequestHandler implements ICAPRequestHandler {
      * {@link Terminator} - The different terminator byte sequences for an ICAP packet.
      */
     private enum Terminator {
+
         HTTP_HEADER(ICAPCommunicationStrings.ICAP_TERMINATOR.getBytes(Charsets.UTF_8)),
         ICAP_HEADER(ICAPCommunicationStrings.ICAP_TERMINATOR.getBytes(Charsets.UTF_8)),
         HTTP_BODY(ICAPCommunicationStrings.HTTP_TERMINATOR.getBytes(Charsets.UTF_8));
