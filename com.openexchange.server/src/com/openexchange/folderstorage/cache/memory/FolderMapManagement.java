@@ -49,14 +49,17 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
@@ -88,21 +91,29 @@ public final class FolderMapManagement {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, FolderMap>> map;
+    private static final Callable<ConcurrentMap<Integer,FolderMap>> LOADER = new Callable<ConcurrentMap<Integer,FolderMap>>() {
+
+        @Override
+        public ConcurrentMap<Integer, FolderMap> call() {
+            return new NonBlockingHashMap<Integer, FolderMap>(256);
+        }
+    };
+
+    private final Cache<Integer, ConcurrentMap<Integer, FolderMap>> cache;
 
     /**
      * Initializes a new {@link FolderMapManagement}.
      */
     private FolderMapManagement() {
         super();
-        map = new ConcurrentLinkedHashMap.Builder<Integer, ConcurrentMap<Integer, FolderMap>>().initialCapacity(64).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
+        cache = CacheBuilder.newBuilder().initialCapacity(64).expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
     /**
      * Clears the folder management.
      */
     public void clear() {
-        map.clear();
+        cache.invalidateAll();
     }
 
     /**
@@ -121,11 +132,11 @@ public final class FolderMapManagement {
      * @param notify Whether to post notification or not
      */
     public void dropFor(int contextId, boolean notify) {
-        map.remove(Integer.valueOf(contextId));
+        cache.invalidate(Integer.valueOf(contextId));
         if (notify) {
             fireInvalidateCacheEvent(contextId);
         }
-        LOG.debug("Cleaned user-sensitive folder cache for context {}", contextId);
+        LOG.debug("Cleaned user-sensitive folder cache for context {}", I(contextId));
     }
 
     /**
@@ -146,14 +157,14 @@ public final class FolderMapManagement {
      * @param notify Whether to post notification or not
      */
     public void dropFor(int userId, int contextId, boolean notify) {
-        ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        ConcurrentMap<Integer, FolderMap> contextMap = cache.getIfPresent(Integer.valueOf(contextId));
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(userId));
         }
         if (notify) {
             fireInvalidateCacheEvent(userId, contextId);
         }
-        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", userId, contextId);
+        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", I(userId), I(contextId));
     }
 
     /**
@@ -163,25 +174,25 @@ public final class FolderMapManagement {
      * @return The folder map
      */
     public FolderMap getFor(Session session) {
-        final Integer cid = Integer.valueOf(session.getContextId());
-        ConcurrentMap<Integer, FolderMap> contextMap = map.get(cid);
-        if (null == contextMap) {
-            final ConcurrentMap<Integer, FolderMap> newMap = new NonBlockingHashMap<Integer, FolderMap>(256);
-            contextMap = map.putIfAbsent(cid, newMap);
-            if (null == contextMap) {
-                contextMap = newMap;
-            }
-        }
-        final Integer us = Integer.valueOf(session.getUserId());
-        FolderMap folderMap = contextMap.get(us);
-        if (null == folderMap) {
-            final FolderMap newFolderMap = new FolderMap(1024, 300, TimeUnit.SECONDS, session.getUserId(), session.getContextId());
-            folderMap = contextMap.putIfAbsent(us, newFolderMap);
+        try {
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            ConcurrentMap<Integer, FolderMap> contextMap = cache.get(Integer.valueOf(contextId), LOADER);
+
+            final Integer us = Integer.valueOf(userId);
+            FolderMap folderMap = contextMap.get(us);
             if (null == folderMap) {
-                folderMap = newFolderMap;
+                final FolderMap newFolderMap = new FolderMap(300, TimeUnit.SECONDS, userId, contextId);
+                folderMap = contextMap.putIfAbsent(us, newFolderMap);
+                if (null == folderMap) {
+                    folderMap = newFolderMap;
+                }
             }
+            return folderMap;
+        } catch (ExecutionException e) {
+            // Cannot occur
+            throw new IllegalStateException(e.getCause());
         }
-        return folderMap;
     }
 
     /**
@@ -191,7 +202,7 @@ public final class FolderMapManagement {
      * @return The folder map or <code>null</code> if absent
      */
     public FolderMap optFor(Session session) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
+        final ConcurrentMap<Integer, FolderMap> contextMap = cache.getIfPresent(Integer.valueOf(session.getContextId()));
         if (null == contextMap) {
             return null;
         }
@@ -206,7 +217,7 @@ public final class FolderMapManagement {
      * @return The folder map or <code>null</code> if absent
      */
     public FolderMap optFor(int userId, int contextId) {
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        final ConcurrentMap<Integer, FolderMap> contextMap = cache.getIfPresent(Integer.valueOf(contextId));
         if (null == contextMap) {
             return null;
         }
@@ -265,7 +276,7 @@ public final class FolderMapManagement {
         if ((null == folderIds) || (null == treeId)) {
             return;
         }
-        ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        ConcurrentMap<Integer, FolderMap> contextMap = cache.getIfPresent(Integer.valueOf(contextId));
         if (null == contextMap) {
             return;
         }
@@ -302,34 +313,7 @@ public final class FolderMapManagement {
      * @param notify Whether to post notification or not
      */
     public void dropFor(String folderId, String treeId, int optUser, int contextId, Session optSession, boolean notify) {
-        if ((null == folderId) || (null == treeId)) {
-            return;
-        }
-        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
-        if (null == contextMap) {
-            return;
-        }
-        //  If folder identifier is not a number AND user identifier is valid
-        //  (because numbers hint to former global folders; e.g. database folders)
-        //  Then it is sufficient to clean in user-associated map only
-        if (optUser > 0 && Tools.getUnsignedInteger(folderId) < 0) {
-            final FolderMap folderMap = contextMap.get(Integer.valueOf(optUser));
-            if (null != folderMap) {
-                folderMap.remove(folderId, treeId, optSession);
-            }
-        } else {
-            // Delete all known
-            for (final FolderMap folderMap : contextMap.values()) {
-                if (null == optSession) {
-                    folderMap.remove(folderId, treeId);
-                } else {
-                    folderMap.remove(folderId, treeId, optSession);
-                }
-            }
-        }
-        if (notify) {
-            fireInvalidateCacheEvent(folderId, treeId, optUser, contextId);
-        }
+        dropFor(Collections.singletonList(folderId), treeId, optUser, contextId, optSession, notify);
     }
 
     // -------------------------------------------------------------------------------------------------------

@@ -54,8 +54,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -74,13 +73,14 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
+ * {@link FolderMap} - An in-memory folder map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMap {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMap.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
     private final int maxLifeMillis;
@@ -90,13 +90,14 @@ public final class FolderMap {
     /**
      * Initializes a new {@link FolderMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
+    public FolderMap(int maxLifeUnits, TimeUnit unit, int userId, int contextId) {
         super();
-        map = new ConcurrentLinkedHashMap.Builder<Key, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
+        map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).<Key, Wrapper> build().asMap();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
         this.contextId = contextId;
         this.userId = userId;
@@ -105,11 +106,12 @@ public final class FolderMap {
     /**
      * Initializes a new {@link FolderMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public FolderMap(final int maxCapacity, final int maxLifeMillis, final int userId, final int contextId) {
-        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
+    public FolderMap(int maxLifeMillis, int userId, int contextId) {
+        this(maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
     }
 
     /**
@@ -337,6 +339,8 @@ public final class FolderMap {
         return map.toString();
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private static Key keyOf(final String folderId, final String treeId) {
         return new Key(folderId, treeId);
     }
@@ -464,7 +468,7 @@ public final class FolderMap {
         private final FolderMap folderMap;
         private final ServerSession session;
 
-        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders, final FolderMap folderMap, final ServerSession session) {
+        RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders, final FolderMap folderMap, final ServerSession session) {
             this.folderId = folderId;
             this.treeId = treeId;
             this.loadSubfolders = loadSubfolders;
@@ -511,7 +515,7 @@ public final class FolderMap {
         private final FolderMap folderMap;
         private final ServerSession session;
 
-        protected LoadSubfolders(final Folder folder, final String treeId, final FolderMap folderMap, final ServerSession session) {
+        LoadSubfolders(final Folder folder, final String treeId, final FolderMap folderMap, final ServerSession session) {
             this.folder = folder;
             this.treeId = treeId;
             this.folderMap = folderMap;
