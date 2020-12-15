@@ -216,12 +216,12 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        return updateFolder(identifier, toUpdate, false, true);
+        return updateFolder(identifier, toUpdate, false);
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
-        return updateFolder(identifier, toUpdate, false, true);
+        return updateFolder(identifier, toUpdate, cascadePermissions, true);
     }
 
     @Override
