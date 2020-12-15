@@ -128,15 +128,7 @@ public class S3ClientRegistry implements Reloadable {
     }
 
     private Callable<? extends S3FileStorageClient> createLoaderFor(S3ClientConfig clientConfig) {
-        S3ClientFactory clientFactory = this.clientFactory;
-        Callable<? extends S3FileStorageClient> loader = new Callable<S3FileStorageClient>() {
-
-            @Override
-            public S3FileStorageClient call() throws Exception {
-                return clientFactory.initS3Client(clientConfig);
-            }
-        };
-        return loader;
+        return new S3ClientLoaderCallable(clientConfig, this.clientFactory);
     }
 
     @Override
@@ -166,6 +158,24 @@ public class S3ClientRegistry implements Reloadable {
             }
         } catch (Exception e) {
             LOG.error("Configuration reload failed for S3 clients", e);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class S3ClientLoaderCallable implements Callable<S3FileStorageClient> {
+
+        private final S3ClientConfig clientConfig;
+        private final S3ClientFactory clientFactory;
+
+        S3ClientLoaderCallable(S3ClientConfig clientConfig, S3ClientFactory clientFactory) {
+            this.clientConfig = clientConfig;
+            this.clientFactory = clientFactory;
+        }
+
+        @Override
+        public S3FileStorageClient call() throws Exception {
+            return clientFactory.initS3Client(clientConfig);
         }
     }
 
