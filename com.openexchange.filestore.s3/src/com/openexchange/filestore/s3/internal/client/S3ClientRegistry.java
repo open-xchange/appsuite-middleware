@@ -52,10 +52,15 @@ package com.openexchange.filestore.s3.internal.client;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -80,7 +85,7 @@ public class S3ClientRegistry implements Reloadable {
 
     private final S3ClientFactory clientFactory;
     private final ServiceLookup services;
-    private final ConcurrentMap<String, S3FileStorageClient> clients;
+    private final Cache<String, S3FileStorageClient> clients;
 
     /**
      * Initializes a new {@link S3ClientRegistry}.
@@ -92,7 +97,7 @@ public class S3ClientRegistry implements Reloadable {
         super();
         this.clientFactory = clientFactory;
         this.services = services;
-        clients = new MapMaker().weakValues().makeMap();
+        clients = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
     /**
@@ -107,17 +112,31 @@ public class S3ClientRegistry implements Reloadable {
      */
     public S3FileStorageClient getOrCreate(S3ClientConfig clientConfig) throws OXException {
         String key = clientConfig.getClientID().orElse(clientConfig.getFilestoreID());
-        S3FileStorageClient client = clients.get(key);
+        S3FileStorageClient client = clients.getIfPresent(key);
         if (client == null) {
-            client = clientFactory.initS3Client(clientConfig);
-            S3FileStorageClient existing = clients.putIfAbsent(key, client);
-            if (existing != null) {
-                client.getSdkClient().shutdown();
-                client = existing;
+            try {
+                client = clients.get(key, createLoaderFor(clientConfig));
+            } catch (ExecutionException | UncheckedExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof OXException) {
+                    throw (OXException) cause;
+                }
+                throw OXException.general("Failed initializing S3 client.", cause);
             }
         }
-
         return client;
+    }
+
+    private Callable<? extends S3FileStorageClient> createLoaderFor(S3ClientConfig clientConfig) {
+        S3ClientFactory clientFactory = this.clientFactory;
+        Callable<? extends S3FileStorageClient> loader = new Callable<S3FileStorageClient>() {
+
+            @Override
+            public S3FileStorageClient call() throws Exception {
+                return clientFactory.initS3Client(clientConfig);
+            }
+        };
+        return loader;
     }
 
     @Override
@@ -133,7 +152,8 @@ public class S3ClientRegistry implements Reloadable {
         try {
             LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
             List<S3FileStorageClient> toRemove = new LinkedList<>();
-            for (Map.Entry<String, S3FileStorageClient> entry : clients.entrySet()) {
+            ConcurrentMap<String, S3FileStorageClient> clientsMap = clients.asMap();
+            for (Map.Entry<String, S3FileStorageClient> entry : clientsMap.entrySet()) {
                 S3FileStorageClient client = entry.getValue();
                 int recentFingerprint = S3ClientConfig.getFingerprint(configService, client.getScope(), entry.getKey());
                 if (recentFingerprint != client.getConfigFingerprint()) {
@@ -142,7 +162,7 @@ public class S3ClientRegistry implements Reloadable {
             }
 
             for (S3FileStorageClient client : toRemove) {
-                clients.remove(client.getKey(), client);
+                clientsMap.remove(client.getKey(), client);
             }
         } catch (Exception e) {
             LOG.error("Configuration reload failed for S3 clients", e);
