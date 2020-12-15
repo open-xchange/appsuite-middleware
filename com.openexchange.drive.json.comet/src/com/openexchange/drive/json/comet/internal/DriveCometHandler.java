@@ -122,10 +122,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
                 if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId()) {
                     Set<String> folderIDs = driveEvent.getFolderIDs();
                     if (null != folderIDs && null != rootFolderIDs) {
-                        List<DriveAction<? extends DriveVersion>> actions = driveEvent.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode));
-                        if (null != actions && 0 < actions.size()) {
-                            write(actions);
-                        }
+                        write(driveEvent.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode)));
                     }
                 }
             }
