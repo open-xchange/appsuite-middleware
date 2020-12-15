@@ -54,17 +54,22 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.database.AfterCommitDatabaseConnectionListener;
+import com.openexchange.database.DatabaseConnectionListener;
+import com.openexchange.database.DatabaseConnectionListenerAnnotatable;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -596,6 +601,20 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObject(final int folderId, final Context ctx) throws OXException {
+        removeFolderObject(ctx.getContextId(), folderId, null);
+    }
+
+    /**
+     * Removes a matching folder object from cache.
+     * <p/>
+     * If a database connection is supplied and is currently in a transaction, the cache removal will implicitly be repeated after the
+     * connection is committed by registering an appropriate {@link DatabaseConnectionListener}.
+     *
+     * @param contextId The context identifier the folder is located in
+     * @param folderId The identifier of the folder to remove from the cache
+     * @param optConnection A database connection to register an additional invalidation callback for, or <code>null</code> if not applicable
+     */
+    public void removeFolderObject(int contextId, int folderId, Connection optConnection) throws OXException {
         Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
@@ -603,9 +622,9 @@ public final class FolderCacheManager {
 
         // Remove object from cache if exist
         if (folderId > 0) {
-            CacheKey cacheKey = getCacheKeyUsing(ctx.getContextId(), folderId, folderCache);
+            CacheKey cacheKey = getCacheKeyUsing(contextId, folderId, folderCache);
             LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
-            Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(ctx.getContextId()).append('-').append(folderId).toString());
+            Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(contextId).append('-').append(folderId).toString());
             lock.lock();
             try {
                 final Object tmp = folderCache.get(cacheKey);
@@ -622,11 +641,22 @@ public final class FolderCacheManager {
                 try {
                     Cache globalCache = cacheService.getCache("GlobalFolderCache");
                     cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
-                    globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
+                    globalCache.removeFromGroup(cacheKey, String.valueOf(contextId));
                 } catch (OXException e) {
                     LOG.warn("", e);
                 }
             }
+        }
+
+        // Invalidate again after transaction is committed
+        if (null != optConnection) {
+            addAfterCommitCallback(optConnection, (c) -> {
+                try {
+                    removeFolderObject(contextId, folderId, null);
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
+            });
         }
     }
 
@@ -638,6 +668,20 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObjects(final int[] folderIds, final Context ctx) throws OXException {
+        removeFolderObjects(ctx.getContextId(), folderIds, null);
+    }
+
+    /**
+     * Removes matching folder objects from cache.
+     * <p/>
+     * If a database connection is supplied and is currently in a transaction, the cache removal will implicitly be repeated after the
+     * connection is committed by registering an appropriate {@link DatabaseConnectionListener}.
+     *
+     * @param contextId The context identifier the folders are located in
+     * @param folderIds The identifiers of the folders to remove from the cache
+     * @param optConnection A database connection to register an additional invalidation callback for, or <code>null</code> if not applicable
+     */
+    public void removeFolderObjects(int contextId, int[] folderIds, Connection optConnection) throws OXException {
         if (folderIds == null || folderIds.length == 0) {
             return;
         }
@@ -650,7 +694,7 @@ public final class FolderCacheManager {
         List<Serializable> cacheKeys = new ArrayList<Serializable>(folderIds.length);
         for (int key : folderIds) {
             if (key > 0) {
-                cacheKeys.add(getCacheKeyUsing(ctx.getContextId(), key, folderCache));
+                cacheKeys.add(getCacheKeyUsing(contextId, key, folderCache));
             }
         }
 
@@ -664,11 +708,22 @@ public final class FolderCacheManager {
                 Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 for (int key : folderIds) {
                     CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(key));
-                    globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
+                    globalCache.removeFromGroup(cacheKey, String.valueOf(contextId));
                 }
             } catch (OXException e) {
                 LOG.warn("", e);
             }
+        }
+
+        // Invalidate again after transaction is committed
+        if (null != optConnection) {
+            addAfterCommitCallback(optConnection, (c) -> {
+                try {
+                    removeFolderObjects(contextId, folderIds, null);
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
+            });
         }
     }
 
@@ -781,6 +836,52 @@ public final class FolderCacheManager {
             throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
         }
         return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
+    }
+
+    /**
+     * Tries to add a callback routine that'll be invoked after the supplied database connection has been committed.
+     *
+     * @param connection The connection to add the callback routine for, or <code>null</code> for a no-op
+     * @param callback The callback routine to add
+     * @return <code>true</code> if the callback routine could be added, <code>false</code>, otherwise
+     */
+    private static boolean addAfterCommitCallback(Connection connection, Consumer<Connection> callback) {
+        try {
+            if (null == connection || false == Databases.isInTransaction(connection)) {
+                return false;
+            }
+        } catch (SQLException e) {
+            LOG.warn("", e);
+            return false;
+        }
+        DatabaseConnectionListenerAnnotatable listenerAnnotatable = optDatabaseConnectionListenerAnnotatable(connection);
+        if (null == listenerAnnotatable) {
+            return false;
+        }
+        listenerAnnotatable.addListener(new AfterCommitDatabaseConnectionListener(callback));
+        return true;
+    }
+
+    /**
+     * Obtains a reference to the connection listener implemented by the supplied database connection if possible.
+     *
+     * @param connection The connection to get the connection listener annotatable for, or <code>null</code> for a no-op
+     * @return A reference to the connection listener implemented by the supplied database connection, or <code>null</code> if not available
+     */
+    private static DatabaseConnectionListenerAnnotatable optDatabaseConnectionListenerAnnotatable(Connection connection) {
+        if (null != connection) {
+            if (DatabaseConnectionListenerAnnotatable.class.isInstance(connection)) {
+                return (DatabaseConnectionListenerAnnotatable) connection;
+            }
+            try {
+                if (connection.isWrapperFor(DatabaseConnectionListenerAnnotatable.class)) {
+                    return connection.unwrap(DatabaseConnectionListenerAnnotatable.class);
+                }
+            } catch (SQLException e) {
+                LOG.warn("", e);
+            }
+        }
+        return null;
     }
 
 }
