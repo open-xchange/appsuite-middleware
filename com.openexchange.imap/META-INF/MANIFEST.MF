@@ -4,11 +4,7 @@ Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
 Bundle-Version: 7.6.3
 Bundle-Vendor: OX Software GmbH
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.cache,
- com.google.common.collect,
- com.google.common.util.concurrent,
+Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.api2,

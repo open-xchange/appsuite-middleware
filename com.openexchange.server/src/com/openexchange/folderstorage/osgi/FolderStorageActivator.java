@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.osgi;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -59,8 +60,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
@@ -139,11 +140,11 @@ public final class FolderStorageActivator implements BundleActivator {
 
     private static final class DisplayNameFolderField implements AdditionalFolderField {
 
-        private final Cache<Key, String> cache;
+        private final ConcurrentMap<Key, String> cache;
 
         protected DisplayNameFolderField() {
             super();
-            cache = CacheBuilder.newBuilder().maximumSize(1024).build();
+            cache = new ConcurrentLinkedHashMap.Builder<Key, String>().maximumWeightedCapacity(1024).weigher(Weighers.entrySingleton()).build();
         }
 
         @Override
@@ -157,17 +158,10 @@ public final class FolderStorageActivator implements BundleActivator {
             if (createdBy <= 0) {
                 return JSONObject.NULL;
             }
-
-            Context context = session.getContext();
-            Key key = Key.valueOf(createdBy, context.getContextId());
-            String displayName = cache.getIfPresent(key);
+            final Context context = session.getContext();
+            final String displayName = cache.get(Key.valueOf(createdBy, context.getContextId()));
             try {
-                if (null != displayName) {
-                    return displayName;
-                }
-                displayName = UserStorage.getInstance().getUser(createdBy, context).getDisplayName();
-                cache.put(key, displayName);
-                return displayName;
+                return null == displayName ? UserStorage.getInstance().getUser(createdBy, context).getDisplayName() : displayName;
             } catch (OXException e) {
                 return null;
             }

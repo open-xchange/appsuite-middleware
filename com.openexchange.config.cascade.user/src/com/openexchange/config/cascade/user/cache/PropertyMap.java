@@ -54,7 +54,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import com.google.common.cache.CacheBuilder;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
@@ -66,7 +67,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class PropertyMap {
 
-    private final com.google.common.cache.Cache<String, Wrapper> map;
+    private final ConcurrentMap<String, Wrapper> map;
     private final int maxLifeMillis;
 
     /**
@@ -78,7 +79,7 @@ public final class PropertyMap {
      */
     public PropertyMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
         super();
-        map = CacheBuilder.newBuilder().maximumSize(maxCapacity).build();
+        map = new ConcurrentLinkedHashMap.Builder<String, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
     }
 
@@ -96,7 +97,6 @@ public final class PropertyMap {
      * Removes elapsed entries from map.
      */
     public void shrink() {
-        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final List<String> removeKeys = new ArrayList<String>(16);
         final long minStamp = System.currentTimeMillis() - maxLifeMillis;
         for (final Entry<String, Wrapper> entry : map.entrySet()) {
@@ -116,7 +116,6 @@ public final class PropertyMap {
      * @return The property
      */
     public BasicProperty putIfAbsent(final String propertyName, final BasicProperty property) {
-        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = wrapperOf(property);
         Wrapper prev = map.putIfAbsent(propertyName, wrapper);
         if (null == prev) {
@@ -144,7 +143,7 @@ public final class PropertyMap {
      * @return The size
      */
     public int size() {
-        return (int) map.size();
+        return map.size();
     }
 
     /**
@@ -153,7 +152,7 @@ public final class PropertyMap {
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
-        return size() <= 0;
+        return map.isEmpty();
     }
 
     /**
@@ -163,7 +162,7 @@ public final class PropertyMap {
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
     public boolean contains(final String propertyName) {
-        return map.getIfPresent(propertyName) != null;
+        return map.containsKey(propertyName);
     }
 
     /**
@@ -173,13 +172,13 @@ public final class PropertyMap {
      * @return The property or <code>null</code> if absent
      */
     public BasicProperty get(final String propertyName) {
-        final Wrapper wrapper = map.getIfPresent(propertyName);
+        final Wrapper wrapper = map.get(propertyName);
         if (null == wrapper) {
             return null;
         }
         if (wrapper.elapsed(maxLifeMillis)) {
-            map.invalidate(propertyName);
-            ThreadPools.submitElseExecute(new ShrinkerTask(this));
+            map.remove(propertyName);
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -193,7 +192,6 @@ public final class PropertyMap {
      * @return The previous property or <code>null</code>
      */
     public BasicProperty put(final String propertyName, final BasicProperty property) {
-        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = map.put(propertyName, wrapperOf(property));
         if (null == wrapper) {
             return null;
@@ -213,7 +211,6 @@ public final class PropertyMap {
      * @return The removed property or <code>null</code>
      */
     public BasicProperty remove(final String propertyName) {
-        ConcurrentMap<String, Wrapper> map = this.map.asMap();
         final Wrapper wrapper = map.remove(propertyName);
         if (null == wrapper) {
             return null;
@@ -230,7 +227,7 @@ public final class PropertyMap {
      * Clears this map.
      */
     public void clear() {
-        map.invalidateAll();
+        map.clear();
     }
 
     @Override

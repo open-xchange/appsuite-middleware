@@ -54,7 +54,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import com.google.common.cache.CacheBuilder;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderMap {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMap.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
     private final int maxLifeMillis;
@@ -93,9 +94,9 @@ public final class FolderMap {
      * @param maxLifeUnits the max life units
      * @param unit the unit
      */
-    public FolderMap(int maxLifeUnits, TimeUnit unit, int userId, int contextId) {
+    public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
         super();
-        map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).<Key, Wrapper> build().asMap();
+        map = new ConcurrentLinkedHashMap.Builder<Key, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
         this.contextId = contextId;
         this.userId = userId;
@@ -107,8 +108,8 @@ public final class FolderMap {
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
-    public FolderMap(int maxLifeMillis, int userId, int contextId) {
-        this(maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
+    public FolderMap(final int maxCapacity, final int maxLifeMillis, final int userId, final int contextId) {
+        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS, userId, contextId);
     }
 
     /**

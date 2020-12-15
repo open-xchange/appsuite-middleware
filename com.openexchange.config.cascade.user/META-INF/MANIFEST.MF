@@ -6,11 +6,7 @@ Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.config.cascade.user.osgi.UserConfigCascadeActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.cache,
- com.google.common.collect,
- com.google.common.util.concurrent,
+Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.config.cascade,
