@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.user.cache;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -95,7 +96,7 @@ public final class PropertyMapManagement {
      */
     private PropertyMapManagement() {
         super();
-        map = CacheBuilder.newBuilder().maximumSize(5000).build();
+        map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
     /**
@@ -112,7 +113,7 @@ public final class PropertyMapManagement {
      */
     public void dropFor(final int contextId) {
         map.invalidate(Integer.valueOf(contextId));
-        LOG.debug("Cleaned user-sensitive property cache for context {}", contextId);
+        LOG.debug("Cleaned user-sensitive property cache for context {}", I(contextId));
     }
 
     /**
@@ -137,7 +138,7 @@ public final class PropertyMapManagement {
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(userId));
         }
-        LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", userId, contextId);
+        LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", I(userId), I(contextId));
     }
 
     /**
