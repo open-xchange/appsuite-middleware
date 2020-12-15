@@ -146,23 +146,23 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder to no-link folder
+        // Move sub-folder to no-link folder; Inherit permissions from D        
         folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
-        checkFolderPermissions(B, 2, 2);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId2);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder back to parent folder
+        // Move sub-folder back to parent folder; Inherit permissions from A    
         folderManager.moveFolder(B, A, Boolean.TRUE);
 
         // Check sub-folder
-        checkFolderPermissions(B, 2, 3, guestId);
+        checkFolderPermissions(B, 1, 2, guestId);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 3, guestId, guestId2);
+        checkFolderPermissions(C, 1, 2, guestId);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
