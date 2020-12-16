@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
@@ -62,6 +63,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.session.ServerSession;
@@ -364,4 +366,19 @@ public interface InfostoreRequest {
      */
     List<Integer> getEntities() throws OXException;
 
+    /**
+     * Gets a search term from the json array named 'filter' in the request.
+     * 
+     * @return the search term
+     * @throws OXException
+     */
+    SearchTerm<?> getSearchTerm() throws OXException;
+
+    /**
+     * Gets the request's data as JSON object.
+     *
+     * @return the JSON object
+     * @throws OXException
+     */
+    JSONObject getJSONData() throws OXException;
 }

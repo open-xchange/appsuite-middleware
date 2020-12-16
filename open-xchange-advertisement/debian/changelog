@@ -1,3 +1,9 @@
+open-xchange-advertisement (7.10.4-15) stable; urgency=medium
+
+  * Build for patch 2020-12-14 (5924)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 09 Dec 2020 11:55:42 +0000
+
 open-xchange-advertisement (7.10.4-14) stable; urgency=medium
 
   * Build for patch 2020-11-23 (5905)

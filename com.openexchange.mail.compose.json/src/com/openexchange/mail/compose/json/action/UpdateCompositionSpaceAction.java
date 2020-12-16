@@ -50,11 +50,14 @@
 package com.openexchange.mail.compose.json.action;
 
 import java.util.UUID;
+import static com.openexchange.mail.compose.CompositionSpaces.buildConsoleTableFor;
+import java.util.Optional;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
@@ -69,6 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.2
  */
 public class UpdateCompositionSpaceAction extends AbstractMailComposeAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateCompositionSpaceAction.class);
 
     /**
      * Initializes a new {@link UpdateCompositionSpaceAction}.
@@ -92,7 +97,9 @@ public class UpdateCompositionSpaceAction extends AbstractMailComposeAction {
         parseJSONMessage(jMessage, md);
 
         CompositionSpace compositionSpace = compositionSpaceService.updateCompositionSpace(uuid, md, session);
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Updated composition space '{}':{}{}", compositionSpace.getId(), Strings.getLineSeparator(), buildConsoleTableFor(compositionSpace, Optional.ofNullable(requestData.getUserAgent())));
+        }
         return new AJAXRequestResult(compositionSpace, "compositionSpace");
     }
 

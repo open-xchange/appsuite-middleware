@@ -255,7 +255,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         return samlSessionCookie;
     }
 
-    private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {
+    protected LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {
         // The properties derived from optional state
         final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 

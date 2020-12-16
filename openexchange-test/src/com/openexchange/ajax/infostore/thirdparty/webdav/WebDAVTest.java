@@ -271,7 +271,8 @@ public class WebDAVTest extends AbstractConfigAwareAPIClientSession {
      */
     private String getRandomFolderName() {
         Random random = new Random();
-        return String.format("Test-Folder-%s", I(random.nextInt()));
+        //including a "+" sign in the folder regards to test MWB-705
+        return String.format("Test+Folder-%s", I(random.nextInt()));
     }
 
     /**

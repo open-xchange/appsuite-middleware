@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,12 +70,11 @@ import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.config.MailProxyConfig;
-import com.openexchange.net.HostList;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.services.Services;
-import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketFetcher;
 
 /**
  * {@link SMTPCapabilityCache} - A cache for CAPABILITY and greeting from SMTP servers.
@@ -235,11 +235,8 @@ public final class SMTPCapabilityCache {
     private static final class CapabilityAndGreetingCallable implements Callable<Capabilities> {
 
         private final InetSocketAddress key;
-
         private final boolean isSecure;
-
         private final ISMTPProperties smtpProperties;
-
         private final String domain;
 
         public CapabilityAndGreetingCallable(final InetSocketAddress key, final boolean isSecure, final ISMTPProperties smtpProperties, final String domain) {
@@ -259,75 +256,13 @@ public final class SMTPCapabilityCache {
             Socket s = null;
             com.sun.mail.util.LineInputStream lineInputStream = null;
             try {
-                try {
-                    if (isSecure) {
-                        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                        s = factoryProvider.getDefault().createSocket();
-                    } else {
-                        s = new Socket();
-                    }
-                    /*
-                     * Get connect timeout
-                     */
-                    int connectionTimeout = smtpProperties.getSmtpConnectionTimeout();
-                    /*
-                     * Set socket timeout
-                     */
-                    int timeout = smtpProperties.getSmtpTimeout();
-                    if (timeout > 0) {
-                        /*
-                         * Define timeout for blocking operations
-                         */
-                        s.setSoTimeout(timeout);
-                    }
-                    /*
-                     * Proxy settings
-                     */
-                    String proxyHost = System.getProperties().getProperty("mail.smtp.proxy.host", null);
-                    int proxyPort = 80;
-                    if (proxyHost == null) {
-                        // No proxy configured
-                        if (connectionTimeout > 0) {
-                            s.connect(key, connectionTimeout);
-                        } else {
-                            s.connect(key);
-                        }
-                    } else {
-                        // Proxy available via configuration
-                        int i = proxyHost.indexOf(':');
-                        if (i >= 0) {
-                            try {
-                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
-                            } catch (NumberFormatException ex) {
-                                // ignore it
-                            }
-                            proxyHost = proxyHost.substring(0, i);
-                        }
-                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.smtp.proxy.port", proxyPort);
-                        HostList nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
-                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
-                            if (connectionTimeout > 0) {
-                                s.connect(key, connectionTimeout);
-                            } else {
-                                s.connect(key);
-                            }
-                        } else {
-                            if (connectionTimeout > 0) {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
-                            } else {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw e;
-                }
+                // Establish socket connection
+                s = SocketFetcher.getSocket(key.getHostString(), key.getPort(), createSmtpProps(), "mail.smtp", false);
+
+                // Read IMAP server greeting on connect
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
                 final StringBuilder sb = new StringBuilder(512);
-                /*
-                 * Read IMAP server greeting on connect
-                 */
                 lineInputStream = new com.sun.mail.util.LineInputStream(in);
                 {
                     String line;
@@ -340,9 +275,8 @@ public final class SMTPCapabilityCache {
                 if (sb.length() > 0) {
                     sb.setLength(0);
                 }
-                /*
-                 * Request capabilities through EHLO command
-                 */
+
+                // Request capabilities through EHLO command
                 out.write(("EHLO " + domain + "\r\n").getBytes(StandardCharsets.UTF_8));
                 out.flush();
                 {
@@ -354,26 +288,68 @@ public final class SMTPCapabilityCache {
                     line = null;
                 }
                 String capabilities = sb.toString();
-                /*
-                 * Close connection through QUIT command
-                 */
+
+                // Close connection through QUIT command
                 out.write("QUIT\r\n".getBytes(StandardCharsets.UTF_8));
                 out.flush();
-                /*
-                 * Create new Capabilities object
-                 */
+
+                // Create new Capabilities object
+                LOG.debug("Successfully fetched capabilities and greeting from SMTP server \"{}\":{}{}", key.getHostString(), Strings.getLineSeparator(), capabilities);
                 return new Capabilities(capabilities);
             } finally {
                 if (lineInputStream != null) {
                     Streams.close(lineInputStream);
                 }
-                if (s != null) {
-                    try {
-                        s.close();
-                    } catch (IOException e) {
-                        LOG.error("", e);
-                    }
+                Streams.close(s);
+            }
+        }
+
+        private Properties createSmtpProps() {
+            Properties smtpProps = MimeDefaultSession.getDefaultMailProperties();
+            {
+                int connectionTimeout = smtpProperties.getSmtpConnectionTimeout();
+                if (connectionTimeout > 0) {
+                    smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(connectionTimeout));
                 }
+            }
+            {
+                int timeout = smtpProperties.getSmtpTimeout();
+                if (timeout > 0) {
+                    smtpProps.put("mail.smtp.timeout", Integer.toString(timeout));
+                }
+            }
+            SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+            final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+            final String sPort = Integer.toString(key.getPort());
+            if (isSecure) {
+                smtpProps.put("mail.smtp.socketFactory.class", socketFactoryClass);
+                smtpProps.put("mail.smtp.socketFactory.port", sPort);
+                smtpProps.put("mail.smtp.socketFactory.fallback", "false");
+                applySslProtocols(smtpProps);
+                applySslCipherSuites(smtpProps);
+            } else {
+                smtpProps.put("mail.smtp.starttls.enable", "true");
+                smtpProps.put("mail.smtp.socketFactory.port", sPort);
+                smtpProps.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
+                smtpProps.put("mail.smtp.ssl.socketFactory.port", sPort);
+                smtpProps.put("mail.smtp.socketFactory.fallback", "false");
+                applySslProtocols(smtpProps);
+                applySslCipherSuites(smtpProps);
+            }
+            return smtpProps;
+        }
+
+        private void applySslProtocols(Properties imapprops) {
+            String sslProtocols = smtpProperties.getSSLProtocols();
+            if (Strings.isNotEmpty(sslProtocols)) {
+                imapprops.put("mail.smtp.ssl.protocols", sslProtocols);
+            }
+        }
+
+        private void applySslCipherSuites(Properties imapprops) {
+            String sslCipherSuites = smtpProperties.getSSLCipherSuites();
+            if (Strings.isNotEmpty(sslCipherSuites)) {
+                imapprops.put("mail.smtp.ssl.ciphersuites", sslCipherSuites);
             }
         }
     }

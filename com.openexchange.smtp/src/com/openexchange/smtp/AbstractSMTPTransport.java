@@ -108,7 +108,6 @@ import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -133,7 +132,6 @@ import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -439,16 +437,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             synchronized (this) {
                 if (null == smtpSession) {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
-                    /*
-                     * Remove proxy settings for whitelisted hosts
-                     */
-                    HostList nonProxyHosts = MailProxyConfig.getInstance().getSmtpNonProxyHostList();
-                    if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(smtpConfig.getSmtpServerAddress())) {
-                        smtpProps.remove("mail.smtp.proxy.host");
-                        smtpProps.remove("mail.smtp.proxy.port");
-                        smtpProps.remove("mail.smtps.proxy.host");
-                        smtpProps.remove("mail.smtps.proxy.port");
-                    }
                     smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
 
