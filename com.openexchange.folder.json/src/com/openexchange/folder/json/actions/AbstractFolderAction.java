@@ -93,6 +93,7 @@ import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.contact.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
@@ -443,7 +444,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             switch (Type.READ.getModule(scope)) {
                 // Contacts
                 case ContactActionFactory.MODULE:
-                    return Collections.singleton((ContentType) ContactContentType.getInstance());
+                    Set<ContentType> contactContentTypes = new HashSet<>(2);
+                    contactContentTypes.add(ContactContentType.getInstance());
+                    contactContentTypes.add(ContactsContentType.getInstance());
+                    return contactContentTypes;
                 // Calendar
                 case ChronosOAuthScope.MODULE:
                     Set<ContentType> result = new HashSet<>(2);
@@ -485,7 +489,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             switch (Type.WRITE.getModule(scope)) {
                 // Contacts
                 case ContactActionFactory.MODULE:
-                    return Collections.singleton((ContentType) ContactContentType.getInstance());
+                    Set<ContentType> contactContentTypes = new HashSet<>(2);
+                    contactContentTypes.add(ContactContentType.getInstance());
+                    contactContentTypes.add(ContactsContentType.getInstance());
+                    return contactContentTypes;
                 // Calendar
                 case ChronosOAuthScope.MODULE:
                     Set<ContentType> result = new HashSet<>(2);
@@ -517,7 +524,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         static String readScopeForContentType(ContentType contentType) {
-            if (contentType == ContactContentType.getInstance()) {
+            if (contentType == ContactContentType.getInstance()||
+                contentType == ContactsContentType.getInstance()) {
                 return Type.READ.getScope(ContactActionFactory.MODULE);
             } else if (contentType == CalendarContentType.getInstance()) {
                 return Type.READ.getScope(AppointmentActionFactory.MODULE);
@@ -539,7 +547,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         static String writeScopeForContentType(ContentType contentType) {
-            if (contentType == ContactContentType.getInstance()) {
+            if (contentType == ContactContentType.getInstance()||
+                contentType == ContactsContentType.getInstance()) {
                 return Type.WRITE.getScope(ContactActionFactory.MODULE);
             } else if (contentType == CalendarContentType.getInstance()) {
                 return Type.WRITE.getScope(AppointmentActionFactory.MODULE);
