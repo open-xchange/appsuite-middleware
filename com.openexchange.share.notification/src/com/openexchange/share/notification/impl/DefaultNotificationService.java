@@ -306,9 +306,18 @@ public class DefaultNotificationService implements ShareNotificationService {
             return warnings;
         }
 
+        // Encode calling user in share target path
+        Map<String, String> additionals = targetPath.getAdditionals();
+        if (null == additionals) {
+            additionals = Collections.singletonMap("c", String.valueOf(session.getUserId()));
+        } else {
+            additionals.put("c", String.valueOf(session.getUserId()));
+        }
+        ShareTargetPath creatorEncodedTargetPath = new ShareTargetPath(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), additionals);
+
         // get underlying share & check session user's permissions
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
-        ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+        ShareTarget srcTarget = new ShareTarget(creatorEncodedTargetPath.getModule(), creatorEncodedTargetPath.getFolder(), creatorEncodedTargetPath.getItem());
         try {
             if (false == moduleSupport.mayAdjust(srcTarget, session)) {
                 throw ShareNotifyExceptionCodes.INSUFFICIENT_PERMISSIONS.create(srcTarget);
@@ -372,7 +381,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         /*
          * Send notifications to guest synchronously
          */
-        Set<InternetAddress> collectedAddresses = sendToGuests(usersById, moduleSupport, srcTarget, warnings, message, targetPath, session, hostData);
+        Set<InternetAddress> collectedAddresses = sendToGuests(usersById, moduleSupport, srcTarget, warnings, message, creatorEncodedTargetPath, session, hostData);
         if (!collectedAddresses.isEmpty()) {
             ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
             if (null != ccs) {
