@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,13 +66,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.config.MailProxyConfig;
-import com.openexchange.net.HostList;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketFetcher;
 
 /**
  * {@link POP3CapabilityCache} - A cache for CAPA responses from POP3 servers.
@@ -224,23 +225,11 @@ public final class POP3CapabilityCache {
         return getCapability0(address, isSecure, pop3Properties, login);
     }
 
-    private static final int MAX_TIMEOUT = 5000;
-
-    private static int getMaxTimeout(final IPOP3Properties pop3Properties) {
-        return Math.min(pop3Properties.getPOP3Timeout(), MAX_TIMEOUT);
-    }
-
-    private static final int MAX_CONNECT_TIMEOUT = 2500;
-
-    private static int getMaxConnectTimeout(final IPOP3Properties pop3Properties) {
-        return Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
-    }
-
     private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, OXException {
         int idleTime = capabiltiesCacheIdleTime();
         if (idleTime < 0) {
             // Never cache
-            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, pop3Properties));
             ft.run();
             return getFrom(ft, address, login, true).getCapabilities();
         }
@@ -250,7 +239,7 @@ public final class POP3CapabilityCache {
 
         Future<Capabilities> f = map.get(address);
         if (null == f) {
-            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, pop3Properties));
             f = map.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -262,7 +251,7 @@ public final class POP3CapabilityCache {
         Capabilities ret = getFrom(f, address, login, caller);
         if (null != ret) {
             if (isElapsed(ret, idleTime)) {
-                FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+                FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, pop3Properties));
                 if (map.replace(address, f, ft)) {
                     f = ft;
                     ft.run();
@@ -285,7 +274,7 @@ public final class POP3CapabilityCache {
             /*
              * Intended for fast capabilities look-up. Use individual timeout value to ensure fast return from call.
              */
-            return new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)).call().getCapabilities();
+            return new CapabilityCallable(address, isSecure, pop3Properties).call().getCapabilities();
         } catch (java.net.SocketTimeoutException e) {
             throw POP3ExceptionCode.CONNECT_ERROR.create(e, address, login);
         }
@@ -343,88 +332,26 @@ public final class POP3CapabilityCache {
 
         private final InetSocketAddress key;
         private final boolean isSecure;
-        private final int connectionTimeout;
-        private final int timeout;
+        private final IPOP3Properties pop3Properties;
 
-        CapabilityCallable(InetSocketAddress key, boolean isSecure, int connectionTimeout, int timeout) {
+        CapabilityCallable(InetSocketAddress key, boolean isSecure, IPOP3Properties pop3Properties) {
             super();
             this.key = key;
             this.isSecure = isSecure;
-            this.connectionTimeout = connectionTimeout;
-            this.timeout = timeout;
+            this.pop3Properties = pop3Properties;
         }
 
         @Override
         public Capabilities call() throws IOException {
-            Socket s = null;
             StringBuilder sb = new StringBuilder(512);
+            Socket s = null;
             try {
-                try {
-                    if (isSecure) {
-                        SSLSocketFactoryProvider factoryProvider = POP3ServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
-                        s = factoryProvider.getDefault().createSocket();
-                    } else {
-                        s = new Socket();
-                    }
-                    /*
-                     * Set socket timeout
-                     */
-                    if (timeout > 0) {
-                        /*
-                         * Define timeout for blocking operations
-                         */
-                        s.setSoTimeout(timeout);
-                    }
-                    /*
-                     * Proxy settings
-                     */
-                    String proxyHost = System.getProperties().getProperty("mail.pop3.proxy.host", null);
-                    int proxyPort = 80;
-                    if (proxyHost == null) {
-                        // No proxy configured
-                        if (connectionTimeout > 0) {
-                            /*
-                             * Throws java.net.SocketTimeoutException if timeout expires before connecting
-                             */
-                            s.connect(key, connectionTimeout);
-                        } else {
-                            s.connect(key);
-                        }
-                    } else {
-                        // Proxy available via configuration
-                        int i = proxyHost.indexOf(':');
-                        if (i >= 0) {
-                            try {
-                                proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
-                            } catch (NumberFormatException ex) {
-                                // ignore it
-                            }
-                            proxyHost = proxyHost.substring(0, i);
-                        }
-                        proxyPort = PropUtil.getIntProperty(System.getProperties(), "mail.pop3.proxy.port", proxyPort);
-                        HostList nonProxyHosts = MailProxyConfig.getInstance().getPop3NonProxyHostList();
-                        if (!nonProxyHosts.isEmpty() && nonProxyHosts.contains(key.getAddress())) {
-                            if (connectionTimeout > 0) {
-                                s.connect(key, connectionTimeout);
-                            } else {
-                                s.connect(key);
-                            }
-                        } else {
-                            if (connectionTimeout > 0) {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort), connectionTimeout);
-                            } else {
-                                s.connect(new InetSocketAddress(proxyHost, proxyPort));
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw e;
-                }
+                // Establish socket connection
+                s = SocketFetcher.getSocket(key.getHostString(), key.getPort(), createPop3Props(), "mail.pop3", false);
+
+                // Read POP3 server greeting on connect
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                /*
-                 * Read POP3 server greeting on connect
-                 */
                 boolean skipLF = false;
                 boolean eol = false;
                 int i = -1;
@@ -443,20 +370,16 @@ public final class POP3CapabilityCache {
                 /* final String greeting = sb.toString(); */
                 sb.setLength(0);
                 if (skipLF) {
-                    /*
-                     * Consume final LF
-                     */
+                    // Consume final LF
                     i = in.read();
                     skipLF = false;
                 }
-                /*
-                 * Request capabilities through CAPABILITY command
-                 */
+
+                // Request capabilities through CAPA command
                 out.write("CAPA\r\n".getBytes());
                 out.flush();
-                /*
-                 * Read CAPABILITY response
-                 */
+
+                // Read CAPABILITY response
                 final String capabilities;
                 {
                     final char pre = (char) in.read();
@@ -499,9 +422,7 @@ public final class POP3CapabilityCache {
                         }
                         sb.setLength(0);
                         if (skipLF) {
-                            /*
-                             * Consume final LF
-                             */
+                            // Consume final LF
                             i = in.read();
                             skipLF = false;
                         }
@@ -541,27 +462,19 @@ public final class POP3CapabilityCache {
                         return new Capabilities(DEFAULT_CAPABILITIES);
                     }
                 }
-                /*
-                 * Close connection through LOGOUT command
-                 */
+
+                // Close connection through LOGOUT command
                 out.write("QUIT\r\n".getBytes());
                 out.flush();
-                /*
-                 * Consume until socket closure
-                 */
-                i = in.read();
-                while (i != -1) {
-                    i = in.read();
-                }
-                /*
-                 * Create new object
-                 */
+
+                // Return result
+                LOG.debug("Successfully fetched capabilities and greeting from POP3 server \"{}\":{}{}", key.getHostString(), Strings.getLineSeparator(), capabilities);
                 return new Capabilities(capabilities);
             } catch (IOException e) {
-                LOG.warn("Failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
+                LOG.warn("Failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostString(), sb);
                 throw e;
             } catch (RuntimeException e) {
-                LOG.warn("Fatally failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
+                LOG.warn("Fatally failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostString(), sb);
                 final IOException ioException = new IOException(e.getMessage());
                 ioException.initCause(e);
                 throw ioException;
@@ -573,6 +486,67 @@ public final class POP3CapabilityCache {
                         LOG.error("", e);
                     }
                 }
+            }
+        }
+
+        private static final int MAX_TIMEOUT = 5000;
+
+        private int getMaxTimeout() {
+            return Math.min(pop3Properties.getPOP3Timeout(), MAX_TIMEOUT);
+        }
+
+        private static final int MAX_CONNECT_TIMEOUT = 2500;
+
+        private int getMaxConnectTimeout() {
+            return Math.min(pop3Properties.getPOP3ConnectionTimeout(), MAX_CONNECT_TIMEOUT);
+        }
+
+        private Properties createPop3Props() {
+            Properties pop3Props = MimeDefaultSession.getDefaultMailProperties();
+            {
+                int connectionTimeout = getMaxConnectTimeout();
+                if (connectionTimeout > 0) {
+                    pop3Props.put("mail.pop3.connectiontimeout", Integer.toString(connectionTimeout));
+                }
+            }
+            {
+                int timeout = getMaxTimeout();
+                if (timeout > 0) {
+                    pop3Props.put("mail.pop3.timeout", Integer.toString(timeout));
+                }
+            }
+            SSLSocketFactoryProvider factoryProvider = POP3ServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+            String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
+            String sPort = Integer.toString(key.getPort());
+            if (isSecure) {
+                pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                applySslProtocols(pop3Props);
+                applySslCipherSuites(pop3Props);
+            } else {
+                pop3Props.put("mail.pop3.starttls.enable", "true");
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.ssl.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                applySslProtocols(pop3Props);
+                applySslCipherSuites(pop3Props);
+            }
+            return pop3Props;
+        }
+
+        private void applySslProtocols(Properties pop3Props) {
+            String sslProtocols = pop3Properties.getSSLProtocols();
+            if (Strings.isNotEmpty(sslProtocols)) {
+                pop3Props.put("mail.pop3.ssl.protocols", sslProtocols);
+            }
+        }
+
+        private void applySslCipherSuites(Properties pop3Props) {
+            String cipherSuites = pop3Properties.getSSLCipherSuites();
+            if (Strings.isNotEmpty(cipherSuites)) {
+                pop3Props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
             }
         }
     }

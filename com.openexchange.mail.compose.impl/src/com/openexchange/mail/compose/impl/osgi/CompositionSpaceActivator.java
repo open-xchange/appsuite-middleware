@@ -54,11 +54,8 @@ import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Optional;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -98,7 +95,8 @@ import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStor
 import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
 import com.openexchange.mail.compose.impl.attachment.filestore.FilestorageAttachmentStorageDatabaseAccessProvider;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
-import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpRegistry;
+import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpScheduler;
+import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
@@ -123,7 +121,6 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -278,15 +275,10 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         final CryptoCompositionSpaceService cryptoServiceImpl = new CryptoCompositionSpaceService(serviceImpl, keyStorageService, this);
         registerService(CompositionSpaceService.class, cryptoServiceImpl);
 
-        {
-            Optional<CompositionSpaceCleanUpRegistry> optionalCleanUpRegistry = CompositionSpaceCleanUpRegistry.initInstance(cryptoServiceImpl, this);
-            if (optionalCleanUpRegistry.isPresent()) {
-                CompositionSpaceCleanUpRegistry cleanUpRegistry = optionalCleanUpRegistry.get();
-                Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-                registerService(EventHandler.class, cleanUpRegistry, serviceProperties);
-            }
-        }
+        CompositionSpaceCleanUpScheduler.initInstance(serviceImpl, this);
+
+        TimerService timerService = getService(TimerService.class);
+        timerService.scheduleWithFixedDelay(new CompositionSpaceCleanUpTask(this), 5000L, 3600000L); // Every 60 minutes
 
         {
             LoginHandlerService loginHandler = new LoginHandlerService() {
@@ -300,7 +292,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
                 public void handleLogin(LoginResult login) throws OXException {
                     Session session = login.getSession();
                     if (null != session) {
-                        CompositionSpaceCleanUpRegistry cleanUpRegistry = CompositionSpaceCleanUpRegistry.getInstance();
+                        CompositionSpaceCleanUpScheduler cleanUpRegistry = CompositionSpaceCleanUpScheduler.getInstance();
                         if (cleanUpRegistry != null) {
                             cleanUpRegistry.scheduleCleanUpFor(session);
                         }
@@ -355,7 +347,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             inmemoryStorage.close();
         }
         FileStorageCompositionSpaceKeyStorage.unsetInstance();
-        CompositionSpaceCleanUpRegistry.releaseInstance();
+        CompositionSpaceCleanUpScheduler.releaseInstance();
         super.stopBundle();
     }
 

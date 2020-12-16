@@ -109,14 +109,12 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -474,14 +472,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             case OAUTH:
                 try {
                     IMAPConfig imapConfig = getIMAPConfig();
-                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                    boolean isPrimary = (imapConfig.getAccountId() == MailAccount.DEFAULT_ID);
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties(), isPrimary).containsKey("AUTH=XOAUTH2");
                 } catch (IOException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             case OAUTHBEARER:
                 try {
                     IMAPConfig imapConfig = getIMAPConfig();
-                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=OAUTHBEARER");
+                    boolean isPrimary = (imapConfig.getAccountId() == MailAccount.DEFAULT_ID);
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()), imapConfig.isSecure(), imapConfig.getIMAPProperties(), isPrimary).containsKey("AUTH=OAUTHBEARER");
                 } catch (IOException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
@@ -701,17 +701,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 } else {
                     imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
                 }
-            }
-
-            /*
-             * Remove proxy settings for whitelisted hosts
-             */
-            HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
-            if (nonProxyHosts.contains(getIMAPConfig().getImapServerAddress())) {
-                imapProps.remove("mail.imap.proxy.host");
-                imapProps.remove("mail.imap.proxy.port");
-                imapProps.remove("mail.imaps.proxy.host");
-                imapProps.remove("mail.imaps.proxy.host");
             }
 
             /*
@@ -970,7 +959,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Establish a new one...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+        boolean isPrimary = false;
         if (MailAccount.DEFAULT_ID == accountId) {
+            isPrimary = true;
             boolean failedToSetClientParameters = true; // Pessimistic
             try {
                 IMAPClientParameters.setDefaultClientParameters(imapStore, session);
@@ -988,7 +979,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (null != preAuthStartTlsCap) {
             try {
-                Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(server), port), false, IMAPProperties.getInstance());
+                Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(new HostAndPort(IDNA.toASCII(server), port), false, IMAPProperties.getInstance(), isPrimary);
                 if (null != capabilities) {
                     preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
                 }

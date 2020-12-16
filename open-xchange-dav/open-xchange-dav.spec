@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 28
+%define        ox_release 29
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,38 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SCR-785
+    if ox_scr_todo SCR-785
+    then
+        if ! contains "macOS" /opt/open-xchange/etc/carddav.properties; then
+            cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=1 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
+diff --git a/carddav.properties b/carddav.properties
+index d8a24e74adb..041e7baa318 100644
+--- a/carddav.properties
++++ b/carddav.properties
+@@ -24,7 +24,8 @@ com.openexchange.carddav.exposedCollections=0
+ # matches all known varieties of the Mac OS Addressbook client, that doesn't 
+ # support multiple collections. Only used if 'exposedCollections' is set to 
+ # '0'. The pattern is used case insensitive. 
+-com.openexchange.carddav.userAgentForAggregatedCollection=.*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*
++com.openexchange.carddav.userAgentForAggregatedCollection=.*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*|.*macOS.*AddressBook.*
+ 
+ # Specifies if all visible folders are used to create the aggregated 
+ # collection, or if a reduced set of folders only containing the global 
+EOF
+        fi
+        ox_scr_done SCR-785
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -66,6 +98,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Dec 09 2020 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2020-12-14 (5923)
 * Mon Nov 16 2020 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2020-11-23 (5904)
 * Tue Nov 03 2020 Steffen Templin <marcus.klein@open-xchange.com>

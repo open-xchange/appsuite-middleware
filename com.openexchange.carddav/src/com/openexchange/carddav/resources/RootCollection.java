@@ -98,7 +98,7 @@ public class RootCollection extends DAVRootCollection {
     	super(factory, "Addressbooks");
     	this.factory = factory;
     	includeProperties(new SyncToken(this));
-        if (DAVUserAgent.MAC_CONTACTS.equals(getUserAgent())) {
+    	if (isUseAggregatedCollection()) {
             /*
              * indicate permissions from default folder also for root collection for macOS client
              */
@@ -107,7 +107,7 @@ public class RootCollection extends DAVRootCollection {
             } catch (OXException e) {
                 throw protocolException(getUrl(), e);
             }
-        }
+    	}
     }
 
     @Override
@@ -209,7 +209,7 @@ public class RootCollection extends DAVRootCollection {
 
     private Pattern getUserAgentForAggregatedCollection() {
         if (null == this.userAgentForAggregatedCollection) {
-            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*";
+            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*|.*macOS.*AddressBook.*";
             try {
                 regex = factory.getConfigValue(USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY, regex);
             } catch (OXException e) {

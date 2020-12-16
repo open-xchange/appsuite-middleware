@@ -375,6 +375,12 @@ public class SocketFetcher {
 	    proxyPort = PropUtil.getIntProperty(props,
 					prefix + ".proxy.port", proxyPort);
 	    String nonProxyList = props.getProperty(prefix + ".proxy.nonProxyHosts", "");
+	    if (Strings.isEmpty(nonProxyList) && prefix.endsWith("s")) {
+            if (prefix.endsWith(".imaps") || prefix.endsWith(".smtps") || prefix.endsWith(".pop3s") || prefix.endsWith(".gimaps")) {
+                // Retry using non-SSL name
+                nonProxyList = props.getProperty(prefix.substring(0, prefix.length() - 1) + ".proxy.nonProxyHosts", "");
+            }
+        }
 	    if (Strings.isNotEmpty(nonProxyList) && HostList.valueOf(nonProxyList.trim().replace('|', ',')).contains(address)) {
 	        proxyHost = null;
         } else {            

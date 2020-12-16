@@ -1,6 +1,7 @@
 package com.openexchange.saml;
 
 import static org.hamcrest.Matchers.containsString;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -19,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -92,6 +95,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.HashCalculator;
@@ -368,8 +372,8 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
-     @Test
-     public void testAutoLogin() throws Exception {
+    @Test
+    public void testAutoLoginWithDeepLink() throws Exception {
         /*
          * Fake SAML cookie and try auto login
          */
@@ -385,6 +389,7 @@ public class SAMLWebSSOProviderTest {
             }
         }));
 
+        String deepLinkParams = "app=io.ox/mail&folder=virtual/all-unseen";
         SimHttpServletRequest autoLoginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
             .setScheme("https")
             .setHost("webmail.example.com")
@@ -392,6 +397,7 @@ public class SAMLWebSSOProviderTest {
             .setParameter("flow", "login")
             .setParameter("client", "test-client")
             .setParameter("redirect", "true")
+            .setParameter("uriFragment", "!!&" + deepLinkParams)
             .build());
         String cookieHash = HashCalculator.getInstance().getHash(
             autoLoginHTTPRequest,
@@ -409,6 +415,9 @@ public class SAMLWebSSOProviderTest {
         Matcher sessionMatcher = Pattern.compile("session=([a-z0-9]+)").matcher(redirectLocation);
         Assert.assertTrue(sessionMatcher.find());
         Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
+
+        Matcher deepLinkMatcher = Pattern.compile(Pattern.quote("&" + deepLinkParams)).matcher(redirectLocation);
+        Assert.assertTrue(deepLinkMatcher.find());
     }
 
      @Test
