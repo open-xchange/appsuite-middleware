@@ -52,6 +52,8 @@ package com.openexchange.admin.reseller.rmi.bugs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.junit.Test;
 import com.openexchange.admin.reseller.rmi.AbstractOXResellerTest;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -60,32 +62,61 @@ import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.rmi.factory.ResellerAdminFactory;
 
 /**
- * {@link Bug795}
+ * {@link Bugs_795_801}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class Bug795 extends AbstractOXResellerTest {
+public class Bugs_795_801 extends AbstractOXResellerTest {
 
     private static final String ERROR_MESSAGE = "Unable to delete %1$s, still owns Subadmin(s)";
 
     /**
-     * Initializes a new {@link Bug795}.
+     * Initializes a new {@link Bugs_795_801}.
      */
-    public Bug795() {
+    public Bugs_795_801() {
         super();
     }
 
+    /**
+     * Bug 795
+     */
     @Test
-    public void testDeleteSubadminThatStillOwnsSubsubAdmins() throws Exception {
-        ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin("reseller-mwb-795");
+    public void testDeleteSubadminWithIdThatStillOwnsSubsubAdmins() throws Exception {
+        executeWith("reseller-mwb-795", (a) -> {
+            ResellerAdmin toDelete = new ResellerAdmin();
+            toDelete.setId(a.getId());
+            return toDelete;
+        });
+    }
+
+    /**
+     * Bug 801
+     */
+    @Test
+    public void testDeleteSubadminWithNameThatStillOwnsSubsubAdmins() throws Exception {
+        executeWith("reseller-mwb-801", (a) -> {
+            ResellerAdmin toDelete = new ResellerAdmin();
+            toDelete.setId(a.getId());
+            return toDelete;
+        });
+    }
+
+    /**
+     * Executes the test case with the specified reseller name and consumer
+     *
+     * @param n The reseller name
+     * @param consumer The consumer
+     */
+    private void executeWith(String n, Function<ResellerAdmin, ResellerAdmin> consumer) throws Exception {
+        ResellerAdmin adm = ResellerAdminFactory.createResellerAdmin(n);
         adm.setRestrictions(new Restriction[] { CanCreateSubAdmin() });
 
         ResellerAdmin admin = getResellerManager().create(adm);
-        ResellerAdmin subAdmin = getResellerManager().create(admin, ResellerAdminFactory.createResellerAdmin("subreseller-mwb-795"));
+        ResellerAdmin subAdmin = getResellerManager().create(admin, ResellerAdminFactory.createResellerAdmin("sub" + n));
 
         try {
-            getResellerManager().delete(admin);
+            getResellerManager().delete(consumer.apply(admin));
             fail("The parent admin should not be deletable when there are subadmins bound to the parent.");
         } catch (Exception e) {
             // Expected
