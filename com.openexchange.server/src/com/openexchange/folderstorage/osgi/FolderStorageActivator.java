@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.osgi;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -114,7 +115,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
         protected DisplayNameFolderField() {
             super();
-            cache = CacheBuilder.newBuilder().maximumSize(1024).build();
+            cache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         }
 
         @Override
