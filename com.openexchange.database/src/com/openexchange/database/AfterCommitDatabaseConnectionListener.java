@@ -47,45 +47,58 @@
  *
  */
 
-package com.openexchange.api.client.impl.osgi;
+package com.openexchange.database;
 
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.api.client.impl.ApiClientServiceImpl;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientService;
-import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.user.UserService;
-import com.openexchange.version.VersionService;
+import java.sql.Connection;
+import java.util.function.Consumer;
 
 /**
- * {@link ApiClientActivator}
+ * {@link AfterCommitDatabaseConnectionListener}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class ApiClientActivator extends HousekeepingActivator {
+public class AfterCommitDatabaseConnectionListener implements DatabaseConnectionListener {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpClientService.class, UserService.class, LeanConfigurationService.class };
+    private final Consumer<Connection> consumer;
+
+    /**
+     * Initializes a new {@link AfterCommitDatabaseConnectionListener}.
+     *
+     * @param consumer The callback to invoke on after the connection has been committed
+     */
+    public AfterCommitDatabaseConnectionListener(Consumer<Connection> consumer) {
+        super();
+        this.consumer = consumer;
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { VersionService.class };
+    public void onAutoCommitChanged(boolean autoCommit, Connection connection) {
+        // no
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        ApiClientServiceImpl apiClientService = new ApiClientServiceImpl(this);
-        registerService(ApiClientService.class, apiClientService);
-        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
-            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
-        registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
+    public void onBeforeRollbackPerformed(Connection connection) {
+        // no
+    }
+
+    @Override
+    public void onAfterRollbackPerformed(Connection connection) {
+        // no
+    }
+
+    @Override
+    public void onBeforeCommitPerformed(Connection connection) {
+        // no
+    }
+
+    @Override
+    public void onAfterCommitPerformed(Connection connection) {
+        try {
+            consumer.accept(connection);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(AfterCommitDatabaseConnectionListener.class).warn("Error invoking callback after commit", e);
+        }
     }
 
 }

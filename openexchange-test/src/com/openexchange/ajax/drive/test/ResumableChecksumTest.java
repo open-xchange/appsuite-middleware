@@ -167,7 +167,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), null, downloadBody);
         try (FileInputStream in = new FileInputStream(downloadFile)) {
             byte[] downloadArray = IOUtils.toByteArray(in);
             assertEquals(l(totalLength), downloadFile.length());
@@ -215,7 +215,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), null, downloadBody);
         try (FileInputStream in = new FileInputStream(downloadFile)) {
             byte[] downloadArray = IOUtils.toByteArray(in);
             assertEquals(l(totalLength), downloadFile.length());

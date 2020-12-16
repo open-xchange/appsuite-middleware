@@ -66,8 +66,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableMap;
@@ -676,7 +676,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
                 }
                 if (FolderCacheManager.isEnabled()) {
                     final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
-                    cacheManager.removeFolderObject(fo.getObjectID(), ctx);
+                    cacheManager.removeFolderObject(ctx.getContextId(), fo.getObjectID(), wc);
                     {
                         FolderObject tmp = cacheManager.loadFolderObject(fo.getObjectID(), ctx, wc);
                         fo.fill(tmp);
@@ -693,7 +693,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
                          * it is needed to do this by removing the folder object so the invalidation is distributed every time also in the
                          * event that it is not in the local cache
                          */
-                        cacheManager.removeFolderObject(parentFolderID, ctx);
+                        cacheManager.removeFolderObject(ctx.getContextId(), parentFolderID, wc);
                         FolderObject tmp = cacheManager.loadFolderObject(parentFolderID, ctx, wc);
                         if (null != handlers) {
                             for (UpdatedFolderHandler handler : handlers) {
@@ -705,7 +705,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
                         /*
                          * Update old parent, too
                          */
-                        cacheManager.removeFolderObject(oldParentId, ctx);
+                        cacheManager.removeFolderObject(ctx.getContextId(), oldParentId, wc);
                         FolderObject tmp = cacheManager.loadFolderObject(oldParentId, ctx, wc);
                         if (null != handlers) {
                             for (UpdatedFolderHandler handler : handlers) {

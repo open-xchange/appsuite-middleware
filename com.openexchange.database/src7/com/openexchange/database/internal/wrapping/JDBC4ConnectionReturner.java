@@ -682,12 +682,20 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         checkForAlreadyClosed();
-        return delegate.isWrapperFor(iface);
+        return iface.isInstance(this) || delegate.isWrapperFor(iface);
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         checkForAlreadyClosed();
+        if (iface.isInstance(this)) {
+            try {
+                return iface.cast(this);
+            } catch (ClassCastException e) {
+                LOGGER.debug("", e);
+                // fall through
+            }
+        }
         return delegate.unwrap(iface);
     }
 

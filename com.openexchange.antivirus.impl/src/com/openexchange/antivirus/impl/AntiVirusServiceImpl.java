@@ -66,6 +66,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
 import com.openexchange.antivirus.AntiVirusProperty;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusService;
@@ -99,7 +100,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class AntiVirusServiceImpl implements AntiVirusService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AntiVirusServiceImpl.class);
-    
+
     private static final long MEGABYTE = 1024L * 1024L;
 
     private final ServiceLookup services;
@@ -121,23 +122,23 @@ public class AntiVirusServiceImpl implements AntiVirusService {
     }
 
     @Override
-    public AntiVirusResult scan(InputStreamClosure stream, String uniqueId, long contentLength) throws OXException {
-        return performScan(stream, uniqueId, contentLength);
+    public AntiVirusResult scan(InputStreamClosure stream, String uniqueId, long contentLength, AntiVirusEncapsulatedContent content) throws OXException {
+        return performScan(stream, uniqueId, contentLength, content);
     }
 
     @Override
-    public AntiVirusResult scan(IFileHolder fileHolder, String uniqueId) throws OXException {
-        return performScan(() -> fileHolder.getStream(), uniqueId, fileHolder.getLength());
+    public AntiVirusResult scan(IFileHolder fileHolder, String uniqueId, AntiVirusEncapsulatedContent content) throws OXException {
+        return performScan(() -> fileHolder.getStream(), uniqueId, fileHolder.getLength(), content);
     }
 
     @Override
-    public AntiVirusResult scan(File file, String uniqueId, long fileSize) throws OXException {
-        return performScan(() -> new FileInputStream(file), uniqueId, fileSize);
+    public AntiVirusResult scan(File file, String uniqueId, long fileSize, AntiVirusEncapsulatedContent content) throws OXException {
+        return performScan(() -> new FileInputStream(file), uniqueId, fileSize, content);
     }
 
     @Override
-    public AntiVirusResult scan(ManagedFile managedFile, String uniqueId) throws OXException {
-        return performScan(() -> managedFile.getInputStream(), uniqueId, managedFile.getSize());
+    public AntiVirusResult scan(ManagedFile managedFile, String uniqueId, AntiVirusEncapsulatedContent content) throws OXException {
+        return performScan(() -> managedFile.getInputStream(), uniqueId, managedFile.getSize(), content);
     }
 
     @Override
@@ -186,7 +187,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      * @return The {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-    private AntiVirusResult performScan(InputStreamClosure stream, String uniqueId, long contentLength) throws OXException {
+    private AntiVirusResult performScan(InputStreamClosure stream, String uniqueId, long contentLength, AntiVirusEncapsulatedContent content) throws OXException {
         LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
         int maxFileSize = leanConfigurationService.getIntProperty(AntiVirusProperty.maxFileSize);
         if (maxFileSize == 0 || (maxFileSize > 0 && contentLength > maxFileSize * MEGABYTE)) {
@@ -208,7 +209,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
 
         // No unique id? No caching, just scan and return
         if (Strings.isEmpty(uniqueId)) {
-            return scan(stream, contentLength, server, port, service, mode, client, options);
+            return scan(stream, content, contentLength, server, port, service, mode, client, options);
         }
 
         AntiVirusResult result = cachedResults.getIfPresent(uniqueId);
@@ -229,7 +230,7 @@ public class AntiVirusServiceImpl implements AntiVirusService {
                 cachedResults.invalidate(uniqueId);
             }
 
-            result = scan(stream, contentLength, server, port, service, mode, client, options);
+            result = scan(stream, content, contentLength, server, port, service, mode, client, options);
             if (Strings.isNotEmpty(result.getISTag())) {
                 cachedResults.put(uniqueId, new UnscannedAntiVirusResult(result));
             }
@@ -252,9 +253,9 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      * @param options The {@link ICAPOptions}
      * @return The parsed {@link AntiVirusResult} of the scan
      */
-    private AntiVirusResult scan(InputStreamClosure stream, long contentLength, String server, int port, String service, OperationMode mode, ICAPClient client, ICAPOptions options) {
+    private AntiVirusResult scan(InputStreamClosure stream, AntiVirusEncapsulatedContent content, long contentLength, String server, int port, String service, OperationMode mode, ICAPClient client, ICAPOptions options) {
         try (InputStream inputStream = stream.newStream()) {
-            ICAPResponse response = logAndMonitorExecution(client, createBuilder(options, server, port, service, mode, inputStream, contentLength).build(), contentLength);
+            ICAPResponse response = logAndMonitorExecution(client, createBuilder(options, content, server, port, service, mode, inputStream, contentLength).build(), contentLength);
             return parser.parse(response);
         } catch (UnknownHostException e) {
             return AntiVirusResultImpl.builder().withError(AntiVirusServiceExceptionCodes.UNKNOWN_HOST.create(e, e.getMessage())).build();
@@ -277,10 +278,10 @@ public class AntiVirusServiceImpl implements AntiVirusService {
      * <li>Allow: if available</li>
      * <li>Content-Length: if available</li>
      * </ul>
-     *
+     * 
      * @return The {@link com.openexchange.icap.ICAPRequest.Builder}
      */
-    private ICAPRequest.Builder createBuilder(ICAPOptions options, String server, int port, String service, OperationMode mode, InputStream inputStream, long contentLength) {
+    private ICAPRequest.Builder createBuilder(ICAPOptions options, AntiVirusEncapsulatedContent content, String server, int port, String service, OperationMode mode, InputStream inputStream, long contentLength) {
         // Base request
         ICAPRequest.Builder builder = new ICAPRequest.Builder();
         builder.withServer(server);
@@ -297,9 +298,16 @@ public class AntiVirusServiceImpl implements AntiVirusService {
                 builder.withHeader(ICAPRequestHeader.ALLOW, "204");
             }
         }
+
+        // Encapsulated HTTP content
+        builder.withOriginalRequest(content.getOriginalRequest().orElse(""));
+        builder.withOriginalRequestHeaders(content.getOriginalRequestHeaders());
+        builder.withOriginalStatus(content.getOriginalResponseLine().orElse(""));
+        builder.withOriginalResponseHeaders(content.getOriginalResponseHeaders());
+
         // Body
         if (contentLength > 0 && contentLength > previewSize) {
-            builder.withBodyHeader(ICAPRequestHeader.CONTENT_LENGTH, Long.toString(contentLength));
+            builder.withOriginalRequestHeader(ICAPRequestHeader.CONTENT_LENGTH, Long.toString(contentLength));
             // Maybe add 'Last-Modified' and 'Date' body headers?
         }
         builder.withBody(inputStream);

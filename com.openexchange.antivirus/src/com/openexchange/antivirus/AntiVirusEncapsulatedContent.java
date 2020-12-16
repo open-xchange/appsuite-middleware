@@ -47,45 +47,49 @@
  *
  */
 
-package com.openexchange.api.client.impl.osgi;
+package com.openexchange.antivirus;
 
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.api.client.impl.ApiClientServiceImpl;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientService;
-import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.user.UserService;
-import com.openexchange.version.VersionService;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * {@link ApiClientActivator}
+ * {@link AntiVirusEncapsulatedContent} - Used to encapsulate additional HTTP content, such
+ * as the original HTTP request/response headers to the ICAP request.
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
+ * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.4">RFC-3507, Section 4.4</a>
  */
-public class ApiClientActivator extends HousekeepingActivator {
+public interface AntiVirusEncapsulatedContent {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpClientService.class, UserService.class, LeanConfigurationService.class };
-    }
+    /**
+     * Returns the optional original HTTP request, e.g. <code>GET /api/files/someFile.jpg HTTP/1.1</code>
+     *
+     * @return the optional original HTTP request
+     */
+    Optional<String> getOriginalRequest();
 
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { VersionService.class };
-    }
+    /**
+     * Returns a map with the original request headers
+     *
+     * @return a map with the original request headers
+     *         or an empty map
+     */
+    Map<String, String> getOriginalRequestHeaders();
 
-    @Override
-    protected void startBundle() throws Exception {
-        ApiClientServiceImpl apiClientService = new ApiClientServiceImpl(this);
-        registerService(ApiClientService.class, apiClientService);
-        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
-            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
-        registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
-    }
+    /**
+     * Returns (if available) the original response's status line,
+     * e.g. <code>HTTP/1.1 200 OK</code>
+     *
+     * @return The optional response's status line
+     */
+    Optional<String> getOriginalResponseLine();
 
+    /**
+     * Returns the optional original response's headers
+     *
+     * @return The optional original response's headers
+     *         or an empty map
+     */
+    Map<String, String> getOriginalResponseHeaders();
 }

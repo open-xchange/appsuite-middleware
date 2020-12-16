@@ -51,8 +51,11 @@ package com.openexchange.share.impl.xctx;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +99,7 @@ public class XctxSessionCache implements XctxSessionManager, EventHandler {
 
     /**
      * Initializes a new {@link XctxSessionCache}.
-     * 
+     *
      * @param services A service lookup reference
      */
     public XctxSessionCache(ServiceLookup services) {
@@ -159,24 +162,36 @@ public class XctxSessionCache implements XctxSessionManager, EventHandler {
         }
         return guestSession;
     }
-    
+
+
     @Override
     public void handleEvent(Event event) {
-        if (null != event && SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
-            try {
+        if (null == event) {
+            return;
+        }
+        try {
+            if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(event.getTopic())) {
+                List<String> sessionIds = new ArrayList<String>();
+                for (Session session : ((Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER)).values()) {
+                    if (session.containsParameter(PARAM_XCTX_SESSIONS)) {
+                        sessionIds.add(session.getSessionID());
+                    }
+                }
+                invalidateGuestSessions(sessionIds);
+            } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (null != session && session.containsParameter(PARAM_XCTX_SESSIONS)) {
-                    invalidateGuestSessions(session.getSessionID());
+                    invalidateGuestSessions(Collections.singleton(session.getSessionID()));
                 }
-            } catch (Exception e) {
-                LOG.warn("Unexpected error invalidating cross-context sessions after local session was removed", e);
             }
+        } catch (Exception e) {
+            LOG.warn("Unexpected error invalidating cross-context sessions after removal of local session(s)", e);
         }
     }
 
     /**
      * Performs the login.
-     * 
+     *
      * @param session The user session spawning the guest session
      * @param baseToken The base token of the guest user
      * @param password The optional password of the guest account
@@ -199,7 +214,7 @@ public class XctxSessionCache implements XctxSessionManager, EventHandler {
         if (null == loginResult || null == loginResult.getSession()) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("no session from login result");
         }
-        LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.", 
+        LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.",
             baseToken, I(loginResult.getUser().getId()), I(loginResult.getContext().getContextId()), loginResult.getSession().getSessionID());
         session.setParameter(PARAM_XCTX_SESSIONS, Boolean.TRUE);
         return loginResult.getSession();
@@ -224,16 +239,21 @@ public class XctxSessionCache implements XctxSessionManager, EventHandler {
         }
     }
 
-    private void invalidateGuestSessions(String sessionId) {
+    private void invalidateGuestSessions(Collection<String> sessionIds) {
+        if (null == sessionIds || sessionIds.isEmpty()) {
+            return;
+        }
         List<String> toInvalidate = new ArrayList<String>();
         for (String key : guestSessionCache.asMap().keySet()) {
-            if (key.startsWith(sessionId)) {
-                toInvalidate.add(key);
+            for (String sessionId : sessionIds) {
+                if (key.startsWith(sessionId)) {
+                    toInvalidate.add(key);
+                }
             }
         }
         if (false == toInvalidate.isEmpty()) {
             guestSessionCache.invalidateAll(toInvalidate);
-            LOG.debug("Successfully invalidated {} cross-context session(s) spawned by local session {}.", I(toInvalidate.size()), sessionId);
+            LOG.debug("Successfully invalidated {} cross-context session(s) spawned by local sessions.", I(toInvalidate.size()));
         }
     }
 

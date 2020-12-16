@@ -67,6 +67,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveEventImpl;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.ExceptionUtils;

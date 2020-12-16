@@ -49,7 +49,10 @@
 
 package com.openexchange.drive.json.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -69,6 +72,7 @@ import com.openexchange.drive.json.internal.UploadActionBodyParser;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -101,15 +105,18 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.drive.json\"");
         Services.set(this);
+        BundleContext context = this.context;
         registerModule(new DriveActionFactory(), "drive");
-        getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
+        ListenerRegistrar listenerRegistrar = ListenerRegistrar.getInstance();
+        registerService(EventHandler.class, listenerRegistrar, singletonDictionary(EventConstants.EVENT_TOPIC,
+            new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
+        getService(DriveEventService.class).registerPublisher(listenerRegistrar);
         track(LongPollingListenerFactory.class, new ServiceTrackerCustomizer<LongPollingListenerFactory, LongPollingListenerFactory>() {
 
-            @SuppressWarnings("synthetic-access")
             @Override
             public LongPollingListenerFactory addingService(ServiceReference<LongPollingListenerFactory> serviceReference) {
                 LongPollingListenerFactory service = context.getService(serviceReference);
-                if (ListenerRegistrar.getInstance().addFactory(service)) {
+                if (listenerRegistrar.addFactory(service)) {
                     return service;
                 } else {
                     // already known
@@ -123,11 +130,10 @@ public class DriveJsonActivator extends AJAXModuleActivator {
                 // nothing to do
             }
 
-            @SuppressWarnings("synthetic-access")
             @Override
             public void removedService(ServiceReference<LongPollingListenerFactory> serviceReference, LongPollingListenerFactory service) {
                 try {
-                    ListenerRegistrar.getInstance().removeFactory(service);
+                    listenerRegistrar.removeFactory(service);
                 } finally {
                     context.ungetService(serviceReference);
                 }

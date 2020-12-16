@@ -55,11 +55,13 @@ import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -313,11 +315,15 @@ public class ApiClientServiceImpl implements ApiClientService, EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        if (event == null || !SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
+        if (null == event) {
             return;
         }
         try {
-            close((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+            if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(event.getTopic())) {
+                close(((Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER)).values());
+            } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(event.getTopic())) {
+                close(Collections.singleton((Session) event.getProperty(SessiondEventConstants.PROP_SESSION)));
+            }
         } catch (Exception e) {
             LOGGER.warn("Unexpected error invalidating API client after local session was removed", e);
         }
@@ -328,23 +334,39 @@ public class ApiClientServiceImpl implements ApiClientService, EventHandler {
      *
      * @param session The session
      */
-    private void close(Session session) {
-        if (null == session || false == session.containsParameter(PARAM_API_CLIENT_SESSIONS)) {
+    private void close(Collection<Session> sessions) {
+        if (null == sessions || sessions.isEmpty()) {
             return;
         }
         /*
-         * Get the keys of all API clients for the given session
+         * collect applicable session ids
          */
-        String sessionID = session.getSessionID();
-        List<String> toInvalidate = cachedClients.asMap().keySet() //
-            .stream().filter(k -> k.startsWith(sessionID)).collect(Collectors.toList());
-
+        List<String> sessionIds = new ArrayList<String>();
+        for (Session session : sessions) {
+            if (session.containsParameter(PARAM_API_CLIENT_SESSIONS)) {
+                sessionIds.add(session.getSessionID());
+            }
+        }
+        if (sessionIds.isEmpty()) {
+            return;
+        }
+        /*
+         * Get the keys of all API clients for the given sessions
+         */
+        List<String> toInvalidate = new ArrayList<String>();
+        for (String key : cachedClients.asMap().keySet()) {
+            for (String sessionId : sessionIds) {
+                if (key.startsWith(sessionId)) {
+                    toInvalidate.add(key);
+                }
+            }
+        }
         /*
          * Invalidate
          */
         if (toInvalidate.isEmpty() == false) {
             cachedClients.invalidateAll(toInvalidate);
-            LOGGER.debug("Successfully invalidated {} API client(s) for session {}.", I(toInvalidate.size()), sessionID);
+            LOGGER.debug("Successfully invalidated {} API client(s) for removed local sessions.", I(toInvalidate.size()));
         }
     }
 }

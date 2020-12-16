@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.events.internal;
+package com.openexchange.drive.events;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +57,8 @@ import com.openexchange.drive.DefaultDirectoryVersion;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.events.DriveContentChange;
-import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.internal.SyncDirectoriesAction;
+import com.openexchange.drive.events.internal.SyncDirectoryAction;
 import com.openexchange.java.util.UUIDs;
 
 /**
@@ -80,7 +80,7 @@ public class DriveEventImpl implements DriveEvent {
      *
      * @param contextID the context ID
      * @param folderIDs The affected folder IDs
-     * @param folderContentChanges The tracked folder content changes
+     * @param folderContentChanges The tracked folder content changes, or <code>null</code> if not applicable
      * @param contentChangesOnly <code>true</code> if there are only folder content changes, <code>false</code>, otherwise
      * @param remote <code>true</code> it this event is 'remote', <code>false</code>, otherwise
      * @param pushTokenReference The push token of the device causing the event, or <code>null</code> if not applicable

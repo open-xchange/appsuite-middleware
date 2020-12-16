@@ -47,45 +47,25 @@
  *
  */
 
-package com.openexchange.api.client.impl.osgi;
-
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.api.client.ApiClientService;
-import com.openexchange.api.client.impl.ApiClientServiceImpl;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.httpclient.HttpClientService;
-import com.openexchange.rest.client.httpclient.SpecificHttpClientConfigProvider;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.user.UserService;
-import com.openexchange.version.VersionService;
+package com.openexchange.icap;
 
 /**
- * {@link ApiClientActivator}
+ * {@link ICAPClientVersion}
+ * </p>
+ * 
+ * <b>Version 1.0</b>
+ * <p>Initial release. Rudimentary ICAP protocol.</p>
+ * 
+ * <b>Version 1.1</b>
+ * <p>Enhanced client's <code>RESPMOD</code> requests over the original HTTP request/response's headers</p>
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class ApiClientActivator extends HousekeepingActivator {
+public class ICAPClientVersion {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpClientService.class, UserService.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { VersionService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        ApiClientServiceImpl apiClientService = new ApiClientServiceImpl(this);
-        registerService(ApiClientService.class, apiClientService);
-        registerService(EventHandler.class, apiClientService, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
-            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
-        registerService(SpecificHttpClientConfigProvider.class, new ApiClientConfigConfigProvider());
-    }
-
+    /**
+     * Defines the current client's version
+     */
+    public static final String CLIENT_VERSION = "1.1";
 }

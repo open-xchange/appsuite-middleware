@@ -55,6 +55,8 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
@@ -219,7 +221,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         if (false == antiVirusService.isEnabled(request.getSession())) {
             return false;
         }
-        AntiVirusResult result = antiVirusService.scan(fileHolder, attachment.getFileId());
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(request.optHttpServletRequest(), request.optHttpServletResponse());
+        AntiVirusResult result = antiVirusService.scan(fileHolder, attachment.getFileId(), content);
         serviceLookup.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, attachment.getFilename());
         return result.isStreamScanned();
     }

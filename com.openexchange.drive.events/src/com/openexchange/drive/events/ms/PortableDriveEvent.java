@@ -59,9 +59,9 @@ import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.hazelcast.nio.serialization.VersionedPortable;
-import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveContentChange;
-import com.openexchange.drive.events.internal.DriveEventImpl;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveEventImpl;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
 
@@ -97,7 +97,7 @@ public class PortableDriveEvent implements CustomPortable, VersionedPortable {
         .addPortableArrayField(PARAMETER_CONTENT_CHANGES, PortableFolderContentChange.CLASS_DEFINITION)
         .addBooleanField(PARAMETER_CONTENT_CHANGES_ONLY)
     .build();
-    
+
     private Set<String> folderIDs;
     private int contextID;
     private String pushToken;

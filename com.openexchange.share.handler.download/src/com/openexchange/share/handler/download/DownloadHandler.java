@@ -64,6 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
@@ -167,7 +169,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
                 fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
                 eTag = FileStorageUtility.getETagFor(fileMetadata);
                 uniqueId = getUniqueId(fileMetadata, session.getContextId());
-                boolean scanned = scan(session, resolvedShare.getResponse(), fileHolder, uniqueId);
+                boolean scanned = scan(session, resolvedShare, fileHolder, uniqueId);
                 if (scanned && false == fileHolder.repetitive()) {
                     fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
                 }
@@ -178,7 +180,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
                 fileHolder = new FileHolder(() -> document.getData(), document.getSize(), document.getMimeType(), document.getName());
                 eTag = document.getEtag();
                 uniqueId = document.getFile() == null ? eTag : getUniqueId(document.getFile(), session.getContextId());
-                boolean scanned = scan(session, resolvedShare.getResponse(), fileHolder, uniqueId);
+                boolean scanned = scan(session, resolvedShare, fileHolder, uniqueId);
                 if (scanned && false == fileHolder.repetitive()) {
                     fileHolder = new FileHolder(() -> document.getData(), document.getSize(), document.getMimeType(), document.getName());
                 }
@@ -236,7 +238,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
      * Scans the specified IFileHolder and sends a 403 error to the client if the enclosed stream is infected.
      *
      * @param session The session
-     * @param response The {@link HttpServletResponse} with which to send a 403 error to the client in case the file is infected
+     * @param resolvedShare The resolved share (contains: {@link HttpServletResponse} with which to send a 403 error to the client in case the file is infected)
      * @param fileHolder The {@link IFileHolder}
      * @param uniqueId the unique identifier
      * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
@@ -244,7 +246,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
      *             is infected then a 403 will be send to the client
      * @throws IOException if an I/O error is occurred when sending a 403 error to the client
      */
-    private boolean scan(Session session, HttpServletResponse response, IFileHolder fileHolder, String uniqueId) throws OXException, IOException {
+    private boolean scan(Session session, ResolvedShare resolvedShare, IFileHolder fileHolder, String uniqueId) throws OXException, IOException {
         AntiVirusService service = Services.getOptionalService(AntiVirusService.class);
         AntiVirusResultEvaluatorService evaluator = Services.getOptionalService(AntiVirusResultEvaluatorService.class);
         if (null == service || null == evaluator) {
@@ -261,11 +263,12 @@ public class DownloadHandler extends HttpAuthShareHandler {
             throw e;
         }
         try {
-            AntiVirusResult result = service.scan(fileHolder, uniqueId);
+            AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(resolvedShare.getRequest(), resolvedShare.getResponse());
+            AntiVirusResult result = service.scan(fileHolder, uniqueId, content);
             evaluator.evaluate(result, fileHolder.getName());
             return result.isStreamScanned();
         } catch (OXException e) {
-            response.sendError(403);
+            resolvedShare.getResponse().sendError(403);
             throw e;
         }
     }
