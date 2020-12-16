@@ -72,24 +72,22 @@ public final class PropertyMap {
     /**
      * Initializes a new {@link PropertyMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
      */
-    public PropertyMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
+    public PropertyMap(int maxLifeUnits, TimeUnit unit) {
         super();
-        map = CacheBuilder.newBuilder().maximumSize(maxCapacity).build();
+        map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
     }
 
     /**
      * Initializes a new {@link PropertyMap}.
      *
-     * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
-    public PropertyMap(final int maxCapacity, final int maxLifeMillis) {
-        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
+    public PropertyMap(int maxLifeMillis) {
+        this(maxLifeMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
