@@ -70,7 +70,17 @@ public class DefaultDescription implements Description {
 
     /**
      * Initializes a new {@link DefaultDescription}.
-     * 
+     *
+     * @param sentence The sentence
+     * @param field The field
+     */
+    public DefaultDescription(SentenceImpl sentence, EventField field) {
+        this(Collections.singletonList(sentence), Collections.singletonList(field));
+    }
+
+    /**
+     * Initializes a new {@link DefaultDescription}.
+     *
      * @param sentences The sentences
      * @param field The field
      */
@@ -80,7 +90,7 @@ public class DefaultDescription implements Description {
 
     /**
      * Initializes a new {@link DefaultDescription}.
-     * 
+     *
      * @param sentences The sentences
      * @param fields The fields
      */
