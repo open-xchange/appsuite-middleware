@@ -55,8 +55,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
@@ -77,7 +75,7 @@ public final class PropertyMap {
      * @param maxLifeUnits the max life units
      * @param unit the unit
      */
-    public PropertyMap(int maxLifeUnits, final TimeUnit unit) {
+    public PropertyMap(int maxLifeUnits, TimeUnit unit) {
         super();
         map = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
