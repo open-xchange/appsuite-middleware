@@ -128,6 +128,21 @@ public interface EntityResolver {
     List<Attendee> prepare(List<Attendee> attendees, boolean resolveResourceIds) throws OXException;
 
     /**
+     * Generates a copy from a client-supplied attendee and prepares it. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value</li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param attendee The attendee to prepare
+     * @param resolveResourceIds <code>true</code> to resolve (internal) resource identifiers, <code>false</code>, otherwise
+     * @return A copied attendee reference, being possibly enriched by the resolved static entity data if a matching internal attendee was found
+     */
+    Attendee prepare(Attendee attendees, boolean resolveResourceIds) throws OXException;
+
+    /**
      * Prepares a list of client-supplied attendees. This includes:
      * <ul>
      * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value,
