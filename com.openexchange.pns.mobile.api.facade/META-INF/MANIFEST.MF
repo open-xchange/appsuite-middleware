@@ -27,3 +27,4 @@ Import-Package: com.google.android.gcm,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.mobile.api.facade.osgi.MobileApiFacadePushStuffActivator
+Automatic-Module-Name: com.openexchange.pns.mobile.api.facade

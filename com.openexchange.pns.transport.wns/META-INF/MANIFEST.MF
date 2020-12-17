@@ -242,3 +242,4 @@ Export-Package: com.openexchange.pns.transport.wns
 Bundle-Activator: com.openexchange.pns.transport.wns.osgi.WnsPushNotificationTransportActivator
 Bundle-ClassPath: lib/java-wns-1.4.0.jar,
  .
+Automatic-Module-Name: com.openexchange.pns.transport.wns

@@ -27,3 +27,4 @@ Import-Package: com.google.common.annotations,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.transport.apn.osgi.ApnPushNotificationTransportActivator
 Export-Package: com.openexchange.pns.transport.apn
+Automatic-Module-Name: com.openexchange.pns.transport.apn

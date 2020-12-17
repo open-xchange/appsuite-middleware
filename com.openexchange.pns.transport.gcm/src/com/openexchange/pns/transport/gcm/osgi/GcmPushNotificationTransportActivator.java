@@ -50,7 +50,6 @@
 package com.openexchange.pns.transport.gcm.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
-import java.util.Dictionary;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.osgi.framework.ServiceRegistration;
