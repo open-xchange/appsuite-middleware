@@ -82,7 +82,7 @@ public class ShareRedirectUtils {
      * @return The redirect URL
      * @throws OXException If redirect URL cannot be generated
      */
-    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig, String host) throws OXException {
+    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig) throws OXException {
         /*
          * evaluate link destination based on share or target
          */

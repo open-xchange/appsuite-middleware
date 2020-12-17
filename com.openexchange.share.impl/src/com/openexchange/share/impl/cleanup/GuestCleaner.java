@@ -143,17 +143,13 @@ public class GuestCleaner {
      */
     public void scheduleContextCleanup(final int contextID) {
         LOG.debug("Scheduling context cleanup task for context {}.", I(contextID));
-        services.getService(ExecutorService.class).submit(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID, guestExpiry);
-                    List<GuestCleanupTask> tasks = contextCleanupTask.call();
-                    cleanupTasks.offerIfAbsentElseReset(tasks);
-                } catch (Exception e) {
-                    LOG.warn("error enqueuing cleanup tasks.", e);
-                }
+        services.getService(ExecutorService.class).submit(() -> {
+            try {
+                ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID, guestExpiry);
+                List<GuestCleanupTask> tasks = contextCleanupTask.call();
+                cleanupTasks.offerIfAbsentElseReset(tasks);
+            } catch (Exception e) {
+                LOG.warn("error enqueuing cleanup tasks.", e);
             }
         });
     }

@@ -99,3 +99,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.share.servlet.osgi.ShareServletActivator
 Export-Package: com.openexchange.share.servlet.handler
+Automatic-Module-Name: com.openexchange.share.servlet

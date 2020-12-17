@@ -69,8 +69,8 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class InternalGroupShareInfo extends AbstractShareInfo {
 
-    private final int contextID;
-    private final Group group;
+    final int contextID;
+    final Group group;
 
     /**
      * Initializes a new {@link InternalGroupShareInfo}.

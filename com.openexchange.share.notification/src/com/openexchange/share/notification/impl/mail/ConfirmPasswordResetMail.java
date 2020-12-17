@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
@@ -88,7 +87,7 @@ public class ConfirmPasswordResetMail extends ShareNotificationMail {
         super(services, mailData);
     }
 
-    public static ConfirmPasswordResetMail init(PasswordResetConfirmNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
+    public static ConfirmPasswordResetMail init(PasswordResetConfirmNotification<InternetAddress> notification, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
@@ -104,7 +103,7 @@ public class ConfirmPasswordResetMail extends ShareNotificationMail {
             context.getContextId());
 
         // Set variables
-        Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator, serverConfig);
+        Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
         MailData mailData = MailData.newBuilder()
             .setRecipient(notification.getTransportInfo())
             .setSubject(String.format(translator.translate(NotificationStrings.PWRC_SUBJECT), serverConfig.getProductName()))
@@ -120,7 +119,7 @@ public class ConfirmPasswordResetMail extends ShareNotificationMail {
         return new ConfirmPasswordResetMail(mailData, services);
     }
 
-    private static Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator, ServerConfig serverConfig) throws OXException {
+    private static Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator) {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
