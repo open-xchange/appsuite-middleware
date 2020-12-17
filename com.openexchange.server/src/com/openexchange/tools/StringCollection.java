@@ -150,7 +150,7 @@ public final class StringCollection {
             // Escape every backslash and single-quote character
             value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
         }
-        value = value.replace("%", quoteReplacement("\\%")).replace("_", quoteReplacement("\\_")).replace('*', '%').replace('?', '_');
+        value = value.replace("%", "\\%").replace("_", "\\_").replace('*', '%').replace('?', '_');
         if (surroundWithWildcard) {
             if (value.length() > 0) {
                 if (value.charAt(0) != '%') {
