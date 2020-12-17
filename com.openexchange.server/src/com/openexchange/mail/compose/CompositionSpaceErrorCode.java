@@ -156,6 +156,14 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * Available attachments in shared attachments folder "%1$s" are inconsistent with the ones held by composition space %2$s.
      */
     INCONSISTENT_SHARED_ATTACHMENTS("Available attachments in shared attachments folder \"%1$s\" are inconsistent with the ones held by composition space %2$s.", CompositionSpaceExceptionMessages.INCONSISTENT_SHARED_ATTACHMENTS_MSG, CATEGORY_WARNING, 23),
+    /**
+     * Failed to retrieve resource from attachment storage with identifier: %1$s
+     */
+    FAILED_RETRIEVAL_ATTACHMENT_RESOURCE("Found no such resource in attachment storage for identifier: %1$s", null, CATEGORY_ERROR, 24),
+    /**
+     * Failed to retrieve key for composition space with identifier: %1$s
+     */
+    FAILED_RETRIEVAL_KEY("Failed to retrieve key for composition space with identifier: %1$s", null, CATEGORY_ERROR, 25),
 
     ;
 

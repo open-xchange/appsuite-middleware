@@ -52,9 +52,11 @@ package com.openexchange.mail.compose.impl.attachment.filestore;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage.getContextAssociatedFileStorage;
 import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage;
+import static com.openexchange.mail.compose.impl.util.TimeLimitedFileStorageOperation.createBuilder;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -67,6 +69,8 @@ import com.openexchange.mail.compose.SeekingDataProvider;
 import com.openexchange.mail.compose.impl.attachment.AbstractNonCryptoAttachmentStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 
 
 /**
@@ -124,7 +128,25 @@ public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAtta
     @Override
     protected AttachmentStorageIdentifier saveData(InputStream input, long size, Session session) throws OXException {
         FileStorageAndId fileStorageRef = getFileStorage(Optional.empty(), session);
-        String storageIdentifier = fileStorageRef.fileStorage.saveNewFile(input);
+
+        AtomicBoolean deleteLocation = new AtomicBoolean(false);
+        Task<String> saveDataTask = new AbstractTask<String>() {
+
+            @Override
+            public String call() throws Exception {
+                String location = fileStorageRef.fileStorage.saveNewFile(input);
+                if (deleteLocation.get()) {
+                    fileStorageRef.fileStorage.deleteFile(location);
+                    return null;
+                }
+                return location;
+            }
+        };
+        String storageIdentifier = createBuilder(saveDataTask, fileStorageRef.fileStorage)
+            .withTaskFlag(deleteLocation)
+            .withWaitTimeoutSeconds(60)
+            .buildAndSubmit()
+            .getResult();
         if (fileStorageRef.dedicatedFileStorageId <= 0) {
             return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(0));
         }
@@ -134,7 +156,18 @@ public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAtta
     @Override
     protected boolean deleteData(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException {
         FileStorage fileStorage = getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session).fileStorage;
-        return fileStorage.deleteFile(storageIdentifier.getIdentifier());
+        Task<Boolean> deleteDataTask = new AbstractTask<Boolean>() {
+
+            @Override
+            public Boolean call() throws Exception {
+                return Boolean.valueOf(fileStorage.deleteFile(storageIdentifier.getIdentifier()));
+            }
+        };
+        Boolean deleted = createBuilder(deleteDataTask, fileStorage)
+            .withWaitTimeoutSeconds(10)
+            .buildAndSubmit()
+            .getResult();
+        return deleted.booleanValue();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -198,11 +231,24 @@ public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAtta
 
         @Override
         public InputStream getData() throws OXException {
+            String location = storageIdentifier.getIdentifier();
             try {
-                return getFileStorage().getFile(storageIdentifier.getIdentifier());
+                FileStorage fileStorage = getFileStorage();
+                Task<InputStream> getFileTask = new AbstractTask<InputStream>() {
+
+                    @Override
+                    public InputStream call() throws Exception {
+                        return fileStorage.getFile(location);
+                    }
+                };
+                return createBuilder(getFileTask, fileStorage)
+                    .withOnTimeOutHandler(() -> CompositionSpaceErrorCode.FAILED_RETRIEVAL_ATTACHMENT_RESOURCE.create(location))
+                    .withWaitTimeoutSeconds(10)
+                    .buildAndSubmit()
+                    .getResult();
             } catch (OXException e) {
                 if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, storageIdentifier.getIdentifier());
+                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, location);
                 }
                 throw e;
             }
@@ -210,11 +256,24 @@ public abstract class FileStorageAttachmentStorage extends AbstractNonCryptoAtta
 
         @Override
         public InputStream getData(long offset, long length) throws OXException {
+            String location = storageIdentifier.getIdentifier();
             try {
-                return getFileStorage().getFile(storageIdentifier.getIdentifier(), offset, length);
+                FileStorage fileStorage = getFileStorage();
+                Task<InputStream> getFileTask = new AbstractTask<InputStream>() {
+
+                    @Override
+                    public InputStream call() throws Exception {
+                        return fileStorage.getFile(location, offset, length);
+                    }
+                };
+                return createBuilder(getFileTask, fileStorage)
+                    .withOnTimeOutHandler(() -> CompositionSpaceErrorCode.FAILED_RETRIEVAL_ATTACHMENT_RESOURCE.create(location))
+                    .withWaitTimeoutSeconds(10)
+                    .buildAndSubmit()
+                    .getResult();
             } catch (OXException e) {
                 if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, storageIdentifier.getIdentifier());
+                    throw CompositionSpaceErrorCode.NO_SUCH_ATTACHMENT_RESOURCE.create(e, location);
                 }
                 throw e;
             }
