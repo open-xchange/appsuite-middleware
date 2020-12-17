@@ -56,16 +56,15 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.client.windows.service.Constants;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -113,17 +112,18 @@ public class Utils {
         return prefixService.getPrefix();
     }
 
-    public static String getUserName(ServerSession session) throws OXException {
+    public static String getUserName(ServerSession session) {
         return getUserName(session, session.getUser());
     }
 
-    public static String getUserName(Session session, User user) throws OXException {
+    public static String getUserName(Session session, User user) {
         String login = session.getLogin();
-        if (login == null) {
-            if (user != null) {
-                // Fallback. session.getLogin() may be null in some special cases (usage of custom plugins like 1und1 UAS).
-                login = user.getLoginInfo();
-            }
+        if (login != null) {
+            return login;
+        }
+        if (user != null) {
+            // Fallback. session.getLogin() may be null in some special cases (usage of custom plugins like 1und1 UAS).
+            login = user.getLoginInfo();
         }
 
         if (login == null) {
@@ -152,43 +152,47 @@ public class Utils {
     }
 
     public static String compileUrl(String baseUrl, String... segments) {
-        return compileUrl(baseUrl, segments, Collections.<String, String>emptyMap());
+        return compileUrl(baseUrl, segments, Collections.<String, String> emptyMap());
     }
 
     public static String compileUrl(String baseUrl, String[] pathSegments, Map<String, String> queryParams) {
-        StringBuilder path = new StringBuilder();
-        if (pathSegments != null && pathSegments.length > 0) {
-            for (String segment : pathSegments) {
-                if (segment != null && segment.length() > 0) {
-                    if (segment.charAt(0) != '/') {
-                        path.append('/');
-                    }
-                    if (segment.charAt(segment.length() - 1) == '/') {
-                        path.append(segment.substring(0, segment.length() - 1));
-                    } else {
-                        path.append(segment);
-                    }
-                }
-            }
-        }
-
-        URIBuilder uri = new URIBuilder(URI.create(baseUrl)).setPath(path.toString());
-        if (queryParams != null && queryParams.size() > 0) {
-            for (Entry<String, String> entry : queryParams.entrySet()) {
-                uri.addParameter(entry.getKey(), entry.getValue());
-            }
-        }
+        String path = buildPathSegments(pathSegments);
+        URIBuilder uri = new URIBuilder(URI.create(baseUrl)).setPath(path);
+        buildURIParameters(queryParams, uri);
         return uri.toString();
     }
 
     public static String convertToBase64(File icon) throws IOException {
-        InputStream is = null;
-        try {
-            is = new Base64InputStream(new FileInputStream(icon), true);
-            return IOUtils.toString(is);
-        } finally {
-            IOUtils.closeQuietly(is);
+        try (InputStream is = new Base64InputStream(new FileInputStream(icon), true)) {
+            return IOUtils.toString(is, Charsets.US_ASCII);
         }
     }
 
+    private static void buildURIParameters(Map<String, String> queryParams, URIBuilder uri) {
+        if (queryParams == null || queryParams.size() == 0) {
+            return;
+        }
+        queryParams.entrySet().stream().forEach((entry) -> uri.addParameter(entry.getKey(), entry.getValue()));
+    }
+
+    private static String buildPathSegments(String[] pathSegments) {
+        if (pathSegments == null || pathSegments.length == 0) {
+            return "";
+        }
+        StringBuilder path = new StringBuilder();
+        for (String segment : pathSegments) {
+            if (segment == null || segment.length() == 0) {
+                continue;
+            }
+            if (segment.charAt(0) != '/') {
+                path.append('/');
+            }
+            if (segment.charAt(segment.length() - 1) == '/') {
+                path.append(segment.substring(0, segment.length() - 1));
+            } else {
+                path.append(segment);
+            }
+        }
+        return path.toString();
+    }
 }

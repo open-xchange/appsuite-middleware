@@ -32,6 +32,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.session,
  com.openexchange.templating,
  com.openexchange.tools.encoding,
+ com.openexchange.tools.io,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.tools.webdav,
@@ -48,3 +49,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.drive.client.windows

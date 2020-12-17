@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DirectoryVersion;
 
-
 /**
  * {@link JsonDirectoryVersion}
  *
@@ -99,7 +98,7 @@ public class JsonDirectoryVersion extends JsonDriveVersion implements DirectoryV
         return jsonArray;
     }
 
-    public static JsonDirectoryVersion deserialize(JSONObject jsonObject) throws JSONException {
+    public static JsonDirectoryVersion deserialize(JSONObject jsonObject) {
         if (null == jsonObject) {
             return null;
         }
