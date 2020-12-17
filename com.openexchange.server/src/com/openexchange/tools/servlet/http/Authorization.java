@@ -204,10 +204,10 @@ public final class Authorization {
     private static final char UNKNOWN = '\ufffd';
 
     public static Credentials decode(final String auth) throws UnsupportedCharsetException {
-        final byte[] decoded = Base64.decode(auth.substring(BASIC_AUTH.length() + 1));
-        String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8).trim();
+        final byte[] decoded = Base64.decode(auth.substring(BASIC_AUTH.length() + 1).trim());
+        String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8);
         if (userpass.indexOf(UNKNOWN) >= 0) {
-            userpass = new String(decoded, com.openexchange.java.Charsets.ISO_8859_1).trim();
+            userpass = new String(decoded, com.openexchange.java.Charsets.ISO_8859_1);
         }
         final int delimiter = userpass.indexOf(':');
         String login = "";
