@@ -31,7 +31,7 @@ No data is copied or synchronized for federated shares, and no additional quota 
 on the remote server is accessed live and directly, proxied through HTTP client integrated in the middleware. Data from other 
 contexts is directly fetched from the storage. 
 
-Doing so, from the client perspective, there's almost no difference working with federated shares fee     
+Doing so, from the client perspective, there's almost no difference working with federated shares.
 
 ## Available Modules
 
@@ -54,8 +54,11 @@ federated share are still performed by this guest account.
 The *cross-ox* mode is used when a share is from *another* OX server. The communication between the OX servers will then take place over 
 the HTTP API. The client will still interact with the local OX server exclusively, and the requests to files and folders of the federated 
 share are proxied through the middleware. This also includes establishing a regular session on the remote server by logging in through the
-original share link. 
+original share link.
 
+### HTTP API client
+
+The *cross-ox* mode uses an HTTP client to establish and uphold the communication to the remote OX server. This client named *apiClient* and its mechanisms are described in more detail with further configuration options [here]({{site.baseurl}}middleware/administration/http_client_configuration.html).
 
 # Installation & Configuration
 

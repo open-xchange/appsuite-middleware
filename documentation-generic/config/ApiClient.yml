@@ -14,7 +14,6 @@ properties:
       file: 
       packageName: open-xchange-core
       tags: ["HTTP client", "API Client", "Black list"]
-properties:
     - key: com.openexchange.api.client.allowedPorts
       description: |
         Defines ports that are allowed to access.
