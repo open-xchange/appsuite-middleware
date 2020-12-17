@@ -15,7 +15,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     private static final String BOB_LASTNAME = "Bob";
     private static final String BOB_DISPLAYNAME = "Carol19";
     private static final String BOB_MAIL2 = "bob@thebuilder.invalid";
-    private static final String BOB_DEPARTMENT = "Department-" + new UID().toString();
+    private static final String BOB_DEPARTMENT = "Department_" + new UID().toString();
 
     @Override
     @Before
