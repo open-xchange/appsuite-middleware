@@ -67,3 +67,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.client.onboarding.json.osgi.OnboardingJsonActivator
+Automatic-Module-Name: com.openexchange.client.onboarding.json

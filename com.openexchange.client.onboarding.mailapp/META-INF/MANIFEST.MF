@@ -18,3 +18,4 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.session,
  org.osgi.framework
 Bundle-Activator: com.openexchange.client.onboarding.mailapp.osgi.MailAppOnboardingActivator
+Automatic-Module-Name: com.openexchange.client.onboarding.mailapp

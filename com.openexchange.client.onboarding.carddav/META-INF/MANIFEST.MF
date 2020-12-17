@@ -130,3 +130,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.client.onboarding.carddav.osgi.CardDAVOnboardingActivator
 Export-Package: com.openexchange.client.onboarding.carddav.custom
+Automatic-Module-Name: com.openexchange.client.onboarding.carddav

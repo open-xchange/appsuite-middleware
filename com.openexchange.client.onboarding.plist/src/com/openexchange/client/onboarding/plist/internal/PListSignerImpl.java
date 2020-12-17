@@ -175,7 +175,7 @@ public final class PListSignerImpl implements PListSigner {
             sink.setContentType(input.getContentType());
             sink.setDisposition(input.getDisposition());
             sink.setName(input.getName());
-            ASN1OutputStream aOut = new ASN1OutputStream(sink.asOutputStream());
+            ASN1OutputStream aOut = ASN1OutputStream.create(sink.asOutputStream());
             aOut.writeObject(contentInfo);
             aOut.flush();
             error = false; // Avoid preliminary closing
