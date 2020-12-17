@@ -133,9 +133,6 @@ Cache directory and file durability can be controlled with these settings:
 * `com.openexchange.mail.compose.mailstorage.fileCacheDir`
 * `com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds`
 
-
-# Dovecot Configuration
-
 # OX Guard
 
 This approach uses OX Guard natively. If Guard is enabled for a currently composed email, a new encrypted draft is immediately saved. From that point in time on, any new draft is a PGP email that can only be decrypted with the users private key.
