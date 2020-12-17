@@ -199,9 +199,7 @@ public final class StringCollection {
             // Escape every backslash and single-quote character
             value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
         }
-        value = value.replaceAll("%", quoteReplacement("\\%")).replaceAll("_", quoteReplacement("\\_")).replaceAll(
-            "\\*",
-            quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
+        value = value.replace("%", "\\%").replace("_", "\\_").replace('*', '%').replace('?', '_');
         if (prependWildcard) {
             final int length = value.length();
             if (length > 0) {
@@ -237,23 +235,25 @@ public final class StringCollection {
      * @return A literal string replacement
      */
     public static String quoteReplacement(final String s) {
-        if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
-            return s;
-        }
-        final StringBuilder sb = new StringBuilder(s.length());
+        StringBuilder sb = null;
         for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
-            if (c == '\\') {
+            char c = s.charAt(i);
+            if (c == '\\' || c == '$') {
+                if (sb == null) {
+                    sb = new StringBuilder(s.length());
+                    if (i > 0) {
+                        sb.append(s, 0, i);
+                    }
+                }
                 sb.append('\\');
-                sb.append('\\');
-            } else if (c == '$') {
-                sb.append('\\');
-                sb.append('$');
-            } else {
                 sb.append(c);
+            } else {
+                if (sb != null) {
+                    sb.append(c);
+                }
             }
         }
-        return sb.toString();
+        return sb == null ? s : sb.toString();
     }
 
     public static String disarmSQLString(final String s) {
