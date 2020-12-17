@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-784 (7.10.5-2) stable; urgency=medium
+
+  * Second preview of 7.10.5 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 17 Dec 2020 13:30:54 +0000
+
 open-xchange-cluster-upgrade-from-784 (7.10.5-1) stable; urgency=medium
 
   * First preview of 7.10.5 release

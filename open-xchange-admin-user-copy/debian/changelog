@@ -1,3 +1,9 @@
+open-xchange-admin-user-copy (7.10.5-2) stable; urgency=medium
+
+  * Second preview of 7.10.5 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 17 Dec 2020 13:30:02 +0000
+
 open-xchange-admin-user-copy (7.10.5-1) stable; urgency=medium
 
   * First preview of 7.10.5 release
