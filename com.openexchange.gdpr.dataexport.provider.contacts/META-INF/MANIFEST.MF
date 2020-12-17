@@ -57,3 +57,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.gdpr.dataexport.provider.contacts.osgi.ContactsDataExportProviderActivator
+Automatic-Module-Name: com.openexchange.gdpr.dataexport.provider.contacts
