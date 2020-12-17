@@ -155,6 +155,7 @@ import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
@@ -2223,9 +2224,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             // Load permissions
             FolderObject folder2 = getFolderObject(folder.getObjectID(), context, con, storageParameters);
             List<OCLPermission> compiledPerms = getCombinedFolderPermissions(folder2, parent);
-            folder.setPermissions(compiledPerms);
+            folder.setPermissions(cleanupGuestGroupPermissions(compiledPerms));
         } else {
-            folder.setPermissions(parent.getPermissions());
+            folder.setPermissions(cleanupGuestGroupPermissions(parent.getPermissions()));
         }
         Optional<List<OCLPermission>> optPermissions = processInheritedPermissions(parent, Optional.of(folder.getPermissions()), Optional.empty());
         optPermissions.ifPresent(p -> folder.setPermissions(p));
@@ -2238,6 +2239,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 inheritFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis, mergePermissions);
             }
         }
+    }
+
+    private List<OCLPermission> cleanupGuestGroupPermissions(List<OCLPermission> perms) {
+        Optional<OCLPermission> existingGuestPermission = perms.stream().filter(e -> GroupStorage.GUEST_GROUP_IDENTIFIER == e.getEntity()).findAny();
+        if (existingGuestPermission.isPresent()) {
+            perms.remove(existingGuestPermission.get());
+        }
+        return perms;
     }
 
     private UpdatedFolderHandler updatedFolderHandlerFor(final StorageParameters storageParameters) {

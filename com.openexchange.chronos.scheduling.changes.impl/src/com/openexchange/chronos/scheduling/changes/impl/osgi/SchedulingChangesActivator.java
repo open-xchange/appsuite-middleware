@@ -55,6 +55,7 @@ import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
 import com.openexchange.chronos.scheduling.changes.impl.DescriptionServiceImpl;
 import com.openexchange.chronos.scheduling.changes.impl.SchedulingChangeServiceImpl;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
@@ -79,7 +80,7 @@ public class SchedulingChangesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { ConfigurationService.class, TemplateService.class, HtmlService.class, UserService.class, HostnameService.class };
+        return new Class[] { ConfigurationService.class, TemplateService.class, HtmlService.class, UserService.class, HostnameService.class, RecurrenceService.class };
     }
 
     @Override
@@ -90,7 +91,7 @@ public class SchedulingChangesActivator extends HousekeepingActivator {
          * Register a description services
          */
         registerService(SchedulingChangeService.class, new SchedulingChangeServiceImpl(this));
-        registerService(DescriptionService.class, new DescriptionServiceImpl());
+        registerService(DescriptionService.class, new DescriptionServiceImpl(this));
     }
 
 }

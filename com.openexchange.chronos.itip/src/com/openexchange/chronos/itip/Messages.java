@@ -312,6 +312,8 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_CHANGED_RRULE = "The appointment's recurrence rule has changed to: %1$s.";
 
+    public static final String HAS_CHANGED_RRULE_UNTIL = "The appointment series now ends on %1$s.";
+
     public static final String INTENTION_RESCHEDULE = "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s";
 
     public static final String LABEL_RESOURCES = "Resources";

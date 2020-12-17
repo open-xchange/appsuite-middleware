@@ -191,8 +191,13 @@ public class WebUIShareHandler extends AbstractShareHandler {
             }
 
             User sharingUser = null;
-            if (ShareTool.checkShareAndGuestCreator(shareRequest.getTargetProxy(), guestInfo)) {
-                sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
+            int sharingUserId = ShareTool.extractShareCreator(targetPath);
+            if (0 == sharingUserId) {
+                if (ShareTool.checkShareAndGuestCreator(shareRequest.getTargetProxy(), guestInfo)) {
+                    sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
+                }
+            } else {
+                sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(sharingUserId, guestInfo.getContextID());
             }
             LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())

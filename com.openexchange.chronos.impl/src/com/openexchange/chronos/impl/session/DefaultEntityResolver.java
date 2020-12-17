@@ -67,10 +67,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.EntityResolver;
@@ -164,6 +166,18 @@ public class DefaultEntityResolver implements EntityResolver {
             }
         }
         return attendees;
+    }
+
+    @Override
+    public Attendee prepare(Attendee attendee, boolean resolveResourceIds) throws OXException {
+        if (null != attendee) {
+            /*
+             * copy attendee, then try and resolve external calendar user address to internal calendar user & enhance with static properties
+             */
+            Attendee attendeeCopy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+            return applyEntityData(resolveExternals(attendeeCopy, attendeeCopy.getCuType(), resolveResourceIds, null));
+        }
+        return attendee;
     }
 
     @Override

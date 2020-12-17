@@ -56,8 +56,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
@@ -81,7 +79,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3ClientRegistry implements Reloadable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(S3ClientRegistry.class);
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3ClientRegistry.class);
+    }
 
     private final S3ClientFactory clientFactory;
     private final ServiceLookup services;
@@ -157,7 +157,7 @@ public class S3ClientRegistry implements Reloadable {
                 clientsMap.remove(client.getKey(), client);
             }
         } catch (Exception e) {
-            LOG.error("Configuration reload failed for S3 clients", e);
+            LoggerHolder.LOG.error("Configuration reload failed for S3 clients", e);
         }
     }
 

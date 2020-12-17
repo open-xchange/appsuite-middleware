@@ -544,4 +544,20 @@ public class ShareTool {
         return false;
     }
 
+    /**
+     * Extracts identifier of user who created this share target from target path if available
+     *
+     * @param targetPath The ShareTargetPath
+     * @return Identifier of creating user if target path contains this information, <code>0</code> otherwise
+     */
+    public static int extractShareCreator(ShareTargetPath targetPath) {
+        if (null != targetPath) {
+            Map<String, String> additionals = targetPath.getAdditionals();
+            if (null != additionals && 0 < additionals.size()) {
+                return null != additionals.get("c") ? Integer.parseInt(additionals.get("c")) : 0;
+            }
+        }
+        return 0;
+    }
+
 }

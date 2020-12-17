@@ -68,6 +68,7 @@ import com.openexchange.chronos.scheduling.changes.impl.desc.SplitDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.SummaryDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.TransparencyDescriber;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DescriptionServiceImpl}
@@ -77,33 +78,22 @@ import com.openexchange.chronos.service.EventUpdate;
  */
 public class DescriptionServiceImpl implements DescriptionService {
 
-    //@formatter:off
-    private static final List<ChangeDescriber> DESCRIBERS = ImmutableList.of(
-        new SplitDescriber(),
-        new RRuleDescriber(),
-        new ReschedulingDescriber(),
-        new OrganizerDescriber(),
-        new SummaryDescriber(),
-        new LocationDescriber(),
-        new ConferenceDescriber(),
-        new DescriptionDescriber(),
-        new TransparencyDescriber(),
-        new AttachmentDescriber(),
-        new AttendeeDescriber()
-    );
-    //@formatter:on
+    private final List<ChangeDescriber> describers;
 
     /**
      * Initializes a new {@link DescriptionServiceImpl}.
+     *
+     * @param services A service lookup reference
      */
-    public DescriptionServiceImpl() {
+    public DescriptionServiceImpl(ServiceLookup services) {
         super();
+        this.describers = initDescribers(services);
     }
 
     @Override
     public List<Description> describe(EventUpdate eventUpdate, EventField... ignorees) {
         List<Description> descriptions = new LinkedList<>();
-        for (ChangeDescriber describer : DESCRIBERS) {
+        for (ChangeDescriber describer : describers) {
             if ((null == ignorees || false == contains(describer.getFields(), ignorees)) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
                 Description description = describer.describe(eventUpdate);
                 if (null != description) {
@@ -120,7 +110,7 @@ public class DescriptionServiceImpl implements DescriptionService {
             return Collections.emptyList();
         }
         List<Description> descriptions = new LinkedList<>();
-        for (ChangeDescriber describer : DESCRIBERS) {
+        for (ChangeDescriber describer : describers) {
             if (contains(describer.getFields(), toDescribe) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
                 Description description = describer.describe(eventUpdate);
                 if (null != description) {
@@ -140,6 +130,24 @@ public class DescriptionServiceImpl implements DescriptionService {
             }
         }
         return false;
+    }
+
+    private static List<ChangeDescriber> initDescribers(ServiceLookup services) {
+        //@formatter:off
+        return ImmutableList.<ChangeDescriber> of(
+            new SplitDescriber(),
+            new RRuleDescriber(services),
+            new ReschedulingDescriber(),
+            new OrganizerDescriber(),
+            new SummaryDescriber(),
+            new LocationDescriber(),
+            new ConferenceDescriber(),
+            new DescriptionDescriber(),
+            new TransparencyDescriber(),
+            new AttachmentDescriber(),
+            new AttendeeDescriber()
+        );
+        //@formatter:on
     }
 
 }

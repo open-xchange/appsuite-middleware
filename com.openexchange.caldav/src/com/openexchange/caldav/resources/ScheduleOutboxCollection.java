@@ -74,8 +74,7 @@ import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.DAVCollection;
@@ -105,7 +104,6 @@ public class ScheduleOutboxCollection extends DAVCollection {
     private final GroupwareCaldavFactory factory;
 
     private List<FreeBusyData> freeBusyRequest;
-    private CalendarSession calendarSession;
 
     /**
      * Initializes a new {@link ScheduleOutboxCollection}.
@@ -115,13 +113,6 @@ public class ScheduleOutboxCollection extends DAVCollection {
     public ScheduleOutboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleOutboxURL.SCHEDULE_OUTBOX));
         this.factory = factory;
-    }
-
-    private CalendarSession getCalendarSession() throws OXException {
-        if (null == calendarSession) {
-            calendarSession = factory.requireService(CalendarService.class).init(factory.getSession());
-        }
-        return calendarSession;
     }
 
     @Override
@@ -176,7 +167,13 @@ public class ScheduleOutboxCollection extends DAVCollection {
             for (FreeBusyData freeBusyData : freeBusyRequest) {
                 Map<Attendee, FreeBusyResult> freeBusyPerAttendee;
                 try {
-                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().getFreeBusy(getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()), true);
+                    freeBusyPerAttendee = new CalendarAccessOperation<Map<Attendee, FreeBusyResult>>(factory) {
+
+                        @Override
+                        protected Map<Attendee, FreeBusyResult> perform(IDBasedCalendarAccess access) throws OXException {
+                            return access.queryFreeBusy(freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()), true);
+                        }
+                    }.execute(factory.getSession());
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
                     continue;

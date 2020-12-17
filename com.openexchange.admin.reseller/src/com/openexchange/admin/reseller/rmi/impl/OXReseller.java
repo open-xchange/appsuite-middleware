@@ -383,8 +383,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if (oxresell.ownsContext(null, dbadm.getId().intValue())) {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE, dbadm.getId().toString());
             }
-            
-            ResellerAdmin[] list = oxresell.list("*", i(adm.getId()));
+
+            ResellerAdmin[] list = oxresell.list("*", i(dbadm.getId()));
             if (list.length != 0) {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE_OWNS_SUBADMINS, dbadm.getId().toString());
             }
@@ -709,11 +709,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
             }
-            
+
             if (isMaster || null == parent || parent.getId().equals(admin.getId())) {
                 return getCapabilities(admin);
             }
-            
+
             GenericChecks.checkChangeValidPasswordMech(admin);
             ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
             if (false == dbAdmin.getParentId().equals(parent.getId())) {

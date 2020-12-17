@@ -69,7 +69,6 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.BusyType;
@@ -84,7 +83,6 @@ import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.FreeBusyUtils;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
@@ -674,8 +672,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         }
         Map<Attendee, Attendee> resolvedAttendees = new HashMap<Attendee, Attendee>(requestedAttendees.size());
         for (Attendee requestedAttendee : requestedAttendees) {
-            Attendee attendeeCopy = AttendeeMapper.getInstance().copy(requestedAttendee, null, (AttendeeField[]) null);
-            resolvedAttendees.put(entityResolver.prepare(attendeeCopy, attendeeCopy.getCuType()), requestedAttendee);
+            resolvedAttendees.put(entityResolver.prepare(requestedAttendee, true), requestedAttendee);
         }
         return resolvedAttendees;
     }

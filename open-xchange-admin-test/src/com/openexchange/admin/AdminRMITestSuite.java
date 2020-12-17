@@ -76,7 +76,6 @@ import com.openexchange.admin.user.copy.rmi.UserCopyTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     //@formatter:off
-    AdminResellerRmiTestSuite.class,
     AdditionalRMITests.class,
     Bug16865Test.class,
     Bug19379Test.class,
