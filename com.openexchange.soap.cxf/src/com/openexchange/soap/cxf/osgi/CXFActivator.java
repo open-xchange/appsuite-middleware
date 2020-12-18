@@ -69,7 +69,6 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.soap.cxf.custom.CXFOsgiServlet;
 import com.openexchange.soap.cxf.interceptor.DropDeprecatedElementsInterceptor;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
@@ -82,6 +81,9 @@ import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor
  */
 public class CXFActivator extends HousekeepingActivator {
 
+    /** Simple class to delay initialization until needed */
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { HttpService.class, ConfigurationService.class };
@@ -90,9 +92,8 @@ public class CXFActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
-            log.info("Starting Bundle: com.openexchange.soap.cxf");
+            LOG.info("Starting Bundle: com.openexchange.soap.cxf");
             // Set jdk.xml.entityExpansionLimit
             {
                 final int defaulEntityExpansionLimit = 128000;
@@ -118,12 +119,12 @@ public class CXFActivator extends HousekeepingActivator {
                     public synchronized void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
                         final HttpService httpService = service;
                         if (httpService != null) {
-                            unregisterHttpAlias(alias, httpService);
-                            unregisterHttpAlias(alias2, httpService);
+                            unregisterHttpAlias(alias, httpService, true);
+                            unregisterHttpAlias(alias2, httpService, false);
                             String servletAlias = alias3;
                             if (null != servletAlias) {
                                 alias3 = null;
-                                unregisterHttpAlias(servletAlias, httpService);
+                                unregisterHttpAlias(servletAlias, httpService, false);
                             }
                         }
                         final WebserviceCollector collector = this.collector;
@@ -184,9 +185,9 @@ public class CXFActivator extends HousekeepingActivator {
                                 }
                                 // Registration
                                 httpService.registerServlet(alias, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: {}", alias);
+                                LOG.info("Registered CXF Servlet under: {}", alias);
                                 httpService.registerServlet(alias2, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: {}", alias2);
+                                LOG.info("Registered CXF Servlet under: {}", alias2);
                                 if (null != baseAddress) {
                                     try {
                                         URL url = new URL(baseAddress);
@@ -194,7 +195,7 @@ public class CXFActivator extends HousekeepingActivator {
                                         if (!alias.equals(servletAlias) && !alias2.equals(servletAlias)) {
                                             alias3 = servletAlias;
                                             httpService.registerServlet(servletAlias, cxfServlet, config, null);
-                                            log.info("Registered CXF Servlet under: {}", alias2);
+                                            LOG.info("Registered CXF Servlet under: {}", alias2);
                                         }
                                     } catch (MalformedURLException e) {
                                         throw new IllegalStateException("Invalid URL specified in property \"com.openexchange.soap.cxf.baseAddress\": \"" + baseAddress + "\"", e);
@@ -228,22 +229,22 @@ public class CXFActivator extends HousekeepingActivator {
                             collector.open();
                             this.collector = collector;
                             collectorOpened = true;
-                            log.info("CXF SOAP service is up and running");
+                            LOG.info("CXF SOAP service is up and running");
                             /*
                              * Return tracked HTTP service
                              */
                             return httpService;
                         } catch (ServletException e) {
-                            log.error("Couldn't register CXF Servlet", e);
+                            LOG.error("Couldn't register CXF Servlet", e);
                         } catch (NamespaceException e) {
-                            log.error("Couldn't register CXF Servlet", e);
+                            LOG.error("Couldn't register CXF Servlet", e);
                         } catch (RuntimeException e) {
                             if (servletRegistered) {
-                                unregisterHttpAlias(alias, httpService);
-                                unregisterHttpAlias(alias2, httpService);
+                                unregisterHttpAlias(alias, httpService, true);
+                                unregisterHttpAlias(alias2, httpService, false);
                                 String servletAlias = alias3;
                                 if (null != servletAlias) {
-                                    unregisterHttpAlias(servletAlias, httpService);
+                                    unregisterHttpAlias(servletAlias, httpService, false);
                                     alias3 = null;
                                 }
                             }
@@ -258,7 +259,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     this.collector = null;
                                 }
                             }
-                            log.error("Couldn't register CXF Servlet", e);
+                            LOG.error("Couldn't register CXF Servlet", e);
                         }
                         context.ungetService(reference);
                         return null;
@@ -267,7 +268,7 @@ public class CXFActivator extends HousekeepingActivator {
                 track(HttpService.class, trackerCustomizer);
                 openTrackers();
         } catch (Exception e) {
-            log.error("", e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -278,9 +279,15 @@ public class CXFActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
-    static void unregisterHttpAlias(String alias, HttpService httpService) {
-        if (alias != null) {
-            HttpServices.unregister(alias, httpService);
+    static void unregisterHttpAlias(String alias, HttpService httpService, boolean logError) {
+        if (Strings.isNotEmpty(alias) && httpService != null) {
+            try {
+                httpService.unregister(alias);
+            } catch (Exception e) {
+                if (logError) {
+                    LOG.error("Failed to unregister HTTP servlet (or resource) associated with alias: {}", alias, e);
+                }
+            }
         }
     }
 
