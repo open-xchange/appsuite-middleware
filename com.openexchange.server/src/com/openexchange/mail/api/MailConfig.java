@@ -862,7 +862,7 @@ public abstract class MailConfig {
         if (account.isDefaultAccount()) {
             // First, check the configured authentication type for current user
             AuthType configuredAuthType = getConfiguredAuthType(forMailAccess, session);
-            if (AuthType.isOAuthType(configuredAuthType)) {
+            if (configuredAuthType != null && configuredAuthType.isOAuth()) {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {

@@ -72,3 +72,4 @@ Export-Package: com.openexchange.client.onboarding,
  com.openexchange.client.onboarding.rmi,
  com.openexchange.client.onboarding.service
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.client.onboarding

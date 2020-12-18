@@ -583,6 +583,7 @@ public class DataExportCleanUpTask implements Runnable {
     private static class FileStorageAndId {
 
         final FileStorage fileStorage;
+        @SuppressWarnings("unused")
         final int filestoreId;
 
         FileStorageAndId(int filestoreId, FileStorage fileStorage) {

@@ -535,6 +535,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             return group;
         }
 
+        @SuppressWarnings("unused")
         void setGroup(Group group) {
             this.group = group;
         }

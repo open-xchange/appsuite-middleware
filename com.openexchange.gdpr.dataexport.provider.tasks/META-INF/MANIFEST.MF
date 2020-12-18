@@ -50,3 +50,4 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.gdpr.dataexport.provider.tasks.osgi.TasksDataExportProviderActivator
+Automatic-Module-Name: com.openexchange.gdpr.dataexport.provider.tasks

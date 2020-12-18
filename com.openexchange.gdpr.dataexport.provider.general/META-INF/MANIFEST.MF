@@ -33,3 +33,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.gdpr.dataexport.provider.general
+Automatic-Module-Name: com.openexchange.gdpr.dataexport.provider.general

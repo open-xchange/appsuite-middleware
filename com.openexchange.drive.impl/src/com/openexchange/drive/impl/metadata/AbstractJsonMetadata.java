@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -137,7 +138,7 @@ public abstract class AbstractJsonMetadata  {
             jsonObject.putOpt("password", share.getGuest().getPassword());
             if (share.getTarget().isFolder()) {
                 boolean includeSubfolders = SubfolderAwareShareInfo.class.isInstance(share) ? ((SubfolderAwareShareInfo) share).isIncludeSubfolders() : false;
-                jsonObject.putOpt("includeSubfolders", includeSubfolders);
+                jsonObject.putOpt("includeSubfolders", B(includeSubfolders));
             }
         }
     }

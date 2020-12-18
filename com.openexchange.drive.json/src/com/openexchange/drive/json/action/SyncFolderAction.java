@@ -88,14 +88,8 @@ public class SyncFolderAction extends AbstractDriveAction {
         /*
          * get original and current client folder versions
          */
-        JsonDirectoryVersion originalVersion = null;
-        JsonDirectoryVersion clientVersion = null;
-        try {
-            originalVersion = JsonDirectoryVersion.deserialize(dataObject.optJSONObject("originalVersion"));
-            clientVersion = JsonDirectoryVersion.deserialize(dataObject.optJSONObject("clientVersion"));
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+        JsonDirectoryVersion originalVersion = JsonDirectoryVersion.deserialize(dataObject.optJSONObject("originalVersion"));
+        JsonDirectoryVersion clientVersion = JsonDirectoryVersion.deserialize(dataObject.optJSONObject("clientVersion")); 
         /*
          * extract file- and directory exclusions if present
          */

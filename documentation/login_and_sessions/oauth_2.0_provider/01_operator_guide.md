@@ -26,8 +26,8 @@ The following sections will describe the configuration of the available modes in
 
 ## Keycloak Setup
 
-All steps necessary to start a [Keycloak](https://www.keycloak.org/) Service in Docker and make basic configurations can be found in this [Keycloak on Docker](https://www.keycloak.org/getting-started/getting-started-docker) guide.
-Additionally, if you want to persist your data, you can use the following docker-compose to spin up your [Keycloak](https://www.keycloak.org/) backed up by a [Mariadb](https://mariadb.org/).
+All steps necessary to start a Keycloak Service in Docker and make basic configurations can be found in this [Keycloak on Docker](https://www.keycloak.org/getting-started/getting-started-docker) guide.
+Additionally, if you want to persist your data, you can use the following docker-compose to spin up your Keycloak backed up by a [Mariadb](https://mariadb.org/).
 
 	version: '3.4'
 	services:

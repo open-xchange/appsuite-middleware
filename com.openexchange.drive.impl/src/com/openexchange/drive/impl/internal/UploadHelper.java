@@ -123,16 +123,12 @@ public class UploadHelper {
          * Try to save directly if applicable or required
          */
         if (false == useSeparateUpload(path, originalVersion, newVersion, offset, totalLength)) {
-            Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
-
-                @Override
-                public Entry<File, String> call() throws OXException {
-                    if (null != originalVersion) {
-                        File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
-                        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
-                    }
-                    return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
+            Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(() -> {
+                if (null != originalVersion) {
+                    File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
+                    return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
                 }
+                return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
             });
             /*
              * validate checksum
@@ -654,21 +650,16 @@ public class UploadHelper {
         final List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
-
-                @Override
-                public SearchIterator<File> call() throws OXException {
-                    if (session.getStorage().supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
-                        return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
-                            getSearchTermForUploadFiles(fileVersions), fields, null,
-                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                    } else {
-                        String pattern = 1 == fileVersions.size() ?
-                            getUploadFilename(fileVersions.get(0).getChecksum()) : "*" + DriveConstants.FILEPART_EXTENSION;
-                        return session.getStorage().getFileAccess().search(pattern, fields, folderID, null,
-                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                    }
+            searchIterator = session.getStorage().wrapInTransaction(() -> {
+                if (session.getStorage().supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
+                    return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
+                        getSearchTermForUploadFiles(fileVersions), fields, null,
+                        SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                 }
+                String pattern = 1 == fileVersions.size() ?
+                    getUploadFilename(fileVersions.get(0).getChecksum()) : "*" + DriveConstants.FILEPART_EXTENSION;
+                return session.getStorage().getFileAccess().search(pattern, fields, folderID, null,
+                    SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
             });
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();

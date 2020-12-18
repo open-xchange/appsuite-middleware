@@ -111,6 +111,9 @@ public class DataExportJSONResultConverter implements ResultConverter {
             /*
              * Collection of tasks
              */
+            if (resultObject == null) {
+                return;
+            }
             @SuppressWarnings("unchecked") Collection<DataExport> exports = (Collection<DataExport>) resultObject;
             final JSONArray jArray = new JSONArray(exports.size());
             for (DataExport export : exports) {

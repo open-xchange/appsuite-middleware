@@ -204,7 +204,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             case LINK:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case MANUAL:
-                return doExecuteManual(request, previousResult, session);
+                return doExecuteManual(previousResult, session);
             case PLIST:
                 return doExecutePlist(request, previousResult, session);
             default:
@@ -426,8 +426,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         return plistResult(request, previousResult, session);
     }
 
-    private Result doExecuteManual(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        return displayResult(request, previousResult, session);
+    private Result doExecuteManual(Result previousResult, Session session) throws OXException {
+        return displayResult(previousResult, session);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -441,7 +441,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private final static String SMTP_PORT_FIELD = "smtpPort";
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
-    private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+    private Result displayResult(Result previousResult, Session session) throws OXException {
         Configurations configurations;
         {
             MailConfig mailConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);

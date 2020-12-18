@@ -124,16 +124,12 @@ public class UploadAction extends AbstractDriveWriteAction {
         Date created = null;
         if (requestData.containsParameter("created")) {
             Long value = requestData.getParameter("created", Long.class);
-            if (null != value) {
-                created = new Date(value.longValue());
-            }
+            created = new Date(value.longValue());
         }
         Date modified = null;
         if (requestData.containsParameter("modified")) {
             Long value = requestData.getParameter("modified", Long.class);
-            if (null != value) {
-                modified = new Date(value.longValue());
-            }
+            modified = new Date(value.longValue());
         }
         /*
          * construct referenced file versions from parameters

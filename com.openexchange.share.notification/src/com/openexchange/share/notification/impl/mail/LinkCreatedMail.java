@@ -64,7 +64,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.regional.RegionalSettingsService;
@@ -102,7 +101,7 @@ public class LinkCreatedMail extends ShareNotificationMail {
         super(services, data);
     }
 
-    public static LinkCreatedMail init(LinkCreatedNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
+    public static LinkCreatedMail init(LinkCreatedNotification<InternetAddress> notification, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);

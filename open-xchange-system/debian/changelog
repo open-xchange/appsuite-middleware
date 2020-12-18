@@ -1,3 +1,9 @@
+open-xchange-system (7.10.5-2) stable; urgency=medium
+
+  * Second preview of 7.10.5 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 17 Dec 2020 13:29:07 +0000
+
 open-xchange-system (7.10.5-1) stable; urgency=medium
 
   * First preview of 7.10.5 release

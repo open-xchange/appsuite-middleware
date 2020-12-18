@@ -209,7 +209,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return new IteratorBackedHits(hitsList);
     }
 
-    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
+    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) {
         // Remember checked clients
         Map<WebSocketClient, Boolean> checkedOnes = new LinkedHashMap<>();
         Set<WebSocketClient> hasOpenWebSocket = new LinkedHashSet<>();
@@ -249,7 +249,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         List<Hits> hitsList = new ArrayList<Hits>();
         for (int userId : userIds) {
-            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId, topic) : getInterestedSubscriptions(userId, contextId, topic);
+            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId) : getInterestedSubscriptions(userId, contextId, topic);
             if (null != hits && false == hits.isEmpty()) {
                 hitsList.add(hits);
             }
@@ -257,7 +257,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return new IteratorBackedHits(hitsList);
     }
 
-    private Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    private Hits getInterestedSubscriptions(String client, int userId, int contextId) {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
             Map<String, WebSocketClient> clients = resolver.getSupportedClients();

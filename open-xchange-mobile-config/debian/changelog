@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.5-2) stable; urgency=medium
+
+  * Second preview of 7.10.5 release
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 17 Dec 2020 13:31:09 +0000
+
 open-xchange-mobile-config (7.10.5-1) stable; urgency=medium
 
   * First preview of 7.10.5 release

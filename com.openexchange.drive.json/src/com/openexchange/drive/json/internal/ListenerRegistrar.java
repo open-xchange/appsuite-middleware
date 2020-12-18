@@ -57,15 +57,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
@@ -120,21 +117,17 @@ public class ListenerRegistrar implements DriveEventPublisher, EventHandler {
         this.listenersPerFolder = Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create(1024, 4));
         this.listenersPerSession = Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create(1024, 2));
         this.listeners = CacheBuilder.newBuilder().expireAfterAccess(EXPIRY_TIME, TimeUnit.SECONDS)
-            .removalListener(new RemovalListener<String, LongPollingListener>() {
-
-                @Override
-                public void onRemoval(RemovalNotification<String, LongPollingListener> notification) {
-                    /*
-                     * remove from secondary mappings, too
-                     */
-                    LongPollingListener listener = notification.getValue();
-                    listenersPerSession.removeAll(listener.getSession().getServerSession().getSessionID());
-                    int contextID = listener.getSession().getServerSession().getContextId();
-                    for (String rootFolderID : listener.getRootFolderIDs()) {
-                        listenersPerFolder.remove(getFolderKey(rootFolderID, contextID), notification.getKey());
-                    }
-                    LOG.debug("Unregistered listener: {}", listener);
+            .removalListener(notification -> {
+                /*
+                 * remove from secondary mappings, too
+                 */
+                LongPollingListener listener = LongPollingListener.class.cast(notification.getValue());
+                listenersPerSession.removeAll(listener.getSession().getServerSession().getSessionID());
+                int contextID = listener.getSession().getServerSession().getContextId();
+                for (String rootFolderID : listener.getRootFolderIDs()) {
+                    listenersPerFolder.remove(getFolderKey(rootFolderID, contextID), notification.getKey());
                 }
+                LOG.debug("Unregistered listener: {}", listener);
             })
             .build();
         this.listenerFactories = new TreeSet<LongPollingListenerFactory>(LongPollingListenerFactory.PRIORITY_COMPARATOR);
@@ -151,21 +144,17 @@ public class ListenerRegistrar implements DriveEventPublisher, EventHandler {
     public LongPollingListener getOrCreate(final DriveSession session, final List<String> rootFolderIDs, SubscriptionMode mode) throws ExecutionException {
         final String listenerID = getListenerID(session, rootFolderIDs);
         final int contextID = session.getServerSession().getContextId();
-        return listeners.get(listenerID, new Callable<LongPollingListener>() {
-
-            @Override
-            public LongPollingListener call() throws Exception {
-                /*
-                 * create listener & remember in secondary mappings
-                 */
-                LongPollingListener listener = createListener(session, rootFolderIDs, mode);
-                for (String rootFolderID : rootFolderIDs) {
-                    listenersPerFolder.put(getFolderKey(rootFolderID, contextID), listenerID);
-                }
-                listenersPerSession.put(session.getServerSession().getSessionID(), listenerID);
-                LOG.debug("Registered new listener: {}", listener);
-                return listener;
+        return listeners.get(listenerID, () -> {
+            /*
+             * create listener & remember in secondary mappings
+             */
+            LongPollingListener listener = createListener(session, rootFolderIDs, mode);
+            for (String rootFolderID : rootFolderIDs) {
+                listenersPerFolder.put(getFolderKey(rootFolderID, contextID), listenerID);
             }
+            listenersPerSession.put(session.getServerSession().getSessionID(), listenerID);
+            LOG.debug("Registered new listener: {}", listener);
+            return listener;
         });
     }
 

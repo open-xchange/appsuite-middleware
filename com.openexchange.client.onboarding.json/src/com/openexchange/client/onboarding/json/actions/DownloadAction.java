@@ -69,6 +69,7 @@ import com.openexchange.client.onboarding.plist.PlistScenarioType;
 import com.openexchange.client.onboarding.plist.PlistUtility;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -170,12 +171,7 @@ public class DownloadAction extends AbstractOnboardingAction {
         }
 
         // Generate synthetic scenario and sign result
-        PListDict dict = null;
-        for (Map.Entry<String, OnboardingPlistProvider> providerEntry : onboardingProviders.entrySet()) {
-            OnboardingPlistProvider provider = providerEntry.getValue();
-            PlistScenario scenario = PlistScenario.newInstance(providerEntry.getKey(), Collections.singletonList(provider));
-            dict = provider.getPlist(dict, scenario, requestData.getHostData().getHost(), session.getUserId(), session.getContextId());
-        }
+        PListDict dict = generatePListDict(requestData, session, onboardingProviders);
         if (dict == null) {
             return new AJAXRequestResult();
         }
@@ -207,4 +203,26 @@ public class DownloadAction extends AbstractOnboardingAction {
         return new AJAXRequestResult(dict, "plist_download");
     }
 
+    /**
+     * Generate a possible synthetic scenario
+     *
+     * @param requestData The {@link AJAXRequestData}
+     * @param session The session
+     * @param onboardingProviders the onboarding providers
+     * @return The possible {@link PListDict} with the synthetic scenario
+     * @throws OXException
+     */
+    private PListDict generatePListDict(AJAXRequestData requestData, ServerSession session, Map<String, OnboardingPlistProvider> onboardingProviders) throws OXException {
+        HostData hostData = requestData.getHostData();
+        if (hostData == null) {
+            return null;
+        }
+        PListDict dict = null;
+        for (Map.Entry<String, OnboardingPlistProvider> providerEntry : onboardingProviders.entrySet()) {
+            OnboardingPlistProvider provider = providerEntry.getValue();
+            PlistScenario scenario = PlistScenario.newInstance(providerEntry.getKey(), Collections.singletonList(provider));
+            dict = provider.getPlist(dict, scenario, hostData.getHost(), session.getUserId(), session.getContextId());
+        }
+        return dict;
+    }
 }

@@ -54,11 +54,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.EntityInfo;
@@ -77,6 +78,8 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ExtendedPermission {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedPermission.class);
 
     protected final PermissionResolver resolver;
 
@@ -142,6 +145,10 @@ public abstract class ExtendedPermission {
              */
             Contact toAdd = userContact;
             ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return;
+            }
             if (Anonymizers.isGuest(session)) {
                 if (session.getUserId() != toAdd.getInternalUserId()) {
                     Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
@@ -165,6 +172,10 @@ public abstract class ExtendedPermission {
              */
             User toAdd = user;
             ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return;
+            }
             if (Anonymizers.isGuest(session)) {
                 if (session.getUserId() != toAdd.getId()) {
                     Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
@@ -242,9 +253,13 @@ public abstract class ExtendedPermission {
     private static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timeZoneID = requestData.getParameter("timezone");
         if (null == timeZoneID) {
-            timeZoneID = requestData.getSession().getUser().getTimeZone();
+            ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return null;
+            }
+            timeZoneID = session.getUser().getTimeZone();
         }
         return TimeZoneUtils.getTimeZone(timeZoneID);
     }
-
 }

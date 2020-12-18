@@ -143,7 +143,7 @@ public class MailNotifications {
         private String shareUrl;
         private Group group;
 
-        private ShareCreatedBuilder() {
+        ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
         }
 
@@ -237,7 +237,7 @@ public class MailNotifications {
         private Date expiryDate;
         private String password;
 
-        private LinkCreatedBuilder() {
+        LinkCreatedBuilder() {
             super(NotificationType.LINK_CREATED);
         }
 

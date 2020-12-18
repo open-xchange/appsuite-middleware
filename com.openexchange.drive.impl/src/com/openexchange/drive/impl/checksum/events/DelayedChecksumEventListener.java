@@ -135,15 +135,11 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
          * schedule checksum invalidations regularly
          */
         TimerService timerService = DriveServiceLookup.getService(TimerService.class);
-        this.timerTask = timerService.scheduleWithFixedDelay(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    triggerChecksumInvalidation();
-                } catch (Exception e) {
-                    LOG.warn("Error triggering checksum invalidations", e);
-                }
+        this.timerTask = timerService.scheduleWithFixedDelay(() -> {
+            try {
+                triggerChecksumInvalidation();
+            } catch (Exception e) {
+                LOG.warn("Error triggering checksum invalidations", e);
             }
         }, TRIGGER_INTERVAL, TRIGGER_INTERVAL);
     }

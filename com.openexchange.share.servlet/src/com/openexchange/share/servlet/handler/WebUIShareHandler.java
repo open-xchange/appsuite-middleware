@@ -112,7 +112,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             case GUEST:
             {
                 if (shareRequest.isInvalidTarget()) {
-                    return redirectToLoginPage(shareRequest, request, response);
+                    return redirectToLoginPage(shareRequest, response);
                 }
 
                 ShareLoginMethod shareLoginMethod = getShareLoginMethod(shareRequest);
@@ -124,7 +124,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             }
             case ANONYMOUS_PASSWORD:
             case GUEST_PASSWORD:
-                return redirectToLoginPage(shareRequest, request, response);
+                return redirectToLoginPage(shareRequest, response);
             default:
                 return ShareHandlerReply.NEUTRAL;
         }
@@ -160,7 +160,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
         }
     }
 
-    private ShareHandlerReply redirectToLoginPage(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private ShareHandlerReply redirectToLoginPage(AccessShareRequest shareRequest, HttpServletResponse response) throws OXException {
         try {
             GuestInfo guestInfo = shareRequest.getGuest();
             ShareTargetPath targetPath = shareRequest.getTargetPath();

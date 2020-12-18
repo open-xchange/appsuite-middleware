@@ -64,7 +64,6 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link PListDownloadConverter}
  *
@@ -90,8 +89,11 @@ public class PListDownloadConverter implements ResultConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        PListDict dict = PListDict.class.cast(result.getResultObject());
+        if (dict == null) {
+            return;
+        }
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        PListDict dict = (PListDict) result.getResultObject();
         Writer writer = new OutputStreamWriter(fileHolder.asOutputStream(), StandardCharsets.UTF_8);
         try {
             dict.writeTo(writer);

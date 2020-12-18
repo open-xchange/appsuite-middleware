@@ -1,5 +1,7 @@
 ---
 title: DB- and Filestore-based Composition Spaces
+icon: far fa-circle
+tags: Mail, Mail Compose
 ---
 
 # Mail headers and (textual) content

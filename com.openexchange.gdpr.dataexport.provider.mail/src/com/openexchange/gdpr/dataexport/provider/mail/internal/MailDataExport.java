@@ -218,7 +218,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
 
             Folder rootFolder;
             {
-                IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                @SuppressWarnings("null") IMailFolderStorage folderStorage = mailAccess.getFolderStorage(); // mailAccess is guarded by 'tryConnect'
                 IMailFolderStorageInfoSupport infoSupport = folderStorage.supports(IMailFolderStorageInfoSupport.class);
                 if (null != infoSupport && infoSupport.isInfoSupported()) {
                     rootFolder = new DefaultFolder(infoSupport.getFolderInfo(MailFolder.ROOT_FOLDER_ID), infoSupport);

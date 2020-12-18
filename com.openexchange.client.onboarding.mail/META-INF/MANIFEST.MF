@@ -145,3 +145,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.client.onboarding.mail.osgi.MailOnboardingConfigurationActivator
 Export-Package: com.openexchange.client.onboarding.mail.custom
+Automatic-Module-Name: com.openexchange.client.onboarding.mail

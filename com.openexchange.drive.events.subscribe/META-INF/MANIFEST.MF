@@ -27,3 +27,4 @@ Import-Package: com.openexchange.context,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.drive.events.subscribe
+Automatic-Module-Name: com.openexchange.drive.events.subscribe

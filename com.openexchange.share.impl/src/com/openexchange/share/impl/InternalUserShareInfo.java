@@ -69,8 +69,8 @@ import com.openexchange.user.User;
  */
 public class InternalUserShareInfo extends AbstractShareInfo {
 
-    private final int contextID;
-    private final User user;
+    final int contextID;
+    final User user;
 
     /**
      * Initializes a new {@link InternalUserShareInfo}.

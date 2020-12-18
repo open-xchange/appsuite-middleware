@@ -1,12 +1,14 @@
 ---
 title: Draft-based Composition Spaces
+icon: far fa-circle
+tags: Mail, Mail Compose, draft-based
 ---
 
 # Introduction
 
 Starting with 7.10.5, server-side representations of open mail compose windows (so called "composition spaces") are per default backed by real emails stored in users "Drafts" folders. Changes to mails in composition are applied periodically or immediately by saving a new draft and hard-deleting the former one, based on the actual change.
 
-This approach is subject to fully replace the former database and filestore driven one. The former approach is considered as **deprecated** starting with  7.10.5.
+> This approach is subject to fully replace the former database and filestore driven one. The former approach is considered as **deprecated** starting with  7.10.5.
 
 The new approach is enabled per default, i.e. any new composition space opened on a machine running 7.10.5 will be based on a physical draft. Still opened composition spaces based on the former approach will continue to be handled by that until they are closed (sent, saved as draft or due to expiry). Therefore, do not decommission any acording filestore or database resources along with the 7.10.5 rollout immediateley!
 
@@ -130,9 +132,6 @@ Cache directory and file durability can be controlled with these settings:
 
 * `com.openexchange.mail.compose.mailstorage.fileCacheDir`
 * `com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds`
-
-
-# Dovecot Configuration
 
 # OX Guard
 

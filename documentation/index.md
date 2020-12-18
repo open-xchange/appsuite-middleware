@@ -16,11 +16,13 @@ With 7.10.2 a new backend implementation for composing emails in the webmailer w
 
 The original implementation was based on App Suite database and filestore and produced real draft emails only on explicit user requests. To address operational and usability concerns, an alternative mail compose backend implementation based on real draft emails is now provided. The new approach operates solely on draft emails in users "Drafts" folders and is enabled by default. It is subject to replace the former mechanism.
 
-**The database and filestore-based mechanism is herewith declared as deprecated and subject for removal in a future release.**
+> **The database and filestore-based mechanism is herewith declared as deprecated and subject for removal in a future release.**
 
 The new mechanism can be disabled – and therefore the former one still being used instead – by setting `com.openexchange.mail.compose.mailstorage.enabled = false`.
 
 **Please note** that the former approach is still used for all still open composition spaces. Do not decommission database and filestore resources until no more spaces are managed by the old mechanism.
+
+For a detailed description of the new draft-based mail compose see [here](https://documentation.open-xchange.com/7.10.5/middleware/mail/mail_compose/01_drafts.html) 
 
 ## Federated Sharing
 
@@ -45,7 +47,7 @@ The following properties needs to be set in order to enable the **cross-context*
 
 The following properties needs to be set in order to enable the **cross-ox** feature:
 
-* <code>[com.openexchange.capability.filestorage_xox](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xox)=true</code>
+* <code>[com.openexchange.capability.filestorage_xox](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xox) = true</code>
 
 See [here](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of relevant configuration options, as well as 
 [Federated Sharing](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/federated_sharing.html) for further details.
@@ -140,7 +142,7 @@ Internally, this separation is enforced by applying a special offset to the port
 
 For this purpose, the new lean configuration property [``com.openexchange.hazelcast.network.portOffset``](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.hazelcast.network.portOffset) is introduced, which allows to configure an explicit offset that is applied to the configured listening port. With the default setting ``auto``, the offset is chosen automatically by the application, based on the shipped Hazelcast version (``4`` with the upcoming update to Hazelcast 4.1). It can still also be set to ``0`` to use the port from [``com.openexchange.hazelcast.network.port``](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.hazelcast.network.port) as-is, if one needs more control due to firewalls etc. However, one should then ensure that nodes running the previous version do use a different port, or all 'old' nodes in the cluster are shut down prior starting the first 'new' one. A similar option is also introduced for the supplementary package ``open-xchange-cluster-upgrade-from-7103-7104``.
 
-And, since the upgraded middleware nodes will effectively form a separate cluster after a restart, this also means that volatile data like user sessions being held in the distributed session storage won't be migrated, requiring end users to re-login after the update (unless managed by an external SSO-system). Also, please obey the general recommendations when performing a [cluster upgrade with breaking Hazelcast upgrade](https://documentation.open-xchange.com/7.10.5/middleware/administration/running_a_cluster.html#rolling-upgrade-with-breaking-hazelcast-upgrade).
+And, since the upgraded middleware nodes will effectively form a separate cluster after a restart, this also means that volatile data like user sessions being held in the **distributed session storage won't be migrated**, requiring end users to re-login after the update (unless managed by an external SSO-system). Also, please obey the general recommendations when performing a [cluster upgrade with breaking Hazelcast upgrade](https://documentation.open-xchange.com/7.10.5/middleware/administration/running_a_cluster.html#rolling-upgrade-with-breaking-hazelcast-upgrade).
 
 ## FULLTEXT index in InfoStore
 

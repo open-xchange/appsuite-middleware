@@ -51,20 +51,15 @@ package com.openexchange.drive.events.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
-import com.openexchange.drive.events.ms.MsDriveEventHandler;
 import com.openexchange.drive.events.ms.PortableDriveEventFactory;
 import com.openexchange.drive.events.ms.PortableFolderContentChangeFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -82,7 +77,7 @@ import com.openexchange.timer.TimerService;
 public class DriveEventsActivator extends HousekeepingActivator {
 
     /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventsActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventsActivator.class);
 
     /**
      * Initializes a new {@link DriveEventsActivator}.
@@ -115,40 +110,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
         registerService(EventHandler.class, service, serviceProperties);
         registerService(CustomPortableFactory.class, new PortableDriveEventFactory());
         registerService(CustomPortableFactory.class, new PortableFolderContentChangeFactory());
-        track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
-
-            private MsDriveEventHandler eventHandler;
-
-            @Override
-            public synchronized PortableMsService addingService(ServiceReference<PortableMsService> reference) {
-                PortableMsService messagingService = context.getService(reference);
-                MsDriveEventHandler.setMsService(messagingService);
-                LOG.debug("Initializing messaging service drive event handler");
-                try {
-                    this.eventHandler = new MsDriveEventHandler(service);
-                } catch (OXException e) {
-                    throw new IllegalStateException(
-                        e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
-                }
-                return messagingService;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
-                // Ignored
-            }
-
-            @Override
-            public synchronized void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
-                LOG.debug("Stopping messaging service cache event handler");
-                MsDriveEventHandler eventHandler = this.eventHandler;
-                if (null != eventHandler) {
-                    eventHandler.stop();
-                    this.eventHandler = null;
-                }
-                MsDriveEventHandler.setMsService(null);
-            }
-        });
+        track(PortableMsService.class, new PortableMsTracker(context, service));
         openTrackers();
     }
 

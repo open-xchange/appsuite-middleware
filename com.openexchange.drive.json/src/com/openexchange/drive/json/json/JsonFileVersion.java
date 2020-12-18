@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.FileVersion;
 
-
 /**
  * {@link JsonFileVersion}
  *
@@ -99,7 +98,7 @@ public class JsonFileVersion extends JsonDriveVersion implements FileVersion {
         return jsonArray;
     }
 
-    public static JsonFileVersion deserialize(JSONObject jsonObject) throws JSONException {
+    public static JsonFileVersion deserialize(JSONObject jsonObject) {
         if (null == jsonObject) {
             return null;
         }

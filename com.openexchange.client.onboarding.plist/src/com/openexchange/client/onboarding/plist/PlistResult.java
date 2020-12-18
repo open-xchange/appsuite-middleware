@@ -155,6 +155,7 @@ public class PlistResult implements Result {
         return TransportProviderRegistry.getTransportProvider("smtp");
     }
 
+    @SuppressWarnings("resource")
     private ResultObject sendEmailResult(OnboardingRequest request, Session session) throws OXException {
         Map<String, Object> input = request.getInput();
         if (null == input) {
@@ -201,6 +202,7 @@ public class PlistResult implements Result {
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
+    @SuppressWarnings("resource")
     private ResultObject generatePListResult(OnboardingRequest request, Session session) throws OXException {
         ThresholdFileHolder fileHolder = null;
         boolean error = true;
@@ -236,7 +238,7 @@ public class PlistResult implements Result {
 
             if (signed instanceof ThresholdFileHolder) {
                 error = false;
-                return (ThresholdFileHolder) signed;
+                return ThresholdFileHolder.class.cast(signed);
             }
 
             tfh = new ThresholdFileHolder(signed);

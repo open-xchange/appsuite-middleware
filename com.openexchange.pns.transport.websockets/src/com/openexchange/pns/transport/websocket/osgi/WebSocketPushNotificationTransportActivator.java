@@ -53,7 +53,6 @@ import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
@@ -77,8 +76,6 @@ import com.openexchange.websockets.WebSocketService;
  * @since v7.8.3
  */
 public class WebSocketPushNotificationTransportActivator extends HousekeepingActivator implements Reloadable {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransportActivator.class);
 
     private List<ServiceRegistration<?>> serviceRegistrations;
     private WebSocketPushNotificationTransport webSocketTransport;

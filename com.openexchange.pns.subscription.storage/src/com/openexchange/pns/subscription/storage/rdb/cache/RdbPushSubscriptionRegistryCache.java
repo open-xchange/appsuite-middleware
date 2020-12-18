@@ -80,7 +80,6 @@ public class RdbPushSubscriptionRegistryCache {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private final RdbPushSubscriptionRegistry registry;
     private final CacheEventService cacheEventService;
     private final CacheService cacheService;
     private final LoadingCache<Integer, LoadingCache<UserAndContext, CachedPushSubscriptionCollection>> cache;
@@ -90,7 +89,6 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public RdbPushSubscriptionRegistryCache(final RdbPushSubscriptionRegistry registry, CacheEventService cacheEventService, CacheService cacheService) {
         super();
-        this.registry = registry;
         this.cacheEventService = cacheEventService;
         this.cacheService = cacheService;
 
@@ -146,9 +144,8 @@ public class RdbPushSubscriptionRegistryCache {
      * Adds specified subscription to appropriate collection (if any available).
      *
      * @param subscription The subscription to add
-     * @throws OXException If add attempt fails
      */
-    public void addAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
+    public void addAndInvalidateIfPresent(PushSubscription subscription) {
         int contextId = subscription.getContextId();
         LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(I(contextId));
         if (null == userCache) {
@@ -169,9 +166,8 @@ public class RdbPushSubscriptionRegistryCache {
      * Removes specified subscription from appropriate collection (if any available).
      *
      * @param subscription The subscription to remove
-     * @throws OXException If remove attempt fails
      */
-    public void removeAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
+    public void removeAndInvalidateIfPresent(PushSubscription subscription) {
         int contextId = subscription.getContextId();
         LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(I(contextId));
         if (null == userCache) {

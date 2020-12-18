@@ -30,3 +30,4 @@ Import-Package: com.google.common.collect,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.impl.osgi.PushNotificationServiceImplActivator
+Automatic-Module-Name: com.openexchange.pns.impl
