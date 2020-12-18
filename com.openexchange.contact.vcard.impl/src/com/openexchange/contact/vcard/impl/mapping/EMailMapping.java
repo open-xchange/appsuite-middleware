@@ -184,11 +184,21 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email2 - type "HOME"
          */
-        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false), parameters, warnings));
+        String candidate = parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false), parameters, warnings);
+        if (candidate != null) {
+            if (!candidate.equals(contact.getEmail1())) { // Avoid duplicates
+                contact.setEmail2(candidate);
+            }
+        }
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true), parameters, warnings));
+        candidate = parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true), parameters, warnings);
+        if (candidate != null) {
+            if (!candidate.equals(contact.getEmail1()) && candidate.equals(contact.getEmail2())) { // Avoid duplicates
+                contact.setEmail3(candidate);
+            }
+        }
         /*
          * telex - type "TLX"
          */
