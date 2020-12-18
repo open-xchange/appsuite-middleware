@@ -1509,12 +1509,7 @@ public class MailStorage implements IMailStorage {
 
         // Create the new draft mail
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        ComposedMailMessage newDraftMail;
-        if (asFinalDraft) {
-            newDraftMail = processor.compileFinalDraft(optRefMessage);
-        } else {
-            newDraftMail = processor.compileDraft();
-        }
+        ComposedMailMessage newDraftMail = asFinalDraft ? processor.compileFinalDraft(optRefMessage) : processor.compileDraft();
 
         newDraftMail = applyGuardEncryption(securitySettings, newDraftMail, session);
         return deleteAndSaveDraftMailSafe(draftPath, storageQuota, messageStorage, newDraftMail);
