@@ -54,6 +54,7 @@ import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.mailstorage.association.IAssociationStorageManager;
 import com.openexchange.mail.compose.mailstorage.storage.IMailStorage;
+import com.openexchange.mail.compose.mailstorage.util.ExceptionLoggingCompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -64,6 +65,8 @@ import com.openexchange.session.Session;
  * @since v7.10.5
  */
 public class MailStorageCompositionSpaceServiceFactory implements CompositionSpaceServiceFactory {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailStorageCompositionSpaceServiceFactory.class);
 
     private static final String SERICE_ID = "draft";
 
@@ -111,7 +114,11 @@ public class MailStorageCompositionSpaceServiceFactory implements CompositionSpa
 
     @Override
     public CompositionSpaceService createServiceFor(Session session) throws OXException {
-        return new MailStorageCompositionSpaceService(session, mailStorage, associationStorageManager, services, SERICE_ID);
+        if (LOG.isDebugEnabled() == false) {
+            return new MailStorageCompositionSpaceService(session, mailStorage, associationStorageManager, services, SERICE_ID);
+        }
+
+        return new ExceptionLoggingCompositionSpaceService(new MailStorageCompositionSpaceService(session, mailStorage, associationStorageManager, services, SERICE_ID));
     }
 
 }
