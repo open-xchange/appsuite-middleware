@@ -81,8 +81,8 @@ import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor
  */
 public class CXFActivator extends HousekeepingActivator {
 
-    /** Simple class to delay initialization until needed */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
