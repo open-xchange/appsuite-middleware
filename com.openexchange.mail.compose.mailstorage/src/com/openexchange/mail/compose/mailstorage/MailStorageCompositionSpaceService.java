@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1232,11 +1233,27 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
         if (existingDraftPaths.isEmpty()) {
             // Mail storage signals no available composition-space-related draft messages...
-            if (!associations.isEmpty()) {
-                // ... but there are associations in cache. Retry...
-                storageResult = mailStorage.lookUp(session);
-                warnings.addAll(storageResult.getWarnings());
-                existingDraftPaths = storageResult.getResult().getDraftPath2CompositionSpaceId();
+            int numberOfAssociations = associations.size();
+            if (numberOfAssociations <= 0) {
+                // ... and there are no associations in cache as well.
+                return Collections.emptyList();
+            }
+
+            // ... but there are associations in cache. Check each cached association if really non-existent.
+            existingDraftPaths = new LinkedHashMap<>(numberOfAssociations);
+            for (CompositionSpaceToDraftAssociation association : associations) {
+                MailStorageResult<Optional<MailStorageId>> lookUpResult = mailStorage.lookUp(association.getCompositionSpaceId(), session);
+                warnings.addAll(lookUpResult.getWarnings());
+                Optional<MailStorageId> optionalMailStorageId = lookUpResult.getResult();
+
+                if (optionalMailStorageId.isPresent()) {
+                    // Draft message does still exist as proven through look-up by composition space identifier
+                    MailStorageId mailStorageId = optionalMailStorageId.get();
+                    existingDraftPaths.put(mailStorageId.getDraftPath(), mailStorageId.getCompositionSpaceId());
+                } else {
+                    // Draft message does not exist
+                    associationStorage.delete(association.getCompositionSpaceId(), session, false);
+                }
             }
 
             if (existingDraftPaths.isEmpty()) {
