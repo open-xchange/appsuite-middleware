@@ -89,23 +89,23 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorMessage.WRONG_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD_DISPLAY),
     /**
-     *
+     * {@value SubscriptionErrorMessage#SERVICE_UNAVAILABLE}
      */
     COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorMessage.SERVICE_UNAVAILABLE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE_DISPLAY),
     /**
-     *
+     * {@value SubscriptionErrorMessage#INCONSISTENT_WORKFLOW}
      */
     INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorMessage.INCONSISTENT_WORKFLOW),
     /**
-     *
+     * {@value SubscriptionErrorMessage#INACTIVE_SOURCE_MSG}
      */
     INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorMessage.INACTIVE_SOURCE_MSG, SubscriptionErrorStrings.INACTIVE_SOURCE_DISPLAY),
     /**
-     *
+     * {@value SubscriptionErrorMessage#MISSING_ARGUMENT_MSG}
      */
     MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorMessage.MISSING_ARGUMENT_MSG, SubscriptionErrorStrings.MISSING_ARGUMENT_DISPLAY),
     /**
-     *
+     * {@value SubscriptionErrorMessage#PERMISSION_DENIED_MSG}
      */
     PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorMessage.PERMISSION_DENIED_MSG, SubscriptionErrorStrings.PERMISSION_DENIED_DISPLAY),
     /**

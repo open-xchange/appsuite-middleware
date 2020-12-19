@@ -403,16 +403,15 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     }
 
     private boolean delete(final Subscription subscription, final Connection writeConnection) throws SQLException, OXException {
+        storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
+
         final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
 
         final List<Object> values = new ArrayList<Object>();
         values.add(I(subscription.getId()));
         values.add(I(subscription.getContext().getContextId()));
-
-        boolean deleted = new StatementBuilder().executeStatement(writeConnection, delete, values) > 0;
-
-        storageService.delete(writeConnection, subscription.getContext(), getConfigurationId(subscription));
-        return deleted;
+        
+        return new StatementBuilder().executeStatement(writeConnection, delete, values) > 0;
     }
 
     private int save(final Subscription subscription, final Connection writeConnection) throws OXException, SQLException {

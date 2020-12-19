@@ -74,17 +74,12 @@ public class SubscriptionJSONWriter {
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
     private static final String ID = "id";
-
     private static final String FOLDER = "folder";
-
+    private static final String ERRORS = "errors";
     private static final String DISPLAYNAME = "displayName";
-
     private static final String SOURCE = "source";
-
     private static final String ENABLED = "enabled";
-
     private static final String CREATED = "created";
-
     private static final String LAST_UPDATED = "lastUpdated";
 
     public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix, TimeZone tz) throws JSONException {
@@ -96,6 +91,7 @@ public class SubscriptionJSONWriter {
         object.put(SOURCE, subscription.getSource().getId());
         object.put(LAST_UPDATED, subscription.getLastUpdate() + (tz != null ? tz.getOffset(subscription.getLastUpdate()) : 0L));
         object.put(CREATED, subscription.getCreated() + (tz != null ? tz.getOffset(subscription.getCreated()) : 0L));
+        object.put(ERRORS, subscription.getConfiguration().containsKey(ERRORS) ? subscription.getConfiguration().get(ERRORS) : Boolean.valueOf(false));
 
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;

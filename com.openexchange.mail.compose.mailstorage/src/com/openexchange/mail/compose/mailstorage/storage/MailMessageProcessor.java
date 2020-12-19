@@ -2187,7 +2187,9 @@ public class MailMessageProcessor {
                     cleanCompositionSpaceHeaders(false);
                     break;
                 default:
-                    // Nothing
+                    // Ensure identifier is contained in headers
+                    String hdr = HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID;
+                    mimeMessage.setHeader(hdr, MimeMessageUtility.forceFold(hdr.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
                     break;
             }
 
