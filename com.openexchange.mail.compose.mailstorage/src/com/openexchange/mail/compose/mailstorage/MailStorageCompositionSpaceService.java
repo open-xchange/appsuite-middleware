@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.mailstorage;
 
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import static com.openexchange.mail.MailExceptionCode.getSize;
@@ -1236,23 +1237,27 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             int numberOfAssociations = associations.size();
             if (numberOfAssociations <= 0) {
                 // ... and there are no associations in cache as well.
+                LOG.debug("Found no open composition spaces and cache is empty as well. Signaling no available composition spaces.", I(numberOfAssociations));
                 return Collections.emptyList();
             }
 
             // ... but there are associations in cache. Check each cached association if really non-existent.
+            LOG.debug("Found no open composition spaces, but cache indicates {} available composition-space-related draft messages. Going to check check each one individually.", I(numberOfAssociations));
             existingDraftPaths = new LinkedHashMap<>(numberOfAssociations);
             for (CompositionSpaceToDraftAssociation association : associations) {
-                MailStorageResult<Optional<MailStorageId>> lookUpResult = mailStorage.lookUp(association.getCompositionSpaceId(), session);
+                UUID compositionSpaceId = association.getCompositionSpaceId();
+                MailStorageResult<Optional<MailStorageId>> lookUpResult = mailStorage.lookUp(compositionSpaceId, session);
                 warnings.addAll(lookUpResult.getWarnings());
                 Optional<MailStorageId> optionalMailStorageId = lookUpResult.getResult();
 
                 if (optionalMailStorageId.isPresent()) {
                     // Draft message does still exist as proven through look-up by composition space identifier
-                    MailStorageId mailStorageId = optionalMailStorageId.get();
-                    existingDraftPaths.put(mailStorageId.getDraftPath(), mailStorageId.getCompositionSpaceId());
+                    existingDraftPaths.put(optionalMailStorageId.get().getDraftPath(), compositionSpaceId);
+                    LOG.debug("Found composition-space-related draft message for composition space identifier", UUIDs.getUnformattedString(compositionSpaceId));
                 } else {
                     // Draft message does not exist
-                    associationStorage.delete(association.getCompositionSpaceId(), session, false);
+                    associationStorage.delete(compositionSpaceId, session, false);
+                    LOG.debug("Found no composition-space-related draft message for composition space identifier", UUIDs.getUnformattedString(compositionSpaceId));
                 }
             }
 
@@ -1261,6 +1266,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 for (CompositionSpaceToDraftAssociation association : associations) {
                     associationStorage.delete(association.getCompositionSpaceId(), session, false);
                 }
+                LOG.debug("Verified no open composition spaces exist. Dropping cache entries & signaling no available composition spaces.", I(numberOfAssociations));
                 return Collections.emptyList();
             }
         }
