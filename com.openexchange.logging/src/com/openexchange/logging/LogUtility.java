@@ -197,7 +197,7 @@ public class LogUtility {
             return "null";
         }
 
-        return new ObjectCollectionString<O>(objects);
+        return new ObjectString<O>(supplier);
     }
 
 }
