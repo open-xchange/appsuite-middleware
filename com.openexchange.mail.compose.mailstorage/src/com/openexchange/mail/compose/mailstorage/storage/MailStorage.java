@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.mailstorage.storage;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.logging.LogUtility.toStringObjectFor;
 import static com.openexchange.mail.compose.CompositionSpaces.getUUIDForLogging;
 import static java.util.stream.Collectors.toList;
 import java.io.IOException;
@@ -1818,7 +1819,7 @@ public class MailStorage implements IMailStorage {
         MailMessage savedDraft;
         try {
             savedDraft = messageStorage.saveDraft(draftFullName, newDraftMail);
-            LOG.debug("Saved new draft as {}", savedDraft.getMailPath());
+            LOG.debug("Saved new draft as {} with {}: {}", savedDraft.getMailPath(), HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID, toStringObjectFor(() -> savedDraft.getFirstHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID)));
         } catch (OXException e) {
             LOG.debug("Failed to save new draft", e);
             throw e;
