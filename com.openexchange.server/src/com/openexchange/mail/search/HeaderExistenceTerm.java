@@ -50,18 +50,16 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
-import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link HeaderExistenceTerm}
+ * {@link HeaderExistenceTerm} - Checks for existence of a certain header regardless of its value.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
