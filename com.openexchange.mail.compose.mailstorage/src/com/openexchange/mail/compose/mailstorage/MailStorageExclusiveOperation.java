@@ -188,7 +188,7 @@ public class MailStorageExclusiveOperation {
                     lookUpResult = compositionSpaceService.requireCompositionSpaceToDraftAssociation(compositionSpaceId);
                     association = lookUpResult.getAssociation();
                 } catch (MissingDraftException e) {
-                    lookUpResult.getAssociationStorage().delete(compositionSpaceId, session, false);
+                    lookUpResult.getAssociationStorage().delete(compositionSpaceId, false);
                     if (lookUpResult.isFromCache()) {
                         // Cache entry might be outdated => reload & retry
                         LOG.warn("Draft mail is missing for association: {}. Reloading.", association, e);
