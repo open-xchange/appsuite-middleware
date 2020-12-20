@@ -51,6 +51,7 @@ package com.openexchange.logging;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 /**
  * {@link LogUtility} - Utility class for logging.
@@ -167,6 +168,36 @@ public class LogUtility {
         }
 
         return new ObjectCollectionString<O>(objects);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class ObjectString<O> {
+
+        private final Supplier<O> supplier;
+
+        ObjectString(Supplier<O> supplier) {
+            super(); this.supplier = supplier;
+        }
+
+        @Override
+        public String toString() {
+            return supplier.get().toString();
+        }
+    }
+
+    /**
+     * Creates a {@link #toString()} object for given supplier.
+     *
+     * @param supplier The supplier
+     * @return The object providing content of given supplier if {@link #toString()} is invoked
+     */
+    public static <O> Object toStringObjectFor(Supplier<O> supplier) {
+        if (supplier == null) {
+            return "null";
+        }
+
+        return new ObjectString<O>(supplier);
     }
 
 }
