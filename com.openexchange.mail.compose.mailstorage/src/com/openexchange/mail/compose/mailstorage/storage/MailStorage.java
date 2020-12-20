@@ -70,7 +70,6 @@ import java.util.Set;
 import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import org.slf4j.Logger;
 import com.google.common.collect.Sets;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
@@ -158,16 +157,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class MailStorage implements IMailStorage {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MailStorage.class);
+    /** The logger constant */
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailStorage.class);
 
-
-    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
-    private static final MailField[] FIELDS_SIZE = new MailField[] { MailField.SIZE };
-    private static final MailField[] FIELDS_LOOK_UP = new MailField[] { MailField.ID, MailField.RECEIVED_DATE, MailField.HEADERS, MailField.SIZE };
-
-    private static final Set<MessageField> ALL_FIELDS = Sets.immutableEnumSet(EnumSet.allOf(MessageField.class));
-
-    private static final String CAPABILITY_GUARD = "guard";
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
 
@@ -203,6 +196,8 @@ public class MailStorage implements IMailStorage {
         }
     }
 
+    private static final MailField[] MAIL_FIELDS_LOOK_UP = new MailField[] { MailField.ID, MailField.RECEIVED_DATE, MailField.HEADERS, MailField.SIZE };
+
     @Override
     public MailStorageResult<LookUpOutcome> lookUp(Session session) throws OXException {
         MailService mailService = services.getServiceSafe(MailService.class);
@@ -224,7 +219,7 @@ public class MailStorage implements IMailStorage {
                 searchTerm = new HeaderExistenceTerm(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID);
             }
             searchTerm = new ANDTerm(searchTerm, new FlagTerm(MailMessage.FLAG_DELETED, false));
-            MailMessage[] mailMessages = mailAccess.getMessageStorage().searchMessages(draftsFolder, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, FIELDS_LOOK_UP);
+            MailMessage[] mailMessages = mailAccess.getMessageStorage().searchMessages(draftsFolder, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, MAIL_FIELDS_LOOK_UP);
 
             // No such mails
             if (mailMessages == null || mailMessages.length == 0) {
@@ -410,6 +405,8 @@ public class MailStorage implements IMailStorage {
         }
     }
 
+    private static final Set<MessageField> MESSAGE_FIELDS_ALL = Sets.immutableEnumSet(EnumSet.allOf(MessageField.class));
+
     @Override
     public MailStorageResult<Map<UUID, MessageInfo>> getMessages(Collection<? extends MailStorageId> mailStorageIds, Set<MessageField> fields, Session session) throws OXException, MissingDraftException {
         if (mailStorageIds == null) {
@@ -438,7 +435,7 @@ public class MailStorage implements IMailStorage {
                     UUID compositionSpaceId = mailStorageId.getCompositionSpaceId();
                     MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess);
                     MailMessageProcessor processor = MailMessageProcessor.initReadEnvelope(compositionSpaceId, draftMail, session, services);
-                    result.put(compositionSpaceId, new MessageInfo(processor.getCurrentDraft(ALL_FIELDS),  draftMail.getSize(), draftMail.getSentDate()));
+                    result.put(compositionSpaceId, new MessageInfo(processor.getCurrentDraft(MESSAGE_FIELDS_ALL),  draftMail.getSize(), draftMail.getSentDate()));
                 }
             } else {
                 Map<String, UUID> mailIds = new HashMap<>(mailStorageIds.size());
@@ -1088,9 +1085,11 @@ public class MailStorage implements IMailStorage {
         }
     }
 
+    private static final MailField[] MAIL_FIELDS_ID = new MailField[] { MailField.ID };
+
     private Optional<MailPath> doLookUp(UUID compositionSpaceId, String draftsFolder, IMailMessageStorage messageStorage) throws OXException {
         SearchTerm<?> searchTerm = new HeaderTerm(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID, UUIDs.getUnformattedString(compositionSpaceId));
-        MailMessage[] mailMessages = messageStorage.searchMessages(draftsFolder, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, FIELDS_ID);
+        MailMessage[] mailMessages = messageStorage.searchMessages(draftsFolder, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, MAIL_FIELDS_ID);
 
         if (mailMessages == null || mailMessages.length == 0 || mailMessages[0] == null) {
             LOG.debug("Found no draft message for composition space {}", getUUIDForLogging(compositionSpaceId));
@@ -1329,10 +1328,12 @@ public class MailStorage implements IMailStorage {
         return mailFields;
     }
 
+    private static final MailField[] MAIL_FIELDS_SIZE = new MailField[] { MailField.SIZE };
+
     private static long fetchMailSize(IMailMessageStorage draftMessageStorage, MailPath mailPath) {
         try {
             LOG.debug("Fetching mail size of draft {}", mailPath);
-            MailMessage[] messages = draftMessageStorage.getMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, FIELDS_SIZE);
+            MailMessage[] messages = draftMessageStorage.getMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, MAIL_FIELDS_SIZE);
             if (messages != null && messages.length > 0 && messages[0] != null) {
                 return messages[0].getSize();
             }
@@ -1845,13 +1846,15 @@ public class MailStorage implements IMailStorage {
         return cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, mailAccess.getSession(), authTokenToUse);
     }
 
+    private static final String CAPABILITY_GUARD = "guard";
+
     /**
      * Applies given security settings to specified mail message.
      *
      * @param securitySettings The security settings to apply
      * @param mailMessage The mail message to apply to
      * @param session The session providing user data
-     * @return The security-wise prepared mail message in case security settings are enabled; otherwise given mail message is retrned as-is
+     * @return The security-wise prepared mail message in case security settings are enabled; otherwise given mail message is returned as-is
      * @throws OXException If applying security settings fails
      */
     private ComposedMailMessage applyGuardEncryption(SecuritySettings securitySettings, ComposedMailMessage mailMessage, Session session) throws OXException {
