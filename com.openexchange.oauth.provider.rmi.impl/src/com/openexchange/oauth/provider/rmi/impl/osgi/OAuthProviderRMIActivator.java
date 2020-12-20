@@ -70,11 +70,17 @@ import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 public class OAuthProviderRMIActivator implements BundleActivator {
 
     private ServiceRegistration<Remote> serviceRegistration;
-
     private ServiceTracker<ClientManagement, ClientManagement> tracker;
 
+    /**
+     * Initializes a new {@link OAuthProviderRMIActivator}.
+     */
+    public OAuthProviderRMIActivator() {
+        super();
+    }
+
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("starting bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
 
         tracker = new ServiceTracker<ClientManagement, ClientManagement>(context, ClientManagement.class, null) {
@@ -102,7 +108,7 @@ public class OAuthProviderRMIActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("stopping bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
 
         unregister();
@@ -119,9 +125,10 @@ public class OAuthProviderRMIActivator implements BundleActivator {
     }
 
     private synchronized void unregister() {
+        ServiceRegistration<Remote> serviceRegistration = this.serviceRegistration;
         if (serviceRegistration != null) {
+            this.serviceRegistration = null;
             serviceRegistration.unregister();
-            serviceRegistration = null;
         }
     }
 
