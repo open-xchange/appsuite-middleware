@@ -82,7 +82,7 @@ public final class GETResponse extends AbstractResponse {
         if (!isDefaultPort()) {
             portPart = ":" + Integer.toString(request.port);
         }
-        postRequest.setHeader(HttpHeaders.REFERER, request.scheme + "://" + request.hostname + portPart + EndpointTest.AUTHORIZATION_ENDPOINT);
+        postRequest.setHeader(HttpHeaders.REFERER, request.scheme + "://" + request.hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
         return postRequest;
     }
 

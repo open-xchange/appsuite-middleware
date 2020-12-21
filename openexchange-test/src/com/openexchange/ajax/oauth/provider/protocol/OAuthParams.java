@@ -58,6 +58,7 @@ public class OAuthParams {
 
     private String scheme = "https";
     private String hostname = "localhost";
+    private int port = 443;
     private String clientId;
     private String redirectURI;
     private String scope;
@@ -105,6 +106,12 @@ public class OAuthParams {
         return this;
     }
 
+
+    public OAuthParams setPort(int port) {
+        this.port = port;
+        return this;
+    }
+
     public String getScheme() {
         return scheme;
     }
@@ -135,6 +142,10 @@ public class OAuthParams {
 
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    public int getPort() {
+        return port;
     }
 
 }

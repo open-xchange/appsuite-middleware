@@ -122,8 +122,9 @@ public class OAuthSession extends AJAXSession {
     }
 
     private void obtainAccess(TestUser user, HttpClient client) throws Exception {
-        String scheme = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        String scheme = "https";
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        int port = 443;
         String login = user.getLogin();
         String password = user.getPassword();
         String state = UUIDs.getUnformattedStringFromRandom();
@@ -131,6 +132,7 @@ public class OAuthSession extends AJAXSession {
         OAuthParams params = new OAuthParams()
             .setScheme(scheme)
             .setHostname(hostname)
+            .setPort(port)
             .setClientId(clientId)
             .setClientSecret(clientSecret)
             .setRedirectURI(redirectURI)
