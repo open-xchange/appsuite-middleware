@@ -50,7 +50,8 @@
 package com.openexchange.mail.mime;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 
 /**
@@ -65,78 +66,79 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     /**
      * Internal cache for frequently requested headers
      */
-    private static final HashMap<String, HeaderName> CACHE = new HashMap<String, HeaderName>(23);
+    private static final Map<String, HeaderName> CACHE;
 
     static {
         /*
          * Frequently requested headers
          */
-        CACHE.put("Bcc", HeaderName.valueOf("Bcc"));
-        CACHE.put("Cc", HeaderName.valueOf("Cc"));
-        CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
+        ImmutableMap.Builder<String, HeaderName> cacheBuilder = ImmutableMap.builderWithExpectedSize(64);
+        cacheBuilder.put("Bcc", new HeaderName("Bcc"));
+        cacheBuilder.put("Cc", new HeaderName("Cc"));
         {
-            final HeaderName headerName = HeaderName.valueOf("Content-ID");
-            CACHE.put("Content-ID", headerName);
-            CACHE.put("Content-Id", headerName);
+            final HeaderName headerName = new HeaderName("Content-ID");
+            cacheBuilder.put("Content-ID", headerName);
+            cacheBuilder.put("Content-Id", headerName);
         }
-        CACHE.put("Content-Transfer-Encoding", HeaderName.valueOf("Content-Transfer-Encoding"));
-        CACHE.put("Content-Type", HeaderName.valueOf("Content-Type"));
-        CACHE.put("Date", HeaderName.valueOf("Date"));
-        CACHE.put("Disposition-Notification-To", HeaderName.valueOf("Disposition-Notification-To"));
-        CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
-        CACHE.put("From", HeaderName.valueOf("From"));
-        CACHE.put("ReplyTo", HeaderName.valueOf("ReplyTo"));
-        CACHE.put("In-Reply-To", HeaderName.valueOf("In-Reply-To"));
+        cacheBuilder.put("Content-Transfer-Encoding", new HeaderName("Content-Transfer-Encoding"));
+        cacheBuilder.put("Content-Type", new HeaderName("Content-Type"));
+        cacheBuilder.put("Date", new HeaderName("Date"));
+        cacheBuilder.put("Disposition-Notification-To", new HeaderName("Disposition-Notification-To"));
+        cacheBuilder.put("Content-Disposition", new HeaderName("Content-Disposition"));
+        cacheBuilder.put("From", new HeaderName("From"));
+        cacheBuilder.put("ReplyTo", new HeaderName("ReplyTo"));
+        cacheBuilder.put("In-Reply-To", new HeaderName("In-Reply-To"));
         {
-            final HeaderName headerName = HeaderName.valueOf("Message-ID");
-            CACHE.put("Message-ID", headerName);
-            CACHE.put("Message-Id", headerName);
+            final HeaderName headerName = new HeaderName("Message-ID");
+            cacheBuilder.put("Message-ID", headerName);
+            cacheBuilder.put("Message-Id", headerName);
         }
-        CACHE.put("MIME-Version", HeaderName.valueOf("MIME-Version"));
-        CACHE.put("Organization", HeaderName.valueOf("Organization"));
-        CACHE.put("Received", HeaderName.valueOf("Received"));
-        CACHE.put("References", HeaderName.valueOf("References"));
-        CACHE.put("Reply-To", HeaderName.valueOf("Reply-To"));
-        CACHE.put("Subject", HeaderName.valueOf("Subject"));
-        CACHE.put("Sender", HeaderName.valueOf("Sender"));
-        CACHE.put("To", HeaderName.valueOf("To"));
-        CACHE.put("X-Mailer", HeaderName.valueOf("X-Mailer"));
-        CACHE.put("X-OX-Marker", HeaderName.valueOf("X-OX-Marker"));
-        CACHE.put("X-OXMsgref", HeaderName.valueOf("X-OXMsgref"));
-        CACHE.put("X-Priority", HeaderName.valueOf("X-Priority"));
-        CACHE.put("X-Spam-Flag", HeaderName.valueOf("X-Spam-Flag"));
-        CACHE.put("Return-Path", HeaderName.valueOf("Return-Path"));
-        CACHE.put("X-OX-VCard-Attached", HeaderName.valueOf("X-OX-VCard-Attached"));
-        CACHE.put("X-OX-Notification", HeaderName.valueOf("X-OX-Notification"));
+        cacheBuilder.put("MIME-Version", new HeaderName("MIME-Version"));
+        cacheBuilder.put("Organization", new HeaderName("Organization"));
+        cacheBuilder.put("Received", new HeaderName("Received"));
+        cacheBuilder.put("References", new HeaderName("References"));
+        cacheBuilder.put("Reply-To", new HeaderName("Reply-To"));
+        cacheBuilder.put("Subject", new HeaderName("Subject"));
+        cacheBuilder.put("Sender", new HeaderName("Sender"));
+        cacheBuilder.put("To", new HeaderName("To"));
+        cacheBuilder.put("X-Mailer", new HeaderName("X-Mailer"));
+        cacheBuilder.put("X-OX-Marker", new HeaderName("X-OX-Marker"));
+        cacheBuilder.put("X-OXMsgref", new HeaderName("X-OXMsgref"));
+        cacheBuilder.put("X-Priority", new HeaderName("X-Priority"));
+        cacheBuilder.put("X-Spam-Flag", new HeaderName("X-Spam-Flag"));
+        cacheBuilder.put("Return-Path", new HeaderName("Return-Path"));
+        cacheBuilder.put("X-OX-VCard-Attached", new HeaderName("X-OX-VCard-Attached"));
+        cacheBuilder.put("X-OX-Notification", new HeaderName("X-OX-Notification"));
         /*
          * User flags
          */
-        CACHE.put("$Forwarded", new HeaderName("$Forwarded"));
-        CACHE.put("$MDNSent", new HeaderName("$MDNSent"));
-        CACHE.put("NonJunk", new HeaderName("NonJunk"));
+        cacheBuilder.put("$Forwarded", new HeaderName("$Forwarded"));
+        cacheBuilder.put("$MDNSent", new HeaderName("$MDNSent"));
+        cacheBuilder.put("NonJunk", new HeaderName("NonJunk"));
         /*
          * Some charsets
          */
         {
             final HeaderName headerName = new HeaderName("us-ascii");
-            CACHE.put("us-ascii", headerName);
-            CACHE.put("US-ASCII", headerName);
+            cacheBuilder.put("us-ascii", headerName);
+            cacheBuilder.put("US-ASCII", headerName);
         }
         {
             final HeaderName headerName = new HeaderName("utf-8");
-            CACHE.put("utf-8", headerName);
-            CACHE.put("UTF-8", headerName);
+            cacheBuilder.put("utf-8", headerName);
+            cacheBuilder.put("UTF-8", headerName);
         }
         {
             final HeaderName headerName = new HeaderName("iso-8859-1");
-            CACHE.put("iso-8859-1", headerName);
-            CACHE.put("ISO-8859-1", headerName);
+            cacheBuilder.put("iso-8859-1", headerName);
+            cacheBuilder.put("ISO-8859-1", headerName);
         }
         {
             final HeaderName headerName = new HeaderName("windows-1258");
-            CACHE.put("windows-1258", headerName);
-            CACHE.put("WINDOWS-1258", headerName);
+            cacheBuilder.put("windows-1258", headerName);
+            cacheBuilder.put("WINDOWS-1258", headerName);
         }
+        CACHE = cacheBuilder.build();
     }
 
     /**
@@ -175,8 +177,9 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         return cached;
     }
 
-    private final String s;
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private final String s;
     private final int hashcode;
 
     /**
