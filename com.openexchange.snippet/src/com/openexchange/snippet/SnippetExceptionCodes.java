@@ -114,7 +114,26 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      * Unable to process signature: the signature raw size exceeds the maximum allowed size of '%1$s' (%2$s bytes).
      */
     MAXIMUM_RAW_SNIPPET_SIZE("Unable to process signature: the signature raw size exceeds the maximum allowed size of '%1$s' (%2$s bytes).", CATEGORY_ERROR, 13),
-
+    /**
+     * The entered display name is too long. Please use a shorter one.
+     */
+    DISPLAY_NAME_TOO_LONG("The entered display name is too long. Please use a shorter one.", SnippetStrings.DISPLAY_NAME_TOO_LONG_MSG, CATEGORY_USER_INPUT, 14),
+    /**
+     * The entered identifier is too long. Please use a shorter one.
+     */
+    ID_TOO_LONG("The entered identifier is too long. Please use a shorter one.", SnippetStrings.ID_TOO_LONG_MSG, CATEGORY_USER_INPUT, 15),
+    /**
+     * The entered module identifier is too long. Please use a shorter one.
+     */
+    MODULE_TOO_LONG("The entered module identifier is too long. Please use a shorter one.", SnippetStrings.MODULE_TOO_LONG_MSG, CATEGORY_USER_INPUT, 16),
+    /**
+     * The entered type identifier is too long. Please use a shorter one.
+     */
+    TYPE_TOO_LONG("The entered type identifier is too long. Please use a shorter one.", SnippetStrings.TYPE_TOO_LONG_MSG, CATEGORY_USER_INPUT, 17),
+    /**
+     * One or more input fields specified for snippet are too long
+     */
+    DATA_TRUNCATION_ERROR("One or more input fields specified for snippet are too long", CATEGORY_ERROR, 18),
     ;
 
     /**

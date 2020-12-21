@@ -57,11 +57,13 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.SnippetExceptionCodes;
 
 /**
  * {@link SnippetJsonParser} - The JSON parser for snippets.
@@ -83,8 +85,9 @@ public final class SnippetJsonParser {
      * @param jsonSnippet The JSON snippet
      * @param snippet The snippet
      * @throws JSONException If a JSON error occurs
+     * @throws OXException If received JSON data is invalid
      */
-    public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet) throws JSONException {
+    public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet) throws JSONException, OXException {
         parse(jsonSnippet, snippet, null);
     }
 
@@ -94,8 +97,9 @@ public final class SnippetJsonParser {
      * @param jsonSnippet The JSON snippet
      * @param snippet The snippet
      * @throws JSONException If a JSON error occurs
+     * @throws OXException If received JSON data is invalid
      */
-    public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet, final Set<Property> set) throws JSONException {
+    public static void parse(final JSONObject jsonSnippet, final DefaultSnippet snippet, final Set<Property> set) throws JSONException, OXException {
         String key = Property.ACCOUNT_ID.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
             snippet.setAccountId(jsonSnippet.getInt(key));
@@ -119,14 +123,22 @@ public final class SnippetJsonParser {
         }
         key = Property.DISPLAY_NAME.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
-            snippet.setDisplayName(jsonSnippet.getString(key));
+            String displayName = jsonSnippet.getString(key);
+            if (displayName.length() > 255) {
+                throw SnippetExceptionCodes.DISPLAY_NAME_TOO_LONG.create();
+            }
+            snippet.setDisplayName(displayName);
             if (null != set) {
                 set.add(Property.DISPLAY_NAME);
             }
         }
         key = Property.ID.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
-            snippet.setId(jsonSnippet.getString(key));
+            String id = jsonSnippet.getString(key);
+            if (id.length() > 64) {
+                throw SnippetExceptionCodes.ID_TOO_LONG.create();
+            }
+            snippet.setId(id);
             if (null != set) {
                 set.add(Property.ID);
             }
@@ -140,7 +152,11 @@ public final class SnippetJsonParser {
         }
         key = Property.MODULE.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
-            snippet.setModule(jsonSnippet.getString(key));
+            String module = jsonSnippet.getString(key);
+            if (module.length() > 255) {
+                throw SnippetExceptionCodes.MODULE_TOO_LONG.create();
+            }
+            snippet.setModule(module);
             if (null != set) {
                 set.add(Property.MODULE);
             }
@@ -154,7 +170,11 @@ public final class SnippetJsonParser {
         }
         key = Property.TYPE.getPropName();
         if (jsonSnippet.hasAndNotNull(key)) {
-            snippet.setType(jsonSnippet.getString(key));
+            String type = jsonSnippet.getString(key);
+            if (type.length() > 255) {
+                throw SnippetExceptionCodes.TYPE_TOO_LONG.create();
+            }
+            snippet.setType(type);
             if (null != set) {
                 set.add(Property.TYPE);
             }

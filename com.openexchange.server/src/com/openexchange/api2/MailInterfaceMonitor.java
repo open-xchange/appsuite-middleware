@@ -112,7 +112,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
     @Override
     public double getAvgUseTime() {
         long duration = 0;
-        for (int i = 0; i < avgUseTimeArr.length; i++) {
+        for (int i = avgUseTimeArr.length; i-- > 0;) {
             duration += avgUseTimeArr[i];
         }
         return (duration / (double) avgUseTimeArr.length);
@@ -128,7 +128,9 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
              */
             try {
                 avgUseTimeArr[avgUseTimePointer++] = time;
-                avgUseTimePointer = avgUseTimePointer % avgUseTimeArr.length;
+                if (avgUseTimePointer >= avgUseTimeArr.length) {
+                    avgUseTimePointer = 0;
+                }
                 setMaxUseTime(time);
                 setMinUseTime(time);
             } finally {
@@ -146,7 +148,9 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
      * Sets the max use time to the maximum of given <code>maxUseTime</code> and existing value
      */
     private final void setMaxUseTime(final long maxUseTime) {
-        this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
+        if (maxUseTime > this.maxUseTime) {
+            this.maxUseTime = maxUseTime;
+        }
     }
 
     @Override
@@ -160,7 +164,9 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
     }
 
     private final void setMinUseTime(final long minUseTime) {
-        this.minUseTime = Math.min(minUseTime, this.minUseTime);
+        if (minUseTime < this.minUseTime) {
+            this.minUseTime = minUseTime;
+        }
     }
 
     @Override

@@ -965,7 +965,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Check if original mails needs to be removed
             {
-                MailPath editFor = m.getMeta().getEditFor();
+                MailPath editFor = meta.getEditFor();
                 if (null != editFor) {
                     try {
                         mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);

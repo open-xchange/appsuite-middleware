@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link HeaderTerm}
+ * {@link HeaderTerm} - Checks if the value of a certain header matches a given string.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

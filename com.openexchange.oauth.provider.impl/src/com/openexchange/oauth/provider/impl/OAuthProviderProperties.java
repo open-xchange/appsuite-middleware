@@ -83,13 +83,13 @@ public enum OAuthProviderProperties implements Property{
      * A value must be set to enable the registration of OAuth 2.0 client applications.
      * It must be the same on every node. After the first client has been registered, the key must not be changed anymore.
      */
-    ENCRYPTION_KEY("encryptionKey", OAuthProviderProperties.EMPTY),
+    ENCRYPTION_KEY("encryptionKey", ""),
 
     /**
      * A comma separated list of issuer names (JWT claim "iss") that tokens are accepted from.
      * If this property is empty, tokens are accepted from all issuers.
      */
-    ALLOWED_ISSUER("allowedIssuer", OAuthProviderProperties.EMPTY),
+    ALLOWED_ISSUER("allowedIssuer", ""),
 
     /**
      * Name of the claim that will be used to resolve a context.
@@ -113,10 +113,10 @@ public enum OAuthProviderProperties implements Property{
      * which a token has been obtained. The part is taken from
      * the value of the according {@link OAuthIntrospectionProperty#USER_LOOKUP_CLAIM}.
      */
-    USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName());
+    USER_LOOKUP_NAME_PART("userLookupNamePart", NamePart.LOCAL_PART.getConfigName()),
 
-    public static final String PREFIX = "com.openexchange.oauth.provider.";
-    private static final String EMPTY = "";
+    ;
+
     private final String fqn;
     private final Object defaultValue;
 
@@ -126,7 +126,7 @@ public enum OAuthProviderProperties implements Property{
      * @param defaultValue
      */
     private OAuthProviderProperties(String suffix, Object defaultValue) {
-        this.fqn = PREFIX + suffix;
+        this.fqn = "com.openexchange.oauth.provider." + suffix;
         this.defaultValue = defaultValue;
     }
 

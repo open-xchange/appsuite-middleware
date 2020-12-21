@@ -64,10 +64,9 @@ import com.google.common.cache.RemovalNotification;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
-import com.openexchange.session.Session;
 
 /**
- * {@link AssociationStorage} - The association storage implementation backed by Google Cache.
+ * {@link AssociationStorage} - The association storage for a certain user implementation backed by Google Cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
@@ -148,8 +147,8 @@ public class AssociationStorage implements IAssociationStorage {
     }
 
     @Override
-    public CompositionSpaceToDraftAssociation get(UUID compositionSpaceId, Session session) throws OXException {
-        Optional<CompositionSpaceToDraftAssociation> optionalAssociation = opt(compositionSpaceId, session);
+    public CompositionSpaceToDraftAssociation get(UUID compositionSpaceId) throws OXException {
+        Optional<CompositionSpaceToDraftAssociation> optionalAssociation = opt(compositionSpaceId);
         if (optionalAssociation.isPresent()) {
             return optionalAssociation.get();
         }
@@ -157,17 +156,17 @@ public class AssociationStorage implements IAssociationStorage {
     }
 
     @Override
-    public List<CompositionSpaceToDraftAssociation> getAllForUser(Session session) throws OXException {
+    public List<CompositionSpaceToDraftAssociation> getAll() throws OXException {
         return associations.size() <= 0 ? Collections.emptyList() : new ArrayList<>(associations.asMap().values());
     }
 
     @Override
-    public Optional<CompositionSpaceToDraftAssociation> opt(UUID compositionSpaceId, Session session) {
+    public Optional<CompositionSpaceToDraftAssociation> opt(UUID compositionSpaceId) {
         return Optional.ofNullable(associations.getIfPresent(compositionSpaceId));
     }
 
     @Override
-    public Optional<CompositionSpaceToDraftAssociation> delete(UUID compositionSpaceId, Session session, boolean ensureExistent) throws OXException {
+    public Optional<CompositionSpaceToDraftAssociation> delete(UUID compositionSpaceId, boolean ensureExistent) throws OXException {
         CompositionSpaceToDraftAssociation removedAssociation = associations.asMap().remove(compositionSpaceId);
 
         if (null == removedAssociation) {
