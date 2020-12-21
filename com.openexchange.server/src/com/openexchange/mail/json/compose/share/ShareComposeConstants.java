@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link ShareComposeConstants}
@@ -65,14 +66,14 @@ public class ShareComposeConstants {
         super();
     }
 
-    /** The special header containing the share reference */
-    public static final String HEADER_SHARE_REFERENCE = "X-Open-Xchange-Share-Reference";
+    /** <code>"X-Open-Xchange-Share-Reference"</code>: The special header containing the share reference */
+    public static final String HEADER_SHARE_REFERENCE = MessageHeaders.HDR_X_OPEN_XCHANGE_SHARE_REFERENCE;
 
-    /** The special header containing the share type */
-    public static final String HEADER_SHARE_TYPE = "X-Open-Xchange-Share-Type";
+    /** <code>"X-Open-Xchange-Share-Type"</code>: The special header containing the share type */
+    public static final String HEADER_SHARE_TYPE = MessageHeaders.HDR_X_OPEN_XCHANGE_SHARE_TYPE;
 
-    /** The special header containing the share URL */
-    public static final String HEADER_SHARE_URL = "X-Open-Xchange-Share-URL";
+    /** <code>"X-Open-Xchange-Share-URL"</code>: The special header containing the share URL */
+    public static final String HEADER_SHARE_URL = MessageHeaders.HDR_X_OPEN_XCHANGE_SHARE_URL;
 
     /** The special user flag to mark a message having a share reference */
     public static final String USER_SHARE_REFERENCE = "$ShareReference";
