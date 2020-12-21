@@ -89,14 +89,14 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         ShareSubscriptionProvider provider = getProvider(session, shareLink);
         if (null == provider) {
             LOGGER.trace("Found no provider for share link {}", shareLink);
-            return unresovable(shareLink);
+            return unsupported(shareLink);
         }
         ShareLinkAnalyzeResult infos = provider.analyze(session, shareLink);
         if (null != infos) {
             return infos;
         }
         LOGGER.trace("Provider {} was unable to produce information about the share link {}", provider.getClass(), shareLink);
-        return unresovable(shareLink);
+        return unsupported(shareLink);
     }
 
     @Override
@@ -159,8 +159,8 @@ public class ShareSubscriptionRegistryImpl extends RankingAwareNearRegistryServi
         return null;
     }
 
-    private ShareLinkAnalyzeResult unresovable(String shareLink) {
-        return new ShareLinkAnalyzeResult(ShareLinkState.UNRESOLVABLE, ShareSubscriptionExceptions.NOT_USABLE.create(shareLink), null);
+    private ShareLinkAnalyzeResult unsupported(String shareLink) {
+        return new ShareLinkAnalyzeResult(ShareLinkState.UNSUPPORTED, ShareSubscriptionExceptions.NOT_USABLE.create(shareLink), null);
     }
 
 }
