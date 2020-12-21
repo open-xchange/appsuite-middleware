@@ -2062,11 +2062,8 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = performCommand(protocol, COMMAND_NOOP, true);
-                    /*
-                     * Grab last response that should indicate an OK
-                     */
-                    final Response response = r[r.length - 1];
+                    Response[] r = performCommand(protocol, COMMAND_NOOP, true);
+                    Response response = r[r.length - 1];
                     return Boolean.valueOf(response.isOK());
                 }
 
@@ -2074,6 +2071,24 @@ public final class IMAPCommandsCollection {
         } catch (MessagingException e) {
             LOG.trace("", e);
         }
+    }
+
+    /**
+     * Force to send a NOOP command to IMAP server.
+     *
+     * @param f The IMAP folder providing the connected store
+     * @throws MessagingException If NOOP command fails
+     */
+    public static void noopCommand(IMAPFolder f) throws MessagingException {
+        f.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                protocol.noop();
+                return Boolean.TRUE;
+            }
+
+        });
     }
 
     /**
