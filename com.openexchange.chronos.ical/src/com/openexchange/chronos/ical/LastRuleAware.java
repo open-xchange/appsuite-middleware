@@ -47,53 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.chronos.ical;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import java.util.SimpleTimeZone;
 
 /**
- * Test suite for iCal tests.
+ * {@link LastRuleAware}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.5
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ // @formatter:off
-    ICalTaskExportTest.class,
-    ICalAppointmentExportTest.class,
-    ICalSeriesTests.class,
-    ICalSingleAndBatchExportTest.class,
-    Bug9840Test.class,
-    Bug11724Test.class,
-    Bug11868Test.class,
-    Bug11871Test.class,
-    Bug11920Test.class,
-    Bug11996Test.class,
-    Bug12414Test.class,
-    Bug12470Test.class,
-    Bug17393Test.class,
-    Bug17963Test_DateWithoutTime.class,
-    Bug19046Test_SeriesWithExtraneousStartDate.class,
-    Bug19089Test.class,
-    Bug19681_TimezoneForUtcProperties.class,
-    Bug20132Test_WrongRecurrenceDatePosition.class,
-    Bug20405Test_TaskWithoutDueDate.class,
-    Bug20413Test_CompletelyWrongDTStart.class,
-    Bug20453Test_emptyDTEND.class,
-    Bug20498Test_ReminderJumpsAnHour.class,
-    Bug20715Test_UidIsNotcaseSensitive.class,
-    Bug20718Test_JumpDuringDstCrossing.class,
-    Bug20896Test_AlarmsChange.class,
-    Bug20945Test_UnexpectedError26.class,
-    Bug22059Test.class,
-    Bug27474Test.class,
-    Bug28071Test.class,
-    Bug56435Test_TaskStateRoundtrip.class,
-    Bug8475Test_TaskAttendeeHandling.class,
-    Bug8654Test_TaskImport.class,
-    Bug63867Test.class,
-    MWB161Test.class,
-    MWB464Test.class,
-    MWB805Test.class,
-}) // @formatter:on
-public final class ICalTestSuite {
+public interface LastRuleAware {
+
+    /**
+     * Optionally gets a {@link SimpleTimeZone} object representing the last known daylight saving time rules of the underlying time zone.
+     *
+     * @return A {@link SimpleTimeZone} for the last rule, or <code>null</code> if the time zone doesn't observe DST or it can't be extracted
+     */
+    SimpleTimeZone getLastRuleInstance();
+
 }

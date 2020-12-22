@@ -52,6 +52,7 @@ package com.openexchange.chronos.ical.ical4j.handler;
 import java.io.InputStream;
 import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.ImportedTimeZone;
 import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Component;
@@ -84,7 +85,7 @@ public class ICal2TimeZoneDataHandler extends ICal2ObjectDataHandler<TimeZone> {
         if (null == component) {
             return null;
         }
-        return new net.fortuna.ical4j.model.TimeZone(component);
+        return new ImportedTimeZone(component);
     }
 
 }

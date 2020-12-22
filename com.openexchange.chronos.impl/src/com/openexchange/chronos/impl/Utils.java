@@ -89,10 +89,10 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SimpleTimeZone;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -115,6 +115,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.ical.LastRuleAware;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
@@ -206,6 +207,9 @@ public class Utils {
         EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO, EventField.CONFERENCES,
         EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
     };
+
+    /** Private fields of {@link SimpleTimeZone} that are accessed when comparing the underlying transition rules of timezones */
+    private static final java.lang.reflect.Field[] SIMPLETIMEZONE_RULE_FIELDS = initSimpleTimeZoneRuleFields();
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
@@ -383,9 +387,9 @@ public class Utils {
             return matchingTimeZone;
         }
         /*
-         * try and match a known timezone with the same rules (original timezone, calendar user timezone, session user timezone)
+         * try and match the original timezone with the same rules if supplied
          */
-        if (haveSameRules(timeZone, originalTimeZone)) {
+        if (haveSameLastRules(timeZone, originalTimeZone)) {
             LOG.debug("No matching timezone found for '{}', falling back to original timezone '{}'.", timeZone.getID(), originalTimeZone);
             return originalTimeZone;
         }
@@ -394,13 +398,13 @@ public class Utils {
          */
         EntityResolver entityResolver = new DefaultEntityResolver(session.getContextId(), Services.getServiceLookup());
         TimeZone calendarUserTimeZone = entityResolver.getTimeZone(calendarUserId);
-        if (haveSameRules(timeZone, calendarUserTimeZone)) {
+        if (haveSameLastRules(timeZone, calendarUserTimeZone)) {
             LOG.debug("No matching timezone found for '{}', falling back to calendar user's timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
             return calendarUserTimeZone;
         }
         if (session.getUserId() != calendarUserId) {
             TimeZone sessionUserTimeZone = entityResolver.getTimeZone(session.getUserId());
-            if (haveSameRules(timeZone, sessionUserTimeZone)) {
+            if (haveSameLastRules(timeZone, sessionUserTimeZone)) {
                 LOG.debug("No matching timezone found for '{}', falling back to session user's timezone '{}'.", timeZone.getID(), sessionUserTimeZone);
                 return sessionUserTimeZone;
             }
@@ -414,40 +418,100 @@ public class Utils {
             return mappedTimeZone;
         }
         /*
-         * select the timezone with the same rules, and most similar identifier
+         * select the timezone with the same rules, and most similar identifier, briefly re-checking the user timezone in lenient mode
          */
-        List<TimeZone> timeZonesWithSameRules = getWithSameRules(timeZone);
-        if (timeZonesWithSameRules.isEmpty()) {
-            LOG.warn("No timezone with matching rules found for '{}', falling back to calendar user timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
-            return calendarUserTimeZone;
+        List<TimeZone> timeZonesWithSameLastRules = getWithSameLastRules(timeZone, false);
+        if (timeZonesWithSameLastRules.isEmpty()) {
+            if (haveSameLastRules(timeZone, calendarUserTimeZone, true)) {
+                LOG.debug("No matching timezone found for '{}', falling back to calendar user's timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+                return calendarUserTimeZone;
+            }
+            timeZonesWithSameLastRules = getWithSameLastRules(timeZone, true);
+            if (timeZonesWithSameLastRules.isEmpty()) {
+                LOG.warn("No timezone with matching rules found for '{}', falling back to calendar user timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+                return calendarUserTimeZone;
+            }
         }
-        timeZonesWithSameRules.sort(Comparator.comparingInt(tz -> levenshteinDistance(tz.getID(), timeZone.getID())));
-        TimeZone fallbackTimeZone = timeZonesWithSameRules.get(0);
+        timeZonesWithSameLastRules.sort(Comparator.comparingInt(tz -> levenshteinDistance(tz.getID(), timeZone.getID())));
+        TimeZone fallbackTimeZone = timeZonesWithSameLastRules.get(0);
         LOG.warn("No matching timezone found for '{}', falling back to '{}'.", timeZone.getID(), fallbackTimeZone);
         return fallbackTimeZone;
     }
 
     /**
-     * Gets a value indicating whether two timezones have the same rule and offset, considering the {@link TimeZone#hasSameRules(TimeZone)}
-     * implementation of both objects with each other to be sure.
+     * Gets a value indicating whether the last observed rule instance of two timezones have the same rule and offset, considering the
+     * {@link TimeZone#hasSameRules(TimeZone)} implementation of both objects with each other to be sure.
      *
      * @param timeZone1 The first timezone to check, or <code>null</code> to get a <code>false</code> result
      * @param timeZone2 The second timezone to check, or <code>null</code> to get a <code>false</code> result
-     * @return <code>true</code> if the timezones have the same rule and offset, <code>false</code>, otherwise
+     * @return <code>true</code> if the last observed rules of the timezones have the same rule and offset, <code>false</code>, otherwise
      */
-    private static boolean haveSameRules(TimeZone timeZone1, TimeZone timeZone2) {
+    private static boolean haveSameLastRules(TimeZone timeZone1, TimeZone timeZone2) {
+        return haveSameLastRules(timeZone1, timeZone2, false);
+    }
+
+    /**
+     * Gets a value indicating whether the last observed rule instance of two timezones have the same rule and offset, considering the
+     * {@link TimeZone#hasSameRules(TimeZone)} implementation of both objects with each other to be sure.
+     *
+     * @param timeZone1 The first timezone to check, or <code>null</code> to get a <code>false</code> result
+     * @param timeZone2 The second timezone to check, or <code>null</code> to get a <code>false</code> result
+     * @param ignoreTimes <code>true</code> to ignore the actual hour of the day of when the transition to/from DST occurs, <code>false</code>, otherwise
+     * @return <code>true</code> if the last observed rules of the timezones have the same rule and offset, <code>false</code>, otherwise
+     */
+    private static boolean haveSameLastRules(TimeZone timeZone1, TimeZone timeZone2, boolean ignoreTimes) {
         if (null == timeZone1 || null == timeZone2) {
             return false;
         }
-        return timeZone1.hasSameRules(timeZone2) && timeZone2.hasSameRules(timeZone1);
+        SimpleTimeZone lastRule1 = optLastRuleInstance(timeZone1);
+        SimpleTimeZone lastRule2 = optLastRuleInstance(timeZone2);
+        if (null == lastRule1 && null == lastRule2 && timeZone1.getRawOffset() == timeZone2.getRawOffset()) {
+            return true;
+        }
+        if (null == lastRule1 || null == lastRule2 || timeZone1.getRawOffset() != timeZone2.getRawOffset()) {
+            return false;
+        }
+        if (ignoreTimes && null != SIMPLETIMEZONE_RULE_FIELDS) {
+            try {
+                for (java.lang.reflect.Field field : SIMPLETIMEZONE_RULE_FIELDS) {
+                    if (field.getInt(lastRule1) != field.getInt(lastRule2)) {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                LOG.debug("Error comparing SimpleTimeZone properties", e);
+            }
+        }
+        return lastRule1.hasSameRules(lastRule2) && lastRule2.hasSameRules(lastRule1);
     }
 
-    private static List<TimeZone> getWithSameRules(TimeZone timeZone) {
+    private static SimpleTimeZone optLastRuleInstance(TimeZone timeZone) {
+        if (null != timeZone) {
+            if (SimpleTimeZone.class.isInstance(timeZone)) {
+                return (SimpleTimeZone) timeZone;
+            }
+            if (LastRuleAware.class.isInstance(timeZone)) {
+                return ((LastRuleAware) timeZone).getLastRuleInstance();
+            }
+            try {
+                java.lang.reflect.Method getLastRuleInstance = timeZone.getClass().getDeclaredMethod("getLastRuleInstance", (Class<?>[]) null);
+                return (SimpleTimeZone) getLastRuleInstance.invoke(timeZone, (Object[]) null);
+            } catch (Exception e) {
+                LOG.debug("Error invoking \"getLastRuleInstance\" on {}", timeZone, e);
+            }
+        }
+        return null;
+    }
+
+    private static List<TimeZone> getWithSameLastRules(TimeZone timeZone, boolean ignoreTimes) {
         List<TimeZone> timeZones = new ArrayList<TimeZone>();
         for (String timeZoneId : TimeZone.getAvailableIDs(timeZone.getRawOffset())) {
-            TimeZone candidateTimeZone = optTimeZone(timeZoneId);
-            if (haveSameRules(timeZone, candidateTimeZone)) {
-                timeZones.add(candidateTimeZone);
+            if (0 < timeZoneId.indexOf('/')) {
+                TimeZone candidateTimeZone = optTimeZone(timeZoneId);
+                if (haveSameLastRules(timeZone, candidateTimeZone, ignoreTimes)) {
+                    timeZones.add(candidateTimeZone);
+                }
             }
         }
         return timeZones;
@@ -1657,6 +1721,26 @@ public class Utils {
             return (DefaultEntityResolver) session.getEntityResolver();
         }
         return new DefaultEntityResolver(ServerSessionAdapter.valueOf(session.getSession()), Services.getServiceLookup());
+    }
+
+    private static java.lang.reflect.Field[] initSimpleTimeZoneRuleFields() {
+        try {
+            java.lang.reflect.Field[] fields = new java.lang.reflect.Field[] {
+                SimpleTimeZone.class.getDeclaredField("rawOffset"),
+                SimpleTimeZone.class.getDeclaredField("startMonth"),
+                SimpleTimeZone.class.getDeclaredField("startDay"),
+                SimpleTimeZone.class.getDeclaredField("startDayOfWeek"),
+                SimpleTimeZone.class.getDeclaredField("endMonth"),
+                SimpleTimeZone.class.getDeclaredField("endDay"),
+                SimpleTimeZone.class.getDeclaredField("endDayOfWeek"),
+                SimpleTimeZone.class.getDeclaredField("dstSavings")
+            };
+            java.lang.reflect.Field.setAccessible(fields, true);
+            return fields;
+        } catch (NoSuchFieldException | SecurityException e) {
+            LOG.warn("Error initialzing SimpleTimeZone rule fields through reflection, smart timezone selection won't be available.", e);
+            return null;
+        }
     }
 
 }
