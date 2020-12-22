@@ -47,32 +47,34 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
- * <p>
- * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
+ * {@link AolConfigSource} - The static config source for <code>aol.com</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.0
+ * @since 7.10.5
  */
-public class OutlookComConfigSource extends StaticConfigSource {
+public class AolConfigSource extends AbstractStaticConfigSource {
 
     /**
-     * Initializes a new {@link OutlookComConfigSource}.
+     * Initializes a new {@link AolConfigSource}.
      */
-    public OutlookComConfigSource() {
+    AolConfigSource() {
         super();
     }
 
     @Override
     protected boolean accept(String emailDomain) {
-        return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
+        if (Strings.isEmpty(emailDomain)) {
+            return false;
+        }
+
+        return "aol.com".equals(Strings.toLowerCase(emailDomain.trim()));
     }
 
     @Override
@@ -83,13 +85,13 @@ public class OutlookComConfigSource extends StaticConfigSource {
         autoconfig.setMailProtocol("imap");
         autoconfig.setMailSecure(true);
         autoconfig.setMailStartTls(forceSecure);
-        autoconfig.setMailServer("imap-mail.outlook.com");
+        autoconfig.setMailServer("imap.aol.com");
         // Transport
-        autoconfig.setTransportPort(25);
+        autoconfig.setTransportPort(465);
         autoconfig.setTransportProtocol("smtp");
-        autoconfig.setTransportSecure(false);
+        autoconfig.setTransportSecure(true);
         autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setTransportServer("smtp-mail.outlook.com");
+        autoconfig.setTransportServer("smtp.aol.com");
         autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
         return autoconfig;
     }

@@ -47,60 +47,64 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
+import com.openexchange.mail.autoconfig.sources.ConfigSource;
 
 /**
- * {@link StaticConfigSource} - An abstract class for static auto-config sources.
+ * {@link KnownStaticConfigSource} - An enumeration of known static sources.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.0
+ * @since v7.10.5
  */
-public abstract class StaticConfigSource implements ConfigSource {
+public enum KnownStaticConfigSource implements ConfigSource {
 
     /**
-     * Initializes a new {@link StaticConfigSource}.
+     * The static config source for <code>gmail.com</code>.
      */
-    protected StaticConfigSource() {
-        super();
+    GMAIL(new GMailConfigSource()),
+    /**
+     * The static config source for <code>outlook.com</code>.
+     */
+    OUTLOOK_COM(new OutlookComConfigSource()),
+    /**
+     * The static config source for <code>gmx.com</code> and <code>gmx.de</code>.
+     */
+    GMX(new GmxConfigSource()),
+    /**
+     * The static config source for <code>zoho.com</code>.
+     */
+    ZOHO(new ZohoConfigSource()),
+    /**
+     * The static config source for <code>icloud.com</code>.
+     */
+    ICLOUD(new ICloudConfigSource()),
+    /**
+     * The static config source for <code>aol.com</code>.
+     */
+    AOL(new AolConfigSource()),
+
+    ;
+
+    private final AbstractStaticConfigSource configSource;
+
+    private KnownStaticConfigSource(AbstractStaticConfigSource configSource) {
+        this.configSource = configSource;
+    }
+
+    // ---------------------------------------------- Delegate methods ---------------------------------------------------------------------
+
+    @Override
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException {
+        return configSource.getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId);
     }
 
     @Override
-    public final Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
+    public DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
+        return configSource.getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, forceSecure);
     }
-
-    @Override
-    public final DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
-        if (accept(emailDomain)) {
-            return getStaticAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, forceSecure);
-        }
-        return null;
-    }
-
-    /**
-     * Checks if specified domain is supported; e.g. <code>"yahoo.com"</code>.
-     *
-     * @param emailDomain The domain to check
-     * @return <code>true</code> if accepted; otherwise <code>false</code>
-     */
-    protected abstract boolean accept(String emailDomain);
-
-    /**
-     * Gets the static auto-config.
-     *
-     * @param emailLocalPart The local part
-     * @param emailDomain The domain part
-     * @param password The password
-     * @param user The identifier of the associated user
-     * @param context The identifier of the context
-     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
-     * @return The auto-config or <code>null</code>
-     * @throws OXException If an error occurs
-     */
-    protected abstract DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException;
 
 }

@@ -60,10 +60,9 @@ import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.sources.ConfigServer;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
-import com.openexchange.mail.autoconfig.sources.GMailConfigSource;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
-import com.openexchange.mail.autoconfig.sources.OutlookComConfigSource;
+import com.openexchange.mail.autoconfig.sources.staticsource.KnownStaticConfigSource;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -83,13 +82,17 @@ public class AutoconfigServiceImpl implements AutoconfigService {
      */
     public AutoconfigServiceImpl(final ServiceLookup services) {
         super();
-        ImmutableList.Builder<ConfigSource> sources = ImmutableList.builderWithExpectedSize(6);
+        KnownStaticConfigSource[] staticConfigSources = KnownStaticConfigSource.values();
+
+        ImmutableList.Builder<ConfigSource> sources = ImmutableList.builderWithExpectedSize(staticConfigSources.length + 4);
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer(services));
         sources.add(new ISPDB(services));
-        sources.add(new GMailConfigSource());
-        sources.add(new OutlookComConfigSource());
+        for (KnownStaticConfigSource staticConfigSource : staticConfigSources) {
+            sources.add(staticConfigSource);
+        }
         sources.add(new Guess(services));
+
         this.sources = sources.build();
     }
 

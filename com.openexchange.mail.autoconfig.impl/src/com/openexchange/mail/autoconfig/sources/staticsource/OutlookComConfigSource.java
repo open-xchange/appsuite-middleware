@@ -47,37 +47,32 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * {@link GMailConfigSource} - The static config source for <code>gmail.com</code>.
+ * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
  * <p>
- * See <a href="https://support.google.com/mail/answer/7126229">https://support.google.com/mail/answer/7126229<a>
+ * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.10.5
+ * @since 7.4.0
  */
-public class GMailConfigSource extends StaticConfigSource {
+public class OutlookComConfigSource extends AbstractStaticConfigSource {
 
     /**
-     * Initializes a new {@link GMailConfigSource}.
+     * Initializes a new {@link OutlookComConfigSource}.
      */
-    public GMailConfigSource() {
+    OutlookComConfigSource() {
         super();
     }
 
     @Override
     protected boolean accept(String emailDomain) {
-        if (Strings.isEmpty(emailDomain)) {
-            return false;
-        }
-
-        String lcd = Strings.toLowerCase(emailDomain.trim());
-        return "gmail.com".equals(lcd) || "googlemail.com".equals(lcd);
+        return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
     }
 
     @Override
@@ -88,13 +83,13 @@ public class GMailConfigSource extends StaticConfigSource {
         autoconfig.setMailProtocol("imap");
         autoconfig.setMailSecure(true);
         autoconfig.setMailStartTls(forceSecure);
-        autoconfig.setMailServer("imap.gmail.com");
+        autoconfig.setMailServer("imap-mail.outlook.com");
         // Transport
-        autoconfig.setTransportPort(465);
+        autoconfig.setTransportPort(25);
         autoconfig.setTransportProtocol("smtp");
-        autoconfig.setTransportSecure(true);
+        autoconfig.setTransportSecure(false);
         autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setTransportServer("smtp.gmail.com");
+        autoconfig.setTransportServer("smtp-mail.outlook.com");
         autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
         return autoconfig;
     }
