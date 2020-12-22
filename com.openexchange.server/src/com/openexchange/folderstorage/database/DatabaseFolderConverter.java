@@ -531,11 +531,9 @@ public final class DatabaseFolderConverter {
             }
         }
         /*
-         * assume all supported file storage capabilities for database folders
+         * assume all supported capabilities for database folders
          */
-        if (FolderObject.INFOSTORE == fo.getModule()) {
-            databaseFolder.addSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
-        }
+        databaseFolder.addSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
         return databaseFolder;
     }
 
