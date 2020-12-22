@@ -202,7 +202,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
                 return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).build();
             }
             if (false == UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
-                return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create()).build();
+                return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
             }
         }
         return resolveState(shareLink, guestInfo).infos(new ShareSubscriptionInformation(null, Module.CALENDAR.getName(), null)).build();
