@@ -217,6 +217,11 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
         if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
             return (JSONObject) internalConfig;
         }
+        internalConfig = calendarAccount.getInternalConfiguration();
+        if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
+            ((JSONObject)internalConfig).remove("lastError");
+            return (JSONObject) internalConfig;
+        }
         return null != calendarAccount ? calendarAccount.getInternalConfiguration() : new JSONObject();
     }
 
