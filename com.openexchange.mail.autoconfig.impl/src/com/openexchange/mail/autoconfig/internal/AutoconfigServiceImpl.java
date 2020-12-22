@@ -49,10 +49,9 @@
 
 package com.openexchange.mail.autoconfig.internal;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.AutoconfigException;
@@ -61,6 +60,7 @@ import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.sources.ConfigServer;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
+import com.openexchange.mail.autoconfig.sources.GMailConfigSource;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.autoconfig.sources.OutlookComConfigSource;
@@ -76,13 +76,21 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     private final List<ConfigSource> sources;
 
+    /**
+     * Initializes a new {@link AutoconfigServiceImpl}.
+     *
+     * @param services THe service look-up
+     */
     public AutoconfigServiceImpl(final ServiceLookup services) {
-        sources = new LinkedList<ConfigSource>();
+        super();
+        ImmutableList.Builder<ConfigSource> sources = ImmutableList.builderWithExpectedSize(6);
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer(services));
         sources.add(new ISPDB(services));
+        sources.add(new GMailConfigSource());
         sources.add(new OutlookComConfigSource());
         sources.add(new Guess(services));
+        this.sources = sources.build();
     }
 
     @Override
@@ -119,14 +127,16 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         return null;
     }
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("@");
-
     protected String getDomain(final QuotedInternetAddress internetAddress) {
-        return PATTERN_SPLIT.split(internetAddress.getAddress())[1];
+        String address = internetAddress.getAddress();
+        int pos = address.indexOf('@');
+        return pos > 0 ? address.substring(pos + 1) : address;
     }
 
     private String getLocalPart(final QuotedInternetAddress internetAddress) {
-        return PATTERN_SPLIT.split(internetAddress.getAddress())[0];
+        String address = internetAddress.getAddress();
+        int pos = address.indexOf('@');
+        return pos > 0 ? address.substring(0, pos) : address;
     }
 
 }

@@ -54,25 +54,30 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
+ * {@link GMailConfigSource} - The static config source for <code>gmail.com</code>.
  * <p>
- * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
+ * See <a href="https://support.google.com/mail/answer/7126229">https://support.google.com/mail/answer/7126229<a>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.0
+ * @since 7.10.5
  */
-public class OutlookComConfigSource extends StaticConfigSource {
+public class GMailConfigSource extends StaticConfigSource {
 
     /**
-     * Initializes a new {@link OutlookComConfigSource}.
+     * Initializes a new {@link GMailConfigSource}.
      */
-    public OutlookComConfigSource() {
+    public GMailConfigSource() {
         super();
     }
 
     @Override
     protected boolean accept(String emailDomain) {
-        return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
+        if (Strings.isEmpty(emailDomain)) {
+            return false;
+        }
+
+        String lcd = Strings.toLowerCase(emailDomain.trim());
+        return "gmail.com".equals(lcd) || "googlemail.com".equals(lcd);
     }
 
     @Override
@@ -83,7 +88,7 @@ public class OutlookComConfigSource extends StaticConfigSource {
         autoconfig.setMailProtocol("imap");
         autoconfig.setMailSecure(true);
         autoconfig.setMailStartTls(forceSecure);
-        autoconfig.setMailServer("imap-mail.outlook.com");
+        autoconfig.setMailServer("imap.gmail.com");
         // Transport
         autoconfig.setTransportPort(25);
         autoconfig.setTransportProtocol("smtp");
