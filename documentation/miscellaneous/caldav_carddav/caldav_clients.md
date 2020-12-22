@@ -203,6 +203,7 @@ Depending on the used client, some specials apply:
 * Only simple tasks (no participants, no recurrence) are supported.
 * Only tasks from personal folders (no shared or public folders) are supported.
 * Only the properties "DTSTART", "DUE", "CATEGORIES", "SUMMARY", "PRIORITY", "DESCRIPTION", "VALARM", "STATUS", "PERCENT-COMPLETE" and "COMPLETED" are synchronized, other ones are discarded by the server.
+* Timezones for a task's start- or due date are not supported and implicitly transformed to UTC time by the server.
 
 ### Creating new Collections
 
