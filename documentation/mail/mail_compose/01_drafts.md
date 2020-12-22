@@ -133,6 +133,19 @@ Cache directory and file durability can be controlled with these settings:
 * `com.openexchange.mail.compose.mailstorage.fileCacheDir`
 * `com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds`
 
+# Dovecot Configuration
+
+Since the association of a draft message to a certain composition space is managed through adding special `X-OX-Composition-Space-Id` header to those messages, it makes sense to add that header to Dovecot's [mail cache settings](https://doc.dovecot.org/configuration_manual/mail_cache_settings/) to improve performance when that header gets frequently queried by clients requesting composition spaces.
+
+To do so, the values for [`mail_cache_fields`](https://doc.dovecot.org/settings/core/#setting-mail-cache-fields) and [`mail_always_cache_fields`](https://doc.dovecot.org/settings/core/#setting-mail-always-cache-fields) should be extended by `hdr.x-ox-composition-space-id`.
+
+Example:
+
+```
+mail_always_cache_fields = flags date.received ... hdr.x-ox-composition-space-id
+mail_cache_fields = flags date.received ... hdr.x-ox-composition-space-id
+```
+
 # OX Guard
 
 This approach uses OX Guard natively. If Guard is enabled for a currently composed email, a new encrypted draft is immediately saved. From that point in time on, any new draft is a PGP email that can only be decrypted with the users private key.

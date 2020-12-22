@@ -224,6 +224,21 @@ public final class MessageHeaders {
 
     public static final HeaderName AUTHENTICATION_RESULTS = HeaderName.valueOf(HDR_AUTHENTICATION_RESULTS);
 
+    /** "X-Open-Xchange-Share-URL" */
+    public static final String HDR_X_OPEN_XCHANGE_SHARE_URL = "X-Open-Xchange-Share-URL";
+
+    public static final HeaderName X_OPEN_XCHANGE_SHARE_URL = HeaderName.valueOf(HDR_X_OPEN_XCHANGE_SHARE_URL);
+
+    /** "X-Open-Xchange-Share-Reference" */
+    public static final String HDR_X_OPEN_XCHANGE_SHARE_REFERENCE = "X-Open-Xchange-Share-Reference";
+
+    public static final HeaderName X_OPEN_XCHANGE_SHARE_REFERENCE = HeaderName.valueOf(HDR_X_OPEN_XCHANGE_SHARE_REFERENCE);
+
+    /** "X-Open-Xchange-Share-Type" */
+    public static final String HDR_X_OPEN_XCHANGE_SHARE_TYPE = "X-Open-Xchange-Share-Type";
+
+    public static final HeaderName X_OPEN_XCHANGE_SHARE_TYPE = HeaderName.valueOf(HDR_X_OPEN_XCHANGE_SHARE_TYPE);
+
     /** "X-OX-Shared-Attachments" */
     public static final String HDR_X_OX_SHARED_ATTACHMENTS = "X-OX-Shared-Attachments";
 

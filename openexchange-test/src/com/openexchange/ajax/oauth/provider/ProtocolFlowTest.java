@@ -98,7 +98,7 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testFlow() throws Exception {
-        GETRequest getLoginForm = new GETRequest().setScheme(scheme).setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
+        GETRequest getLoginForm = new GETRequest().setScheme(scheme).setHostname(hostname).setPort(port).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
         GETResponse loginFormResponse = getLoginForm.execute(client);
         POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword());
         POSTResponse loginResponse = loginRequest.submit(client);
@@ -157,6 +157,7 @@ public class ProtocolFlowTest extends EndpointTest {
         OAuthParams params = new OAuthParams()
             .setScheme(scheme)
             .setHostname(hostname)
+            .setPort(port)
             .setClientId(getClientId())
             .setClientSecret(getClientSecret())
             .setRedirectURI(getRedirectURI())
@@ -199,6 +200,7 @@ public class ProtocolFlowTest extends EndpointTest {
         OAuthParams params = new OAuthParams()
             .setScheme(scheme)
             .setHostname(hostname)
+            .setPort(port)
             .setClientId(getClientId())
             .setClientSecret(getClientSecret())
             .setRedirectURI(getRedirectURI())
