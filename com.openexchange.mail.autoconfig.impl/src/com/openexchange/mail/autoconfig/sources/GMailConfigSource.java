@@ -90,11 +90,11 @@ public class GMailConfigSource extends StaticConfigSource {
         autoconfig.setMailStartTls(forceSecure);
         autoconfig.setMailServer("imap.gmail.com");
         // Transport
-        autoconfig.setTransportPort(25);
+        autoconfig.setTransportPort(465);
         autoconfig.setTransportProtocol("smtp");
-        autoconfig.setTransportSecure(false);
+        autoconfig.setTransportSecure(true);
         autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setTransportServer("smtp-mail.outlook.com");
+        autoconfig.setTransportServer("smtp.gmail.com");
         autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
         return autoconfig;
     }
