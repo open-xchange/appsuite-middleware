@@ -90,6 +90,7 @@ public class CalDAVIfScheduleTagMatchAction extends DAVAction {
             if (null == resource || false == resource.exists()) {
                 throw DAVProtocol.protocolException(request.getUrl(), OXException.notFound(String.valueOf(request.getUrl())), HttpServletResponse.SC_NOT_FOUND);
             }
+            expectedScheduleTag = Strings.unquote(expectedScheduleTag);
             if (false == EventResource.class.isInstance(resource) || false == Objects.equals(expectedScheduleTag, ((EventResource) resource).getScheduleTag())) {
                 throw DAVProtocol.protocolException(request.getUrl(), OXException.conflict(), HttpServletResponse.SC_PRECONDITION_FAILED);
             }

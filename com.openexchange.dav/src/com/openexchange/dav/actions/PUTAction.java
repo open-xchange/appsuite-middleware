@@ -54,7 +54,6 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.WebdavPutAction.SizeExceededInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -132,10 +131,7 @@ public abstract class PUTAction extends DAVAction {
         }
         response.setStatus(HttpServletResponse.SC_CREATED);
         if (includeResponseETag()) {
-            String eTag = resource.getETag();
-            if (Strings.isNotEmpty(eTag)) {
-                response.setHeader("ETag", eTag);
-            }
+            setHeaderOpt("ETag", resource.getETag(), true, response);
         }
     }
 

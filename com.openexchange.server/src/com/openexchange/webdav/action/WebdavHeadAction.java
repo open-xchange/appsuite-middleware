@@ -50,6 +50,7 @@
 package com.openexchange.webdav.action;
 
 import java.util.Date;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -70,7 +71,10 @@ public class WebdavHeadAction extends AbstractAction {
 		if (!resource.isCollection()) {
 			res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : Long.toString(overrideLength));
 		}
-		res.setHeader("ETag", resource.getETag());
+        String eTag = resource.getETag();
+        if (null != eTag) {
+            res.setHeader("ETag", Strings.quote(eTag, true));
+        }
 		res.setHeader("Accept-Ranges", "bytes");
 
         Date lastModified = resource.getLastModified();

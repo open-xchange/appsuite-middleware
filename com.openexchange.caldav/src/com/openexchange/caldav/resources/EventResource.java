@@ -202,7 +202,7 @@ public class EventResource extends DAVObjectResource<Event> {
         if (null == object || false == object.containsSequence()) {
             return null;
         }
-        return '"' + String.valueOf(object.getSequence()) + '"';
+        return String.valueOf(object.getSequence());
     }
 
     /**

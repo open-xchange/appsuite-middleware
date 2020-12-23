@@ -124,7 +124,7 @@ public class CalDAVPOSTAction extends POSTAction {
                  */
                 WebdavResource updatedResource = factory.resolveResource(request.getUrl());
                 WebdavResource newResource = factory.resolveResource(splitComponentUrl);
-                response.setHeader("ETag", updatedResource.getETag());
+                setHeaderOpt("ETag", updatedResource.getETag(), true, response);
                 PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller(request.getURLPrefix(), request.getCharset(), request.isBrief())
                     .addProperty(DAVProtocol.DAV_NS.getURI(), "getetag")
                     .addProperty(DAVProtocol.CAL_NS.getURI(), "calendar-data")
