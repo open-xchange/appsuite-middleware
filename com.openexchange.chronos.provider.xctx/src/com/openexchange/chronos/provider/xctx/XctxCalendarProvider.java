@@ -208,6 +208,15 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
             }
             if (false == Objects.equals(oldUserConfig.optString("password", null), password)) {
                 doGuestLogin(session, url, password);
+                /*
+                 * clear persisted error if login was successful after configuration changes
+                 */
+                Pair<OXException, Date> lastError = optAccountError(calendarAccount);
+                if (null != lastError) {
+                    LOG.info("Clearing previously remembered error \"{}\" in calendar account {} to try again after reconfiguration.",
+                        lastError.getFirst().getErrorCode(), I(calendarAccount.getAccountId()));
+                    setAccountError(calendarAccount, null);
+                }
             }
         }
         /*
@@ -216,13 +225,6 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
         Object internalConfig = userConfig.remove("internalConfig");
         if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
             return (JSONObject) internalConfig;
-        }
-        if (null != calendarAccount) {
-            internalConfig = calendarAccount.getInternalConfiguration();
-            if (null != internalConfig && JSONObject.class.isInstance(internalConfig)) {
-                ((JSONObject) internalConfig).remove("lastError");
-                return (JSONObject) internalConfig;
-            }
         }
         return null != calendarAccount ? calendarAccount.getInternalConfiguration() : new JSONObject();
     }
@@ -354,45 +356,56 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
      * @return The updated calendar account, or the passed account as-is if nothing was changes
      */
     private CalendarAccount storeAccountError(Session session, CalendarAccount account, OXException error) {
+        /*
+         * serialize & persist error, then update account if needed
+         */
+        JSONObject updatedInternalConfig = setAccountError(account, error);
+        if (null != updatedInternalConfig) {
+            try {
+                JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
+                userConfig.putSafe("internalConfig", updatedInternalConfig);
+                return services.getService(CalendarAccountService.class).updateAccount(session, account.getAccountId(), userConfig, account.getLastModified().getTime(), null);
+            } catch (OXException e) {
+                LOG.warn("Error persisting error in account config", e);
+            }
+        }
+        return account;
+    }
+
+    /**
+     * Stores an exception as last error within the account's internal configuration data.
+     *
+     * @param account The calendar account
+     * @param error The error to set, or <code>null</code> to clear a previously set last error
+     * @return The updated internal configuration of the calendar account, or <code>null</code> if nothing was changed
+     */
+    private JSONObject setAccountError(CalendarAccount account, OXException error) {
         JSONObject internalConfig = null != account.getInternalConfiguration() ? account.getInternalConfiguration() : new JSONObject();
         /*
          * set or remove error in account config
          */
         if (null == error) {
-            if (null == internalConfig.remove("lastError")) {
-                return account;
-            }
-        } else {
-            try {
-                DataHandler dataHandler = services.getServiceSafe(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
-                ConversionResult result = dataHandler.processData(new SimpleData<OXException>(error), new DataArguments(), null);
-                if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
-                    JSONObject errorJson = (JSONObject) result.getData();
-                    errorJson.remove("error_stack");
-                    errorJson.put("timestamp", System.currentTimeMillis());
-                    internalConfig.putSafe("lastError", errorJson);
-                }
-            } catch (OXException | JSONException e) {
-                LOG.error("Unable to process data.", e);
-                return account;
-            }
+            return null == internalConfig.remove("lastError") ? null : internalConfig;
         }
-        /*
-         * update account
-         */
         try {
-            JSONObject userConfig = null != account.getUserConfiguration() ? account.getUserConfiguration() : new JSONObject();
-            userConfig.putSafe("internalConfig", internalConfig);
-            return services.getService(CalendarAccountService.class).updateAccount(session, account.getAccountId(), userConfig, account.getLastModified().getTime(), null);
-        } catch (OXException e) {
-            LOG.warn("Error persisting error in account config", e);
-            return account;
+            DataHandler dataHandler = services.getServiceSafe(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+            ConversionResult result = dataHandler.processData(new SimpleData<OXException>(error), new DataArguments(), null);
+            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                JSONObject errorJson = (JSONObject) result.getData();
+                errorJson.remove("error_stack");
+                errorJson.put("timestamp", System.currentTimeMillis());
+                return internalConfig.putSafe("lastError", errorJson);
+            }
+        } catch (OXException | JSONException e) {
+            LOG.error("Unable to process data.", e);
         }
+        return null;
     }
 
     /**
      * Optionally gets a persisted account error that occurred during previous operations from the underlying account configuration.
      *
+     * @param account The calendar account to get the persisted account error from
      * @return The account error, paired with the time it occurred, or <code>null</code> if there is none
      */
     private Pair<OXException, Date> optAccountError(CalendarAccount account) {
