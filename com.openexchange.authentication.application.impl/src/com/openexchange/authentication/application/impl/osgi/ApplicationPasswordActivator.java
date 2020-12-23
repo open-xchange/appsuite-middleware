@@ -82,6 +82,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ApplicationPasswordActivator}
@@ -120,6 +122,10 @@ public class ApplicationPasswordActivator extends AJAXModuleActivator {
             @Override
             public boolean isEnabled(String capability, Session session, CapabilitySet capabilities) throws OXException {
                 if (sCapability.equals(capability)) {
+                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (null == serverSession || serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                        return false;
+                    }
                     // Confirm loaded, user has the capability, and at least one storage registered
                     if (null != appPasswordService) {
                         List<AppPasswordApplication> applications = appPasswordService.getApplications(session);
