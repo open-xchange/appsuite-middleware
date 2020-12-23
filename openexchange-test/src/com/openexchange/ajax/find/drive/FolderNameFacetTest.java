@@ -54,7 +54,7 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -103,7 +103,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         FindQueryBody body = new FindQueryBody();
         addBasicFacets(body);
         FindQueryResponse response = findApi.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         FindQueryResponseData data = response.getData();
         assertEquals(1, i(data.getSize()));
     }
@@ -198,14 +198,14 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
 
         // Without folder facet, result in "My Files" and "Public Files" expected
         FindQueryResponse response = findApi.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         FindQueryResponseData data = response.getData();
         assertEquals(2, i(data.getSize()));
 
         // Search as another user, result in "Public Files" expected
         FindApi findApi2 = new FindApi(apiClient2);
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         data = response.getData();
         assertEquals(1, i(data.getSize()));
 
@@ -216,13 +216,13 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         facet.setValue(getPrivateInfostoreFolder(apiClient));
         body.addFacetsItem(facet);
         response = findApi.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         data = response.getData();
         assertEquals(1, i(data.getSize()));
 
         // Search as another user, no results expected
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         data = response.getData();
         assertEquals(0, i(data.getSize()));
 
@@ -235,13 +235,13 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         facet.setValue(String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
         body.addFacetsItem(facet);
         response = findApi.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         data = response.getData();
         assertEquals(1, i(data.getSize()));
 
         // Search as another user, 1 result expected
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        assertTrue(Strings.isEmpty(response.getError()));
+        checkResponseForErrors(response);
         data = response.getData();
         assertEquals(1, i(data.getSize()));
     }
@@ -308,6 +308,12 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         return resp.getData();
     }
 
+    private void checkResponseForErrors(FindQueryResponse response) {
+        if (Strings.isNotEmpty(response.getError())) {
+            fail(response.getError());
+        }
+    }
+
     private void addBasicFacets(FindQueryBody body) {
         // Folder facet
         FindActiveFacet folderFacet = new FindActiveFacet();
@@ -326,4 +332,5 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         folderNameFacet.setFilter(filter);
         body.addFacetsItem(folderNameFacet);
     }
+
 }
