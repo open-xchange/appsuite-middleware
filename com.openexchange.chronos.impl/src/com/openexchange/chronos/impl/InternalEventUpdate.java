@@ -477,7 +477,6 @@ public class InternalEventUpdate implements EventUpdate {
                 Check.startAndEndDate(session, updatedEvent);
                 break;
             case RECURRENCE_RULE:
-                Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
                 /*
                  * ignore a 'matching' recurrence rule
                  */
@@ -494,6 +493,15 @@ public class InternalEventUpdate implements EventUpdate {
                         throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
                     }
                     updatedEvent.removeRecurrenceRule();
+                    break;
+                }
+                /*
+                 * check rule's validity if set
+                 */
+                if (null != updatedEvent.getRecurrenceRule()) {
+                    String rrule = updatedEvent.getRecurrenceRule();
+                    DateTime seriesStart = null != updatedEvent.getStartDate() ? updatedEvent.getStartDate() : originalEvent.getStartDate();
+                    Check.recurrenceDataIsValid(session.getRecurrenceService(), new DefaultRecurrenceData(rrule, seriesStart));
                 }
                 break;
             case DELETE_EXCEPTION_DATES:

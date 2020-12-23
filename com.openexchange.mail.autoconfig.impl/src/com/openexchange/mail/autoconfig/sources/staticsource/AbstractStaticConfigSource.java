@@ -47,53 +47,26 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
+import com.openexchange.mail.autoconfig.sources.ConfigSource;
 
 /**
- * {@link StaticConfigSource} - An abstract class for static auto-config sources.
+ * {@link AbstractStaticConfigSource} - An abstract class for static auto-config sources.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.0
  */
-public abstract class StaticConfigSource implements ConfigSource {
+public abstract class AbstractStaticConfigSource implements ConfigSource {
 
     /**
-     * Checks if a given domain is supported.
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     * @since 7.4.0
+     * Initializes a new {@link AbstractStaticConfigSource}.
      */
-    public static interface DomainFilter {
-
-        /**
-         * Checks if specified domain is supported; e.g. <code>"yahoo.com"</code>.
-         *
-         * @param emailDomain The domain to check
-         * @return <code>true</code> if accepted; otherwise <code>false</code>
-         */
-        public boolean accept(String emailDomain);
-    }
-
-    // ---------------------------------------------------------------- //
-
-    private final DomainFilter filter;
-
-    /**
-     * Initializes a new {@link StaticConfigSource}.
-     *
-     * @param filter The domain filter
-     * @throws NullPointerException If <code>filter</code> is <code>null</code>
-     */
-    protected StaticConfigSource(final DomainFilter filter) {
+    protected AbstractStaticConfigSource() {
         super();
-        if (null == filter) {
-            throw new NullPointerException("filter rmust not be null.");
-        }
-        this.filter = filter;
     }
 
     @Override
@@ -103,11 +76,19 @@ public abstract class StaticConfigSource implements ConfigSource {
 
     @Override
     public final DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
-        if (null != filter && filter.accept(emailDomain)) {
+        if (accept(emailDomain)) {
             return getStaticAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, forceSecure);
         }
         return null;
     }
+
+    /**
+     * Checks if specified domain is supported; e.g. <code>"yahoo.com"</code>.
+     *
+     * @param emailDomain The domain to check
+     * @return <code>true</code> if accepted; otherwise <code>false</code>
+     */
+    protected abstract boolean accept(String emailDomain);
 
     /**
      * Gets the static auto-config.

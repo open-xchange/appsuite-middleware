@@ -190,7 +190,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
                     iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, L(refreshIntervalFromFeed));
                 }
             } catch (IllegalArgumentException e) {
-                LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
+                LOG.debug("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
             }
         } else if (persistedInterval != 0) { // maybe deleted from ics in the meantime
             iCalConfig.remove(ICalCalendarConstants.REFRESH_INTERVAL);

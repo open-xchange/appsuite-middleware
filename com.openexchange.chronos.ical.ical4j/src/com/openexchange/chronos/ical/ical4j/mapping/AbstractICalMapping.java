@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.ImportedTimeZone;
 import com.openexchange.chronos.ical.ical4j.ParserTools;
 import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.exception.OXException;
@@ -255,13 +256,13 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
                 return TimeZones.UTC;
             }
             if (null != dateProperty.getTimeZone()) {
-                return dateProperty.getTimeZone();
+                return wrapTimeZone(dateProperty.getTimeZone());
             }
         }
         if (DateListProperty.class.isInstance(property)) {
             DateListProperty dateListProperty = (DateListProperty) property;
             if (null != dateListProperty.getTimeZone()) {
-                return dateListProperty.getTimeZone();
+                return wrapTimeZone(dateListProperty.getTimeZone());
             }
         }
         Parameter tzidParameter = property.getParameter(Parameter.TZID);
@@ -269,6 +270,14 @@ public abstract class AbstractICalMapping<T extends Component, U> implements ICa
             return CalendarUtils.optTimeZone(tzidParameter.getValue(), defaultTimeZone);
         }
         return defaultTimeZone;
+    }
+
+    private static TimeZone wrapTimeZone(TimeZone timeZone) {
+        if (net.fortuna.ical4j.model.TimeZone.class.isInstance(timeZone)) {
+            net.fortuna.ical4j.model.TimeZone icalTimeZone = (net.fortuna.ical4j.model.TimeZone) timeZone;
+            return new ImportedTimeZone(icalTimeZone.getVTimeZone());
+        }
+        return timeZone;
     }
 
     /**

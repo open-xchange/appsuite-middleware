@@ -184,4 +184,5 @@ However, there are a few limitations:
 * It is not possible to add *local* resource or group attendees to events created in *remote* calendars of federated shares 
 * Calendars from integrated federated shares won't be available when accessing the server via CalDAV
 * No re-sharing of subscribed shares is possible, since guest users don't have *invite_guests* capability
+* No push notifications for the web client are triggered for changes in integrated cross-context calendars
 * Depending on the version the remote server is running in *cross-ox* mode, certain features may not be available when interacting with the share

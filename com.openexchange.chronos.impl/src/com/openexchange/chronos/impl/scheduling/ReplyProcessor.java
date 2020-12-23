@@ -135,7 +135,7 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
         Event firstEvent = message.getResource().getFirstEvent();
         CalendarUser originator = message.getSchedulingObject().getOriginator();
         Attendee replyingAttendee = getReplyingAttendee(firstEvent, originator);
-        EventID eventID = Utils.resolveEventId(session, storage, firstEvent.getUid(), null, message.getTargetUser());
+        EventID eventID = Utils.resolveEventId(session, storage, firstEvent.getUid(), firstEvent.getRecurrenceId(), message.getTargetUser());
         Event originalEvent = loadEventData(eventID.getObjectID());
 
         Check.eventIsVisible(folder, originalEvent);

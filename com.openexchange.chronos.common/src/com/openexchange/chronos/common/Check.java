@@ -126,9 +126,24 @@ public class Check {
     public static String recurrenceRuleIsValid(RecurrenceService recurrenceService, Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            recurrenceService.validate(new DefaultRecurrenceData(recurrenceRule, event.getStartDate(), null));
+            Check.recurrenceDataIsValid(recurrenceService, new DefaultRecurrenceData(recurrenceRule, event.getStartDate(), null));
         }
         return recurrenceRule;
+    }
+
+    /**
+     * Checks a recurrence data object for validity.
+     *
+     * @param recurrenceService A reference to the recurrence service
+     * @param recurrenceData The recurrence data to check, or <code>null</code> for a no-op
+     * @return The passed recurrence data, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static RecurrenceData recurrenceDataIsValid(RecurrenceService recurrenceService, RecurrenceData recurrenceData) throws OXException {
+        if (null != recurrenceData) {
+            recurrenceService.validate(recurrenceData);
+        }
+        return recurrenceData;
     }
 
     /**
@@ -495,7 +510,7 @@ public class Check {
 
     /**
      * Checks that the given event contains no attendees fulfilling certain criteria.
-     * 
+     *
      * @param event The event to check the attendees in
      * @param internal {@link Boolean#TRUE} to prevent internal entities, {@link Boolean#FALSE} to prevent non-internal ones,
      *            or <code>null</code> to not check against internal/external

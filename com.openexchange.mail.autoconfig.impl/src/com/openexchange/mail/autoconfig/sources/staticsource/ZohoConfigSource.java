@@ -47,53 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * Test suite for iCal tests.
+ * {@link ZohoConfigSource} - The static config source for <code>zoho.com</code>.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.5
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ // @formatter:off
-    ICalTaskExportTest.class,
-    ICalAppointmentExportTest.class,
-    ICalSeriesTests.class,
-    ICalSingleAndBatchExportTest.class,
-    Bug9840Test.class,
-    Bug11724Test.class,
-    Bug11868Test.class,
-    Bug11871Test.class,
-    Bug11920Test.class,
-    Bug11996Test.class,
-    Bug12414Test.class,
-    Bug12470Test.class,
-    Bug17393Test.class,
-    Bug17963Test_DateWithoutTime.class,
-    Bug19046Test_SeriesWithExtraneousStartDate.class,
-    Bug19089Test.class,
-    Bug19681_TimezoneForUtcProperties.class,
-    Bug20132Test_WrongRecurrenceDatePosition.class,
-    Bug20405Test_TaskWithoutDueDate.class,
-    Bug20413Test_CompletelyWrongDTStart.class,
-    Bug20453Test_emptyDTEND.class,
-    Bug20498Test_ReminderJumpsAnHour.class,
-    Bug20715Test_UidIsNotcaseSensitive.class,
-    Bug20718Test_JumpDuringDstCrossing.class,
-    Bug20896Test_AlarmsChange.class,
-    Bug20945Test_UnexpectedError26.class,
-    Bug22059Test.class,
-    Bug27474Test.class,
-    Bug28071Test.class,
-    Bug56435Test_TaskStateRoundtrip.class,
-    Bug8475Test_TaskAttendeeHandling.class,
-    Bug8654Test_TaskImport.class,
-    Bug63867Test.class,
-    MWB161Test.class,
-    MWB464Test.class,
-    MWB805Test.class,
-}) // @formatter:on
-public final class ICalTestSuite {
+public class ZohoConfigSource extends AbstractStaticConfigSource {
+
+    /**
+     * Initializes a new {@link ZohoConfigSource}.
+     */
+    ZohoConfigSource() {
+        super();
+    }
+
+    @Override
+    protected boolean accept(String emailDomain) {
+        if (Strings.isEmpty(emailDomain)) {
+            return false;
+        }
+
+        return "zoho.com".equals(Strings.toLowerCase(emailDomain.trim()));
+    }
+
+    @Override
+    protected DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
+        final DefaultAutoconfig autoconfig = new DefaultAutoconfig();
+        // IMAP
+        autoconfig.setMailPort(993);
+        autoconfig.setMailProtocol("imap");
+        autoconfig.setMailSecure(true);
+        autoconfig.setMailStartTls(forceSecure);
+        autoconfig.setMailServer("imap.zoho.eu");
+        // Transport
+        autoconfig.setTransportPort(465);
+        autoconfig.setTransportProtocol("smtp");
+        autoconfig.setTransportSecure(true);
+        autoconfig.setTransportStartTls(forceSecure);
+        autoconfig.setTransportServer("smtp.zoho.eu");
+        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
+        return autoconfig;
+    }
+
 }

@@ -56,8 +56,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -94,20 +92,16 @@ import com.openexchange.tools.id.IDMangler;
  * <p>
  * User 1 from context A will share the folder
  * User 2 from context B will analyze the share
+ * <p>
+ * For local testing set
+ * <code>com.openexchange.capability.xctx=true</code>
+ * <code>com.openexchange.capability.xox=false</code>
+ * <code>com.openexchange.api.client.blacklistedHosts=""</code>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
 public class ShareManagementSubscriptionTest extends AbstractShareManagementTest {
-
-    @Override
-    protected Map<String, String> getNeededConfigurations() {
-        HashMap<String, String> configuration = new HashMap<String, String>(4, 0.9f);
-        configuration.put("com.openexchange.capability.xctx", Boolean.TRUE.toString());
-        configuration.put("com.openexchange.capability.xox", Boolean.TRUE.toString());
-        configuration.put("com.openexchange.api.client.blacklistedHosts", "");
-        return configuration;
-    }
 
     /* Context 2 */
     private TestContext context2;
@@ -135,9 +129,6 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
         remember(folderManager);
         infostoreRoot = folderManager.findInfostoreRoot();
-
-        setUpConfiguration();
-        setUpConfiguration(ajaxClientC2);
     }
 
     @Override
@@ -152,7 +143,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Test
-    public void testMissingLink_APIException() throws Exception {
+    public void testMissingLink() throws Exception {
         ShareLinkAnalyzeResponse analyzeShareLink = smApiC2.analyzeShareLink(apiClientC2.getSession(), getBody(""));
         assertNull(analyzeShareLink.getData());
         assertNotNull(analyzeShareLink.getError(), analyzeShareLink.getErrorDesc());
@@ -160,47 +151,50 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Test
-    public void testSomeLink_Unresovable() throws Exception {
-        analyze("https://example.org/no/share/link", StateEnum.UNRESOLVABLE);
+    public void testSomeLink() throws Exception {
+        analyze("https://example.org/no/share/link", StateEnum.UNSUPPORTED);
     }
 
     @Test
-    public void testBrokenLink_Unresovable() throws Exception {
-        analyze("https://example.org/ajax/share/aaaf78820506e0b2faf7883506ce41388f98fa02a4e314c9/1/8/MTk3Njk0", StateEnum.UNRESOLVABLE);
+    public void testBrokenLink() throws Exception {
+        analyze("https://example.org/ajax/share/aaaf78820506e0b2faf7883506ce41388f98fa02a4e314c9/1/8/MTk3Njk0", StateEnum.UNSUPPORTED);
     }
 
     @Test
-    public void testAnonymousLink_Forbidden() throws Exception {
+    public void testAnonymousLink() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
 
-        analyze(shareLink, StateEnum.FORBIDDEN);
+        analyze(shareLink, StateEnum.UNSUPPORTED);
     }
 
     @Test
-    public void testSingleFile_Forbidden() throws Exception {
+    public void testSingleFile() throws Exception {
         String folderId = createFolder();
 
         String item = createFile(folderId, "file" + sharedFolderName);
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId, item);
-        analyze(shareLink, StateEnum.FORBIDDEN);
+        analyze(shareLink, StateEnum.UNSUPPORTED);
     }
 
     @Test
-    public void testAnonymousLinkWithPassword_Forbidden() throws Exception {
+    public void testAnonymousLinkWithPassword() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
 
-        analyze(shareLink, StateEnum.FORBIDDEN);
+        analyze(shareLink, StateEnum.UNSUPPORTED);
 
         updateLinkWithPassword(folderManager, smApi, folderId);
-        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.FORBIDDEN);
+        analyze(smApiC2, getOrCreateShareLink(folderManager, smApi, folderId), StateEnum.UNSUPPORTED);
     }
 
     @Test
-    public void testDeletedAnonymousLink_Unresolvable() throws Exception {
+    public void testDeletedAnonymousLink() throws Exception {
         String folderId = createFolder();
         ShareLinkData shareLink = getOrCreateShareLink(folderManager, smApi, folderId);
+
+        analyze(shareLink, StateEnum.UNSUPPORTED);
+
         deleteShareLink(folderManager, smApi, folderId);
 
         /*
@@ -209,7 +203,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
          * is returned.
          */
         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(3));
-        analyze(shareLink, StateEnum.UNRESOLVABLE);
+        analyze(shareLink, StateEnum.UNSUPPORTED);
     }
 
     /**
@@ -241,7 +235,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        SubscribeShareResponseData accountData = addOXShareAccount(smApiC2, shareLink, null);
+        addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Remove guest from folder permission
@@ -256,15 +250,9 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
-         * Unsubscribe from share and check response
+         * Unsubscribe from share and check response, last share gone, so the account should have been removed
          */
         unsubscribe(shareLink);
-        analyze(shareLink, StateEnum.UNSUBSCRIBED);
-
-        /*
-         * Delete account and check again
-         */
-        deleteOXShareAccount(smApiC2.getApiClient(), accountData.getFolder());
         analyze(shareLink, StateEnum.ADDABLE);
     }
 
@@ -334,15 +322,9 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         analyze(shareLink, StateEnum.SUBSCRIBED);
 
         /*
-         * Unsubscribe from share and check response
+         * Unsubscribe from share and check response, last share gone, so the account should have been removed
          */
         unsubscribe(shareLink);
-        analyze(shareLink, StateEnum.UNSUBSCRIBED);
-
-        /*
-         * Delete account and check again
-         */
-        deleteOXShareAccount(smApiC2.getApiClient(), accountData.getFolder());
         analyze(shareLink, StateEnum.ADDABLE_WITH_PASSWORD);
     }
 

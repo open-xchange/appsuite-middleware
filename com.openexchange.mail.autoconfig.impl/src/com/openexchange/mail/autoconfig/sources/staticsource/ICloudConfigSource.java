@@ -47,53 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.mail.autoconfig.sources.staticsource;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * Test suite for iCal tests.
+ * {@link ICloudConfigSource} - The static config source for <code>icloud.com</code>.
+ * <p>
+ * See <a href="https://support.apple.com/HT202304">https://support.apple.com/HT202304</a>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.10.5
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ // @formatter:off
-    ICalTaskExportTest.class,
-    ICalAppointmentExportTest.class,
-    ICalSeriesTests.class,
-    ICalSingleAndBatchExportTest.class,
-    Bug9840Test.class,
-    Bug11724Test.class,
-    Bug11868Test.class,
-    Bug11871Test.class,
-    Bug11920Test.class,
-    Bug11996Test.class,
-    Bug12414Test.class,
-    Bug12470Test.class,
-    Bug17393Test.class,
-    Bug17963Test_DateWithoutTime.class,
-    Bug19046Test_SeriesWithExtraneousStartDate.class,
-    Bug19089Test.class,
-    Bug19681_TimezoneForUtcProperties.class,
-    Bug20132Test_WrongRecurrenceDatePosition.class,
-    Bug20405Test_TaskWithoutDueDate.class,
-    Bug20413Test_CompletelyWrongDTStart.class,
-    Bug20453Test_emptyDTEND.class,
-    Bug20498Test_ReminderJumpsAnHour.class,
-    Bug20715Test_UidIsNotcaseSensitive.class,
-    Bug20718Test_JumpDuringDstCrossing.class,
-    Bug20896Test_AlarmsChange.class,
-    Bug20945Test_UnexpectedError26.class,
-    Bug22059Test.class,
-    Bug27474Test.class,
-    Bug28071Test.class,
-    Bug56435Test_TaskStateRoundtrip.class,
-    Bug8475Test_TaskAttendeeHandling.class,
-    Bug8654Test_TaskImport.class,
-    Bug63867Test.class,
-    MWB161Test.class,
-    MWB464Test.class,
-    MWB805Test.class,
-}) // @formatter:on
-public final class ICalTestSuite {
+public class ICloudConfigSource extends AbstractStaticConfigSource {
+
+    /**
+     * Initializes a new {@link ICloudConfigSource}.
+     */
+    ICloudConfigSource() {
+        super();
+    }
+
+    @Override
+    protected boolean accept(String emailDomain) {
+        if (Strings.isEmpty(emailDomain)) {
+            return false;
+        }
+
+        return "icloud.com".equals(Strings.toLowerCase(emailDomain.trim()));
+    }
+
+    @Override
+    protected DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
+        final DefaultAutoconfig autoconfig = new DefaultAutoconfig();
+        // IMAP
+        autoconfig.setMailPort(993);
+        autoconfig.setMailProtocol("imap");
+        autoconfig.setMailSecure(true);
+        autoconfig.setMailStartTls(forceSecure);
+        autoconfig.setMailServer("imap.mail.me.com");
+        // Transport
+        autoconfig.setTransportPort(587);
+        autoconfig.setTransportProtocol("smtp");
+        autoconfig.setTransportSecure(false);
+        autoconfig.setTransportStartTls(true);
+        autoconfig.setTransportServer("smtp.mail.me.com");
+        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
+        return autoconfig;
+    }
+
 }
