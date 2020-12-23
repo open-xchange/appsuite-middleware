@@ -1105,6 +1105,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapStore.connect(server, port, login, pw);
                 }
             }
+            //new Throwable("New IMAP connection").printStackTrace(System.out);
             AuditLogService auditLogService = Services.optService(AuditLogService.class);
             if (null != auditLogService) {
                 String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
