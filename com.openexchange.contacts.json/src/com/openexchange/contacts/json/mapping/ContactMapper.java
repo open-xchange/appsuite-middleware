@@ -49,7 +49,7 @@
 
 package com.openexchange.contacts.json.mapping;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2233,15 +2233,12 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, String value) {
-                if (value == null) {
-                    remove(contact);
-                    return;
-                }
-                try {
-                    contact.setId(value);
-                    contact.setObjectID(Integer.parseInt(value));
-                } catch (Exception e) {
-                    LOG.debug("Value '{}' cannot be parsed as integer. The 'id' was set but not the 'ObjectID'.", e);
+                contact.setId(value);
+                int parsedId = Strings.getUnsignedInt(value);
+                if (-1 != parsedId) {
+                    contact.setObjectID(parsedId);
+                } else {
+                    LOG.debug("Value '{}' cannot be parsed as integer. The 'id' was set but not the 'ObjectID'.", value);
                 }
             }
 
@@ -2252,8 +2249,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                String id = contact.getId();
-                return Strings.isEmpty(id) ? Integer.toString(contact.getObjectID()) : id;
+                return contact.containsId() ? contact.getId() : contact.containsObjectID() ? String.valueOf(contact.getObjectID()) : null;
             }
 
             @Override
@@ -2387,16 +2383,12 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, String value) throws OXException {
-                if (value == null) {
-                    remove(contact);
-                    return;
-                }
-                try {
-                    contact.setFolderId(value);
-                    contact.setParentFolderID(Integer.parseInt(value));
-                    return;
-                } catch (NumberFormatException e) {
-                    LOG.debug("Value '{}' cannot be parsed as integer. The 'folderId' was set but not the 'parentFolderID'.", e);
+                contact.setFolderId(value);
+                int parsedId = Strings.getUnsignedInt(value);
+                if (-1 != parsedId) {
+                    contact.setParentFolderID(parsedId);
+                } else {
+                    LOG.debug("Value '{}' cannot be parsed as integer. The 'folderId' was set but not the 'parentFolderID'.", value);
                 }
             }
 
@@ -2407,8 +2399,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                String folderId = contact.getFolderId();
-                return Strings.isEmpty(folderId) ? Integer.toString(contact.getParentFolderID()) : folderId;
+                return contact.containsFolderId() ? contact.getFolderId() : contact.containsParentFolderID() ? String.valueOf(contact.getParentFolderID()) : null;
             }
 
             @Override
@@ -2422,11 +2413,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                if (value != null) {
-                    contact.setPrivateFlag(value.booleanValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setPrivateFlag(null == value ? false : b(value));
             }
 
             @Override
@@ -2449,11 +2436,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if (value != null) {
-                    contact.setCreatedBy(value.intValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setCreatedBy(null == value ? 0 : i(value));
             }
 
             @Override
@@ -2476,11 +2459,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if (value != null) {
-                    contact.setModifiedBy(value.intValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setModifiedBy(null == value ? 0 : i(value));
             }
 
             @Override
@@ -2729,11 +2708,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if (value != null) {
-                    contact.setInternalUserId(value.intValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setInternalUserId(null == value ? 0 : i(value));
             }
 
             @Override
@@ -2756,11 +2731,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if (value != null) {
-                    contact.setLabel(value.intValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setLabel(null == value ? 0 : i(value));
             }
 
             @Override
@@ -2840,11 +2811,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if (value != null) {
-                    contact.setDefaultAddress(value.intValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setDefaultAddress(null == value ? 0 : i(value));
             }
 
             @Override
@@ -2901,11 +2868,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                if (value != null) {
-                    contact.setMarkAsDistributionlist(value.booleanValue());
-                } else {
-                    remove(contact);
-                }
+                contact.setMarkAsDistributionlist(null == value ? false : b(value));
             }
 
             @Override
@@ -2928,12 +2891,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if(value != null) {
-                    contact.setNumberOfAttachments(value.intValue());
-                }
-                else {
-                    remove(contact);
-                }
+                contact.setNumberOfAttachments(null == value ? 0 : i(value));
             }
 
             @Override
@@ -3025,12 +2983,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if(value != null) {
-                    contact.setNumberOfImages(value.intValue());
-                }
-                else {
-                    remove(contact);
-                }
+                contact.setNumberOfImages(null == value ? 0 : i(value));
             }
 
             @Override
@@ -3100,12 +3053,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                if(value != null) {
-                    contact.setUseCount(value.intValue());
-                }
-                else {
-                   remove(contact);
-                }
+                contact.setUseCount(null == value ? 0 : i(value));
             }
 
             @Override
