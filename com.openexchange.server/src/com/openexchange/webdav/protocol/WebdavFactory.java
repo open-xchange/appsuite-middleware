@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.protocol;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 public interface WebdavFactory{
@@ -72,7 +71,6 @@ public interface WebdavFactory{
 	 * Gets the session of the current user
 	 *
 	 * @return The {@link Session}
-	 * @throws OXException
 	 */
-    public Session getSession() throws OXException;
+    public Session getSession();
 }

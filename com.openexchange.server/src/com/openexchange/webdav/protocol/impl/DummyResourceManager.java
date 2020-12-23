@@ -51,7 +51,6 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -162,7 +161,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	}
 
     @Override
-    public Session getSession() throws OXException {
+    public Session getSession() {
         return null;
     }
 
