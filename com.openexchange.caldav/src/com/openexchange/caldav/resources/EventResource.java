@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.dmfs.rfc5545.DateTime;
+import com.google.common.escape.Escaper;
 import com.google.common.xml.XmlEscapers;
 import com.openexchange.caldav.CalDAVImport;
 import com.openexchange.caldav.CaldavProtocol;
@@ -202,7 +203,7 @@ public class EventResource extends DAVObjectResource<Event> {
         if (null == object || false == object.containsSequence()) {
             return null;
         }
-        return '"' + String.valueOf(object.getSequence()) + '"';
+        return String.valueOf(object.getSequence());
     }
 
     /**
@@ -347,14 +348,15 @@ public class EventResource extends DAVObjectResource<Event> {
                     calendarUser = object.getModifiedBy();
                     timestamp = object.getLastModified();
                 }
+                Escaper escaper = XmlEscapers.xmlContentEscaper();
                 StringBuilder stringBuilder = new StringBuilder();
                 if (null != calendarUser) {
-                    stringBuilder.append("<D:href>").append(calendarUser.getUri()).append("</D:href>");
+                    stringBuilder.append("<D:href>").append(escaper.escape(calendarUser.getUri())).append("</D:href>");
                     if (CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
                         try {
                             User user = factory.getService(UserService.class).getUser(calendarUser.getEntity(), factory.getContext());
-                            stringBuilder.append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>")
-                                .append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>");
+                            stringBuilder.append("<CS:first-name>").append(escaper.escape(user.getGivenName())).append("</CS:first-name>")
+                                .append("<CS:last-name>").append(escaper.escape(user.getSurname())).append("</CS:last-name>");
                         } catch (OXException e) {
                             LOG.warn("error resolving user '{}'", calendarUser, e);
                         }
@@ -364,7 +366,7 @@ public class EventResource extends DAVObjectResource<Event> {
                     stringBuilder.append("<CS:dtstamp>").append(Tools.formatAsUTC(timestamp)).append("</CS:dtstamp>");
                 }
                 property.setXML(true);
-                property.setValue(XmlEscapers.xmlContentEscaper().escape(stringBuilder.toString()));
+                property.setValue(stringBuilder.toString());
             }
             return property;
         }

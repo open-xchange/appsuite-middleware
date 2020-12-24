@@ -384,14 +384,26 @@ public abstract class DAVAction extends AbstractAction {
      * @param response The response to set the header in
      */
     protected void setHeaderOpt(String header, Object value, WebdavResponse response) {
+        setHeaderOpt(header, value, false, response);
+    }
+
+    /**
+     * Optionally sets a response header if the supplied value reference is not <code>null</code>.
+     *
+     * @param header The name of the header name to set
+     * @param value The value to set, or <code>null</code> to do nothing
+     * @param quote <code>true</code> to put quotation marks around the value, <code>false</code> to set the value as-is
+     * @param response The response to set the header in
+     */
+    protected void setHeaderOpt(String header, Object value, boolean quote, WebdavResponse response) {
         if (null != value) {
-            response.setHeader(header, value.toString());
+            response.setHeader(header, quote ? Strings.quote(String.valueOf(value), true) : String.valueOf(value));
         }
     }
 
     /**
      * Gets the decoded WebDAV paths from all <code>DAV:href</code> children of the supplied parent element.
-     * 
+     *
      * @param request The underlying WebDAV request
      * @param parentElement The parent element to extract the paths of the children from
      * @return The extracted WebDAV paths, or an empty list if there are none
@@ -410,7 +422,7 @@ public abstract class DAVAction extends AbstractAction {
 
     /**
      * Gets the WebDAV path from the supplied <code>href</code> value.
-     * 
+     *
      * @param request The underlying WebDAV request
      * @param href The <code>href</code> value to get the WebDAV path from
      * @return The WebDAV path

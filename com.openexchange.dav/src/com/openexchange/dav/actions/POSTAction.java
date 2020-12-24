@@ -227,7 +227,7 @@ public class POSTAction extends DAVAction {
         response.setStatus(HttpServletResponse.SC_CREATED);
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
-        response.setHeader("ETag", resource.getETag());
+        setHeaderOpt("ETag", resource.getETag(), true, response);
         response.setHeader("Cal-Managed-ID", String.valueOf(attachmenId));
     }
 
@@ -296,7 +296,7 @@ public class POSTAction extends DAVAction {
         response.setStatus(HttpServletResponse.SC_CREATED);
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
-        response.setHeader("ETag", resource.getETag());
+        setHeaderOpt("ETag", resource.getETag(), true, response);
         response.setHeader("Cal-Managed-ID", String.valueOf(attachmentId));
     }
 

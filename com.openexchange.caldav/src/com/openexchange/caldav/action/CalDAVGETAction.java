@@ -77,7 +77,7 @@ public class CalDAVGETAction extends GETAction {
     protected void setResponseHeaders(WebdavResource resource, WebdavResponse response) throws WebdavProtocolException {
         super.setResponseHeaders(resource, response);
         if (EventResource.class.isInstance(resource)) {
-            setHeaderOpt("Schedule-Tag", ((EventResource) resource).getScheduleTag(), response);
+            setHeaderOpt("Schedule-Tag", ((EventResource) resource).getScheduleTag(), true, response);
         }
     }
 

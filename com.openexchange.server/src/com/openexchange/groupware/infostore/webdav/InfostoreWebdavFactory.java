@@ -304,7 +304,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
 
     private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException {
         final State s = state.get();
-        final ServerSession session = getSession();
+        final ServerSession session = ServerSessionAdapter.valueOf(getSession());
         final Context ctx = session.getContext();
         try {
             final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session);
@@ -494,7 +494,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             return new ArrayList<OXWebdavResource>();
         }
         final State s = state.get();
-        final ServerSession session = getSession();
+        final ServerSession session = ServerSessionAdapter.valueOf(getSession());
         final EffectivePermission perm = collection.getEffectivePermission();
         if (!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
@@ -603,12 +603,8 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     }
 
     @Override
-    public ServerSession getSession() throws OXException {
-        try {
-            return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (OXException e) {
-            throw e;
-        }
+    public Session getSession() {
+        return sessionHolder.getSessionObject();
     }
 
     /**

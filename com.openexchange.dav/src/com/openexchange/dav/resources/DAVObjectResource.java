@@ -140,7 +140,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
         if (false == exists() || null == object || null == getLastModified(object)) {
             return "";
         }
-        return "http://www.open-xchange.com/etags/" + getId(object) + '-' + getLastModified(object).getTime();
+        return String.format("%d-%s-%d", Integer.valueOf(getFactory().getSession().getContextId()), getId(object), Long.valueOf(getLastModified(object).getTime()));
     }
 
     @Override

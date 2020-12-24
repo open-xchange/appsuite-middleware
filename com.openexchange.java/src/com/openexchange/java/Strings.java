@@ -1262,6 +1262,18 @@ public class Strings {
     }
 
     /**
+     * Puts double quotes around a string, optionally escaping quotes within the string.
+     *
+     * @param s The string to quote.
+     * @param escape <code>true</code> to escape quotes within the given string prior quoting, <code>false</code>, otherwise
+     * @return The quoted string.
+     */
+    public static String quote(final String s, boolean escape) {
+        String value = escape && null != s && s.contains("\"") ? s.replaceAll("\"", "\\\\\"") : s;
+        return concat(Character.valueOf('"'), value, Character.valueOf('"'));
+    }
+
+    /**
      * Removes single or double quotes from a string if its quoted.
      *
      * @param s The value to be unquoted
