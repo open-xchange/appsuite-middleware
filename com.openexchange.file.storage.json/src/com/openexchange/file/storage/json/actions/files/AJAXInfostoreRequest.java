@@ -273,7 +273,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         String cryptoAction = data != null ? data.getParameter("cryptoAction") : null;
         if (cryptoAction != null && !cryptoAction.isEmpty()) {
 
-            //Parsing authentication from the request. Might be null since not all crypto-actions require authentication.
+            // Parsing authentication from the request. Might be null since not all crypto-actions require authentication.
             String authentication = null;
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = Services.getCryptographicServiceAuthenticationFactory();
             if (encryptionAuthenticationFactory != null) {
@@ -282,18 +282,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 }
             }
 
-            //Creating file access with crypto functionalities
+            // Creating file access with crypto functionalities
             CryptographicAwareIDBasedFileAccessFactory encryptionAwareFileAccessFactory = Services.getCryptographicFileAccessFactory();
-            if (encryptionAwareFileAccessFactory != null) {
-                EnumSet<CryptographyMode> cryptMode = CryptographyMode.createSet(cryptoAction);
-                if (cryptMode.size() > 0) {
-                    return fileAccess = encryptionAwareFileAccessFactory.createAccess(Services.getFileAccessFactory().createAccess(session), cryptMode, session, authentication);
-                } else {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("cryptoAction", cryptoAction);
-                }
-            } else {
+            if (encryptionAwareFileAccessFactory == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptographicAwareIDBasedFileAccessFactory.class.getSimpleName());
             }
+
+            EnumSet<CryptographyMode> cryptMode = CryptographyMode.createSet(cryptoAction);
+            if (cryptMode.size() <= 0) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("cryptoAction", cryptoAction);
+            }
+            return fileAccess = encryptionAwareFileAccessFactory.createAccess(Services.getFileAccessFactory().createAccess(session), cryptMode, session, authentication);
         }
 
         return fileAccess = Services.getFileAccessFactory().createAccess(session);

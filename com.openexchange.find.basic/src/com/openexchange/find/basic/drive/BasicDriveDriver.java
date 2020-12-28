@@ -119,6 +119,7 @@ import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 
 /**
  * {@link BasicDriveDriver}
@@ -228,6 +229,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
     @Override
     public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
+        IDBasedFileAccess fileAccess = null;
         FileStorageAccountAccess accountAccess = getAccountAccess(searchRequest, session);
         accountAccess.connect();
         try {
@@ -247,7 +249,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 fields = Field.get(columns);
             }
 
-            IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
+            fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
 
             List<Document> results = new ArrayList<Document>();
 
@@ -309,6 +311,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
         } finally {
             accountAccess.close();
+            TransactionAwares.finishSafe(fileAccess);
         }
     }
 

@@ -80,6 +80,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 
 
 /**
@@ -154,19 +155,21 @@ public class AddAttachmentMailComposeAction extends AbstractMailComposeAction {
             }
 
             IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-            String id = jAttachment.getString("id");
-            String version = jAttachment.optString("version", FileStorageFileAccess.CURRENT_VERSION);
-
-            AttachmentDescription attachment = new AttachmentDescription();
-            attachment.setCompositionSpaceId(compositionSpaceId.getId());
-            attachment.setContentDisposition(Attachment.ContentDisposition.dispositionFor(disposition));
-            InputStream attachmentData = parseDriveAttachment(attachment, id, version, fileAccess);
             try {
-                AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(
-                    compositionSpaceId.getId(), attachment, attachmentData, getClientToken(requestData));
-                return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
+                String id = jAttachment.getString("id");
+                String version = jAttachment.optString("version", FileStorageFileAccess.CURRENT_VERSION);
+                AttachmentDescription attachment = new AttachmentDescription();
+                attachment.setCompositionSpaceId(compositionSpaceId.getId());
+                attachment.setContentDisposition(Attachment.ContentDisposition.dispositionFor(disposition));
+                InputStream attachmentData = parseDriveAttachment(attachment, id, version, fileAccess);
+                try {
+                    AttachmentResult attachmentResult = compositionSpaceService.addAttachmentToCompositionSpace(compositionSpaceId.getId(), attachment, attachmentData, getClientToken(requestData));
+                    return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
+                } finally {
+                    Streams.close(attachmentData);
+                }
             } finally {
-                Streams.close(attachmentData);
+                TransactionAwares.finishSafe(fileAccess);
             }
         }
 
