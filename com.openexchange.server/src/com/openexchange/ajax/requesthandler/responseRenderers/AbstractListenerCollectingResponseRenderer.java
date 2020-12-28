@@ -49,13 +49,14 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.HttpErrorCodeException;
@@ -73,38 +74,63 @@ public abstract class AbstractListenerCollectingResponseRenderer implements List
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractListenerCollectingResponseRenderer.class);
 
-    /** The queue for added listeners */
-    protected final Queue<RenderListener> renderListenerRegistry;
-
-    /** The flag signaling if there is any registered listener */
-    protected volatile boolean hasRenderListeners;
+    /** The reference for listeners */
+    private final AtomicReference<List<RenderListener>> listenersReference;
 
     /**
      * Initializes a new {@link AbstractListenerCollectingResponseRenderer}.
      */
     protected AbstractListenerCollectingResponseRenderer() {
         super();
-        this.renderListenerRegistry = new ConcurrentLinkedQueue<RenderListener>();
+        this.listenersReference = new AtomicReference<List<RenderListener>>(null);
     }
 
     @Override
     public void addRenderListener(RenderListener listener) {
-        if (null != listener && renderListenerRegistry.add(listener)) {
-            hasRenderListeners = true;
+        if (listener == null) {
+            return;
         }
+
+        List<RenderListener> listeners;
+        List<RenderListener> newListeners;
+        do {
+            listeners = listenersReference.get();
+            newListeners = listeners == null ? ImmutableList.of(listener) : ImmutableList.<RenderListener> builderWithExpectedSize(listeners.size() + 1).addAll(listeners).add(listener).build();
+        } while (false == listenersReference.compareAndSet(listeners, newListeners));
     }
 
     @Override
     public void removeRenderListener(RenderListener listener) {
-        if (null != listener && renderListenerRegistry.remove(listener)) {
-            hasRenderListeners = (false == renderListenerRegistry.isEmpty());
+        if (listener == null) {
+            return;
         }
+
+        List<RenderListener> listeners;
+        List<RenderListener> newListeners;
+        do {
+            listeners = listenersReference.get();
+            if (listeners == null) {
+                // Cannot remove from empty list. Leave as-is.
+                return;
+            }
+
+            // Copy to local list for removal
+            newListeners = new ArrayList<>(listeners);
+            boolean removed = newListeners.remove(listener);
+            if (removed == false) {
+                // Nothing removed. Leave as-is.
+                return;
+            }
+
+            newListeners = newListeners.isEmpty() ? null : ImmutableList.copyOf(newListeners);
+        } while (false == listenersReference.compareAndSet(listeners, newListeners));
     }
 
     @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         // Fast check for available listeners
-        if (false == hasRenderListeners) {
+        List<RenderListener> listeners = listenersReference.get();
+        if (listeners == null) {
             // No listeners...
             actualWrite(request, result, req, resp);
             return;
@@ -112,7 +138,7 @@ public abstract class AbstractListenerCollectingResponseRenderer implements List
 
         // Collect applicable listeners
         List<RenderListener> applicableListeners = new LinkedList<RenderListener>();
-        for (RenderListener renderListener : this.renderListenerRegistry) {
+        for (RenderListener renderListener : listeners) {
             if (renderListener.handles(request)) {
                 applicableListeners.add(renderListener);
             }
