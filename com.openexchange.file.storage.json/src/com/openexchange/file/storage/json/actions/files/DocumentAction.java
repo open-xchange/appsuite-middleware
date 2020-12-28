@@ -77,6 +77,7 @@ import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 
 /**
  * {@link DocumentAction}
@@ -420,21 +421,26 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 return 0;
             }
 
-            InputStream partialIn = null;
+            IDBasedFileAccess newFileAccess = null;
             try {
-                IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
-                partialIn = newFileAccess.getDocument(id, version, pos, length);
-                int read = partialIn.read(b, off, length);
-                pos += read;
-                return read;
-            } catch (OXException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    throw (IOException) cause;
+                newFileAccess = Services.getFileAccessFactory().createAccess(session);
+                InputStream partialIn = null;
+                try {
+                    partialIn = newFileAccess.getDocument(id, version, pos, length);
+                    int read = partialIn.read(b, off, length);
+                    pos += read;
+                    return read;
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof IOException) {
+                        throw (IOException) cause;
+                    }
+                    throw new IOException(null == cause ? e : cause);
+                } finally {
+                    Streams.close(partialIn);
                 }
-                throw new IOException(null == cause ? e : cause);
             } finally {
-                Streams.close(partialIn);
+                TransactionAwares.finishSafe(newFileAccess);
             }
         }
 
