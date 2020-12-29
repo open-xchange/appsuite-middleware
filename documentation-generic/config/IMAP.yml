@@ -1010,3 +1010,14 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP", "Logging"]
+    - key: com.openexchange.imap.protection.maxNumberOfMessages
+      defaultValue: 100000
+      description: |
+        Specifies the max. number of messages that are allowed being returned to a requesting client
+      related: 
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP", "Limit"]
