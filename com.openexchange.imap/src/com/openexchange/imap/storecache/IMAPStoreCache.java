@@ -439,8 +439,8 @@ public final class IMAPStoreCache {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static Key newKey(int accountId, String host, int port, String user, int userId, int contextId) {
-        return new Key(accountId, host, port, user, userId, contextId);
+    private static Key newKey(int accountId, String host, int port, String login, int userId, int contextId) {
+        return new Key(accountId, host, port, login, userId, contextId);
     }
 
     /**
@@ -451,17 +451,17 @@ public final class IMAPStoreCache {
         private final int accountId;
         private final String host;
         private final int port;
-        private final String user;
+        private final String login;
         final int userId;
         final int contextId;
         private final int hash;
 
-        Key(int accountId, String host, int port, String user, int userId, int contextId) {
+        Key(int accountId, String host, int port, String login, int userId, int contextId) {
             super();
             this.accountId = accountId;
             this.host = host;
             this.port = port;
-            this.user = user;
+            this.login = login;
             this.userId = userId;
             this.contextId = contextId;
             final int prime = 31;
@@ -469,7 +469,7 @@ public final class IMAPStoreCache {
             result = prime * result + accountId;
             result = prime * result + ((host == null) ? 0 : host.hashCode());
             result = prime * result + port;
-            result = prime * result + ((user == null) ? 0 : user.hashCode());
+            result = prime * result + ((login == null) ? 0 : login.hashCode());
             result = prime * result + userId;
             result = prime * result + contextId;
             hash = result;
@@ -508,16 +508,15 @@ public final class IMAPStoreCache {
             } else if (!host.equals(other.host)) {
                 return false;
             }
-            if (user == null) {
-                if (other.user != null) {
+            if (login == null) {
+                if (other.login != null) {
                     return false;
                 }
-            } else if (!user.equals(other.user)) {
+            } else if (!login.equals(other.login)) {
                 return false;
             }
             return true;
         }
-
-    }
+    } // End of class Key
 
 }

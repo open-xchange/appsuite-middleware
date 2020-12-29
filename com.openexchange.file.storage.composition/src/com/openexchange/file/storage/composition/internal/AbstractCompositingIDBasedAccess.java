@@ -50,7 +50,10 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.marker.OXThreadMarkers.unrememberCloseable;
 import static org.slf4j.LoggerFactory.getLogger;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,7 +86,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware {
+public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware, Closeable {
 
     /** The identifier of the shared infostore root folder */
     static final String SHARED_INFOSTORE_ID = "10"; // com.openexchange.groupware.container.FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID
@@ -109,6 +112,19 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
     }
+
+    // --------------------------------------------------- Closeable stuff -----------------------------------------------------------------
+
+    @Override
+    public void close() throws IOException {
+        try {
+            this.finish0(false);
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    // --------------------------------------------------- IDBasedAccess stuff -------------------------------------------------------------
 
     @Override
     public List<OXException> getWarnings() {
@@ -170,6 +186,10 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     @Override
     public void finish() throws TransactionException {
+        finish0(true);
+    }
+
+    private void finish0(boolean unremember) throws TransactionException {
         connectedAccounts.get().clear();
         List<FileStorageAccountAccess> accesses = accessesToClose.get();
         for (FileStorageAccountAccess access : accesses) {
@@ -179,6 +199,9 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             access.close();
         }
         accesses.clear();
+        if (unremember) {
+            unrememberCloseable(this);
+        }
         super.finish();
     }
 

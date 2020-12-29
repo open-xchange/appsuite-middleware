@@ -108,7 +108,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-switchboard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-unifiedmail"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-upsell-multiple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-userfeedback"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-websockets-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-xing-json"/>
