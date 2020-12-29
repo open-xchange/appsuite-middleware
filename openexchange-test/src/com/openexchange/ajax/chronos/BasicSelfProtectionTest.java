@@ -89,7 +89,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = getDefaultFolder();
+        folderId = createAndRememberNewFolder(defaultUserApi, getDefaultFolder(), defaultUserApi.getCalUser().intValue());
     }
 
     /**
@@ -147,7 +147,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         String excpectedErrorCode = CalendarExceptionCodes.TOO_MANY_ATTENDEES.create().getErrorCode();
 
         // Create single event with over 1000 attendees
-        EventData toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees");
+        EventData toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees", folderId);
 
         ArrayList<Attendee> attendees = new ArrayList<>(1010);
         attendees.addAll(toCreate.getAttendees());
@@ -189,7 +189,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         String excpectedErrorCode = CalendarExceptionCodes.TOO_MANY_ALARMS.create().getErrorCode();
 
         // Create single event with over 100 alarms
-        EventData toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees");
+        EventData toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees", folderId);
 
         ArrayList<Alarm> alarms = new ArrayList<>(110);
         toCreate.setAlarms(alarms);
@@ -205,7 +205,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
 
 
         // Create normal and try to update
-        toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees");
+        toCreate = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testTooManyAttendees", folderId);
         EventData expectedEventData = eventManager.createEvent(toCreate);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
