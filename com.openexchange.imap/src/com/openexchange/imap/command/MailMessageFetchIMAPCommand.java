@@ -226,18 +226,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param messageCount The IMAP folder's message count
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @param optionalInterceptor The optional interceptor
-     * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int messageCount, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
-        int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
