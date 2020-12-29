@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailsetting.UserMailSettingAttribute;
 
 /**
  * {@link AttributeChangers}
@@ -64,7 +63,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.mailse
 public interface AttributeChangers {
 
     /**
-     * Changes the specified {@link UserMailSettingAttribute}
+     * Changes the specified user attribute
      *
      * @param userData The {@link User} data
      * @param userId the user identifier
