@@ -59,6 +59,10 @@ import static org.junit.Assert.assertNull;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.UserizedFolderImpl;
 
 /**
  * {@link SubscriptionSourceCollectorTest}
@@ -73,15 +77,21 @@ public class SubscriptionSourceCollectorTest {
 
     private SubscribeService testService1;
 
+    private FolderService mock;
+
     @Before
-    public void setUp() {
+    public void setUp() throws OXException {
+        // Mock folder service
+        mock = Mockito.mock(com.openexchange.folderstorage.FolderService.class);
+        UserizedFolderImpl folderMock = Mockito.mock(UserizedFolderImpl.class);
+        Mockito.when(mock.getFolder(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(folderMock);
+
         collector = new SubscriptionSourceCollector();
         collector.addSubscribeService(testService1 = service("com.openexchange.subscription.test1"));
         collector.addSubscribeService(service("com.openexchange.subscription.test2"));
         collector.addSubscribeService(serviceWithPriority("com.openexchange.subscription.test3", 2));
         collector.addSubscribeService(service("com.openexchange.subscription.test3"));
         collector.addSubscribeService(serviceHandlingNothing("com.openexchange.subscription.testHandlesNoFolder"));
-
     }
 
     @Test
@@ -134,7 +144,7 @@ public class SubscriptionSourceCollectorTest {
     private SubscribeService service(String string) {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(string);
-        SimSubscribeService service = new SimSubscribeService();
+        SimSubscribeService service = SimSubscribeService.createSimSubscribeService(mock);
         service.setSubscriptionSource(source);
         source.setSubscribeService(service);
         return service;
@@ -143,6 +153,8 @@ public class SubscriptionSourceCollectorTest {
     private SubscribeService serviceHandlingNothing(String string) {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(string);
+
+        AbstractSubscribeService.FOLDER_STORAGE_SERVICE.set(mock);
         SimSubscribeService service = new SimSubscribeService() {
 
             @Override

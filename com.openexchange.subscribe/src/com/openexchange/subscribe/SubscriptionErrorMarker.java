@@ -51,6 +51,7 @@ package com.openexchange.subscribe;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -67,13 +68,15 @@ class SubscriptionErrorMarker {
 
     private static final String ERRORS_KEY = "errors";
     private final AbstractSubscribeService subscribeService;
-    private FolderService folderService;
+    private final FolderService folderService;
 
     /**
      * Initializes a new {@link SubscriptionErrorMarker}.
      */
     SubscriptionErrorMarker(AbstractSubscribeService subscribeService, FolderService folderService) {
         super();
+        Objects.requireNonNull(subscribeService);
+        Objects.requireNonNull(folderService);
         this.subscribeService = subscribeService;
         this.folderService = folderService;
     }
