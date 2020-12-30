@@ -90,7 +90,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Get all relevant filters for the given combination
-     * 
+     *
      * @param combination as char array
      * @return all relevant filters for that combination
      */
@@ -98,8 +98,9 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         ArrayUtils.reverse(combination);
         for (int i = 0; i < combination.length; i++) {
-            if (combination[i] == '1')
+            if (combination[i] == '1') {
                 facets.addAll(getLoActiveFacets().get(i));
+            }
         }
         return facets;
     }
@@ -162,7 +163,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * - DONE: 6
      * - WAITING: 5
      * - DEFERRED: 5
-     * 
+     *
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -197,14 +198,14 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
          * {1, 1, 0, 0, 0}, //participant a and external
          * {0, 1, 0, 0, 0} //all participants (2int + 1ext)
          * };
-         * 
+         *
          * int[][] participantCombinationMatrix = { {0},
          * {1},
          * {0, 1},
          * {0, 2},
          * {0, 1, 2}
          * };
-         * 
+         *
          * for (int i = 0; i < expectedResultsMatrix.length; i++) {
          * int k = 0;
          * facets.clear();
@@ -275,7 +276,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * - in PRIVATE: 10
      * - in PUBLIC: 10
      * - in SHARED: 11
-     * 
+     *
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -504,7 +505,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
      * Test filter combination 8, i.e. with task type
      * - SINGLE: 29
      * - SERIES: 2
-     * 
+     *
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -543,7 +544,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 10, i.e. with type and status
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -715,7 +716,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
      * Test filter combination 15, i.e. with all 4 filters
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
