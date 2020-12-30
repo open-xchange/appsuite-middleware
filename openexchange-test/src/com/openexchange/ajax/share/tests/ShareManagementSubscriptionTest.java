@@ -67,7 +67,6 @@ import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -114,7 +113,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     public void setUp() throws Exception {
         super.setUp();
 
-        context2 = TestContextPool.acquireContext(this.getClass().getSimpleName());
+        context2 = this.testContextList.get(1);
         testUserC2 = context2.acquireUser();
         apiClientC2 = generateApiClient(testUserC2);
         addTearDownOperation(() -> logoutClient(apiClientC2, true));
@@ -132,14 +131,8 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != context2) {
-                TestContextPool.backContext(context2);
-            }
-        } finally {
-            super.tearDown();
-        }
+    protected int getNumerOfContexts() {
+        return 2;
     }
 
     @Test
