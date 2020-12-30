@@ -9941,23 +9941,19 @@
         "operationId" : "deleteAttachmentsById",
         "tags" : [ "MailCompose" ],
         "summary" : "Delete an existing attachment.",
+        "security" : [ {
+          "session" : [ ]
+        } ],
         "parameters" : [ {
           "$ref" : "#/components/parameters/MailComposeClientToken"
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object containing the success status.",
+            "description" : "A JSON object containing the current state of the mail compose",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "object",
-                  "title" : "DeleteAttachmentsByIdBody",
-                  "properties" : {
-                    "success" : {
-                      "type" : "boolean",
-                      "description" : "true if the attachment has been successfully deleted"
-                    }
-                  }
+                  "$ref" : "#/components/schemas/MailComposeAttachmentResponse"
                 }
               }
             }
