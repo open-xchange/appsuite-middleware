@@ -96,6 +96,7 @@ public final class ContactImageDataSource implements ImageDataSource {
      * Initializes a new {@link ContactImageDataSource}
      */
     public ContactImageDataSource(ServiceLookup services) {
+        super();
         this.services = services;
     }
 
@@ -178,32 +179,36 @@ public final class ContactImageDataSource implements ImageDataSource {
         PictureSearchData contactPictureRequestData = new PictureSearchData(null, null, I(folder), I(contactId), null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
         IFileHolder fileHolder = picture.getFileHolder();
-
-        /*
-         * Return contact image
-         */
-        final DataProperties properties = new DataProperties(8);
-        properties.put(DataProperties.PROPERTY_FOLDER_ID, Integer.toString(folder));
-        properties.put(DataProperties.PROPERTY_ID, Integer.toString(contactId));
-
-        if (fileHolder == null) {
-            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", I(contactId), I(folder), I(session.getContextId()), I(session.getUserId()));
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
-        }
-
-        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
-        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-        properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-        InputStream stream = fileHolder.getStream();
         try {
-            SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
-            stream = null;
-            return retval;
+            /*
+             * Return contact image
+             */
+            final DataProperties properties = new DataProperties(8);
+            properties.put(DataProperties.PROPERTY_FOLDER_ID, Integer.toString(folder));
+            properties.put(DataProperties.PROPERTY_ID, Integer.toString(contactId));
+
+            if (fileHolder == null) {
+                LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", I(contactId), I(folder), I(session.getContextId()), I(session.getUserId()));
+                properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+                properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+                properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
+                return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+            }
+
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            InputStream stream = fileHolder.getStream();
+            try {
+                SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
+                stream = null;
+                fileHolder = null;
+                return retval;
+            } finally {
+                Streams.close(stream);
+            }
         } finally {
-            Streams.close(stream);
+            Streams.close(fileHolder);
         }
     }
 

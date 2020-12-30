@@ -85,6 +85,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class UserImageDataSource implements ImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserImageDataSource.class);
+
     private static final String REGISTRATION_NAME = "com.openexchange.user.image";
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";
@@ -123,32 +124,36 @@ public final class UserImageDataSource implements ImageDataSource {
         PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null, null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
         IFileHolder fileHolder = picture.getFileHolder();
-
-        /*
-         * Return contact image
-         */
-        final DataProperties properties = new DataProperties(8);
-        properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
-
-        if (fileHolder == null) {
-            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", I(userID), I(session.getContextId()), I(session.getUserId()));
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
-        }
-
-        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
-        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-        properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-        InputStream stream = fileHolder.getStream();
         try {
-            SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
-            stream = null;
-            return retval;
+            /*
+             * Return contact image
+             */
+            final DataProperties properties = new DataProperties(8);
+            properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+            properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
+
+            if (fileHolder == null) {
+                LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", I(userID), I(session.getContextId()), I(session.getUserId()));
+                properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+                properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+                properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
+                return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+            }
+
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            InputStream stream = fileHolder.getStream();
+            try {
+                SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
+                stream = null;
+                fileHolder = null;
+                return retval;
+            } finally {
+                Streams.close(stream);
+            }
         } finally {
-            Streams.close(stream);
+            Streams.close(fileHolder);
         }
     }
 
