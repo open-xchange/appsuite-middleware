@@ -100,7 +100,6 @@ public class ParallelGuestSessionsTest extends ShareTest {
             }
         });
         /*
-         * /*
          * check permissions
          */
         OCLPermission matchingPermission = null;

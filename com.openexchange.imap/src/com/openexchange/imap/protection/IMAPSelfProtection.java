@@ -47,31 +47,22 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.imap.protection;
 
-import java.sql.Connection;
-import java.util.Collection;
-import java.util.Set;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * {@link AttributeChangers}
+ * {@link IMAPSelfProtection} - Provides access to configured limitations.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public interface AttributeChangers {
+public interface IMAPSelfProtection {
 
     /**
-     * Changes the specified user attribute
+     * Gets the max. number of messages that are allowed being returned.
      *
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @param pendingInvocations A collection of tasks, which are supposed to be executed after successful change operation
-     * @return An unmodifiable {@link Set} with all successfully changed attributes
-     * @throws StorageException if an SQL error or any other error is occurred
+     * @return The max. number of messages or equal to/less than <code>0</code> (zero) if unlimited
      */
-    Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException;
+    int getMaxNumberOfMessages();
+
 }

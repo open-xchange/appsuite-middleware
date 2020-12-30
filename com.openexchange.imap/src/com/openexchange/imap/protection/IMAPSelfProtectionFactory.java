@@ -47,31 +47,66 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.imap.protection;
 
-import java.sql.Connection;
-import java.util.Collection;
-import java.util.Set;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
+import com.openexchange.imap.protection.impl.ConfigUsingIMAPSelfProtection;
+import com.openexchange.session.Session;
 
 /**
- * {@link AttributeChangers}
+ * {@link IMAPSelfProtectionFactory} - The factory for IMAP self-protection.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public interface AttributeChangers {
+public class IMAPSelfProtectionFactory {
+
+    private static final IMAPSelfProtectionFactory INSTANCE = new IMAPSelfProtectionFactory();
 
     /**
-     * Changes the specified user attribute
+     * Gets the instance.
      *
-     * @param userData The {@link User} data
-     * @param userId the user identifier
-     * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @param pendingInvocations A collection of tasks, which are supposed to be executed after successful change operation
-     * @return An unmodifiable {@link Set} with all successfully changed attributes
-     * @throws StorageException if an SQL error or any other error is occurred
+     * @return The instance
      */
-    Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException;
+    public static IMAPSelfProtectionFactory getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link IMAPSelfProtectionFactory}.
+     */
+    private IMAPSelfProtectionFactory() {
+        super();
+    }
+
+    /**
+     * Creates the IMAP self-protection for session-associated user.
+     *
+     * @param session The session providing user information
+     * @return The IMAP self-protection
+     * @throws OXException If IMAP self-protection cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public IMAPSelfProtection createSelfProtectionFor(Session session) throws OXException {
+        if (session == null) {
+            throw new IllegalArgumentException("Session must not be null");
+        }
+
+        return createSelfProtectionFor(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Creates the IMAP self-protection for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The IMAP self-protection
+     * @throws OXException If IMAP self-protection cannot be returned
+     */
+    public IMAPSelfProtection createSelfProtectionFor(int userId, int contextId) throws OXException {
+        return new ConfigUsingIMAPSelfProtection(userId, contextId);
+    }
+
 }

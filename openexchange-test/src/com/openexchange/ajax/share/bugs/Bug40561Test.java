@@ -105,7 +105,7 @@ public class Bug40561Test extends ShareTest {
         activeFacets.add(AbstractFindTest.createActiveFolderFacet(sharedFolderID));
         activeFacets.add(AbstractFindTest.createActiveFacet((SimpleFacet) AbstractFindTest.findByType(DriveFacetType.FILE_NAME, facets)));
         List<PropDocument> searchResults = AbstractFindTest.query(guestClient, Module.DRIVE, activeFacets);
-        Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
+        Assert.assertNotNull("Unable to find document by property", AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class Bug40561Test extends ShareTest {
             activeFacets.add(AbstractFindTest.createActiveFolderFacet(sharedFolderID));
             activeFacets.add(AbstractFindTest.createActiveFacet((SimpleFacet) AbstractFindTest.findByType(CommonFacetType.GLOBAL, facets)));
             List<PropDocument> searchResults = AbstractFindTest.query(shareClient, Module.DRIVE, activeFacets);
-            Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
+            Assert.assertNotNull("Unable to find document by property", AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
         } finally {
             shareClient.logout();
         }

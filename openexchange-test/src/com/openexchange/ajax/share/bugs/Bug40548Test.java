@@ -51,7 +51,12 @@ package com.openexchange.ajax.share.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -142,8 +147,14 @@ public class Bug40548Test extends ShareTest {
          * download preview using the sharing user's session
          */
         getPreviewResponse = getPreview(getClient(), file.getFolderId(), file.getId());
-        assertEquals(HttpServletResponse.SC_OK, getPreviewResponse.getStatusCode());
+        if (getPreviewResponse.getStatusCode() != HttpServletResponse.SC_OK) {
+            fail("Invalid response code: " + streamToString(getPreviewResponse.getContent(), Charset.forName("UTF-8")));
+        }
         assertNotNull(getPreviewResponse.getContentAsByteArray());
+    }
+
+    private static String streamToString(InputStream stream, Charset charset) throws IOException {
+        return IOUtils.toString(stream, charset);
     }
 
     private static GetDocumentResponse getPreview(AJAXClient client, String folderID, String fileID) throws Exception {
@@ -153,7 +164,6 @@ public class Bug40548Test extends ShareTest {
         try {
             client.getSession().setId(null);
             return client.execute(getPreviewRequest);
-
         } finally {
             client.getSession().setId(oldSessionID);
         }

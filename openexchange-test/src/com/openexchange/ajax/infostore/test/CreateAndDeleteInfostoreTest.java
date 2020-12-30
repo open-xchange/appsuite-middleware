@@ -144,7 +144,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
             java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
             itm.newAction(expected, file);
-            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
+            assertFalse("Creating an entry should work: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
             File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
@@ -159,7 +159,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
             java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
             itm.newAction(expected, file);
-            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
+            assertFalse("Creating an entry should work: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
             File actual = itm.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());

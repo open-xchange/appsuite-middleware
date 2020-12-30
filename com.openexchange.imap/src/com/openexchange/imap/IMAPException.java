@@ -343,7 +343,7 @@ public final class IMAPException extends OXException {
          */
         THREAD_SORT_PARSING_ERROR(IMAPCode.THREAD_SORT_PARSING_ERROR),
         /**
-         * A SQL error occurred: %1$s
+         * An SQL error occurred: %1$s
          */
         SQL_ERROR(IMAPCode.SQL_ERROR),
         /**
@@ -370,6 +370,10 @@ public final class IMAPException extends OXException {
          * Update of folder %1$s failed. Owner is required to keep administrative rights.
          */
         OWNER_MUST_BE_ADMIN(IMAPCode.OWNER_MUST_BE_ADMIN),
+        /**
+         * Too many messages requested (limit is %1$s). Please query a smaller range.
+         */
+        MAX_NUMBER_OF_MESSAGES_EXCEEDED(IMAPCode.MAX_NUMBER_OF_MESSAGES_EXCEEDED),
 
         ;
 
@@ -1098,6 +1102,10 @@ public final class IMAPException extends OXException {
          * Unexpected error: %1$s
          */
         UNEXPECTED_ERROR("Unexpected error: %1$s", Category.CATEGORY_ERROR, 11, MESSAGE),
+        /**
+         * Too many messages requested (limit is %1$s). Please query a smaller range.
+         */
+        MAX_NUMBER_OF_MESSAGES_EXCEEDED("Too many messages requested (limit is %1$s). Please query a smaller range.", Category.CATEGORY_USER_INPUT, 2060, IMAPExceptionMessages.MAX_NUMBER_OF_MESSAGES_EXCEEDED_MSG),
         ;
 
         private final String message;

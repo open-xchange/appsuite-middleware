@@ -203,6 +203,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userDestFolder.getObjectID(), matchingPermission.getEntity());
             checkGuestPermission(lGuestPermission, guest);
             String shareURL = discoverShareURL(guest);
+            assertNotNull("Missing share url", shareURL);
 
             guestClient = resolveShare(shareURL, getUsername(lGuestPermission.getRecipient()), getPassword(lGuestPermission.getRecipient()));
 

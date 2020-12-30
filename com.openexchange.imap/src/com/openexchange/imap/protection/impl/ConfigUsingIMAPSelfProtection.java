@@ -47,31 +47,49 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
+package com.openexchange.imap.protection.impl;
 
-import java.sql.Connection;
-import java.util.Collection;
-import java.util.Set;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.exception.OXException;
+import com.openexchange.imap.protection.IMAPSelfProtection;
+import com.openexchange.imap.services.Services;
+import com.openexchange.server.ServiceExceptionCode;
+
 
 /**
- * {@link AttributeChangers}
+ * {@link ConfigUsingIMAPSelfProtection} - The IMAP self-protection fetching values from configuration.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public interface AttributeChangers {
+public class ConfigUsingIMAPSelfProtection implements IMAPSelfProtection {
+
+    private final int maxNumberOfMessages;
 
     /**
-     * Changes the specified user attribute
+     * Initializes a new {@link ConfigUsingIMAPSelfProtection}.
      *
-     * @param userData The {@link User} data
-     * @param userId the user identifier
+     * @param userId The user identifier
      * @param contextId The context identifier
-     * @param connection The {@link Connection} to use
-     * @param pendingInvocations A collection of tasks, which are supposed to be executed after successful change operation
-     * @return An unmodifiable {@link Set} with all successfully changed attributes
-     * @throws StorageException if an SQL error or any other error is occurred
+     * @throws OXException If initialization fails
      */
-    Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException;
+    public ConfigUsingIMAPSelfProtection(int userId, int contextId) throws OXException {
+        super();
+
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+        maxNumberOfMessages = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.protection.maxNumberOfMessages", 100000, view);
+    }
+
+    @Override
+    public int getMaxNumberOfMessages() {
+        return maxNumberOfMessages;
+    }
+
 }

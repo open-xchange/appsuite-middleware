@@ -165,4 +165,6 @@ public final class IMAPExceptionMessages implements LocalizableStrings {
 
     public static final String OWNER_MUST_BE_ADMIN_MSG = "Update of folder failed. Owner is required to keep administrative rights.";
 
+    public static final String MAX_NUMBER_OF_MESSAGES_EXCEEDED_MSG = "Too many messages requested (limit is %1$s). Please query a smaller range.";
+
 }
