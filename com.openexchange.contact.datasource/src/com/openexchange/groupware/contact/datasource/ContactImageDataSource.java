@@ -71,6 +71,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -196,7 +197,14 @@ public final class ContactImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
         properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-        return new SimpleData<D>((D) (fileHolder.getStream()), properties);
+        InputStream stream = fileHolder.getStream();
+        try {
+            SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
+            stream = null;
+            return retval;
+        } finally {
+            Streams.close(stream);
+        }
     }
 
     /**
