@@ -96,7 +96,20 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
 
     private FindApi findApi;
     private FoldersApi foldersApi;
-    private ApiClient apiClient2;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        findApi = new FindApi(apiClient);
+        foldersApi = new FoldersApi(apiClient);
+        createNewFolder(false);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        foldersApi.deleteFolders(createdFolders, "0", L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        super.tearDown();
+    }
 
     @Test
     public void testSearchForFolderName() throws Exception {
@@ -220,12 +233,6 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         data = response.getData();
         assertEquals(1, i(data.getSize()));
 
-        // Search as another user, no results expected
-        response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
-        checkResponseForErrors(response);
-        data = response.getData();
-        assertEquals(0, i(data.getSize()));
-
         // Search in "Public Files" only
         body = new FindQueryBody();
         addBasicFacets(body);
@@ -244,21 +251,6 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         checkResponseForErrors(response);
         data = response.getData();
         assertEquals(1, i(data.getSize()));
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        apiClient2 = generateApiClient(testUser2);
-        findApi = new FindApi(apiClient);
-        foldersApi = new FoldersApi(apiClient);
-        createNewFolder(false);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        foldersApi.deleteFolders(createdFolders, "0", L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        super.tearDown();
     }
 
     private String createNewFolder(boolean isPublic) throws Exception {
