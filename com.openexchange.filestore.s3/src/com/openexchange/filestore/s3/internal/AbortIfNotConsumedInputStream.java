@@ -52,27 +52,31 @@ package com.openexchange.filestore.s3.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.openexchange.java.Streams;
 
 /**
- * {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}
+ * {@link AbortIfNotConsumedInputStream} - Ensures underlying S3 object't content stream is aborted if this instance is closed but
+ * not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStream {
+public class AbortIfNotConsumedInputStream extends InputStream {
 
-    private final S3ObjectInputStream objectContent;
+    /** The underlying input stream representing the content of an S3 object */
+    protected S3ObjectInputStream objectContent;
 
-    private boolean closed = false;
+    private boolean closed;
 
     /**
-     * Initializes a new {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
+     * Initializes a new {@link AbortIfNotConsumedInputStream}.
      *
      * @param objectContent The input stream containing the contents of an object
      */
-    public AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent) {
+    public AbortIfNotConsumedInputStream(S3ObjectInputStream objectContent) {
         super();
         this.objectContent = objectContent;
+        closed = false;
     }
 
     @Override
@@ -104,17 +108,7 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
     public void close() throws IOException {
         if (!closed) {
             closed = true;
-            try {
-                if (objectContent.read() >= 0) {
-                    // Abort HTTP connection in case not all bytes were read from the
-                    // S3ObjectInputStream
-                    objectContent.abort();
-                }
-            } catch (IOException e) {
-                //
-            } finally {
-                objectContent.close();
-            }
+            closeContentStream(objectContent);
         }
     }
 
@@ -131,6 +125,28 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
     @Override
     public boolean markSupported() {
         return objectContent.markSupported();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Closes given S3 object's content stream with respect to possibly non-consumed bytes.
+     *
+     * @param objectContent The input stream representing the content of an S3 object, which is supposed to be closed
+     */
+    protected static void closeContentStream(S3ObjectInputStream objectContent) {
+        if (objectContent != null) {
+            try {
+                if (objectContent.read() >= 0) {
+                    // Abort HTTP connection in case not all bytes were read from the S3ObjectInputStream
+                    objectContent.abort();
+                }
+            } catch (IOException e) {
+                //
+            } finally {
+                Streams.close(objectContent);
+            }
+        }
     }
 
 }
