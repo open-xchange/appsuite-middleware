@@ -87,7 +87,7 @@ public class SearchTest extends AbstractAJAXSession {
         assertFalse(itm.getLastResponse().hasError());
 
         JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-
+        assertEquals(3, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 5");
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 25");
@@ -97,6 +97,7 @@ public class SearchTest extends AbstractAJAXSession {
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
 
+        assertEquals(3, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 25");
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 5");

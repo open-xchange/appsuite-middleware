@@ -562,6 +562,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return imapConfig;
     }
 
+    private boolean hasIMAP4rev1() {
+        return imapConfig.getImapCapabilities().hasIMAP4rev1();
+    }
+
     private void checkMessagesLimit(int numberOfMessages) throws OXException {
         int maxNumberOfMessages = getIMAPSelfProtection().getMaxNumberOfMessages();
         if (maxNumberOfMessages > 0 && maxNumberOfMessages < numberOfMessages) {
@@ -590,7 +594,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public String[] getPrimaryContentsLong(String fullName, long[] mailIds) throws OXException {
-        if (!imapConfig.getImapCapabilities().hasIMAP4rev1()) {
+        if (!hasIMAP4rev1()) {
             return super.getPrimaryContentsLong(fullName, mailIds);
         }
         try {
@@ -839,41 +843,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
             final MailMessage[] messages;
-            final MailField[] fields = fieldSet.toArray();
-            if (imapConfig.asMap().containsKey("UIDPLUS")) {
-                long[] valids = filterNegativeElements(uids);
-                final TLongObjectHashMap<MailMessage> fetchedMsgs =
-                    fetchValidWithFallbackFor(
-                        fullName,
-                        valids,
-                        valids.length,
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        false);
-                /*
-                 * Fill array
-                 */
-                messages = new MailMessage[uids.length];
-                for (int i = uids.length; i-- > 0;) {
-                    messages[i] = fetchedMsgs.get(uids[i]);
-                }
-            } else {
-                long[] valids = filterNegativeElements(uids);
-                final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, valids);
-                final TLongObjectMap<MailMessage> fetchedMsgs =
-                    fetchValidWithFallbackFor(
-                        fullName,
-                        seqNumsMap.values(),
-                        seqNumsMap.size(),
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported),
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        true);
-                /*
-                 * Fill array
-                 */
-                messages = new MailMessage[uids.length];
-                for (int i = uids.length; i-- > 0;) {
-                    messages[i] = fetchedMsgs.get(seqNumsMap.get(uids[i]));
+            {
+                MailField[] fields = fieldSet.toArray();
+                FetchProfile fetchProfile = getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported);
+                if (imapConfig.asMap().containsKey("UIDPLUS")) {
+                    long[] valids = filterNegativeElements(uids);
+                    TLongObjectHashMap<MailMessage> fetchedMsgs = fetchValidWithFallbackFor(fullName, valids, valids.length, fetchProfile, hasIMAP4rev1(), false);
+                    /*
+                     * Fill array
+                     */
+                    messages = new MailMessage[uids.length];
+                    for (int i = uids.length; i-- > 0;) {
+                        messages[i] = fetchedMsgs.get(uids[i]);
+                    }
+                } else {
+                    long[] valids = filterNegativeElements(uids);
+                    TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, valids);
+                    TLongObjectMap<MailMessage> fetchedMsgs = fetchValidWithFallbackFor(fullName, seqNumsMap.values(), seqNumsMap.size(), fetchProfile, hasIMAP4rev1(), true);
+                    /*
+                     * Fill array
+                     */
+                    messages = new MailMessage[uids.length];
+                    for (int i = uids.length; i-- > 0;) {
+                        messages[i] = fetchedMsgs.get(seqNumsMap.get(uids[i]));
+                    }
                 }
             }
             /*
@@ -2159,20 +2152,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Fetch (possibly) filtered and sorted sequence numbers
              */
-            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             MailMessage[] mailMessages;
-            if (fetchBody) {
+            {
+                boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
                 FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported);
-                List<MailMessage> list = fetchMessages(msgIds, fetchProfile);
-                mailMessages = list.toArray(new MailMessage[list.size()]);
-            } else {
-                /*
-                 * Body content not requested, we simply return IDMailMessage objects filled with requested fields
-                 */
-                boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported);
-                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, isRev1, messageCount);
-                mailMessages = setAccountInfo(tmp);
+                if (fetchBody) {
+                    List<MailMessage> list = fetchMessages(msgIds, fetchProfile);
+                    mailMessages = list.toArray(new MailMessage[list.size()]);
+                } else {
+                    /*
+                     * Body content not requested, we simply return IDMailMessage objects filled with requested fields
+                     */
+                    MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1(), messageCount);
+                    mailMessages = setAccountInfo(tmp);
+                }
             }
 
             if (mailMessages.length == 0) {
@@ -2198,20 +2191,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             checkMessagesLimit(seqNumsToFetch.length);
 
-            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             MailMessage[] mailMessages;
-            if (fetchBody) {
+            {
+                boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
                 FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported);
-                List<MailMessage> list = fetchMessages(seqNumsToFetch, fetchProfile);
-                mailMessages = list.toArray(new MailMessage[list.size()]);
-            } else {
-                /*
-                 * Body content not requested, we simply return IDMailMessage objects filled with requested fields
-                 */
-                boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags, previewSupported);
-                MailMessage[] tmp = fetchMessages(seqNumsToFetch, fetchProfile, isRev1, messageCount);
-                mailMessages = setAccountInfo(tmp);
+                if (fetchBody) {
+                    List<MailMessage> list = fetchMessages(seqNumsToFetch, fetchProfile);
+                    mailMessages = list.toArray(new MailMessage[list.size()]);
+                } else {
+                    /*
+                     * Body content not requested, we simply return IDMailMessage objects filled with requested fields
+                     */
+                    MailMessage[] tmp = fetchMessages(seqNumsToFetch, fetchProfile, hasIMAP4rev1(), messageCount);
+                    mailMessages = setAccountInfo(tmp);
+                }
             }
 
             return mailMessages;
@@ -2393,7 +2386,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private MailMessage[] fetchSortAndSlice(int[] seqnums, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames, int messageCount) throws OXException, MessagingException {
         boolean fastFetch = getIMAPProperties().isFastFetch();
-        boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
         if (null == indexRange) {
             // Fetch them all
@@ -2404,7 +2396,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (fetchBody) {
                 list = fetchMessages(seqnums, fetchProfile);
             } else {
-                MailMessage[] tmp = fetchMessages(seqnums, fetchProfile, hasIMAP4rev1, messageCount);
+                MailMessage[] tmp = fetchMessages(seqnums, fetchProfile, hasIMAP4rev1(), messageCount);
                 list = new ArrayList<>(tmp.length);
                 for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
@@ -2426,6 +2418,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // A certain range is requested, thus grab messages only with ID and sort field information
+        boolean hasIMAP4rev1 = hasIMAP4rev1();
         MailMessage[] sortedRange;
         {
             // Inject interceptor to retrieve sorted range

@@ -84,6 +84,7 @@ public class AbstractClientSession {
     private AJAXClient client;
     private AJAXClient client2;
     protected TestContext testContext;
+    protected List<TestContext> testContextList;
     protected TestUser admin;
     protected TestUser testUser;
     protected TestUser testUser2;
@@ -93,13 +94,23 @@ public class AbstractClientSession {
         ProvisioningSetup.init();
 
         operations = new LinkedList<>();
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName(), getNumerOfContexts());
+        testContext = testContextList.get(0);
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
         client = generateClient(testUser);
         client2 = generateClient(testUser2);
         admin = testContext.getAdmin();
+    }
+
+    /**
+     * Allows to override the number of contexts aquired from this test
+     *
+     * @return The number of context to aquire. Defaults to 1
+     */
+    protected int getNumerOfContexts() {
+        return 1;
     }
 
     @SuppressWarnings("unused")
@@ -118,7 +129,7 @@ public class AbstractClientSession {
             client2 = logoutClient(client2, true);
 
         } finally {
-            TestContextPool.backContext(testContext);
+            TestContextPool.backContext(testContextList);
         }
     }
 

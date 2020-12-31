@@ -179,7 +179,9 @@ public class AttachmentsTest extends AbstractMailComposeTest {
         assertEquals("Wrong attachment name.", attachment.getName(), response.getData().getAttachments().get(0).getName());
         assertTrue("Empty file.", l(response.getData().getAttachments().get(0).getSize()) > 0L);
 
-        api.deleteAttachmentsById(model.getId(), response.getData().getAttachments().get(0).getId(), null);
+        MailComposeAttachmentResponse deleteResp = api.deleteAttachmentsById(model.getId(), response.getData().getAttachments().get(0).getId(), null);
+        check(deleteResp);
+        assertEquals("Expected no attachment.", 0, deleteResp.getData().getAttachments().size());
         response = api.getMailComposeById(model.getId());
         check(response);
         assertEquals("Expected no attachment.", 0, response.getData().getAttachments().size());

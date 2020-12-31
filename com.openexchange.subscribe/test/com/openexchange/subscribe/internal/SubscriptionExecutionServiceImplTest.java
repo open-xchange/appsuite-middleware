@@ -56,8 +56,11 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.UserizedFolderImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.generic.FolderUpdaterService;
@@ -88,10 +91,16 @@ public class SubscriptionExecutionServiceImplTest {
     private Subscription subscription;
 
     @Before
-    public void setUp() {
+    public void setUp() throws OXException {
         final SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
-        subscribeService = new SimSubscribeService();
+
+        // Mock folder service
+        FolderService mock = Mockito.mock(com.openexchange.folderstorage.FolderService.class);
+        UserizedFolderImpl folderMock = Mockito.mock(UserizedFolderImpl.class);
+        Mockito.when(mock.getFolder(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(folderMock);
+
+        subscribeService = SimSubscribeService.createSimSubscribeService(mock);
         subscription = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(12);
@@ -102,7 +111,7 @@ public class SubscriptionExecutionServiceImplTest {
         subscribeService.setSubscriptionSource(source);
         final SubscriptionSource source2 = new SubscriptionSource();
         source2.setId(SOURCE_NAME2);
-        source2.setSubscribeService(new SimSubscribeService() );
+        source2.setSubscribeService(SimSubscribeService.createSimSubscribeService(mock));
         discovery.addSource( source );
         discovery.addSource( source2 );
         discovery.setLookupIdentifier( source.getId() );

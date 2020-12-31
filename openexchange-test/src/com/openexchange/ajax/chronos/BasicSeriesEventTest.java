@@ -279,8 +279,8 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData recurringEvent = eventManager.getRecurringEvent(folderId, expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
         assertEquals(expectedEventData.getId(), recurringEvent.getId());
         assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getZuluDateTime(DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
-        assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(actualEventData.getStartDate().getTzid(), DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        assertEquals(expectedRecurrenceId.getTzid() + ":" + expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
         UpdatesResult updates = eventManager.getUpdates(from, true, folderId);
@@ -327,7 +327,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         assertEquals(expectedEventData.getId(), recurringEvent.getId());
         assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
         instance.add(Calendar.DAY_OF_MONTH, 2);
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(instance.getTimeInMillis());
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime("UTC", instance.getTimeInMillis());
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getStartDate().getValue());
         assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 

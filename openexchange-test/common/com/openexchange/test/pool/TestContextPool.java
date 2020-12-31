@@ -101,14 +101,16 @@ public class TestContextPool {
      * Returns an exclusive {@link TestContext} which means this context is currently not used by any other test.<br>
      * <br>
      * <b>Caution: After using the {@link TestContext} make sure it will be returned to pool by using {@link #backContext(TestContext)}!</b>
-     * 
+     *
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @return {@link TestContext} to be used for tests.
      */
     public static TestContext acquireContext(String acquiredBy) {
         try {
-            TestContext context = contexts.take();
-            Assert.assertNotNull("Unable to acquire test context due to an empty pool.", context);
+
+            List<TestContext> contextList = aquireContexts(1);
+            Assert.assertFalse("Unable to acquire test context due to an empty pool.", contextList == null || contextList.isEmpty());
+            TestContext context = contextList.get(0);
             context.setAcquiredBy(acquiredBy);
             contextWatcher.get().contextInUse(context);
             LOG.debug("Context '{}' has been acquired by {}.", context.getName(), acquiredBy);
@@ -118,6 +120,45 @@ public class TestContextPool {
             LOG.error("", e);
         }
         return null;
+    }
+
+    /**
+     * Similar to {@link #acquireContext(String)} but returns any number of contexts instead of only one <br>
+     * <br>
+     * <b>Caution: After using the {@link TestContext}s make sure to return them to the pool by using {@link #backContext(List)}!</b>
+     *
+     * @param acquiredBy The name of the class that acquires the context (for logging purposes)
+     * @param amount The amount of contexts to aquire
+     * @return a list of {@link TestContext} to be used for tests.
+     */
+    public static List<TestContext> acquireContext(String acquiredBy, int amount) {
+        try {
+            List<TestContext> result = aquireContexts(amount);
+            Assert.assertFalse("Unable to acquire test context due to an empty pool.", result == null || result.isEmpty());
+            result.forEach((c) -> {
+                c.setAcquiredBy(acquiredBy);
+                contextWatcher.get().contextInUse(c);
+                LOG.debug("Context '{}' has been acquired by {}.", c.getName(), acquiredBy);
+            });
+
+            return result;
+        } catch (InterruptedException e) {
+            // should not happen
+            LOG.error("", e);
+        }
+        return null;
+    }
+
+    private static synchronized List<TestContext> aquireContexts(int amount) throws InterruptedException {
+        List<TestContext> result = new ArrayList<TestContext>(amount);
+        for (int i = amount; i > 0; i--) {
+            result.add(contexts.take());
+        }
+        return result;
+    }
+
+    public static void backContext(List<TestContext> contexts) {
+        contexts.forEach(c -> backContext(c));
     }
 
     public static void backContext(TestContext context) {

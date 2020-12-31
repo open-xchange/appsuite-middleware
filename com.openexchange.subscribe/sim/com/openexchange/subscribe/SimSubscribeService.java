@@ -68,6 +68,11 @@ public class SimSubscribeService extends AbstractSubscribeService {
         super(); //FIXME: mock ServiceLookup
     }
 
+    public static SimSubscribeService createSimSubscribeService(com.openexchange.folderstorage.FolderService mockService) {
+        AbstractSubscribeService.FOLDER_STORAGE_SERVICE.set(mockService);
+        return new SimSubscribeService();
+    }
+
     private SubscriptionSource source;
 
     private Subscription subscription;
