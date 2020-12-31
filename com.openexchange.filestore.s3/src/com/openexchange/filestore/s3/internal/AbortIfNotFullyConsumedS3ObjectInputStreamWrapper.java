@@ -51,7 +51,11 @@ package com.openexchange.filestore.s3.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import javax.servlet.http.HttpServletResponse;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.openexchange.java.Streams;
 
 /**
  * {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Ensures underlying S3 object't content stream is aborted if this gets closed
@@ -107,17 +111,7 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
     public void close() throws IOException {
         if (!closed) {
             closed = true;
-            try {
-                if (objectContent.read() >= 0) {
-                    // Abort HTTP connection in case not all bytes were read from the
-                    // S3ObjectInputStream
-                    objectContent.abort();
-                }
-            } catch (IOException e) {
-                //
-            } finally {
-                objectContent.close();
-            }
+            closeContentStream(objectContent);
         }
     }
 
@@ -134,6 +128,80 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
     @Override
     public boolean markSupported() {
         return objectContent.markSupported();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Closes given S3 object's content stream with respect to possibly non-consumed bytes.
+     *
+     * @param objectContent The content stream to close
+     */
+    protected static void closeContentStream(S3ObjectInputStream objectContent) {
+        if (objectContent == null) {
+            return;
+        }
+
+        try {
+            if (objectContent.read() >= 0) {
+                // Abort HTTP connection in case not all bytes were read from the S3ObjectInputStream
+                objectContent.abort();
+            }
+        } catch (IOException e) {
+            //
+        } finally {
+            Streams.close(objectContent);
+        }
+    }
+
+    /**
+     * Checks if given I/O exception does <b>not</b> indicate premature EOF.
+     *
+     * @param e The I/O exception to examine
+     * @return <code>true</code> if <b>no</b> premature EOF; otherwise <code>false</code>
+     */
+    protected static boolean isNotPrematureEof(IOException e) {
+        return isPrematureEof(e) == false;
+    }
+
+    /**
+     * Checks if given I/O exception indicates premature EOF.
+     *
+     * @param e The I/O exception to examine
+     * @return <code>true</code> if premature EOF; otherwise <code>false</code>
+     */
+    protected static boolean isPrematureEof(IOException e) {
+        if ("org.apache.http.ConnectionClosedException".equals(e.getClass().getName())) {
+            // HTTP connection has been closed unexpectedly
+            String message = e.getMessage();
+            if (message != null && message.startsWith("Premature end of Content-Length delimited message body")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Wraps given exception by an appropriate I/O exception.
+     *
+     * @param e The exception to wrap
+     * @param key The key in the specified bucket under which the object is stored
+     * @return The appropriate I/O exception
+     */
+    protected static IOException wrap(AmazonClientException e, String key) {
+        if (AmazonServiceException.class.isInstance(e)) {
+            AmazonServiceException serviceError = (AmazonServiceException) e;
+            /*
+             * Map to appropriate FileStorageCodes if possible
+             */
+            if (HttpServletResponse.SC_NOT_FOUND == serviceError.getStatusCode()) {
+                return new IOException("File not found: " + key, e);
+            }
+            if (HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == serviceError.getStatusCode()) {
+                return new IOException("Invalid range specified for file: " + key, e);
+            }
+        }
+        return new IOException("Cannot read file: " + key + ". Reason: " + e.getMessage(), e);
     }
 
 }

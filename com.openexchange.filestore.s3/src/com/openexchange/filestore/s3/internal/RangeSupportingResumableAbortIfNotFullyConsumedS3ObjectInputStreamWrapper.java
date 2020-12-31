@@ -53,45 +53,43 @@ import java.io.IOException;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 
 /**
- * {@link ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Resumes reading an S3 object's content on premature EOF and ensures
+ * {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Resumes reading an S3 object's content on premature EOF and ensures
  * underlying S3 object't content stream is aborted if this gets closed even though not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
+public class RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
 
     private final AmazonS3Client s3Client;
     private final String bucketName;
     private final String key;
+    private final long rangeEnd;
 
-    private long numberOfReadBytes;
+    private long rangeStart;
     private long mark;
-    private long fileSize;
 
     /**
-     * Initializes a new {@link ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
+     * Initializes a new {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
      *
      * @param objectContent The input stream containing the contents of an object
+     * @param range The optional range
      * @param bucketName The name of the bucket containing the desired object
      * @param key The key in the specified bucket under which the object is stored
      * @param s3Client The S3 client
      */
-    public ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, String bucketName, String key, AmazonS3Client s3Client) {
+    public RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, long[] range, String bucketName, String key, AmazonS3Client s3Client) {
         super(objectContent);
         this.bucketName = bucketName;
         this.key = key;
         this.s3Client = s3Client;
-        numberOfReadBytes = 0;
+        rangeEnd = range[1];
+        rangeStart = range[0];
         mark = -1;
-        fileSize = -1;
     }
 
     @Override
@@ -99,7 +97,7 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
         try {
             int bite = objectContent.read();
             if (bite >= 0) {
-                numberOfReadBytes++;
+                rangeStart++;
             }
             return bite;
         } catch (IOException e) {
@@ -107,7 +105,7 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
                 throw e;
             }
 
-            // Initialize new object stream after preamture EOF
+            // Initialize new object stream after premature EOF
             initNewObjectStreamAfterPrematureEof();
 
             // Repeat with new S3ObjectInputStream instance
@@ -125,7 +123,7 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
         try {
             int result = objectContent.read(b, off, len);
             if (result >= 0) {
-                numberOfReadBytes += result;
+                rangeStart += result;
             }
             return result;
         } catch (IOException e) {
@@ -133,7 +131,7 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
                 throw e;
             }
 
-            // Initialize new object stream after preamture EOF
+            // Initialize new object stream after premature EOF
             initNewObjectStreamAfterPrematureEof();
 
             // Repeat with new S3ObjectInputStream instance
@@ -144,14 +142,14 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
     @Override
     public long skip(long n) throws IOException {
         long result = objectContent.skip(n);
-        numberOfReadBytes += result;
+        rangeStart += result;
         return result;
     }
 
     @Override
     public void mark(int readlimit) {
         objectContent.mark(readlimit);
-        mark = numberOfReadBytes;
+        mark = rangeStart;
     }
 
     @Override
@@ -166,7 +164,7 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
         }
 
         objectContent.reset();
-        numberOfReadBytes = mark;
+        rangeStart = mark;
     }
 
     private void initNewObjectStreamAfterPrematureEof() throws IOException {
@@ -176,54 +174,11 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
 
         // Issue Get-Object request with appropriate range
         try {
-            long rangeEnd = getFileSize() - 1;
-            long rangeStart = numberOfReadBytes;
             GetObjectRequest request = new GetObjectRequest(bucketName, key);
             request.setRange(rangeStart, rangeEnd);
             objectContent = s3Client.getObject(request).getObjectContent();
         } catch (AmazonClientException ce) {
             throw wrap(ce, key);
-        }
-    }
-
-    private long getFileSize() throws IOException {
-        long fileSize = this.fileSize;
-        if (fileSize < 0) {
-            fileSize = getContentLength();
-            this.fileSize = fileSize;
-        }
-        return fileSize;
-    }
-
-    /**
-     * Extracts the effective content length from the S3 object metadata, which is the length of the unencrypted content if specified, or the plain content length, otherwise.
-     *
-     * @return The length of the unencrypted content if specified, or the plain content length, otherwise
-     * @throws IOException If content length cannot be returned
-     */
-    private long getContentLength() throws IOException {
-        ObjectMetadata metadata = getObject().getObjectMetadata();
-        String unencryptedContentLength = metadata.getUserMetaDataOf(com.amazonaws.services.s3.Headers.UNENCRYPTED_CONTENT_LENGTH);
-        if (Strings.isNotEmpty(unencryptedContentLength)) {
-            try {
-                return Long.parseLong(unencryptedContentLength.trim());
-            } catch (NumberFormatException e) {
-                throw new IOException("Header for the original, unencrypted size of an encrypted object is not a number: " + unencryptedContentLength);
-            }
-        }
-        return metadata.getContentLength();
-    }
-
-    /**
-     * Gets the S3 object.
-     *
-     * @throws IOException If S3 object cannot be returned
-     */
-    private S3Object getObject() throws IOException {
-        try {
-            return s3Client.getObject(bucketName, key);
-        } catch (AmazonClientException e) {
-            throw wrap(e, key);
         }
     }
 

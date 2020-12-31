@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.internal;
 
+import static com.openexchange.filestore.s3.internal.AbortIfNotFullyConsumedS3ObjectInputStreamWrapper.closeContentStream;
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
@@ -96,6 +97,7 @@ import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.UploadPartRequest;
@@ -229,30 +231,62 @@ public class S3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name) throws OXException {
         String key = addPrefix(name);
-        return new ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(getObject(key).getObjectContent(), bucketName, key, client.getSdkClient());
+        S3ObjectInputStream objectContent = null;
+        try {
+            objectContent = getObject(key).getObjectContent();
+            InputStream wrapper = wrapperWithoutRangeSupport(objectContent, key);
+            objectContent = null; // Avoid premature closing
+            return wrapper;
+        } catch (AmazonClientException e) {
+            throw wrap(e, key);
+        } finally {
+            closeContentStream(objectContent);
+        }
+    }
+
+    private InputStream wrapperWithoutRangeSupport(S3ObjectInputStream objectContent, String key) {
+        return new ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(objectContent, bucketName, key, client.getSdkClient());
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
+        // Check validity of given offset/length arguments
         long fileSize = getFileSize(name);
         if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(L(offset), L(length), name, L(fileSize));
         }
+
+        // Check for 0 (zero) requested bytes
+        if (length == 0) {
+            return Streams.EMPTY_INPUT_STREAM;
+        }
+
+        // Initialize appropriate Get-Object request
         String key = addPrefix(name);
         GetObjectRequest request = new GetObjectRequest(bucketName, key);
-        if (-1 != length) {
-            request.setRange(offset, offset + length - 1);
-        } else {
-            request.setRange(offset, fileSize - 1);
-        }
+        long rangeEnd = (length > 0 ? (offset + length) : fileSize) - 1;
+        request.setRange(offset, rangeEnd);
+
+        // Return content stream
+        S3ObjectInputStream objectContent = null;
         try {
-            return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(client.getSdkClient().getObject(request).getObjectContent());
+            objectContent = client.getSdkClient().getObject(request).getObjectContent();
+            long[] range = new long[] { offset, rangeEnd };
+            InputStream wrapper = wrapperWithRangeSupport(objectContent, range, key);
+            objectContent = null; // Avoid premature closing
+            return wrapper;
         } catch (AmazonClientException e) {
             if (AmazonServiceException.class.isInstance(e) && HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
                 throw FileStorageCodes.INVALID_RANGE.create(e, L(offset), L(length), name, L(fileSize));
             }
             throw wrap(e, key);
+        } finally {
+            closeContentStream(objectContent);
         }
+    }
+
+    private InputStream wrapperWithRangeSupport(S3ObjectInputStream objectContent, long[] range, String key) {
+        return new RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(objectContent, range, bucketName, key, client.getSdkClient());
     }
 
     @Override
