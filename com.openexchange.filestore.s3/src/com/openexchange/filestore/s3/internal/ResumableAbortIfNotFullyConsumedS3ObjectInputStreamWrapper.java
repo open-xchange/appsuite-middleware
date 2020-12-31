@@ -56,7 +56,6 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -66,15 +65,10 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
-
-    private final AmazonS3Client s3Client;
-    private final String bucketName;
-    private final String key;
+public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
 
     private long numberOfReadBytes;
-    private long mark;
-    private long fileSize;
+    private long contentLength;
 
     /**
      * Initializes a new {@link ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
@@ -85,98 +79,31 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
      * @param s3Client The S3 client
      */
     public ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, String bucketName, String key, AmazonS3Client s3Client) {
-        super(objectContent);
-        this.bucketName = bucketName;
-        this.key = key;
-        this.s3Client = s3Client;
+        super(objectContent, bucketName, key, s3Client);
         numberOfReadBytes = 0;
-        mark = -1;
-        fileSize = -1;
+        contentLength = -1;
     }
 
     @Override
-    public int read() throws IOException {
-        try {
-            int bite = objectContent.read();
-            if (bite >= 0) {
-                numberOfReadBytes++;
-            }
-            return bite;
-        } catch (IOException e) {
-            if (isNotPrematureEof(e)) {
-                throw e;
-            }
-
-            // Initialize new object stream after preamture EOF
-            initNewObjectStreamAfterPrematureEof();
-
-            // Repeat with new S3ObjectInputStream instance
-            return read();
-        }
+    protected void onBytesRead(long numberOfBytes) {
+        numberOfReadBytes += numberOfBytes;
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
-        return read(b, 0, b.length);
+    protected long getCurrentMark() {
+        return numberOfReadBytes;
     }
 
     @Override
-    public int read(byte b[], int off, int len) throws IOException {
-        try {
-            int result = objectContent.read(b, off, len);
-            if (result >= 0) {
-                numberOfReadBytes += result;
-            }
-            return result;
-        } catch (IOException e) {
-            if (isNotPrematureEof(e)) {
-                throw e;
-            }
-
-            // Initialize new object stream after preamture EOF
-            initNewObjectStreamAfterPrematureEof();
-
-            // Repeat with new S3ObjectInputStream instance
-            return read(b, off, len);
-        }
-    }
-
-    @Override
-    public long skip(long n) throws IOException {
-        long result = objectContent.skip(n);
-        numberOfReadBytes += result;
-        return result;
-    }
-
-    @Override
-    public void mark(int readlimit) {
-        objectContent.mark(readlimit);
-        mark = numberOfReadBytes;
-    }
-
-    @Override
-    public void reset() throws IOException {
-        if (!objectContent.markSupported()) {
-            throw new IOException("Mark not supported");
-        }
-
-        long mark = this.mark;
-        if (mark == -1) {
-            throw new IOException("Mark not set");
-        }
-
-        objectContent.reset();
+    protected void resetMark(long mark) {
         numberOfReadBytes = mark;
     }
 
-    private void initNewObjectStreamAfterPrematureEof() throws IOException {
-        // Close existent stream from which -1 was prematurely read
-        Streams.close(objectContent);
-        objectContent = null;
-
+    @Override
+    protected void initNewObjectStreamAfterPrematureEof() throws IOException {
         // Issue Get-Object request with appropriate range
         try {
-            long rangeEnd = getFileSize() - 1;
+            long rangeEnd = getContentLength() - 1;
             long rangeStart = numberOfReadBytes;
             GetObjectRequest request = new GetObjectRequest(bucketName, key);
             request.setRange(rangeStart, rangeEnd);
@@ -186,15 +113,6 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
         }
     }
 
-    private long getFileSize() throws IOException {
-        long fileSize = this.fileSize;
-        if (fileSize < 0) {
-            fileSize = getContentLength();
-            this.fileSize = fileSize;
-        }
-        return fileSize;
-    }
-
     /**
      * Extracts the effective content length from the S3 object metadata, which is the length of the unencrypted content if specified, or the plain content length, otherwise.
      *
@@ -202,16 +120,22 @@ public class ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends 
      * @throws IOException If content length cannot be returned
      */
     private long getContentLength() throws IOException {
-        ObjectMetadata metadata = getObject().getObjectMetadata();
-        String unencryptedContentLength = metadata.getUserMetaDataOf(com.amazonaws.services.s3.Headers.UNENCRYPTED_CONTENT_LENGTH);
-        if (Strings.isNotEmpty(unencryptedContentLength)) {
-            try {
-                return Long.parseLong(unencryptedContentLength.trim());
-            } catch (NumberFormatException e) {
-                throw new IOException("Header for the original, unencrypted size of an encrypted object is not a number: " + unencryptedContentLength);
+        long contentLength = this.contentLength;
+        if (contentLength < 0) {
+            ObjectMetadata metadata = getObject().getObjectMetadata();
+            String unencryptedContentLength = metadata.getUserMetaDataOf(com.amazonaws.services.s3.Headers.UNENCRYPTED_CONTENT_LENGTH);
+            if (Strings.isEmpty(unencryptedContentLength)) {
+                contentLength = metadata.getContentLength();
+            } else {
+                try {
+                    contentLength = Long.parseLong(unencryptedContentLength.trim());
+                } catch (NumberFormatException e) {
+                    throw new IOException("Header for the original, unencrypted size of an encrypted object is not a number: " + unencryptedContentLength);
+                }
             }
+            this.contentLength = contentLength;
         }
-        return metadata.getContentLength();
+        return contentLength;
     }
 
     /**
