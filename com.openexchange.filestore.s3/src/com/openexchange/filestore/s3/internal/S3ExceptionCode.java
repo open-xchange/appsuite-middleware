@@ -419,7 +419,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Failed to create a bucket for name "%1$s" using region "%2$s"
      */
-    BUCKET_CREATION_FAILED(S3ExceptionMessages.BUCKET_CREATION_FAILED, CATEGORY_CONFIGURATION, 81);
+    BUCKET_CREATION_FAILED(S3ExceptionMessages.BUCKET_CREATION_FAILED, CATEGORY_CONFIGURATION, 81),
 
     ;
 
