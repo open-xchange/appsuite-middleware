@@ -54,16 +54,18 @@ import java.io.InputStream;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 /**
- * {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}
+ * {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Ensures underlying S3 object't content stream is aborted if this gets closed
+ * even though not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStream {
 
-    private final S3ObjectInputStream objectContent;
+    /** The underlying S3 object's content stream to read from */
+    protected S3ObjectInputStream objectContent;
 
-    private boolean closed = false;
+    private boolean closed;
 
     /**
      * Initializes a new {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
@@ -73,6 +75,7 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
     public AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent) {
         super();
         this.objectContent = objectContent;
+        closed = false;
     }
 
     @Override

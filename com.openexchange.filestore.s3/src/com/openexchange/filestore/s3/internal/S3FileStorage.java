@@ -228,7 +228,8 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
-        return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(getObject(addPrefix(name)).getObjectContent());
+        String key = addPrefix(name);
+        return new ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(getObject(key).getObjectContent(), bucketName, key, client.getSdkClient());
     }
 
     @Override
