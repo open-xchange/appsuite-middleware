@@ -50,104 +50,62 @@
 package com.openexchange.filestore.s3.internal;
 
 import java.io.IOException;
-import java.io.InputStream;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.openexchange.java.Streams;
 
 /**
- * {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Ensures underlying S3 object't content stream is aborted if this gets closed
- * even though not all bytes have been read, yet.
+ * {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Resumes reading an S3 object's content on premature EOF and ensures
+ * underlying S3 object't content stream is aborted if this gets closed even though not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.5
  */
-public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStream {
+public class RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
 
-    /** The underlying S3 object's content stream to read from */
-    protected S3ObjectInputStream objectContent;
-
-    private boolean closed;
+    private final long rangeEnd;
+    private long rangeStart;
 
     /**
-     * Initializes a new {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
+     * Initializes a new {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
      *
      * @param objectContent The input stream containing the contents of an object
+     * @param range The optional range
+     * @param bucketName The name of the bucket containing the desired object
+     * @param key The key in the specified bucket under which the object is stored
+     * @param s3Client The S3 client
      */
-    public AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent) {
-        super();
-        this.objectContent = objectContent;
-        closed = false;
+    public RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, long[] range, String bucketName, String key, AmazonS3Client s3Client) {
+        super(objectContent, bucketName, key, s3Client);
+        rangeEnd = range[1];
+        rangeStart = range[0];
     }
 
     @Override
-    public int read() throws IOException {
-        return objectContent.read();
+    protected void onBytesRead(long numberOfBytes) {
+        rangeStart += numberOfBytes;
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
-        return read(b, 0, b.length);
+    protected long getCurrentMark() {
+        return rangeStart;
     }
 
     @Override
-    public int read(byte b[], int off, int len) throws IOException {
-        return objectContent.read(b, off, len);
+    protected void resetMark(long mark) {
+        rangeStart = mark;
     }
 
     @Override
-    public long skip(long n) throws IOException {
-        return objectContent.skip(n);
-    }
-
-    @Override
-    public int available() throws IOException {
-        return objectContent.available();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (!closed) {
-            closed = true;
-            closeContentStream(objectContent);
-        }
-    }
-
-    @Override
-    public void mark(int readlimit) {
-        objectContent.mark(readlimit);
-    }
-
-    @Override
-    public void reset() throws IOException {
-        objectContent.reset();
-    }
-
-    @Override
-    public boolean markSupported() {
-        return objectContent.markSupported();
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Closes given S3 object's content stream with respect to possibly non-consumed bytes.
-     *
-     * @param objectContent The content stream to close
-     */
-    protected static void closeContentStream(S3ObjectInputStream objectContent) {
-        if (objectContent == null) {
-            return;
-        }
-
+    protected void initNewObjectStreamAfterPrematureEof() throws IOException {
+        // Issue Get-Object request with appropriate range
         try {
-            if (objectContent.read() >= 0) {
-                // Abort HTTP connection in case not all bytes were read from the S3ObjectInputStream
-                objectContent.abort();
-            }
-        } catch (IOException e) {
-            //
-        } finally {
-            Streams.close(objectContent);
+            GetObjectRequest request = new GetObjectRequest(bucketName, key);
+            request.setRange(rangeStart, rangeEnd);
+            objectContent = s3Client.getObject(request).getObjectContent();
+        } catch (AmazonClientException ce) {
+            throw wrap(ce, key);
         }
     }
 
