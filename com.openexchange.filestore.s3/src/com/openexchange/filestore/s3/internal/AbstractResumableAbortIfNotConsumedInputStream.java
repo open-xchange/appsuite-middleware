@@ -237,6 +237,20 @@ public abstract class AbstractResumableAbortIfNotConsumedInputStream extends Abo
             // HTTP connection has been closed unexpectedly
             String message = e.getMessage();
             if (message != null && message.startsWith("Premature end of Content-Length delimited message body")) {
+                /*-
+                 * See org.apache.http.impl.io.ContentLengthInputStream.read(byte[], int, int)
+                 *
+                 * ...
+                 * int readLen = this.in.read(b, off, chunk);
+                 * if (readLen == -1 && pos < contentLength) {
+                 *     throw new ConnectionClosedException(
+                 *         "Premature end of Content-Length delimited message body (expected: %,d; received: %,d)",
+                 *         contentLength, pos);
+                 * }
+                 * ...
+                 *
+                 * E.g. "Premature end of Content-Length delimited message body (expected: 52,428,800; received: 21,463,040)"
+                 */
                 return true;
             }
         }
