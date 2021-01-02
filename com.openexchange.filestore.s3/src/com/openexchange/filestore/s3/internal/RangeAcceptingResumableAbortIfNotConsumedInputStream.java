@@ -56,19 +56,19 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 /**
- * {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Resumes reading an S3 object's content on premature EOF and ensures
+ * {@link RangeAcceptingResumableAbortIfNotConsumedInputStream} - Resumes reading an S3 object's content on premature EOF and ensures
  * underlying S3 object't content stream is aborted if this gets closed even though not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
+public class RangeAcceptingResumableAbortIfNotConsumedInputStream extends AbstractResumableAbortIfNotConsumedInputStream {
 
     private final long rangeEnd;
     private long rangeStart;
 
     /**
-     * Initializes a new {@link RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
+     * Initializes a new {@link RangeAcceptingResumableAbortIfNotConsumedInputStream}.
      *
      * @param objectContent The input stream containing the contents of an object
      * @param range The optional range
@@ -76,7 +76,7 @@ public class RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamW
      * @param key The key in the specified bucket under which the object is stored
      * @param s3Client The S3 client
      */
-    public RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, long[] range, String bucketName, String key, AmazonS3Client s3Client) {
+    public RangeAcceptingResumableAbortIfNotConsumedInputStream(S3ObjectInputStream objectContent, long[] range, String bucketName, String key, AmazonS3Client s3Client) {
         super(objectContent, bucketName, key, s3Client);
         rangeEnd = range[1];
         rangeStart = range[0];

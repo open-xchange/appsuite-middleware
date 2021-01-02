@@ -49,7 +49,7 @@
 
 package com.openexchange.filestore.s3.internal;
 
-import static com.openexchange.filestore.s3.internal.AbortIfNotFullyConsumedS3ObjectInputStreamWrapper.closeContentStream;
+import static com.openexchange.filestore.s3.internal.AbortIfNotConsumedInputStream.closeContentStream;
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
@@ -245,7 +245,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     private InputStream wrapperWithoutRangeSupport(S3ObjectInputStream objectContent, String key) {
-        return new ResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(objectContent, bucketName, key, client.getSdkClient());
+        return new ResumableAbortIfNotConsumedInputStream(objectContent, bucketName, key, client.getSdkClient());
     }
 
     @Override
@@ -286,7 +286,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     private InputStream wrapperWithRangeSupport(S3ObjectInputStream objectContent, long[] range, String key) {
-        return new RangeSupportingResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(objectContent, range, bucketName, key, client.getSdkClient());
+        return new RangeAcceptingResumableAbortIfNotConsumedInputStream(objectContent, range, bucketName, key, client.getSdkClient());
     }
 
     @Override

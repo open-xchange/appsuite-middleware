@@ -58,13 +58,13 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.openexchange.java.Streams;
 
 /**
- * {@link AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper} - Resumes reading an S3 object's content on premature EOF and ensures
+ * {@link AbstractResumableAbortIfNotConsumedInputStream} - Resumes reading an S3 object's content on premature EOF and ensures
  * underlying S3 object't content stream is aborted if this gets closed even though not all bytes have been read, yet.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public abstract class AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends AbortIfNotFullyConsumedS3ObjectInputStreamWrapper {
+public abstract class AbstractResumableAbortIfNotConsumedInputStream extends AbortIfNotConsumedInputStream {
 
     /** The S3 client to access S3 resources */
     protected final AmazonS3Client s3Client;
@@ -78,14 +78,14 @@ public abstract class AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStrea
     private long mark;
 
     /**
-     * Initializes a new {@link AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
+     * Initializes a new {@link AbstractResumableAbortIfNotConsumedInputStream}.
      *
      * @param objectContent The input stream containing the contents of an object
      * @param bucketName The name of the bucket containing the desired object
      * @param key The key in the specified bucket under which the object is stored
      * @param s3Client The S3 client
      */
-    protected AbstractResumableAbortIfNotFullyConsumedS3ObjectInputStreamWrapper(S3ObjectInputStream objectContent, String bucketName, String key, AmazonS3Client s3Client) {
+    protected AbstractResumableAbortIfNotConsumedInputStream(S3ObjectInputStream objectContent, String bucketName, String key, AmazonS3Client s3Client) {
         super(objectContent);
         this.bucketName = bucketName;
         this.key = key;
