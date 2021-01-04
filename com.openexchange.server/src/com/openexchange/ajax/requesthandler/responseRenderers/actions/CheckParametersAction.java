@@ -78,22 +78,26 @@ public class CheckParametersAction implements IFileResponseRendererAction {
     @Override
     public void call(IDataWrapper data) throws FileResponseRendererActionException {
         // Check certain parameters
-        data.setDelivery(AJAXUtility.sanitizeParam(data.getRequest().getParameter(DELIVERY)));
         if (data.getDelivery() == null) {
-            data.setDelivery(data.getFile().getDelivery());
-        }
-        data.setContentType(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_TYPE), true));
-        data.setContentTypeByParameter(Boolean.FALSE);
-        if (Strings.isEmpty(data.getContentType())) {
-            if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
-                data.setContentType(IDataWrapper.SAVE_AS_TYPE);
-            } else {
-                data.setContentType(data.getFileContentType());
+            data.setDelivery(AJAXUtility.sanitizeParam(data.getRequest().getParameter(DELIVERY)));
+            if (data.getDelivery() == null) {
+                data.setDelivery(data.getFile().getDelivery());
             }
-        } else {
-            data.setContentTypeByParameter(Boolean.TRUE);
         }
-        data.setContentType(unquote(data.getContentType()));
+        if (data.getContentTypeByParameter() != null && data.getContentTypeByParameter().booleanValue()) {
+            data.setContentType(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_TYPE), true));
+            data.setContentTypeByParameter(Boolean.FALSE);
+            if (Strings.isEmpty(data.getContentType())) {
+                if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
+                    data.setContentType(IDataWrapper.SAVE_AS_TYPE);
+                } else {
+                    data.setContentType(data.getFileContentType());
+                }
+            } else {
+                data.setContentTypeByParameter(Boolean.TRUE);
+            }
+            data.setContentType(unquote(data.getContentType()));
+        }
         // Delivery is set to "view", but Content-Type is indicated as application/octet-stream
         if (IDataWrapper.VIEW.equalsIgnoreCase(data.getDelivery()) && (null != data.getContentType() && data.getContentType().startsWith(IDataWrapper.SAVE_AS_TYPE))) {
             data.setContentType(FileResponseRenderer.getContentTypeByFileName(data.getFileName()));
