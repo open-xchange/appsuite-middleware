@@ -281,7 +281,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         FolderObject client2Folder = null;
         String sharedFolderId = "u:" + getClient2().getValues().getUserId();
         for (FolderObject folder : sharedFolders) {
-            if (folder.getFullName().equals(sharedFolderId)) {
+            if (sharedFolderId.equals(folder.getFullName())) {
                 client2Folder = folder;
                 break;
             }
