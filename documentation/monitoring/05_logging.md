@@ -183,14 +183,14 @@ You should already have a Kafka cluster running and a topic already created. The
 
 # Custom Fields Support
 
-With version 7.6.3 as well as with version 7.8.2, we introduced a new functionality to the LOGSTASH appender, that of the custom fields. The appender can now be configured to log arbitrary custom fields with every log entry in Logstash. Note that since 7.10.4, the custom fields are supported in both Logstash and Kafka appenders. For the new naming refer to this [article](https://confluence.open-xchange.com/display/MID/Logging+with+Logback).
+With version 7.6.3 as well as with version 7.8.2, we introduced a new functionality to the Logstash appender, that of the custom fields. The appender can now be configured to log arbitrary custom fields with every log entry in Logstash. Note that since 7.10.4, the custom fields are supported in both Logstash and Kafka appenders.
 
 The only thing that needs to be done to get this working is to add a few lines to the logback.xml. First, a newRuleXML element has to be registered under the configuration tag, in order to activate the CustomFieldsAction:
 
 ```xml
-<newRule pattern="*/encoder/customField" actionClass="com.openexchange.logback.extensions.logstash.CustomFieldsAction"/>
+<newRule pattern="*/encoder/customField" actionClass="com.openexchange.logback.extensions.encoders.CustomFieldAction"/>
 ```
-...and that's pretty much it! Now, you can define your own customFields inside of the <encoder> tag of the appender, e.g.:
+...and that's pretty much it! Now, you can define your own customFields inside the `<encoder>` tag of the appender, e.g.:
 
 ```xml
 <encoder class="com.openexchange.logback.extensions.encoders.JSONEncoder">
