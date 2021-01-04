@@ -113,7 +113,7 @@ properties:
     - key: com.openexchange.calendar.xctx2.enabled
       description: |
         Configures if the <i>cross-context</i> calendar provider for integrating federated shares is available for a user or not. 
-      defaultValue: true
+      defaultValue: false
       version: 7.10.5
       reloadable: true
       configcascadeAware: true

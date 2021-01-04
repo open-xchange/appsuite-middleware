@@ -69,7 +69,7 @@ public class CalendarProviders {
     /** The identifier for the internal chronos calendar provider */
     public static final String ID_CHRONOS = "chronos";
 
-    /** The identifier for of the provider for cross-context shares */
+    /** The identifier of the provider for cross-context shares */
     public static final String ID_XCTX = "xctx2"; // from com.openexchange.groupware.modules.Module.CALENDAR
 
     /**
