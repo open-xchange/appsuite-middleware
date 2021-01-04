@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -139,7 +140,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      */
     List<AlarmTrigger> getAndCheckAlarmTrigger(long until, int min) throws ApiException {
     	List<AlarmTrigger> triggers = eventManager.getAlarmTrigger(until);
-        assertTrue(min <= triggers.size());
+        assertTrue(String.format("Missing some triggers. Expected at least %s triggers but only found %s", I(min), I(triggers.size())), min <= triggers.size());
         return triggers;
     }
 
