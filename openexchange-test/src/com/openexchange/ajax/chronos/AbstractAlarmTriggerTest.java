@@ -56,7 +56,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.junit.Assert;
@@ -190,13 +192,12 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     }
 
     protected AlarmTrigger findTrigger(String eventId, List<AlarmTrigger> triggers) {
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getEventId().equals(eventId)) {
-                return trigger;
-            }
+        Optional<AlarmTrigger> result = triggers.stream().filter(t -> t.getEventId().equals(eventId)).findFirst();
+        if (result.isPresent() == false) {
+            Assert.fail(String.format("Alarm trigger not found. Search for '%s', but only found the following ids: %s", eventId, triggers.stream().map(t -> t.getEventId()).collect(Collectors.joining(", "))));
+            return null;
         }
-        Assert.fail("Alarm trigger not found.");
-        return null;
+        return result.get();
     }
 
     protected AlarmTrigger findTriggerByAlarm(Integer alarmId, List<AlarmTrigger> triggers) {
@@ -205,7 +206,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
                 return trigger;
             }
         }
-        Assert.fail("Alarm trigger not found.");
+        Assert.fail(String.format("Alarm trigger not found. Search for alarm id '%s', but only found the following alarm ids: %s", alarmId, triggers.stream().map(t -> t.getAlarmId()).collect(Collectors.joining(", "))));
         return null;
     }
 
