@@ -164,8 +164,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     }
 
     protected static boolean indicatesDownload(HttpServletRequest request) {
-        return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
-            isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
+        return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) || isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
     }
 
     protected static boolean isTrue(String value) {

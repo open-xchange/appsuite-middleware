@@ -231,7 +231,19 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         final long length = fileHolder.getLength();
         final List<Closeable> closeables = new LinkedList<>();
         final String fileContentType = fileHolder.getContentType();
-        IDataWrapper data = new DataWrapper().setContentTypeByParameter(Boolean.FALSE).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result);
+        // @formatter:off
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(Boolean.FALSE)
+                                             .setLength(length)
+                                             .setDelivery(fileHolder.getDelivery())
+                                             .setFile(fileHolder)
+                                             .setRequest(req)
+                                             .setFileContentType(fileContentType)
+                                             .setFileName(fileName)
+                                             .setRequestData(requestData)
+                                             .setResponse(resp)
+                                             .setCloseAbles(closeables)
+                                             .setResult(result);
+        // @formatter:on
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
