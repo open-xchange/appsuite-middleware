@@ -212,18 +212,14 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                 data.setContentType(preferredContentType);
             } else {
                 // A Content-Type parameter is specified...
-                if (IDataWrapper.SAVE_AS_TYPE.equals(preferredContentType) || equalTypes(preferredContentType, data.getContentType())) {
+                if (equalTypes(preferredContentType, data.getContentType())) {
                     // Set if sanitize-able
                     if (!trySetSanitizedContentType(data.getContentType(), preferredContentType, data.getResponse())) {
                         data.setContentType(preferredContentType);
                     }
                 } else {
                     // Specified Content-Type does NOT match file's real MIME type. Ignore it due to security reasons (see bug #25343)
-                    final StringBuilder sb = new StringBuilder(128);
-                    sb.append("Denied parameter \"").append(IDataWrapper.PARAMETER_CONTENT_TYPE);
-                    sb.append("\" due to security constraints (requested \"");
-                    sb.append(data.getContentType()).append("\" , but is \"").append(preferredContentType).append("\").");
-                    LOG.warn(sb.toString());
+                    LOG.warn("Denied parameter \"{}\" due to security constraints (requested \"{}\" , but is \"{}\").", IDataWrapper.PARAMETER_CONTENT_TYPE, data.getContentType(), preferredContentType);
                     data.getResponse().setContentType(preferredContentType);
                     data.setContentType(preferredContentType);
                 }
