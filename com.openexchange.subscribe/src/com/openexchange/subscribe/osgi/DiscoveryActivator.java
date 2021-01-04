@@ -126,7 +126,6 @@ public class DiscoveryActivator extends HousekeepingActivator {
         AbstractSubscribeService.ENCRYPTION_FACTORY.set(getService(SecretEncryptionFactoryService.class));
         AbstractSubscribeService.CRYPTO_SERVICE.set(getService(CryptoService.class));
         AbstractSubscribeService.FOLDERS.set(folders);
-        AbstractSubscribeService.FOLDER_STORAGE_SERVICE.set(getServiceSafe(com.openexchange.folderstorage.FolderService.class));
         AbstractSubscribeService.USER_PERMISSIONS.set(userPermissions);
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();

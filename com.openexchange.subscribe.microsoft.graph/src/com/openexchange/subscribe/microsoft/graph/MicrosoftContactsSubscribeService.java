@@ -86,8 +86,10 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
 
     /**
      * Initialises a new {@link MicrosoftContactsSubscribeService}.
+     *
+     * @throws OXException
      */
-    public MicrosoftContactsSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
+    public MicrosoftContactsSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) throws OXException {
         super(metadata, SOURCE_ID, FolderObject.CONTACT, "Outlook.com", services);
     }
 

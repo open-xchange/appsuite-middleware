@@ -154,8 +154,7 @@ public class SubscriptionSourceCollectorTest {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(string);
 
-        AbstractSubscribeService.FOLDER_STORAGE_SERVICE.set(mock);
-        SimSubscribeService service = new SimSubscribeService() {
+        SimSubscribeService service = new SimSubscribeService(mock) {
 
             @Override
             public boolean handles(int folderModule) {

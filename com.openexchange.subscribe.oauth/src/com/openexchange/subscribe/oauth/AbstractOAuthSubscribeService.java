@@ -90,15 +90,16 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
 
     /**
      * Initialises a new {@link AbstractOAuthSubscribeService}.
-     * 
+     *
      * @param metadata The OAuth metadata
      * @param sourceId The subscription's source identifier
      * @param module The module
      * @param displayName The display name
      * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public AbstractOAuthSubscribeService(OAuthServiceMetaData metadata, String sourceId, int module, String displayName, ServiceLookup services) {
-        super();
+    public AbstractOAuthSubscribeService(OAuthServiceMetaData metadata, String sourceId, int module, String displayName, ServiceLookup services) throws OXException {
+        super(services.getServiceSafe(com.openexchange.folderstorage.FolderService.class));
         this.metadata = metadata;
         this.sourceId = sourceId;
         this.module = module;
@@ -166,7 +167,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
 
     /**
      * Deletes the subscription with the specified identifier in the specified {@link Context}
-     * 
+     *
      * @param context The {@link Context}
      * @param id The subscription's identifier
      * @throws OXException if an error is occurred
@@ -177,7 +178,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
 
     /**
      * Returns the {@link OAuthAccount} of the user and the specified {@link Subscription}
-     * 
+     *
      * @param session The {@link Session}
      * @param subscription The {@link Subscription}
      * @return The {@link OAuthAccount}
@@ -198,14 +199,14 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
 
     /**
      * Get the {@link KnownApi}
-     * 
+     *
      * @return the {@link KnownApi}
      */
     protected abstract KnownApi getKnownApi();
 
     /**
      * Initialises the subscription source
-     * 
+     *
      * @return the initialised subscription source
      */
     private SubscriptionSource initialiseSubscriptionSource() {

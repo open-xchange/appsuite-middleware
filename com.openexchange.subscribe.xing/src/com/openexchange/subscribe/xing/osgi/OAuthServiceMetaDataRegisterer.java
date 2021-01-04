@@ -52,6 +52,9 @@ package com.openexchange.subscribe.xing.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
 
@@ -61,6 +64,8 @@ import com.openexchange.oauth.OAuthServiceMetaData;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
 
     private final BundleContext context;
     private final XingSubscribeActivator activator;
@@ -84,7 +89,12 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         if (xingIdentifier.equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetaData(oAuthServiceMetaData);
-            activator.registerSubscribeService();
+            try {
+                activator.registerSubscribeService();
+            } catch (OXException e) {
+                LOG.error("Unable to create Xing Contact subscription services: " + e.getMessage(), e);
+                return null;
+            }
         }
         return oAuthServiceMetaData;
     }

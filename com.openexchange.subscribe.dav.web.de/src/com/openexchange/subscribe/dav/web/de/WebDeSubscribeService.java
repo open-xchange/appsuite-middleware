@@ -51,6 +51,7 @@ package com.openexchange.subscribe.dav.web.de;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.dav.AbstractCardDAVSubscribeService;
 import com.openexchange.tools.session.ServerSession;
@@ -65,10 +66,11 @@ public class WebDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
      * Initializes a new {@link WebDeSubscribeService}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public WebDeSubscribeService(ServiceLookup services) {
+    public WebDeSubscribeService(ServiceLookup services) throws OXException {
         super(services);
     }
 
