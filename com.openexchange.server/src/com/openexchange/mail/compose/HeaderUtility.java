@@ -436,7 +436,7 @@ public class HeaderUtility {
             .putSafe("language", security.getLanguage())
             .putSafe("message", security.getMessage())
             .putSafe("pin", security.getPin())
-            .putSafe("msgRef", security.getMessage())
+            .putSafe("msgRef", security.getMsgRef())
             .putSafe("authToken", security.getAuthToken())
             .toString();
     }
