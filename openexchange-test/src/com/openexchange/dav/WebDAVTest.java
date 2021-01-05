@@ -118,6 +118,12 @@ import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
 import com.openexchange.test.TestManager;
+import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderResponse;
+import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.NewFolderBody;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
@@ -251,7 +257,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         resTm = new ResourceTestManager(client);
         testManagers.add(resTm);
 
-        testUserApi = new UserApi(getApiClient(), getEnhancedApiClient(), testUser);
+        testUserApi = new UserApi(getApiClient(), getEnhancedApiClient(), testUser, false);
     }
 
     @Override
@@ -259,7 +265,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         try {
             if (0 < folderIdsToDelete.size()) {
                 try {
-                    testUserApi.getFoldersApi().deleteFolders(new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null, null);
+                    testUserApi.getFoldersApi().deleteFolders(testUserApi.getSession(), new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null);
                 } catch (Exception e) {
                     LOG.error("", e);
                 }
@@ -452,6 +458,34 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
 
     protected AJAXClient getAJAXClient() {
         return getClient();
+    }
+
+    protected FolderData createSubfolder(String parentId, String title) throws Exception {
+        return createSubfolder(getFolderData(parentId), title);
+    }
+
+    protected FolderData getFolderData(String id) throws Exception {
+        FolderResponse response = getUserApi().getFoldersApi().getFolder(getSessionId(), id, null, null, null);
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+    }
+
+    protected FolderData createSubfolder(FolderData parentFolder, String title) throws Exception {
+        NewFolderBodyFolder newFolder = new NewFolderBodyFolder().module(parentFolder.getModule()).title(title).permissions(null);
+        NewFolderBody newFolderBody = new NewFolderBody();
+        newFolderBody.setFolder(newFolder);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().createFolder(getSessionId(), parentFolder.getId(), newFolderBody, null, null, null, null);
+        String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolderIdForCleanup(newId);
+        return getFolderData(newId);
+    }
+
+    protected FolderData updateFolder(String id, FolderData folderUpdate) throws Exception {
+        FolderBody folderBody = new FolderBody();
+        folderBody.setFolder(folderUpdate);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().updateFolder(getSessionId(), id, folderBody, null, null, null, null, null, null, null);
+        String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolderIdForCleanup(newId);
+        return getFolderData(newId);
     }
 
     protected String fetchSyncToken(String relativeUrl) throws Exception {
