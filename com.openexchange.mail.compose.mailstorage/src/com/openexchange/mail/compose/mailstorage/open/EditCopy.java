@@ -124,8 +124,11 @@ public class EditCopy extends AbstractOpener {
      * @throws OXException If an Open-Xchange error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    public void doOpenForEditCopy(OpenCompositionSpaceParameters parameters, OpenState state, Session session) throws OXException, MessagingException {
+    public void doOpenForEditCopy(boolean isEditFor, OpenCompositionSpaceParameters parameters, OpenState state, Session session) throws OXException, MessagingException {
         MailPath editFor = parameters.getReferencedMails().get(0);
+        if (isEditFor) {
+            state.metaBuilder.withEditFor(editFor);
+        }
         state.mailInterface = MailServletInterface.getInstanceWithDecryptionSupport(session, null);
         MailMessage originalMail = requireMailMessage(editFor, state.mailInterface);
         state.metaBuilder.withDate(originalMail.getSentDate());
