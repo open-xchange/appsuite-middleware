@@ -15,6 +15,12 @@ To setup the Dropbox file store you have to install the package `open-xchange-fi
    * The redirect URI uses `https://` as protocol
    * The redirect URI follows the pattern: `https://` + `<host-name>` + `/ajax/defer`
    * E.g. `https://myappsuite.mydomain.invalid/ajax/defer`
+* Switch to "Permissions" tab and ensure the following permissions are granted
+   * `account_info.read`
+   * `files.content.read`
+   * `files.content.write`
+   * `files.metadata.read`
+   * `files.metadata.write`
    
 # Configuration
 
