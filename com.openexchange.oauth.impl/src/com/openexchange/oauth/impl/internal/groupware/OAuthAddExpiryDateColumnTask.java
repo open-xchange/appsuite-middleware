@@ -47,65 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.oauth;
+package com.openexchange.oauth.impl.internal.groupware;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthFileStorageAccountEventHandler}
+ * {@link OAuthAddExpiryDateColumnTask} - Adds the <code>expiryDate</code> column to the <code>oauthAccounts</code> table.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class OAuthFileStorageAccountEventHandler implements EventHandler {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OAuthFileStorageAccountEventHandler.class);
-
-    private final KnownApi api;
-    private final ServiceLookup services;
+public class OAuthAddExpiryDateColumnTask extends AbstractOAuthUpdateTask {
 
     /**
-     * Initialises a new {@link OAuthFileStorageAccountEventHandler}.
-     * 
-     * @param services The service lookup instance
-     * @param api the API
+     * Initializes a new {@link OAuthAddExpiryDateColumnTask}.
      */
-    public OAuthFileStorageAccountEventHandler(ServiceLookup services, KnownApi api) {
+    public OAuthAddExpiryDateColumnTask() {
         super();
-        this.services = services;
-        this.api = api;
     }
 
     @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            return;
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        if (Tools.columnNotExists(connection, CreateOAuthAccountTable.TABLE_NAME, "expiryDate")) {
+            Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column("expiryDate", "BIGINT(64) DEFAULT NULL"));
         }
-        try {
-            Integer contextId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID));
-            if (null == contextId) {
-                return;
-            }
-            Integer userId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_USER_ID));
-            if (null == userId) {
-                return;
-            }
-            OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry registry = registryService.get(api.getServiceId());
-            if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
-                LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
-            }
-        } catch (Exception e) {
-            LOG.error("Error while handling SessionD event '{}'", topic, e);
-        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { OAuthAddIdentityColumnTaskV2.class.getName() };
     }
 }

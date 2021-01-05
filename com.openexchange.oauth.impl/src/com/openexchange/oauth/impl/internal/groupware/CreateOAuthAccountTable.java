@@ -57,11 +57,11 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
-    
+
     static final String TABLE_NAME = "oauthAccounts";
 
     public static final String CREATE_TABLE_STATEMENT =
-        "CREATE TABLE oauthAccounts (" +
+        "CREATE TABLE " + TABLE_NAME + " (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "user INT4 UNSIGNED NOT NULL," +
         "id INT4 UNSIGNED NOT NULL," +
@@ -71,6 +71,7 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
         "serviceId VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "scope VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         "identity VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL," +
+        "expiryDate BIGINT(64) DEFAULT NULL," +
         "PRIMARY KEY (cid, id)," +
         "KEY `identity` (cid,identity(191))" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

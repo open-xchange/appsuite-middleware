@@ -254,6 +254,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String getToken() {
                 return "requestToken";
             }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
+            }
 
         });
 
@@ -280,6 +285,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
             }
         });
 
@@ -393,6 +403,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
             }
         });
 

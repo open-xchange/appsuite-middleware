@@ -87,25 +87,25 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractExtendedScribeAwareOAuthServiceMetaData.class);
 
     /**
-     * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
+     * Initializes a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      *
      * @param services The {@link ServiceLookup}
      * @param api The {@link DefaultAPI}
      * @param scopes The {@link OAuthScope}s
      */
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, OAuthScope... scopes) {
+    protected AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, OAuthScope... scopes) {
         this(services, api, false, true, scopes);
     }
 
     /**
-     * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
+     * Initializes a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      *
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link DefaultAPI}
      * @param needsRequestToken Whether it needs a request token
      * @param registerTokenBasedDeferrer Whether to register the token based deferrer
      */
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, boolean needsRequestToken, boolean registerTokenBasedDeferrer, OAuthScope... scopes) {
+    protected AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, boolean needsRequestToken, boolean registerTokenBasedDeferrer, OAuthScope... scopes) {
         super(services, api, scopes);
         this.needsRequestToken = needsRequestToken;
         this.registerTokenBasedDeferrer = registerTokenBasedDeferrer;
@@ -199,7 +199,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         Verifier verifier = new Verifier((String) arguments.get(org.scribe.model.OAuthConstants.CODE));
         Token accessToken = scribeOAuthService.getAccessToken(null, verifier);
 
-        return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret());
+        return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret(), accessToken.getExpiry() == null ? 0L : accessToken.getExpiry().getTime());
     }
 
     @Override
@@ -256,7 +256,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * Extracts the protocol from the specified URL
      *
      * @param url The URL
-     * @return The extracted protocol (either http or https)
+     * @return The extracted protocol (either <code>"http"</code> or <code>"https"</code>)
      */
     private String extractProtocol(final String url) {
         return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";

@@ -130,7 +130,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public List<OAuthAccount> getAccounts(final Session session) throws OXException {
+    public List<OAuthAccount> getAccounts(Session session) throws OXException {
         return oauthAccountStorage.getAccounts(session);
     }
 
@@ -140,14 +140,14 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public OAuthInteraction initOAuth(final Session session, final String serviceMetaData, final String callbackUrl, final HostInfo currentHost, Set<OAuthScope> scopes) throws OXException {
+    public OAuthInteraction initOAuth(Session session, String serviceMetaData, String callbackUrl, HostInfo currentHost, Set<OAuthScope> scopes) throws OXException {
         try {
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, userId, contextId);
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
+            OAuthServiceMetaData metaData = registry.getService(serviceMetaData, userId, contextId);
 
             // Check for individual OAuthInteraction
-            final OAuthInteraction interaction = metaData.initOAuth(callbackUrl, session);
+            OAuthInteraction interaction = metaData.initOAuth(callbackUrl, session);
             if (interaction != null) {
                 return interaction;
             }
@@ -155,7 +155,7 @@ public class OAuthServiceImpl implements OAuthService {
 
             // Apply possible modifications to call-back URL
             {
-                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
+                String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
                 if (modifiedUrl != null) {
                     cbUrl = modifiedUrl;
                 }
@@ -186,7 +186,7 @@ public class OAuthServiceImpl implements OAuthService {
             }
 
             // Process authorization URL
-            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString(), session), cbUrl);
+            String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString(), session), cbUrl);
             // Register deferrer
             if (metaData.registerTokenBasedDeferrer()) {
                 // Register by token
@@ -216,7 +216,7 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final Map<String, Object> arguments) throws OXException {
+    public OAuthAccount createAccount(Session session, String serviceMetaData, Set<OAuthScope> scopes, Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
         // Create appropriate OAuth account instance
         DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -224,14 +224,13 @@ public class OAuthServiceImpl implements OAuthService {
         OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
         // Set display name & identifier
-        String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        String displayName = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME));
         account.setDisplayName(displayName);
         // Token & secret
-        account.setToken((String) arguments.get(OAuthConstants.ARGUMENT_TOKEN));
-        account.setSecret((String) arguments.get(OAuthConstants.ARGUMENT_SECRET));
+        account.setToken(String.class.cast(arguments.get(OAuthConstants.ARGUMENT_TOKEN)));
+        account.setSecret(String.class.cast(arguments.get(OAuthConstants.ARGUMENT_SECRET)));
         account.setEnabledScopes(scopes);
         // Store the account
-        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         oauthAccountStorage.storeAccount(session, account);
         return account;
     }
@@ -246,15 +245,14 @@ public class OAuthServiceImpl implements OAuthService {
 
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
 
-        String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        String displayName = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME));
         account.setDisplayName(displayName);
         account.setEnabledScopes(scopes);
 
-        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         String userIdentity = service.getUserIdentity(session, accountId, account.getToken(), account.getSecret());
         account.setUserIdentity(userIdentity);
 
-        String actionHint = (String) arguments.get(OAuthConstants.ARGUMENT_ACTION_HINT);
+        String actionHint = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_ACTION_HINT));
         DefaultOAuthAccount existingAccount = getExistingAccount(session, userIdentity, serviceMetaData, accountId);
 
         if (existingAccount == null) {
@@ -285,12 +283,13 @@ public class OAuthServiceImpl implements OAuthService {
             existingAccount.addEnabledScope(scope);
         }
         existingAccount.setUserIdentity(userIdentity);
+        existingAccount.setExpiration(account.getExpiration());
         oauthAccountStorage.updateAccount(session, existingAccount);
         return existingAccount;
     }
 
     @Override
-    public OAuthAccount createAccount(Session session, final String serviceMetaData, Set<OAuthScope> scopes, final OAuthInteractionType type, final Map<String, Object> arguments) throws OXException {
+    public OAuthAccount createAccount(Session session, String serviceMetaData, Set<OAuthScope> scopes, OAuthInteractionType type, Map<String, Object> arguments) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
         try {
             DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -298,7 +297,7 @@ public class OAuthServiceImpl implements OAuthService {
             OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
             account.setMetaData(service);
 
-            String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            String displayName = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME));
             account.setDisplayName(displayName);
 
             obtainToken(type, arguments, account, scopes);
@@ -320,7 +319,7 @@ public class OAuthServiceImpl implements OAuthService {
             return account;
         } catch (OXException x) {
             if (ExceptionUtils.isEitherOf(x, SSLHandshakeException.class)) {
-                String url = (String) arguments.get(OAuthConstants.ARGUMENT_AUTH_URL);
+                String url = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_AUTH_URL));
                 if (Strings.isNotEmpty(url)) {
                     try {
                         url = new URI(url).getHost();
@@ -338,31 +337,31 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public void deleteAccount(Session session, final int accountId) throws OXException {
+    public void deleteAccount(Session session, int accountId) throws OXException {
         oauthAccountStorage.deleteAccount(session, accountId);
         postOAuthDeleteEvent(accountId, session);
     }
 
     @Override
-    public void updateAccount(Session session, final int accountId, final Map<String, Object> arguments) throws OXException {
+    public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
         oauthAccountStorage.updateAccount(session, accountId, arguments);
     }
 
     @Override
-    public OAuthAccount getAccount(final Session session, final int accountId) throws OXException {
+    public OAuthAccount getAccount(Session session, int accountId) throws OXException {
         return oauthAccountStorage.getAccount(session, accountId);
     }
 
     @Override
-    public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
-        final int contextId = session.getContextId();
-        final int userId = session.getUserId();
-        final List<OAuthServiceMetaData> allServices = registry.getAllServices(userId, contextId);
-        for (final OAuthServiceMetaData metaData : allServices) {
+    public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        List<OAuthServiceMetaData> allServices = registry.getAllServices(userId, contextId);
+        for (OAuthServiceMetaData metaData : allServices) {
             if (metaData.getAPI() == api) {
-                final List<OAuthAccount> accounts = getAccounts(session, metaData.getId());
+                List<OAuthAccount> accounts = getAccounts(session, metaData.getId());
                 OAuthAccount likely = null;
-                for (final OAuthAccount acc : accounts) {
+                for (OAuthAccount acc : accounts) {
                     if (likely == null || acc.getId() < likely.getId()) {
                         likely = acc;
                     }
@@ -376,19 +375,18 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public OAuthAccount updateAccount(Session session, final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
+    public OAuthAccount updateAccount(Session session, int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
         DefaultOAuthAccount account = new DefaultOAuthAccount();
 
         OAuthServiceMetaData service = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
         account.setMetaData(service);
 
-        String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        String displayName = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME));
         account.setDisplayName(displayName);
         account.setId(accountId);
         obtainToken(type, arguments, account, scopes);
 
-        //Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         account.setEnabledScopes(scopes);
         // Lazy identity update
         if (!oauthAccountStorage.hasUserIdentity(session, accountId, serviceMetaData)) {
@@ -430,7 +428,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    private void registerTokenForDeferredAccess(final String token, String cbUrl, final DeferringURLService ds, final int userId, final int contextId) {
+    private void registerTokenForDeferredAccess(String token, String cbUrl, DeferringURLService ds, int userId, int contextId) {
         // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
         if (isDeferrerAvailable(ds, userId, contextId)) {
             if (ds.seemsDeferred(cbUrl, userId, contextId)) {
@@ -453,7 +451,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @return <code>true</code> if the {@link DeferringURLService} is not <code>null</code> and available;
      *         <code>false</code> otherwise
      */
-    private boolean isDeferrerAvailable(final DeferringURLService ds, final int userId, final int contextId) {
+    private boolean isDeferrerAvailable(DeferringURLService ds, int userId, int contextId) {
         return null != ds && ds.isDeferrerURLAvailable(userId, contextId);
     }
 
@@ -463,17 +461,17 @@ public class OAuthServiceImpl implements OAuthService {
      * @param accountId The account identifier
      * @param session The session
      */
-    private void postOAuthDeleteEvent(final int accountId, final Session session) {
-        final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+    private void postOAuthDeleteEvent(int accountId, Session session) {
+        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null == eventAdmin) {
             return;
         }
-        final Dictionary<String, Object> props = new Hashtable<String, Object>(4);
+        Dictionary<String, Object> props = new Hashtable<String, Object>(4);
         props.put(OAuthEventConstants.PROPERTY_SESSION, session);
         props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
         props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
         props.put(OAuthEventConstants.PROPERTY_ID, Integer.valueOf(accountId));
-        final Event event = new Event(OAuthEventConstants.TOPIC_DELETE, props);
+        Event event = new Event(OAuthEventConstants.TOPIC_DELETE, props);
         eventAdmin.sendEvent(event);
     }
 
@@ -486,7 +484,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @param scopes The {@link OAuthScope}s
      * @throws OXException if the token cannot be retrieved
      */
-    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
+    protected void obtainToken(OAuthInteractionType type, Map<String, Object> arguments, DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         switch (type) {
             case OUT_OF_BAND:
                 obtainTokenByOutOfBand(arguments, account, scopes);
@@ -507,7 +505,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @param scopes The {@link OAuthScope}s
      * @throws OXException if the token cannot be retrieved
      */
-    private void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
+    private void obtainTokenByCallback(Map<String, Object> arguments, DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         obtainTokenByOutOfBand(arguments, account, scopes);
     }
 
@@ -519,25 +517,27 @@ public class OAuthServiceImpl implements OAuthService {
      * @param scopes The {@link OAuthScope}s
      * @throws OXException if the token cannot be retrieved
      */
-    private void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
+    private void obtainTokenByOutOfBand(Map<String, Object> arguments, DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         try {
-            final OAuthServiceMetaData metaData = account.getMetaData();
-            final OAuthToken oAuthToken = metaData.getOAuthToken(arguments, scopes);
+            OAuthServiceMetaData metaData = account.getMetaData();
+            OAuthToken oAuthToken = metaData.getOAuthToken(arguments, scopes);
             if (null == oAuthToken) {
                 isNull(arguments, OAuthConstants.ARGUMENT_PIN, OAuthConstants.ARGUMENT_REQUEST_TOKEN);
 
-                String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+                String pin = String.class.cast(arguments.get(OAuthConstants.ARGUMENT_PIN));
                 OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
                 Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
                 // With the request token and the verifier (which is a number) we need now to get the access token
-                final Verifier verifier = new Verifier(pin);
-                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session, scopes);
-                final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
+                Verifier verifier = new Verifier(pin);
+                org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session, scopes);
+                Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
                 account.setToken(accessToken.getToken());
                 account.setSecret(accessToken.getSecret());
+                account.setExpiration(accessToken.getExpiry() == null ? 0L : accessToken.getExpiry().getTime());
             } else {
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());
+                account.setExpiration(oAuthToken.getExpiration());
             }
         } catch (org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
@@ -556,8 +556,8 @@ public class OAuthServiceImpl implements OAuthService {
      * @return The {@link org.scribe.oauth.OAuthService}
      * @throws OXException if the desired service is not supported
      */
-    private org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl, Session session, Set<OAuthScope> scopes) throws OXException {
-        final Class<? extends Api> apiClass;
+    private org.scribe.oauth.OAuthService getScribeService(OAuthServiceMetaData metaData, String callbackUrl, Session session, Set<OAuthScope> scopes) throws OXException {
+        Class<? extends Api> apiClass;
         if (metaData instanceof com.openexchange.oauth.impl.ScribeAware) {
             apiClass = ((com.openexchange.oauth.impl.ScribeAware) metaData).getScribeService();
         } else {
@@ -568,7 +568,7 @@ public class OAuthServiceImpl implements OAuthService {
             }
             apiClass = knownApi.getApiClass();
         }
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
         serviceBuilder.apiKey(metaData.getAPIKey(session)).apiSecret(metaData.getAPISecret(session));
         if (null != callbackUrl) {
             serviceBuilder.callback(callbackUrl);
@@ -590,25 +590,25 @@ public class OAuthServiceImpl implements OAuthService {
      * @return An {@link OXException}
      */
     private OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e) {
-        final String message = e.getMessage();
+        String message = e.getMessage();
         if (null != message) {
-            final String lcMsg = com.openexchange.java.Strings.toLowerCase(message);
+            String lcMsg = com.openexchange.java.Strings.toLowerCase(message);
             String str = "can't extract token and secret from this:";
             int pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                final String msg = toText(message.substring(pos + str.length()));
+                String msg = toText(message.substring(pos + str.length()));
                 return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
             str = "can't extract a token from an empty string";
             pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                final String msg = toText(message.substring(pos));
+                String msg = toText(message.substring(pos));
                 return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
             str = "can't extract a token from this:";
             pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                final String msg = toText(message.substring(pos + str.length()));
+                String msg = toText(message.substring(pos + str.length()));
                 return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
         }
@@ -624,8 +624,8 @@ public class OAuthServiceImpl implements OAuthService {
      * @param msg the message to convert
      * @return The converted message
      */
-    private String toText(final String msg) {
-        final HtmlService htmlService = Services.getService(HtmlService.class);
+    private String toText(String msg) {
+        HtmlService htmlService = Services.getService(HtmlService.class);
         if (null == htmlService) {
             return msg;
         }

@@ -61,7 +61,6 @@ import com.openexchange.oauth.OAuthToken;
 public final class ScribeOAuthToken implements OAuthToken {
 
     private static final String EMPTY = "";
-
     private final Token token;
 
     /**
@@ -87,5 +86,10 @@ public final class ScribeOAuthToken implements OAuthToken {
     @Override
     public String toString() {
         return token == null ? "<empty-token>" : token.toString();
+    }
+
+    @Override
+    public long getExpiration() {
+        return token == null ? 0L : (token.getExpiry() == null ? 0L : token.getExpiry().getTime());
     }
 }

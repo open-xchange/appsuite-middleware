@@ -239,7 +239,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     }
 
                     Metadata metadata = client.files().moveV2(path, toPath).getMetadata();
-                    DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                    DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
                     file.copyFrom(dbxFile, copyFields);
                     return dbxFile.getIDTuple();
                 } catch (RelocationErrorException e) {
@@ -276,7 +276,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, destPath);
             }
-            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+            DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
             if (update != null) {
                 update.copyFrom(dbxFile, copyFields);
             }
@@ -300,7 +300,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, destPath);
             }
-            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+            DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
             if (update != null) {
                 update.copyFrom(dbxFile, copyFields);
             }
@@ -858,7 +858,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 Metadata metadata = match.getMetadata().getMetadataValue();
                 String parent = getParent(metadata.getPathDisplay());
                 if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
-                    results.add(new DropboxFile((FileMetadata) metadata, userId));
+                    results.add(new DropboxFile(FileMetadata.class.cast(metadata), userId));
                 }
             }
             if (hasMore) {

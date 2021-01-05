@@ -296,7 +296,7 @@ public abstract class AbstractRESTClient {
      * @throws ClientProtocolException if a client protocol error occurs
      * @throws IOException if an I/O error occurs
      */
-    HttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
+    private HttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
         LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
         try {
             HttpResponse httpResponse = getHttpClient().execute(httpRequest);

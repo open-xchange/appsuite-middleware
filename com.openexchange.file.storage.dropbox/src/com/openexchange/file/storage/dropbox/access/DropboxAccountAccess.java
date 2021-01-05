@@ -121,6 +121,8 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
                 newInstance.initialize();
                 dropboxOAuthAccess = newInstance;
             }
+        } else {
+            this.dropboxOAuthAccess = dropboxOAuthAccess.ensureNotExpired();
         }
         this.dropboxOAuthAccess = dropboxOAuthAccess;
     }

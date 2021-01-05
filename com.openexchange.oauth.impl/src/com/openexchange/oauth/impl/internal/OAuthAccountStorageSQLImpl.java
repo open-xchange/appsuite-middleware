@@ -136,9 +136,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int user = session.getUserId();
 
         // Crypt tokens
-        ((DefaultOAuthToken) account).setToken(encrypt(account.getToken(), session));
-        ((DefaultOAuthToken) account).setSecret(encrypt(account.getSecret(), session));
-        ((DefaultOAuthAccount) account).setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
+        DefaultOAuthToken.class.cast(account).setToken(encrypt(account.getToken(), session));
+        DefaultOAuthToken.class.cast(account).setSecret(encrypt(account.getSecret(), session));
+        DefaultOAuthAccount.class.cast(account).setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
 
         // Create INSERT command
         ArrayList<Object> values = new ArrayList<>(SQLStructure.OAUTH_COLUMN.values().length);
@@ -151,7 +151,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
     @Override
     public OAuthAccount getAccount(Session session, int accountId, boolean loadSecrets) throws OXException {
-        Connection connection = (Connection) session.getParameter("__connection");
+        Connection connection = Connection.class.cast(session.getParameter("__connection"));
         try {
             if (connection != null && Databases.isInTransaction(connection)) {
                 // Given connection is already in transaction. Invoke & return immediately.
@@ -190,7 +190,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         int userId = session.getUserId();
         int contextId = session.getContextId();
 
-        Connection connection = (Connection) session.getParameter("__connection");
+        Connection connection = Connection.class.cast(session.getParameter("__connection"));
         if (connection != null) {
             try {
                 if (Databases.isInTransaction(connection)) {
@@ -243,8 +243,8 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     @Override
     public void updateAccount(Session session, OAuthAccount account) throws OXException {
         // Crypt tokens
-        ((DefaultOAuthToken) account).setToken(encrypt(account.getToken(), session));
-        ((DefaultOAuthToken) account).setSecret(encrypt(account.getSecret(), session));
+        DefaultOAuthToken.class.cast(account).setToken(encrypt(account.getToken(), session));
+        DefaultOAuthToken.class.cast(account).setSecret(encrypt(account.getSecret(), session));
         /*
          * Get connection
          */
@@ -313,7 +313,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         if (list.isEmpty()) {
             return;
         }
-        Connection connection = (Connection) session.getParameter("__connection");
+        Connection connection = Connection.class.cast(session.getParameter("__connection"));
         try {
             if (connection != null && Databases.isInTransaction(connection)) {
                 // Given connection is already in transaction. Invoke & return immediately.
@@ -346,7 +346,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         ResultSet rs = null;
         Connection connection = getConnection(true, context);
         try {
-            stmt = connection.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
+            stmt = connection.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity, expiryDate FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, serviceId);
@@ -379,6 +379,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
             account.setEnabledScopes(enabledScopes);
             account.setUserIdentity(rs.getString(7));
+            account.setExpiration(rs.getLong(8));
             return account;
         } catch (SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -405,7 +406,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         ResultSet rs = null;
         final Connection con = getConnection(true, context);
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity, expiryDate FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
@@ -432,6 +433,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                         account.setEnabledScopes(enabledScopes);
                     }
                     account.setUserIdentity(rs.getString(7));
+                    account.setExpiration(rs.getLong(8));
                     accounts.add(account);
                 } catch (OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -462,7 +464,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         ResultSet rs = null;
         final Connection con = getConnection(true, context);
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope, identity, expiryDate FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, serviceMetaData);
@@ -489,6 +491,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                     account.setEnabledScopes(enabledScopes);
                     account.setUserIdentity(rs.getString(6));
+                    account.setExpiration(rs.getLong(7));
                     accounts.add(account);
                 } catch (OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -846,7 +849,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt = connection.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity, expiryDate FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             int contextId = session.getContextId();
             int userId = session.getUserId();
             stmt.setInt(1, contextId);
@@ -885,6 +888,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
             account.setEnabledScopes(enabledScopes);
             account.setUserIdentity(rs.getString(6));
+            account.setExpiration(rs.getLong(7));
             return account;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1128,21 +1132,23 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             }
             final String sToken = encrypt(token.getToken(), session);
             final String secret = encrypt(token.getSecret(), session);
+            final long expiry = token.getExpiration();
             ret.add(new Setter() {
 
                 @Override
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, sToken);
                     stmt.setString(pos + 1, secret);
+                    stmt.setLong(pos + 2, expiry);
                     if (Strings.isEmpty(secret)) {
                         LOG.debug("Setting empty OAuth secret for account '{}' of user '{}' in context '{}'", I(accountId), I(session.getUserId()), I(session.getContextId()));
                     }
-                    return pos + 2;
+                    return pos + 3;
                 }
 
                 @Override
                 public void appendTo(final StringBuilder stmtBuilder) {
-                    stmtBuilder.append("accessToken = ?, accessSecret = ?");
+                    stmtBuilder.append("accessToken = ?, accessSecret = ?, expiryDate = ?");
                 }
             });
         }

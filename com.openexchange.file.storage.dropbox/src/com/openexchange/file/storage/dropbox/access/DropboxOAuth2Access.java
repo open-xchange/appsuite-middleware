@@ -49,22 +49,31 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.model.Token;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.http.HttpRequestor;
 import com.dropbox.core.v2.DbxClientV2;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.api.DropboxApi2;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.session.Session;
 
 /**
@@ -86,9 +95,9 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     @Override
     public void initialize() throws OXException {
-        final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
+        OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(getSession(), getAccountId());
+            OAuthAccount oauthAccount = oAuthService.getAccount(getSession(), getAccountId());
             verifyAccount(oauthAccount, oAuthService, OXScope.drive);
             HttpRequestor httpRequestor = new ApacheHttpClientHttpRequestor();
             DbxRequestConfig config = DbxRequestConfig.newBuilder(DropboxConfiguration.getInstance().getProductName()).withHttpRequestor(httpRequestor).build();
@@ -104,6 +113,19 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
+        if (isExpired()) {
+            synchronized (this) {
+                if (isExpired()) {
+                    if (getOAuthAccount() == null) {
+                        initialize();
+                    }
+                    ClusterLockService clusterLockService = DropboxServices.getService(ClusterLockService.class);
+                    clusterLockService.runClusterTask(new DropboxReauthorizeClusterTask(getSession(), getOAuthAccount()), new ExponentialBackOffRetryPolicy());
+                    // Re-set account and client and make all proper connections
+                    initialize();
+                }
+            }
+        }
         return this;
     }
 
@@ -124,6 +146,31 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             return getAccountId(fsAccount.getConfiguration());
         } catch (IllegalArgumentException e) {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
+        }
+    }
+
+    private class DropboxReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        /**
+         * Initialises a new {@link DropboxReauthorizeClusterTask}.
+         */
+        public DropboxReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super(DropboxServices.getServices(), session, cachedAccount);
+        }
+
+        @Override
+        public Token reauthorize() throws OXException {
+            ServiceBuilder serviceBuilder = new ServiceBuilder().provider(DropboxApi2.class);
+            serviceBuilder.apiKey(getCachedAccount().getMetaData().getAPIKey(getSession())).apiSecret(getCachedAccount().getMetaData().getAPISecret(getSession()));
+            DropboxApi2.DropboxOAuth2Service scribeOAuthService = DropboxApi2.DropboxOAuth2Service.class.cast(serviceBuilder.build());
+
+            // Refresh the token
+            try {
+                return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
+            } catch (OAuthException e) {
+                OAuthAccount dbAccount = getDBAccount();
+                throw OAuthUtil.handleScribeOAuthException(e, dbAccount, getSession());
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ The new mechanism can be disabled – and therefore the former one still being u
 
 **Please note** that the former approach is still used for all still open composition spaces. Do not decommission database and filestore resources until no more spaces are managed by the old mechanism.
 
-For a detailed description of the new draft-based mail compose see [here](https://documentation.open-xchange.com/7.10.5/middleware/mail/mail_compose/01_drafts.html) 
+For a detailed description of the new draft-based mail compose see [here](https://documentation.open-xchange.com/7.10.5/middleware/mail/mail_compose/01_drafts.html)
 
 ## Federated Sharing
 
@@ -49,9 +49,8 @@ The following properties needs to be set in order to enable the **cross-ox** fea
 
 * <code>[com.openexchange.capability.filestorage_xox](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#com.openexchange.capability.filestorage_xox) = true</code>
 
-See [here](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of relevant configuration options, as well as 
+See [here](https://documentation.open-xchange.com/components/middleware/config/7.10.5/#mode=tags&tag=Federated%20Sharing) for a complete list of relevant configuration options, as well as
 [Federated Sharing](https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/federated_sharing.html) for further details.
-
 
 ## Reseller Scope in Config-Cascade
 
@@ -151,3 +150,17 @@ With Open-Xchange server v7.10.5 a ``FULLTEXT`` index to improve searching for f
 ## Changed default values for Drive folder move permission modes
 
 With Open-Xchange server v7.10.5 the default values for Drive folder move permission modes were changed. The new default value for the properties ``com.openexchange.folderstorage.permissions.moveToPublic``, ``com.openexchange.folderstorage.permissions.moveToPrivate`` and ``com.openexchange.folderstorage.permissions.moveToShared`` is now ``inherit``, so all folders will inherit the permissions from the new parent folder on move. For more details see [Drive folder permission mode on folder move] (https://documentation.open-xchange.com/7.10.5/middleware/miscellaneous/drive_folder_permission_modes_on_move.html).
+
+## Upgraded Dropbox SDK and implemented short-lived tokens
+
+Dropbox launched recently several [permission enhancements and scoped apps](https://dropbox.tech/developers/now-available--scoped-apps-and-enhanced-permissions). Furthermore, starting September 30th, 2021, the Dropbox OAuth flow will no longer return long-lived access tokens. With v7.10.5, the Open-Xchange server will support the previously mentioned permission enhancements and short-lived tokens. For that purpose a new column is added to the `oauthAccounts` table, namely the `expiresIn`, which stores the expiration timestamp of each individual access token.
+
+The only step admins need to take is to login to their Dropbox App Console, switch to "Permissions" tab and ensure the following permissions are granted:
+
+ * `account_info.read`
+ * `files.content.read`
+ * `files.content.write`
+ * `files.metadata.read`
+ * `files.metadata.write`
+
+More information on how to migrate your Dropbox App can be found [here](https://dropbox.tech/developers/migrating-app-permissions-and-access-tokens).

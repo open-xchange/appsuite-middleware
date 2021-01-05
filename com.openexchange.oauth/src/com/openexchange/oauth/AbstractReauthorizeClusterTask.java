@@ -201,7 +201,7 @@ public abstract class AbstractReauthorizeClusterTask {
         // Set the arguments for the update
         int accountId = dbAccount.getId();
         Map<String, Object> arguments = new HashMap<>(2);
-        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(token.getToken(), refreshToken));
+        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(token.getToken(), refreshToken, token.getExpiry() == null ? 0L : token.getExpiry().getTime()));
         arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
 
         // Update the account

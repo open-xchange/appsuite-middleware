@@ -99,6 +99,5 @@ Import-Package: com.google.common.collect,
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.impl.osgi.Activator
 Export-Package: com.openexchange.oauth.impl,
- com.openexchange.oauth.impl.access.impl,
- com.openexchange.oauth.impl.internal.groupware
+ com.openexchange.oauth.impl.access.impl
 Automatic-Module-Name: com.openexchange.oauth.impl
