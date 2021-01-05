@@ -156,7 +156,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         }
         ShareTargetPath targetPath = ShareTool.getShareTarget(shareLink);
         if (null == targetPath || Module.CALENDAR.getFolderConstant() != targetPath.getModule() || false == targetPath.isFolder()) {
-            return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
+            return new Builder().state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
         }
         /*
          * check if account already exists for this guest user
@@ -199,7 +199,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         }
         if (null != guestInfo) {
             if (false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
-                return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).build();
+                return new Builder().state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).build();
             }
             if (false == UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
                 return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).build();
@@ -274,7 +274,6 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         return getSubscriptionInfo(updatedAccount, ShareTool.getShareTarget(shareLink));
     }
 
-
     @Override
     public boolean unsubscribe(Session session, String shareLink) throws OXException {
         return unsubscribe(session, shareLink, false);
@@ -305,7 +304,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         if (null != result) {
             return true;
         }
-        if (null == result && null != calendarAccess.getWarnings() && 1 == calendarAccess.getWarnings().size() &&
+        if (null != calendarAccess.getWarnings() && 1 == calendarAccess.getWarnings().size() &&
             ShareSubscriptionExceptions.ACCOUNT_WILL_BE_REMOVED.equals(calendarAccess.getWarnings().get(0))) {
             throw calendarAccess.getWarnings().get(0); //TODO: or supply the warnings to the caller?
         }

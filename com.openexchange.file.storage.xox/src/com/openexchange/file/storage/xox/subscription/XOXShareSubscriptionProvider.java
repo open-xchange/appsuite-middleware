@@ -179,8 +179,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                     if (Strings.isNotEmpty(folder)) {
                         RemoteFolder remoteFolder = apiClient.execute(new GetFolderCall(folder));
                         if (folder.equals(remoteFolder.getID())) {
-                            builder.state(ADDABLE);
-                            builder.error(null);
+                            builder.state(ADDABLE).error(null);
                         }
                     }
                 }
@@ -195,7 +194,7 @@ public class XOXShareSubscriptionProvider extends AbstractFileStorageSubscriptio
                 /*
                  * Only thrown for anonymous guest
                  */
-                builder.state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+                builder.state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
             } else {
                 builder.state(UNRESOLVABLE).error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink, e));
             }

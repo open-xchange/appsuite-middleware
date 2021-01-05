@@ -126,6 +126,11 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
     }
 
     @Override
+    public boolean getDefaultEnabled() {
+        return false; // will use com.openexchange.calendar.xctx2.enabled automatically during checks if set
+    }
+
+    @Override
     public boolean isAvailable(Session session) {
         try {
             ServerSession serverSession = ServerSessionAdapter.valueOf(session);

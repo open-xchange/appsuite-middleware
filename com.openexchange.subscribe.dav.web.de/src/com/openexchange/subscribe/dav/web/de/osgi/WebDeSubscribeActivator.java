@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.dav.web.de.osgi;
 
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.subscribe.SubscribeService;
@@ -71,7 +72,7 @@ public class WebDeSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpClientService.class };
+        return new Class[] { HttpClientService.class, FolderService.class };
     }
 
     @Override

@@ -251,9 +251,16 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         Assert.assertTrue("Missing expected root folder(s). Expected " + expectedFolderIds + " but got " + rootFolderIds, rootFolderIds.containsAll(expectedFolderIds));
         Assert.assertFalse("Infostore root folder was contained in response but must not", rootFolderIds.contains(I(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID)));
 
-        ListRequest listPrivateRequest = new ListRequest(api, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        listPrivateRequest.setAltNames(altNames);
-        List<FolderObject> privateFolders = listFolders(listPrivateRequest);
+        VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
+        request.setAltNames(altNames);
+        VisibleFoldersResponse response = oAuthClient.execute(request);
+        assertNoErrorsAndWarnings(response);
+        Iterator<FolderObject> privateFoldersIter = response.getPrivateFolders();
+        List<FolderObject> privateFolders = new ArrayList<FolderObject>(3);
+        while (privateFoldersIter.hasNext()) {
+            privateFolders.add(privateFoldersIter.next());
+
+        }
         assertContentTypeAndPermissions(privateFolders);
         Set<Integer> privateFolderIds = collectFolderIds(privateFolders);
         Assert.assertTrue("Missing expected private folder " + privateFolderId() + " in " + privateFolderIds, privateFolderIds.contains(I(privateFolderId())));
@@ -281,7 +288,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         FolderObject client2Folder = null;
         String sharedFolderId = "u:" + getClient2().getValues().getUserId();
         for (FolderObject folder : sharedFolders) {
-            if (folder.getFullName().equals(sharedFolderId)) {
+            if (sharedFolderId.equals(folder.getFullName())) {
                 client2Folder = folder;
                 break;
             }

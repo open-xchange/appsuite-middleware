@@ -185,8 +185,9 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
      *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public XingSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
+    public XingSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) throws OXException {
         super(oauthServiceMetadata, "com.openexchange.subscribe.xing", FolderObject.CONTACT, "XING", services);
         this.services = services;
     }

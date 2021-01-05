@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-11-14 16:21+0800\n"
+"PO-Revision-Date: 2020-12-13 18:19+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -51,6 +51,22 @@ msgstr "暫時接受"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "暫時接受"
+
+#. * Unable to access the link %1$s
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:63
+msgid "Unable to access the link %1$s"
+msgstr "無法存取連結 %1$s"
+
+#. * To access the link credentials are required.
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:66
+msgid "To access the link credentials are required."
+msgstr "需要輸入帳號密碼才能存取連結。"
+
+#. * The access to the share was revoked. Please contact the owner of the share
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:69
+msgid ""
+"The access to the share was revoked. Please contact the owner of the share"
+msgstr "已註銷對分享的存取權限，請聯絡分享項目的擁有者"
 
 #: com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
@@ -106,8 +122,13 @@ msgid ""
 msgstr ""
 "無法在密碼變更期間更新應用程式密碼。您可能需要先移除再重新建立應用程式密碼。"
 
+#. *
+#. * The operation could not be completed due to missing capabilities.
+#.
 #: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "由於缺少權限，無法完成該操作。"
 
@@ -225,8 +246,10 @@ msgid ""
 msgstr "指定的 iCalendar 來源並未包含有效內容，無法處理。"
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
-msgid "The given iCal file contains too many entities."
-msgstr "提供的 iCal 檔案有太多實體。"
+msgid ""
+"The given iCal file contains too many entities. A max of %1$s entities are "
+"allowed per file."
+msgstr "提供的 iCal 檔案有太多項目，每個檔案最多只允許 %1$s 筆。"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1276,6 +1299,13 @@ msgstr "近期修改了登入資訊，造成驗證失敗。請移除帳號後以
 msgid "Internal Calendar"
 msgstr "內部行事曆"
 
+#. *
+#. * The name of the internal calendar provider.
+#.
+#: com.openexchange.chronos.provider.xctx/src/com/openexchange/chronos/provider/xctx/XctxCalendarStrings.java:65
+msgid "Federated Calendar Shares"
+msgstr "聯合行事曆分享"
+
 #. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
 msgid "The requested page does not denote a calendar."
@@ -1386,7 +1416,11 @@ msgstr "找不到要求的約會。"
 msgid "The requested version of the appointment was not found."
 msgstr "找不到要求的約會版本。"
 
+#. *
+#. * The requested folder was not found.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:93
 msgid "The requested folder was not found."
 msgstr "找不到要求的資料夾。"
 
@@ -1446,13 +1480,21 @@ msgstr "主辦人也必須是參與者。"
 msgid "All appointments of a series must contain the same organizer."
 msgstr "序列約會的主辦人必須相同。"
 
+#. *
+#. * The supplied folder is not supported. Please select a valid folder and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:73
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr "不支援指定的資料夾，請選擇有效的資料夾後再試一次。"
 
+#. *
+#. * The operation could not be completed due to a concurrent modification. Please reload the data and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:85
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1885,6 +1927,49 @@ msgstr "未知用戶端"
 #: com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
 msgstr "另一個節點正在執行相同任務，請稍後再試。"
+
+#. *
+#. * The name of the internal contacts provider.
+#.
+#: com.openexchange.contact.provider.internal/src/com/openexchange/contact/provider/internal/InternalContactsStrings.java:65
+msgid "Internal Contacts"
+msgstr "內部連絡人"
+
+#. *
+#. * The requested contact account was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:65
+msgid "The requested contact account was not found."
+msgstr "找不到要求的聯絡人帳號"
+
+#. *
+#. * The contacts provider '%1$s' is not available.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:77
+msgid "The contacts provider '%1$s' is not available."
+msgstr "連絡人供應商「%1$s」無法使用。"
+
+#. *
+#. * The requested operation is not supported for contacts provider '%1$s'.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:81
+msgid "The requested operation is not supported for contacts provider '%1$s'."
+msgstr "連絡人供應商「%1$s」不支援要求的操作。"
+
+#. *
+#. * The requested contact was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:89
+msgid "The requested contact was not found."
+msgstr "要求的聯絡人不存在。"
+
+#. *
+#. * The field '%1$s' is mandatory. Please supply a valid value and try again.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:97
+msgid ""
+"The field '%1$s' is mandatory. Please supply a valid value and try again."
+msgstr "欄位「%1$s」必填，請提供有效的值後再試一次。"
 
 #: com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -2514,6 +2599,13 @@ msgstr "全域資料庫設定無效: %1$s"
 msgid "No global database for context group \"%1$s\" found."
 msgstr "無環境群組「%1$s」的全域資料庫。"
 
+#. The counter managed for administrative entities became inconsistent and administrator should consider running the 'checkcountsconsistency' tool
+#: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:139
+msgid ""
+"Apparently administrative count tables became inconsistent. Consider running "
+"'checkcountsconsistency' tool."
+msgstr "顯然管理計數表已不一致。請考慮執行「checkcountsconsistency」工具。"
+
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
 msgid "Problem with reading from or writing to database"
@@ -2831,7 +2923,7 @@ msgstr "檔案大小"
 #. Displayed as: [Search for] 'user input' in file name.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:115
 msgid "in file name"
 msgstr "於檔案名稱"
 
@@ -2877,7 +2969,11 @@ msgid "Enter url"
 msgstr "請輸入網址"
 
 #. Missing capability for file storage %1$s
+#. *
+#. * Missing capability for file storage %1$s
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:63
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:70
 msgid "Missing capability for file storage %1$s"
 msgstr "檔案儲存空間 %1$s 缺少能力資訊"
 
@@ -2894,7 +2990,11 @@ msgid ""
 msgstr "無法更新文檔，因為它被修改。請重試。"
 
 #. The connection check failed
+#. *
+#. * The connection check failed
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:72
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:65
 msgid "The connection check failed."
 msgstr "連線檢查失敗。"
 
@@ -2907,6 +3007,20 @@ msgstr "無法連線到網址：%1$s。請更正後再試一次。"
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
 msgid "The given URL is invalid. Please change it and try again."
 msgstr "指定的網址無效。請更正後再試一次。"
+
+#. *
+#. * The share link label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:65
+msgid "OX share link"
+msgstr "OX 分享連結"
+
+#. *
+#. * The password label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:70
+msgid "OX share link password"
+msgstr "OX 分享連結密碼"
 
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
@@ -3161,6 +3275,47 @@ msgid ""
 "The account name is too long. Please limit the account name to a maximum of "
 "%1$s characters."
 msgstr "帳號名稱太長，請縮短到 %1$s 字元以內。"
+
+#. With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:196
+msgid ""
+"With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
+"\"%3$s\" people will lose access."
+msgstr ""
+"將檔案 \"%1$s\" 從分享資料夾 \"%2$s \" 移出至 \"%3$s\"，部分人員將失去存取權"
+"限"
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%2$s\" will lose access."
+msgstr ""
+"檔案「%1$s」將分享給所有有權限存取「%3$s」的人，每個能看到「%2$s」的人都會失"
+"去存取權限。"
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:202
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
+msgstr "檔案「%1$s」將分享給所有有權限存取「%3$s」的人。"
+
+#. With moving file \"%1$s\" its permissions will get lost.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
+msgid "With moving file \"%1$s\" its permissions will get lost."
+msgstr "移動檔案 \"%1$s\" 後，將失去它的存取權限設定。"
+
+#. The account could not be updated 1$s
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:208
+msgid "The account could not be updated: 1$s"
+msgstr "無法更新帳號: %1$s"
+
+#. Searching folder by folder name is not supported
+#. User tries to search folder by folder name, but that functionality is not supported
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:211
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
+msgid "Searching folder by folder name is not supported"
+msgstr "不支援以資料夾名稱搜尋資料夾"
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3658,44 +3813,51 @@ msgstr "聯絡人"
 msgid "File description"
 msgstr "檔案描述"
 
+#. Search in folder name
+#. -----------------------------------------------------------------------------------------------------
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
+msgid "Folder name"
+msgstr "資料夾名稱"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
 msgid "Images"
 msgstr "圖片"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
 msgid "Audio"
 msgstr "音訊"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
 msgid "Video"
 msgstr "視訊"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
 msgid "Documents"
 msgstr "文件"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
 msgid "Other"
 msgstr "其他"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "公共文件夾"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "私人文件夾"
 
 #. Shared folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "共用資料夾"
@@ -3703,16 +3865,23 @@ msgstr "共用資料夾"
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:120
 msgid "in file description"
 msgstr "於檔案描述"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file content.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:125
 msgid "in file content"
 msgstr "於檔案內容"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in folder name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+msgid "in folder name"
+msgstr "於資料夾名稱"
 
 #. Context: Searching in mail.
 #. Displayed as: [Search for] 'user input' in mail text.
@@ -6492,12 +6661,10 @@ msgstr ""
 msgid "Failed to delete all folders"
 msgstr "無法刪除所有資料夾"
 
-#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#. The folder was not updated. Please review the warnings for details.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
-msgid ""
-"The folder was not updated due to possible data loss. Please review the "
-"warnings for details."
-msgstr "因為可能已損失資料，並未更新「%1$s」資料夾。請參考警告中的詳細資訊。"
+msgid "The folder was not updated. Please review the warnings for details."
+msgstr "資料夾並未更新，請確認警告資訊當中的詳情。"
 
 #. Folder name contains not allowed characters: \"%1$s\"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
@@ -6508,6 +6675,46 @@ msgstr "資料夾名稱包含無效字元:「%1$s」"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
 msgid "The chosen permission(s) cannot be set"
 msgstr "無法設定選擇的權限"
+
+#. With moving the shared folder \"%1$s\" people will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:113
+msgid "With moving the shared folder \"%1$s\" people will lose access."
+msgstr "移動共享資料夾 \"%1$s\" 後，成員將失去存取權限。"
+
+#. This folder  will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:116
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%1$s\" will lose access."
+msgstr ""
+"此資料夾將分享給所有有權存取 \"%3$s\" 的人，每個看得到 \"%1$s\" 的人將失去存"
+"取權限。"
+
+#. This folder will be shared with everyone who has access to \"%3$s\.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
+msgid "This folder will be shared with everyone who has access to \"%3$s\"."
+msgstr "此資料夾將分享給所有有權存取 \"%3$s\" 的人。"
+
+#. You are moving a folder that contains shares. People will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:122
+msgid "You are moving a folder that contains shares. People will lose access."
+msgstr "您正在移動包含分享項目的資料夾，其他人將失去存取權限。"
+
+#. This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:125
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see the subfolders of \"%1$s\" will lose access."
+msgstr ""
+"此資料夾將分享給所有有權存取 \"%3$s\" 的人，每個看得到 \"%1$s\" 的子資料夾的"
+"人將失去存取權限。"
+
+#. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
+#: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:276
+#: com.openexchange.server/src/com/openexchange/mail/OAuthMailErrorMessages.java:62
+msgid "No account access permitted."
+msgstr "未授權存取帳號。"
 
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -7184,11 +7391,6 @@ msgstr "視訊"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:122
 msgid "Templates"
 msgstr "模板"
-
-#. -----------------------------------------------------------------------------------------------------
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
-msgid "Folder name"
-msgstr "資料夾名稱"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
@@ -9764,6 +9966,20 @@ msgid ""
 "inconsistent."
 msgstr "包含要用來分享的資料夾，與資料夾中可用的附件並不一致。"
 
+#. *
+#. * The description of the read-only scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+msgid "Read all your mails"
+msgstr "讀取您的所有郵件"
+
+#. *
+#. * The description of the writable scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+msgid "Create, modify, delete, import and send mails"
+msgstr "建立、編輯、刪除、匯入與寄出郵件"
+
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -9813,15 +10029,6 @@ msgstr "請使用下列密碼: %1$s"
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
 msgstr "未命名"
-
-#. Application 'xyz' requires following permissions:
-#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
-#. - ...
-#: com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
-msgid ""
-"Send RFC822 data using primary account's transport. This requires master "
-"authentication to be active."
-msgstr "使用主帳號的傳輸權限傳送 RFC822 資料，需要開啟主控認證。"
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -11030,6 +11237,26 @@ msgid ""
 "later."
 msgstr "您尋找的共享項目目前無法使用，請稍候再試。"
 
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:100
+msgid "You don't have sufficient permissions to subscribe to a share."
+msgstr "您沒有足夠的權限來訂閱分享內容。"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
+msgid "Subscribing to a single file is not allowed"
+msgstr "不允許訂閱單一檔案"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
+msgid "You are not allowed to subscribe to a share for %1$s"
+msgstr "您未被允許為 %1$s 訂閱分享項目"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:106
+msgid "You are not allowed to subscribe to an anonymous share"
+msgstr "您未被允許訂閱匿名分享項目"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:108
+msgid "You are not allowed to unsubscribe folder %1$s"
+msgstr "您未被允許取消訂閱 %1$s 資料夾"
+
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "圖片"
@@ -11535,6 +11762,33 @@ msgstr "發生錯誤，無法傳送通知郵件。"
 msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr "您沒有足夠的權限來傳送通知至此分享內容。"
+
+#. * Unable to find a subscription for \"%1$s\"
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:63
+msgid "Unable to find a subscription for \"%1$s\""
+msgstr "找不到「%1$s」的訂閱"
+
+#. * The given link \"%1$s\" can't be resolved to a share.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:66
+msgid "The given link \"%1$s\" can't be resolved to a share."
+msgstr "指定的連結「%1$s」無法對應到某筆分享項目。"
+
+#. * You don't have enough permissions to perform the operation.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:69
+msgid "You don't have enough permissions to perform the operation."
+msgstr "您沒有足夠的權限來進行操作。"
+
+#. * The folder %1$s belongs to a folder tree that is unsubscribed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:72
+msgid "The folder %1$s belongs to a folder tree that is unsubscribed."
+msgstr "%1$s 資料夾屬於已取消訂閱的資料夾樹。"
+
+#. * After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:75
+msgid ""
+"After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
+"will be removed."
+msgstr "取消訂閱 \"%1$s\" 後，將移除所有來自帳號 \"%2$s\" 的資料夾。"
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -14131,6 +14385,20 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid "The given iCal file contains too many entities."
+#~ msgstr "提供的 iCal 檔案有太多實體。"
+
+#~ msgid ""
+#~ "The folder was not updated due to possible data loss. Please review the "
+#~ "warnings for details."
+#~ msgstr ""
+#~ "因為可能已損失資料，並未更新「%1$s」資料夾。請參考警告中的詳細資訊。"
+
+#~ msgid ""
+#~ "Send RFC822 data using primary account's transport. This requires master "
+#~ "authentication to be active."
+#~ msgstr "使用主帳號的傳輸權限傳送 RFC822 資料，需要開啟主控認證。"
 
 #~ msgid ""
 #~ "You have been invited to an appointment organized by %1$s on behalf of "

@@ -69,6 +69,7 @@ import org.xml.sax.SAXException;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
@@ -82,8 +83,8 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @since v7.10.0
  */
 public abstract class AbstractDAVSubscribeService extends AbstractSubscribeService {
-    
-    public final static String CLIENT_ID = "davsub"; 
+
+    public final static String CLIENT_ID = "davsub";
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -93,9 +94,11 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
 
     /**
      * Initializes a new {@link AbstractDAVSubscribeService}.
+     *
+     * @throws OXException
      */
-    protected AbstractDAVSubscribeService(ServiceLookup services) {
-        super();
+    protected AbstractDAVSubscribeService(ServiceLookup services) throws OXException {
+        super(services.getServiceSafe(com.openexchange.folderstorage.FolderService.class));
         this.services = services;
         this.subscriptionSource = initSS();
     }

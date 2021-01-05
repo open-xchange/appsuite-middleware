@@ -53,7 +53,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
@@ -70,12 +72,14 @@ import com.openexchange.subscribe.yahoo.oauth.YahooContactsOAuthAccountAssociati
  */
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
+
     private final BundleContext context;
     private final String yahooIdentifier;
     private volatile ServiceRegistration<SubscribeService> serviceRegistration;
     private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public OAuthServiceMetaDataRegisterer(final BundleContext context, ServiceLookup services) {
         this.context = context;
@@ -88,7 +92,12 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         if (yahooIdentifier.equals(oAuthServiceMetaData.getId())) {
             if (null == serviceRegistration) {
-                serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
+                try {
+                    serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
+                } catch (OXException e) {
+                    LOG.error("Unable to create YahooSubscribeService: " + e.getMessage(), e);
+                    return null;
+                }
                 org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
             }
 
@@ -96,7 +105,12 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
                 associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new YahooContactsOAuthAccountAssociationProvider(services), null);
             }
             if (null == serviceRegistration) {
-                serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
+                try {
+                    serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
+                } catch (OXException e) {
+                    LOG.error("Unable to create YahooSubscribeService: " + e.getMessage(), e);
+                    return null;
+                }
                 LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
             }
         }

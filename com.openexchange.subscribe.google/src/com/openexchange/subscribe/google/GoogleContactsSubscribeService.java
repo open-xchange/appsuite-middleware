@@ -108,8 +108,9 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
+    public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) throws OXException {
         super(oauthServiceMetadata, SOURCE_ID, FolderObject.CONTACT, "Google", services);
         this.services = services;
 

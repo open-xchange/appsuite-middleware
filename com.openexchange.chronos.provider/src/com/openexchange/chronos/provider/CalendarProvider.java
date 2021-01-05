@@ -92,6 +92,20 @@ public interface CalendarProvider {
     int getDefaultMaxAccounts();
 
     /**
+     * Gets a value indicating whether the calendar provider is enabled by <b>default</b> or not.
+     * <p/>
+     * <i>Note: The value may still be overridden by the corresponding configuration property.</i>
+     * <p/>
+     * Returns <code>true</code> by default, override if applicable.
+     *
+     * @return <code>true</code> if the provider is enabled by default, <code>false</code>, otherwise
+     * @see CalendarProviders#getEnabledPropertyName(CalendarProvider)
+     */
+    default boolean getDefaultEnabled() {
+        return true;
+    }
+
+    /**
      * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
      *
      * @return The supported calendar capabilities, or an empty set if no extended functionality is available
@@ -166,7 +180,7 @@ public interface CalendarProvider {
      * decrypted automatically when account data of the provider is loaded again from the storage.
      * <p/>
      * Returns an ampty set by default, override as needed.
-     * 
+     *
      * @return The <i>secret</i> properties in account configurations of this calendar provider, or an empty set if there are none
      */
     default Set<String> getSecretProperties() {

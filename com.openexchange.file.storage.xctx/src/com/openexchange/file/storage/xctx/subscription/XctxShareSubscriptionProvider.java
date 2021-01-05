@@ -155,10 +155,10 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             return unknownGuest(shareLink);
         }
         if (false == RecipientType.GUEST.equals(guestInfo.getRecipientType()) || Strings.isEmpty(guestInfo.getEmailAddress())) {
-            return forbidden(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create());
+            return new Builder().state(UNSUPPORTED).error(ShareExceptionCodes.NO_SUBSCRIBE_SHARE_ANONYMOUS.create()).infos(getModuleInfo()).build();
         }
         if (false == UserAliasUtility.isAlias(guestInfo.getEmailAddress(), getAliases(ServerSessionAdapter.valueOf(session).getUser()))) {
-            return forbidden(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(guestInfo.getEmailAddress()));
+            return new Builder().state(FORBIDDEN).error(ShareExceptionCodes.NO_SUBSCRIBE_PERMISSION.create(shareLink)).infos(getModuleInfo()).build();
         }
 
         /*
@@ -247,21 +247,6 @@ public class XctxShareSubscriptionProvider extends AbstractFileStorageSubscripti
             .state(UNRESOLVABLE)
             .error(ShareSubscriptionExceptions.NOT_USABLE.create(shareLink))
             .infos(null)
-            .build(); // @formatter:on
-    }
-
-    /**
-     * Create a response for a forbidden action, e.g. when the current
-     * user tries to subscribe to a share she is not the target user of
-     *
-     * @param exception The exception to send
-     * @return The response
-     */
-    private ShareLinkAnalyzeResult forbidden(OXException exception) {
-        return new Builder() // @formatter:off
-            .state(FORBIDDEN)
-            .error(exception)
-            .infos(getModuleInfo())
             .build(); // @formatter:on
     }
 

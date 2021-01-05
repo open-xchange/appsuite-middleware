@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Before;
@@ -170,9 +171,10 @@ public class SearchTest extends AbstractAJAXSession {
     }
 
     public static void assertTitles(final List<com.openexchange.file.storage.File> files, final String... titles) {
-        final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
+        List<String> list = Arrays.asList(titles);
+        final Set<String> titlesSet = new HashSet<String>(list);
 
-        final String error = "Expected: " + titlesSet + " but got " + files;
+        final String error = String.format("Expected: [%s] but got [%s]", list.stream().collect(Collectors.joining(", ")), files.stream().map(f -> f.getTitle()).collect(Collectors.joining(", ")));
         assertEquals(error, titles.length, files.size());
         for (int i = 0; i < files.size(); i++) {
             final com.openexchange.file.storage.File entry = files.get(i);

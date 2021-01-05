@@ -120,8 +120,10 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
 
     /**
      * Initializes a new {@link AbstractCardDAVSubscribeService}.
+     *
+     * @throws OXException
      */
-    protected AbstractCardDAVSubscribeService(ServiceLookup services) {
+    protected AbstractCardDAVSubscribeService(ServiceLookup services) throws OXException {
         super(services);
     }
 

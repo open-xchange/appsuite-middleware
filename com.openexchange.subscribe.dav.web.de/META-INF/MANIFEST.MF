@@ -6,6 +6,7 @@ Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
+ com.openexchange.folderstorage,
  com.openexchange.i18n,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,

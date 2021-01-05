@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -99,7 +100,13 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
         if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
             logger.info("Registering Google Contact subscription services.");
-            GoogleContactsSubscribeService subscribeService = new GoogleContactsSubscribeService(oAuthServiceMetaData, services);
+            GoogleContactsSubscribeService subscribeService;
+            try {
+                subscribeService = new GoogleContactsSubscribeService(oAuthServiceMetaData, services);
+            } catch (OXException e) {
+                logger.error("Unable to create Google Contact subscription services: " + e.getMessage(), e);
+                return null;
+            }
             contactsRegistration = context.registerService(SubscribeService.class, subscribeService, null);
             deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new GoogleSubscriptionsOAuthAccountDeleteListener(subscribeService, services), null);
 

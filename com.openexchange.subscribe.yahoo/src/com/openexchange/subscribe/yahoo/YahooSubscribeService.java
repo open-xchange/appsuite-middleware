@@ -77,8 +77,9 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
      *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
+    public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) throws OXException {
         super(metadata, SOURCE_ID, FolderObject.CONTACT, "Yahoo!", services);
         this.services = services;
     }

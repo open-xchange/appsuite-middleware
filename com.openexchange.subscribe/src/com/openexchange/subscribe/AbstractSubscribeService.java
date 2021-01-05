@@ -97,17 +97,18 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public static final AtomicReference<SecretEncryptionFactoryService> ENCRYPTION_FACTORY = new AtomicReference<>();
     public static final AtomicReference<CryptoService> CRYPTO_SERVICE = new AtomicReference<>();
     public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<>();
-    public static final AtomicReference<com.openexchange.folderstorage.FolderService> FOLDER_STORAGE_SERVICE = new AtomicReference<>();
     public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<>();
 
     private final SubscriptionErrorMarker marker;
 
     /**
      * Initializes a new {@link AbstractSubscribeService}.
+     *
+     * @param folderService The {@link com.openexchange.folderstorage.FolderService} to use
      */
-    public AbstractSubscribeService() {
+    public AbstractSubscribeService(com.openexchange.folderstorage.FolderService folderService) {
         super();
-        marker = new SubscriptionErrorMarker(this, FOLDER_STORAGE_SERVICE.get());
+        marker = new SubscriptionErrorMarker(this, folderService);
     }
 
     /**
