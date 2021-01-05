@@ -411,8 +411,12 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
         for (List<String> mail : mailsResponse.getData()) {
             String subject = mail.get(2);
-            if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
+            if (Strings.isEmpty(subject)) {
                 LOGGER.info("Mail with ID {} has no subject", mail.get(0));
+                continue;
+            }
+            if (false == subject.contains(subjectToMatch)) {
+                LOGGER.info("Wrong subject. Expected \"{}\" but was \"{}\"", subjectToMatch, subject);
                 continue;
             }
             MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
