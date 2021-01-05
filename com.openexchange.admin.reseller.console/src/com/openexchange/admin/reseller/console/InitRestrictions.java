@@ -89,8 +89,9 @@ public class InitRestrictions extends ResellerAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             final OXResellerInterface rsi = getResellerInterface();
-
+            System.out.println("Starting initialization...");
             rsi.initDatabaseRestrictions(auth);
+            System.out.println("Restrictions successfully initialized.");
         } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
