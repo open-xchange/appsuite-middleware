@@ -359,7 +359,7 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         SyncToken nextSyncToken;
         if (updates.isTruncated()) {
             syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(DAVProtocol.SC_INSUFFICIENT_STORAGE, getUrl(), this));
-            nextSyncToken = new SyncToken(updates.getTimestamp(), Flag.TRUNCATED);
+            nextSyncToken = new SyncToken(updates.getTimestamp(), null, Flag.TRUNCATED);
         } else {
             nextSyncToken = new SyncToken(updates.getTimestamp());
         }
