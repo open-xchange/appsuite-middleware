@@ -187,7 +187,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
             //      maybe we can introduce something like "-1" for "unknown number of versions"
             String path = toPath(folderId, id);
-            ListRevisionsResult revisions = client.files().listRevisions(path, 100);
+            ListRevisionsResult revisions = client.files().listRevisionsBuilder(path).withLimit(Long.valueOf(100)).start();
             if (revisions != null) {
                 dropboxFile.setNumberOfVersions(revisions.getEntries().size());
             }
@@ -746,7 +746,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = length - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), true, null, false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
