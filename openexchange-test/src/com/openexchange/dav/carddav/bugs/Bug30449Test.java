@@ -76,14 +76,17 @@ public class Bug30449Test extends CardDAVTest {
     @Test
     public void testDontIncludeX_OPEN_XCHANGE_CTYPE() throws Exception {
         /*
+         * create subfolder for test on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(folderName);
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
-         * create subfolder and contacts on server
+         * create contact on server
          */
-        String folderName = "testfolder_" + randomUID();
-        FolderObject subFolder = super.createFolder(folderName);
         String uid = randomUID();
         String firstName = "gerd";
         String lastName = "gurke";
