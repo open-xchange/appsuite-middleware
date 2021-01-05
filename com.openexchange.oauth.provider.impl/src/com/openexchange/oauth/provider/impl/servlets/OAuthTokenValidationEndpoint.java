@@ -59,7 +59,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.net.HttpHeaders;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
@@ -67,7 +66,6 @@ import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizatio
 import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
-import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -97,9 +95,7 @@ public abstract class OAuthTokenValidationEndpoint extends OAuthEndpoint {
     protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws IOException {
         try {
             Tools.disableCaching(resp);
-            if (isInsecureButMustNot(request)) {
-                resp.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-                resp.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            if (isNotSecureEndpoint(request, resp)) {
                 return;
             }
 
