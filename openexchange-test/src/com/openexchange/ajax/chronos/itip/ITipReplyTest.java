@@ -192,7 +192,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         fromList.add(userResponseC2.getData().getEmail1());
         data.setTo(Collections.singletonList(toList));
         data.setFrom(fromList);
-        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(apiClientC2.getSession(), data.getId(), data.toJson(), null);
+        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(data.getId(), data.toJson(), null, null);
         assertNull(forwardedMail.getErrorDesc());
 
         /*
