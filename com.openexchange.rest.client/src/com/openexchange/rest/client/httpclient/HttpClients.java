@@ -158,4 +158,22 @@ public final class HttpClients {
             }
         }
     }
+
+    /**
+     * Aborts the supplied HTTP request silently.
+     * <p>
+     * Any active execution of this method should return immediately. If the request has not started, it will abort after the next execution.
+     * Aborting this request will cause all subsequent executions with this request to fail.
+     *
+     * @param request The HTTP request to abort
+     */
+    public static void abort(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.abort();
+            } catch (Exception e) {
+                LOG.trace("Failed to reset request for making it reusable.", e);
+            }
+        }
+    }
 }
