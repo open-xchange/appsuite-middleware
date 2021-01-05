@@ -120,7 +120,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     }
 
-    // Bug 3928 
+    // Bug 3928
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -138,7 +138,7 @@ public class NewTest extends InfostoreAJAXTest {
         assertEquals("Version Comment", obj.getVersionComment());
     }
 
-    // Bug 4120 
+    // Bug 4120
     @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -147,7 +147,7 @@ public class NewTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse("Unexpected error: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
         data.setFileMIMEType("text/plain");
