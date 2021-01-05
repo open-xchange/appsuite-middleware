@@ -56,8 +56,8 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -161,14 +161,14 @@ public final class OAuthUtil {
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
     public static final String providerScopesToString(Set<OAuthScope> scopes) {
-        Set<String> strings = new HashSet<>();
+        Set<String> scopeIdentifiers = new LinkedHashSet<>();
         for (OAuthScope scope : scopes) {
             String[] split = Strings.splitByWhitespaces(scope.getProviderScopes());
-            for (String s : split) {
-                strings.add(s);
+            for (String scopeIdentifier : split) {
+                scopeIdentifiers.add(scopeIdentifier);
             }
         }
-        return setToString(strings);
+        return setToString(scopeIdentifiers);
     }
 
     /**
@@ -179,28 +179,30 @@ public final class OAuthUtil {
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
     public static final String oxScopesToString(Set<OAuthScope> scopes) {
-        Set<String> strings = new HashSet<>();
+        Set<String> scopeNames = new LinkedHashSet<>();
         for (OAuthScope scope : scopes) {
-            strings.add(scope.getOXScope().name());
+            scopeNames.add(scope.getOXScope().name());
         }
-        return setToString(strings);
+        return setToString(scopeNames);
     }
 
     /**
      * Creates a whitespace separated list of strings out of the specified {@link Set}
      *
-     * @param strings The {@link Set} with the strings
+     * @param scopes The {@link Set} with the strings
      * @return a whitespace separated list of strings
      */
-    private static final String setToString(Set<String> strings) {
-        if (strings.isEmpty()) {
+    private static final String setToString(Set<String> scopes) {
+        if (scopes.isEmpty()) {
             return "";
         }
+
+        Iterator<String> iter = scopes.iterator();
         StringBuilder builder = new StringBuilder();
-        for (String string : strings) {
-            builder.append(string).append(" ");
+        builder.append(iter.next());
+        while (iter.hasNext()) {
+            builder.append(' ').append(iter.next());
         }
-        builder.setLength(builder.length() - 1);
         return builder.toString();
     }
 
