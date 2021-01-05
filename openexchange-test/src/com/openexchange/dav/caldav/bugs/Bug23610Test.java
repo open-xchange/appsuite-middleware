@@ -127,14 +127,14 @@ public class Bug23610Test extends CalDAVTest {
         for (Property property : attendees) {
             if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
                 for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
-                    if (attribute.getKey().equals("PARTSTAT")) {
+                    if (attribute.getKey().equals("PARTSTAT") && false == partstat.equals(attribute.getValue())) {
                         attribute.setValue(partstat);
+                        iCalResource.getVEvent().setTransp(Appointment.DECLINE == confirmationStatus ? "TRANSPARENT" : "OPAQUE");
                     }
                 }
                 break;
             }
         }
-        iCalResource.getVEvent().setTransp(Appointment.DECLINE == confirmationStatus ? "TRANSPARENT" : "OPAQUE");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server
