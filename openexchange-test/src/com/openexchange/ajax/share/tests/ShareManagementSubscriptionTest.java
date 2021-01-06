@@ -119,6 +119,8 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         addTearDownOperation(() -> logoutClient(apiClientC2, true));
         smApiC2 = new ShareManagementApi(apiClientC2);
         filestorageApiC2 = new FilestorageApi(apiClientC2);
+        cleanInbox(apiClientC2);
+        
 
         AJAXClient ajaxClientC2 = generateClient(testUserC2);
         addTearDownOperation(() -> ajaxClientC2.logout());
