@@ -256,4 +256,28 @@ public class ImportedTimeZone extends net.fortuna.ical4j.model.TimeZone implemen
         return null;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((lastRuleInstance == null) ? 0 : lastRuleInstance.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ImportedTimeZone other = (ImportedTimeZone) obj;
+        if (lastRuleInstance == null) {
+            if (other.lastRuleInstance != null)
+                return false;
+        } else if (!lastRuleInstance.equals(other.lastRuleInstance))
+            return false;
+        return true;
+    }
 }
