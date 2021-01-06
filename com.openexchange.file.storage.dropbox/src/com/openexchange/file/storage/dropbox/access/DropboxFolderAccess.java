@@ -233,7 +233,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         if (false == autoRename) {
             String fullpath = constructPath(parentId, toCreate.getName());
             try {
-                FolderMetadata folderMetadata = client.files().createFolder(fullpath);
+                FolderMetadata folderMetadata = client.files().createFolderV2(fullpath).getMetadata();
                 return folderMetadata.getPathDisplay();
             } catch (CreateFolderErrorException e) {
                 CreateFolderError error = e.errorValue;
@@ -256,7 +256,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         NameBuilder name = null;
         while (true) {
             try {
-                FolderMetadata folderMetadata = client.files().createFolder(fullpath);
+                FolderMetadata folderMetadata = client.files().createFolderV2(fullpath).getMetadata();
                 return folderMetadata.getPathDisplay();
             } catch (CreateFolderErrorException e) {
                 CreateFolderError error = e.errorValue;
@@ -303,7 +303,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
         if (false == autoRename) {
             try {
-                Metadata metadata = client.files().move(folderId, newParentId);
+                Metadata metadata = client.files().moveV2Builder(folderId, newParentId).start().getMetadata();
                 return metadata.getPathDisplay();
             } catch (RelocationErrorException e) {
                 RelocationError relocationError = e.errorValue;
@@ -327,7 +327,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         while (true) {
             try {
                 String toPath = newParentId + name.toString();
-                Metadata metadata = client.files().move(folderId, toPath);
+                Metadata metadata = client.files().moveV2Builder(folderId, toPath).start().getMetadata();
                 return metadata.getPathDisplay();
             } catch (RelocationErrorException e) {
                 RelocationError relocationError = e.errorValue;
@@ -354,7 +354,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         String parentId = folderId.substring(0, lastIndex + 1);
         try {
             String newPath = parentId + newName;
-            Metadata metadata = client.files().move(folderId, newPath);
+            Metadata metadata = client.files().moveV2Builder(folderId, newPath).start().getMetadata();
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
             RelocationError relocationError = e.errorValue;
@@ -375,7 +375,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public String deleteFolder(String folderId) throws OXException {
         try {
-            Metadata metadata = client.files().delete(folderId);
+            Metadata metadata = client.files().deleteV2(folderId).getMetadata();
             return metadata.getName();
         } catch (DeleteErrorException e) {
             throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "", accountDisplayName);
@@ -396,7 +396,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             for (Metadata entry : entries) {
                 if (entry instanceof FolderMetadata) {
                     try {
-                        client.files().delete(entry.getPathDisplay());
+                        client.files().deleteV2(entry.getPathDisplay());
                     } catch (DeleteErrorException e) {
                         LOG.debug("The folder '{}' could not be deleted. Skipping.", entry.getPathDisplay(), e);
                     }

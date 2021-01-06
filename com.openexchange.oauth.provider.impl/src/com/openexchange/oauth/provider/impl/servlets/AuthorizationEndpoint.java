@@ -148,9 +148,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (isInsecureButMustNot(request)) {
-            response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-            response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        if (isNotSecureEndpoint(request, response)) {
             return;
         }
 
@@ -205,9 +203,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (isInsecureButMustNot(request)) {
-            response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-            response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        if (isNotSecureEndpoint(request, response)) {
             return;
         }
 

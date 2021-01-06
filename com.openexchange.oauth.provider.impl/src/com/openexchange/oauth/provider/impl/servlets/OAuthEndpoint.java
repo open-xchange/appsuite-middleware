@@ -67,6 +67,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HttpHeaders;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
@@ -121,24 +122,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
      * @param request The HTTP request
      * @return <code>true</code> if an insecure request was made and this is not allowed
      */
-    protected boolean isInsecureButMustNot(HttpServletRequest request) {
-        if (Tools.considerSecure(request)) {
-            return false;
-        }
-
-        if (allowInsecureLocalhost()) {
-            String hostname = URLHelper.getHostname(request);
-            int portIndex = hostname.indexOf(':');
-            if (portIndex > 0) {
-                hostname = hostname.substring(0, portIndex);
-            }
-
-            if (URI_LOCALHOSTS.contains(hostname)) {
-                return false;
-            }
-        }
-
-        return true;
+    private boolean isInsecureButMustNot(HttpServletRequest request) {
+        return !Tools.considerSecure(request);
     }
 
     /**
@@ -250,6 +235,38 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
         OXTemplate loginPage = templateService.loadTemplate("oauth-provider-error.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
         loginPage.process(vars, writer);
+    }
+
+    /**
+     * Checks whether the request is allowed or not and sends an appropriate response in case it is not.
+     *
+     * @param request The request
+     * @param response The response
+     * @return <code>true</code> if the request is allowed, <code>false</code> otherwise
+     * @throws IOException
+     */
+    protected boolean isNotSecureEndpoint(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (isInsecureButMustNot(request)) {
+
+            if (allowInsecureLocalhost()) {
+                String hostname = URLHelper.getHostname(request);
+                int portIndex = hostname.indexOf(':');
+                if (portIndex > 0) {
+                    hostname = hostname.substring(0, portIndex);
+                }
+
+                if (URI_LOCALHOSTS.contains(hostname)) {
+                    return false;
+                }
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Localhost not allowed. Please adjust com.openexchange.oauth.provider.allowInsecureLocalhost");
+                return true;
+            }
+
+            response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
+            response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            return true;
+        }
+        return false;
     }
 
 }

@@ -554,11 +554,15 @@ public class MailStorage implements IMailStorage {
             MailPath newDraftPath = deleteAndSaveDraftMail(draftPath, processor.getOriginalSize(), processor, securitySettings, defaultMailAccess, true, optRefMessage, session).getMailPath();
             processor.getFileCacheReference().ifPresent(r -> r.cleanUp());
 
-            // Check for edit-draft
+            // Check for edit-draft --> Not needed since already dropped when opening composition space
+            /*-
+             *
             MailPath editFor = meta == null ? null : meta.getEditFor();
             if (editFor != null) {
                 defaultMailAccess.getMessageStorage().deleteMessages(editFor.getFolder(), new String[] { editFor.getMailID() }, true);
             }
+             *
+             */
 
             return MailStorageResult.resultFor(null, newDraftPath, true, defaultMailAccess, processor);
         } finally {

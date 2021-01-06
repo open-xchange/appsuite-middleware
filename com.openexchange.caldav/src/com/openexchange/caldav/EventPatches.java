@@ -49,10 +49,11 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -973,6 +974,95 @@ public class EventPatches {
         }
 
         /**
+         * Restores an event's transparency back to its original value in case the participation status of the calendar user's attendee
+         * was also changed along with the update (bug 23610).
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void restoreEventTransparency(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (false == resource.exists() || null == importedEvent || false == isGroupScheduled(importedEvent) ||
+                isOrganizer(resource.getEvent(), resource.getFactory().getUser().getId())) {
+                return; // not applicable
+            }
+            try {
+                int calendarUserId = resource.getParent().getCalendarUser().getId();
+                new CalendarAccessOperation<Void>(factory) {
+
+                    @Override
+                    protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                        /*
+                         * restore transparency in single event or series master
+                         */
+                        EventID eventID = getEventID(resource.getEvent());
+                        restoreEventTransparency(access, calendarUserId, eventID, importedEvent);
+                        /*
+                         * restore transparency in change exceptions
+                         */
+                        if (null != importedChangeExceptions) {
+                            for (Event importedChangeException : importedChangeExceptions) {
+                                eventID = new EventID(eventID.getFolderID(), eventID.getObjectID(), importedChangeException.getRecurrenceId());
+                                restoreEventTransparency(access, calendarUserId, eventID, importedEvent);
+                            }
+                        }
+                        return null;
+                    }
+                }.execute(factory.getSession());
+            } catch (OXException e) {
+                LOG.warn("Error restoring participation status in organizer's attendee", e);
+            }
+        }
+
+        private Event optEvent(IDBasedCalendarAccess access, EventID eventID) {
+            try {
+                return access.getEvent(eventID);
+            } catch (OXException e) {
+                LOG.debug("Unable to get event with id {}", eventID, e);
+                return null;
+            }
+        }
+
+        /**
+         * Restores an event's transparency back to its original value in case the participation status of the calendar user's attendee
+         * was also changed along with the update, and the underlying event represents an attendee scheduling resource.
+         *
+         * @param access A reference to the calendar access
+         * @param calendarUserId The identifier of the actual calendar user id
+         * @param eventID The identifier of the original event to check the imported event against
+         * @param importedEvent The imported event
+         */
+        private void restoreEventTransparency(IDBasedCalendarAccess access, int calendarUserId, EventID eventID, Event importedEvent) throws OXException {
+            /*
+             * check if transparency has changed
+             */
+            Event originalEvent = optEvent(access, eventID);
+            if (null == originalEvent || isOpaqueTransparency(importedEvent) == isOpaqueTransparency(originalEvent) || 
+                false == isAttendeeSchedulingResource(originalEvent, calendarUserId)) {
+                return;
+            }
+            /*
+             * check if participation status of user attendee has changed, too
+             */
+            Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
+            if (null == originalAttendee) {
+                return;
+            }
+            EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
+            entityResolver.prepare(importedEvent.getAttendees(), new int[] { calendarUserId });
+            Attendee updatedAttendee = find(importedEvent.getAttendees(), calendarUserId);
+            if (null == updatedAttendee || false == matches(updatedAttendee, originalAttendee)) {
+                return;
+            }
+            if (null != originalAttendee.getPartStat() && false == originalAttendee.getPartStat().matches(updatedAttendee.getPartStat())) {
+                /*
+                 * participation status actively changed, so ignore implicit transparency change
+                 */
+                importedEvent.setTransp(originalEvent.getTransp());
+            }
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -1002,6 +1092,7 @@ public class EventPatches {
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
                 removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
                 restoreParticipantStatus(resource, importedEvent);
+                restoreEventTransparency(resource, importedEvent, importedChangeExceptions);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*

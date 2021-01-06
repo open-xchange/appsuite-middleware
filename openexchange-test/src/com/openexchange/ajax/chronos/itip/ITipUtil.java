@@ -113,7 +113,9 @@ public class ITipUtil {
     private static final String NOTIFY_NEW_MODIFIED_DELETED = "notifyNewModifiedDeleted";
     private static final String DELETE_INVITATION_MAIL_AFTER_ACTION = "deleteInvitationMailAfterAction";
 
+    /** Machine readable folder name of the INBOX */
     public static final String FOLDER_MACHINE_READABLE = "default0%2FINBOX";
+    /** Human readable folder name of the INBOX */
     public static final String FOLDER_HUMAN_READABLE = "default0/INBOX";
 
     /**

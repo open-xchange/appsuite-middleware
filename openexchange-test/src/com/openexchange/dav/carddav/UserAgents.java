@@ -74,6 +74,8 @@ public final class UserAgents {
 
     public static final String MACOS_10_15 = "Mac OS X/10.15 (19A603) AddressBookCore/1";
 
+    public static final String MACOS_11_1 = "macOS/11.1 (20C69) AddressBookCore/2452.2";
+
     public static final String IOS_5_0_1 = "iOS/5.0.1 (9A405) dataaccessd/1.0";
 
     public static final String IOS_5_0_1_PREF = "iOS/5.0.1 (9A405) Preferences/1.0";

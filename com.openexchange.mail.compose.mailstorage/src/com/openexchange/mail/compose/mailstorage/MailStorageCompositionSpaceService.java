@@ -562,6 +562,9 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 warnings.add(MailExceptionCode.FLAG_FAIL.create());
             }
         }
+        // Not needed since already dropped when opening composition space
+        /*-
+         *
         MailPath editFor = meta.getEditFor();
         if (null != editFor && MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
             try {
@@ -570,6 +573,8 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
             }
         }
+         *
+         */
     }
 
     private UserSettingMail getMailSendSettings(ServerSession serverSession, int accountId, AJAXRequestData request) throws OXException {
@@ -708,10 +713,10 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                     } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
                         new Reply(services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
                     } else if (type == Type.EDIT) {
-                        new EditCopy(services).doOpenForEditCopy(parameters, args, session);
+                        new EditCopy(services).doOpenForEditCopy(true, parameters, args, session);
                         editFor = parameters.getReferencedMails().get(0);
                     } else if (type == Type.COPY) {
-                        new EditCopy(services).doOpenForEditCopy(parameters, args, session);
+                        new EditCopy(services).doOpenForEditCopy(false, parameters, args, session);
                     } else if (type == Type.RESEND) {
                         new Resend(services).doOpenForResend(parameters, args, session);
                     }

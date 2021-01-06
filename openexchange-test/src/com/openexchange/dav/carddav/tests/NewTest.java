@@ -151,17 +151,20 @@ public class NewTest extends CardDAVTest {
     @Test
     public void testAddContactInSubfolderServer() throws Exception {
         /*
-         * fetch sync token for later synchronization
-         */
-        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
-        /*
-         * create folder and contact on server
+         * create folder on server
          */
         String folderName = "testfolder_" + randomUID();
         super.createFolder(folderName);
         FolderObject createdFolder = super.getFolder(folderName);
         assertNotNull("folder not found on server", createdFolder);
         assertEquals("foldername wrong", folderName, createdFolder.getFolderName());
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create contact on server
+         */
         String uid = randomUID();
         String firstName = "test";
         String lastName = "herbert";

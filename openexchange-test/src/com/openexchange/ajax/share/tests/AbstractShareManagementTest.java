@@ -70,6 +70,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
@@ -114,6 +116,8 @@ import com.openexchange.tools.id.IDMangler;
  * @since v7.10.5
  */
 public class AbstractShareManagementTest extends AbstractEnhancedApiClientSession {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractShareManagementTest.class);
 
     /* Context 1 */
     protected String sharedFolderName;
@@ -407,12 +411,18 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
         for (List<String> mail : mailsResponse.getData()) {
             String subject = mail.get(2);
-            if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
+            if (Strings.isEmpty(subject)) {
+                LOGGER.info("Mail with ID {} has no subject", mail.get(0));
+                continue;
+            }
+            if (false == subject.contains(subjectToMatch)) {
+                LOGGER.info("Wrong subject. Expected \"{}\" but was \"{}\"", subjectToMatch, subject);
                 continue;
             }
             MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
             MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
             if (null == extractMatchingAddress(mailData.getFrom(), fromToMatch)) {
+                LOGGER.info("Found potential matching sharing mail but expected sender {} is not in the FROM header {}", fromToMatch, mailData.getFrom());
                 continue;
             }
             rememberMail(mailApi, mailData);

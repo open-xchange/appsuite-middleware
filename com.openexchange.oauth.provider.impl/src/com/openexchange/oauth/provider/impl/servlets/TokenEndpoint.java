@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.net.HttpHeaders;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.authorizationserver.client.Client;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
@@ -67,7 +66,6 @@ import com.openexchange.oauth.provider.authorizationserver.client.ClientManageme
 import com.openexchange.oauth.provider.authorizationserver.grant.Grant;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
-import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -95,12 +93,9 @@ public class TokenEndpoint extends OAuthEndpoint {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Tools.disableCaching(response);
-            if (isInsecureButMustNot(request)) {
-                response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-                response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            if (isNotSecureEndpoint(request, response)) {
                 return;
             }
-
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
             if (clientId == null) {
                 failWithMissingParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);

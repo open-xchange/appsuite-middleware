@@ -65,15 +65,15 @@ public class SyncToken {
          * Indicates that the sync token was generated for an initial synchronization response.
          */
         INITIAL(1 << 0),
-            
+
         /**
          * Indicates that the sync token was generated along with a truncated response.
          */
         TRUNCATED(1 << 2),
         ;
-        
+
         final int value;
-        
+
         private Flag(int value) {
             this.value = value;
         }
@@ -88,32 +88,42 @@ public class SyncToken {
      */
     public static SyncToken parse(String token) throws IllegalArgumentException {
         if (Strings.isEmpty(token)) {
-            return new SyncToken(0L, Flag.INITIAL);
+            return new SyncToken(0L, null, Flag.INITIAL);
         }
         String[] splitted = Strings.splitByDots(token);
         if (0 == splitted.length) {
             throw new IllegalArgumentException(token);
         }
         long timestamp = Long.parseLong(splitted[0]);
-        int flags = 0;
-        if (1 < splitted.length) {
-            flags = Integer.parseInt(splitted[1]);
-        }
-        return new SyncToken(timestamp, flags);
+        int flags = 1 < splitted.length ? Integer.parseInt(splitted[1]) : 0;
+        String additional = 2 < splitted.length ? splitted[2] : null;
+        return new SyncToken(timestamp, additional, flags);
     }
 
     private final long timestamp;
     private final int flags;
+    private final String additional;
 
     /**
      * Initializes a new {@link SyncToken}.
-     * 
+     *
      * @param timestamp The corresponding timestamp of the collection contents
+     */
+    public SyncToken(long timestamp) {
+        this(timestamp, null, 0);
+    }
+
+    /**
+     * Initializes a new {@link SyncToken}.
+     *
+     * @param timestamp The corresponding timestamp of the collection contents
+     * @param additional An additional, arbitrary value to encode along with the token
      * @param flags Additional flags to encode along with the token
      */
-    public SyncToken(long timestamp, Flag... flags) {
+    public SyncToken(long timestamp, String additional, Flag... flags) {
         super();
         this.timestamp = timestamp;
+        this.additional = additional;
         int encodedFlags = 0;
         if (null != flags) {
             for (Flag flag : flags) {
@@ -123,9 +133,17 @@ public class SyncToken {
         this.flags = encodedFlags;
     }
 
-    private SyncToken(long timestamp, int flags) {
+    /**
+     * Initializes a new {@link SyncToken}.
+     *
+     * @param timestamp The corresponding timestamp of the collection contents
+     * @param additional An additional, arbitrary value to encode along with the token
+     * @param flags Additional flags as bitmask to encode along with the token
+     */
+    public SyncToken(long timestamp, String additional, int flags) {
         super();
         this.timestamp = timestamp;
+        this.additional = additional;
         this.flags = flags;
     }
 
@@ -140,7 +158,7 @@ public class SyncToken {
 
     /**
      * Gets a value indicating whether the token was generated for an initial synchronization response.
-     * 
+     *
      * @return <code>true</code> if it was generated for an initial synchronization response, <code>false</code>, otherwise
      */
     public boolean isInitial() {
@@ -157,13 +175,39 @@ public class SyncToken {
     }
 
     /**
+     * Gets an additional arbitrary value encoded within the sync token.
+     *
+     * @return An additional string value, or <code>null</code> if not set
+     */
+    public String getAdditional() {
+        return additional;
+    }
+
+    /**
+     * Gets the additional flags encoded with the sync token.
+     *
+     * @return The flags
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
      * Gets the string representation of the token.
-     * 
+     *
      * @return The encoded sync-token
      */
     @Override
     public String toString() {
-        return 0 < flags ? timestamp + "." + flags : String.valueOf(timestamp);
+        if (null == additional && 0 >= flags) {
+            return String.valueOf(timestamp);
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(timestamp).append('.').append(flags);
+        if (null != additional) {
+            stringBuilder.append('.').append(additional);
+        }
+        return stringBuilder.toString();
     }
 
 }

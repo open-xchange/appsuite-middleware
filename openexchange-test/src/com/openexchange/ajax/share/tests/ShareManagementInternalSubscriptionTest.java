@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import org.junit.Test;
@@ -110,7 +111,7 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
 
         ExtendedSubscribeShareBody body = getExtendedBody(shareLink, null, "Share from " + testUser.getLogin());
         SubscribeShareResponse mountShareResponse = smApi2.subscribeShare(smApi2.getApiClient().getSession(), body);
-        assertThat(mountShareResponse.getErrorDesc(), is("You don't have enough permissions to perform the operation."));
+        assertThat(mountShareResponse.getErrorDesc(), is(notNullValue()));
     }
 
 }
