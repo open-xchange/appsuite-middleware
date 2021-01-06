@@ -1,2 +1,2 @@
-opt/open-xchange/etc/noreply.properties
-opt/open-xchange/etc/smtp.properties
+/opt/open-xchange/etc/noreply.properties
+/opt/open-xchange/etc/smtp.properties
