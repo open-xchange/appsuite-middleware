@@ -5,15 +5,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-11-12 20:06+0100\n"
+"PO-Revision-Date: 2020-12-11 14:26+0100\n"
 "Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
 "Language-Team: Italian <it@workshop-chapina.it>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 20.08.3\n"
+"X-Generator: Lokalize 20.12.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -51,6 +52,24 @@ msgstr "accettato provvisoriamente"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "accettato provvisoriamente"
+
+#. * Unable to access the link %1$s
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:63
+msgid "Unable to access the link %1$s"
+msgstr "Impossibile accedere al collegamento %1$s"
+
+#. * To access the link credentials are required.
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:66
+msgid "To access the link credentials are required."
+msgstr "Per accedere al collegamento sono necessarie le credenziali."
+
+#. * The access to the share was revoked. Please contact the owner of the share
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:69
+msgid ""
+"The access to the share was revoked. Please contact the owner of the share"
+msgstr ""
+"L'accesso alla condivisione è stato revocato. Contatta il proprietario della"
+" condivisione"
 
 #: com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
@@ -110,8 +129,13 @@ msgstr ""
 "della password. Potresti dover rimuovere e poi ricreare le password "
 "dell'applicazione."
 
+#. *
+#. * The operation could not be completed due to missing capabilities.
+#.
 #: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 msgid "The operation could not be completed due to missing capabilities."
 msgstr ""
 "L'operazione non può essere completata a causa per la mancanza di capacità."
@@ -239,8 +263,12 @@ msgstr ""
 "essere elaborata."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
-msgid "The given iCal file contains too many entities."
-msgstr "Il file iCal specificato contiene troppe entità."
+msgid ""
+"The given iCal file contains too many entities. A max of %1$s entities are "
+"allowed per file."
+msgstr ""
+"Il file iCal fornito contiene troppe entità. È consentito un massimo di %1$s"
+" entità per file."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1368,6 +1396,13 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Calendario interno"
 
+#. *
+#. * The name of the internal calendar provider.
+#.
+#: com.openexchange.chronos.provider.xctx/src/com/openexchange/chronos/provider/xctx/XctxCalendarStrings.java:65
+msgid "Federated Calendar Shares"
+msgstr "Condivisioni di calendario federato"
+
 #. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
 msgid "The requested page does not denote a calendar."
@@ -1482,7 +1517,11 @@ msgstr "L'appuntamento richiesto non è stato trovato."
 msgid "The requested version of the appointment was not found."
 msgstr "La versione richiesta dell'appuntamento non è stata trovata."
 
+#. *
+#. * The requested folder was not found.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:93
 msgid "The requested folder was not found."
 msgstr "La cartella richiesta non è stata trovata."
 
@@ -1552,7 +1591,11 @@ msgid "All appointments of a series must contain the same organizer."
 msgstr ""
 "Tutti gli appuntamenti di una serie devono contenere lo stesso organizzatore."
 
+#. *
+#. * The supplied folder is not supported. Please select a valid folder and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:73
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1560,7 +1603,11 @@ msgstr ""
 "La cartella fornita non è supportata. Seleziona una cartella valida e "
 "riprova."
 
+#. *
+#. * The operation could not be completed due to a concurrent modification. Please reload the data and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:85
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -2039,6 +2086,50 @@ msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
 "Un altro nodo sta attualmente eseguendo la stessa operazione. Riprova più "
 "tardi."
+
+#. *
+#. * The name of the internal contacts provider.
+#.
+#: com.openexchange.contact.provider.internal/src/com/openexchange/contact/provider/internal/InternalContactsStrings.java:65
+msgid "Internal Contacts"
+msgstr "Contatti interni"
+
+#. *
+#. * The requested contact account was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:65
+msgid "The requested contact account was not found."
+msgstr "L'account di contatto richiesto non è stato trovato."
+
+#. *
+#. * The contacts provider '%1$s' is not available.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:77
+msgid "The contacts provider '%1$s' is not available."
+msgstr "Il provider di contatti '%1$s' non è disponibile."
+
+#. *
+#. * The requested operation is not supported for contacts provider '%1$s'.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:81
+msgid "The requested operation is not supported for contacts provider '%1$s'."
+msgstr ""
+"L'operazione richiesta non è supportata per il fornitore di contatti '%1$s'."
+
+#. *
+#. * The requested contact was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:89
+msgid "The requested contact was not found."
+msgstr "Il contatto richiesto non è stato trovato."
+
+#. *
+#. * The field '%1$s' is mandatory. Please supply a valid value and try again.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:97
+msgid ""
+"The field '%1$s' is mandatory. Please supply a valid value and try again."
+msgstr "Il campo '%1$s' è obbligatorio. Fornisci un valore valido e riprova."
 
 #: com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -2679,6 +2770,16 @@ msgstr "Configurazione non valida per i database globali: %1$s"
 msgid "No global database for context group \"%1$s\" found."
 msgstr "Nessun database globale trovato per il gruppo di contesto \"%1$s\"."
 
+#. The counter managed for administrative entities became inconsistent and administrator should consider running the 'checkcountsconsistency' tool
+#: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:139
+msgid ""
+"Apparently administrative count tables became inconsistent. Consider running "
+"'checkcountsconsistency' tool."
+msgstr ""
+"Sembra che le tabelle di conteggio amministrativo siano diventate incoerenti."
+" Considera di "
+"eseguire lo strumento 'checkcountsconsistency'."
+
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
 msgid "Problem with reading from or writing to database"
@@ -3032,7 +3133,7 @@ msgstr "Dimensione del file"
 #. Displayed as: [Search for] 'user input' in file name.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:115
 msgid "in file name"
 msgstr "nel nome del file"
 
@@ -3078,7 +3179,11 @@ msgid "Enter url"
 msgstr "Digita l'URL"
 
 #. Missing capability for file storage %1$s
+#. *
+#. * Missing capability for file storage %1$s
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:63
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:70
 msgid "Missing capability for file storage %1$s"
 msgstr "Funzionalità mancante per l'archiviazione file %1$s"
 
@@ -3097,7 +3202,11 @@ msgstr ""
 "ancora."
 
 #. The connection check failed
+#. *
+#. * The connection check failed
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:72
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:65
 msgid "The connection check failed."
 msgstr "Il controllo della connessione non è riuscito."
 
@@ -3110,6 +3219,20 @@ msgstr "Impossibile connettersi all'URI: %1$s. Modifica e riprova."
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
 msgid "The given URL is invalid. Please change it and try again."
 msgstr "L'URL indicato non è valido. Cambialo e riprova."
+
+#. *
+#. * The share link label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:65
+msgid "OX share link"
+msgstr "Collegamento di condivisione di OX"
+
+#. *
+#. * The password label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:70
+msgid "OX share link password"
+msgstr "Password del collegamento di condivisione di OX"
 
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
@@ -3390,8 +3513,52 @@ msgid ""
 "The account name is too long. Please limit the account name to a maximum of "
 "%1$s characters."
 msgstr ""
-"Il nome dell'account è troppo lungo. Limita il nome dell'account a un massimo"
-" di %1$s caratteri."
+"Il nome dell'account è troppo lungo. Limita il nome dell'account a un "
+"massimo di %1$s caratteri."
+
+#. With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:196
+msgid ""
+"With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
+"\"%3$s\" people will lose access."
+msgstr ""
+"Spostando il file \"%1$s\" dalla cartella condivisa \"%2$s\" alla cartella"
+" condivisa \"%3$s\", le persone perderanno l'accesso."
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%2$s\" will lose access."
+msgstr ""
+"Il file \"%1$s\" sarà condiviso con tutti gli utenti che hanno accesso a \""
+"%3$s\". "
+"Chiunque possa vedere \"%2$s\" perderà l'accesso."
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:202
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
+msgstr ""
+"Il file \"%1$s\" sarà condiviso con tutti gli utenti che hanno accesso a \""
+"%3$s\"."
+
+#. With moving file \"%1$s\" its permissions will get lost.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
+msgid "With moving file \"%1$s\" its permissions will get lost."
+msgstr "Con lo spostamento del file \"%1$s\" i suoi permessi andranno persi."
+
+#. The account could not be updated 1$s
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:208
+msgid "The account could not be updated: 1$s"
+msgstr "Impossibile aggiornare l'account: %1$s"
+
+#. Searching folder by folder name is not supported
+#. User tries to search folder by folder name, but that functionality is not supported
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:211
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
+msgid "Searching folder by folder name is not supported"
+msgstr "La ricerca nella cartella per nome della cartella non è supportata"
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3919,44 +4086,51 @@ msgstr "Contatti"
 msgid "File description"
 msgstr "Descrizione del file"
 
+#. Search in folder name
+#. -----------------------------------------------------------------------------------------------------
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
+msgid "Folder name"
+msgstr "Nome della cartella"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
 msgid "Images"
 msgstr "Immagini"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
 msgid "Audio"
 msgstr "Audio"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
 msgid "Video"
 msgstr "Video"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
 msgid "Documents"
 msgstr "Documenti"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
 msgid "Other"
 msgstr "Altro"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Cartelle pubbliche"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Cartelle private"
 
 #. Shared folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Cartelle condivise"
@@ -3964,16 +4138,23 @@ msgstr "Cartelle condivise"
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:120
 msgid "in file description"
 msgstr "nella descrizione del file"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file content.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:125
 msgid "in file content"
 msgstr "nel contenuto del file"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in folder name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+msgid "in folder name"
+msgstr "nel nome della cartella"
 
 #. Context: Searching in mail.
 #. Displayed as: [Search for] 'user input' in mail text.
@@ -4568,8 +4749,8 @@ msgid ""
 "Invalid password length. The password must have a minimum length of %1$d "
 "characters."
 msgstr ""
-"Lunghezza della password non valida. La password deve avere una lunghezza"
-" minima di %1$d caratteri."
+"Lunghezza della password non valida. La password deve avere una lunghezza "
+"minima di %1$d caratteri."
 
 #. *
 #. * Invalid password length. The password must have a maximum length of %1$d characters.
@@ -4579,8 +4760,8 @@ msgid ""
 "Invalid password length. The password must have a maximum length of %1$d "
 "characters."
 msgstr ""
-"Lunghezza della password non valida. La password deve avere una lunghezza"
-" massima di %1$d caratteri."
+"Lunghezza della password non valida. La password deve avere una lunghezza "
+"massima di %1$d caratteri."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -7005,14 +7186,11 @@ msgstr ""
 msgid "Failed to delete all folders"
 msgstr "Eliminazione di tutte le cartelle non riuscita"
 
-#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#. The folder was not updated. Please review the warnings for details.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
-msgid ""
-"The folder was not updated due to possible data loss. Please review the "
-"warnings for details."
+msgid "The folder was not updated. Please review the warnings for details."
 msgstr ""
-"La cartella non è stata aggiornata a causa di una possibile perdita di dati. "
-"Controlla gli avvisi per i dettagli."
+"La cartella non è stata aggiornata. Controlla gli avvisi per i dettagli."
 
 #. Folder name contains not allowed characters: \"%1$s\"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
@@ -7023,6 +7201,53 @@ msgstr "Il nome della cartella contiene caratteri non consentiti: \"%1$s\""
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
 msgid "The chosen permission(s) cannot be set"
 msgstr "I permessi scelti non possono essere impostati"
+
+#. With moving the shared folder \"%1$s\" people will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:113
+msgid "With moving the shared folder \"%1$s\" people will lose access."
+msgstr ""
+"Spostando la cartella condivisa \"%1$s\" le persone perderanno l'accesso."
+
+#. This folder  will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:116
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%1$s\" will lose access."
+msgstr ""
+"Questa cartella sarà condivisa con tutti gli utenti che hanno accesso a \""
+"%3$s\". "
+"Chiunque possa vedere \"%1$s\" perderà l'accesso."
+
+#. This folder will be shared with everyone who has access to \"%3$s\.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
+msgid "This folder will be shared with everyone who has access to \"%3$s\"."
+msgstr ""
+"Questa cartella sarà condivisa con tutti gli utenti che hanno accesso a \""
+"%3$s\"."
+
+#. You are moving a folder that contains shares. People will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:122
+msgid "You are moving a folder that contains shares. People will lose access."
+msgstr ""
+"Stai spostando una cartella che contiene condivisioni. Le persone perderanno"
+" l'accesso."
+
+#. This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:125
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see the subfolders of \"%1$s\" will lose access."
+msgstr ""
+"Questa cartella sarà condivisa con tutti gli utenti che hanno accesso a \""
+"%3$s\". "
+"Chiunque possa vedere le sottocartelle di \"%1$s\" perderà l'accesso."
+
+#. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
+#: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:276
+#: com.openexchange.server/src/com/openexchange/mail/OAuthMailErrorMessages.java:62
+msgid "No account access permitted."
+msgstr "Nessun accesso all'account consentito."
 
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -7756,11 +7981,6 @@ msgstr "Video"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:122
 msgid "Templates"
 msgstr "Modelli"
-
-#. -----------------------------------------------------------------------------------------------------
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
-msgid "Folder name"
-msgstr "Nome della cartella"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
@@ -10471,8 +10691,22 @@ msgid ""
 "Available attachments in the folder containing the attachments to share are "
 "inconsistent."
 msgstr ""
-"Gli allegati disponibili nella cartella contenente gli allegati da"
-" condividere sono incoerenti."
+"Gli allegati disponibili nella cartella contenente gli allegati da "
+"condividere sono incoerenti."
+
+#. *
+#. * The description of the read-only scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+msgid "Read all your mails"
+msgstr "Leggi tutti i tuoi messaggi di posta"
+
+#. *
+#. * The description of the writable scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+msgid "Create, modify, delete, import and send mails"
+msgstr "Crea, modifica, elimina, importa e invia messaggi di posta"
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10523,17 +10757,6 @@ msgstr "Utilizza la password seguente: %1$s"
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
 msgstr "Senza nome"
-
-#. Application 'xyz' requires following permissions:
-#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
-#. - ...
-#: com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
-msgid ""
-"Send RFC822 data using primary account's transport. This requires master "
-"authentication to be active."
-msgstr ""
-"Invia i dati RFC822 utilizzando il trasporto dell'account primario. Ciò "
-"richiede che l'autenticazione principale sia attiva."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -11895,6 +12118,27 @@ msgstr ""
 "La condivisione che stai cercando non è attualmente disponibile. Riprova più "
 "tardi."
 
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:100
+msgid "You don't have sufficient permissions to subscribe to a share."
+msgstr ""
+"Non disponi di autorizzazioni sufficienti per sottoscrive una condivisione."
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
+msgid "Subscribing to a single file is not allowed"
+msgstr "La sottoscrizione di un singolo file non è consentita"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
+msgid "You are not allowed to subscribe to a share for %1$s"
+msgstr "Non sei autorizzato a sottoscrivere una condivisione per %1$s"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:106
+msgid "You are not allowed to subscribe to an anonymous share"
+msgstr "Non sei autorizzato a iscriverti a una condivisione anonima"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:108
+msgid "You are not allowed to unsubscribe folder %1$s"
+msgstr "Non sei autorizzato ad annullare la sottoscrizione della cartella %1$s"
+
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "immagine"
@@ -12479,6 +12723,38 @@ msgstr ""
 "Non disponi di autorizzazioni sufficienti per inviare notifiche per questa "
 "condivisione."
 
+#. * Unable to find a subscription for \"%1$s\"
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:63
+msgid "Unable to find a subscription for \"%1$s\""
+msgstr "Impossibile trovare una sottoscrizione per \"%1$s\""
+
+#. * The given link \"%1$s\" can't be resolved to a share.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:66
+msgid "The given link \"%1$s\" can't be resolved to a share."
+msgstr ""
+"Il collegamento specificato \"%1$s\" non può essere risolto in una"
+" condivisione."
+
+#. * You don't have enough permissions to perform the operation.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:69
+msgid "You don't have enough permissions to perform the operation."
+msgstr "Non disponi di autorizzazioni sufficienti per eseguire l'operazione."
+
+#. * The folder %1$s belongs to a folder tree that is unsubscribed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:72
+msgid "The folder %1$s belongs to a folder tree that is unsubscribed."
+msgstr "La cartella %1$s appartiene a un albero di cartelle non sottoscritto."
+
+#. * After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:75
+msgid ""
+"After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
+"will be removed."
+msgstr ""
+"Dopo aver annullato la sottoscrizione a \"%1$s\", tutte le cartelle"
+" dell'account \"%2$s\" "
+"saranno rimosse."
+
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
 msgid ""
@@ -12634,26 +12910,26 @@ msgid ""
 "Zoom meetings cannot be used in all-day appointments. Please use a fixed "
 "start- and end-time and try again."
 msgstr ""
-"Le riunioni Zoom non possono essere utilizzate negli appuntamenti che durano"
-" tutto il giorno. Utilizza un'ora di inizio e di fine fissa e riprova."
+"Le riunioni Zoom non possono essere utilizzate negli appuntamenti che durano "
+"tutto il giorno. Utilizza un'ora di inizio e di fine fissa e riprova."
 
 #: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
 msgid ""
 "Zoom meetings cannot be used in appointments with floating start- or end-"
 "times. Please use a fixed start- and end-time and try again."
 msgstr ""
-"Le riunioni Zoom non possono essere utilizzate negli appuntamenti con orari"
-" di inizio o fine variabili. Utilizza un'ora di inizio e di fine fissa e"
-" riprova."
+"Le riunioni Zoom non possono essere utilizzate negli appuntamenti con orari "
+"di inizio o fine variabili. Utilizza un'ora di inizio e di fine fissa e "
+"riprova."
 
 #: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
 msgid ""
 "Zoom meetings cannot be used in recurring appointment series spanning over "
 "more than one year. Please shorten the recurrence rule and try again."
 msgstr ""
-"Le riunioni Zoom non possono essere utilizzate in serie di appuntamenti"
-" ricorrenti che coprono più di un anno. Accorcia la regola di ricorrenza e"
-" riprova."
+"Le riunioni Zoom non possono essere utilizzate in serie di appuntamenti "
+"ricorrenti che coprono più di un anno. Accorcia la regola di ricorrenza e "
+"riprova."
 
 #: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
 msgid ""
@@ -12661,9 +12937,9 @@ msgid ""
 "single appointments and vice versa. Please generate a new Zoom meeting and "
 "try again."
 msgstr ""
-"La stessa riunione Zoom non può essere riutilizzata quando si passa da"
-" appuntamenti ricorrenti a appuntamenti singoli e viceversa. Genera una nuova"
-" riunione Zoom e riprova."
+"La stessa riunione Zoom non può essere riutilizzata quando si passa da "
+"appuntamenti ricorrenti a appuntamenti singoli e viceversa. Genera una nuova "
+"riunione Zoom e riprova."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -15115,6 +15391,23 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The given iCal file contains too many entities."
+#~ msgstr "Il file iCal specificato contiene troppe entità."
+
+#~ msgid ""
+#~ "The folder was not updated due to possible data loss. Please review the "
+#~ "warnings for details."
+#~ msgstr ""
+#~ "La cartella non è stata aggiornata a causa di una possibile perdita di "
+#~ "dati. Controlla gli avvisi per i dettagli."
+
+#~ msgid ""
+#~ "Send RFC822 data using primary account's transport. This requires master "
+#~ "authentication to be active."
+#~ msgstr ""
+#~ "Invia i dati RFC822 utilizzando il trasporto dell'account primario. Ciò "
+#~ "richiede che l'autenticazione principale sia attiva."
 
 #~ msgid ""
 #~ "You have been invited to an appointment organized by %1$s on behalf of "

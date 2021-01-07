@@ -1,18 +1,19 @@
-# Robert Krátký <robert@workshop-chapina.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020.
+# Robert Krátký <robert@workshop-chapina.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021.
 # Antje Faber, 2011, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-12-07 15:01+0100\n"
+"PO-Revision-Date: 2021-01-02 18:17+0100\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
-"Language-Team: Czech <cs@workshop-chapina.com>\n"
+"Language-Team: Czech <>\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Lokalize 20.08.1\n"
 "X-Language: cs\n"
 "X-Source-Language: en\n"
 
@@ -51,6 +52,22 @@ msgstr "předběžně přijal(a)"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "předběžně přijal(a)"
+
+#. * Unable to access the link %1$s
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:63
+msgid "Unable to access the link %1$s"
+msgstr "Odkaz %1$s není přístupný"
+
+#. * To access the link credentials are required.
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:66
+msgid "To access the link credentials are required."
+msgstr "Pro přístup k odkazu jsou potřeba přihlašovací údaje"
+
+#. * The access to the share was revoked. Please contact the owner of the share
+#: com.openexchange.api.client/src/com/openexchange/api/client/ApiClientExceptionMessages.java:69
+msgid ""
+"The access to the share was revoked. Please contact the owner of the share"
+msgstr "Přístup ke sdílené položce byl odebrán. Kontaktujte vlastníka."
 
 #: com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
@@ -109,8 +126,13 @@ msgstr ""
 "Během změny hesla není možné hesla aplikací aktualizovat. Patrně budete "
 "muset hesla odstranit a pak je znovu vytvořit."
 
+#. *
+#. * The operation could not be completed due to missing capabilities.
+#.
 #: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "Kvůli nedostatečným oprávněním nebylo možné operaci dokončit."
 
@@ -232,8 +254,12 @@ msgstr ""
 "Daný zdroj pro iCalendar neobsahuje platný obsah a nelze jej zpracovat."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
-msgid "The given iCal file contains too many entities."
-msgstr "Daný iCal soubor obsahuje příliš mnoho položek."
+msgid ""
+"The given iCal file contains too many entities. A max of %1$s entities are "
+"allowed per file."
+msgstr ""
+"Daný iCal soubor obsahuje příliš mnoho položek. Soubor může obsahovat"
+" maximálně %1$s položek."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1334,6 +1360,13 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Interní kalendář"
 
+#. *
+#. * The name of the internal calendar provider.
+#.
+#: com.openexchange.chronos.provider.xctx/src/com/openexchange/chronos/provider/xctx/XctxCalendarStrings.java:65
+msgid "Federated Calendar Shares"
+msgstr "Sdílené kalendáře"
+
 #. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
 msgid "The requested page does not denote a calendar."
@@ -1444,7 +1477,11 @@ msgstr "Požadovaná schůzka nebyla nalezena."
 msgid "The requested version of the appointment was not found."
 msgstr "Požadovaná verze schůzky nebyla nalezena."
 
+#. *
+#. * The requested folder was not found.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:93
 msgid "The requested folder was not found."
 msgstr "Požadovaná složka nebyla nalezena."
 
@@ -1506,7 +1543,11 @@ msgstr "Organizátor musí být zároveň účastníkem."
 msgid "All appointments of a series must contain the same organizer."
 msgstr "Všechny schůzky v sérii musí mít stejného organizátora."
 
+#. *
+#. * The supplied folder is not supported. Please select a valid folder and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:73
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1514,7 +1555,11 @@ msgstr ""
 "Složka, kterou jste zadal(a), není podporována. Vyberte platnou složku a "
 "zkuste to znovu."
 
+#. *
+#. * The operation could not be completed due to a concurrent modification. Please reload the data and try again.
+#.
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:85
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1981,6 +2026,49 @@ msgstr "Neznámý klient"
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
 "Stejnou činnost právě provádí jiný člen sítě. Zkuste to, prosím, později."
+
+#. *
+#. * The name of the internal contacts provider.
+#.
+#: com.openexchange.contact.provider.internal/src/com/openexchange/contact/provider/internal/InternalContactsStrings.java:65
+msgid "Internal Contacts"
+msgstr "Interní kontakty"
+
+#. *
+#. * The requested contact account was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:65
+msgid "The requested contact account was not found."
+msgstr "Požadovaný účet kontaktu nebyl nalezen."
+
+#. *
+#. * The contacts provider '%1$s' is not available.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:77
+msgid "The contacts provider '%1$s' is not available."
+msgstr "Poskytovatel kontaktu „%1$s“ není dostupný."
+
+#. *
+#. * The requested operation is not supported for contacts provider '%1$s'.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:81
+msgid "The requested operation is not supported for contacts provider '%1$s'."
+msgstr "Požadovaná operace není poskytovatelem kontaktu „%1$s“ podporovaná."
+
+#. *
+#. * The requested contact was not found.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:89
+msgid "The requested contact was not found."
+msgstr "Požadovaný kontakt nebyl nalezen."
+
+#. *
+#. * The field '%1$s' is mandatory. Please supply a valid value and try again.
+#.
+#: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:97
+msgid ""
+"The field '%1$s' is mandatory. Please supply a valid value and try again."
+msgstr "Pole ‚%1$s‘ je povinné. Zadejte platnou hodnotu a zkuste to znovu."
 
 #: com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -2619,6 +2707,15 @@ msgid "No global database for context group \"%1$s\" found."
 msgstr ""
 "Nepodařilo se nalézt žádnou globální databázi pro skupinu kontextů „%1$s“."
 
+#. The counter managed for administrative entities became inconsistent and administrator should consider running the 'checkcountsconsistency' tool
+#: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:139
+msgid ""
+"Apparently administrative count tables became inconsistent. Consider running "
+"'checkcountsconsistency' tool."
+msgstr ""
+"Tabulky s počtem administrativních položek jsou nejspíš poškozené. Zvažte"
+" použití nástroje ‚checkcountsconsistency‘."
+
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
 msgid "Problem with reading from or writing to database"
@@ -2963,7 +3060,7 @@ msgstr "Velikost souboru"
 #. Displayed as: [Search for] 'user input' in file name.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:115
 msgid "in file name"
 msgstr "v názvu souboru"
 
@@ -3009,7 +3106,11 @@ msgid "Enter url"
 msgstr "Zadejte URL"
 
 #. Missing capability for file storage %1$s
+#. *
+#. * Missing capability for file storage %1$s
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:63
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:70
 msgid "Missing capability for file storage %1$s"
 msgstr "Chybějící funkcionalita pro úložný prostor %1$s"
 
@@ -3028,7 +3129,11 @@ msgstr ""
 "znovu."
 
 #. The connection check failed
+#. *
+#. * The connection check failed
+#.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:72
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/XOXFileStorageExceptionMessages.java:65
 msgid "The connection check failed."
 msgstr "Test připojení selhal"
 
@@ -3041,6 +3146,20 @@ msgstr "Na adrese %1$s se nelze připojit. Změňte adresu a zkuste to znovu."
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
 msgid "The given URL is invalid. Please change it and try again."
 msgstr "Daná adresa není platná. Změňte ji a zkuste to znovu."
+
+#. *
+#. * The share link label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:65
+msgid "OX share link"
+msgstr "Odkaz ke sdílení OX"
+
+#. *
+#. * The password label
+#.
+#: com.openexchange.file.storage.xox/src/com/openexchange/file/storage/xox/FormStrings.java:70
+msgid "OX share link password"
+msgstr "Heslo k odkazu ke sdílení OX"
 
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
@@ -3311,6 +3430,47 @@ msgid ""
 "The account name is too long. Please limit the account name to a maximum of "
 "%1$s characters."
 msgstr "Název účtu je příliš dlouhý. Omezte název na max. %1$s znaků."
+
+#. With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:196
+msgid ""
+"With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
+"\"%3$s\" people will lose access."
+msgstr ""
+"Přesunutím souboru „%1$s“ ze sdílené složky „%2$s“ do „%3$s“ přijdou"
+" uživatelé o přístup."
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%2$s\" will lose access."
+msgstr ""
+"Soubor „%1$s“ bude sdílen se všemi, kdo mají přístup k „%3$s“. Všichni, kdo"
+" mohou přistupovat k „%2$s“, přístup ztratí."
+
+#. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:202
+msgid ""
+"The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
+msgstr "Soubor „%1$s“ bude sdílen se všemi, kdo mají přístup k „%3$s“."
+
+#. With moving file \"%1$s\" its permissions will get lost.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
+msgid "With moving file \"%1$s\" its permissions will get lost."
+msgstr "Přesunutí souboru „%1$s“ zruší dosavadní oprávnění souboru."
+
+#. The account could not be updated 1$s
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:208
+msgid "The account could not be updated: 1$s"
+msgstr "Účet se nepodařilo aktualizovat: %1$s"
+
+#. Searching folder by folder name is not supported
+#. User tries to search folder by folder name, but that functionality is not supported
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:211
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
+msgid "Searching folder by folder name is not supported"
+msgstr "Vyhledávání složek podle názvu není podporované."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3825,44 +3985,51 @@ msgstr "Kontakty"
 msgid "File description"
 msgstr "Popis souboru"
 
+#. Search in folder name
+#. -----------------------------------------------------------------------------------------------------
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
+msgid "Folder name"
+msgstr "Název složky"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
 msgid "Images"
 msgstr "Obrázky"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
 msgid "Audio"
 msgstr "Audio"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
 msgid "Video"
 msgstr "Video"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
 msgid "Documents"
 msgstr "Dokumenty"
 
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
 msgid "Other"
 msgstr "Jiné"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Veřejné složky"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Soukromé složky"
 
 #. Shared folders
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Sdílené složky"
@@ -3870,16 +4037,23 @@ msgstr "Sdílené složky"
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:120
 msgid "in file description"
 msgstr "v popisu souboru"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file content.
 #. The 'user input' part is always prepended, please heed this in translations.
-#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:125
 msgid "in file content"
 msgstr "v obsahu souboru"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in folder name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+msgid "in folder name"
+msgstr "ve složce"
 
 #. Context: Searching in mail.
 #. Displayed as: [Search for] 'user input' in mail text.
@@ -6824,14 +6998,10 @@ msgstr ""
 msgid "Failed to delete all folders"
 msgstr "Smazání všech složek se nepodařilo"
 
-#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#. The folder was not updated. Please review the warnings for details.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
-msgid ""
-"The folder was not updated due to possible data loss. Please review the "
-"warnings for details."
-msgstr ""
-"Složka nebyla aktualizována kvůli potenciální ztrátě dat. Bližší podrobnosti "
-"ve varováních."
+msgid "The folder was not updated. Please review the warnings for details."
+msgstr "Složka nebyla aktualizována. Bližší podrobnosti ve varováních."
 
 #. Folder name contains not allowed characters: \"%1$s\"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
@@ -6842,6 +7012,48 @@ msgstr "Název souboru obsahuje nepovolené znaky: „%1$s“"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:110
 msgid "The chosen permission(s) cannot be set"
 msgstr "Vybraná oprávnění nelze uplatnit"
+
+#. With moving the shared folder \"%1$s\" people will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:113
+msgid "With moving the shared folder \"%1$s\" people will lose access."
+msgstr "Přesunutím sdílené složky „%1$s“ přijdou uživatelé o přístup."
+
+#. This folder  will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:116
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see \"%1$s\" will lose access."
+msgstr ""
+"Složka bude sdílena se všemi, kdo mají přístup k „%3$s“. Všichni, kdo mohou"
+" přistupovat k „%1$s“, přístup ztratí."
+
+#. This folder will be shared with everyone who has access to \"%3$s\.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
+msgid "This folder will be shared with everyone who has access to \"%3$s\"."
+msgstr "Složka bude sdílena se všemi, kdo mají přístup k „%3$s“."
+
+#. You are moving a folder that contains shares. People will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:122
+msgid "You are moving a folder that contains shares. People will lose access."
+msgstr ""
+"Přesouváte složku, která obsahuje sdílené položky. Uživatelé tím přijdou o"
+" přístup."
+
+#. This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+#: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:125
+msgid ""
+"This folder will be shared with everyone who has access to \"%3$s\". "
+"Everyone who can see the subfolders of \"%1$s\" will lose access."
+msgstr ""
+"Složka bude sdílena se všemi, kdo mají přístup k „%3$s“. Všichni, kdo mohou"
+" přistupovat k podsložkám „%1$s“, přístup ztratí."
+
+#. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
+#: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:276
+#: com.openexchange.server/src/com/openexchange/mail/OAuthMailErrorMessages.java:62
+msgid "No account access permitted."
+msgstr "Přístup k účtům není povolený."
 
 #. No group given.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -7547,11 +7759,6 @@ msgstr "Videa"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:122
 msgid "Templates"
 msgstr "Šablony"
-
-#. -----------------------------------------------------------------------------------------------------
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:126
-msgid "Folder name"
-msgstr "Název složky"
 
 #. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
@@ -10204,6 +10411,20 @@ msgid ""
 "inconsistent."
 msgstr "Přílohy ve složce obsahující přílohy ke sdílení jsou poškozené."
 
+#. *
+#. * The description of the read-only scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+msgid "Read all your mails"
+msgstr "Číst všechny zprávy"
+
+#. *
+#. * The description of the writable scope for OAuth requests
+#.
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+msgid "Create, modify, delete, import and send mails"
+msgstr "Vytvářet, upravovat, mazat, importovat a odesílat emaily"
+
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -10253,17 +10474,6 @@ msgstr "Použijte, prosím, následující heslo: %1$s"
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
 msgstr "Bez názvu"
-
-#. Application 'xyz' requires following permissions:
-#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
-#. - ...
-#: com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
-msgid ""
-"Send RFC822 data using primary account's transport. This requires master "
-"authentication to be active."
-msgstr ""
-"Pošlete data RFC288 prostřednictvím primárního účtu. To vyžaduje aktivní "
-"hlavní autentizaci."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -11571,6 +11781,27 @@ msgid ""
 "later."
 msgstr "Požadovaný sdílený zdroj není dostupný. Zkuste to, prosím, později."
 
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:100
+msgid "You don't have sufficient permissions to subscribe to a share."
+msgstr ""
+"Nemáte příslušná oprávnění k přihlášení k odběru tohoto sdíleného obsahu."
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
+msgid "Subscribing to a single file is not allowed"
+msgstr "Přihlášení k odběru jediného souboru není povolené"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
+msgid "You are not allowed to subscribe to a share for %1$s"
+msgstr "Nemáte oprávnění k přihlášení k odběru sdíleného obsahu v „$1$s“"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:106
+msgid "You are not allowed to subscribe to an anonymous share"
+msgstr "Nemáte oprávnění k přihlášení k odběru anonymního sdíleného obsahu"
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:108
+msgid "You are not allowed to unsubscribe folder %1$s"
+msgstr "Nemáte oprávnění k odhlášení odběru složky „%1$s“"
+
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "obrázek"
@@ -12124,6 +12355,33 @@ msgid ""
 msgstr ""
 "Nemáte příslušná oprávnění k posílání oznámení ohledně tohoto sdíleného "
 "obsahu."
+
+#. * Unable to find a subscription for \"%1$s\"
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:63
+msgid "Unable to find a subscription for \"%1$s\""
+msgstr "Nepodařilo se najít přihlášení k odběru k „%1$s“"
+
+#. * The given link \"%1$s\" can't be resolved to a share.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:66
+msgid "The given link \"%1$s\" can't be resolved to a share."
+msgstr "Daný odkaz („%1$s“) nemíří na sdílený obsah."
+
+#. * You don't have enough permissions to perform the operation.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:69
+msgid "You don't have enough permissions to perform the operation."
+msgstr "Pro vykonání operace nemáte dostatečná oprávnění."
+
+#. * The folder %1$s belongs to a folder tree that is unsubscribed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:72
+msgid "The folder %1$s belongs to a folder tree that is unsubscribed."
+msgstr "Složka %1$s spadá pod složku, která není přihlášena ḱ odběru."
+
+#. * After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" will be removed.
+#: com.openexchange.share/src/com/openexchange/share/subscription/ShareSubscriptionExceptionMessages.java:75
+msgid ""
+"After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
+"will be removed."
+msgstr "Po odhlášení z „%1$s“ budou všechny složky z účtu „%2$s“ odstraněny."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -14743,6 +15001,23 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The given iCal file contains too many entities."
+#~ msgstr "Daný iCal soubor obsahuje příliš mnoho položek."
+
+#~ msgid ""
+#~ "The folder was not updated due to possible data loss. Please review the "
+#~ "warnings for details."
+#~ msgstr ""
+#~ "Složka nebyla aktualizována kvůli potenciální ztrátě dat. Bližší "
+#~ "podrobnosti ve varováních."
+
+#~ msgid ""
+#~ "Send RFC822 data using primary account's transport. This requires master "
+#~ "authentication to be active."
+#~ msgstr ""
+#~ "Pošlete data RFC288 prostřednictvím primárního účtu. To vyžaduje aktivní "
+#~ "hlavní autentizaci."
 
 #~ msgid ""
 #~ "You have been invited to an appointment organized by %1$s on behalf of "
