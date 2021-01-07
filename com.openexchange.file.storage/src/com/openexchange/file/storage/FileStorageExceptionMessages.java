@@ -203,12 +203,15 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // With moving file \"%1$s\" its permissions will get lost.
     public static final String MOVE_SHARED_FILE = "With moving file \"%1$s\" its permissions will get lost.";
-    
+
     // The account could not be updated 1$s
     public static final String UNALLOWED_ACCOUNT_UPDATE_MSG = "The account could not be updated: 1$s";
 
     // Searching folder by folder name is not supported
     public static final String NO_SEARCH_SUPPORT_MSG = "Searching folder by folder name is not supported";
+
+    // The maximum number of accounts is exceeded.
+    public static final String MAX_ACCOUNTS_EXCEEDED_MSG = "The maximum number of accounts is exceeded.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.
