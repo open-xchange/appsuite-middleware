@@ -127,7 +127,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteContacts(ServerSession session, AutocompleteRequest autocompleteRequest, AutocompleteParameters parameters) throws OXException {
-        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, null, autocompleteRequest.getLimit(), autocompleteRequest.getOptions().includeContextAdmin());
+        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, null, autocompleteRequest.getLimit());
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     protected List<Contact> autocompleteUsers(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
-        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)), autocompleteRequest.getLimit(), autocompleteRequest.getOptions().includeContextAdmin());
+        return searchContacts(session, autocompleteRequest.getPrefix(), parameters, Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)), autocompleteRequest.getLimit());
     }
 
     /**
@@ -174,11 +174,10 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @param prefix The search prefix; no need to append a wild-card here
      * @param parameters The {@link AutocompleteParameters}
      * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in all visible folders
-     * @param includeAdmin <code>true</code> to include the context administrator from search results, <code>false</code>, otherwise
      * @return A list of found contacts, sorted using the {@link UseCountComparator} comparator
      * @throws OXException If contact search fails
      */
-    private List<Contact> searchContacts(ServerSession session, String prefix, AutocompleteParameters parameters, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
+    private List<Contact> searchContacts(ServerSession session, String prefix, AutocompleteParameters parameters, List<String> folderIDs, int limit) throws OXException {
         if (false == session.getUserConfiguration().hasContact()) {
             return Collections.emptyList();
         }

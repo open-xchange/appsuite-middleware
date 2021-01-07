@@ -201,31 +201,12 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * extract requested contact fields
          */
-        ContactField[] contactFields;
+        ;
         int[] columnIDs = searchRequest.getColumns().getIntColumns();
         if (0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
-        /*
-         * exclude context admin if requested
-         */
-        if (searchRequest.getOptions().includeContextAdmin()) {
-            contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
-        } else {
-            ContactField[] mandatoryFields = new ContactField[SORT_FIELDS.length + 1];
-            mandatoryFields[0] = ContactField.INTERNAL_USERID;
-            System.arraycopy(SORT_FIELDS, 0, mandatoryFields, 1, SORT_FIELDS.length);
-            contactFields = ColumnParser.getFieldsToQuery(columnIDs, mandatoryFields);
-            CompositeSearchTerm excludeAdminTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
-            isNullTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-            excludeAdminTerm.addSearchTerm(isNullTerm);
-            SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
-            notEqualsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-            notEqualsTerm.addOperand(new ConstantOperand<>(I(session.getContext().getMailadmin())));
-            excludeAdminTerm.addSearchTerm(notEqualsTerm);
-            searchTerm.addSearchTerm(excludeAdminTerm);
-        }
+        ContactField[] contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
         /*
          * search
          */
