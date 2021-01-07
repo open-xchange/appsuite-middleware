@@ -360,6 +360,20 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-dataretrieval
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-dataretrieval
+Empty transitional package. This package was discontinued and can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 %description
 Open-Xchange Meta packages
 
@@ -447,6 +461,9 @@ Authors:
 %defattr(-,root,root)
 
 %files -n open-xchange-upsell-multiple
+%defattr(-,root,root)
+
+%files -n open-xchange-dataretrieval
 %defattr(-,root,root)
 
 %changelog

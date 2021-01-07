@@ -133,3 +133,10 @@ Section: oldlibs
 Priority: extra
 Description: Empty transitional package.
  This package was discontinued and can be removed.
+
+Package: open-xchange-dataretrieval
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package was discontinued and can be removed.
