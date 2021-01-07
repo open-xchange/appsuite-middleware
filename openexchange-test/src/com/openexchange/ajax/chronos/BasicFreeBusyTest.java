@@ -50,8 +50,10 @@
 package com.openexchange.ajax.chronos;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.l;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -129,19 +131,33 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());
         List<ChronosFreeBusyResponseData> data = freeBusy.getData();
-        //Expect only one event for the given attendee
+        //Expect one result for the given attendee
         assertEquals(1, data.size());
         List<FreeBusyTime> freeBusyTimes = data.get(0).getFreeBusyTime();
 
-        // Expect only 2 free busy times.
-        assertEquals(2, freeBusyTimes.size());
-        assertEquals(day1, freeBusyTimes.get(0).getStartTime().longValue());
-        assertEquals(day1 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(0).getEndTime().longValue());
-        assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
+        // Expect free busy times events on day one and five, but not for day 3
+        FreeBusyTime time1 = null;
+        FreeBusyTime time3 = null;
+        FreeBusyTime time5 = null;
+        for (FreeBusyTime freeBusyTime : freeBusyTimes) {
+            if (day1 == l(freeBusyTime.getStartTime())) {
+                time1 = freeBusyTime;
+            } else if (day3 == l(freeBusyTime.getStartTime())) {
+                time3 = freeBusyTime;
+            } else if (day5 == l(freeBusyTime.getStartTime())) {
+                time5 = freeBusyTime;
+            }
+        }
 
-        assertEquals(day5, freeBusyTimes.get(1).getStartTime().longValue());
-        assertEquals(day5 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(1).getEndTime().longValue());
-        assertEquals("BUSY", freeBusyTimes.get(1).getFbType());
+        assertNotNull("No free/busy time for event on " + day1, time1);
+        assertEquals(day1 + TimeUnit.HOURS.toMillis(1), time1.getEndTime().longValue());
+        assertEquals("BUSY", time1.getFbType());
+
+        assertNotNull("No free/busy time for event on " + day5, time5);
+        assertEquals(day5 + TimeUnit.HOURS.toMillis(1), time5.getEndTime().longValue());
+        assertEquals("BUSY", time5.getFbType());
+
+        assertNull("Unexpected free/busy time for masked event on " + day3, time3);
     }
 
     private EventData createEvent(String summary, long start, long end, IdWrappingTestUser... users) throws ApiException {
