@@ -346,6 +346,20 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-dataretrieval
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-dataretrieval
+Empty transitional package. This package was discontinued and can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 %description
 Open-Xchange Meta packages
 
@@ -458,6 +472,9 @@ Authors:
 %files -n open-xchange-realtime-events-json
 %defattr(-,root,root)
 %doc README.TXT
+
+%files -n open-xchange-dataretrieval
+%defattr(-,root,root)
 
 %changelog
 * Tue Jan 19 2021 Carsten Hoeger <choeger@open-xchange.com>
