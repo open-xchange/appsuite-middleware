@@ -358,11 +358,12 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         Set<String> eventIdsWithAttachment = new HashSet<String>();
         String sql = new StringBuilder()
             .append("SELECT DISTINCT(attached) FROM prg_attachment ")
-            .append("WHERE cid=? AND attached").append(Databases.getPlaceholders(eventIds.length)).append(';')
+            .append("WHERE cid=? AND module=? AND attached").append(Databases.getPlaceholders(eventIds.length)).append(';')
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, MODULE_ID);
             for (String id : eventIds) {
                 stmt.setInt(parameterIndex++, asInt(id));
             }
