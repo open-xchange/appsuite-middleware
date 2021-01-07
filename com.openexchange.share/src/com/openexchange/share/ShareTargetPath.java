@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -308,6 +309,18 @@ public class ShareTargetPath {
         }
 
         return new String(BaseEncoding.base64Url().omitPadding().decode(input), Charsets.UTF_8);
+    }
+
+    /**
+     * Gets a value indicating whether the targeted folder or item matches the one specified by another share target path.
+     * <p/>
+     * Any <i>additional</i> parameters are ignored implicitly.
+     *
+     * @param other The target path to match
+     * @return <code>true</code> if the share targets point to the same folder or item, <code>false</code>, otherwise
+     */
+    public boolean matches(ShareTargetPath other) {
+        return null != other && module == other.module && Objects.equals(folder, other.folder) && Objects.equals(item, other.item);
     }
 
     @Override
