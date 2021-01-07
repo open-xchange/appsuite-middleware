@@ -184,21 +184,11 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email2 - type "HOME"
          */
-        String candidate = parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false), parameters, warnings);
-        if (candidate != null) {
-            if (!candidate.equals(contact.getEmail1())) { // Avoid duplicates
-                contact.setEmail2(candidate);
-            }
-        }
+        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1, false), parameters, warnings));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        candidate = parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true), parameters, warnings);
-        if (candidate != null) {
-            if (!candidate.equals(contact.getEmail1()) && candidate.equals(contact.getEmail2())) { // Avoid duplicates
-                contact.setEmail3(candidate);
-            }
-        }
+        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2, true), parameters, warnings));
         /*
          * telex - type "TLX"
          */
@@ -264,14 +254,14 @@ public class EMailMapping extends AbstractMapping {
         }
         if (null == email && fallbackToUnknownType) {
             /*
-             * if no distinguishing e-mail type found, use first non-distinguishing address as fallback
+             * if no distinguishing e-mail type found, use first non-distinguishing address as fallback, in case there are other distinguishing ones
              */
             List<Email> simpleEmails = getPropertiesWithoutTypes(emails,
                 EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
-            if (0 < simpleEmails.size()) {
+            if (0 < simpleEmails.size() && simpleEmails.size() != emails.size()) {
                 sort(simpleEmails);
                 email = simpleEmails.get(0);
-            }            
+            }
         }
         return email;
     }

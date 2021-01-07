@@ -49,44 +49,79 @@
 
 package com.openexchange.contact.vcard;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link UnitTests}
+ * {@link MWB768Test}
+ *
+ * Imported vcard shows mail address twice in contact
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.5
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    AddressTest.class,
-    DistributionListTest.class,
-    BasicTest.class,
-    RoundtripTest.class,
-    UpdateTest.class,
-    WarningsTest.class,
-    ColorLabelTest.class,
-    EmptyTest.class,
-    ImportIteratorTest.class,
-    RemoveImageTest.class,
-    Bug13557Test.class,
-    Bug14349Test.class,
-    Bug14350Test.class,
-    Bug15008Test.class,
-    Bug15229Test.class,
-    Bug15241Test.class,
-    Bug18226Test.class,
-    Bug21656Test.class,
-    Bug55090Test.class,
-    Bug6823Test.class,
-    Bug6962Test.class,
-    Bug7106Test.class,
-    Bug7248Test.class,
-    Bug7249Test.class,
-    Bug7250Test.class,
-    Bug7719Test.class,
-    MWB768Test.class,
-})
-public class UnitTests {
+public class MWB768Test extends VCardTest {
+
+    /**
+     * Initializes a new {@link MWB768Test}.
+     */
+    public MWB768Test() {
+        super();
+    }
+
+    @Test
+    public void testImportVCard1() {
+        /*
+         * import vCard
+         */
+        String vCard = // @formatter:off
+            "BEGIN:VCARD\r\n" +
+            "VERSION:4.0\r\n" +
+            "EMAIL;PREF=1:marie.linan19876@example.com\r\n" +
+            "FN:Marie LINAN\r\n" +
+            "N:LINAN;Marie;;;\r\n" +
+            "TEL;TYPE=work;VALUE=TEXT:0254786523\r\n" +
+            "TEL;TYPE=cell;VALUE=TEXT:0656379123\r\n" +
+            "UID:ef1c4d70-0c2f-434a-b3aa-ba782926236b\r\n" +
+            "END:VCARD\r\n"
+        ; // @formatter:on
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        Assert.assertEquals("marie.linan19876@example.com", contact.getEmail1());
+        assertNull(contact.getEmail2());
+        assertNull(contact.getEmail3());
+    }
+
+    @Test
+    public void testImportVCard2() {
+        /*
+         * import vCard
+         */
+        String vCard = // @formatter:off
+            "BEGIN:VCARD\r\n" +
+            "VERSION:4.0\r\n" +
+            "EMAIL;PREF=1:paul.bosin1987@example.com\r\n" +
+            "FN:Paul BOSIN\r\n" +
+            "N:BOSIN;Paul;;;\r\n" +
+            "TEL;TYPE=work;VALUE=TEXT:0356967534\r\n" +
+            "TEL;TYPE=cell;VALUE=TEXT:0693693572\r\n" +
+            "UID:e27f4994-2109-4b20-ba38-6212dcf20e61\r\n" +
+            "END:VCARD\r\n"
+        ; // @formatter:on
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        Assert.assertEquals("paul.bosin1987@example.com", contact.getEmail1());
+        assertNull(contact.getEmail2());
+        assertNull(contact.getEmail3());
+    }
 
 }
