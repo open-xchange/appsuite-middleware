@@ -429,7 +429,7 @@ public class HeaderUtility {
             return JSON_SECURITY_DISABLED;
         }
 
-        return new JSONObject(4)
+        return new JSONObject(10)
             .putSafe("encrypt", Boolean.valueOf(security.isEncrypt()))
             .putSafe("pgpInline", Boolean.valueOf(security.isPgpInline()))
             .putSafe("sign", Boolean.valueOf(security.isSign()))

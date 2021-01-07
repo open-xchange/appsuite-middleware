@@ -126,3 +126,10 @@ Section: oldlibs
 Priority: extra
 Description: Empty transitional package.
  This package can be removed as realtime events are deprecated.
+
+Package: open-xchange-upsell-multiple
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package was discontinued and can be removed.

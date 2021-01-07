@@ -75,6 +75,7 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
     public void setUp() throws Exception {
         super.setUp();
         smApi2 = new ShareManagementApi(apiClient2);
+        cleanInbox(apiClient2);
     }
 
     @Test
@@ -109,9 +110,12 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         folderId = setFolderPermission(folderId, originalPermissions);
         analyze(smApi2, shareLink, StateEnum.INACCESSIBLE);
 
+        /*
+         * Check that share can't be subscribed
+         */
         ExtendedSubscribeShareBody body = getExtendedBody(shareLink, null, "Share from " + testUser.getLogin());
-        SubscribeShareResponse mountShareResponse = smApi2.subscribeShare(smApi2.getApiClient().getSession(), body);
-        assertThat(mountShareResponse.getErrorDesc(), is(notNullValue()));
+        SubscribeShareResponse subscribeShareResponse = smApi2.subscribeShare(smApi2.getApiClient().getSession(), body);
+        assertThat(subscribeShareResponse.getErrorDesc(), is(notNullValue()));
     }
 
 }

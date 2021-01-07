@@ -346,6 +346,20 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-upsell-multiple
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-upsell-multiple
+Empty transitional package. This package was discontinued and can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 %description
 Open-Xchange Meta packages
 
@@ -430,6 +444,9 @@ Authors:
 %defattr(-,root,root)
 
 %files -n open-xchange-realtime-events-json
+%defattr(-,root,root)
+
+%files -n open-xchange-upsell-multiple
 %defattr(-,root,root)
 
 %changelog

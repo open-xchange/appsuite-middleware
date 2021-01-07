@@ -276,7 +276,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
 
     @Override
     public boolean unsubscribe(Session session, String shareLink) throws OXException {
-        return unsubscribe(session, shareLink, false);
+        return unsubscribe(session, shareLink, true);
     }
 
     public boolean unsubscribe(Session session, String shareLink, boolean ignoreWarnings) throws OXException {
@@ -292,8 +292,7 @@ public class XctxShareSubscriptionProvider implements ShareSubscriptionProvider 
         DefaultCalendarFolder folderUpdate = new DefaultCalendarFolder();
         folderUpdate.setId(folderId);
         folderUpdate.setSubscribed(Boolean.FALSE);
-        DefaultCalendarParameters parameters = new DefaultCalendarParameters();
-        parameters.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, B(ignoreWarnings));
+        CalendarParameters parameters = new DefaultCalendarParameters().set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, B(ignoreWarnings));
         XctxCalendarAccess calendarAccess = provider.connect(session, existingAccount, parameters);
         String result;
         try {

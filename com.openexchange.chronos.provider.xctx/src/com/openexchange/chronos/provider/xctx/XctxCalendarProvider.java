@@ -326,7 +326,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
         try {
             long value = services.getServiceSafe(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), property);
             if (TimeUnit.MINUTES.toMillis(1L) > value) {
-                throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(new Exception("Invalid value " + value), property);
+                throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(new Exception("Invalid value " + value + " (less than one minute)"), property);
             }
             return value;
         } catch (OXException e) {

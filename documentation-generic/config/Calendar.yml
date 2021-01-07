@@ -148,7 +148,7 @@ properties:
     - key: com.openexchange.calendar.xctx2.retryAfterErrorInterval
       description: |
         Configures the interval in milliseconds when a retry attempt should be performed after an error occurred when initializing the 
-        cross-context calendar access.  
+        cross-context calendar access. Must be at least one minute.
       defaultValue: 3600000
       version: 7.10.5
       reloadable: true

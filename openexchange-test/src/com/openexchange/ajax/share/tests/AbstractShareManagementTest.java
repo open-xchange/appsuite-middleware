@@ -395,6 +395,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      * @throws Exception If the mail can't be found or something mismatches
      */
     protected MailData receiveShareMail(ApiClient apiClient, String fromToMatch, String subjectToMatch) throws Exception {
+        LOGGER.info("Searching for mail with subject \"{}\" from {}", subjectToMatch, fromToMatch);
         for (int i = 0; i < 10; i++) {
             MailData mailData = lookupMail(apiClient, "default0%2FINBOX", fromToMatch, subjectToMatch);
             if (null != mailData) {
@@ -416,7 +417,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
                 continue;
             }
             if (false == subject.contains(subjectToMatch)) {
-                LOGGER.info("Wrong subject. Expected \"{}\" but was \"{}\"", subjectToMatch, subject);
+                LOGGER.info("\"{}\" doesn't contain expected subject", subject);
                 continue;
             }
             MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
@@ -463,6 +464,17 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         fileAccountData.setConfiguration(new JSONObject());
         FileAccountCreationResponse resp = filestorageApi.updateFileAccount(fileAccountData);
         assertThat("Password still wrong", resp.getError(), notNullValue());
+    }
+
+    /**
+     * Clears the INBOX by removing all mail in it
+     *
+     * @param apiClient The API client
+     * @throws ApiException In case clearing fails
+     */
+    protected void cleanInbox(ApiClient apiClient) throws ApiException {
+        MailApi mailApi = new MailApi(apiClient);
+        mailApi.clearMailFolders(Collections.singletonList("default0/INBOX"), now());
     }
 
 }
