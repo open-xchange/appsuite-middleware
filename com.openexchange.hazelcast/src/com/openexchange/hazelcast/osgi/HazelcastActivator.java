@@ -338,7 +338,7 @@ public class HazelcastActivator implements BundleActivator {
             @Override
             public void run() {
                 // Graceful shut-down
-                hzInstance.getLifecycleService().shutdown();
+                hzInstance.shutdown();
             }
         };
         FutureTask<Void> ft = new FutureTask<Void>(r, null);

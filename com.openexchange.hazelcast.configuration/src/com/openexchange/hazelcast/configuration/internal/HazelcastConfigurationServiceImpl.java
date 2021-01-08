@@ -498,6 +498,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         System.setProperty(ClusterProperty.LOGGING_TYPE.getName(), loggingType);
         config.setProperty(ClusterProperty.LOGGING_TYPE.getName(), loggingType);
         config.setProperty(ClusterProperty.PHONE_HOME_ENABLED.getName(), "false");
+        config.setProperty(ClusterProperty.SHUTDOWNHOOK_ENABLED.getName(), "false");
         config.setProperty(ClusterProperty.HEALTH_MONITORING_LEVEL.getName(), configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(ClusterProperty.OPERATION_CALL_TIMEOUT_MILLIS.getName(), configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(ClusterProperty.ENABLE_JMX.getName(), configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
