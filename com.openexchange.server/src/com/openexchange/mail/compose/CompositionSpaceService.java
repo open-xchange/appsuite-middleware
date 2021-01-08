@@ -123,11 +123,12 @@ public interface CompositionSpaceService {
      * Closes specified composition space and drops all associated resources.
      *
      * @param compositionSpaceId The composition space identifier
+     * @param hardDelete Whether associated resources are supposed to be permanently deleted or a backup should be moved to some sort of trash bin
      * @param clientToken The clients current token to edit the space
      * @return <code>true</code> if such a composition space has been successfully closed; otherwise <code>false</code>
      * @throws OXException If closing/deleting composition space fails
      */
-    boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException;
+    boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException;
 
     /**
      * Closes those composition spaces associated with given session, which are idle for longer than given max. idle time.

@@ -459,7 +459,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                         MailStorageResult<MailPath> saveAsDraftResult = mailStorage.saveAsFinalDraft(association, ClientToken.NONE, serverSession);
                         warnings.addAll(saveAsDraftResult.getWarnings());
                     } else {
-                        MailStorageResult<Boolean> deleteResult = mailStorage.delete(association, false, ClientToken.NONE, serverSession);
+                        MailStorageResult<Boolean> deleteResult = mailStorage.delete(association, true, false, ClientToken.NONE, serverSession);
                         warnings.addAll(deleteResult.getWarnings());
                         boolean closed = deleteResult.getResult().booleanValue();
 
@@ -1366,7 +1366,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
         LookUpResult lookUpResult = optCompositionSpaceToDraftAssociation(compositionSpaceId);
         if (lookUpResult.isEmpty()) {
             return false;
@@ -1381,7 +1381,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
                     Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.delete(compositionSpaceId, false);
                     MailStorageId toDelete = optionalAssociation.orElse(lookUpResult.getAssociation());
-                    MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, true, clientToken, session);
+                    MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, hardDelete, true, clientToken, session);
                     warnings.addAll(storageResult.getWarnings());
                     return storageResult.getResult().booleanValue();
                 }

@@ -133,9 +133,9 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
         try {
-            return service.closeCompositionSpace(compositionSpaceId, clientToken);
+            return service.closeCompositionSpace(compositionSpaceId, hardDelete, clientToken);
         } catch (OXException e) {
             LOG.debug("Exception occurred while calling closeCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
             throw e;

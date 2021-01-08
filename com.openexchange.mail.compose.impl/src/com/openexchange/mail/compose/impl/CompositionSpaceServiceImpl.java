@@ -2144,7 +2144,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
         CompositionSpace compositionSpace = getStorageService().getCompositionSpace(session, compositionSpaceId);
         if (compositionSpace == null) {
             // No such composition space
