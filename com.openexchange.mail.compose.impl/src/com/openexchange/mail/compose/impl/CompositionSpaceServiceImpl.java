@@ -2157,21 +2157,18 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
-        // TODO: Auto-delete referenced draft message on edit-draft?
-        boolean autoDeleteDraftOnEdit = false;
-        if (autoDeleteDraftOnEdit) {
-            MailPath editFor = getEditForFrom(compositionSpace);
-            if (null != editFor) {
-                MailServletInterface mailInterface = null;
-                try {
-                    mailInterface = MailServletInterface.getInstance(session);
-                    mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
-                } catch (Exception e) {
-                    LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
-                } finally {
-                    if (null != mailInterface) {
-                        mailInterface.close();
-                    }
+        // Auto-delete referenced draft message on edit-draft
+        MailPath editFor = getEditForFrom(compositionSpace);
+        if (null != editFor) {
+            MailServletInterface mailInterface = null;
+            try {
+                mailInterface = MailServletInterface.getInstance(session);
+                mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
+            } catch (Exception e) {
+                LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
+            } finally {
+                if (null != mailInterface) {
+                    mailInterface.close();
                 }
             }
         }
