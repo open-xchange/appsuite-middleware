@@ -401,6 +401,11 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     NO_SEARCH_SUPPORT("Searching folder by folder name is not supported", Category.CATEGORY_ERROR, 79, FileStorageExceptionMessages.NO_SEARCH_SUPPORT_MSG),
 
+    /**
+     * Maximum number of %1$d accounts for provider %2$s is exceeded.
+     */
+    MAX_ACCOUNTS_EXCEEDED("Maximum number of %1$d accounts for provider %2$s is exceeded.", Category.CATEGORY_ERROR, 80, FileStorageExceptionMessages.MAX_ACCOUNTS_EXCEEDED_MSG),
+
     ;
 
     /**

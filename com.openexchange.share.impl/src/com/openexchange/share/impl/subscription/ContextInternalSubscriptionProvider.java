@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.share.subscription.ShareLinkState.INACCESSIBLE;
 import static com.openexchange.share.subscription.ShareLinkState.SUBSCRIBED;
 import static com.openexchange.share.subscription.ShareLinkState.UNSUBSCRIBED;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -67,11 +65,13 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.Links;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult;
 import com.openexchange.share.subscription.ShareLinkAnalyzeResult.Builder;
+import com.openexchange.share.subscription.ShareLinkState;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
 import com.openexchange.share.subscription.ShareSubscriptionInformation;
 import com.openexchange.share.subscription.ShareSubscriptionProvider;
@@ -86,15 +86,14 @@ import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
  */
 public class ContextInternalSubscriptionProvider implements ShareSubscriptionProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextInternalSubscriptionProvider.class);
+
     private final static String PUBLIC_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
     private final static String USER_INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
 
     /** The identifiers of the folders that are not allowed to unsubscribe from */
     private static final Set<String> PARENT_FOLDER = Collections.unmodifiableSet(USER_INFOSTORE_FOLDER_ID, PUBLIC_INFOSTORE_FOLDER_ID);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContextInternalSubscriptionProvider.class);
-
-    private static final String FOLDER = "folder";
     private final ServiceLookup services;
 
     /**
@@ -117,27 +116,29 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         if (Strings.isEmpty(shareLink)) {
             return false;
         }
-        return shareLink.contains(Links.PATH) && shareLink.contains(Links.FRAGMENT_APP) && shareLink.contains(FOLDER);
+        try {
+            return null != ShareLinks.parseInternal(shareLink);
+        } catch (OXException e) {
+            LOGGER.debug("Unable to parse link", e);
+        }
+        return false;
     }
 
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
-        /*
-         * Get folder ID from link
-         */
-        String folderId = getFolderId(shareLink);
-        if (Strings.isEmpty(folderId)) {
-            return incaccessible(shareLink);
+        ShareTarget target = ShareLinks.parseInternal(shareLink);
+        if (Strings.isNotEmpty(target.getItem())) {
+            return new ShareLinkAnalyzeResult(ShareLinkState.UNSUPPORTED, ShareSubscriptionExceptions.NOT_USABLE.create(shareLink), null);
         }
-
         /*
          * Access folder
          */
         FolderService folderService = services.getServiceSafe(FolderService.class);
+        String folderId = target.getFolder();
         try {
             UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
             folder = getRootFolder(session, folderService, folder);
-            
+
             Builder builder = new Builder();
             String moduleName = getModuleName(folder.getContentType().getModule());
             builder.infos(new ShareSubscriptionInformation(folder.getAccountID(), moduleName, folderId));
@@ -158,13 +159,19 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         /*
          * Get the folder to subscribe
          */
-        String folderId = getFolderId(shareLink);
-        if (Strings.isEmpty(folderId)) {
+        ShareTarget target = ShareLinks.parseInternal(shareLink);
+        if (Strings.isNotEmpty(target.getItem())) {
             throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
         }
+        
         FolderService folderService = services.getServiceSafe(FolderService.class);
+        String folderId = target.getFolder();
         UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
-        String moduleName = getModuleName(folder.getContentType().getModule());
+        int module = folder.getContentType().getModule();
+        if (module != target.getModule()) {
+            throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
+        }
+        String moduleName = getModuleName(module);
 
         /*
          * Check if already subscribed
@@ -203,13 +210,18 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         /*
          * Get the folder to subscribe
          */
-        String folderId = getFolderId(shareLink);
-        if (Strings.isEmpty(folderId)) {
+        ShareTarget target = ShareLinks.parseInternal(shareLink);
+        if (Strings.isNotEmpty(target.getItem())) {
             return false;
         }
+        
         FolderService folderService = services.getServiceSafe(FolderService.class);
+        String folderId = target.getFolder();
         UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
-
+        int module = folder.getContentType().getModule();
+        if (module != target.getModule()) {
+            return false;
+        }
         /*
          * Check if folder can be unsubscribed
          */
@@ -239,55 +251,6 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
     /*
      * ============================== HELPERS ==============================
      */
-
-    /**
-     * Transforms the string into an {@link URL}
-     *
-     * @param url The URL to transform
-     * @return A {@link URL} or <code>null</code>
-     * @throws OXException In case of invalid URL
-     */
-    private static URL getUrl(String url) throws OXException {
-        try {
-            if (false == url.startsWith("http")) { // includes 'https'
-                return new URL("https://" + url);
-            }
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw ShareSubscriptionExceptions.NOT_USABLE.create(url, e);
-        }
-    }
-
-    /**
-     * Get the folder ID from the share link
-     *
-     * @param shareLink The share link
-     * @return The folder ID or <code>null</code>
-     * @throws OXException
-     */
-    private String getFolderId(String shareLink) throws OXException {
-        URL url = getUrl(shareLink);
-        String ref = url.getRef();
-        if (Strings.isEmpty(ref)) {
-            return null;
-        }
-        if (ref.startsWith(Links.FRAGMENT_APP)) {
-            ref = ref.substring(Links.FRAGMENT_APP.length());
-        }
-        for (String param : ref.split("&")) {
-            if (Strings.isNotEmpty(param) && param.startsWith(FOLDER)) {
-                String[] pair = param.split("=");
-                if (null != pair && pair.length == 2) {
-                    return pair[1];
-                }
-            }
-        }
-        return null;
-    }
-
-    private static ShareLinkAnalyzeResult incaccessible(String link) {
-        return new ShareLinkAnalyzeResult(INACCESSIBLE, ShareExceptionCodes.INVALID_LINK.create(link), null);
-    }
 
     /**
      * Gets a value indicating whether the given folder can be subscribed or not

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.apiclient;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.I;
 import static java.lang.Boolean.TRUE;

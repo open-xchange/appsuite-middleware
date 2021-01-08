@@ -49,13 +49,14 @@
 
 package com.openexchange.file.storage;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Functions.OXFunction;
 import com.openexchange.session.Session;
-import static com.openexchange.java.Autoboxing.i;
 
 /**
  * {@link SizeLimitedFileStorageAccountManager} - limits the amount of accounts a user can create for a {@link FileStorageService}
@@ -101,7 +102,7 @@ public class SizeLimitedFileStorageAccountManager implements FileStorageAccountM
         if (maxAllowedAccounts == 0 || existingAccounts.size() < maxAllowedAccounts) {
             return delegate.addAccount(account, session);
         }
-        throw FileStorageExceptionCodes.QUOTA_REACHED.create();
+        throw FileStorageExceptionCodes.MAX_ACCOUNTS_EXCEEDED.create(I(maxAllowedAccounts), serviceId);
     }
 
     @Override

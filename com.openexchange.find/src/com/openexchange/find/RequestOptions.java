@@ -61,31 +61,16 @@ import java.util.Map;
  */
 public class RequestOptions {
 
-    public static final String INCLUDE_CONTEXT_ADMIN = "admin";
-
     public static final String CLIENT_TIMEZONE = "timezone";
 
     private final Map<String, String> optionMap;
-
-    private final boolean includeContextAdmin;
 
     private final String timeZone;
 
     public RequestOptions(final Map<String, String> optionMap) {
         super();
         this.optionMap = optionMap;
-        this.includeContextAdmin = getBoolOption(INCLUDE_CONTEXT_ADMIN, true);
         this.timeZone = getOption(CLIENT_TIMEZONE);
-    }
-
-    /**
-     * Modules that contain contacts in autocomplete or query responses
-     * can be instructed to include or exclude the context administrator.
-     *
-     * @return Whether the context administrator should be included or not.
-     */
-    public boolean includeContextAdmin() {
-        return includeContextAdmin;
     }
 
     /**

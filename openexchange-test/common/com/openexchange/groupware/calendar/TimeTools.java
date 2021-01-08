@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import com.mdimension.jchronic.Chronic;
-import com.mdimension.jchronic.Options;
 import com.mdimension.jchronic.utils.Span;
 
 /**
@@ -130,16 +129,7 @@ public final class TimeTools {
         }
 
         Date date = null;
-        final Span span;
-        try {
-            span = Chronic.parse(value);
-        } catch (IllegalStateException e) {
-            Options options = new Options();
-            String msg = "Error parsing \"" + value + "\": " + e.getMessage() +
-                " [chronic.options.now.timeZone.ID: " + options.getNow().getTimeZone().getID() +
-                ", chronic.options.now.timeInMillis: " + options.getNow().getTimeInMillis() + "]";
-            throw new IllegalStateException(msg, e);
-        }
+        final Span span = Chronic.parse(value);
         if (null == span) {
             return null;
         }

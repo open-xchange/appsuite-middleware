@@ -54,7 +54,11 @@ import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.List;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
@@ -70,7 +74,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.exception.ShareCoreExceptionCodes;
-
 
 /**
  * Utility class for generating share links.
@@ -116,7 +119,7 @@ public class ShareLinks {
      */
     public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
         Module module = Module.getForFolderConstant(target.getModule());
-        if (null==module){
+        if (null == module) {
             throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(I(target.getModule()));
         }
         String moduleStr = module.getName();
@@ -318,6 +321,60 @@ public class ShareLinks {
             }
         }
         return hostname;
+    }
+
+    /**
+     * Parsed an internal share link and extracts the internal share target the link points to.
+     * <p>
+     * See also {@link com.openexchange.share.Links#generateInternalLink(String, String, String, HostData)}
+     * 
+     * @param shareLink The share link to parse
+     * @return The share target
+     * @throws OXException - {@link ShareExceptionCodes#INVALID_LINK}
+     */
+    public static ShareTarget parseInternal(String shareLink) throws OXException {
+        /*
+         * Parse fragment
+         */
+        List<NameValuePair> fragments;
+        try {
+            String fragment = new URIBuilder(shareLink).getFragment();
+            if (Strings.isEmpty(fragment)) {
+                throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
+            }
+            fragments = URLEncodedUtils.parse(fragment, Charset.forName("UTF-8"));
+        } catch (URISyntaxException e) {
+            throw ShareExceptionCodes.INVALID_LINK.create(e, shareLink);
+        }
+        /*
+         * Translate to share target
+         */
+        Module module = null;
+        String folder = null;
+        String item = null;
+        for (NameValuePair pair : fragments) {
+            if (Strings.isEmpty(pair.getName()) || Strings.isEmpty(pair.getValue())) {
+                continue;
+            }
+            switch (pair.getName()) {
+                case "folder":
+                    folder = pair.getValue();
+                    break;
+                case "id":
+                    item = pair.getValue();
+                    break;
+                case "app":
+                    String app = pair.getValue().startsWith("io.ox/") ? pair.getValue().substring(5) : pair.getValue();
+                    module = Module.getForName(app);
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (null == module || Strings.isEmpty(folder)) {
+            throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
+        }
+        return new ShareTarget(module.getFolderConstant(), folder, item);
     }
 
 }

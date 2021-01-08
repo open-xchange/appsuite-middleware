@@ -47,6 +47,7 @@ public class SearchTest extends AbstractAJAXSession {
             com.openexchange.file.storage.File tempFile = InfostoreTestManager.createFile(folderId, "Test " + i, "text/javascript");
             tempFile.setDescription("this is document " + alphabet[i]);
             itm.newAction(tempFile);
+            assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
             all[i] = "Test " + i;
         }
     }

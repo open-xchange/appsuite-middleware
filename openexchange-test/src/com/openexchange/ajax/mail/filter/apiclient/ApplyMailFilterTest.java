@@ -54,9 +54,9 @@ import static java.lang.Boolean.FALSE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -77,6 +77,7 @@ import com.openexchange.testing.httpclient.models.Result.ResultEnum;
  * {@link ApplyMailFilterTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
 public class ApplyMailFilterTest extends AbstractMailFilterTest {
@@ -89,77 +90,143 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
     }
 
     /**
-     * Tests the apply mailfilter action
-     *
-     * @throws ApiException
+     * Tests the apply mail-filter action
      */
     @Test
     public void testApplyMailfilterAction() throws ApiException {
         // Create a new mail folder
-        NewFolderBody body = new NewFolderBody();
-        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setTitle(ApplyMailFilterTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        folder.setModule("mail");
-        body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", body, "0", null, null, null);
-        assertNull(createFolder.getErrorDesc(), createFolder.getError());
-        String folderId = rememberFolder(createFolder.getData());
+        String folderId = createFolder();
 
         // Add two mails to this folder (one matches the sieve rule)
         String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
-        File f = new File(testMailDir, "mailfilter1.eml");
+        importMail("mailfilter1.eml", testMailDir, folderId);
+        String matchingMailId = importMail("mailfilter2.eml", testMailDir, folderId);
+
+        // Add a new sieve rule and remember its id
+        Integer ruleId = addNewRule();
+
+        // Check amount of mails are 2
+        getAllMailsAssertAmount(folderId, 2);
+
+        // Apply the rule to the new folder
+        applyPredefinedRule(folderId, ruleId);
+
+        // Check one mail is properly marked as deleted
+        MailsResponse allMails = getAllMailsAssertAmount(folderId, 1);
+        Assert.assertNotEquals(matchingMailId, allMails.getData().get(0).get(0));
+    }
+
+    /////////////////////////////////// HELPERS //////////////////////////////////
+
+    /**
+     * Creates a new folder
+     *
+     * @return The folder identifier
+     * @throws ApiException if an error is occurred
+     */
+    private String createFolder() throws ApiException {
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setTitle(ApplyMailFilterTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        folder.setModule("mail");
+
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+
+        FolderUpdateResponse createFolder = folderApi.createFolder("default0/INBOX", body, "0", null, null, null);
+        assertNull(createFolder.getErrorDesc(), createFolder.getError());
+        return rememberFolder(createFolder.getData());
+    }
+
+    /**
+     * Imports the specified .eml asset from the specified asset directory
+     * to the folder with the specified identifier
+     *
+     * @param asset The asset name
+     * @param assetDir The asset directory
+     * @param folderId The folder identifier
+     * @return The imported mail identifier
+     * @throws ApiException if an error is occurred
+     */
+    private String importMail(String asset, String assetDir, String folderId) throws ApiException {
+        File f = new File(assetDir, asset);
         Assert.assertTrue(f.exists());
 
         MailImportResponse importResponse = mailApi.importMail(folderId, f, null, Boolean.TRUE);
         Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
-        f = new File(testMailDir, "mailfilter2.eml");
-        Assert.assertTrue(f.exists());
 
-        importResponse = mailApi.importMail(folderId, f, null, Boolean.TRUE);
-        Assert.assertNull(importResponse.getErrorDesc(), importResponse.getError());
         List<MailDestinationData> data = importResponse.getData();
         Assert.assertNotNull(data);
         Assert.assertEquals(1, data.size());
-        String matchingMailId = data.get(0).getId();
-        // Add a new sieve rule and remember its id
-        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getRule(), null);
-        Assert.assertNull(response.getErrorDesc(), response.getError());
-        Integer ruleId = rememberSieveRule(response.getData());
 
-        // Check amount of mails
+        return data.get(0).getId();
+    }
+
+    /**
+     * Gets all mails from the specified folder and asserts that the expected amount
+     * is equals the actual amount
+     *
+     * @param folderId The folder identifier
+     * @param expectedAmount The expected amount
+     * @return The MailsResponse
+     * @throws ApiException if an API error is occurred
+     */
+    private MailsResponse getAllMailsAssertAmount(String folderId, int expectedAmount) throws ApiException {
         MailsResponse allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
         Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
         Assert.assertNotNull(allMails.getData());
-        Assert.assertEquals("Unexpected amount of mails returned.", 2, allMails.getData().size());
+        Assert.assertEquals("Unexpected amount of mails returned.", expectedAmount, allMails.getData().size());
 
-        // apply the rule to the new folder
+        return allMails;
+    }
+
+    /**
+     * Applies the predefined rule to the specified folder
+     *
+     * @param folderId The folder id to apply the rule
+     * @param ruleId The rule id to apply to the folder
+     * @throws ApiException if an error is occurred
+     */
+    private void applyPredefinedRule(String folderId, Integer ruleId) throws ApiException {
         MailFilterApplyResponse applyPredefinedRule = mailfilterapi.applyPredefinedRule(ruleId, null, folderId);
+
         // Check result is ok
         Assert.assertNull(applyPredefinedRule.getErrorDesc(), applyPredefinedRule.getError());
         Assert.assertNotNull(applyPredefinedRule.getData());
         applyPredefinedRule.getData().stream().forEach(result -> assertNull("Expected no error but found: " + result.getErrors(), result.getErrors()));
+
         Assert.assertEquals("Invalid size of results: " + applyPredefinedRule.getData().toString(), 1, applyPredefinedRule.getData().size());
         applyPredefinedRule.getData().stream().forEach(m -> assertEquals(ResultEnum.OK, m.getResult()));
-        // Check one mail is properly marked as deleted
-        allMails = mailApi.getAllMails(folderId, "600", null, FALSE, FALSE, null, null, I(0), I(5), I(5), null);
-        Assert.assertNull(allMails.getErrorDesc(), allMails.getError());
-        Assert.assertNotNull(allMails.getData());
-        Assert.assertEquals("Unexpected amount of mails returned.", 1, allMails.getData().size());
-        Assert.assertNotEquals(matchingMailId, allMails.getData().get(0).get(0));
     }
 
+    /**
+     * Adds a new sieve rule
+     * 
+     * @return The rule's id
+     * @throws ApiException if an error is occurred
+     */
+    private Integer addNewRule() throws ApiException {
+        MailFilterCreationResponse response = mailfilterapi.createRuleV2(getRule(), null);
+        Assert.assertNull(response.getErrorDesc(), response.getError());
+        return rememberSieveRule(response.getData());
+    }
+
+    /**
+     * Creates a rule
+     *
+     * @return The created rule
+     */
     private MailFilterRulev2 getRule() {
-        MailFilterRulev2 rule = new MailFilterRulev2();
+        //@formatter:off
         MailFilterTestv2 test = new MailFilterTestv2();
-        test.setHeader("to");
-        test.id("to");
-        test.values(Collections.singletonList("person3@invalid.com"));
-        test.comparison("contains");
-        rule.test(test);
+        test.id("to")
+            .values(ImmutableList.of("person3@invalid.com"))
+            .comparison("contains")
+            .setHeader("to");
+        //@formatter:on
+
         MailFilterAction action = new MailFilterAction();
         action.setId("discard");
-        rule.actioncmds(Collections.singletonList(action));
-        return rule;
-    }
 
+        return new MailFilterRulev2().test(test).actioncmds(ImmutableList.of(action));
+    }
 }

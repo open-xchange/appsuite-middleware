@@ -67,7 +67,7 @@ public final class ShareSubscriptionInformation {
      * Initializes a new {@link ShareSubscriptionInformation}.
      * 
      * @param accountId The account ID of the subscription
-     * @param module The module ID
+     * @param module The module name as per {@link com.openexchange.share.impl.groupware.ShareModuleMapping}
      * @param folder The folder ID
      */
     public ShareSubscriptionInformation(String accountId, String module, String folder) {

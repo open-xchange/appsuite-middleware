@@ -297,7 +297,8 @@ public class MailStorage implements IMailStorage {
 
             validateIfNeeded(mailStorageId, processor);
 
-            Meta meta = processor.getCurrentDraft(MessageField.META).getMeta();
+            MessageDescription currentDraft = processor.getCurrentDraft(MessageField.META, MessageField.SECURITY);
+            Meta meta = currentDraft.getMeta();
             Optional<MailMessage> optRefMessage = Optional.empty();
             if (meta != null) {
                 MailPath referencedMessage = null;
@@ -310,7 +311,7 @@ public class MailStorage implements IMailStorage {
 
                 if (referencedMessage != null) {
                     try {
-                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess));
+                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess, getSecurity(currentDraft).getAuthToken()));
                     } catch (OXException e) {
                         LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
                     }
@@ -527,9 +528,10 @@ public class MailStorage implements IMailStorage {
 
             MailMessageProcessor processor = initMessageProcessorFull(mailStorageId, session, defaultMailAccess, clientToken);
             validateIfNeeded(mailStorageId, processor);
-            MessageDescription originalDescription = processor.getCurrentDraft();
+            MessageDescription originalDescription = processor.getCurrentDraft(MessageField.META, MessageField.SECURITY);
 
-            SecuritySettings securitySettings = getSecuritySettings(getSecurity(originalDescription));
+            Security security = getSecurity(originalDescription);
+            SecuritySettings securitySettings = getSecuritySettings(security);
 
             Meta meta = originalDescription.getMeta();
             Optional<MailMessage> optRefMessage = Optional.empty();
@@ -544,7 +546,7 @@ public class MailStorage implements IMailStorage {
 
                 if (referencedMessage != null) {
                     try {
-                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess));
+                        optRefMessage = Optional.of(getOriginalMail(session, referencedMessage, mailService, mailAccesses, defaultMailAccess, security.getAuthToken()));
                     } catch (OXException e) {
                         LOG.error("Cannot not apply reference headers because fetching the referenced message failed", e);
                     }
@@ -691,6 +693,8 @@ public class MailStorage implements IMailStorage {
             boolean changed = validateIfNeeded(mailStorageId, processor);
             MessageDescription originalDescription = processor.getCurrentDraft();
 
+            Security security = getSecurity(originalDescription);
+
             // Acquire meta information and determine the "replyFor" path
             Meta meta = originalDescription.getMeta();
             MailPath replyFor = meta.getReplyFor();
@@ -698,7 +702,7 @@ public class MailStorage implements IMailStorage {
                 throw CompositionSpaceErrorCode.NO_REPLY_FOR.create();
             }
 
-            MailMessage originalMail = getOriginalMail(session, replyFor, mailService, mailAccesses, defaultMailAccess);
+            MailMessage originalMail = getOriginalMail(session, replyFor, mailService, mailAccesses, defaultMailAccess, security.getAuthToken());
             List<Attachment> newAttachments = fetchOriginalAttachments(session, compositionSpaceId, processor, originalMail);
 
             List<Attachment> addedAttachments = processor.addAttachments(newAttachments);
@@ -1375,7 +1379,7 @@ public class MailStorage implements IMailStorage {
         if (originalDescription.containsNotNullSecurity() && newDescription.containsNotNullSecurity()) {
             Security newSecurity = null;
             if (newDescription.getSecurity().isEncrypt() && Strings.isEmpty(newDescription.getSecurity().getAuthToken())) {
-                //we need to preserve the authentication token from the existing draft, if the caller want's us to encrypt but is missing an authToken
+                //we need to preserve the authentication token from the existing draft, if the caller wants us to encrypt but is missing an authToken
                 //otherwise the token would get overwritten and de-cryption would fail the next time
                 newSecurity = Security.builder(newDescription.getSecurity()).withAuthToken(originalDescription.getSecurity().getAuthToken()).build();
             } else if (newDescription.getSecurity().isEncrypt() == false && Strings.isNotEmpty(originalDescription.getSecurity().getAuthToken())) {
@@ -1439,11 +1443,11 @@ public class MailStorage implements IMailStorage {
         return Collections.emptyList();
     }
 
-    private MailMessage getOriginalMail(Session session, MailPath mailPath, MailService mailService, List<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> mailAccesses, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess) throws OXException {
+    private MailMessage getOriginalMail(Session session, MailPath mailPath, MailService mailService, List<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> mailAccesses, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess, String authToken) throws OXException {
         Optional<MailMessage> optionalMail;
         if (mailPath.getAccountId() == MailAccount.DEFAULT_ID) {
             if (mayDecrypt(session)) {
-                defaultMailAccess = createCryptographicAwareAccess(defaultMailAccess, null);
+                defaultMailAccess = createCryptographicAwareAccess(defaultMailAccess, authToken);
             }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), defaultMailAccess.getMessageStorage());
         } else {
@@ -1451,7 +1455,7 @@ public class MailStorage implements IMailStorage {
             mailAccesses.add(otherAccess);
             otherAccess.connect(false);
             if (mayDecrypt(session)) {
-                otherAccess = createCryptographicAwareAccess(otherAccess, null);
+                otherAccess = createCryptographicAwareAccess(otherAccess, authToken);
             }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), otherAccess.getMessageStorage());
         }
@@ -1675,14 +1679,12 @@ public class MailStorage implements IMailStorage {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccezz = mailAccess;
         IMailMessageStorage messageStorage = mailAccezz.getMessageStorage();
 
-        Security security = null;
-
         Optional<InputStream> optionalMimeStream = getMimeStream(draftPath, messageStorage);
         if (optionalMimeStream.isPresent()) {
             InputStream mimeStream = optionalMimeStream.get();
             try {
                 HeadersAndStream parsedHeaders = parseHeaders(mimeStream);
-                security = convertSecurity(parsedHeaders.headers);
+                Security security = convertSecurity(parsedHeaders.headers);
                 if (!security.isEncrypt()) {
                     mimeStream = null; // Avoid premature closing
                     return parsedHeaders.mimeStream;
@@ -1774,12 +1776,11 @@ public class MailStorage implements IMailStorage {
 
         MailPath draftPath = mailStorageId.getDraftPath();
 
-        Security security = null;
         Optional<MailMessage> optionalDraftMail = getMail(draftPath, messageStorage);
         if (optionalDraftMail.isPresent()) {
             MailMessage mailMessage = optionalDraftMail.get();
 
-            security = convertSecurity(mailMessage);
+            Security security = convertSecurity(mailMessage);
             if (!decryptIfRequired || !security.isEncrypt()) {
                 return mailMessage;
             }
