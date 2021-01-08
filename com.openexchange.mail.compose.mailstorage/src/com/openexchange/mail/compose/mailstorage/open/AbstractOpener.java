@@ -123,20 +123,22 @@ public abstract class AbstractOpener {
      * Converts given Internet email address to an {@link Address} instance.
      *
      * @param addr The Internet email address to convert
+     * @param withPersonalIfPresent <code>true</code> to take over possible personal part; otherwise <code>false</code> to not set it
      * @return The resulting {@code Address} instance
      */
-    protected static Address toAddress(QuotedInternetAddress addr) {
-        return null == addr ? null : new Address(addr.getPersonal(), addr.getUnicodeAddress());
+    protected static Address toAddress(QuotedInternetAddress addr, boolean withPersonalIfPresent) {
+        return null == addr ? null : new Address(withPersonalIfPresent ? addr.getPersonal() : null, addr.getUnicodeAddress());
     }
 
     /**
      * Converts given Internet email address to an {@link Address} instance.
      *
      * @param addr The Internet email address to convert
+     * @param withPersonalIfPresent <code>true</code> to take over possible personal part; otherwise <code>false</code> to not set it
      * @return The resulting {@code Address} instance
      */
-    protected static Address toAddress(InternetAddress addr) {
-        return null == addr ? null : new Address(addr.getPersonal(), IDNA.toIDN(addr.getAddress()));
+    protected static Address toAddress(InternetAddress addr, boolean withPersonalIfPresent) {
+        return null == addr ? null : new Address(withPersonalIfPresent ? addr.getPersonal() : null, IDNA.toIDN(addr.getAddress()));
     }
 
     /**
@@ -152,7 +154,7 @@ public abstract class AbstractOpener {
 
         List<Address> addresses = new ArrayList<Address>(addrs.length);
         for (InternetAddress addr : addrs) {
-            Address address = toAddress(addr);
+            Address address = toAddress(addr, true);
             if (null != address) {
                 addresses.add(address);
             }

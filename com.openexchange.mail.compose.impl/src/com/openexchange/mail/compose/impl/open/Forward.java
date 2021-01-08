@@ -147,13 +147,13 @@ public class Forward extends AbstractOpener {
                 if (fromAddressProvider.isDetectBy()) {
                     InternetAddress from = MimeProcessingUtility.determinePossibleFrom(true, originalMail, forwardsFor.get(0).getAccountId(), session, context);
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                         fromSet = true;
                     }
                 } else if (fromAddressProvider.isSpecified()) {
                     InternetAddress from = fromAddressProvider.getFromAddress();
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                         fromSet = true;
                     }
                 }
@@ -161,7 +161,7 @@ public class Forward extends AbstractOpener {
             if (!fromSet) {
                 String sendAddr = usm.getSendAddr();
                 if (sendAddr != null) {
-                    state.message.setFrom(toAddress(new QuotedInternetAddress(sendAddr, false)));
+                    state.message.setFrom(toAddress(new QuotedInternetAddress(sendAddr, false), false));
                 }
             }
         }
@@ -172,9 +172,9 @@ public class Forward extends AbstractOpener {
                 final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, context);
                 if (null != users && users.length > 0) {
                     InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
-                    state.message.setFrom(toAddress(onBehalfOf));
+                    state.message.setFrom(toAddress(onBehalfOf, false));
                     QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
-                    state.message.setSender(toAddress(sender));
+                    state.message.setSender(toAddress(sender, false));
                 }
             }
         }
