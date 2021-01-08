@@ -73,8 +73,10 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Interner;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.cache.interner.ListLsubInterner;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
@@ -112,6 +114,18 @@ final class ListLsubCollection implements Serializable {
     private static enum State {
         DEPRECATED, DEPRECATED_FORCE_NEW, INITIALIZED;
     }
+
+    // ------------------------------------------------------- Interner stuff --------------------------------------------------------------
+
+    private static Interner<String> fullNameInterner() {
+        return ListLsubInterner.getInstance().getFullNameInterner();
+    }
+
+    private static Interner<String> attribteInterner() {
+        return ListLsubInterner.getInstance().getAttribteInterner();
+    }
+
+    // ------------------------------------------------------- End of interner stuff -------------------------------------------------------
 
     /**
      * For testing.
@@ -702,8 +716,9 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private ListLsubEntryImpl createLISTEntryForNamespaceFolder(String fullName, ListLsubEntryImpl lsubEntry, ListLsubEntryImpl rootEntry) {
+    private ListLsubEntryImpl createLISTEntryForNamespaceFolder(String inputFullName, ListLsubEntryImpl lsubEntry, ListLsubEntryImpl rootEntry) {
         ListLsubEntryImpl lle = new ListLsubEntryImpl(lsubEntry, true);
+        String fullName = fullNameInterner().intern(inputFullName);
         listMap.put(fullName, lle);
 
         char separator = lle.getSeparator();
@@ -712,7 +727,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Non-root level
              */
-            final String parentFullName = fullName.substring(0, pos);
+            final String parentFullName = fullNameInterner().intern(fullName.substring(0, pos));
             ListLsubEntryImpl parent = listMap.get(parentFullName);
             if (null != parent) {
                 lle.setParent(parent);
@@ -971,6 +986,7 @@ final class ListLsubCollection implements Serializable {
                 if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
                     mbox = Boolean.FALSE;
                 }
+                // already interned
                 final String fullName = listLsubEntry.getFullName();
                 final String originalFullName = listLsubEntry.optOriginalFullName();
 
@@ -1202,7 +1218,7 @@ final class ListLsubCollection implements Serializable {
                     map.put(parentFullName, parent);
                     final int pos = parentFullName.lastIndexOf(separator);
                     if (pos >= 0) {
-                        grandFullName = parentFullName.substring(0, pos);
+                        grandFullName = fullNameInterner().intern(parentFullName.substring(0, pos));
                         newEntry = parent;
                         break Next;
                     }
@@ -1412,7 +1428,7 @@ final class ListLsubCollection implements Serializable {
                 } else {
                     attributes = new HashSet<String>(attrs.length);
                     for (String attribute : attrs) {
-                        String attr = Strings.asciiLowerCase(attribute);
+                        String attr = attribteInterner().intern(Strings.asciiLowerCase(attribute));
                         switch (POS_MAP.get(attr)) {
                             case 1:
                                 changeState = ListLsubEntry.ChangeState.CHANGED;
@@ -1441,7 +1457,7 @@ final class ListLsubCollection implements Serializable {
                 }
             }
             boolean subscribed = addIt ? imapFolder.isSubscribed() : false;
-            String fullName = imapFolder.getFullName();
+            String fullName = fullNameInterner().intern(imapFolder.getFullName());
             if (subscribed) {
                 ListLsubEntryImpl lsubEntry = new ListLsubEntryImpl(fullName, attributes, imapFolder.getSeparator(), changeState, hasInferiors, canOpen, hasChildren, null);
                 ConcurrentMap<String, ListLsubEntryImpl> map = lsubMap;
@@ -1542,7 +1558,7 @@ final class ListLsubCollection implements Serializable {
                 } else {
                     attributes = new HashSet<String>(attrs.length);
                     for (String attribute : attrs) {
-                        String attr = Strings.asciiLowerCase(attribute);
+                        String attr = attribteInterner().intern(Strings.asciiLowerCase(attribute));
                         switch (POS_MAP.get(attr)) {
                             case 1:
                                 changeState = ListLsubEntry.ChangeState.CHANGED;
@@ -1570,7 +1586,7 @@ final class ListLsubCollection implements Serializable {
                     }
                 }
             }
-            String fullName = imapFolder.getFullName();
+            String fullName = fullNameInterner().intern(imapFolder.getFullName());
             if (subscribed) {
                 ListLsubEntryImpl lsubEntry = new ListLsubEntryImpl(fullName, attributes, imapFolder.getSeparator(), changeState, hasInferiors, canOpen, hasChildren, null);
                 ConcurrentMap<String, ListLsubEntryImpl> map = lsubMap;
@@ -1673,13 +1689,14 @@ final class ListLsubCollection implements Serializable {
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
-    protected ListLsubEntryImpl doSingleListCommand(String fullName, IMAPProtocol protocol, boolean lsub) throws ProtocolException {
+    protected ListLsubEntryImpl doSingleListCommand(String inputFullName, IMAPProtocol protocol, boolean lsub) throws ProtocolException {
         if (!lsub) {
             doDummyLsub(protocol);
         }
         /*
          * Perform command: LIST "" "INBOX"
          */
+        String fullName = fullNameInterner().intern(inputFullName);
         final String command = lsub ? "LSUB" : "LIST";
         Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, new StringBuilder(command).append(" \"\"").toString(), args);
@@ -2668,7 +2685,7 @@ final class ListLsubCollection implements Serializable {
             return INBOX;
         }
         if (fullName.length() > 5 && upperCase.startsWith("INBOX") && separator == upperCase.charAt(5)) {
-            return new StringBuilder(INBOX).append(separator).append(fullName.substring(6)).toString();
+            return fullNameInterner().intern(new StringBuilder(INBOX).append(separator).append(fullName.substring(6)).toString());
         }
         return fullName;
     }
