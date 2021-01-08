@@ -143,9 +143,7 @@ public final class CSVDataRetentionConfig {
             } else if (!directory.canWrite()) {
                 throw DataRetentionExceptionCodes.IO.create("Directory \"" + directoryStr + "\" does not grant write permission.");
             }
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.dir=").append(directory.getPath());
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.dir=").append(directory.getPath());
         }
         // Version number
         {
@@ -156,9 +154,7 @@ public final class CSVDataRetentionConfig {
                 LOG.error("Property \"com.openexchange.dataretention.versionNumber\" is not a number: {}.Using fallback \"1\" instead.", versionNumberStr);
                 versionNumber = 1;
             }
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.versionNumber=").append(versionNumber);
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.versionNumber=").append(versionNumber);
         }
         // Client ID
         {
@@ -167,9 +163,7 @@ public final class CSVDataRetentionConfig {
                 LOG.warn("Missing client ID. Using empty string.");
             }
             clientId = clientIDStr;
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.clientID=").append(clientId);
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.clientID=").append(clientId);
         }
         // Source ID
         {
@@ -178,9 +172,7 @@ public final class CSVDataRetentionConfig {
                 LOG.warn("Missing source ID. Using empty string.");
             }
             sourceId = srcIDStr;
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.sourceID=").append(sourceId);
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.sourceID=").append(sourceId);
         }
         // Location
         {
@@ -189,9 +181,7 @@ public final class CSVDataRetentionConfig {
                 LOG.warn("Missing location. Using empty string.");
             }
             location = locationStr;
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.location=").append(location);
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.location=").append(location);
         }
         // Time zone
         {
@@ -207,9 +197,7 @@ public final class CSVDataRetentionConfig {
                 tzStr = "GMT";
             }
             timeZone = TimeZone.getTimeZone(tzStr);
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.timeZone=").append(timeZone.getID());
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.timeZone=").append(timeZone.getID());
         }
         // Rotate length
         {
@@ -224,9 +212,7 @@ public final class CSVDataRetentionConfig {
                 LOG.error("Property \"com.openexchange.dataretention.rotateLength\" is not a number: {}.Using fallback \"0\" instead.", rl);
                 rotateLength = 0L;
             }
-            if (null != logBuilder) {
-                logBuilder.append("\n\tcom.openexchange.dataretention.rotateLength=").append(rotateLength);
-            }
+            logBuilder.append("\n\tcom.openexchange.dataretention.rotateLength=").append(rotateLength);
         }
         LOG.info(logBuilder.toString());
     }

@@ -86,7 +86,7 @@ public class LiquibaseHelper {
      * @param migration The database migration
      * @return The initialized liquibase instance
      */
-    public static Liquibase prepareLiquibase(Connection connection, DBMigration migration) throws LiquibaseException, OXException {
+    public static Liquibase prepareLiquibase(Connection connection, DBMigration migration) throws LiquibaseException {
         return prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
     }
 
@@ -99,7 +99,7 @@ public class LiquibaseHelper {
      * @param accessor Needed to access the given file
      * @return The initialized liquibase instance
      */
-    public static Liquibase prepareLiquibase(Connection connection, String fileLocation, ResourceAccessor accessor) throws LiquibaseException, OXException {
+    public static Liquibase prepareLiquibase(Connection connection, String fileLocation, ResourceAccessor accessor) throws LiquibaseException {
         MySQLDatabase database = new MySQLDatabase();
         database.setConnection(new JdbcConnection(connection));
         return new Liquibase(fileLocation, LiquibaseHelper.prepareResourceAccessor(accessor), database);

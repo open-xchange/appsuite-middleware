@@ -71,3 +71,4 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.filestore.sproxyd.osgi.SproxydActivator
+Automatic-Module-Name: com.openexchange.filestore.sproxyd

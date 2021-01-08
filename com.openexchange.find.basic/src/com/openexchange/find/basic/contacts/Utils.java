@@ -64,13 +64,21 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class Utils {
 
+    /**
+     * Creates a search term for the queries using a facet matching the supplied fields.
+     *
+     * @param session The server session
+     * @param fields The filter fields to select the matching facet
+     * @param queries The queries
+     * @return The search term, or <code>null</code> to indicate a <code>FALSE</code> condition with empty results.
+     * @throws OXException
+     */
     public static SearchTerm<?> getSearchTerm(ServerSession session, ContactField[] fields, List<String> queries) throws OXException {
         if (queries.isEmpty()) {
             return null;
@@ -80,29 +88,27 @@ public class Utils {
         if (queries.size() == 1) {
             String query = queries.get(0);
             checkPatternLength(query, minimumSearchCharacters);
-            return getTermForFields(fields, query, minimumSearchCharacters);
-        } else {
-            CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-            int operands = 0;
-            for (String query : queries) {
-                if (fulfillsLengthConstraint(query, minimumSearchCharacters)) {
-                    andTerm.addSearchTerm(getTermForFields(fields, query, minimumSearchCharacters));
-                    ++operands;
-                }
-            }
-
-            if (operands > 0) {
-                return andTerm;
-            } else {
-                // Fallback to avoid aborting the search as a whole
-                String query = Strings.join(queries, " ");
-                checkPatternLength(query, minimumSearchCharacters);
-                return getTermForFields(fields, query, minimumSearchCharacters);
+            return getTermForFields(fields, query);
+        }
+        CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        int operands = 0;
+        for (String query : queries) {
+            if (fulfillsLengthConstraint(query, minimumSearchCharacters)) {
+                andTerm.addSearchTerm(getTermForFields(fields, query));
+                ++operands;
             }
         }
+
+        if (operands > 0) {
+            return andTerm;
+        }
+        // Fallback to avoid aborting the search as a whole
+        String query = Strings.join(queries, " ");
+        checkPatternLength(query, minimumSearchCharacters);
+        return getTermForFields(fields, query);
     }
 
-    private static SearchTerm<?> getTermForFields(ContactField[] fields, String query, int minimumSearchCharacters) {
+    private static SearchTerm<?> getTermForFields(ContactField[] fields, String query) {
         String pattern = addWildcards(query, true, true);
         CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
         for (ContactField field : fields) {
@@ -134,7 +140,7 @@ public class Utils {
         return pattern;
     }
 
-    private static boolean fulfillsLengthConstraint(String pattern, int minimumSearchCharacters) throws OXException {
+    private static boolean fulfillsLengthConstraint(String pattern, int minimumSearchCharacters) {
         if (null != pattern && 0 < minimumSearchCharacters && pattern.length() < minimumSearchCharacters) {
             return false;
         }

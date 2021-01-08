@@ -22,3 +22,4 @@ Import-Package: com.openexchange.config,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.events.remote

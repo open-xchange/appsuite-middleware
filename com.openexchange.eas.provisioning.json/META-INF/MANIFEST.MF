@@ -43,3 +43,4 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.openexchange.mobile.configuration.json.action,
  com.openexchange.mobile.configuration.json.container,
  com.openexchange.mobile.configuration.json.servlet
+Automatic-Module-Name: com.openexchange.eas.provisioning.json

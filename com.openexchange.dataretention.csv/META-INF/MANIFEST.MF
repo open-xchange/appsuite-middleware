@@ -17,3 +17,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.dataretention.csv.osgi.CSVDataRetentionActivator
+Automatic-Module-Name: com.openexchange.dataretention.csv

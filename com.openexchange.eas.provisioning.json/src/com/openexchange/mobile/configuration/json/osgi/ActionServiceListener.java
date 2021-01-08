@@ -71,6 +71,7 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
         this.context = context;
     }
 
+    @Override
     public ActionService addingService(final ServiceReference<ActionService> serviceReference) {
         final ActionService service = context.getService(serviceReference);
         if (null == service) {
@@ -83,31 +84,31 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
                 LOG.error("Missing identifier in action service: {}", serviceReference.getClass().getName());
                 return service;
             }
-            if (getInstance().getActionService((ActionTypes)identifier) != null) {
+            if (getInstance().getActionService((ActionTypes) identifier) != null) {
                 LOG.error("A action service is already registered for identifier: {}", identifier);
                 return service;
             }
-            getInstance().putActionService((ActionTypes)identifier, service);
+            getInstance().putActionService((ActionTypes) identifier, service);
             LOG.info("Action service for identifier '{}' successfully registered", identifier);
         }
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<ActionService> reference, final ActionService service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference<ActionService> reference, final ActionService service) {
         try {
-            {
-                final Object identifier = reference.getProperty("action");
-                if (null == identifier) {
-                    LOG.error("Missing identifier in action service: {}", service.getClass().getName());
-                    return;
-                }
-                getInstance().removeActionService((ActionTypes)identifier);
-                LOG.info("Action service for identifier '{}' successfully unregistered", identifier);
+            final Object identifier = reference.getProperty("action");
+            if (null == identifier) {
+                LOG.error("Missing identifier in action service: {}", service.getClass().getName());
+                return;
             }
+            getInstance().removeActionService((ActionTypes) identifier);
+            LOG.info("Action service for identifier '{}' successfully unregistered", identifier);
         } finally {
             context.ungetService(reference);
         }

@@ -74,16 +74,6 @@ import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 class State {
 
     /**
-     * Logger.
-     */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(State.class);
-
-    /**
-     * Version long for interoperability.
-     */
-    private static final long serialVersionUID = 1064393846000L;
-
-    /**
      * Number of entries in a level.
      */
     private final int entries;

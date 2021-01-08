@@ -25,3 +25,4 @@ Import-Package: com.google.common.collect,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.database.tombstone.cleanup.osgi.TombstoneCleanupActivator
+Automatic-Module-Name: com.openexchange.database.tombstone.cleanup

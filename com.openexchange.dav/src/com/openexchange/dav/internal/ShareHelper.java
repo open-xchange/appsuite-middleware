@@ -122,14 +122,13 @@ public class ShareHelper {
             } catch (OXException e) {
                 if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                     throw WebdavProtocolException.generalError(e, folderCollection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
-                } else {
-                    throw WebdavProtocolException.generalError(e, folderCollection.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
                 }
+                throw WebdavProtocolException.generalError(e, folderCollection.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
         }
     }
 
-    private static List<Permission> parseShare(DAVFactory factory, Permission[] originalPermissions, Element shareElement) throws WebdavProtocolException {
+    private static List<Permission> parseShare(DAVFactory factory, Permission[] originalPermissions, Element shareElement) {
         List<Permission> permissions = new ArrayList<Permission>(Arrays.asList(originalPermissions));
         boolean hasChanged = false;
         List<Element> setElements = shareElement.getChildren("set", CALENDARSERVER_NS);
@@ -158,7 +157,7 @@ public class ShareHelper {
         return hasChanged ? permissions : null;
     }
 
-    private static List<Permission> parseShareResource(DAVFactory factory, Permission[] originalPermissions, Element shareResourceElement) throws WebdavProtocolException {
+    private static List<Permission> parseShareResource(DAVFactory factory, Permission[] originalPermissions, Element shareResourceElement) {
         List<Element> shareeElements = shareResourceElement.getChildren("sharee", DAV_NS);
         if (null != shareeElements && 0 < shareeElements.size()) {
             List<Permission> permissions = new ArrayList<Permission>(Arrays.asList(originalPermissions));

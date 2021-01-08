@@ -22,8 +22,9 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  com.openexchange.tx,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.2",
+ org.osgi.util.tracker,
  org.slf4j
 Bundle-Vendor: OX Software GmbH
 Export-Package: com.openexchange.file.storage.limit,
  com.openexchange.file.storage.limit.type
+Automatic-Module-Name: com.openexchange.file.storage.limit

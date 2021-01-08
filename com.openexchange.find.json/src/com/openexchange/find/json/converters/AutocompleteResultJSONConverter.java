@@ -77,7 +77,7 @@ public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
+        AutocompleteResult autocompleteResult = AutocompleteResult.class.cast(result.getResultObject());
         try {
             JSONObject jsonResult = new JSONObject(2);
             jsonResult.put("facets", convertFacets(session, autocompleteResult.getFacets()));

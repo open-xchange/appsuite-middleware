@@ -49,8 +49,6 @@
 
 package com.openexchange.find.facet;
 
-
-
 /**
  * A display item that is localizable and shall be string formatted by clients.
  * The result string then consists of two parts: An argument (most likely user
@@ -68,12 +66,14 @@ package com.openexchange.find.facet;
  */
 public class FormattableDisplayItem implements DisplayItem {
 
-    private final String suffix;
+    private static final long serialVersionUID = -5707165345744171006L;
 
+    private final String suffix;
     private final String arg;
 
     /**
      * Initializes a new {@link FormattableDisplayItem}.
+     * 
      * @param suffix The suffix that is appended to the argument. Never <code>null</code>.
      * @param args The format argument. Never <code>null</code>.
      */

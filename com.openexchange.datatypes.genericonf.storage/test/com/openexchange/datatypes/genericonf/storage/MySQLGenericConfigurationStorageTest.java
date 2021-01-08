@@ -114,11 +114,11 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     @Test
     public void testLoadDynamicConfiguration() throws SQLException, OXException {
-        byte[] uuid = getUUID();
+        getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value')");
-        uuid = getUUID();
+        getUUID();
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'otherField', 'otherValue')");
-        uuid = getUUID();
+        getUUID();
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'booleanField', 1)");
 
         final Map<String, Object> content = new HashMap<String, Object>();

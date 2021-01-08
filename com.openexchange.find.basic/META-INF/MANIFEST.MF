@@ -105,3 +105,4 @@ Import-Package: com.davekoelle,
 Export-Package: com.openexchange.find.basic.common,
  com.openexchange.find.basic.drive
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.find.basic

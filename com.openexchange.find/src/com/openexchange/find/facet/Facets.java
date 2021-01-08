@@ -88,6 +88,12 @@ public class Facets {
             this.type = type;
         }
 
+        /**
+         * Adds a flag
+         * 
+         * @param flag The flag
+         * @return The facet builder
+         */
         public FacetBuilder<F> addFlag(String flag) {
             return null;
         }

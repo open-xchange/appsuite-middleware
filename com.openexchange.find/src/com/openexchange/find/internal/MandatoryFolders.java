@@ -92,6 +92,7 @@ public class MandatoryFolders extends FindSetting {
                 return true;
             }
 
+            @SuppressWarnings({ "synthetic-access", "null" })
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ServerSessionAdapter serverSession = new ServerSessionAdapter(session, ctx, user, userConfig);

@@ -165,10 +165,8 @@ public class ConnectionHelper {
 
     /**
      * Backs an acquired writable connection to the pool if needed, rolling back the transaction automatically if not yet committed.
-     *
-     * @throws OXException
      */
-    public void backWritableAfterReading() throws OXException {
+    public void backWritableAfterReading() {
         if (null != writableConnection) {
             if (false == committed) {
                 Databases.rollback(writableConnection);

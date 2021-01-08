@@ -77,3 +77,4 @@ Import-Package: com.google.common.annotations,
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.dovecot.doveadm.client.osgi.DoveAdmClientActivator
 Export-Package: com.openexchange.dovecot.doveadm.client
+Automatic-Module-Name: com.openexchange.dovecot.doveadm.client

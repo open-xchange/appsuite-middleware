@@ -49,8 +49,6 @@
 
 package com.openexchange.find.facet;
 
-
-
 /**
  * A display item that is meant to be ignored (e.g. not written out in API responses).
  *
@@ -58,6 +56,8 @@ package com.openexchange.find.facet;
  * @since v7.6.0
  */
 public class NoDisplayItem implements DisplayItem {
+
+    private static final long serialVersionUID = 1153475229867357657L;
 
     @Override
     public String getDisplayName() {

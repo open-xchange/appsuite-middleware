@@ -254,6 +254,7 @@ public class EndpointPool {
 
     private final class Heartbeat implements Runnable {
 
+        @SuppressWarnings("hiding")
         private final String filestoreId;
         private final EndpointPool endpoints;
 
@@ -263,6 +264,7 @@ public class EndpointPool {
             this.endpoints = endpoints;
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void run() {
             try {

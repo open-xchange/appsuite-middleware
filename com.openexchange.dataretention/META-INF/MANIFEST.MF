@@ -14,3 +14,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.dataretention.osgi.DataRetentionActivator
+Automatic-Module-Name: com.openexchange.dataretention

@@ -67,17 +67,15 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.ImmutablePermission;
 import com.openexchange.folderstorage.ImmutablePermission.Builder;
-import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.UserizedFolderImpl;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.EntityInfo;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.User;
 
 
 /**
