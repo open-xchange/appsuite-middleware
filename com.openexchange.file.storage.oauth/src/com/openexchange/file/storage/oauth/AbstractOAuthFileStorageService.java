@@ -69,11 +69,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -93,7 +95,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener, FileStorageAccountDeleteListener {
+public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener, FileStorageAccountDeleteListener, LoginAwareFileStorageServiceExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthFileStorageService.class);
 
@@ -140,6 +142,15 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         oauthAccount.setOption("type", api.getServiceId());
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+    }
+    
+    @Override
+    public void testConnection(FileStorageAccount account, Session session) throws OXException {
+        FileStorageAccountAccess accountAccess = getAccountAccess(account.getId(), session);
+        if (false == accountAccess.isConnected()) {
+            accountAccess.connect();
+        }
+        accountAccess.ping();
     }
 
     @Override
