@@ -331,6 +331,8 @@ public class BODYSTRUCTURE implements Item {
 		type = "application";
 		subtype = "octet-stream";
 	    }
+        type = javax.mail.util.Interners.internContentAttribute(type);
+        subtype = javax.mail.util.Interners.internContentAttribute(subtype);
 	    cParams = parseParameters(r);
 	    if (parseDebug)
 		System.out.println("DEBUG IMAP: cParams " + cParams);
@@ -347,6 +349,12 @@ public class BODYSTRUCTURE implements Item {
 	    encoding = r.readAtomString();
 	    if (encoding != null && encoding.equalsIgnoreCase("NIL"))
 		encoding = null;
+        /*
+         * XXX - Work around bug in office365.com that returns
+         *       a string with a trailing space in some cases.
+         */
+        if (encoding != null)
+        encoding = javax.mail.util.Interners.internTransferEncoding(encoding.trim());
 	    if (parseDebug)
 		System.out.println("DEBUG IMAP: encoding " + encoding);
 	    size = r.readNumber();
@@ -422,7 +430,7 @@ public class BODYSTRUCTURE implements Item {
 	    // Disposition
 	    byte b = r.readByte();
 	    if (b == '(') {
-		disposition = r.readString();
+	    disposition = javax.mail.util.Interners.internContentAttribute(r.readString());
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: disposition " +
 							disposition);
@@ -506,6 +514,7 @@ public class BODYSTRUCTURE implements Item {
 			"BODYSTRUCTURE parse error: " +
 			type + "/" + subtype + ": " +
 			"null name in parameter list");
+        name = javax.mail.util.Interners.internContentAttribute(name);
 		String value = r.readString();
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: parameter value " + value);

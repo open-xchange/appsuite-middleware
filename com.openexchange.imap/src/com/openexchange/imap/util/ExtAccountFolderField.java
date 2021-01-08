@@ -291,6 +291,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                 // * METADATA INBOX/QUARANTAINE (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias NIL)
                                 String fullName = ir.readAtomString();
                                 fullName = BASE64MailboxDecoder.decode(fullName);
+                                fullName = javax.mail.util.Interners.internFullName(fullName);
                                 String[] metadatas = ir.readAtomStringList();
                                 int length = metadatas.length;
                                 int index = 0;
@@ -378,6 +379,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         metadataResponse.skipSpaces();
         String fullName = metadataResponse.readAtomString();
         fullName = BASE64MailboxDecoder.decode(fullName);
+        fullName = javax.mail.util.Interners.internFullName(fullName);
 
         // Read until opening parenthesis or EOF
         byte b = 0;

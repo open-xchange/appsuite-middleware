@@ -54,40 +54,46 @@ import com.sun.mail.iap.*;
 
 public class ID {
 
-    private Map<String, String> serverParams = null;
+    private final Map<String, String> serverParams;
 
     /**
      * Parse the server parameter list out of the response.
+     *
+     * @param   r   the response
+     * @exception   ProtocolException   for protocol failures
      */
     public ID(Response r) throws ProtocolException {
-	// id_response ::= "ID" SPACE id_params_list
-	// id_params_list ::= "(" #(string SPACE nstring) ")" / nil
-	//       ;; list of field value pairs
+    // id_response ::= "ID" SPACE id_params_list
+    // id_params_list ::= "(" #(string SPACE nstring) ")" / nil
+    //       ;; list of field value pairs
 
-	r.skipSpaces();
-	int c = r.peekByte();
-	if (c == 'N' || c == 'n')	// assume NIL
-	    return;
+    r.skipSpaces();
+    int c = r.peekByte();
+    if (c == 'N' || c == 'n') { // assume NIL
+        this.serverParams = null;
+        return;
+    }
 
-	if (c != '(')
-	    throw new ProtocolException("Missing '(' at start of ID");
+    if (c != '(')
+        throw new ProtocolException("Missing '(' at start of ID");
 
-	serverParams = new HashMap<String, String>();
-
-	String[] v = r.readStringList();
-	if (v != null) {
-	    for (int i = 0; i < v.length; i += 2) {
-		String name = v[i];
-		if (name == null)
-		    throw new ProtocolException("ID field name null");
-		if (i + 1 >= v.length)
-		    throw new ProtocolException("ID field without value: " +
-									name);
-		String value = v[i + 1];
-		serverParams.put(name, value);
-	    }
-	}
-	serverParams = Collections.unmodifiableMap(serverParams);
+    String[] v = r.readStringList();
+    if (v != null) {
+        Map<String, String> serverParams = new HashMap<String, String>(v.length);
+        for (int i = 0; i < v.length; i += 2) {
+        String name = v[i];
+        if (name == null)
+            throw new ProtocolException("ID field name null");
+        if (i + 1 >= v.length)
+            throw new ProtocolException("ID field without value: " +
+                                    name);
+        String value = v[i + 1];
+        serverParams.put(name, value);
+        }
+        this.serverParams = Collections.unmodifiableMap(serverParams);
+    } else {
+        this.serverParams = Collections.emptyMap();
+    }
     }
 
     /**
