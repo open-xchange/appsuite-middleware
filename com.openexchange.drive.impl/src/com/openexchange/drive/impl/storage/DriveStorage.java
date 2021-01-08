@@ -403,7 +403,7 @@ public class DriveStorage {
                 session.trace(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " +
                     combine(getPath(movedFile.getFolderId()), movedFile.getFileName()));
             }
-            getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields);
+            getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields, true, false);
         }
         return movedFile;
     }
@@ -970,6 +970,7 @@ public class DriveStorage {
     public FileStorageFolder getTrashFolder() throws OXException {
         if (null == trashFolder) {
             trashFolder = getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
+            trashFolder = null;
         }
         return trashFolder;
     }

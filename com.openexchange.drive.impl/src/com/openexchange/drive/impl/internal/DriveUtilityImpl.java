@@ -302,7 +302,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 List<Field> updatedFields = Collections.singletonList(Field.OBJECT_PERMISSIONS);
                 DefaultFile updatedFile = new DefaultFile(file);
                 updatedFile.setObjectPermissions(metadata.getObjectPermissions());
-                String fileID = syncSession.getStorage().getFileAccess().saveFileMetadata(updatedFile, file.getSequenceNumber(), updatedFields);
+                String fileID = syncSession.getStorage().getFileAccess().saveFileMetadata(updatedFile, file.getSequenceNumber(), updatedFields, true, false);
                 /*
                  * re-get updated file to determine added permissions as needed
                  */
