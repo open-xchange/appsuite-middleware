@@ -101,7 +101,7 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * create share with guest permissions that allow subfolder creation (yet no update/delete)
          */
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", randomUID());
+        OCLGuestPermission guestPermission = createNamedAuthorPermission();
         guestPermission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
         guestPermission.setFolderAdmin(true);
         /*
@@ -128,7 +128,7 @@ public class CreateSubfolderTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*

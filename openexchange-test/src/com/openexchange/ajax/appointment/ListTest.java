@@ -56,6 +56,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.junit.After;
@@ -67,14 +68,11 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.junit.Assert;
-import com.openexchange.resource.Resource;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
@@ -157,10 +155,8 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setSequence(0);
 
         final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        List<Resource> searchResult = resTm.search(testContext.getResourceParticipants().get(0));
-        Assert.assertFalse("Expected the search result not to be empty.", searchResult.isEmpty());
-        final int resourceParticipantId = searchResult.get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
         participants[1] = new UserParticipant(userParticipantId);

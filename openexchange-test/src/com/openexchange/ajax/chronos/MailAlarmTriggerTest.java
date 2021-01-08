@@ -92,6 +92,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        testContext.acquireNoReplyUser();
         mailApi = new MailApi(apiClient);
         userApi = new UserApi(apiClient);
     }
@@ -110,9 +111,12 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         String summary = "mailAlarmTest_" + new UID().toString();
         summary = summary.substring(0, 30); // reduce length to 30 to not being limited during mail generation
         long currentTime = System.currentTimeMillis();
-        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15));
-        DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
-        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null);
+        Calendar startTime = Calendar.getInstance(getUserTimeZone());
+        startTime.setTimeInMillis(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15)); // in 15 min 15 s
+        DateTimeData startDate = DateTimeUtil.getDateTime(startTime);
+        startTime.add(Calendar.HOUR, 1); // in 1 h 15 min 15 s
+        DateTimeData endDate = DateTimeUtil.getDateTime(startTime);
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null); // 15 min before start
 
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
@@ -121,7 +125,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1, folderId);
 
-        // wait until the mail is send (30 seconds + 15 seconds as a buffer)
+        // wait until the mail is send (15 seconds + 30 seconds as a buffer)
         Thread.sleep(TimeUnit.SECONDS.toMillis(45));
 
         checkMail(summary, time, getDates(expectedSentDate), 1);

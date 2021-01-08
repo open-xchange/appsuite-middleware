@@ -111,7 +111,7 @@ public class FolderItemCountTest extends ShareTest {
         /*
          * check item count in shared folder
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(guestPermission.getApiClient(), guest), guestPermission.getRecipient());
         GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, guestClient.getFolder(), new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 });
         GetResponseNew res = guestClient.execute(req);
         Folder fo = res.getFolder();

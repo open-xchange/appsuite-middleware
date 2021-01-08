@@ -61,7 +61,6 @@ import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.resource.Resource;
 
 /**
  * {@link Bug60589Test}
@@ -78,8 +77,8 @@ public class Bug60589Test extends CalDAVTest {
         /*
          * lookup internal resource for test
          */
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
-        String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resource.getIdentifier());
+        int resId = testContext.acquireResource(); // TODO add null check
+        String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resId);
         /*
          * create appointment
          */
@@ -141,7 +140,7 @@ public class Bug60589Test extends CalDAVTest {
             }
         }
         assertNotNull("Resource participant not found in appointment", resourceParticipant);
-        assertEquals("Internal resource not resolved", resource.getIdentifier(), resourceParticipant.getIdentifier());
+        assertEquals("Internal resource not resolved", resId, resourceParticipant.getIdentifier());
     }
 
     @Test
@@ -149,8 +148,8 @@ public class Bug60589Test extends CalDAVTest {
         /*
          * lookup internal resource for test
          */
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
-        String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resource.getIdentifier());
+        int resId = testContext.acquireResource(); // TODO add null check
+        String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resId);
         /*
          * create appointment
          */
@@ -223,7 +222,7 @@ public class Bug60589Test extends CalDAVTest {
             }
         }
         assertNotNull("Resource participant not found in appointment", resourceParticipant);
-        assertEquals("Internal resource not resolved", resource.getIdentifier(), resourceParticipant.getIdentifier());
+        assertEquals("Internal resource not resolved", resId, resourceParticipant.getIdentifier());
     }
 
     @Test

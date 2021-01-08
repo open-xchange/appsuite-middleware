@@ -159,8 +159,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * prepare guest permission
          */
-        String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
@@ -191,7 +190,8 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(client1, guestA);
+        String shareURLA = discoverShareURL(guestPermission.getApiClient(), guestA);
+
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -222,7 +222,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(client2, guestB);
+        String shareURLB = discoverShareURL(guestPermission.getApiClient(), guestB);
         /*
          * check permission entities
          */
@@ -249,8 +249,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * prepare guest permission
          */
-        String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
@@ -273,7 +272,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(client1, guestA);
+        String shareURLA = discoverShareURL(guestPermission.getApiClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -296,7 +295,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(client2, guestB);
+        String shareURLB = discoverShareURL(guestPermission.getApiClient(), guestB);
         /*
          * check permission entities
          */
@@ -354,7 +353,9 @@ public class AggregateSharesTest extends ShareTest {
         assertEquals("Login type wrong", "guest_password", shareResolveResponse.getLoginType());
         assertEquals("Status wrong", "not_found_continue", shareResolveResponse.getStatus());
         assertNotNull("No target", shareResolveResponse.getTarget());
-        assertTrue("Target wrong", ShareTargetPath.parse(folderBTarget).matches(ShareTargetPath.parse(shareResolveResponse.getTarget())));
+        ShareTargetPath folderBShareTarget = ShareTargetPath.parse(folderBTarget);
+        ShareTargetPath responseTarget = ShareTargetPath.parse(shareResolveResponse.getTarget());
+        assertTrue("Target wrong. Expected: " + folderBTarget.toString() + " but got: " + responseTarget.toString(), folderBShareTarget.matches(responseTarget));
         /*
          * check if share link to folder A still accessible
          */

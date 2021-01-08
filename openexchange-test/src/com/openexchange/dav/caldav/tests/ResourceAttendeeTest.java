@@ -52,6 +52,7 @@ package com.openexchange.dav.caldav.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.dav.StatusCodes;
@@ -71,42 +72,46 @@ import com.openexchange.resource.Resource;
  */
 public class ResourceAttendeeTest extends CalDAVTest {
 
+    private Resource resource;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        Integer res = testContext.acquireResource();
+        Assert.assertNotNull(res);
+        resource = resTm.get(res.intValue());
+    }
+
     @Test
     public void testCreateViaResourceIdWithCorrectCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         int contextId = getClient().getValues().getContextId();
         testCreate(resource.getIdentifier(), ResourceId.forResource(contextId, resource.getIdentifier()), "RESOURCE");
     }
 
     @Test
     public void testCreateViaMailWithCorrectCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         testCreate(resource.getIdentifier(), "mailto:" + resource.getMail(), "RESOURCE");
     }
 
     @Test
     public void testCreateViaResourceIdWithoutCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         int contextId = getClient().getValues().getContextId();
         testCreate(resource.getIdentifier(), ResourceId.forResource(contextId, resource.getIdentifier()), null);
     }
 
     @Test
     public void testCreateViaMailWithoutCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         testCreate(resource.getIdentifier(), "mailto:" + resource.getMail(), null);
     }
 
     @Test
     public void testCreateViaResourceIdWithIncorrectCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         int contextId = getClient().getValues().getContextId();
         testCreate(resource.getIdentifier(), ResourceId.forResource(contextId, resource.getIdentifier()), "INDIVIDUAL");
     }
 
     @Test
     public void testCreateViaMailWithIncorrectCUType() throws Exception {
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
         testCreate(resource.getIdentifier(), "mailto:" + resource.getMail(), "INDIVIDUAL");
     }
 
@@ -117,19 +122,19 @@ public class ResourceAttendeeTest extends CalDAVTest {
         String uid = randomUID();
         Date start = TimeTools.D("next monday at 12:00");
         Date end = TimeTools.D("next monday at 13:00");
-        String iCal = // @formatter:off 
-            "BEGIN:VCALENDAR" + "\r\n" + 
-            "VERSION:2.0" + "\r\n" + 
-            "BEGIN:VEVENT" + "\r\n" + 
-            "UID:" + uid + "\r\n" + 
-            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + 
-            "DTSTART:" + formatAsUTC(start) + "\r\n" + 
-            "DTEND:" + formatAsUTC(end) + "\r\n" + 
+        String iCal = // @formatter:off
+            "BEGIN:VCALENDAR" + "\r\n" +
+            "VERSION:2.0" + "\r\n" +
+            "BEGIN:VEVENT" + "\r\n" +
+            "UID:" + uid + "\r\n" +
+            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
+            "DTSTART:" + formatAsUTC(start) + "\r\n" +
+            "DTEND:" + formatAsUTC(end) + "\r\n" +
             "SUMMARY:ResourceAttendeeTest"  + "\r\n" +
             "ORGANIZER:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=NEEDS-ACTION" + (null != cuType ? ";CUTYPE=" + cuType : "") + ":" + uri + "\r\n" +
-            "END:VEVENT" + "\r\n" + 
+            "END:VEVENT" + "\r\n" +
             "END:VCALENDAR" + "\r\n";
         ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));

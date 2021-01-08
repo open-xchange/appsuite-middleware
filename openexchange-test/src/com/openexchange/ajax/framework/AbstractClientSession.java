@@ -54,6 +54,8 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -74,6 +76,8 @@ import com.openexchange.test.tryagain.TryAgainTestRule;
 @RunWith(ConcurrentTestRunner.class)
 @Concurrent(count = 5)
 public class AbstractClientSession {
+
+    @Rule public TestName name = new TestName();
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
@@ -100,7 +104,7 @@ public class AbstractClientSession {
         ProvisioningSetup.init();
 
         operations = new LinkedList<>();
-        testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName(), getNumerOfContexts());
+        testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName() + "." + name.getMethodName(), getNumerOfContexts());
         testContext = testContextList.get(0);
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();

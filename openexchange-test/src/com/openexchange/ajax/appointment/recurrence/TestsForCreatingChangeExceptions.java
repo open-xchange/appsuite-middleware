@@ -53,6 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.exception.OXException;
@@ -229,6 +231,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
     @Test
     public void testShouldKeepChangeInResourcesLimitedToException() throws Exception {
+        this.testContext.acquireResource();
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -242,7 +245,9 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         changes = new Changes();
 
-        Resource res = resTm.search("*").get(0);
+        List<Resource> resources = resTm.search("*");
+        Assert.assertFalse("Missing resources", resources.isEmpty());
+        Resource res = resources.get(0);
 
         ResourceParticipant resParticipant = new ResourceParticipant(res);
         Participant[] participants = new ResourceParticipant[] { resParticipant };

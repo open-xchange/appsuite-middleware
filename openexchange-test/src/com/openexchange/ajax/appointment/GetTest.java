@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -61,7 +62,6 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -86,8 +86,8 @@ public class GetTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
 
         final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -122,8 +122,8 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
 
         final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
@@ -171,8 +171,8 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
         final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);

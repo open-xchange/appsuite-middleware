@@ -114,7 +114,6 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Get another user of context 1
          */
         testUserC1_2 = testContext.acquireUser();
-        addTearDownOperation(() -> context2.backUser(testUserC1_2));
         apiClientC1_2 = generateApiClient(testUserC1_2);
         rememberClient(apiClientC1_2);
 

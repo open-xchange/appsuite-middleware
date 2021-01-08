@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,15 +57,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -85,7 +85,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     private Appointment single;
 
-    private String groupParticipant;
+    private int groupParticipant;
 
     private Appointment exception;
 
@@ -104,7 +104,7 @@ public class Bug33242Test extends AbstractAJAXSession {
         super.setUp();
         catm2 = new CalendarTestManager(getClient2());
 
-        groupParticipant = testContext.getGroupParticipants().get(0);
+        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(testUser2.getUserId())))); //TODO null check
 
         prepareSeries();
         prepareSingle();
@@ -170,15 +170,9 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     /**
      * @return
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
-    private GroupParticipant getGroupParticipant(String groupParticipant) throws OXException, IOException, JSONException {
-        SearchResponse response = getClient().execute(new SearchRequest(groupParticipant));
-        Group[] group = response.getGroups();
-        final int groupParticipantId = group[0].getIdentifier();
-        GroupParticipant gpart = new GroupParticipant(groupParticipantId);
+    private GroupParticipant getGroupParticipant(int groupParticipant) {
+        GroupParticipant gpart = new GroupParticipant(groupParticipant);
         return gpart;
     }
 

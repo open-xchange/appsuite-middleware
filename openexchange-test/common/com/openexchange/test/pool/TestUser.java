@@ -49,6 +49,7 @@
 
 package com.openexchange.test.pool;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import com.openexchange.java.Strings;
 
@@ -73,12 +74,22 @@ public class TestUser implements Serializable {
 
     private final String context;
 
+    private final Integer userId;
+
     public TestUser(String user, String context, String password) {
         this.user = user;
         this.context = context;
         this.login = user + "@" + context;
         this.password = password;
+        this.userId = I(-1);
+    }
 
+    public TestUser(String user, String context, String password, Integer userId) {
+        this.user = user;
+        this.context = context;
+        this.login = user + "@" + context;
+        this.password = password;
+        this.userId = userId;
     }
 
     public String getLogin() {
@@ -95,6 +106,15 @@ public class TestUser implements Serializable {
 
     public String getContext() {
         return context;
+    }
+
+    /**
+     * Gets the userId
+     *
+     * @return The userId
+     */
+    public Integer getUserId() {
+        return userId;
     }
 
     @Override

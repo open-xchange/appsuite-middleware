@@ -56,11 +56,11 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.calendar.ConflictTools;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug15585Test extends AbstractAJAXSession {
+public class Bug15585Test extends AbstractResourceAwareAjaxSession {
 
     private Appointment appointment;
     private Appointment appointment2;

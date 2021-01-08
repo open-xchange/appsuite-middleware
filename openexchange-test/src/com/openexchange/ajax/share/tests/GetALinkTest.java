@@ -85,6 +85,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemResponse;
+import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
@@ -120,9 +121,13 @@ public class GetALinkTest extends ShareAPITest {
         FolderObject parent = infostore;
         file = new DefaultFile();
         file.setFolderId(String.valueOf(parent.getObjectID()));
-        file.setTitle("GetALinkTest_" + now);
-        file.setDescription(file.getTitle());
-        itm.newAction(file);
+        String fileName = "GetALinkTest_" + now;
+        file.setTitle(fileName);
+        file.setFileName(fileName);
+        file.setDescription(fileName);
+
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(file.getFolderId(), file.getFileName(), new byte[] {}, L(now), null, file.getTitle(), null, null, file.getDescription(), null, null, null, null, null, null, null, null, null, null);
+        file.setId(checkResponse(uploadInfoItem.getError(), uploadInfoItem.getErrorDesc(), uploadInfoItem.getData()));
     }
 
     @Override
@@ -250,9 +255,11 @@ public class GetALinkTest extends ShareAPITest {
          * Move to "My files"
          */
         String newParentFolderId = Integer.toString(getClient().getValues().getPrivateInfostoreFolder());
-        InfoItemMovedResponse moveResponse = infostoreApi.moveFile(L(System.currentTimeMillis()), newParentFolderId, file.getId(), null, Boolean.TRUE);
+        InfoItemMovedResponse moveResponse = infostoreApi.moveFile(L(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)), newParentFolderId, file.getId(), null, Boolean.TRUE);
+        assertNotNull("Warning expected", moveResponse.getError());
+        assertTrue("Warning does not contain the filename: " + moveResponse.getErrorDesc(), moveResponse.getErrorDesc().contains(file.getDescription()));
         String updatedFileId = moveResponse.getData();
-        assertNotNull(updatedFileId);
+        assertNotNull("File id from successful file update expected", updatedFileId);
         InfoItemResponse infoItemResponse = infostoreApi.getInfoItem(updatedFileId, newParentFolderId);
         InfoItemData infoItem = checkResponse(infoItemResponse.getError(), infoItemResponse.getErrorDesc(), infoItemResponse.getData());
         assertTrue(infoItem.getObjectPermissions().isEmpty());

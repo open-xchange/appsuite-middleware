@@ -51,11 +51,10 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
@@ -65,6 +64,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.MailData;
 
 /**
  * {@link NotifyFileSharesTest}
@@ -95,9 +96,10 @@ public class NotifyFileSharesTest extends ShareTest {
     }
 
     private void testNotifyGuest(int parent) throws Exception {
-        FileStorageGuestObjectPermission permission = randomGuestObjectPermission(RecipientType.GUEST);
+        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST);
+        FileStorageGuestObjectPermission permission = asObjectPermission(guestPermission);
         String emailAddress = ((GuestRecipient) permission.getRecipient()).getEmailAddress();
-        testNotify(parent, permission, emailAddress);
+        testNotify(parent, permission, emailAddress, guestPermission.getApiClient());
     }
 
     private void testNotifyGroup(int parent) throws Exception {
@@ -105,7 +107,7 @@ public class NotifyFileSharesTest extends ShareTest {
         AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
-        testNotify(parent, permission, emailAddress);
+        testNotify(parent, permission, emailAddress, getApiClient2());
     }
 
     private void testNotifyUser(int parent) throws Exception {
@@ -114,10 +116,10 @@ public class NotifyFileSharesTest extends ShareTest {
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(userId, false, FileStorageObjectPermission.WRITE);
-        testNotify(parent, permission, emailAddress);
+        testNotify(parent, permission, emailAddress, getApiClient2());
     }
 
-    private void testNotify(int parentFolder, FileStorageObjectPermission permission, String emailAddress) throws Exception {
+    private void testNotify(int parentFolder, FileStorageObjectPermission permission, String emailAddress, ApiClient apiClient) throws Exception {
         /*
          * insert shared file
          */
@@ -138,12 +140,12 @@ public class NotifyFileSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getClient().execute(new ClearMailsRequest());
+        mailManager.clearMails();
         getClient().execute(new NotifyFileRequest(file.getId(), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
+        MailData notificationMessage = discoverInvitationMessage(apiClient, emailAddress);
         assertNotNull(notificationMessage);
     }
 }

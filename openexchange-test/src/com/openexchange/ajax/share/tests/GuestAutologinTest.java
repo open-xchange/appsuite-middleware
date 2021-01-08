@@ -104,7 +104,7 @@ public class GuestAutologinTest extends ShareTest {
          */
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, module, folder.getObjectID(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
         /*
          * login & store guest session for auto-login, then try to auto-login
          */

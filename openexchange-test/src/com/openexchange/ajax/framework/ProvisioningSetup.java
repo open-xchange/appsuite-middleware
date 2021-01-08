@@ -54,16 +54,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.ajax.framework.config.util.PropertyHelper;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 
@@ -81,28 +77,10 @@ public class ProvisioningSetup {
 
     private static AtomicBoolean initialized = new AtomicBoolean();
 
-    private static final String PASSWORD_IDENTIFIER = "password";
-    private static final String ADMIN_IDENTIFIER = "oxadmin";
     private static final String MASTER_IDENTIFIER = "oxadminmaster";
     private static final String MASTER_PWD_IDENTIFIER = "oxadminmaster_password";
     private static final String REST_IDENTIFIER = "restUser";
     private static final String REST_PWD_IDENTIFIER = "restPwd";
-
-    private static final String CONTEXT_IDENTIFIER = "context";
-    private static final String USER1_IDENTIFIER = "user1";
-    private static final String USER2_IDENTIFIER = "user2";
-    private static final String USER3_IDENTIFIER = "user3";
-    private static final String USER4_IDENTIFIER = "user4";
-    private static final String USER5_IDENTIFIER = "user5";
-    private static final String NO_REPLY_IDENTIFIER = "noreply";
-    private static final String PARTICIPANT1_IDENTIFIER = "participant1";
-    private static final String PARTICIPANT2_IDENTIFIER = "participant2";
-    private static final String PARTICIPANT3_IDENTIFIER = "participant3";
-    private static final String GROUP_PARTICIPANT_IDENTIFIER = "group_participant";
-    private static final String RESOURCE_PARTICIPANT = "resource_participant";
-    private static final String RESOURCE_PARTICIPANT1 = "resource_participant1";
-    private static final String RESOURCE_PARTICIPANT2 = "resource_participant2";
-    private static final String RESOURCE_PARTICIPANT3 = "resource_participant3";
 
     public static void init() throws OXException {
         synchronized (ProvisioningSetup.class) {
@@ -111,11 +89,8 @@ public class ProvisioningSetup {
                 AJAXConfig.init();
                 Properties contextsAndUsers = getProperties();
 
-                createProvisionedContext(contextsAndUsers);
                 createOXAdminMaster(contextsAndUsers);
                 createRestUser(contextsAndUsers);
-
-                TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
                 LOG.info("Finished initialization for {} contexts.", I(TestContextPool.getAllTimeAvailableContexts().size()));
@@ -139,69 +114,6 @@ public class ProvisioningSetup {
         TestUser restUser = new TestUser(user, "", password);
 
         TestContextPool.setRestUser(restUser);
-    }
-
-    private static void createProvisionedContext(Properties contextsAndUsers) {
-        String password = contextsAndUsers.getProperty(PASSWORD_IDENTIFIER);
-        String oxadmin = contextsAndUsers.getProperty(ADMIN_IDENTIFIER);
-
-        Map<String, Object> map = new HashMap<>();
-        for (final String name : contextsAndUsers.stringPropertyNames()) {
-            map.put(name, contextsAndUsers.getProperty(name));
-        }
-
-        for (int i = 1;; i++) {
-            String prefix = Integer.toString(i) + ".";
-            Map<String, Object> filter = PropertyHelper.filter(map, prefix, true, false);
-
-            if ((filter == null) || (filter.size() == 0)) {
-                break;
-            }
-
-            String contextName = filter.get(prefix + CONTEXT_IDENTIFIER).toString();
-            try {
-                TestContext context = new TestContext(contextName);
-                context.setAdmin(new TestUser(oxadmin, contextName, password));
-
-                String userId1 = filter.get(prefix + USER1_IDENTIFIER).toString();
-                TestUser testUser = new TestUser(userId1, contextName, password);
-                context.addUser(testUser);
-
-                String userId2 = filter.get(prefix + USER2_IDENTIFIER).toString();
-                TestUser testUser2 = new TestUser(userId2, contextName, password);
-                context.addUser(testUser2);
-
-                String userId3 = filter.get(prefix + USER3_IDENTIFIER).toString();
-                TestUser testUser3 = new TestUser(userId3, contextName, password);
-                context.addUser(testUser3);
-
-                String userId4 = filter.get(prefix + USER4_IDENTIFIER).toString();
-                TestUser testUser4 = new TestUser(userId4, contextName, password);
-                context.addUser(testUser4);
-
-                String userId5 = filter.get(prefix + USER5_IDENTIFIER).toString();
-                TestUser testUser5 = new TestUser(userId5, contextName, password);
-                context.addUser(testUser5);
-
-                String noReply = filter.get(prefix + NO_REPLY_IDENTIFIER).toString();
-                TestUser noReplyUser = new TestUser(noReply, contextName, password);
-                context.setNoReplyUser(noReplyUser);
-
-                context.addUserParticipants(filter.get(prefix + PARTICIPANT1_IDENTIFIER).toString());
-                context.addUserParticipants(filter.get(prefix + PARTICIPANT2_IDENTIFIER).toString());
-                context.addUserParticipants(filter.get(prefix + PARTICIPANT3_IDENTIFIER).toString());
-                context.addGroupParticipant(filter.get(prefix + GROUP_PARTICIPANT_IDENTIFIER).toString());
-                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT).toString());
-                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT1).toString());
-                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT2).toString());
-                context.addResourceParticipants(filter.get(prefix + RESOURCE_PARTICIPANT3).toString());
-
-                TestContextPool.addContext(context);
-            } catch (Exception e) {
-                LOG.warn("Unable to add context {} to context registry.", contextName, e);
-                // TODO: handle exception
-            }
-        }
     }
 
     private static Properties getProperties() throws OXException {

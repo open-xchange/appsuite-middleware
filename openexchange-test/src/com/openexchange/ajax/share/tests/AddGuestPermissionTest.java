@@ -83,38 +83,9 @@ public class AddGuestPermissionTest extends ShareTest {
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
-    public void noTestUpdateSharedFolderExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                for (int module : TESTED_MODULES) {
-                    if (isReadOnlySharing(module) && false == isReadOnly(guestPermission)) {
-                        continue;
-                    }
-                    testUpdateSharedFolder(api, module, guestPermission);
-                }
-            }
-        }
-    }
-
     @Test
     public void testUpdateSharedFileRandomly() throws Exception {
-        testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
-    }
-
-    public void noTestUpdateSharedFileExtensively() throws Exception {
-        for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
-            testUpdateSharedFile(randomFolderAPI(), guestPermission);
-        }
-    }
-
-    public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-                for (int module : TESTED_MODULES) {
-                    testUpdateSharedFolderWithCascadingPermissions(api, module, getDefaultFolder(module), guestPermission);
-                }
-            }
-        }
+        testUpdateSharedFile(randomFolderAPI(), randomGuestPermission());
     }
 
     private void testUpdateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
@@ -151,7 +122,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -221,16 +192,17 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
 
-    private void testUpdateSharedFile(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testUpdateSharedFile(EnumAPI api, OCLGuestPermission guestPermission) throws Exception {
         testUpdateSharedFile(api, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
     }
 
-    private void testUpdateSharedFile(EnumAPI api, int parent, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testUpdateSharedFile(EnumAPI api, int parent, OCLGuestPermission oclGuestPermission) throws Exception {
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
         /*
          * create folder and a file inside
          */
@@ -261,7 +233,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), oclGuestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

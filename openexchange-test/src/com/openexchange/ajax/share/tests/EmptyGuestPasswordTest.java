@@ -98,8 +98,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
     @Test
     @TryAgain
     public void testEmptyPassword() throws Exception {
-        long now = System.currentTimeMillis();
-        OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
+        OCLGuestPermission perm = createNamedGuestPermission(false);
         folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder(), perm);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
@@ -118,7 +117,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * check access to share - a login request must not have been performed
          */
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(perm.getApiClient(), guest);
         GuestClient guestClient = resolveShare(shareURL);
         assertNull(guestClient.getLoginResponse());
         /*

@@ -455,7 +455,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         TestUser testUser3 = context2.acquireUser();
-        addTearDownOperation(() -> context2.backUser(testUser3));
 
         Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
         addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());

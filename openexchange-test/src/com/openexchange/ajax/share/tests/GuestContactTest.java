@@ -57,6 +57,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.share.GuestClient;
@@ -72,6 +73,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.user.User;
 
 /**
@@ -96,10 +98,12 @@ public class GuestContactTest extends ShareTest {
         /*
          * create folder and a shared file inside
          */
-        String guestName = randomUID();
-        String guestMail = guestName + "@example.com";
+
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        OCLGuestPermission guestOCLPermission = createNamedGuestPermission();
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(guestOCLPermission);
+        String guestName = ((GuestRecipient) guestOCLPermission.getRecipient()).getDisplayName();
+        String guestMail = ((GuestRecipient) guestOCLPermission.getRecipient()).getEmailAddress();
         File file = insertSharedFile(folder.getObjectID(), guestPermission);
         /*
          * check permissions
@@ -119,7 +123,7 @@ public class GuestContactTest extends ShareTest {
         ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(guestOCLPermission.getApiClient(), guest), guestPermission.getRecipient());
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
@@ -138,10 +142,10 @@ public class GuestContactTest extends ShareTest {
         /*
          * create folder and a shared file inside
          */
-        String guestName = randomUID();
-        String guestMail = guestName + "@example.com";
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        OCLGuestPermission oclGuestPermission = createNamedGuestPermission();
+        String guestName = oclGuestPermission.getName();
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
         File file = insertSharedFile(folder.getObjectID(), guestPermission);
         /*
          * check permissions
@@ -161,7 +165,7 @@ public class GuestContactTest extends ShareTest {
         ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(oclGuestPermission.getApiClient(), guest), guestPermission.getRecipient());
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
@@ -195,10 +199,11 @@ public class GuestContactTest extends ShareTest {
         /*
          * create folder and a shared file inside
          */
-        String guestName = randomUID();
-        String guestMail = guestName + "@example.com";
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission());
+        GuestRecipient guestRecipient = (GuestRecipient) guestPermission.getRecipient();
+        String guestName = guestRecipient.getDisplayName();
+        String guestMail = guestRecipient.getEmailAddress();
         File file = insertSharedFile(folder.getObjectID(), guestPermission);
         /*
          * check permissions

@@ -98,19 +98,19 @@ public class Bug40627Test extends ShareTest {
     @Test
     @TryAgain
     public void testCheckExtendedFolderPermissionAsInvitedGuest() throws Exception {
-        testCheckExtendedFolderPermissions(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest"));
+        testCheckExtendedFolderPermissions(createNamedGuestPermission());
     }
 
     @Test
     @TryAgain
     public void testCheckExtendedObjectPermissionAsAnonymousGuest() throws Exception {
-        testCheckExtendedObjectPermissions(asObjectPermission(createAnonymousGuestPermission()));
+        testCheckExtendedObjectPermissions(createAnonymousGuestPermission());
     }
 
     @Test
     @TryAgain
     public void testCheckExtendedObjectPermissionAsInvitedGuest() throws Exception {
-        testCheckExtendedObjectPermissions(asObjectPermission(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest")));
+        testCheckExtendedObjectPermissions(createNamedGuestPermission());
     }
 
     private void testCheckExtendedFolderPermissions(OCLGuestPermission guestPermission) throws Exception {
@@ -151,7 +151,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest, guestPermission), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -179,16 +179,18 @@ public class Bug40627Test extends ShareTest {
      * @return The share url
      * @throws Exception
      */
-    private String discoverShare(ExtendedPermissionEntity guest) throws Exception {
-        String shareURL = discoverShareURL(guest);
+    private String discoverShare(ExtendedPermissionEntity guest, OCLGuestPermission guestPermission) throws Exception {
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
         assertNotNull("Share mail not found", shareURL);
         return shareURL;
     }
 
-    private void testCheckExtendedObjectPermissions(FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testCheckExtendedObjectPermissions(OCLGuestPermission oclGuestPermission) throws Exception {
         /*
          * create folder and a shared file inside
          */
+
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>();
         permissions.add(guestPermission);
         permissions.add(new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ));
@@ -221,7 +223,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest, oclGuestPermission), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission, contents);
         /*

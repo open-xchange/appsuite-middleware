@@ -71,8 +71,9 @@ import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -88,6 +89,7 @@ import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
@@ -101,8 +103,7 @@ import com.openexchange.ajax.share.actions.FolderSharesRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
+import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
@@ -123,6 +124,10 @@ import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.test.pool.TestContext;
+import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.MailData;
 
 /**
  * {@link ShareTest}
@@ -132,20 +137,6 @@ import com.openexchange.share.recipient.ShareRecipient;
 public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
     // @formatter:off
-    protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
-        createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
-        createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousGuestPermission("secret"),
-        createAnonymousGuestPermission()
-    };
-
-    protected static final FileStorageGuestObjectPermission[] TESTED_OBJECT_PERMISSIONS = new FileStorageGuestObjectPermission[] {
-        asObjectPermission(TESTED_PERMISSIONS[0]),
-        asObjectPermission(TESTED_PERMISSIONS[1]),
-        asObjectPermission(TESTED_PERMISSIONS[2]),
-        asObjectPermission(TESTED_PERMISSIONS[3])
-    };
-
     protected static final EnumAPI[] TESTED_FOLDER_APIS = new EnumAPI[] { EnumAPI.OX_OLD, EnumAPI.OX_NEW, EnumAPI.OUTLOOK };
 
     protected static final int[] TESTED_MODULES = new int[] {
@@ -158,25 +149,31 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
     private Map<Integer, FolderObject> foldersToDelete;
     private Map<String, File> filesToDelete;
+    protected InfostoreTestManager itm;
+
+    private TestContext guestContext;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShareTest.class);
+
+    public enum GuestPermissionType {
+        NAMED_AUTHOR_PERMISSION,
+        NAMED_GUEST_PERMISSION,
+        ANONYMOUS_GUEST_PERMISSION_WITH_PASSWORD,
+        ANONYMOUS_GUEST_PERMSSION
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        itm = new InfostoreTestManager(getClient());
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
+        guestContext = testContextList.get(1);
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != getClient()) {
-                deleteFoldersSilently(getClient(), foldersToDelete);
-                deleteFilesSilently(getClient(), filesToDelete.values());
-            }
-        } finally {
-            super.tearDown();
-        }
+    protected int getNumerOfContexts() {
+        return 2;
     }
 
     /**
@@ -833,23 +830,11 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * the guest entity points to an anonymous share, or by fetching and parsing the notification message for the recipient in case he is
      * an invited guest.
      *
+     * @param client The api client to use
      * @param guestEntity The guest entity
      * @return The share URL, or <code>null</code> if not found
      */
-    protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
-        return discoverShareURL(getClient(), guestEntity);
-    }
-
-    /**
-     * Discovers the share URL based on the supplied guest permission entity by either reading the share URL property directly in case
-     * the guest entity points to an anonymous share, or by fetching and parsing the notification message for the recipient in case he is
-     * an invited guest.
-     *
-     * @param client The ajax client to use
-     * @param guestEntity The guest entity
-     * @return The share URL, or <code>null</code> if not found
-     */
-    protected String discoverShareURL(AJAXClient client, ExtendedPermissionEntity guestEntity) throws Exception {
+    protected String discoverShareURL(ApiClient client, ExtendedPermissionEntity guestEntity) throws Exception {
         switch (guestEntity.getType()) {
             case ANONYMOUS:
                 return guestEntity.getShareURL();
@@ -872,7 +857,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param emailAddress The guest's e-mail address to search for
      * @return The message, or <code>null</code> if not found
      */
-    protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
+    protected MailData discoverInvitationMessage(ApiClient client, String emailAddress) throws Exception {
         return discoverInvitationMessage(client, emailAddress, 10000L);
     }
 
@@ -884,13 +869,14 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param timeout The maximum timeout to wait for the message to arrive, or <code>0</code> to only check once
      * @return The message, or <code>null</code> if not found
      */
-    protected Message discoverInvitationMessage(AJAXClient client, String emailAddress, long timeout) throws Exception {
+    protected MailData discoverInvitationMessage(ApiClient client, String emailAddress, long timeout) throws Exception {
+        MailManager mailManager = new MailManager(client);
         if (0 >= timeout) {
-            return discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+            return discoverInvitationMessage(mailManager.getMails(), emailAddress);
         }
         long until = System.currentTimeMillis() + timeout;
         do {
-            Message message = discoverInvitationMessage(client.execute(new GetMailsRequest()).getMessages(), emailAddress);
+            MailData message = discoverInvitationMessage(mailManager.getMails(), emailAddress);
             if (null != message) {
                 return message;
             }
@@ -925,9 +911,9 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param emailAddress The guest's e-mail address to search for
      * @return The message, or <code>null</code> if not found
      */
-    protected Message discoverInvitationMessage(List<Message> messages, String emailAddress) {
-        for (Message message : messages) {
-            String toHeader = message.getHeaders().get("To");
+    protected MailData discoverInvitationMessage(List<MailData> messages, String emailAddress) {
+        for (MailData message : messages) {
+            String toHeader = ((Map<String, String>) message.getHeaders()).get("Delivered-To");
             if (Strings.isNotEmpty(toHeader)) {
                 InternetAddress[] addresses = null;
                 try {
@@ -955,16 +941,16 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param emailAddress The guest's e-mail address to search for
      * @return The share URL, or <code>null</code> if not found
      */
-    protected String discoverInvitationLink(AJAXClient client, String emailAddress) throws Exception {
-        Message message = discoverInvitationMessage(client, emailAddress);
+    protected String discoverInvitationLink(ApiClient client, String emailAddress) throws Exception {
+        MailData message = discoverInvitationMessage(client, emailAddress);
         if (null != message) {
-            return message.getHeaders().get("X-Open-Xchange-Share-URL");
+            return ((Map<String, String>) message.getHeaders()).get("X-Open-Xchange-Share-URL");
         }
         // Wait another 5 seconds for the mail to arrive
         Thread.sleep(TimeUnit.SECONDS.toMillis(5));
         message = discoverInvitationMessage(client, emailAddress);
         if (null != message) {
-            return message.getHeaders().get("X-Open-Xchange-Share-URL");
+            return ((Map<String, String>) message.getHeaders()).get("X-Open-Xchange-Share-URL");
         }
         return null;
     }
@@ -1087,8 +1073,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param recipient The recipient
      * @return An authenticated guest client being able to access the share
      */
-    protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient) throws Exception {
-        String shareURL = discoverShareURL(guestPermission);
+    protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient, ApiClient apiClient) throws Exception {
+        String shareURL = discoverShareURL(apiClient, guestPermission);
         assertNotNull("Got no share URL for " + recipient, shareURL);
         return new GuestClient(shareURL, recipient);
     }
@@ -1236,31 +1222,22 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         }
     }
 
-    protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName, String password) {
+    private static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
         guestPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName) {
-        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
-        guestPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
-        return guestPermission;
+    private static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
+        return createNamedAuthorPermission(-1, emailAddress, displayName, password);
     }
 
-    protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
+    private static OCLGuestPermission createNamedAuthorPermission(int userId, String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
         guestPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
-        return guestPermission;
-    }
-
-    protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName) {
-        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
-        guestPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
-        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+        guestPermission.setEntity(userId);
         return guestPermission;
     }
 
@@ -1287,6 +1264,85 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         guestPermission.setFolderAdmin(false);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
+    }
+
+    protected OCLGuestPermission createGuestPermission(GuestPermissionType permissionType) {
+        OCLGuestPermission permission = null;
+        switch (permissionType) {
+            case ANONYMOUS_GUEST_PERMISSION_WITH_PASSWORD:
+                permission = createAnonymousGuestPermission("secret");
+                break;
+            case ANONYMOUS_GUEST_PERMSSION:
+                permission = createAnonymousGuestPermission();
+                break;
+            case NAMED_AUTHOR_PERMISSION:
+                permission = createNamedAuthorPermission();
+                break;
+            case NAMED_GUEST_PERMISSION:
+                permission = createNamedGuestPermission();
+                break;
+            default:
+                break;
+        }
+        return permission;
+    }
+
+    protected OCLGuestPermission createNamedGuestPermission() {
+        return createNamedGuestPermission(true);
+    }
+
+    /**
+     *
+     * Creates a {@link OCLGuestPermission} from a new user in the guest context
+     *
+     * @param usePassword Whether to use the users password or not
+     * @return
+     */
+    protected OCLGuestPermission createNamedGuestPermission(boolean usePassword) {
+        TestUser namedGuest = guestContext.acquireUser();
+        return createNamedGuestPermission(namedGuest, usePassword);
+    }
+
+    /**
+     *
+     * Creates a named guest permission
+     *
+     * @param testUser The test user to create the permission for
+     * @param usePassword Whether to use the testUser`s password or not
+     * @return The {@link OCLGuestPermission}
+     */
+    protected OCLGuestPermission createNamedGuestPermission(TestUser testUser, boolean usePassword) {
+        OCLGuestPermission permission;
+        permission = createNamedGuestPermission(testUser.getLogin(), testUser.getUser(), usePassword ? testUser.getPassword() : null);
+        try {
+            permission.setApiClient(generateApiClient(testUser));
+        } catch (OXException e) {
+            LOGGER.warn("Api client for user {} can not be created.", testUser.getUser());
+        }
+        return permission;
+    }
+
+    protected OCLGuestPermission createNamedAuthorPermission() {
+        return createNamedAuthorPermission(true);
+    }
+
+    /**
+     *
+     * Creates a name author permission for a new user from the guest context
+     *
+     * @param usePassword Whether to use the users password or not
+     * @return
+     */
+    protected OCLGuestPermission createNamedAuthorPermission(boolean usePassword) {
+        OCLGuestPermission permission;
+        TestUser namedAuthor = guestContext.acquireUser();
+        permission = createNamedAuthorPermission(namedAuthor.getLogin(), namedAuthor.getUser(), usePassword ? namedAuthor.getPassword() : null);
+        try {
+            permission.setApiClient(generateApiClient(namedAuthor));
+        } catch (OXException e) {
+            LOGGER.warn("Api client for user {} can not be created.", namedAuthor.getUser());
+        }
+        return permission;
     }
 
     protected static OCLGuestPermission createAnonymousGuestPermission(String password) {
@@ -1361,15 +1417,22 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return TESTED_FOLDER_APIS[random.nextInt(TESTED_FOLDER_APIS.length)];
     }
 
-    protected static OCLGuestPermission randomGuestPermission(int module) {
-        OCLGuestPermission permission;
+    protected OCLGuestPermission randomGuestPermission(int module) {
+        OCLGuestPermission permission = null;
         do {
-            permission = TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
+            permission = randomGuestPermission();
         } while (false == isReadOnly(permission) && isReadOnlySharing(module));
         return permission;
     }
 
-    protected static OCLGuestPermission randomGuestPermission(RecipientType type, int module) {
+    protected OCLGuestPermission randomGuestPermission() {
+
+        GuestPermissionType[] permissionTypes = GuestPermissionType.values();
+        GuestPermissionType permissionType = permissionTypes[random.nextInt(permissionTypes.length)];
+        return createGuestPermission(permissionType);
+    }
+
+    protected OCLGuestPermission randomGuestPermission(RecipientType type, int module) {
         OCLGuestPermission permission;
         do {
             permission = randomGuestPermission(module);
@@ -1377,14 +1440,22 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return permission;
     }
 
-    protected static FileStorageGuestObjectPermission randomGuestObjectPermission() {
-        return TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
+    protected OCLGuestPermission randomGuestPermission(RecipientType type) {
+        OCLGuestPermission permission;
+        do {
+            permission = randomGuestPermission();
+        } while (false == type.equals(permission.getRecipient().getType()));
+        return permission;
     }
 
-    protected static FileStorageGuestObjectPermission randomGuestObjectPermission(RecipientType type) {
+    protected FileStorageGuestObjectPermission randomGuestObjectPermission() {
+        return asObjectPermission(randomGuestPermission());
+    }
+
+    protected FileStorageGuestObjectPermission randomGuestObjectPermission(RecipientType type) {
         FileStorageGuestObjectPermission permission;
         do {
-            permission = TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
+            permission = asObjectPermission(randomGuestPermission());
         } while (false == type.equals(permission.getRecipient().getType()));
         return permission;
     }

@@ -50,18 +50,13 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import org.json.JSONException;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -72,15 +67,11 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.SendLinkRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
-import com.openexchange.ajax.user.actions.GetRequest;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
@@ -89,6 +80,14 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
 import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.MailAttachment;
+import com.openexchange.testing.httpclient.models.MailData;
+import com.openexchange.testing.httpclient.models.UserData;
+import com.openexchange.testing.httpclient.models.UserResponse;
+import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link MailNotificationTest}
@@ -105,7 +104,6 @@ public class MailNotificationTest extends ShareTest {
     private final String IMAGETYPE1 = "image/jpeg";
     private final String FILENAME1 = "snippet1.ad";
     private final String FILETYPE1 = "text/plain";
-    private Contact clientContact;
     private String clientFullName, clientEmail;
     private final String clientShareMessage = "Hey there, i've got some shares for you!";
     DateFormat dateFormat = null;
@@ -123,12 +121,12 @@ public class MailNotificationTest extends ShareTest {
         dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, userValues.getLocale());
     }
 
-    private void initUserConfig() throws OXException, IOException, JSONException {
-        com.openexchange.ajax.user.actions.GetRequest request = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
-        com.openexchange.ajax.user.actions.GetResponse response = getClient().execute(request);
-        clientContact = response.getContact();
-        clientFullName = String.format("%1$s %2$s", clientContact.getGivenName(), clientContact.getSurName());
-        clientEmail = clientContact.getEmail1();
+    private void initUserConfig() throws ApiException {
+        UserApi userApi = new UserApi(getApiClient());
+        UserResponse userResponse = userApi.getUser(null);
+        UserData user = checkResponse(userResponse.getError(), userResponse.getErrorDesc(), userResponse.getData());
+        clientFullName = String.format("%1$s %2$s", user.getFirstName(), user.getLastName());
+        clientEmail = user.getEmail1();
     }
 
     //---IMAGES-----------------------------------------------------------------------------------------------------------------------------
@@ -229,7 +227,7 @@ public class MailNotificationTest extends ShareTest {
     @Test
     @TryAgain
     public void testGuestGetsMessageIfAddedViaFolderPermission() throws Exception {
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null);
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         FolderObject toUpdate = new FolderObject();
         toUpdate.setObjectID(testFolder1.getObjectID());
         toUpdate.setLastModified(testFolder1.getLastModified());
@@ -244,25 +242,25 @@ public class MailNotificationTest extends ShareTest {
             }
         });
 
-        Message message = assertAndGetMessage();
-        Document document = message.requireHtml();
+        MailData mailData = assertAndGetMessage(guestPermission.getApiClient());
+        Document document = toDocument(mailData);
         String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName());
         String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName());
         String viewItemStringString = NotificationStrings.VIEW_FOLDER;
-
-        assertSubject(message.getMimeMessage(), initialSubject);
+        assertEquals(mailData.getSubject(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemStringString);
         assertShareMessage(document, clientShareMessage);
 
         assertSignatureText(document, "");
-        assertSignatureImage(message);
+        assertSignatureImage(document);
     }
 
     @Test
     @TryAgain
     public void testGuestGetsMessageIfAddedViaFilePermission() throws Exception {
-        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null));
+        OCLGuestPermission oclGuestPermission = createNamedGuestPermission();
+        FileStorageObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
         File testFile = insertFile(testFolder1.getObjectID());
 
         DefaultFile toUpdate = new DefaultFile();
@@ -285,25 +283,26 @@ public class MailNotificationTest extends ShareTest {
             }
         });
 
-        Message message = assertAndGetMessage();
-        Document document = message.requireHtml();
+        MailData mailData = assertAndGetMessage(oclGuestPermission.getApiClient());
+        Document document = toDocument(mailData);
         String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, testFile.getFileName());
         String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, testFile.getFileName());
         String viewItemStringString = NotificationStrings.VIEW_FILE;
 
-        assertSubject(message.getMimeMessage(), initialSubject);
+        assertEquals(mailData.getSubject(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemStringString);
         assertShareMessage(document, clientShareMessage);
 
         assertSignatureText(document, "");
-        assertSignatureImage(message);
+        assertSignatureImage(document);
     }
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
     private void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, String shareMessage, boolean notify) throws Exception {
-        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null), shareMessage, notify);
-        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, null, null);
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
+        share(testFolder, file, guestPermission, shareMessage, notify);
+        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, null, null, guestPermission.getApiClient());
     }
 
     private void testAnonymousGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate) throws Exception {
@@ -312,14 +311,15 @@ public class MailNotificationTest extends ShareTest {
         ((AnonymousRecipient) permission.getRecipient()).setExpiryDate(expiryDate);
         share(testFolder, file, permission, shareMessage, true);
         ShareTarget target = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()), file == null ? null : file.getId());
-        getClient().execute(new SendLinkRequest(target, randomUID() + "@example.com", shareMessage));
-        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, password, expiryDate);
+        TestUser guestUserToGetLinkMail = testContext.acquireUser();
+        getClient().execute(new SendLinkRequest(target, guestUserToGetLinkMail.getLogin(), shareMessage));
+        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, password, expiryDate, generateApiClient(guestUserToGetLinkMail));
     }
 
-    private void assertGotA(String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate) throws Exception {
-        Message message = assertAndGetMessage();
-        Document document = message.requireHtml();
-        assertSubject(message.getMimeMessage(), initialSubject);
+    private void assertGotA(String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate, ApiClient apiClient) throws Exception {
+        MailData mailData = assertAndGetMessage(apiClient);
+        Document document = toDocument(mailData);
+        assertEquals(mailData.getSubject(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemString);
 
@@ -328,7 +328,7 @@ public class MailNotificationTest extends ShareTest {
         }
 
         assertSignatureText(document, "");
-        assertSignatureImage(message);
+        assertSignatureImage(document);
 
         if (password != null) {
             assertPassword(document, password);
@@ -337,6 +337,12 @@ public class MailNotificationTest extends ShareTest {
         if (expiryDate != null) {
             assertExpiryDate(document, expiryDate);
         }
+    }
+
+    private Document toDocument(MailData mailData) {
+        MailAttachment content = mailData.getAttachments().get(0);
+        Document document = Jsoup.parse(content.getContent());
+        return document;
     }
 
     private void share(FolderObject testFolder, File file, OCLPermission guestPermission, final String shareMessage, final boolean notify) throws Exception {
@@ -393,8 +399,7 @@ public class MailNotificationTest extends ShareTest {
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         share(testFolder, file, permission, null, false);
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
-        assertEquals(0, messages.size());
+        assertEquals(0, new MailManager(getApiClient2()).getMailCount());
     }
 
     private File createFile(FolderObject folder, String fileName, String mimeType) throws Exception {
@@ -409,15 +414,10 @@ public class MailNotificationTest extends ShareTest {
         return file;
     }
 
-    private Message assertAndGetMessage() throws JSONException, MessagingException, OXException, IOException {
-        List<Message> messages = getClient().execute(new GetMailsRequest()).getMessages();
+    private MailData assertAndGetMessage(ApiClient apiClient) throws Exception {
+        List<MailData> messages = new MailManager(apiClient).getMails();
         assertEquals(1, messages.size());
         return messages.get(0);
-    }
-
-    private void assertSubject(MimeMessage mimeMessage, String expected) throws MessagingException {
-        String subject = mimeMessage.getSubject();
-        assertEquals(expected, subject);
     }
 
     private void assertHasSharedItems(Document document, String expected) {
@@ -444,10 +444,10 @@ public class MailNotificationTest extends ShareTest {
         assertEquals(expected, document.getElementById("signature_text").ownText());
     }
 
-    private void assertSignatureImage(Message message) throws Exception {
-        String src = message.requireHtml().getElementById("signature_image").attr("src");
-        BodyPart image = message.getBodyPartByContentID("<" + src.substring(4) + ">");
-        assertNotNull(image);
+    private void assertSignatureImage(Document document) {
+        String src = document.getElementById("signature_image").attr("src");
+        String[] imageSrc = src.split("=", 2);
+        assertTrue(imageSrc.length > 1);
     }
 
 }

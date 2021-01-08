@@ -130,8 +130,7 @@ public class Bug41622Test extends ShareTest {
          * prepare guest permission
          */
         EnumAPI api = randomFolderAPI();
-        String name = randomUID();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(name + "@example.com", name, "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         /*
          * as user 1 with client 1, create folder A shared to guest user
          */
@@ -163,7 +162,7 @@ public class Bug41622Test extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(getClient(), api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(getClient(), guestA);
+        String shareURLA = discoverShareURL(guestPermission.getApiClient(), guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -195,7 +194,7 @@ public class Bug41622Test extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(client2, guestB);
+        String shareURLB = discoverShareURL((guestPermission).getApiClient(), guestB);
         /*
          * check permission entities
          */

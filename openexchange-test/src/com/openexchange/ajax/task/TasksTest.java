@@ -154,6 +154,10 @@ public class TasksTest extends AbstractAJAXSession {
 
     @Test
     public void testUpdateDelegatedTask() throws Throwable {
+        // aquire two additional users for this test
+        this.testContext.acquireUser();
+        this.testContext.acquireUser();
+
         final List<Participant> participants = ParticipantTools.getParticipants(getClient(), 4, true, getClient().getValues().getUserId());
         final List<Participant> firstParticipants = new ArrayList<Participant>();
         firstParticipants.addAll(participants.subList(0, 2));

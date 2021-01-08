@@ -68,7 +68,7 @@ public class FreeBusyTest extends AppointmentTest {
 
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
-        
+
         final Appointment[] appointmentArray = catm.freeBusy(userId, Participant.USER, start, end);
 
         boolean found = false;
@@ -128,7 +128,7 @@ public class FreeBusyTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -144,7 +144,7 @@ public class FreeBusyTest extends AppointmentTest {
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 2));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 2));
 
-        Appointment[] appointmentArray =catm.freeBusy(userId, Participant.USER, start, end);; 
+        Appointment[] appointmentArray =catm.freeBusy(userId, Participant.USER, start, end);;
 
         boolean found = false;
 
@@ -159,7 +159,7 @@ public class FreeBusyTest extends AppointmentTest {
         }
 
         assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
-        
+
         appointmentArray = catm.freeBusy(resourceParticipantId, Participant.RESOURCE, start, end);
 
         found = false;

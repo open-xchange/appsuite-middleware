@@ -105,7 +105,7 @@ public class Bug41537Test extends ShareTest {
         /*
          * Create share
          */
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", randomUID());
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         FolderObject folder = insertSharedFolder(EnumAPI.OUTLOOK, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), guestPermission);
         OCLPermission guestEntityPermission = findFirstGuestPermission(folder);
         assertNotNull(guestEntityPermission);
@@ -115,7 +115,7 @@ public class Bug41537Test extends ShareTest {
         /*
          * Init guest session
          */
-        String folderShareURL = discoverShareURL(guest);
+        String folderShareURL = discoverShareURL(guestPermission.getApiClient(), guest);
         GuestClient guestClient = resolveShare(folderShareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);

@@ -106,7 +106,7 @@ public class AJAXConfig extends AbstractConfig {
     public static String getProperty(final Property key, final String fallBack) {
         String property;
         try {
-            property = getProperty(key);
+            property = singleton.getPropertyInternal(key.getPropertyName(), fallBack);
         } catch (Exception e) {
             return fallBack;
         }
@@ -161,7 +161,22 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * The client secret configured in the oauth authentication server
          */
-        OAUTH_CLIENT_PASSWORD("oauthClientPassword")
+        OAUTH_CLIENT_PASSWORD("oauthClientPassword"),
+
+        /**
+         * Whether newly created contexts should be deleted after usage or not
+         */
+        DELETE_CONTEXT("deleteContextAfterUse"),
+
+        /**
+         * The suffix of the context name
+         */
+        CONTEXT_NAME_SUFFIX("contextNameSuffix"),
+
+        /**
+         * Whether to use a random cid range or not
+         */
+        USE_RANDOM_CID_RANGE("useRandomCidRange")
 
         ;
 

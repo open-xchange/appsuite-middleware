@@ -182,7 +182,6 @@ public class MailPushTest extends AbstractMailTest {
             assertTrue("Missing \"folder\" field in JSON data of \"ox:mail:new\" event", jArg.hasAndNotNull("folder"));
             assertEquals("Unexpected folder identifier", "default0/INBOX", jArg.getString("folder"));
         } finally {
-            testContext.backUser(user);
             socket.close();
         }
     }

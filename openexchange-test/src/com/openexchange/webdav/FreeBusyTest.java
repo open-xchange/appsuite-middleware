@@ -52,11 +52,13 @@ package com.openexchange.webdav;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,6 +86,8 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.httpclient.models.ResourceResponse;
+import com.openexchange.testing.httpclient.modules.ResourcesApi;
 import com.openexchange.testing.restclient.invoker.ApiClient;
 import com.openexchange.testing.restclient.modules.InternetFreeBusyApi;
 
@@ -150,7 +154,11 @@ public class FreeBusyTest extends AbstractChronosTest {
         userName = testUser.getUser();
         server = testUser.getContext();
         contextid = getClient().getValues().getContextId();
-        testResourceName = "test-resource-1";
+
+        Integer resId = testContext.acquireResource();
+        ResourceResponse resource = new ResourcesApi(getApiClient()).getResource(resId);
+        assertNull(resource.getError());
+        testResourceName = resource.getData().getName();
         this.testDate = new Date();
         this.busyDate = createEvent(TranspEnum.OPAQUE, FreeBusyTest.class.getName() + "_Busy", 10, 11);
         this.freeDate = createEvent(TranspEnum.TRANSPARENT, FreeBusyTest.class.getName() + "_Free", 11, 12);
@@ -168,12 +176,6 @@ public class FreeBusyTest extends AbstractChronosTest {
             }
         }
         return this.protocol + "://" + this.hostname + ":8009";
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        TestContextPool.backContext(testContext);
-        super.tearDown();
     }
 
     // -------------------------------Positive tests--------------------------------------------------------------
@@ -568,7 +570,8 @@ public class FreeBusyTest extends AbstractChronosTest {
         return eventManager.createEvent(event);
     }
 
-    private void validateICal(String content, String userName, String serverName, int weeksPast, int weeksFuture, boolean simple) throws ParseException {
+    private void validateICal(String contentStr, String userName, String serverName, int weeksPast, int weeksFuture, boolean simple) throws ParseException {
+        String content = removeLinebreaksAndWhiteSpace(contentStr);
         assertTrue("Is no VCalendar", content.startsWith("BEGIN:VCALENDAR") && content.contains("END:VCALENDAR"));
         assertTrue("Contains no VFreeBusy", content.contains("BEGIN:VFREEBUSY") && content.contains("END:VFREEBUSY"));
         String startDate = this.busyDate.getStartDate().getValue();
@@ -602,6 +605,19 @@ public class FreeBusyTest extends AbstractChronosTest {
 
         assertTrue("Does not contain the user name", content.contains(userName));
         assertTrue("Does not contain the server name", content.contains(serverName));
+    }
+
+    /**
+     * Prepares the ical string. Removes linebreaks and leading and trailing whitespaces.
+     *
+     * @param s The string to prepare
+     * @return Thre resulting string
+     */
+    private static final String removeLinebreaksAndWhiteSpace(String s) {
+        List<String> lines = Arrays.asList(s.split("\\r?\\n"));
+        StringBuilder str = new StringBuilder();
+        lines.stream().map(tmp -> tmp.trim()).forEach(tmp -> str.append(tmp));
+        return str.toString();
     }
 
     @Override

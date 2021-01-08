@@ -89,7 +89,7 @@ public class Bug40826Test extends ShareTest {
     }
 
     private void testShareToAuthor(int module) throws Exception {
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest");
+        OCLGuestPermission guestPermission = createNamedAuthorPermission();
         /*
          * try and create folder shared to guest user
          */

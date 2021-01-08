@@ -111,7 +111,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
     @Test
     @TryAgain
     public void testCopySharedFile_guestCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
-        OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        OCLGuestPermission lGuestPermission = createNamedAuthorPermission();
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
 
         AJAXClient client2 = new AJAXClient(testContext.acquireUser());
@@ -141,7 +141,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
             assertNotNull(matchingPermission);
             ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userDestFolder.getObjectID(), matchingPermission.getEntity());
             checkGuestPermission(lGuestPermission, guest);
-            String shareURL = discoverShareURL(guest);
+            String shareURL = discoverShareURL(lGuestPermission.getApiClient(), guest);
 
             guestClient = resolveShare(shareURL, getUsername(lGuestPermission.getRecipient()), getPassword(lGuestPermission.getRecipient()));
 

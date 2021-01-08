@@ -171,15 +171,10 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         UserApi api = new UserApi(getApiClient());
         userResponseC1 = api.getUser(String.valueOf(getClient().getValues().getUserId()));
 
-        context2 = TestContextPool.acquireContext(AbstractITipTest.class.getName());
+        context2 = testContextList.get(1);
         addTearDownOperation(() -> TestContextPool.backContext(context2));
 
         testUserC2 = context2.acquireUser();
-        addTearDownOperation(() -> {
-            if (null != context2) {
-                context2.backUser(testUserC2);
-            }
-        });
 
         apiClientC2 = generateApiClient(testUserC2);
         rememberClient(apiClientC2);
@@ -198,6 +193,11 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
         eventManager.setIgnoreConflicts(true);
         eventManagerC2.setIgnoreConflicts(true);
+    }
+
+    @Override
+    protected int getNumerOfContexts() {
+        return 2;
     }
 
     @Override

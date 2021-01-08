@@ -102,6 +102,8 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     public void setUp() throws Exception {
         super.setUp();
         super.setUpConfiguration();
+        // add third user necessary for testing
+        this.testContext.acquireUser();
         folderApi = new FoldersApi(getApiClient());
         UserApi userApi = new UserApi(apiClient);
         UsersResponse resp = userApi.getAllUsers("1", null, null);

@@ -66,6 +66,7 @@ import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -96,7 +97,7 @@ public class HttpAuthTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws OXException {
         TestContextPool.backContext(testContext);
     }
 

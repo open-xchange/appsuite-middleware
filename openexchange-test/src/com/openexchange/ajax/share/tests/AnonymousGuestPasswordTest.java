@@ -197,7 +197,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         /*
          * try to update password
@@ -209,7 +209,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * check if share link still accessible with old password
          */
-        guestClient = resolveShare(guest, guestPermission.getRecipient());
+        guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         /*
          * check access to share with new password

@@ -429,7 +429,7 @@ public class Bug43270Test extends ShareTest {
         prepareUser(readCreateSharedFolders, shareLinks, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(client2, FolderObject.INFOSTORE));
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
-        folder.getPermissions().add(createNamedAuthorPermission(randomUID() + "@example.com", randomUID()));
+        folder.getPermissions().add(createNamedAuthorPermission());
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
         updateRequest.setFailOnError(false);
         executeAndCheck(updateRequest, expectedError);
@@ -452,7 +452,7 @@ public class Bug43270Test extends ShareTest {
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(client2, FolderObject.INFOSTORE));
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         File file = insertFile(client2, folder.getObjectID(), randomUID());
-        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedAuthorPermission(randomUID() + "@example.com", randomUID()));
+        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedAuthorPermission());
         file.setObjectPermissions(Collections.singletonList(guestPermission));
         UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(file, new Field[] { Field.OBJECT_PERMISSIONS }, file.getLastModified());
         updateRequest.setFailOnError(false);

@@ -168,7 +168,7 @@ public class FolderTransactionTest extends ShareTest {
 
         ExtendedPermissionEntity guest = discoverGuestEntity(api, module, sharedFolder.getObjectID(), matchingPermission.getEntity());
         assertNotNull("API: " + api + ", Module: " + module, guest);
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
 
         /*
          * Update should fail because of invalid permissions

@@ -133,7 +133,7 @@ public class BasicAuthTest extends ShareTest {
     public void testBasicAuth() throws Exception {
         EnumAPI api = EnumAPI.OUTLOOK;
         int module = FolderObject.CALENDAR;
-        OCLGuestPermission guestPermission = createNamedGuestPermission("horst@example.com", "Horst Example", "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
 
         // Create a calendar folder having a share permission
         FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), guestPermission);
@@ -237,7 +237,7 @@ public class BasicAuthTest extends ShareTest {
         }
 
         // Check access to share (via guest client)
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
         GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);

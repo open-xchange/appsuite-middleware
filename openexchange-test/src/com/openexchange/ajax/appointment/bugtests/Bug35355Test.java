@@ -56,8 +56,8 @@ import java.util.Date;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -70,7 +70,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Bug35355Test extends AbstractAJAXSession {
+public class Bug35355Test extends AbstractResourceAwareAjaxSession {
 
     private CalendarTestManager ctm3;
 
@@ -100,7 +100,6 @@ public class Bug35355Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
         client3 = new AJAXClient(testContext.acquireUser());
 
         up1 = new UserParticipant(getClient().getValues().getUserId());

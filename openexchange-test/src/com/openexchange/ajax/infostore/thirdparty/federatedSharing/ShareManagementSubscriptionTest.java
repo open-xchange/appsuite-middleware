@@ -118,7 +118,6 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
 
         context2 = this.testContextList.get(1);
         testUserC2 = context2.acquireUser();
-        addTearDownOperation(() -> context2.backUser(testUserC2));
         apiClientC2 = generateApiClient(testUserC2);
         addTearDownOperation(() -> logoutClient(apiClientC2, true));
         smApiC2 = new ShareManagementApi(apiClientC2);

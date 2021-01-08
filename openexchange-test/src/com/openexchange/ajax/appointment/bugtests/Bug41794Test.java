@@ -50,24 +50,23 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.io.IOException;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Collections;
 import java.util.Date;
-import org.json.JSONException;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.group.actions.SearchRequest;
-import com.openexchange.ajax.group.actions.SearchResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link Bug41794Test}
@@ -80,15 +79,16 @@ public class Bug41794Test extends AbstractAJAXSession {
     private AJAXClient client3;
     private CalendarTestManager ctm2;
     private CalendarTestManager ctm3;
-    private String groupParticipant;
+    private int groupParticipant;
     private Appointment appointment;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client3 = new AJAXClient(testContext.acquireUser());
-        groupParticipant = testContext.getGroupParticipants().get(0);
+        TestUser user3 = testContext.acquireUser();
+        client3 = new AJAXClient(user3);
+        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(user3.getUserId())))); //TODO null check
         catm = new CalendarTestManager(getClient());
         ctm2 = new CalendarTestManager(getClient2());
         ctm3 = new CalendarTestManager(client3);
@@ -115,6 +115,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         assertNull("Did not expect appointment for user 2", ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
 
         Appointment loadedAppointment = ctm3.get(client3.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
+        assertNotNull(loadedAppointment);
         loadedAppointment.setAlarm(15);
         loadedAppointment.setLastModified(new Date(Long.MAX_VALUE));
         loadedAppointment.setIgnoreConflicts(true);
@@ -135,10 +136,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         }
     }
 
-    private GroupParticipant getGroupParticipant(String groupParticipant) throws OXException, IOException, JSONException {
-        SearchResponse response = getClient().execute(new SearchRequest(groupParticipant));
-        Group[] group = response.getGroups();
-        final int groupParticipantId = group[0].getIdentifier();
+    private GroupParticipant getGroupParticipant(int groupParticipantId) {
         GroupParticipant gpart = new GroupParticipant(groupParticipantId);
         return gpart;
     }

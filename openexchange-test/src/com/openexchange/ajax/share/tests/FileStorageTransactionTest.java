@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -115,7 +116,8 @@ public class FileStorageTransactionTest extends ShareTest {
         for (DefaultFile file : files) {
             if (r.nextBoolean()) {
                 file.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
-                itm.updateAction(file, new Field[] { Field.OBJECT_PERMISSIONS }, new Date());
+                itm.updateAction(file, new Field[] { Field.OBJECT_PERMISSIONS }, new Date(Long.MAX_VALUE));
+                assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
                 sharedFiles.add(file);
             }
         }
@@ -141,7 +143,7 @@ public class FileStorageTransactionTest extends ShareTest {
             assertEquals(1, share.getExtendedPermissions().size());
             ExtendedPermissionEntity guest = share.getExtendedPermissions().get(0);
             checkGuestPermission(permission, guest);
-            GuestClient guestClient =  resolveShare(guest, permission.getRecipient());
+            GuestClient guestClient = resolveShare(guest, permission.getRecipient(), null);
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(permission);
             /*

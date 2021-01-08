@@ -171,8 +171,8 @@ public class Bug15903Test extends CalendarTestManagerTest {
         } catch (@SuppressWarnings("unused") OXException e) {
             gotException = true;
         }
-
-        assertTrue("second user should not see the appointment any longer", gotException);
+        assertTrue(catm2.getLastResponse().hasError());
+        assertTrue("second user should not see the appointment any longer", gotException || appForSeconduser == null);
 
         client2.logout();
 

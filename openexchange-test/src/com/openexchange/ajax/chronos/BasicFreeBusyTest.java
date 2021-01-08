@@ -64,6 +64,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -160,16 +161,14 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertNull("Unexpected free/busy time for masked event on " + day3, time3);
     }
 
-    private EventData createEvent(String summary, long start, long end, IdWrappingTestUser... users) throws ApiException {
+    private EventData createEvent(String summary, long start, long end, TestUser... users) throws ApiException {
         List<Attendee> attendees = null;
         if (users != null && users.length > 0) {
             attendees = new ArrayList<>(users.length);
-            for (IdWrappingTestUser user : users) {
+            for (TestUser user : users) {
                 Attendee att = new Attendee();
                 att.setCuType(CuTypeEnum.INDIVIDUAL);
-                if (user.containsId()) {
-                    att.setEntity(Integer.valueOf(user.getUserId()));
-                }
+                att.setEntity(user.getUserId());
                 attendees.add(att);
             }
         }

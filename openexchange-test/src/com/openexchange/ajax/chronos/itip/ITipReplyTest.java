@@ -167,7 +167,6 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          * Forward to other user of same context
          */
         TestUser partyCrasher = context2.acquireUser();
-        addTearDownOperation(() -> context2.backUser(partyCrasher));
         String crashersMail = partyCrasher.getLogin();
 
         /*

@@ -81,6 +81,9 @@ public class GetResponse extends AbstractAJAXResponse {
         if (null == appointmentObj) {
             this.appointmentObj = new Appointment();
             final JSONObject json = (JSONObject) getResponse().getData();
+            if (json == null) {
+                return null;
+            }
             new AppointmentParser(true, timeZone).parse(appointmentObj, json);
         }
         return appointmentObj;

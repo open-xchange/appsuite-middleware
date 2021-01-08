@@ -282,7 +282,7 @@ public class Bug44962Test extends ShareTest {
         prepareUser(readCreateSharedFolders, false, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, module, getDefaultFolder(client2, module));
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
-        folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
+        folder.getPermissions().add(createNamedGuestPermission());
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
         updateRequest.setFailOnError(false);
         executeAndCheck(updateRequest, expectedError);
@@ -293,7 +293,7 @@ public class Bug44962Test extends ShareTest {
         FolderObject folder = insertPublicFolder(client2, EnumAPI.OX_NEW, module);
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         prepareUser(false, editPublicFolders, inviteGuests);
-        folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
+        folder.getPermissions().add(createNamedGuestPermission());
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
         updateRequest.setFailOnError(false);
         executeAndCheck(updateRequest, expectedError);

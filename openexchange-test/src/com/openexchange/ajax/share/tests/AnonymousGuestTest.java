@@ -109,7 +109,7 @@ public class AnonymousGuestTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -133,7 +133,7 @@ public class AnonymousGuestTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -219,7 +219,8 @@ public class AnonymousGuestTest extends ShareTest {
     @Test
     @TryAgain
     public void testAddAnonymousGuestToFile() throws Exception {
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
+        OCLGuestPermission oclGuestPermission = createAnonymousGuestPermission();
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
 
         File updated = addPermissions(file, guestPermission);
         FileStorageObjectPermission matchingPermission = findAndCheckPermission(updated);
@@ -231,7 +232,7 @@ public class AnonymousGuestTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), oclGuestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -243,7 +244,8 @@ public class AnonymousGuestTest extends ShareTest {
          * Permission bits are ignored for anonymous guests, therefore the update should succeed
          * and the created permission will be read-only
          */
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createInvalidAnonymousGuestPermission());
+        OCLGuestPermission oclGuestPermission = createInvalidAnonymousGuestPermission();
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
 
         File updated = addPermissions(file, guestPermission);
         FileStorageObjectPermission matchingPermission = findAndCheckPermission(updated);
@@ -255,7 +257,7 @@ public class AnonymousGuestTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), oclGuestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }

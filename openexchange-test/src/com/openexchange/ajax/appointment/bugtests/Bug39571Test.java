@@ -56,7 +56,7 @@ import java.util.Calendar;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -70,7 +70,7 @@ import com.openexchange.groupware.container.UserParticipant;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class Bug39571Test extends AbstractAJAXSession {
+public class Bug39571Test extends AbstractResourceAwareAjaxSession {
 
     private Appointment series;
     private int nextYear;

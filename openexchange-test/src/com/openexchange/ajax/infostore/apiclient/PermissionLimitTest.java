@@ -84,6 +84,8 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
     public void setUp() throws Exception {
         super.setUp();
         super.setUpConfiguration();
+        testContext.acquireUser();
+        testContext.acquireUser();
 
         UserApi userApi = new UserApi(apiClient);
         UsersResponse resp = userApi.getAllUsers("1", null, null);

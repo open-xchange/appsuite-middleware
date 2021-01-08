@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.resource.Resource;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -112,7 +111,7 @@ public class Bug53479Test extends CalDAVTest {
         /*
          * create appointment on server as user b with resource participant and user a
          */
-        Resource resource = resTm.search(testContext.getResourceParticipants().get(0)).get(0);
+        int resId = testContext.acquireResource(); // TODO add null check
         String uid = randomUID();
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(manager2.getPrivateFolder());
@@ -123,7 +122,7 @@ public class Bug53479Test extends CalDAVTest {
         appointment.setEndDate(TimeTools.D("next week at 5 pm", TimeZone.getTimeZone("Europe/Berlin")));
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
-        appointment.addParticipant(new ResourceParticipant(resource.getIdentifier()));
+        appointment.addParticipant(new ResourceParticipant(resId));
         appointment = manager2.insert(appointment);
         /*
          * verify appointment on client as user a
@@ -154,7 +153,7 @@ public class Bug53479Test extends CalDAVTest {
         appointment = manager2.get(appointment);
         Participant resourceParticipant = null;
         for (Participant participant : appointment.getParticipants()) {
-            if (Participant.RESOURCE == participant.getType() && participant.getIdentifier() == resource.getIdentifier()) {
+            if (Participant.RESOURCE == participant.getType() && participant.getIdentifier() == resId) {
                 resourceParticipant = participant;
                 break;
             }

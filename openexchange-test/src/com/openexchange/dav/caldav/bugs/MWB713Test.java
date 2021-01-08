@@ -60,11 +60,10 @@ import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 
 /**
- * 
+ *
  * {@link MWB713Test}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -81,10 +80,15 @@ public class MWB713Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        context2 = TestContextPool.acquireContext(this.getClass().getCanonicalName());
+        context2 = testContextList.get(1);
         organizerUser = context2.acquireUser();
         organizerClient = generateClient(organizerUser);
         uid = randomUID();
+    }
+
+    @Override
+    protected int getNumerOfContexts() {
+        return 2;
     }
 
     @Test
@@ -99,59 +103,59 @@ public class MWB713Test extends CalDAVTest {
 
         // @formatter:off
         String create =
-            "BEGIN:VCALENDAR\n" + 
-            "VERSION:2.0\n" + 
-            "PRODID:-//Open-Xchange//7.10.5-Rev0//EN\n" + 
+            "BEGIN:VCALENDAR\n" +
+            "VERSION:2.0\n" +
+            "PRODID:-//Open-Xchange//7.10.5-Rev0//EN\n" +
             "METHOD:REQUEST\n" +
-            "BEGIN:VEVENT\n" + 
+            "BEGIN:VEVENT\n" +
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\n" +
             "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\n" +
-            "ATTENDEE;CN=A;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;EMAIL=" + organizerMail + ":mailto:" + organizerMail + "\n" + 
-            "ATTENDEE;CN=B;PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;EMAIL=" + attendeeMail + ":mailto:" + attendeeMail + "\n" + 
-            "CLASS:PUBLIC\n" + 
-            "CREATED:20201204T091730Z\n" + 
-            "LAST-MODIFIED:20201204T091730Z\n" + 
-            "ORGANIZER;CN=A:mailto:" + organizerMail + "\n" + 
-            "SEQUENCE:0\n" + 
-            "SUMMARY:MWB713Test\n" + 
-            "TRANSP:OPAQUE\n" + 
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
-            "END:VEVENT\n" + 
+            "ATTENDEE;CN=A;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;EMAIL=" + organizerMail + ":mailto:" + organizerMail + "\n" +
+            "ATTENDEE;CN=B;PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;EMAIL=" + attendeeMail + ":mailto:" + attendeeMail + "\n" +
+            "CLASS:PUBLIC\n" +
+            "CREATED:20201204T091730Z\n" +
+            "LAST-MODIFIED:20201204T091730Z\n" +
+            "ORGANIZER;CN=A:mailto:" + organizerMail + "\n" +
+            "SEQUENCE:0\n" +
+            "SUMMARY:MWB713Test\n" +
+            "TRANSP:OPAQUE\n" +
+            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" +
+            "END:VEVENT\n" +
             "END:VCALENDAR\n";
 
         String update =
-            "BEGIN:VCALENDAR\n" + 
-            "VERSION:2.0\n" + 
-            "PRODID:-//Open-Xchange//7.10.5-Rev0//EN\n" + 
+            "BEGIN:VCALENDAR\n" +
+            "VERSION:2.0\n" +
+            "PRODID:-//Open-Xchange//7.10.5-Rev0//EN\n" +
             "METHOD:REQUEST\n" +
-            "BEGIN:VEVENT\n" + 
+            "BEGIN:VEVENT\n" +
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(start2, "Europe/Berlin") + "\n" +
             "DTEND;TZID=Europe/Berlin:" + format(end2, "Europe/Berlin") + "\n" +
-            "ATTENDEE;CN=A;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;EMAIL=" + organizerMail + ":mailto:" + organizerMail + "\n" + 
-            "ATTENDEE;CN=B;PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;EMAIL=" + attendeeMail + ":mailto:" + attendeeMail + "\n" + 
-            "CLASS:PUBLIC\n" + 
-            "CREATED:20201204T091730Z\n" + 
-            "LAST-MODIFIED:20201204T091730Z\n" + 
-            "ORGANIZER;CN=A:mailto:" + organizerMail + "\n" + 
-            "SEQUENCE:0\n" + 
-            "SUMMARY:MWB713Test\n" + 
-            "TRANSP:OPAQUE\n" + 
-            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
-            "END:VEVENT\n" + 
+            "ATTENDEE;CN=A;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;EMAIL=" + organizerMail + ":mailto:" + organizerMail + "\n" +
+            "ATTENDEE;CN=B;PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;EMAIL=" + attendeeMail + ":mailto:" + attendeeMail + "\n" +
+            "CLASS:PUBLIC\n" +
+            "CREATED:20201204T091730Z\n" +
+            "LAST-MODIFIED:20201204T091730Z\n" +
+            "ORGANIZER;CN=A:mailto:" + organizerMail + "\n" +
+            "SEQUENCE:0\n" +
+            "SUMMARY:MWB713Test\n" +
+            "TRANSP:OPAQUE\n" +
+            "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" +
+            "END:VEVENT\n" +
             "END:VCALENDAR\n";
         // @formatter:on
-        
+
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, create));
         ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertEquals(start.getTime(), iCalResource.getVEvent().getDTStart().getTime());
         assertEquals(end.getTime(), iCalResource.getVEvent().getDTEnd().getTime());
-        
+
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, update, iCalResource.getETag()));
 
         iCalResource = get(uid);

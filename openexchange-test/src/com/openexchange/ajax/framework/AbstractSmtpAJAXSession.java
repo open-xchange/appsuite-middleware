@@ -49,50 +49,41 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
+import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 
-public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
+public abstract class AbstractSmtpAJAXSession extends AbstractAPIClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSmtpAJAXSession.class);
 
-    private static final AtomicInteger counter = new AtomicInteger();
-
     protected TestUser noReplyUser;
-    private AJAXClient noReplyClient;
+    private ApiClient noReplyApiClient;
+    private AJAXClient noReplyAJAXClient;
 
-    @BeforeClass
-    public static void before() throws Exception {
-        counter.incrementAndGet();
-        SmtpMockSetup.init();
-    }
+    protected MailManager noReplyMailManager;
+    protected MailManager mailManager;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        List<TestUser> copyOfAll = testContext.getCopyOfAll();
-        for (TestUser user : copyOfAll) {
-            AJAXClient currentClient =  new AJAXClient(user);
-            currentClient.execute(new ClearMailsRequest());
-            currentClient.logout();
-        }
-        noReplyUser = testContext.getNoReplyUser();
-        noReplyClient = new AJAXClient(noReplyUser);
-        getNoReplyClient().execute(new ClearMailsRequest());
+        mailManager = new MailManager(getApiClient());
+        noReplyUser = testContext.acquireNoReplyUser();
+        noReplyAJAXClient = new AJAXClient(noReplyUser);
+        noReplyApiClient = generateApiClient(noReplyUser);
+        rememberClient(noReplyApiClient);
+        noReplyMailManager = new MailManager(noReplyApiClient);
+        noReplyMailManager.clearMails();
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            if (noReplyClient != null) {
+            if (noReplyAJAXClient != null) {
                 // Client can be null if setUp() fails
-                noReplyClient.logout();
-                noReplyClient = null;
+                noReplyAJAXClient.logout();
+                noReplyAJAXClient = null;
             }
         } catch (Exception e) {
             LoggerFactory.getLogger(AbstractSmtpAJAXSession.class).error("Unable to correctly tear down test setup.", e);
@@ -101,18 +92,11 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
         }
     }
 
-    @AfterClass
-    public static void afterClass() {
-        synchronized (AbstractSmtpAJAXSession.class) {
-            int get = counter.decrementAndGet();
-            if (get == 0) {
-                LOG.info("No more test running. Going to restore SMTP config.", new Throwable());
-                SmtpMockSetup.restore();
-            }
-        }
+    public AJAXClient getNoReplyAJAXClient() {
+        return noReplyAJAXClient;
     }
 
-    public AJAXClient getNoReplyClient() {
-        return noReplyClient;
+    public ApiClient getNoReplyApiClient() {
+        return noReplyApiClient;
     }
 }

@@ -104,7 +104,7 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         AJAXClient userClient = new AJAXClient(user);
         String email = userClient.getValues().getDefaultAddress();
         int userID = userClient.getValues().getUserId();
-        OCLGuestPermission guestPermission = createNamedGuestPermission(email, "", user.getPassword());
+        OCLGuestPermission guestPermission = createNamedGuestPermission(user, true);
         userClient.logout();
         /*
          * create folder shared to guest user
@@ -138,9 +138,8 @@ public class ConvertToInternalPermissionTest extends ShareTest {
          * prepare guest permission with e-mail address of other other internal user
          */
         AJAXClient userClient = new AJAXClient(user);
-        String email = userClient.getValues().getDefaultAddress();
         int userID = userClient.getValues().getUserId();
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(email, "", user.getPassword()));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(user, true));
         userClient.logout();
         /*
          * create folder and a shared file inside

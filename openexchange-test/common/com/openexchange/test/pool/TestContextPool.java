@@ -49,20 +49,29 @@
 
 package com.openexchange.test.pool;
 
+import static com.openexchange.java.Autoboxing.b;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.lang.SerializationUtils;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import javax.mail.internet.AddressException;
 import org.junit.Assert;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
-import com.openexchange.java.Strings;
 
 /**
  * {@link TestContextPool} - This class will manage the context handling, esp. providing unused contexts and queue related requests
@@ -74,28 +83,11 @@ public class TestContextPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextPool.class);
 
-    private static BlockingQueue<TestContext> contexts = new LinkedBlockingQueue<>(50);
-
     private static List<TestContext> allTimeContexts = new ConcurrentList<>();
 
-    private static AtomicReference<TestContextWatcher> contextWatcher = new AtomicReference<>();
+    private static Semaphore semaphore = new Semaphore(20, true);
 
-    private static AtomicBoolean watcherInitialized = new AtomicBoolean(false);
-
-    public static synchronized void addContext(TestContext context) {
-        remember(context);
-        contexts.add(context);
-        startWatcher();
-        LOG.info("Added context '{}' with users {} to pool.", context.getName(), Strings.concat(",", context.getCopyOfAll()));
-    }
-
-    private static void remember(TestContext context) {
-        if (allTimeContexts.contains(context)) {
-            return;
-        }
-        allTimeContexts.add((TestContext) SerializationUtils.clone(context));
-        LOG.info("Added context {} to all time available context list.", context.getName());
-    }
+    private static final boolean DELETE_AFTER_USAGE = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.DELETE_CONTEXT, Boolean.toString(true))));
 
     /**
      * Returns an exclusive {@link TestContext} which means this context is currently not used by any other test.<br>
@@ -104,22 +96,21 @@ public class TestContextPool {
      *
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @return {@link TestContext} to be used for tests.
+     * @throws OXException
      */
-    public static TestContext acquireContext(String acquiredBy) {
+    public static TestContext acquireContext(String acquiredBy) throws OXException {
+        List<TestContext> contextList;
         try {
-
-            List<TestContext> contextList = aquireContexts(1);
+            contextList = aquireContexts(1);
             Assert.assertFalse("Unable to acquire test context due to an empty pool.", contextList == null || contextList.isEmpty());
             TestContext context = contextList.get(0);
-            context.setAcquiredBy(acquiredBy);
-            contextWatcher.get().contextInUse(context);
             LOG.debug("Context '{}' has been acquired by {}.", context.getName(), acquiredBy);
             return context;
-        } catch (InterruptedException e) {
-            // should not happen
-            LOG.error("", e);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | InvalidDataException | ContextExistsException | MalformedURLException | NotBoundException | AddressException e) {
+            // Should not happen
+            LOG.error(e.getMessage());
+            throw new OXException(e);
         }
-        return null;
     }
 
     /**
@@ -130,51 +121,70 @@ public class TestContextPool {
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @param amount The amount of contexts to aquire
      * @return a list of {@link TestContext} to be used for tests.
+     * @throws OXException
      */
-    public static List<TestContext> acquireContext(String acquiredBy, int amount) {
+    public static List<TestContext> acquireContext(String acquiredBy, int amount) throws OXException {
         try {
             List<TestContext> result = aquireContexts(amount);
             Assert.assertFalse("Unable to acquire test context due to an empty pool.", result == null || result.isEmpty());
             result.forEach((c) -> {
-                c.setAcquiredBy(acquiredBy);
-                contextWatcher.get().contextInUse(c);
-                LOG.debug("Context '{}' has been acquired by {}.", c.getName(), acquiredBy);
+                LOG.info("Context '{}' has been acquired by {}.", c.getName(), acquiredBy);
             });
 
             return result;
-        } catch (InterruptedException e) {
-            // should not happen
-            LOG.error("", e);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | InvalidDataException | ContextExistsException | MalformedURLException | NotBoundException | AddressException e) {
+            // Should not happen
+            LOG.error(e.getMessage());
+            Assert.fail("Error: " + e.getMessage());
+            throw new OXException(e);
         }
-        return null;
     }
 
-    private static synchronized List<TestContext> aquireContexts(int amount) throws InterruptedException {
+    private static List<TestContext> aquireContexts(int amount) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException, AddressException {
         List<TestContext> result = new ArrayList<TestContext>(amount);
-        for (int i = amount; i > 0; i--) {
-            result.add(contexts.take());
+        try {
+            Assert.assertTrue("Aquisation of semaphore took too long", semaphore.tryAcquire(amount, 10, TimeUnit.MINUTES));
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            Assert.fail("Unable to aquire context");
+            return null;
+        }
+        boolean success = false;
+        try {
+            for (int i = amount; i > 0; i--) {
+                result.add(ProvisioningService.getInstance().createContext());
+            }
+            success = true;
+        } finally {
+            // release samphore in case context creation fails
+            if (success == false) {
+                semaphore.release(amount);
+            }
         }
         return result;
     }
 
-    public static void backContext(List<TestContext> contexts) {
-        contexts.forEach(c -> backContext(c));
+    public static void backContext(List<TestContext> contexts) throws OXException {
+        if (contexts != null) {
+            for (TestContext context : contexts) {
+                backContext(context);
+            }
+        }
     }
 
-    public static void backContext(TestContext context) {
-        if (context == null) {
-            return;
-        }
-        contextWatcher.get().contextSuccessfullyReturned(context);
-        if (contexts.contains(context)) {
+    public static void backContext(TestContext context) throws OXException {
+        semaphore.release();
+        if (context == null || DELETE_AFTER_USAGE == false) {
             return;
         }
         try {
-            context.reset();
-            contexts.put(context);
-        } catch (InterruptedException e) {
+            ProvisioningService.getInstance().deleteContext(context.getId());
+        } catch (NoSuchContextException e) {
+            // ignore
+            LOG.debug("Context already deleted", e);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException e) {
             // should not happen
             LOG.error("", e);
+            throw new OXException(e);
         }
     }
 
@@ -202,15 +212,6 @@ public class TestContextPool {
 
     public static void setRestUser(TestUser restUser) {
         TestContextPool.restUser = restUser;
-    }
-
-    public static void startWatcher() {
-        if (!watcherInitialized.getAndSet(true)) {
-            TestContextWatcher contextWatcherTask = new TestContextWatcher();
-            contextWatcher.compareAndSet(null, contextWatcherTask);
-            Thread contextWatcherThread = new Thread(contextWatcherTask, "TestContextWatcher");
-            contextWatcherThread.start();
-        }
     }
 
     public static synchronized List<TestContext> getAllTimeAvailableContexts() {

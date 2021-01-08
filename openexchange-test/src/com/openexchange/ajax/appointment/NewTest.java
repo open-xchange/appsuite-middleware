@@ -56,13 +56,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -89,7 +89,9 @@ public class NewTest extends AppointmentTest {
     @After
     public void tearDown() throws Exception {
         try {
-            ctm2.cleanUp();
+            if (ctm2 != null) {
+                ctm2.cleanUp();
+            }
         } finally {
             super.tearDown();
         }
@@ -327,7 +329,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -351,7 +353,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -377,8 +379,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
         participants[0] = new UserParticipant(userId);
@@ -680,6 +682,7 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testConflictWithResource() throws Exception {
+        this.testContext.acquireResource();
         Appointment appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflictWithResource", new Date(startTime), new Date(endTime));
         appointment.setShownAs(Appointment.ABSENT);
         appointment.setIgnoreConflicts(true);

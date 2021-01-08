@@ -50,19 +50,28 @@
 package com.openexchange.test.pool;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.java.ConcurrentHashSet;
+import javax.mail.internet.AddressException;
+import org.junit.Assert;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.java.Strings;
 
 /**
  * {@link TestContext}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
 public class TestContext implements Serializable {
@@ -75,115 +84,61 @@ public class TestContext implements Serializable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContext.class);
 
     private final String name;
+    private final int id;
 
-    private String acquiredBy;
+    private final AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
+    private final AtomicReference<TestUser> noReplyUser = new AtomicReference<>();
 
-    private volatile ConcurrentHashSet<TestUser> acquiredUsers = new ConcurrentHashSet<TestUser>(); //required for reset
-
-    private volatile BlockingQueue<TestUser> users = new LinkedBlockingQueue<>();
-
-    private volatile ConcurrentHashSet<String> acquiredGroupParticipants = new ConcurrentHashSet<String>(); //required for reset
-
-    private volatile List<String> groupParticipants = new ArrayList<String>();
-    private volatile List<String> userParticipants = new ArrayList<String>();
-    private volatile List<String> resourceParticipants = new ArrayList<String>();
-
-    // the admin is not handled to be acquired only by one party
-    private AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
-
-    private AtomicReference<TestUser> noReplyUser = new AtomicReference<>();
-
-    public TestContext(String name) {
+    /**
+     * Initializes a new {@link TestContext}.
+     *
+     * @param id
+     * @param name
+     * @param admin
+     */
+    public TestContext(int id, String name, TestUser admin) {
         this.name = name;
-    }
-
-    public void setAdmin(TestUser lAdmin) {
-        contextAdmin.compareAndSet(null, lAdmin);
+        this.id = id;
+        this.contextAdmin.set(admin);
     }
 
     public TestUser getAdmin() {
         return contextAdmin.get();
     }
 
-    public void addUser(TestUser user) {
-        users.add(user);
-    }
-
     public TestUser acquireUser() {
         try {
-            TestUser user = users.take();
-            acquiredUsers.add(user);
-            return user;
-        } catch (InterruptedException e) {
+            return ProvisioningService.getInstance().createUser(id);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException | AddressException e) {
             LOG.error("", e);
         }
         return null;
-    }
-
-    public void backUser(TestUser user) {
-        try {
-            acquiredUsers.remove(user);
-            users.put(user);
-        } catch (InterruptedException e) {
-            LOG.error("", e);
-        }
-    }
-
-    /**
-     * Resets the context and adds all acquired users back to the pool
-     */
-    protected void reset() {
-        setAcquiredBy(null);
-
-        if (!acquiredUsers.isEmpty()) {
-            users.addAll(acquiredUsers);
-            acquiredUsers.clear();
-        }
-        if (!acquiredGroupParticipants.isEmpty()) {
-            groupParticipants.addAll(acquiredGroupParticipants);
-            acquiredGroupParticipants.clear();
-        }
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAcquiredBy() {
-        return acquiredBy;
+    public Integer acquireResource() {
+        try {
+            return ProvisioningService.getInstance().createResource(id);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public void setAcquiredBy(String acquiredBy) {
-        this.acquiredBy = acquiredBy;
+    public Integer acquireGroup(Optional<List<Integer>> optUsers) {
+        try {
+            return ProvisioningService.getInstance().createGroup(id, optUsers);
+        } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException | NoSuchUserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public List<String> getUserParticipants() {
-        return userParticipants;
-    }
-
-    public void addUserParticipants(String... userParticipants) {
-        this.userParticipants.addAll(Arrays.asList(userParticipants));
-    }
-
-    public List<String> getResourceParticipants() {
-        return resourceParticipants;
-    }
-
-    public void addResourceParticipants(String... resourceParticipants) {
-        this.resourceParticipants.addAll(Arrays.asList(resourceParticipants));
-    }
-
-    public void addGroupParticipant(String... groupParticipants) {
-        this.groupParticipants.addAll(Arrays.asList(groupParticipants));
-    }
-
-    public List<String> getGroupParticipants() {
-        return this.groupParticipants;
-    }
-
-    public List<TestUser> getCopyOfAll() {
-        return new ArrayList<>(users);
-    }
 
     @Override
     public int hashCode() {
@@ -215,12 +170,30 @@ public class TestContext implements Serializable {
         return true;
     }
 
-    public TestUser getNoReplyUser() {
-        return noReplyUser.get();
+    /**
+     * Gets the context id.
+     *
+     * @return The context id.
+     */
+    public int getId() {
+        return id;
     }
 
-    public void setNoReplyUser(TestUser noReplyUser) {
-        this.noReplyUser.set(noReplyUser);
+    public TestUser acquireNoReplyUser() {
+        if (noReplyUser.get() == null) {
+            synchronized (this) {
+                if (noReplyUser.get() == null) {
+                    noReplyUser.set(acquireUser());
+                    try {
+                        ProvisioningService.getInstance().changeContexConfig(this.id, Collections.singletonMap("com.openexchange.noreply.address", noReplyUser.get().getLogin()));
+                    } catch (RemoteException | InvalidCredentialsException | NoSuchContextException | StorageException | InvalidDataException | MalformedURLException | NotBoundException e) {
+                        LOG.error("Unable to change config for no reply address", e);
+                        Assert.fail();
+                    }
+                }
+            }
+        }
+        return noReplyUser.get();
     }
 
     @Override
@@ -229,9 +202,6 @@ public class TestContext implements Serializable {
         builder.append("TestContext [");
         if (Strings.isNotEmpty(name)) {
             builder.append("name=").append(name).append(", ");
-        }
-        if (Strings.isNotEmpty(acquiredBy)) {
-            builder.append("acquiredBy=").append(acquiredBy).append(", ");
         }
         builder.append("]");
         return builder.toString();

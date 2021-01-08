@@ -78,7 +78,7 @@ public class ResolveLegacyLinkTest extends ShareTest {
 
     /**
      * Initializes a new {@link ResolveLegacyLinkTest}.
-     * 
+     *
      * @param name
      */
     public ResolveLegacyLinkTest() {
@@ -87,7 +87,7 @@ public class ResolveLegacyLinkTest extends ShareTest {
 
     @Test
     public void testOpeningALegacyLinkWorks() throws Exception {
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest");
+        OCLGuestPermission guestPermission = createNamedGuestPermission(false);
         int module = randomModule();
         EnumAPI api = randomFolderAPI();
         FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), guestPermission);
@@ -104,7 +104,7 @@ public class ResolveLegacyLinkTest extends ShareTest {
 
         ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
-        URI uri = new URI(discoverShareURL(guest));
+        URI uri = new URI(discoverShareURL(guestPermission.getApiClient(), guest));
         String path = uri.getPath();
         Matcher m = Pattern.compile("(.*)/share/([a-z0-9]+/)").matcher(path);
         assertTrue(m.find());

@@ -61,6 +61,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -110,13 +111,14 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String folderLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
+        String folderLink = discoverInvitationLink(getApiClient2(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", folderLink);
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
         Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
         String folderID = String.valueOf(folder.getObjectID());
         Assert.assertEquals(folderID, folderMatcher.group(1));
+        new MailManager(getApiClient2()).clearMails();
         /*
          * create file in this folder share it to the same user, too
          */
@@ -125,7 +127,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String fileLink = discoverInvitationLink(getClient(), client2.getValues().getDefaultAddress());
+        String fileLink = discoverInvitationLink(getApiClient2(), client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", fileLink);
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);

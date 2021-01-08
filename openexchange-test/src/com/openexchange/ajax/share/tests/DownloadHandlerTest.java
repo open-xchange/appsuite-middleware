@@ -65,6 +65,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -91,28 +92,30 @@ public class DownloadHandlerTest extends ShareTest {
 
     @Test
     public void testDownloadSharedFileRandomly() throws Exception {
-        testDownloadSharedFile(randomFolderAPI(), randomGuestObjectPermission());
+        testDownloadSharedFile(randomFolderAPI(), randomGuestPermission());
     }
 
     public void noTestDownloadSharedFileExtensively() throws Exception {
-        for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
+        for (GuestPermissionType permissionType : GuestPermissionType.values()) {
+            OCLGuestPermission guestPermission = createGuestPermission(permissionType);
             testDownloadSharedFile(EnumAPI.OX_NEW, guestPermission);
         }
     }
 
-    private void testDownloadSharedFile(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testDownloadSharedFile(EnumAPI api, OCLGuestPermission guestPermission) throws Exception {
         testDownloadSharedFile(api, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
     }
 
-    private void testDownloadSharedFile(EnumAPI api, int parent, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testDownloadSharedFile(EnumAPI api, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
          * create folder and a shared file inside
          */
+        FileStorageGuestObjectPermission guestObjectPermission = asObjectPermission(guestPermission);
         byte[] contents = new byte[64 + random.nextInt(256)];
         random.nextBytes(contents);
         String filename = randomUID();
         FolderObject folder = insertPrivateFolder(api, FolderObject.INFOSTORE, parent);
-        File file = insertSharedFile(folder.getObjectID(), filename, guestPermission, contents);
+        File file = insertSharedFile(folder.getObjectID(), filename, guestObjectPermission, contents);
         /*
          * check permissions
          */
@@ -124,28 +127,28 @@ public class DownloadHandlerTest extends ShareTest {
             }
         }
         assertNotNull("No matching permission in created file found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
+        checkPermissions(guestObjectPermission, matchingPermission);
         /*
          * discover & check guest
          */
         ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
-        checkGuestPermission(guestPermission, guest);
+        checkGuestPermission(guestObjectPermission, guest);
         /*
          * check access to share (via guest client)
          */
-        String shareURL = discoverShareURL(guest);
-        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
+        GuestClient guestClient = resolveShare(shareURL, guestObjectPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
+        guestClient.checkShareAccessible(guestObjectPermission);
         /*
          * prepare basic http client to access file directly
          */
         DefaultHttpClient httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-        String password = getPassword(guestPermission.getRecipient());
+        String password = getPassword(guestObjectPermission.getRecipient());
         if (null != password) {
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(guestPermission.getRecipient()), getPassword(guestPermission.getRecipient()));
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(guestObjectPermission.getRecipient()), getPassword(guestObjectPermission.getRecipient()));
             credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
             httpClient.setCredentialsProvider(credentialsProvider);
         }

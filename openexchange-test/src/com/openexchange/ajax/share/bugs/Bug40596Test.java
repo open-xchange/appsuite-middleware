@@ -89,7 +89,7 @@ public class Bug40596Test extends ShareTest {
     public void testBug40596() throws Exception {
         File file = insertFile(getClient().getValues().getPrivateInfostoreFolder());
         remember(file);
-        OCLGuestPermission guestPermission = createNamedGuestPermission("testbug40596@example.com", "Bug 40596", "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         DefaultFileStorageGuestObjectPermission objectPermission = (DefaultFileStorageGuestObjectPermission) asObjectPermission(guestPermission);
         objectPermission.setPermissions(FileStorageGuestObjectPermission.DELETE);
         file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(objectPermission));

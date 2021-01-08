@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -885,6 +886,10 @@ public class GuestClient extends AJAXClient {
 
     private static Date getFutureTimestamp() {
         return new Date(System.currentTimeMillis() + 1000000);
+    }
+
+    public void assertNoLoginError() {
+        assertFalse("Unexpected error: " + loginResponse.getErrorMessage(), loginResponse.hasError());
     }
 
 }

@@ -51,17 +51,12 @@ package com.openexchange.ajax.onboarding.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.List;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 
 /**
  * {@link EASSyncProfileTest}
@@ -78,11 +73,8 @@ public class EASSyncProfileTest extends AbstractSmtpAJAXSession {
         ExecuteRequest req = new ExecuteRequest("apple.iphone/eassync", "email", body, false);
         OnboardingTestResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
-        GetMailsRequest mailReq = new GetMailsRequest();
-        GetMailsResponse mailResp = getNoReplyClient().execute(mailReq);
-        List<Message> messages = mailResp.getMessages();
-        assertNotNull(messages);
-        assertEquals(1, messages.size());
+
+        assertEquals(1, mailManager.getMailCount());
     }
 
     @Test

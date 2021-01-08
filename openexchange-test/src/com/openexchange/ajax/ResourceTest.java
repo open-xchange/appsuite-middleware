@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
 import com.openexchange.resource.Resource;
 
-public class ResourceTest extends AbstractAJAXSession {
+public class ResourceTest extends AbstractResourceAwareAjaxSession {
 
     @Test
     public void testSearch() throws Exception {

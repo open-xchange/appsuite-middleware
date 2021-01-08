@@ -164,7 +164,7 @@ public final class GenericChecks {
      */
     public static void checkValidMailAddress(String address) throws InvalidDataException {
         if (Strings.isNotEmpty(address) && false == isValidMailAddress(address)) {
-            throw new InvalidDataException("Invalid email address");
+            throw new InvalidDataException("Invalid email address: " + address);
         }
     }
 

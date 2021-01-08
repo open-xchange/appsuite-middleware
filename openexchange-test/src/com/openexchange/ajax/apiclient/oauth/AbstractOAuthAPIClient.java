@@ -50,16 +50,13 @@
 package com.openexchange.ajax.apiclient.oauth;
 
 import java.io.IOException;
-import org.junit.Assert;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import okhttp3.Credentials;
@@ -86,11 +83,6 @@ public abstract class AbstractOAuthAPIClient extends AbstractAPIClientSession {
 
     @Override
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
         oauthclient = generateOAuthClient();
     }
 

@@ -100,7 +100,7 @@ public class LocalizedMessagesTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), guestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         /*
          * get & check token from resolve response

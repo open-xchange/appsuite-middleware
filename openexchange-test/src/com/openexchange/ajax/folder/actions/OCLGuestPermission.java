@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder.actions;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -61,6 +62,8 @@ public class OCLGuestPermission extends OCLPermission {
     private static final long serialVersionUID = -3277662647906767821L;
 
     private ShareRecipient recipient;
+
+    private ApiClient apiClient;
 
     /**
      * Initializes an empty {@link OCLGuestPermission}.
@@ -89,6 +92,14 @@ public class OCLGuestPermission extends OCLPermission {
 
     public int getPermissionBits() {
         return Permissions.createPermissionBits(getFolderPermission(), getReadPermission(), getWritePermission(), getDeletePermission(), isFolderAdmin());
+    }
+
+    public ApiClient getApiClient() {
+        return apiClient;
+    }
+
+    public void setApiClient(ApiClient apiClient) {
+        this.apiClient = apiClient;
     }
 
 }

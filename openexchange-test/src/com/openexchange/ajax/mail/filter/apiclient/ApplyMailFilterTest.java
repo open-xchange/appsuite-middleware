@@ -99,8 +99,8 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
 
         // Add two mails to this folder (one matches the sieve rule)
         String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
-        importMail("mailfilter1.eml", testMailDir, folderId);
-        String matchingMailId = importMail("mailfilter2.eml", testMailDir, folderId);
+        importMail("mailfilter1.eml", testMailDir, folderId); // person1 to person2
+        String matchingMailId = importMail("mailfilter2.eml", testMailDir, folderId); // person1 to person3
 
         // Add a new sieve rule and remember its id
         Integer ruleId = addNewRule();
@@ -200,7 +200,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
 
     /**
      * Adds a new sieve rule
-     * 
+     *
      * @return The rule's id
      * @throws ApiException if an error is occurred
      */
@@ -219,9 +219,9 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         //@formatter:off
         MailFilterTestv2 test = new MailFilterTestv2();
         test.id("to")
-            .values(ImmutableList.of("person3@invalid.com"))
+            .header("to")
             .comparison("contains")
-            .setHeader("to");
+            .values(ImmutableList.of("person3@invalid.com"));
         //@formatter:on
 
         MailFilterAction action = new MailFilterAction();

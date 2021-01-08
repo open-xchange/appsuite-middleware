@@ -56,14 +56,14 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.MailData;
 
 /**
  * {@link NotifyFolderSharesTest}
@@ -99,7 +99,7 @@ public class NotifyFolderSharesTest extends ShareTest {
     private void testNotifyGuest(int module, int parent) throws Exception {
         OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST, module);
         String emailAddress = ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress();
-        testNotify(module, parent, guestPermission, emailAddress);
+        testNotify(module, parent, guestPermission, emailAddress, guestPermission.getApiClient());
     }
 
     private void testNotifyGroup(int module, int parent) throws Exception {
@@ -109,7 +109,7 @@ public class NotifyFolderSharesTest extends ShareTest {
         AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
-        testNotify(module, parent, permission, emailAddress);
+        testNotify(module, parent, permission, emailAddress, getApiClient2());
     }
 
     private void testNotifyUser(int module, int parent) throws Exception {
@@ -119,10 +119,10 @@ public class NotifyFolderSharesTest extends ShareTest {
         client2.logout();
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        testNotify(module, parent, permission, emailAddress);
+        testNotify(module, parent, permission, emailAddress, getApiClient2());
     }
 
-    private void testNotify(int module, int parent, OCLPermission permission, String emailAddress) throws Exception {
+    private void testNotify(int module, int parent, OCLPermission permission, String emailAddress, ApiClient apiClient) throws Exception {
         /*
          * create shared folder
          */
@@ -142,12 +142,12 @@ public class NotifyFolderSharesTest extends ShareTest {
         /*
          * pop inbox, then notify recipient again
          */
-        getClient().execute(new ClearMailsRequest());
+        mailManager.clearMails();
         getClient().execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), matchingPermission.getEntity()));
         /*
          * verify notification message
          */
-        Message notificationMessage = discoverInvitationMessage(getClient(), emailAddress);
+        MailData notificationMessage = discoverInvitationMessage(apiClient, emailAddress);
         assertNotNull(notificationMessage);
     }
 

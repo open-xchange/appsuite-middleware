@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.appointment;
 
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * {@link IdWrappingTestUser}
+ * {@link AbstractResourceAwareAjaxSession} is an extension of the {@link AbstractAJAXSession} which aquires a single resource
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @since v7.10.5
  */
-public class IdWrappingTestUser extends TestUser{
+public abstract class AbstractResourceAwareAjaxSession extends AbstractAJAXSession {
 
-    /**
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = -1280961120367103713L;
-
-    private int userId=-1;
-
-    /**
-     * Initializes a new {@link IdWrappingTestUser}.
-     * @param user The user
-     */
-    public IdWrappingTestUser(TestUser user) {
-        super(user.getUser(), user.getContext(), user.getPassword());
-    }
-
-    /**
-     * Initializes a new {@link IdWrappingTestUser}.
-     * @param user
-     * @param context
-     * @param password
-     */
-    private IdWrappingTestUser(String user, String context, String password) {
-        super(user, context, password);
-    }
-
-    public boolean containsId(){
-        return userId!=-1;
-    }
-
-    public int getUserId(){
-        return userId;
-    }
-
-    public void setUserId(int id){
-        this.userId=id;
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        testContext.acquireResource();
     }
 
 }

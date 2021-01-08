@@ -85,12 +85,6 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
         setModuleAccess(false);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        setModuleAccess(true);
-    }
-
     @Test
     public void testImportCalendarAccess() throws Exception {
         String errorResponse = getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS);

@@ -149,6 +149,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      */
     public Context(final int id, final String name) {
         super();
+        init();
         this.id = Integer.valueOf(id);
         this.name = name;
     }

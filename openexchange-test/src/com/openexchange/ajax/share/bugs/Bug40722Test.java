@@ -74,7 +74,7 @@ public class Bug40722Test extends ShareTest {
     @Test
     @TryAgain
     public void testRemoveGuestPassword() throws Exception {
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission();
         /*
          * create folder shared to guest user
          */
@@ -101,7 +101,7 @@ public class Bug40722Test extends ShareTest {
         /*
          * check access to share
          */
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(guestPermission.getApiClient(), guest);
         GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*

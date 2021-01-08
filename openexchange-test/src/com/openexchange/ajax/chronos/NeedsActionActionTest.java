@@ -137,8 +137,6 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
     @Override
     public void tearDown() throws Exception {
         try {
-            testContext.backUser(testUser3);
-            testContext.backUser(testUser4);
             client3 = logoutClient(client3, true);
             client4 = logoutClient(client4, true);
         } finally {

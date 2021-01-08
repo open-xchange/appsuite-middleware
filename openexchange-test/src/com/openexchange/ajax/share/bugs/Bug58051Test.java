@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -76,15 +77,16 @@ public class Bug58051Test extends ShareTest {
 
     @Test
     public void testGetUserAsNamedGuest() throws Exception {
-        testGetUserAsGuest(asObjectPermission(createNamedGuestPermission("horst@example.com", "Horst Example", "secret")));
+        testGetUserAsGuest(createNamedGuestPermission());
     }
 
     @Test
     public void testGetUserAsAnonyousGuest() throws Exception {
-        testGetUserAsGuest(asObjectPermission(createAnonymousGuestPermission()));
+        testGetUserAsGuest(createAnonymousGuestPermission());
     }
 
-    private void testGetUserAsGuest(FileStorageGuestObjectPermission guestPermission) throws Exception {
+    private void testGetUserAsGuest(OCLGuestPermission oclGuestPermission) throws Exception {
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(oclGuestPermission);
         /*
          * create folder and a shared file inside
          */
@@ -111,7 +113,7 @@ public class Bug58051Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient(), oclGuestPermission.getApiClient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*

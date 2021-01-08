@@ -57,11 +57,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
-import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -105,8 +105,8 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
 
         final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();
-        final int resourceParticipantId = resTm.search(testContext.getResourceParticipants().get(0)).get(0).getIdentifier();
+        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);

@@ -117,6 +117,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private UserValues values;
 
+    private FolderTestManager ftm;
+
     private FolderTestManager ftm2;
 
     private final ContentType contentType;
@@ -144,6 +146,8 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private static final Set<EnumAPI> APIS = EnumSet.allOf(EnumAPI.class);
+
+
     static {
         APIS.remove(EnumAPI.EAS_FOLDERS);
     }
@@ -211,6 +215,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             }
         }
 
+        ftm = new FolderTestManager(getClient());
         privateSubfolder = ftm.generatePrivateFolder("oauth provider folder tree test - private " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), privateFolderId(), userId);
         publicSubfolder = ftm.generatePublicFolder("oauth provider folder tree test - public " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), FolderObject.SYSTEM_PUBLIC_FOLDER_ID, userId);
         ftm.insertFoldersOnServer(new FolderObject[] { privateSubfolder, publicSubfolder });
@@ -515,6 +520,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     @After
     public void tearDown() throws Exception {
         try {
+            if (ftm != null) {
+                ftm.cleanUp();
+            }
             if (ftm2 != null) {
                 ftm2.cleanUp();
             }

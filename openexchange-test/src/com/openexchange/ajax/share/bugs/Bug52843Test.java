@@ -60,12 +60,11 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
-import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.testing.httpclient.models.MailData;
 
 /**
  * {@link Bug52843Test}
@@ -105,16 +104,16 @@ public class Bug52843Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(guestPermission.getApiClient(), guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
          * try to re-send notification as guest
          */
-        getClient().execute(new ClearMailsRequest());
+        mailManager.clearMails();
         AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), getClient().getValues().getUserId()));
         assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
-        Message notificationMessage = discoverInvitationMessage(getClient(), getClient().getValues().getDefaultAddress());
+        MailData notificationMessage = discoverInvitationMessage(getApiClient(), getClient().getValues().getDefaultAddress());
         assertNull("Notification was received", notificationMessage);
     }
 }

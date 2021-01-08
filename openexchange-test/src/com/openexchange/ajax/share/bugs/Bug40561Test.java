@@ -57,6 +57,7 @@ import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
@@ -73,6 +74,7 @@ import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.recipient.GuestRecipient;
 
 /**
  * [Desktop/Win10] Drive: Searching engine does not work/show results
@@ -87,9 +89,10 @@ public class Bug40561Test extends ShareTest {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
 
-        String guestEmailAddress = randomUID() + "@example.com";
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedAuthorPermission(guestEmailAddress, randomUID()));
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(guestPermission));
+        OCLGuestPermission guestPermission = createNamedAuthorPermission(false);
+        String guestEmailAddress = ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress();
+        FileStorageGuestObjectPermission guestObjectPermission = asObjectPermission(guestPermission);
+        file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(guestObjectPermission));
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
         String sharedFolderID = "10";
@@ -97,8 +100,8 @@ public class Bug40561Test extends ShareTest {
         tmp.setFolderId(sharedFolderID);
         String sharedFileID = tmp.toUniqueID();
 
-        GuestClient guestClient = resolveShare(discoverInvitationLink(getClient(), guestEmailAddress));
-        guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestPermission);
+        GuestClient guestClient = resolveShare(discoverInvitationLink(guestPermission.getApiClient(), guestEmailAddress));
+        guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestObjectPermission);
 
         List<Facet> facets = AbstractFindTest.autocomplete(guestClient, Module.DRIVE, "tests");
         List<ActiveFacet> activeFacets = new ArrayList<>(2);

@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.share.recipient.GuestRecipient;
 
 /**
  * {@link SharedFilesFolderTest}
@@ -126,14 +127,14 @@ public class SharedFilesFolderTest extends ShareTest {
     @Test
     public void testReShareNotPossibleForInvitedGuests() throws Exception {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
-        String guestEmail = randomUID() + "@example.com";
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(guestEmail, randomUID());
+        OCLGuestPermission guestPermission = createNamedAuthorPermission(false);
+        String guestEmail = ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress();
         permissions.add(asObjectPermission(guestPermission));
         file.setObjectPermissions(permissions);
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
         String sharedFileId = sharedFileId(file.getId());
 
-        String invitationLink = discoverInvitationLink(getClient(), guestEmail);
+        String invitationLink = discoverInvitationLink(guestPermission.getApiClient(), guestEmail);
         GuestClient guestClient = resolveShare(invitationLink);
         guestPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(sharedFileId, guestPermission);
@@ -145,7 +146,7 @@ public class SharedFilesFolderTest extends ShareTest {
         DefaultFile toUpdate = new DefaultFile();
         toUpdate.setFolderId(SHARED_FOLDER);
         toUpdate.setId(sharedFileId);
-        permissions.add(asObjectPermission(createNamedAuthorPermission(randomUID() + "example.com", randomUID())));
+        permissions.add(asObjectPermission(createNamedAuthorPermission(false)));
         toUpdate.setObjectPermissions(permissions);
 
         UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, file.getLastModified());
