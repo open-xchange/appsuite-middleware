@@ -327,7 +327,7 @@ public class HazelcastActivator implements BundleActivator {
         OutOfMemoryErrorDispatcher.setServerHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
-        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, L(System.currentTimeMillis() - hzStart), lf);
+        LOG.info("{}Hazelcast:{}    New hazelcast instance (v{}) successfully created in {} msec.{}", lf, lf, hazelcast.getCluster().getClusterVersion(), L(System.currentTimeMillis() - hzStart), lf);
         this.hazelcastInstance = hazelcast;
         return hazelcast;
     }
