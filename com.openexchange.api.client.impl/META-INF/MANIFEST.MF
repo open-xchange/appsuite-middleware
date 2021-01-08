@@ -52,3 +52,4 @@ Import-Package: com.github.openjson,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.api.client.impl.osgi.ApiClientActivator
+Automatic-Module-Name: com.openexchange.api.client.impl

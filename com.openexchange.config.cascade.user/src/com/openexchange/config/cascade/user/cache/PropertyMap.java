@@ -259,6 +259,7 @@ public final class PropertyMap {
             return (System.currentTimeMillis() - stamp) > maxLifeMillis;
         }
 
+        @SuppressWarnings("unused")
         public BasicProperty getIfNotElapsed(final int maxLifeMillis) {
             return elapsed(maxLifeMillis) ? null : value;
         }

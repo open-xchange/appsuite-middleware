@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceImpl {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterLockServiceDatabaseImpl.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(ClusterLockServiceDatabaseImpl.class);
 
     // On duplicate key simply retain the same values
     private static final String ACQUIRE_LOCK = "INSERT INTO clusterLock (cid, user, name, timestamp) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `cid` = `cid` AND `user` = `user` AND `name` = `name` AND `timestamp` = `timestamp`";

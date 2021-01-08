@@ -24,3 +24,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Bundle-Activator: com.openexchange.caching.events.osgi.CacheEventServiceActivator
 Export-Package: com.openexchange.caching.events
+Automatic-Module-Name: com.openexchange.caching.events

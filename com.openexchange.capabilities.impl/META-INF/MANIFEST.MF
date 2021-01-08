@@ -52,3 +52,4 @@ Import-Package: com.google.common.collect,
  org.slf4j
 Bundle-Activator: com.openexchange.capabilities.osgi.CapabilitiesActivator
 Require-Bundle: slf4j.api
+Automatic-Module-Name: com.openexchange.capabilities.impl

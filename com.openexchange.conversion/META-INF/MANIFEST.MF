@@ -17,3 +17,4 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Export-Package: com.openexchange.conversion
 Bundle-Activator: com.openexchange.conversion.osgi.ConversionActivator
+Automatic-Module-Name: com.openexchange.conversion

@@ -27,3 +27,4 @@ Import-Package: com.openexchange.advertisement,
  org.json,
  org.osgi.framework,
  org.slf4j
+Automatic-Module-Name: com.openexchange.advertisement.impl

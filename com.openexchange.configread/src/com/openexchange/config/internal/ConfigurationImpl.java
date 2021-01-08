@@ -949,6 +949,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @param service The instance to add
      * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
      */
+    @SuppressWarnings("null")
     public synchronized boolean addReloadable(Reloadable service) {
         if (ForcedReloadable.class.isInstance(service)) {
             forcedReloadables.add((ForcedReloadable) service);
@@ -974,7 +975,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (isInterestedInAll(propertiesOfInterest)) {
                 matchingAllProperties.add(service);
             } else {
-                for (String propertyName : propertiesOfInterest) {
+                for (String propertyName : propertiesOfInterest) { // Guarded by 'hasInterestForProperties'
                     Reloadables.validatePropertyName(propertyName);
                     if (propertyName.endsWith(".*")) {
                         // Wild-card property name: we remove the .*
@@ -1002,7 +1003,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         // Check interest for files
         if (hasInterestForFiles) {
-            for (String configFileName : configFileNames) {
+            for (String configFileName : configFileNames) { // Guarded by 'hasInterestForFiles'
                 Reloadables.validateFileName(configFileName);
                 List<Reloadable> list = matchingFile.get(configFileName);
                 if (null == list) {

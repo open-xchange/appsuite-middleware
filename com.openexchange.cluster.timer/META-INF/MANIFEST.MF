@@ -9,3 +9,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.timer,
  org.slf4j
 Export-Package: com.openexchange.cluster.timer
+Automatic-Module-Name: com.openexchange.cluster.timer

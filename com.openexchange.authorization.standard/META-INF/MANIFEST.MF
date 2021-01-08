@@ -20,3 +20,4 @@ Import-Package: com.openexchange.authorization,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j
+Automatic-Module-Name: com.openexchange.authorization.standard

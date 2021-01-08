@@ -26,3 +26,4 @@ Import-Package: com.openexchange.database.migration,
  org.slf4j
 Bundle-Vendor: OX Software GmbH
 Export-Package: com.openexchange.control.consoleold
+Automatic-Module-Name: com.openexchange.control

@@ -22,3 +22,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.config.cascade.context.osgi.ContextConfigCascadeActivator
+Automatic-Module-Name: com.openexchange.config.cascade.context

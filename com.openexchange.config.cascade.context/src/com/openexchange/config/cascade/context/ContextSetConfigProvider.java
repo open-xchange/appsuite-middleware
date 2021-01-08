@@ -264,6 +264,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return retval;
     }
 
+    @SuppressWarnings("cast")
     protected void prepare(Map<String, Object> yamlFiles) {
         ContextSetTermParser parser = new ContextSetTermParser();
         for (Map.Entry<String, Object> file : yamlFiles.entrySet()) {
