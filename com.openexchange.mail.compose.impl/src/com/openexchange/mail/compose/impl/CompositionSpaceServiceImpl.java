@@ -2157,7 +2157,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
-        // Auto-delete referenced draft message on edit-draft
+        // TODO: Auto-delete referenced draft message on edit-draft?
         boolean autoDeleteDraftOnEdit = false;
         if (autoDeleteDraftOnEdit) {
             MailPath editFor = getEditForFrom(compositionSpace);
