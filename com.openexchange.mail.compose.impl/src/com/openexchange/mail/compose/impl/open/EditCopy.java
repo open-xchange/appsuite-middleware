@@ -162,7 +162,7 @@ public class EditCopy extends AbstractOpener {
         {
             InternetAddress[] from = originalMail.getFrom();
             if (null != from && from.length > 0) {
-                state.message.setFrom(toAddress(from[0]));
+                state.message.setFrom(toAddress(from[0], false));
             }
         }
 
@@ -170,7 +170,7 @@ public class EditCopy extends AbstractOpener {
         {
             InternetAddress[] replyTo = originalMail.getReplyTo();
             if (null != replyTo && replyTo.length > 0) {
-                state.message.setReplyTo(toAddress(replyTo[0]));
+                state.message.setReplyTo(toAddress(replyTo[0], true));
             }
         }
 
