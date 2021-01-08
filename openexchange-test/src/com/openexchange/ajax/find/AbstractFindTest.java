@@ -54,10 +54,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -67,6 +70,9 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -97,7 +103,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected AJAXClient client2;
 
     protected FolderTestManager folderManager2;
-    
+
     protected I18nServiceRegistry i18nServiceRegistry;
 
     /**
@@ -273,6 +279,23 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         int start = random.nextInt(value.length() - minLength);
         int stop = start + minLength + random.nextInt(value.length() - start - minLength);
         return value.substring(start, stop);
+    }
+
+    protected JSONObject setShowAdmin(Boolean value) throws Exception {
+        Map<String, String> properties = Collections.singletonMap("com.openexchange.showAdmin", null == value ? null : value.toString());
+        ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "context", null);
+        ChangePropertiesResponse changePropertiesResponse = getClient().execute(changePropertiesRequest);
+        return ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
+    }
+
+    protected void restoreOldConfig(JSONObject oldConfig) throws Exception {
+        if (null != oldConfig) {
+            Map<String, String> oldProperties = new HashMap<String, String>();
+            for (Entry<String, Object> entry : oldConfig.entrySet()) {
+                oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+            getClient().execute(new ChangePropertiesRequest(oldProperties, "context", null));
+        }
     }
 
     /**
