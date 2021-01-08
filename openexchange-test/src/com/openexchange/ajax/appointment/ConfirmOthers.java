@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -134,6 +135,11 @@ public class ConfirmOthers extends AbstractAJAXSession {
     @Override
     @After
     public void tearDown() throws Exception {
+        try {
+            new CalendarTestManager(clientA).resetDefaultFolderPermissions();
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).error("", e);
+        }
         try {
             clientC.execute(new DeleteRequest(appointment.getObjectID(), clientC.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
             if (null != clientA) {
