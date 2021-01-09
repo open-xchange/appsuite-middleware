@@ -55,6 +55,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug32385Test}
@@ -100,6 +102,18 @@ public class Bug32385Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
 
         catm.insert(appointment);
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        try {
+            new CalendarTestManager(getClient2()).resetDefaultFolderPermissions();
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).error("", e);
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Test

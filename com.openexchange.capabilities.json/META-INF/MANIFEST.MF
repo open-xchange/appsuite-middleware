@@ -34,3 +34,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.capabilities.json
+Automatic-Module-Name: com.openexchange.capabilities.json

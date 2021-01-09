@@ -176,6 +176,12 @@ public class Bug18558Test extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
+            new CalendarTestManager(clientA).resetDefaultFolderPermissions();
+            new CalendarTestManager(clientB).resetDefaultFolderPermissions();
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).error("", e);
+        }
+        try {
             if (null != appointment) {
                 appointment.setLastModified(new Date(Long.MAX_VALUE));
                 if (appointment.getObjectID() > 0) {

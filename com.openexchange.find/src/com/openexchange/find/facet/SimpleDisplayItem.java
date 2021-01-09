@@ -51,7 +51,6 @@ package com.openexchange.find.facet;
 
 import com.openexchange.i18n.I18nService;
 
-
 /**
  * A {@link DisplayItem} containing only a (possibly localizable) default value.
  *
@@ -60,8 +59,9 @@ import com.openexchange.i18n.I18nService;
  */
 public class SimpleDisplayItem implements DisplayItem {
 
-    private final String displayName;
+    private static final long serialVersionUID = 4905996948698710854L;
 
+    private final String displayName;
     private final boolean isLocalizable;
 
     /**

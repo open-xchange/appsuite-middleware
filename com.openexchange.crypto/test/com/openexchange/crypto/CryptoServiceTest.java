@@ -64,14 +64,11 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CryptoServiceTest {
+
     protected String payload = "Hello World!";
-
     protected String payloadSpecial = "H\u00d4\u00f8\u03a9ll\u00d4\u00f8\u03a9 &/() w\u00d4\u00f8\u03a9RLD!";
-
     protected String password = "passwordpasswordpasswordpassword";
-
     protected String passwordSpecial = "p\u00c0\u00dfw\u00d4\u00f8\u03a9rd;";
-
     protected String badPassword = "passwordpasswordpasswordpassword1";
 
     protected CryptoService cryptoService;
@@ -79,12 +76,12 @@ public class CryptoServiceTest {
     protected final byte[] salt = new byte[] { 0x34, 0x11, 0x45, 0x03, 0x04, 0x05, 0x06, 0x43, 0x23, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0e };
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         cryptoService = new CryptoServiceImpl();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         cryptoService = null;
     }
 

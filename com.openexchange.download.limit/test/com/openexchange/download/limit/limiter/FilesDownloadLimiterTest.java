@@ -225,7 +225,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testGetLimit_noGuest_returnNull() throws OXException {
+    public void testGetLimit_noGuest_returnNull() {
         FileAccess limit = limiter.getLimit(internal, CONTEXT_ID);
 
         assertNull(limit);
@@ -320,7 +320,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_wrongModule_notApplicable() throws OXException {
+    public void testApplicable_wrongModule_notApplicable() {
         requestData.setModule("apps/manifests");
 
         boolean applicable = limiter.applicable(requestData);
@@ -329,7 +329,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_wrongAction_notApplicable() throws OXException {
+    public void testApplicable_wrongAction_notApplicable() {
         requestData.setAction("all");
 
         boolean applicable = limiter.applicable(requestData);
@@ -338,7 +338,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_isAnonymousSession_notApplicable() throws OXException {
+    public void testApplicable_isAnonymousSession_notApplicable() {
         Mockito.when(Autoboxing.valueOf(session.isAnonymous())).thenReturn(Boolean.TRUE);
 
         boolean applicable = limiter.applicable(requestData);
@@ -348,7 +348,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_isNotGuest_notApplicable() throws OXException {
+    public void testApplicable_isNotGuest_notApplicable() {
         Mockito.when(session.getUser()).thenReturn(internal);
 
         boolean applicable = limiter.applicable(requestData);
@@ -357,7 +357,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicableWithDocumentAction_isGuestButNoDelivery_notApplicable() throws OXException {
+    public void testApplicableWithDocumentAction_isGuestButNoDelivery_notApplicable() {
         Mockito.when(session.getUser()).thenReturn(guest);
 
         boolean applicable = limiter.applicable(requestData);
@@ -366,7 +366,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicableWithDocumentAction_isGuestAndDelivery_applicable() throws OXException {
+    public void testApplicableWithDocumentAction_isGuestAndDelivery_applicable() {
         Mockito.when(session.getUser()).thenReturn(guest);
         requestData.putParameter("delivery", "download");
 
@@ -376,7 +376,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicableWithDocumentAction_isGuestAndDL_applicable() throws OXException {
+    public void testApplicableWithDocumentAction_isGuestAndDL_applicable() {
         Mockito.when(session.getUser()).thenReturn(guest);
         requestData.putParameter("dl", "1");
 
@@ -386,7 +386,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_isGuest_isApplicable() throws OXException {
+    public void testApplicable_isGuest_isApplicable() {
         requestData.setAction("zipdocuments");
 
         boolean applicable = limiter.applicable(requestData);
@@ -559,7 +559,7 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testOnRequestPerformed_exceptionThrown_doNothing() throws OXException {
+    public void testOnRequestPerformed_exceptionThrown_doNothing() {
         limiter.onRequestPerformed(requestData, null, new Exception("buh"));
 
         Mockito.verify(session, Mockito.never()).isAnonymous();

@@ -194,17 +194,17 @@ public class Reply extends AbstractOpener {
                      * Set if a "From" candidate applies
                      */
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                     }
                 } else if (fromAddressProvider.isSpecified()) {
                     from = fromAddressProvider.getFromAddress();
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                     }
                 }
             }
         } else {
-            state.message.setFrom(toAddress(from));
+            state.message.setFrom(toAddress(from, false));
         }
 
         /*
@@ -225,9 +225,9 @@ public class Reply extends AbstractOpener {
                         final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, context);
                         if (null != users && users.length > 0) {
                             InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
-                            state.message.setFrom(toAddress(onBehalfOf));
+                            state.message.setFrom(toAddress(onBehalfOf, false));
                             QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
-                            state.message.setSender(toAddress(sender));
+                            state.message.setSender(toAddress(sender, false));
                         }
                     }
                     /*

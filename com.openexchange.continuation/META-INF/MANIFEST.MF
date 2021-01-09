@@ -38,3 +38,4 @@ Import-Package: com.google.common.annotations,
  org.slf4j
 Export-Package: com.openexchange.continuation
 Bundle-Activator: com.openexchange.continuation.osgi.ContinuationActivator
+Automatic-Module-Name: com.openexchange.continuation

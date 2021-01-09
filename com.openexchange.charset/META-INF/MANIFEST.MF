@@ -18,3 +18,4 @@ Import-Package: com.openexchange.java,
  sun.misc,
  sun.reflect
 Export-Package: com.openexchange.charset
+Automatic-Module-Name: com.openexchange.charset

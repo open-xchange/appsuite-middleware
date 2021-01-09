@@ -69,6 +69,7 @@ import org.junit.Test;
  */
 public class ExecutorContinuationTest {
 
+    @SuppressWarnings("unused")
     private ContinuationRegistryService registry;
 
     /**

@@ -12,3 +12,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.sessiond,
  org.slf4j
 Export-Package: com.openexchange.clientinfo
+Automatic-Module-Name: com.openexchange.clientinfo

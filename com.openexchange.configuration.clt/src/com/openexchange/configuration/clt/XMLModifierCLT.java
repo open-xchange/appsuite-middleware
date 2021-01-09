@@ -110,7 +110,7 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
         if (retVal == null) {
             retVal = Integer.valueOf(1);
         }
-        System.exit(retVal);
+        System.exit(retVal.intValue());
     }
 
     /**

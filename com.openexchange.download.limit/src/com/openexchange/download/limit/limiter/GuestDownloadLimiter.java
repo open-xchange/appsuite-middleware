@@ -224,6 +224,9 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
     @Override
     public void onRequestInitialized(AJAXRequestData requestData) throws OXException {
         ServerSession session = requestData.getSession();
+        if (session == null) {
+            return;
+        }
         int contextId = session.getContextId();
 
         removeOldAccesses(session, contextId);
@@ -257,6 +260,9 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return;
         }
         ServerSession session = requestData.getSession();
+        if (session == null) {
+            return;
+        }
         int contextId = session.getContextId();
 
         FileAccess limit = getLimit(session.getUser(), contextId);
@@ -274,7 +280,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             }
             requestResult.setResponseProperty("X-Content-Size", null);
         } else if (resultObject instanceof IFileHolder) {
-            IFileHolder file = (IFileHolder) resultObject;
+            IFileHolder file = IFileHolder.class.cast(resultObject);
             length = file.getLength();
         }
         if (length != -1) {

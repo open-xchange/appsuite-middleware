@@ -66,7 +66,6 @@ public class Test {
 
     @Before
     public void setUp(){
-        String printString = new String();
         out = new PrintStream(new ByteArrayOutputStream());
         System.setOut(out);
     }

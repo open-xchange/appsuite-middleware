@@ -46,3 +46,4 @@ Import-Package: com.google.common.annotations,
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.configread

@@ -98,6 +98,7 @@ import com.openexchange.java.Streams;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
+@SuppressWarnings("deprecation")
 public class Datamining {
 
     /**

@@ -143,12 +143,12 @@ public class Resend extends AbstractOpener {
                      * Set if a "From" candidate applies
                      */
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                     }
                 } else if (fromAddressProvider.isSpecified()) {
                     from = fromAddressProvider.getFromAddress();
                     if (null != from) {
-                        state.message.setFrom(toAddress(from));
+                        state.message.setFrom(toAddress(from, false));
                     }
                 }
             }

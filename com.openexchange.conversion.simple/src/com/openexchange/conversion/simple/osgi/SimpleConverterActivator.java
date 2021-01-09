@@ -68,42 +68,40 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class SimpleConverterActivator extends HousekeepingActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{Converter.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { Converter.class };
+    }
 
-	/*
-	 * Register the SimpleConverterService and listen for registrations of new
-	 * SimplePayloadConverters. When new SimplePayloadConverters are added wrap
-	 * them in a PayloadConverterAdapter and register them as ResultConverter
-	 * service so they can be added to the DefaultConverter (as the
-	 * DispatcherActivator is listening for new ResultConverter services)
-	 */
-	@Override
-	protected void startBundle() throws Exception {
-	    //Get the Default converter that is able to convert AJAXRequestResults from..to
-		Converter converter = getService(Converter.class);
+    /*
+     * Register the SimpleConverterService and listen for registrations of new
+     * SimplePayloadConverters. When new SimplePayloadConverters are added wrap
+     * them in a PayloadConverterAdapter and register them as ResultConverter
+     * service so they can be added to the DefaultConverter (as the
+     * DispatcherActivator is listening for new ResultConverter services)
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        //Get the Default converter that is able to convert AJAXRequestResults from..to
+        Converter converter = getService(Converter.class);
 
-		final AJAXConverterAdapter rtConverter = new AJAXConverterAdapter(converter);
-		registerService(SimpleConverter.class, rtConverter);
+        final AJAXConverterAdapter rtConverter = new AJAXConverterAdapter(converter);
+        registerService(SimpleConverter.class, rtConverter);
 
+        track(SimplePayloadConverter.class, new SimpleRegistryListener<SimplePayloadConverter>() {
 
-		track(SimplePayloadConverter.class, new SimpleRegistryListener<SimplePayloadConverter>() {
+            @SuppressWarnings("synthetic-access")
+            @Override
+            public void added(ServiceReference<SimplePayloadConverter> ref, SimplePayloadConverter service) {
+                registerService(ResultConverter.class, new PayloadConverterAdapter(service, rtConverter));
+            }
 
-			public void added(ServiceReference<SimplePayloadConverter> ref,
-					SimplePayloadConverter service) {
-				registerService(ResultConverter.class, new PayloadConverterAdapter(service, rtConverter));
-			}
+            @Override
+            public void removed(ServiceReference<SimplePayloadConverter> ref, SimplePayloadConverter service) {
+                // TODO: Figure out something here
+            }
+        });
 
-			public void removed(ServiceReference<SimplePayloadConverter> ref,
-					SimplePayloadConverter service) {
-				// TODO: Figure out something here
-			}
-		});
-
-		openTrackers();
-
-	}
-
+        openTrackers();
+    }
 }

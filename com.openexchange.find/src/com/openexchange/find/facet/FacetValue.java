@@ -132,6 +132,7 @@ public class FacetValue implements Serializable {
         this.filter = null;
     }
 
+    @SuppressWarnings("synthetic-access")
     private FacetValue(FacetValueBuilder builder) {
         super();
         this.id = builder.id;
@@ -314,6 +315,7 @@ public class FacetValue implements Serializable {
             return this;
         }
 
+        @SuppressWarnings("synthetic-access")
         public FacetValue build() {
             checkNotNull(id, MISSING_FIELD, "id");
             checkNotNull(displayItem, MISSING_FIELD, DisplayItem.class.getSimpleName());

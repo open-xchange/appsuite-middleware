@@ -49,6 +49,8 @@
 
 package com.openexchange.cluster.lock.internal;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.map.IMap;
@@ -66,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceImpl {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceHazelcastImpl.class);
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceHazelcastImpl.class);
 
     private final Unregisterer unregisterer;
 
@@ -87,16 +89,16 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
         IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
         long timeNow = System.currentTimeMillis();
-        Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
+        Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), L(timeNow));
         if (timeThen == null) {
             return true;
         }
 
-        if (!leaseExpired(timeNow, timeThen)) {
+        if (!leaseExpired(timeNow, l(timeThen))) {
             return false;
         }
 
-        return clusterLocks.replace(clusterTask.getTaskName(), timeThen, timeNow);
+        return clusterLocks.replace(clusterTask.getTaskName(), timeThen, L(timeNow));
     }
 
     @Override
@@ -134,7 +136,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
      * @return The {@link HazelcastInstance}
      * @throws OXException if the {@link HazelcastInstance} is absent
      */
-    private HazelcastInstance getHazelcastInstance() throws OXException {
+    HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
         if (hazelcastInstance == null) {
             LOGGER.warn("The Hazelcast service is not available on this node.");
@@ -168,7 +170,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
                 IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
                 LOGGER.debug("Refreshing lock for cluster task '{}'", taskName);
                 long timeNow = System.currentTimeMillis();
-                clusterLocks.put(taskName, timeNow);
+                clusterLocks.put(taskName, L(timeNow));
             } catch (OXException e) {
                 LOGGER.error("{}", e.getMessage(), e);
                 return;

@@ -49,31 +49,31 @@
 
 package com.openexchange.ajax.oauth;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
-import java.rmi.Naming;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.oauth.actions.AllOAuthServicesRequest;
 import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
 import com.openexchange.ajax.oauth.types.OAuthService;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * Instances of com.openexchange.oauth.OAuthServiceMetaData should be invisible if their according
@@ -87,13 +87,10 @@ public class OAuthServiceTest {
 
     private static final String TESTSERVICE = "com.openexchange.oauth.testservice";
 
-    private AJAXClient client;
-
     private TestContext testContext;
-
-    private TestUser oxadmin;
-
-    private TestUser user2;
+    private AJAXClient client1;
+    private AJAXClient client2;
+    private JSONObject oldConfig2;
 
     @BeforeClass
     public static void before() throws Exception {
@@ -102,48 +99,40 @@ public class OAuthServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        oxadmin = testContext.getAdmin();
-        user2 = testContext.acquireUser();
-        AJAXClient client2 = new AJAXClient(user2);
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
-        Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(getContext(client2), user, credentials);
-        client2.logout();
+        testContext = TestContextPool.acquireContext(getClass().getCanonicalName());
+        client1 = new AJAXClient(testContext.acquireUser());
+        client2 = new AJAXClient(testContext.acquireUser());
 
-        TestUser user1 = testContext.acquireUser();
-        client = new AJAXClient(user1);
-    }
-
-    private Context getContext(AJAXClient client) throws OXException, IOException, JSONException {
-        return new Context(I(client.getValues().getContextId()));
+        Map<String, String> properties = Collections.singletonMap("com.openechange.oauth.testservice.enabled", "false");
+        ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "user", null);
+        ChangePropertiesResponse changePropertiesResponse = client2.execute(changePropertiesRequest);
+        oldConfig2 = ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
     }
 
     @After
     public void tearDown() throws Exception {
         try {
-            if (client != null) {
-                client.logout();
+            if (null != client1) {
+                client1.logout();
             }
-            AJAXClient client2 = new AJAXClient(user2);
-
-            com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-            user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
-            Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
-            OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-            iface.change(getContext(client2), user, credentials);
+            if (null != client2) {
+                if (null != oldConfig2) {
+                    Map<String, String> oldProperties = new HashMap<String, String>();
+                    for (Entry<String, Object> entry : oldConfig2.entrySet()) {
+                        oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                    client2.execute(new ChangePropertiesRequest(oldProperties, "user", null));
+                }
+            }
             client2.logout();
         } finally {
             TestContextPool.backContext(testContext);
         }
-
     }
 
     @Test
     public void testGetAllServices() throws OXException, IOException, JSONException {
-        OAuthServicesResponse response = client.execute(new AllOAuthServicesRequest());
+        OAuthServicesResponse response = client1.execute(new AllOAuthServicesRequest());
         List<OAuthService> services = response.getServices();
         boolean found = false;
         for (OAuthService service : services) {
@@ -152,13 +141,12 @@ public class OAuthServiceTest {
                 break;
             }
         }
-
         Assert.assertTrue("Service is missing: '" + TESTSERVICE + "'", found);
     }
 
     @Test
     public void testGetTestService() throws OXException, IOException, JSONException {
-        OAuthServicesResponse response = client.execute(new GetOAuthServiceRequest(TESTSERVICE));
+        OAuthServicesResponse response = client1.execute(new GetOAuthServiceRequest(TESTSERVICE));
         List<OAuthService> services = response.getServices();
         Assert.assertEquals("Get response should contain exactly one service", 1, services.size());
         OAuthService service = services.get(0);
@@ -167,25 +155,15 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetAllServicesWithoutPermission() throws Exception {
-        AJAXClient client2 = null;
-        try {
-            client2 = new AJAXClient(user2);
-
-            OAuthServicesResponse response = client2.execute(new AllOAuthServicesRequest());
-            List<OAuthService> services = response.getServices();
-            boolean found = false;
-            for (OAuthService service : services) {
-                if (TESTSERVICE.equals(service.getId())) {
-                    found = true;
-                    break;
-                }
-            }
-
-            Assert.assertFalse("Service is present without permission: '" + TESTSERVICE + "'", found);
-        } finally {
-            if (client2 != null) {
-                client2.logout();
+        OAuthServicesResponse response = client2.execute(new AllOAuthServicesRequest());
+        List<OAuthService> services = response.getServices();
+        boolean found = false;
+        for (OAuthService service : services) {
+            if (TESTSERVICE.equals(service.getId())) {
+                found = true;
+                break;
             }
         }
+        Assert.assertFalse("Service is present without permission: '" + TESTSERVICE + "'", found);
     }
 }

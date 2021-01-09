@@ -62,11 +62,8 @@ public enum Property implements PropertyInterface {
     PemFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.PemFile"),
     ;
 
-
     private final Class<?> clazz;
-
     private final Required required;
-
     private final String name;
 
     /**
@@ -79,14 +76,17 @@ public enum Property implements PropertyInterface {
         this.name = name;
     }
 
+    @Override
     public Class<? extends Object> getClazz() {
         return clazz;
     }
 
+    @Override
     public Required getRequired() {
         return required;
     }
 
+    @Override
     public String getName() {
         return name;
     }

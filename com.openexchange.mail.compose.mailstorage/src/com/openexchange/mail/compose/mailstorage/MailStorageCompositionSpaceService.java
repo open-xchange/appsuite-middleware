@@ -459,7 +459,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                         MailStorageResult<MailPath> saveAsDraftResult = mailStorage.saveAsFinalDraft(association, ClientToken.NONE, serverSession);
                         warnings.addAll(saveAsDraftResult.getWarnings());
                     } else {
-                        MailStorageResult<Boolean> deleteResult = mailStorage.delete(association, false, ClientToken.NONE, serverSession);
+                        MailStorageResult<Boolean> deleteResult = mailStorage.delete(association, true, false, ClientToken.NONE, serverSession);
                         warnings.addAll(deleteResult.getWarnings());
                         boolean closed = deleteResult.getResult().booleanValue();
 
@@ -697,10 +697,13 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             SharedFolderReference sharedFolderRef = null;
             boolean referencesOpenCompositionSpace = false;
             if (Type.NEW == type) {
+                LOG.debug("Opening new composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_NEW);
             } else if (Type.FAX == type) {
+                LOG.debug("Opening fax composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_FAX);
             } else if (Type.SMS == type) {
+                LOG.debug("Opening SMS composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_SMS);
             } else {
                 OpenState args = new OpenState(compositionSpaceId, messageDesc, encrypt, Meta.builder());
@@ -709,15 +712,20 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
 
                     if (type == Type.FORWARD) {
+                        LOG.debug("Opening forward composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                         new Forward(services).doOpenForForward(parameters, args, session);
                     } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
+                        LOG.debug("Opening reply composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                         new Reply(services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
                     } else if (type == Type.EDIT) {
+                        LOG.debug("Opening edit-draft composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                         new EditCopy(services).doOpenForEditCopy(true, parameters, args, session);
                         editFor = parameters.getReferencedMails().get(0);
                     } else if (type == Type.COPY) {
+                        LOG.debug("Opening copy-draft composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                         new EditCopy(services).doOpenForEditCopy(false, parameters, args, session);
                     } else if (type == Type.RESEND) {
+                        LOG.debug("Opening resend composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
                         new Resend(services).doOpenForResend(parameters, args, session);
                     }
 
@@ -1358,7 +1366,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
         LookUpResult lookUpResult = optCompositionSpaceToDraftAssociation(compositionSpaceId);
         if (lookUpResult.isEmpty()) {
             return false;
@@ -1373,7 +1381,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 if (LockResult.IMMEDIATE_ACQUISITION == lockResult) {
                     Optional<CompositionSpaceToDraftAssociation> optionalAssociation = associationStorage.delete(compositionSpaceId, false);
                     MailStorageId toDelete = optionalAssociation.orElse(lookUpResult.getAssociation());
-                    MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, true, clientToken, session);
+                    MailStorageResult<Boolean> storageResult = mailStorage.delete(toDelete, hardDelete, true, clientToken, session);
                     warnings.addAll(storageResult.getWarnings());
                     return storageResult.getResult().booleanValue();
                 }

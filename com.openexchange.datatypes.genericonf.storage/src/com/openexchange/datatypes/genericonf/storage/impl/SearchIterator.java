@@ -51,8 +51,8 @@ package com.openexchange.datatypes.genericonf.storage.impl;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.IterationBreak;
@@ -66,20 +66,22 @@ import com.openexchange.datatypes.genericonf.IterationBreak;
  */
 public class SearchIterator implements MapIterator<String, Object> {
 
-
     private final StringBuilder from = new StringBuilder();
     private final StringBuilder where = new StringBuilder();
-    private final List<Object> queryReplacements = new ArrayList<Object>();
-    private final Map<Class, String> aliases = new HashMap<Class, String>();
-
+    private final List<Object> queryReplacements = new LinkedList<>();
+    private final Map<Class<?>, String> aliases = new HashMap<>();
 
     private boolean firstTable = true;
     private boolean stringsIncluded = false;
     private boolean boolsIncluded = false;
-
-
-    private static final ToSQLType toSQL = new ToSQLType();
-
+    
+    
+    /**
+     * Initializes a new {@link SearchIterator}.
+     */
+    public SearchIterator() {
+        super();
+    }
 
     @Override
     public void handle(String key, Object object) throws IterationBreak {
@@ -153,11 +155,11 @@ public class SearchIterator implements MapIterator<String, Object> {
         boolsIncluded = true;
     }
 
-    private void registerAlias(Class type, String alias) {
+    private void registerAlias(Class<?> type, String alias) {
         aliases.put(type, alias);
     }
 
-    private String getAlias(Class type) {
+    private String getAlias(Class<?> type) {
         return aliases.get(type);
     }
 

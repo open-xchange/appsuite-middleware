@@ -51,7 +51,6 @@ package com.openexchange.mobile.configuration.json.action.sms.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
-import org.apache.xmlrpc.XmlRpcException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobile.configuration.json.action.ActionService;
@@ -131,12 +130,7 @@ public class ActionSMS implements ActionService {
 			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid), e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
-		} catch (XmlRpcException e) {
-			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid),e);
-			provisioningResponse.setMessage("Internal error occured while sending SMS...");
-			provisioningResponse.setSuccess(false);
 		}
-
 
 		return provisioningResponse;
 	}

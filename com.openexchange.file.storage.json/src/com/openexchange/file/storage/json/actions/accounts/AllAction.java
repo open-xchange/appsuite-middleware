@@ -111,7 +111,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
             // Get the accounts associated with current file storage service
             List<FileStorageAccount> userAccounts = null;
             if (fsService instanceof AccountAware) {
-                userAccounts = ((AccountAware) fsService).getAccounts(session);
+                userAccounts = AccountAware.class.cast(fsService).getAccounts(session);
             }
             if (null == userAccounts) {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
@@ -126,7 +126,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
                     //Extended connection check if requested by the client and supported by the FileStorage
                     if (Boolean.TRUE.equals(connectionCheck) && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-                        ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+                        LoginAwareFileStorageServiceExtension.class.cast(account.getFileStorageService()).testConnection(account, session);
                     }
 
                     result.put(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
@@ -154,6 +154,4 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
         return requestResult;
     }
-
-
 }

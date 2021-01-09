@@ -95,24 +95,12 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
 
     @Override
     public ScheduledTimerTask scheduleWithFixedDelay(final String id, final Runnable task, final long initialDelay, final long delay) {
-        return services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
-
-            @Override
-            public void run() {
-                runIfDue(id, task, delay, true);
-            }
-        }, getEffectiveInitialDelay(id, initialDelay, delay), delay);
+        return services.getService(TimerService.class).scheduleWithFixedDelay(() -> runIfDue(id, task, delay, true), getEffectiveInitialDelay(id, initialDelay, delay), delay);
     }
 
     @Override
     public ScheduledTimerTask scheduleAtFixedRate(final String id, final Runnable task, long initialDelay, final long period) {
-        return services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                runIfDue(id, task, period, false);
-            }
-        }, getEffectiveInitialDelay(id, initialDelay, period), period);
+        return services.getService(TimerService.class).scheduleAtFixedRate(() -> runIfDue(id, task, period, false), getEffectiveInitialDelay(id, initialDelay, period), period);
     }
 
     private long getEffectiveInitialDelay(String id, long initialDelay, long interval) {

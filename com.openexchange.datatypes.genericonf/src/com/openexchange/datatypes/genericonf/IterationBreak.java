@@ -49,7 +49,6 @@
 
 package com.openexchange.datatypes.genericonf;
 
-
 /**
  * {@link IterationBreak}
  *
@@ -57,5 +56,7 @@ package com.openexchange.datatypes.genericonf;
  *
  */
 public class IterationBreak extends Throwable {
+
+    private static final long serialVersionUID = -8188577694130518361L;
 
 }

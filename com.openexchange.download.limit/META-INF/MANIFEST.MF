@@ -29,3 +29,4 @@ Import-Package: com.openexchange.ajax.fileholder,
 Bundle-Activator: com.openexchange.download.limit.osgi.ShareLimitActivator
 Export-Package: com.openexchange.download.limit.limiter,
  com.openexchange.download.limit.limiter.exceptions
+Automatic-Module-Name: com.openexchange.download.limit

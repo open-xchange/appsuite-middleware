@@ -52,12 +52,10 @@ package com.openexchange.ajax.find.contacts;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -67,10 +65,7 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.user.actions.GetRequest;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -86,23 +81,6 @@ import com.openexchange.java.util.TimeZones;
  * @since v7.6.0
  */
 public class ExcludeContextAdminTest extends AbstractFindTest {
-
-    private JSONObject setShowAdmin(Boolean value) throws Exception {
-        Map<String, String> properties = Collections.singletonMap("com.openexchange.showAdmin", null == value ? null : value.toString());
-        ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "context", null);
-        ChangePropertiesResponse changePropertiesResponse = getClient().execute(changePropertiesRequest);
-        return ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
-    }
-
-    private void restoreOldConfig(JSONObject oldConfig) throws Exception {
-        if (null != oldConfig) {
-            Map<String, String> oldProperties = new HashMap<String, String>();
-            for (Entry<String, Object> entry : oldConfig.entrySet()) {
-                oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
-            }
-            getClient().execute(new ChangePropertiesRequest(oldProperties, "context", null));
-        }
-    }
 
     /*
      * Perform autocomplete and query on contacts with showAdmin=false and

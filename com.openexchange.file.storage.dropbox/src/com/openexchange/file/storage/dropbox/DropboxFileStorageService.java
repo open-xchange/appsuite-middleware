@@ -76,7 +76,7 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
     /**
      * Initializes a new {@link DropboxFileStorageService}.
      * 
-     * @param services The {@link ServiceLookup} 
+     * @param services The {@link ServiceLookup}
      */
     public DropboxFileStorageService(ServiceLookup services) {
         super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);

@@ -420,7 +420,7 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
         return false;
     }
 
-    private boolean checkNoQuota(String id, long quota) throws OXException {
+    private boolean checkNoQuota(String id, long quota) {
         if (quota == 0) {
             // Advertise no quota to listeners
             int ownerId = ownerInfo.getOwnerId();
@@ -1141,6 +1141,15 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
         }
     }
 
+    /**
+     * Sends notifications when the quota is exceeded
+     *
+     * @param id The item's id that caused the quota to exceed
+     * @param quota current quota
+     * @param required The required quota
+     * @param newUsage The new quota after the operation
+     * @param oldUsage The old quota before the operation
+     */
     private void notifyOnQuotaExceeded(String id, long quota, long required, long newUsage, long oldUsage) {
         int ownerId = ownerInfo.getOwnerId();
         for (QuotaFileStorageListener quotaListener : quotaListeners) {

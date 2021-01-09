@@ -14,3 +14,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.tools.session,
  org.osgi.framework
 Export-Package: com.openexchange.conversion.simple
+Automatic-Module-Name: com.openexchange.conversion.simple

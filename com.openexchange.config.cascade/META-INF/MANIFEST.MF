@@ -22,3 +22,4 @@ Import-Package: com.google.common.annotations,
  org.slf4j
 Export-Package: com.openexchange.config.cascade
 Bundle-Activator: com.openexchange.config.cascade.osgi.ConfigCascadeActivator
+Automatic-Module-Name: com.openexchange.config.cascade

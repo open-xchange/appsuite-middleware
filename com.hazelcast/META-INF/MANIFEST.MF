@@ -3,13 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast
 Bundle-SymbolicName: com.hazelcast
 Bundle-Description: Core Hazelcast Module
-Bundle-Version: 4.1.0
+Bundle-Version: 4.1.1
 Bundle-Vendor: Hazelcast
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/hazelcast-4.1.jar,
+Bundle-ClassPath: lib/hazelcast-4.1.1.jar,
  .
-Import-Package: javax.annotation;resolution:=optional,
+Import-Package: javax.annotation;version="[3.0,4)";resolution:=optional,
  javax.cache;version="[1.1,2)";resolution:=optional,
  javax.cache.configuration;version="[1.1,2)";resolution:=optional,
  javax.cache.event;version="[1.1,2)";resolution:=optional,
@@ -39,6 +39,7 @@ Import-Package: javax.annotation;resolution:=optional,
  javax.xml.transform.stream,
  javax.xml.validation,
  javax.xml.xpath,
+ net.openhft.affinity;version="[3.2,4)";resolution:=optional,
  org.apache.log4j;version="[1.2,2)";resolution:=optional,
  org.apache.log4j.spi;version="[1.2,2)";resolution:=optional,
  org.apache.logging.log4j;version="[2.13,3)";resolution:=optional,
@@ -51,15 +52,15 @@ Import-Package: javax.annotation;resolution:=optional,
  org.xml.sax,
  org.xml.sax.helpers,
  sun.misc;resolution:=optional
-Export-Package: com.hazelcast.aggregation;version="4.1.0",
- com.hazelcast.aggregation.impl;version="4.1.0";
+Export-Package: com.hazelcast.aggregation;version="4.1.1",
+ com.hazelcast.aggregation.impl;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.auditlog;version="4.1.0";uses:="javax.security.auth.callback",
- com.hazelcast.auditlog.impl;version="4.1.0";uses:="com.hazelcast.auditlog",
- com.hazelcast.cache;version="4.1.0";
+ com.hazelcast.auditlog;version="4.1.1";uses:="javax.security.auth.callback",
+ com.hazelcast.auditlog.impl;version="4.1.1";uses:="com.hazelcast.auditlog",
+ com.hazelcast.cache;version="4.1.1";
   uses:="com.hazelcast.cache.impl.event,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -73,7 +74,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.expiry,
    javax.cache.processor,
    javax.cache.spi",
- com.hazelcast.cache.impl;version="4.1.0";
+ com.hazelcast.cache.impl;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cache.impl.event,
    com.hazelcast.cache.impl.eviction,
@@ -121,7 +122,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.processor,
    javax.cache.spi,
    javax.management",
- com.hazelcast.cache.impl.event;version="4.1.0";
+ com.hazelcast.cache.impl.event;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cache.impl,
    com.hazelcast.cluster,
@@ -130,12 +131,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.annotation,
    com.hazelcast.spi.impl.eventservice",
- com.hazelcast.cache.impl.eviction;version="4.1.0";
+ com.hazelcast.cache.impl.eviction;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.internal.eviction,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cache.impl.journal;version="4.1.0";
+ com.hazelcast.cache.impl.journal;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -147,13 +148,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.ringbuffer.impl,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cache.impl.maxsize.impl;version="4.1.0";uses:="com.hazelcast.cache.impl.record,com.hazelcast.internal.eviction",
- com.hazelcast.cache.impl.merge.entry;version="4.1.0";
+ com.hazelcast.cache.impl.maxsize.impl;version="4.1.1";uses:="com.hazelcast.cache.impl.record,com.hazelcast.internal.eviction",
+ com.hazelcast.cache.impl.merge.entry;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cache.impl.operation;version="4.1.0";
+ com.hazelcast.cache.impl.operation;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.cache.impl.event,
    com.hazelcast.cache.impl.record,
@@ -170,7 +171,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.configuration,
    javax.cache.expiry,
    javax.cache.processor",
- com.hazelcast.cache.impl.record;version="4.1.0";
+ com.hazelcast.cache.impl.record;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.config,
    com.hazelcast.internal.eviction,
@@ -181,19 +182,19 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    javax.cache.expiry",
- com.hazelcast.cache.impl.tenantcontrol;version="4.1.0";
+ com.hazelcast.cache.impl.tenantcontrol;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.tenantcontrol,
    javax.cache",
- com.hazelcast.cache.impl.wan;version="4.1.0";
+ com.hazelcast.cache.impl.wan;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.cardinality;version="4.1.0";uses:="com.hazelcast.core,javax.annotation",
- com.hazelcast.cardinality.impl;version="4.1.0";
+ com.hazelcast.cardinality;version="4.1.1";uses:="com.hazelcast.core,javax.annotation",
+ com.hazelcast.cardinality.impl;version="4.1.1";
   uses:="com.hazelcast.cardinality,
    com.hazelcast.cardinality.impl.hyperloglog,
    com.hazelcast.core,
@@ -207,24 +208,24 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice.impl,
    com.hazelcast.spi.merge,
    javax.annotation",
- com.hazelcast.cardinality.impl.hyperloglog;version="4.1.0";uses:="com.hazelcast.nio.serialization",
- com.hazelcast.cardinality.impl.hyperloglog.impl;version="4.1.0";uses:="com.hazelcast.cardinality.impl.hyperloglog,com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.cardinality.impl.operations;version="4.1.0";
+ com.hazelcast.cardinality.impl.hyperloglog;version="4.1.1";uses:="com.hazelcast.nio.serialization",
+ com.hazelcast.cardinality.impl.hyperloglog.impl;version="4.1.1";uses:="com.hazelcast.cardinality.impl.hyperloglog,com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.cardinality.impl.operations;version="4.1.1";
   uses:="com.hazelcast.cardinality.impl,
    com.hazelcast.cardinality.impl.hyperloglog,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.client;version="4.1.0";
+ com.hazelcast.client;version="4.1.1";
   uses:="com.hazelcast.client.config,
    com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance.impl,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.client.cache;version="4.1.0";uses:="javax.cache,javax.cache.configuration,javax.cache.spi",
- com.hazelcast.client.cache.impl;version="4.1.0";
+ com.hazelcast.client.cache;version="4.1.1";uses:="javax.cache,javax.cache.configuration,javax.cache.spi",
+ com.hazelcast.client.cache.impl;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cache.impl,
    com.hazelcast.cache.impl.event,
@@ -244,7 +245,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.expiry,
    javax.cache.integration,
    javax.cache.processor",
- com.hazelcast.client.cache.impl.nearcache;version="4.1.0";
+ com.hazelcast.client.cache.impl.nearcache;version="4.1.1";
   uses:="com.hazelcast.client.cache.impl,
    com.hazelcast.client.impl.spi,
    com.hazelcast.config,
@@ -254,12 +255,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.annotation,
    javax.cache.expiry,
    javax.cache.integration",
- com.hazelcast.client.cache.impl.nearcache.invalidation;version="4.1.0";
+ com.hazelcast.client.cache.impl.nearcache.invalidation;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.cluster,
    com.hazelcast.internal.nearcache.impl.invalidation,
    com.hazelcast.spi.impl",
- com.hazelcast.client.config;version="4.1.0";
+ com.hazelcast.client.config;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.client.config.impl,
    com.hazelcast.client.impl.spi,
@@ -272,20 +273,20 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.topic,
    javax.annotation,
    org.w3c.dom",
- com.hazelcast.client.config.impl;version="4.1.0";
+ com.hazelcast.client.config.impl;version="4.1.1";
   uses:="com.hazelcast.client.config,
    com.hazelcast.config,
    com.hazelcast.config.security,
    com.hazelcast.internal.config,
    org.w3c.dom",
- com.hazelcast.client.console;version="4.1.0";
+ com.hazelcast.client.console;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.map,
    com.hazelcast.multimap,
    com.hazelcast.topic",
- com.hazelcast.client.cp.internal;version="4.1.0";
+ com.hazelcast.client.cp.internal;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.spi,
    com.hazelcast.cp,
@@ -293,36 +294,36 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.cp.lock,
    com.hazelcast.cp.session,
    javax.annotation",
- com.hazelcast.client.cp.internal.datastructures.atomiclong;version="4.1.0";
+ com.hazelcast.client.cp.internal.datastructures.atomiclong;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.spi.impl",
- com.hazelcast.client.cp.internal.datastructures.atomicref;version="4.1.0";
+ com.hazelcast.client.cp.internal.datastructures.atomicref;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.spi.impl",
- com.hazelcast.client.cp.internal.datastructures.countdownlatch;version="4.1.0";uses:="com.hazelcast.client.impl.spi,com.hazelcast.cp,com.hazelcast.cp.internal",
- com.hazelcast.client.cp.internal.datastructures.lock;version="4.1.0";
+ com.hazelcast.client.cp.internal.datastructures.countdownlatch;version="4.1.1";uses:="com.hazelcast.client.impl.spi,com.hazelcast.cp,com.hazelcast.cp.internal",
+ com.hazelcast.client.cp.internal.datastructures.lock;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.lock",
- com.hazelcast.client.cp.internal.datastructures.proxy;version="4.1.0";
+ com.hazelcast.client.cp.internal.datastructures.proxy;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.spi,
    com.hazelcast.core,
    javax.annotation",
- com.hazelcast.client.cp.internal.datastructures.semaphore;version="4.1.0";uses:="com.hazelcast.client.impl.spi,com.hazelcast.cp,com.hazelcast.cp.internal",
- com.hazelcast.client.cp.internal.session;version="4.1.0";
+ com.hazelcast.client.cp.internal.datastructures.semaphore;version="4.1.1";uses:="com.hazelcast.client.impl.spi,com.hazelcast.cp,com.hazelcast.cp.internal",
+ com.hazelcast.client.cp.internal.session;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.session,
    com.hazelcast.spi.impl",
- com.hazelcast.client.impl;version="4.1.0";
+ com.hazelcast.client.impl;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.client.config,
    com.hazelcast.client.impl.clientside,
@@ -358,8 +359,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.annotation,
    javax.security.auth,
    javax.security.auth.login",
- com.hazelcast.client.impl.client;version="4.1.0",
- com.hazelcast.client.impl.clientside;version="4.1.0";
+ com.hazelcast.client.impl.client;version="4.1.1",
+ com.hazelcast.client.impl.clientside;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cardinality,
    com.hazelcast.client,
@@ -409,13 +410,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    javax.annotation,
    javax.security.auth.callback",
- com.hazelcast.client.impl.connection;version="4.1.0";
+ com.hazelcast.client.impl.connection;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.spi,
    com.hazelcast.cluster,
    com.hazelcast.internal.nio,
    javax.annotation",
- com.hazelcast.client.impl.connection.tcp;version="4.1.0";
+ com.hazelcast.client.impl.connection.tcp;version="4.1.1";
   uses:="com.hazelcast.client.config,
    com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.connection,
@@ -429,15 +430,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.logging,
    com.hazelcast.security,
    javax.annotation",
- com.hazelcast.client.impl.management;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.spi.properties",
- com.hazelcast.client.impl.operations;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol;version="4.1.0";
+ com.hazelcast.client.impl.management;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.spi.properties",
+ com.hazelcast.client.impl.operations;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.spi.impl.operationservice",
+ com.hazelcast.client.impl.protocol;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol.task,
    com.hazelcast.internal.networking,
    com.hazelcast.internal.nio,
    com.hazelcast.internal.util.collection,
    com.hazelcast.spi.impl",
- com.hazelcast.client.impl.protocol.codec;version="4.1.0";
+ com.hazelcast.client.impl.protocol.codec;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.client.impl.client,
    com.hazelcast.client.impl.protocol,
@@ -459,7 +460,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl.xa,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.client.impl.protocol.codec.builtin;version="4.1.0";
+ com.hazelcast.client.impl.protocol.codec.builtin;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cache.impl,
    com.hazelcast.client.impl.protocol,
@@ -472,7 +473,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.map.impl,
    com.hazelcast.map.impl.querycache.event,
    com.hazelcast.sql",
- com.hazelcast.client.impl.protocol.codec.custom;version="4.1.0";
+ com.hazelcast.client.impl.protocol.codec.custom;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.client.impl.client,
    com.hazelcast.client.impl.protocol,
@@ -497,13 +498,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl.xa,
    com.hazelcast.version,
    javax.transaction.xa",
- com.hazelcast.client.impl.protocol.codec.holder;version="4.1.0";
+ com.hazelcast.client.impl.protocol.codec.holder;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol.task.dynamicconfig,
    com.hazelcast.config,
    com.hazelcast.internal.serialization,
    com.hazelcast.query",
- com.hazelcast.client.impl.protocol.exception;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.client.impl.protocol.task;version="4.1.0";
+ com.hazelcast.client.impl.protocol.exception;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.client.impl.protocol.task;version="4.1.1";
   uses:="com.hazelcast.client.impl,
    com.hazelcast.client.impl.client,
    com.hazelcast.client.impl.protocol,
@@ -521,7 +522,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.security,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.cache;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.cache;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
@@ -532,21 +533,21 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.cardinality;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.cardinality;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.crdt.pncounter;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.crdt.pncounter;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.dynamicconfig;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.dynamicconfig;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
@@ -555,35 +556,35 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio.serialization",
- com.hazelcast.client.impl.protocol.task.executorservice;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.executorservice;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.executorservice.durable;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.executorservice.durable;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.list;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.list;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.management;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.management;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.map;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.map;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
@@ -605,14 +606,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query.impl.predicates,
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.metrics;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.metrics;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.multimap;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.multimap;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
@@ -620,14 +621,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.queue;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.queue;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.replicatedmap;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.replicatedmap;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
@@ -638,28 +639,28 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.map,
    com.hazelcast.query,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.ringbuffer;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.ringbuffer;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.scheduledexecutor;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.scheduledexecutor;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.set;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.set;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.impl.protocol.task.topic;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.topic;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
@@ -667,7 +668,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.topic",
- com.hazelcast.client.impl.protocol.task.transaction;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transaction;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
@@ -676,43 +677,43 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction.impl.xa",
- com.hazelcast.client.impl.protocol.task.transactionallist;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transactionallist;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.client.impl.protocol.task.transactionalmap;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transactionalmap;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.client.impl.protocol.task.transactionalmultimap;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transactionalmultimap;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.client.impl.protocol.task.transactionalqueue;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transactionalqueue;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.client.impl.protocol.task.transactionalset;version="4.1.0";
+ com.hazelcast.client.impl.protocol.task.transactionalset;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.client.impl.protocol.util;version="4.1.0";
+ com.hazelcast.client.impl.protocol.util;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.internal.networking,
    com.hazelcast.internal.networking.nio,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.properties",
- com.hazelcast.client.impl.proxy;version="4.1.0";
+ com.hazelcast.client.impl.proxy;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.cardinality,
    com.hazelcast.client.impl,
@@ -747,7 +748,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.client.impl.proxy.txn;version="4.1.0";
+ com.hazelcast.client.impl.proxy.txn;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.connection,
    com.hazelcast.client.impl.protocol,
@@ -757,7 +758,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    com.hazelcast.transaction,
    javax.annotation",
- com.hazelcast.client.impl.proxy.txn.xa;version="4.1.0";
+ com.hazelcast.client.impl.proxy.txn.xa;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.connection,
    com.hazelcast.client.impl.spi,
@@ -766,7 +767,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.client.impl.spi;version="4.1.0";
+ com.hazelcast.client.impl.spi;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.client.config,
    com.hazelcast.client.impl.clientside,
@@ -786,7 +787,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.client.impl.spi.impl;version="4.1.0";
+ com.hazelcast.client.impl.spi.impl;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.client.config,
    com.hazelcast.client.impl.clientside,
@@ -810,8 +811,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.client.impl.spi.impl.discovery;version="4.1.0";uses:="com.hazelcast.client.impl.connection,com.hazelcast.cluster,com.hazelcast.spi.properties",
- com.hazelcast.client.impl.spi.impl.listener;version="4.1.0";
+ com.hazelcast.client.impl.spi.impl.discovery;version="4.1.1";uses:="com.hazelcast.client.impl.connection,com.hazelcast.cluster,com.hazelcast.spi.properties",
+ com.hazelcast.client.impl.spi.impl.listener;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.spi,
@@ -821,15 +822,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.nio,
    com.hazelcast.internal.util.executor,
    javax.annotation",
- com.hazelcast.client.impl.statistics;version="4.1.0";uses:="com.hazelcast.client.config,com.hazelcast.client.impl.clientside",
- com.hazelcast.client.map.impl.iterator;version="4.1.0";
+ com.hazelcast.client.impl.statistics;version="4.1.1";uses:="com.hazelcast.client.config,com.hazelcast.client.impl.clientside",
+ com.hazelcast.client.map.impl.iterator;version="4.1.1";
   uses:="com.hazelcast.client.impl.proxy,
    com.hazelcast.client.impl.spi,
    com.hazelcast.internal.serialization,
    com.hazelcast.map.impl.iterator,
    com.hazelcast.projection,
    com.hazelcast.query",
- com.hazelcast.client.map.impl.nearcache;version="4.1.0";
+ com.hazelcast.client.map.impl.nearcache;version="4.1.1";
   uses:="com.hazelcast.client.impl.proxy,
    com.hazelcast.client.impl.spi,
    com.hazelcast.internal.nearcache,
@@ -838,12 +839,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    com.hazelcast.spi.impl,
    javax.annotation",
- com.hazelcast.client.map.impl.nearcache.invalidation;version="4.1.0";
+ com.hazelcast.client.map.impl.nearcache.invalidation;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.cluster,
    com.hazelcast.internal.nearcache.impl.invalidation,
    com.hazelcast.spi.impl",
- com.hazelcast.client.map.impl.querycache;version="4.1.0";
+ com.hazelcast.client.map.impl.querycache;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.cluster,
    com.hazelcast.internal.serialization,
@@ -851,7 +852,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.map.impl.querycache,
    com.hazelcast.map.impl.querycache.publisher,
    com.hazelcast.map.impl.querycache.subscriber",
- com.hazelcast.client.map.impl.querycache.subscriber;version="4.1.0";
+ com.hazelcast.client.map.impl.querycache.subscriber;version="4.1.1";
   uses:="com.hazelcast.client.config,
    com.hazelcast.client.impl.clientside,
    com.hazelcast.cluster,
@@ -865,15 +866,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.executionservice,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.client.properties;version="4.1.0";uses:="com.hazelcast.spi.properties",
- com.hazelcast.client.util;version="4.1.0";
+ com.hazelcast.client.properties;version="4.1.1";uses:="com.hazelcast.spi.properties",
+ com.hazelcast.client.util;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.client.config,
    com.hazelcast.client.impl.connection,
    com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.util",
- com.hazelcast.cluster;version="4.1.0";
+ com.hazelcast.cluster;version="4.1.1";
   uses:="com.hazelcast.hotrestart,
    com.hazelcast.instance,
    com.hazelcast.nio,
@@ -881,7 +882,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.cluster.impl;version="4.1.0";
+ com.hazelcast.cluster.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance,
@@ -890,15 +891,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.version",
- com.hazelcast.cluster.memberselector;version="4.1.0";uses:="com.hazelcast.cluster",
- com.hazelcast.cluster.memberselector.impl;version="4.1.0";uses:="com.hazelcast.cluster",
- com.hazelcast.collection;version="4.1.0";
+ com.hazelcast.cluster.memberselector;version="4.1.1";uses:="com.hazelcast.cluster",
+ com.hazelcast.cluster.memberselector.impl;version="4.1.1";uses:="com.hazelcast.cluster",
+ com.hazelcast.collection;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance,
    javax.annotation",
- com.hazelcast.collection.impl;version="4.1.0";uses:="com.hazelcast.collection.impl.txncollection,com.hazelcast.nio,com.hazelcast.spi.impl.operationservice",
- com.hazelcast.collection.impl.collection;version="4.1.0";
+ com.hazelcast.collection.impl;version="4.1.1";uses:="com.hazelcast.collection.impl.txncollection,com.hazelcast.nio,com.hazelcast.spi.impl.operationservice",
+ com.hazelcast.collection.impl.collection;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.collection,
    com.hazelcast.collection.impl.collection.operations,
@@ -914,7 +915,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.eventservice,
    javax.annotation",
- com.hazelcast.collection.impl.collection.operations;version="4.1.0";
+ com.hazelcast.collection.impl.collection.operations;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.list,
    com.hazelcast.core,
@@ -923,12 +924,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.collection.impl.common;version="4.1.0";
+ com.hazelcast.collection.impl.common;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.collection,
    com.hazelcast.core,
    com.hazelcast.internal.serialization",
- com.hazelcast.collection.impl.list;version="4.1.0";
+ com.hazelcast.collection.impl.list;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.txnlist,
@@ -944,13 +945,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl,
    javax.annotation",
- com.hazelcast.collection.impl.list.operations;version="4.1.0";
+ com.hazelcast.collection.impl.list.operations;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.collection.operations,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.collection.impl.queue;version="4.1.0";
+ com.hazelcast.collection.impl.queue;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.collection,
    com.hazelcast.collection.impl.txnqueue,
@@ -971,7 +972,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl,
    javax.annotation",
- com.hazelcast.collection.impl.queue.operations;version="4.1.0";
+ com.hazelcast.collection.impl.queue.operations;version="4.1.1";
   uses:="com.hazelcast.collection.impl.queue,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -979,7 +980,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.collection.impl.set;version="4.1.0";
+ com.hazelcast.collection.impl.set;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.txnset,
@@ -994,28 +995,28 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl",
- com.hazelcast.collection.impl.set.operations;version="4.1.0";uses:="com.hazelcast.collection.impl.collection,com.hazelcast.collection.impl.collection.operations,com.hazelcast.nio",
- com.hazelcast.collection.impl.txncollection;version="4.1.0";
+ com.hazelcast.collection.impl.set.operations;version="4.1.1";uses:="com.hazelcast.collection.impl.collection,com.hazelcast.collection.impl.collection.operations,com.hazelcast.nio",
+ com.hazelcast.collection.impl.txncollection;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection,
    com.hazelcast.internal.services,
    com.hazelcast.nio,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction.impl",
- com.hazelcast.collection.impl.txncollection.operations;version="4.1.0";
+ com.hazelcast.collection.impl.txncollection.operations;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection.operations,
    com.hazelcast.collection.impl.txncollection,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.collection.impl.txnlist;version="4.1.0";
+ com.hazelcast.collection.impl.txnlist;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.list,
    com.hazelcast.collection.impl.txncollection,
    com.hazelcast.spi.impl,
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl",
- com.hazelcast.collection.impl.txnqueue;version="4.1.0";
+ com.hazelcast.collection.impl.txnqueue;version="4.1.1";
   uses:="com.hazelcast.collection.impl.queue,
    com.hazelcast.collection.impl.txncollection,
    com.hazelcast.config,
@@ -1026,20 +1027,20 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl,
    javax.annotation",
- com.hazelcast.collection.impl.txnqueue.operations;version="4.1.0";
+ com.hazelcast.collection.impl.txnqueue.operations;version="4.1.1";
   uses:="com.hazelcast.collection.impl.queue.operations,
    com.hazelcast.collection.impl.txncollection,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.collection.impl.txnset;version="4.1.0";
+ com.hazelcast.collection.impl.txnset;version="4.1.1";
   uses:="com.hazelcast.collection.impl.collection,
    com.hazelcast.collection.impl.set,
    com.hazelcast.collection.impl.txncollection,
    com.hazelcast.spi.impl,
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl",
- com.hazelcast.config;version="4.1.0";
+ com.hazelcast.config;version="4.1.1";
   uses:="com.hazelcast.cache.impl,
    com.hazelcast.cache.impl.event,
    com.hazelcast.collection,
@@ -1074,13 +1075,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.expiry,
    javax.cache.integration,
    org.w3c.dom",
- com.hazelcast.config.cp;version="4.1.0",
- com.hazelcast.config.matcher;version="4.1.0";uses:="com.hazelcast.config",
- com.hazelcast.config.properties;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.config.replacer;version="4.1.0";uses:="com.hazelcast.config.replacer.spi",
- com.hazelcast.config.replacer.spi;version="4.1.0",
- com.hazelcast.config.security;version="4.1.0";uses:="com.hazelcast.config,com.hazelcast.security,javax.security.auth.callback",
- com.hazelcast.console;version="4.1.0";
+ com.hazelcast.config.cp;version="4.1.1",
+ com.hazelcast.config.matcher;version="4.1.1";uses:="com.hazelcast.config",
+ com.hazelcast.config.properties;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.config.replacer;version="4.1.1";uses:="com.hazelcast.config.replacer.spi",
+ com.hazelcast.config.replacer.spi;version="4.1.1",
+ com.hazelcast.config.security;version="4.1.1";uses:="com.hazelcast.config,com.hazelcast.security,javax.security.auth.callback",
+ com.hazelcast.console;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.core,
    com.hazelcast.cp,
@@ -1090,7 +1091,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.topic",
- com.hazelcast.core;version="4.1.0";
+ com.hazelcast.core;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cardinality,
    com.hazelcast.client,
@@ -1119,28 +1120,28 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.topic,
    com.hazelcast.transaction,
    javax.annotation",
- com.hazelcast.core.server;version="4.1.0",
- com.hazelcast.cp;version="4.1.0";
+ com.hazelcast.core.server;version="4.1.1",
+ com.hazelcast.cp;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.cp.event,
    com.hazelcast.cp.lock,
    com.hazelcast.cp.session,
    javax.annotation",
- com.hazelcast.cp.event;version="4.1.0";uses:="com.hazelcast.cp",
- com.hazelcast.cp.event.impl;version="4.1.0";
+ com.hazelcast.cp.event;version="4.1.1";uses:="com.hazelcast.cp",
+ com.hazelcast.cp.event.impl;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.event,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.exception;version="4.1.0";
+ com.hazelcast.cp.exception;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.spi.exception,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal;version="4.1.0";
+ com.hazelcast.cp.internal;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config.cp,
    com.hazelcast.cp,
@@ -1167,7 +1168,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice.impl,
    com.hazelcast.spi.impl.servicemanager,
    javax.annotation",
- com.hazelcast.cp.internal.client;version="4.1.0";
+ com.hazelcast.cp.internal.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.cp,
@@ -1175,8 +1176,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.cp.internal.raft,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures;version="4.1.0";uses:="com.hazelcast.internal.serialization,com.hazelcast.nio.serialization,com.hazelcast.spi.impl.servicemanager",
- com.hazelcast.cp.internal.datastructures.atomiclong;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures;version="4.1.1";uses:="com.hazelcast.internal.serialization,com.hazelcast.nio.serialization,com.hazelcast.spi.impl.servicemanager",
+ com.hazelcast.cp.internal.datastructures.atomiclong;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
@@ -1186,25 +1187,25 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.atomiclong.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomiclong.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.atomiclong.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomiclong.operation;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.atomiclong.proxy;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomiclong.proxy;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.atomicref;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomicref;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
@@ -1214,24 +1215,24 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.atomicref.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomicref.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.atomicref.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomicref.operation;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.atomicref.proxy;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.atomicref.proxy;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.countdownlatch;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.countdownlatch;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.cp,
@@ -1241,21 +1242,21 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.countdownlatch.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.countdownlatch.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.countdownlatch.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.countdownlatch.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.countdownlatch.proxy;version="4.1.0";uses:="com.hazelcast.cp,com.hazelcast.cp.internal,com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.exception;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.cp.internal.datastructures.lock;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.countdownlatch.proxy;version="4.1.1";uses:="com.hazelcast.cp,com.hazelcast.cp.internal,com.hazelcast.spi.impl",
+ com.hazelcast.cp.internal.datastructures.exception;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.cp.internal.datastructures.lock;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.cp,
@@ -1266,19 +1267,19 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.lock.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.lock.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.lock.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.lock.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.lock.proxy;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.lock.proxy;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.datastructures.lock,
@@ -1286,7 +1287,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.cp.lock,
    com.hazelcast.spi.impl,
    javax.annotation",
- com.hazelcast.cp.internal.datastructures.semaphore;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.semaphore;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config.cp,
    com.hazelcast.core,
@@ -1297,32 +1298,32 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.semaphore.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.semaphore.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.semaphore.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.semaphore.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.semaphore.proxy;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.semaphore.proxy;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.session,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.spi;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.services,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.datastructures.spi.atomic;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi.atomic;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
@@ -1332,7 +1333,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.datastructures.spi.blocking;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi.blocking;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
@@ -1346,25 +1347,25 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.datastructures.spi.blocking.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi.blocking.operation;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.internal.util,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.datastructures.spi.client;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal.client,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.datastructures.spi.operation;version="4.1.0";
+ com.hazelcast.cp.internal.datastructures.spi.operation;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.exception;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.spi.exception",
- com.hazelcast.cp.internal.operation;version="4.1.0";
+ com.hazelcast.cp.internal.exception;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.spi.exception",
+ com.hazelcast.cp.internal.operation;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft,
@@ -1373,7 +1374,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.operation.integration;version="4.1.0";
+ com.hazelcast.cp.internal.operation.integration;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft.impl,
@@ -1381,21 +1382,21 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.operation.unsafe;version="4.1.0";
+ com.hazelcast.cp.internal.operation.unsafe;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.persistence;version="4.1.0";
+ com.hazelcast.cp.internal.persistence;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft.impl.persistence,
    javax.annotation",
- com.hazelcast.cp.internal.raft;version="4.1.0";uses:="com.hazelcast.cp",
- com.hazelcast.cp.internal.raft.command;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.raft.exception;version="4.1.0";uses:="com.hazelcast.cp.exception,com.hazelcast.cp.internal.raft.impl",
- com.hazelcast.cp.internal.raft.impl;version="4.1.0";
+ com.hazelcast.cp.internal.raft;version="4.1.1";uses:="com.hazelcast.cp",
+ com.hazelcast.cp.internal.raft.command;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.cp.internal.raft.exception;version="4.1.1";uses:="com.hazelcast.cp.exception,com.hazelcast.cp.internal.raft.impl",
+ com.hazelcast.cp.internal.raft.impl;version="4.1.1";
   uses:="com.hazelcast.config.cp,
    com.hazelcast.cp,
    com.hazelcast.cp.internal.raft,
@@ -1407,25 +1408,25 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.logging,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.raft.impl.command;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.command;version="4.1.1";
   uses:="com.hazelcast.cp.internal.raft,
    com.hazelcast.cp.internal.raft.command,
    com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.raft.impl.dto;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.dto;version="4.1.1";
   uses:="com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.cp.internal.raft.impl.log,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.raft.impl.handler;version="4.1.0";uses:="com.hazelcast.cp.internal.raft.impl,com.hazelcast.cp.internal.raft.impl.dto,com.hazelcast.cp.internal.raft.impl.task",
- com.hazelcast.cp.internal.raft.impl.log;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.handler;version="4.1.1";uses:="com.hazelcast.cp.internal.raft.impl,com.hazelcast.cp.internal.raft.impl.dto,com.hazelcast.cp.internal.raft.impl.task",
+ com.hazelcast.cp.internal.raft.impl.log;version="4.1.1";
   uses:="com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.cp.internal.raft.impl.persistence,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.raft.impl.persistence;version="4.1.0";uses:="com.hazelcast.cp.internal.raft.impl,com.hazelcast.cp.internal.raft.impl.log,javax.annotation",
- com.hazelcast.cp.internal.raft.impl.state;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.persistence;version="4.1.1";uses:="com.hazelcast.cp.internal.raft.impl,com.hazelcast.cp.internal.raft.impl.log,javax.annotation",
+ com.hazelcast.cp.internal.raft.impl.state;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.cp.internal.raft.impl.dto,
@@ -1433,19 +1434,19 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.cp.internal.raft.impl.persistence,
    com.hazelcast.internal.util,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.raft.impl.task;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.task;version="4.1.1";
   uses:="com.hazelcast.cp.internal.raft,
    com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.logging,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.raft.impl.util;version="4.1.0",
- com.hazelcast.cp.internal.raftop;version="4.1.0";
+ com.hazelcast.cp.internal.raft.impl.util;version="4.1.1",
+ com.hazelcast.cp.internal.raftop;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft.impl,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.raftop.metadata;version="4.1.0";
+ com.hazelcast.cp.internal.raftop.metadata;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.raft.impl,
@@ -1453,12 +1454,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.cp.internal.raftop.snapshot;version="4.1.0";
+ com.hazelcast.cp.internal.raftop.snapshot;version="4.1.1";
   uses:="com.hazelcast.cp,
    com.hazelcast.cp.internal,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.session;version="4.1.0";
+ com.hazelcast.cp.internal.session;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.cp,
@@ -1473,14 +1474,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.cp.internal.session.client;version="4.1.0";
+ com.hazelcast.cp.internal.session.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.cp.internal,
    com.hazelcast.cp.internal.session,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.cp.internal.session.operation;version="4.1.0";
+ com.hazelcast.cp.internal.session.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cp,
    com.hazelcast.cp.internal,
@@ -1488,14 +1489,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.util,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.cp.internal.util;version="4.1.0";uses:="com.hazelcast.spi.impl",
- com.hazelcast.cp.lock;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.cp",
- com.hazelcast.cp.lock.exception;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.cp.session;version="4.1.0";uses:="com.hazelcast.cluster",
- com.hazelcast.crdt;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.spi.exception",
- com.hazelcast.crdt.pncounter;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.durableexecutor;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.spi.exception,javax.annotation",
- com.hazelcast.durableexecutor.impl;version="4.1.0";
+ com.hazelcast.cp.internal.util;version="4.1.1";uses:="com.hazelcast.spi.impl",
+ com.hazelcast.cp.lock;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.cp",
+ com.hazelcast.cp.lock.exception;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.cp.session;version="4.1.1";uses:="com.hazelcast.cluster",
+ com.hazelcast.crdt;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.spi.exception",
+ com.hazelcast.crdt.pncounter;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.durableexecutor;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.spi.exception,javax.annotation",
+ com.hazelcast.durableexecutor.impl;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.durableexecutor,
    com.hazelcast.internal.metrics,
@@ -1509,14 +1510,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.durableexecutor.impl.operations;version="4.1.0";
+ com.hazelcast.durableexecutor.impl.operations;version="4.1.1";
   uses:="com.hazelcast.durableexecutor.impl,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.executor;version="4.1.0";uses:="com.hazelcast.instance",
- com.hazelcast.executor.impl;version="4.1.0";
+ com.hazelcast.executor;version="4.1.1";uses:="com.hazelcast.instance",
+ com.hazelcast.executor.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.executor,
@@ -1530,14 +1531,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.executor.impl.operations;version="4.1.0";
+ com.hazelcast.executor.impl.operations;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.flakeidgen;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.flakeidgen.impl;version="4.1.0";
+ com.hazelcast.flakeidgen;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.flakeidgen.impl;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.flakeidgen,
    com.hazelcast.internal.metrics,
@@ -1547,16 +1548,16 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    javax.annotation",
- com.hazelcast.flakeidgen.impl.client;version="4.1.0";
+ com.hazelcast.flakeidgen.impl.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.nio",
- com.hazelcast.function;version="4.1.0";uses:="com.hazelcast.internal.serialization,javax.annotation",
- com.hazelcast.hotrestart;version="4.1.0",
- com.hazelcast.instance;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.instance.impl;version="4.1.0";
+ com.hazelcast.function;version="4.1.1";uses:="com.hazelcast.internal.serialization,javax.annotation",
+ com.hazelcast.hotrestart;version="4.1.1",
+ com.hazelcast.instance;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.instance.impl;version="4.1.1";
   uses:="com.hazelcast.auditlog,
    com.hazelcast.cache.impl,
    com.hazelcast.cardinality,
@@ -1609,8 +1610,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.internal;version="4.1.0",
- com.hazelcast.internal.adapter;version="4.1.0";
+ com.hazelcast.internal;version="4.1.1",
+ com.hazelcast.internal.adapter;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.core,
    com.hazelcast.map,
@@ -1619,7 +1620,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.expiry,
    javax.cache.integration,
    javax.cache.processor",
- com.hazelcast.internal.ascii;version="4.1.0";
+ com.hazelcast.internal.ascii;version="4.1.1";
   uses:="com.hazelcast.instance.impl,
    com.hazelcast.internal.ascii.memcache,
    com.hazelcast.internal.networking,
@@ -1627,13 +1628,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.server,
    com.hazelcast.nio.serialization",
- com.hazelcast.internal.ascii.memcache;version="4.1.0";
+ com.hazelcast.internal.ascii.memcache;version="4.1.1";
   uses:="com.hazelcast.internal.ascii,
    com.hazelcast.internal.nio.ascii,
    com.hazelcast.logging,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization",
- com.hazelcast.internal.ascii.rest;version="4.1.0";
+ com.hazelcast.internal.ascii.rest;version="4.1.1";
   uses:="com.hazelcast.instance.impl,
    com.hazelcast.internal.ascii,
    com.hazelcast.internal.json,
@@ -1643,7 +1644,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.internal.cluster;version="4.1.0";
+ com.hazelcast.internal.cluster;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.instance,
@@ -1651,8 +1652,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.version",
- com.hazelcast.internal.cluster.fd;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.spi.properties",
- com.hazelcast.internal.cluster.impl;version="4.1.0";
+ com.hazelcast.internal.cluster.fd;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.spi.properties",
+ com.hazelcast.internal.cluster.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.config,
@@ -1681,7 +1682,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.internal.cluster.impl.operations;version="4.1.0";
+ com.hazelcast.internal.cluster.impl.operations;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.cluster,
    com.hazelcast.internal.cluster.impl,
@@ -1692,7 +1693,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.version",
- com.hazelcast.internal.config;version="4.1.0";
+ com.hazelcast.internal.config;version="4.1.1";
   uses:="com.hazelcast.cache.impl.event,
    com.hazelcast.collection,
    com.hazelcast.config,
@@ -1716,9 +1717,9 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.cache.expiry,
    javax.cache.integration,
    org.w3c.dom",
- com.hazelcast.internal.config.override;version="4.1.0";uses:="com.hazelcast.client.config,com.hazelcast.config",
- com.hazelcast.internal.config.yaml;version="4.1.0";uses:="com.hazelcast.internal.yaml,org.w3c.dom",
- com.hazelcast.internal.crdt;version="4.1.0";
+ com.hazelcast.internal.config.override;version="4.1.1";uses:="com.hazelcast.client.config,com.hazelcast.config",
+ com.hazelcast.internal.config.yaml;version="4.1.1";uses:="com.hazelcast.internal.yaml,org.w3c.dom",
+ com.hazelcast.internal.crdt;version="4.1.1";
   uses:="com.hazelcast.cluster.impl,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.serialization,
@@ -1727,7 +1728,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.crdt.pncounter;version="4.1.0";
+ com.hazelcast.internal.crdt.pncounter;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.core,
@@ -1741,12 +1742,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.internal.crdt.pncounter.operations;version="4.1.0";
+ com.hazelcast.internal.crdt.pncounter.operations;version="4.1.1";
   uses:="com.hazelcast.cluster.impl,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.diagnostics;version="4.1.0";
+ com.hazelcast.internal.diagnostics;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance.impl,
@@ -1764,7 +1765,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.properties,
    com.hazelcast.version",
- com.hazelcast.internal.dynamicconfig;version="4.1.0";
+ com.hazelcast.internal.dynamicconfig;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.config.cp,
    com.hazelcast.config.security,
@@ -1780,12 +1781,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.properties,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.internal.dynamicconfig.search;version="4.1.0";
+ com.hazelcast.internal.dynamicconfig.search;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.dynamicconfig,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.internal.eviction;version="4.1.0";
+ com.hazelcast.internal.eviction;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -1798,12 +1799,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.properties",
- com.hazelcast.internal.eviction.impl.comparator;version="4.1.0";uses:="com.hazelcast.internal.serialization,com.hazelcast.spi.eviction",
- com.hazelcast.internal.eviction.impl.evaluator;version="4.1.0";uses:="com.hazelcast.internal.eviction,com.hazelcast.spi.eviction",
- com.hazelcast.internal.eviction.impl.strategy.sampling;version="4.1.0";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.eviction.impl.evaluator",
- com.hazelcast.internal.hotrestart;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.hotrestart,com.hazelcast.internal.management.dto",
- com.hazelcast.internal.iteration;version="4.1.0",
- com.hazelcast.internal.jmx;version="4.1.0";
+ com.hazelcast.internal.eviction.impl.comparator;version="4.1.1";uses:="com.hazelcast.internal.serialization,com.hazelcast.spi.eviction",
+ com.hazelcast.internal.eviction.impl.evaluator;version="4.1.1";uses:="com.hazelcast.internal.eviction,com.hazelcast.spi.eviction",
+ com.hazelcast.internal.eviction.impl.strategy.sampling;version="4.1.1";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.eviction.impl.evaluator",
+ com.hazelcast.internal.hotrestart;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.hotrestart,com.hazelcast.internal.management.dto",
+ com.hazelcast.internal.iteration;version="4.1.1",
+ com.hazelcast.internal.jmx;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.core,
    com.hazelcast.cp,
@@ -1818,12 +1819,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.topic.impl.reliable,
    com.hazelcast.wan.impl,
    javax.management",
- com.hazelcast.internal.jmx.suppliers;version="4.1.0";
+ com.hazelcast.internal.jmx.suppliers;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.map,
    com.hazelcast.multimap,
    com.hazelcast.replicatedmap",
- com.hazelcast.internal.journal;version="4.1.0";
+ com.hazelcast.internal.journal;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -1833,8 +1834,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.ringbuffer,
    com.hazelcast.ringbuffer.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.json;version="4.1.0";uses:="com.hazelcast.internal.serialization",
- com.hazelcast.internal.locksupport;version="4.1.0";
+ com.hazelcast.internal.json;version="4.1.1";uses:="com.hazelcast.internal.serialization",
+ com.hazelcast.internal.locksupport;version="4.1.1";
   uses:="com.hazelcast.internal.partition,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.services,
@@ -1846,14 +1847,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.locksupport.operations;version="4.1.0";
+ com.hazelcast.internal.locksupport.operations;version="4.1.1";
   uses:="com.hazelcast.internal.locksupport,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.services,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.longregister;version="4.1.0";
+ com.hazelcast.internal.longregister;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.internal.partition,
@@ -1864,25 +1865,25 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.impl.operationservice.impl,
    com.hazelcast.spi.impl.servicemanager",
- com.hazelcast.internal.longregister.client;version="4.1.0";
+ com.hazelcast.internal.longregister.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.spi,
    com.hazelcast.core,
    com.hazelcast.cp,
    com.hazelcast.spi.impl",
- com.hazelcast.internal.longregister.client.codec;version="4.1.0";uses:="com.hazelcast.client.impl.protocol",
- com.hazelcast.internal.longregister.client.task;version="4.1.0";
+ com.hazelcast.internal.longregister.client.codec;version="4.1.1";uses:="com.hazelcast.client.impl.protocol",
+ com.hazelcast.internal.longregister.client.task;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.task,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.longregister.client.codec,
    com.hazelcast.internal.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.longregister.operations;version="4.1.0";
+ com.hazelcast.internal.longregister.operations;version="4.1.1";
   uses:="com.hazelcast.internal.longregister,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.management;version="4.1.0";
+ com.hazelcast.internal.management;version="4.1.1";
   uses:="com.hazelcast.client.impl,
    com.hazelcast.core,
    com.hazelcast.instance.impl,
@@ -1895,14 +1896,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    javax.annotation,
    javax.script",
- com.hazelcast.internal.management.dto;version="4.1.0";
+ com.hazelcast.internal.management.dto;version="4.1.1";
   uses:="com.hazelcast.client,
    com.hazelcast.config,
    com.hazelcast.internal.json,
    com.hazelcast.internal.management.events,
    com.hazelcast.json.internal",
- com.hazelcast.internal.management.events;version="4.1.0";uses:="com.hazelcast.internal.json",
- com.hazelcast.internal.management.operation;version="4.1.0";
+ com.hazelcast.internal.management.events;version="4.1.1";uses:="com.hazelcast.internal.json",
+ com.hazelcast.internal.management.operation;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cluster,
    com.hazelcast.config,
@@ -1915,11 +1916,11 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.wan,
    javax.cache.expiry,
    javax.cache.processor",
- com.hazelcast.internal.memory;version="4.1.0";uses:="com.hazelcast.internal.metrics,com.hazelcast.internal.nio",
- com.hazelcast.internal.memory.impl;version="4.1.0";uses:="com.hazelcast.internal.memory,sun.misc",
- com.hazelcast.internal.metrics;version="4.1.0";uses:="com.hazelcast.internal.metrics.collectors,javax.annotation",
- com.hazelcast.internal.metrics.collectors;version="4.1.0";uses:="com.hazelcast.internal.metrics",
- com.hazelcast.internal.metrics.impl;version="4.1.0";
+ com.hazelcast.internal.memory;version="4.1.1";uses:="com.hazelcast.internal.metrics,com.hazelcast.internal.nio",
+ com.hazelcast.internal.memory.impl;version="4.1.1";uses:="com.hazelcast.internal.memory,sun.misc",
+ com.hazelcast.internal.metrics;version="4.1.1";uses:="com.hazelcast.internal.metrics.collectors,javax.annotation",
+ com.hazelcast.internal.metrics.collectors;version="4.1.1";uses:="com.hazelcast.internal.metrics",
+ com.hazelcast.internal.metrics.impl;version="4.1.1";
   uses:="com.hazelcast.client.config,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -1933,8 +1934,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.metrics.jmx;version="4.1.0";uses:="com.hazelcast.internal.metrics,javax.management",
- com.hazelcast.internal.metrics.managementcenter;version="4.1.0";
+ com.hazelcast.internal.metrics.jmx;version="4.1.1";uses:="com.hazelcast.internal.metrics,javax.management",
+ com.hazelcast.internal.metrics.managementcenter;version="4.1.1";
   uses:="com.hazelcast.internal.metrics,
    com.hazelcast.internal.serialization,
    com.hazelcast.logging,
@@ -1942,8 +1943,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.internal.metrics.metricsets;version="4.1.0";uses:="com.hazelcast.internal.metrics",
- com.hazelcast.internal.monitor;version="4.1.0";
+ com.hazelcast.internal.metrics.metricsets;version="4.1.1";uses:="com.hazelcast.internal.metrics",
+ com.hazelcast.internal.monitor;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.hotrestart,
    com.hazelcast.instance,
@@ -1953,7 +1954,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.version,
    com.hazelcast.wan,
    com.hazelcast.wan.impl",
- com.hazelcast.internal.monitor.impl;version="4.1.0";
+ com.hazelcast.internal.monitor.impl;version="4.1.1";
   uses:="com.hazelcast.cache,
    com.hazelcast.cluster,
    com.hazelcast.collection,
@@ -1977,7 +1978,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.version,
    com.hazelcast.wan,
    com.hazelcast.wan.impl",
- com.hazelcast.internal.nearcache;version="4.1.0";
+ com.hazelcast.internal.nearcache;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.adapter,
    com.hazelcast.internal.eviction,
@@ -1987,7 +1988,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.nearcache.impl;version="4.1.0";
+ com.hazelcast.internal.nearcache.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.adapter,
    com.hazelcast.internal.eviction,
@@ -1998,7 +1999,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.executionservice,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.nearcache.impl.invalidation;version="4.1.0";
+ com.hazelcast.internal.nearcache.impl.invalidation;version="4.1.1";
   uses:="com.hazelcast.client.impl.protocol,
    com.hazelcast.cluster,
    com.hazelcast.core,
@@ -2013,14 +2014,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.executionservice,
    com.hazelcast.spi.properties",
- com.hazelcast.internal.nearcache.impl.maxsize;version="4.1.0";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.nearcache.impl",
- com.hazelcast.internal.nearcache.impl.preloader;version="4.1.0";
+ com.hazelcast.internal.nearcache.impl.maxsize;version="4.1.1";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.nearcache.impl",
+ com.hazelcast.internal.nearcache.impl.preloader;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.adapter,
    com.hazelcast.internal.monitor.impl,
    com.hazelcast.internal.serialization",
- com.hazelcast.internal.nearcache.impl.record;version="4.1.0";uses:="com.hazelcast.internal.nearcache,com.hazelcast.internal.serialization",
- com.hazelcast.internal.nearcache.impl.store;version="4.1.0";
+ com.hazelcast.internal.nearcache.impl.record;version="4.1.1";uses:="com.hazelcast.internal.nearcache,com.hazelcast.internal.serialization",
+ com.hazelcast.internal.nearcache.impl.store;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.adapter,
    com.hazelcast.internal.eviction,
@@ -2035,8 +2036,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.util,
    com.hazelcast.nearcache,
    javax.annotation",
- com.hazelcast.internal.networking;version="4.1.0",
- com.hazelcast.internal.networking.nio;version="4.1.0";
+ com.hazelcast.internal.networking;version="4.1.1",
+ com.hazelcast.internal.networking.nio;version="4.1.1";
   uses:="com.hazelcast.internal.metrics,
    com.hazelcast.internal.networking,
    com.hazelcast.internal.networking.nio.iobalancer,
@@ -2046,8 +2047,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.util.executor,
    com.hazelcast.logging,
    com.hazelcast.spi.impl.operationexecutor",
- com.hazelcast.internal.networking.nio.iobalancer;version="4.1.0";uses:="com.hazelcast.internal.networking.nio,com.hazelcast.logging",
- com.hazelcast.internal.nio;version="4.1.0";
+ com.hazelcast.internal.networking.nio.iobalancer;version="4.1.1";uses:="com.hazelcast.internal.networking.nio,com.hazelcast.logging",
+ com.hazelcast.internal.nio;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.internal.networking,
@@ -2058,13 +2059,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    javax.annotation",
- com.hazelcast.internal.nio.ascii;version="4.1.0";
+ com.hazelcast.internal.nio.ascii;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.ascii,
    com.hazelcast.internal.networking,
    com.hazelcast.internal.server,
    com.hazelcast.internal.server.tcp",
- com.hazelcast.internal.partition;version="4.1.0";
+ com.hazelcast.internal.partition;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.partition.impl,
@@ -2079,7 +2080,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.partitiongroup,
    javax.annotation",
- com.hazelcast.internal.partition.impl;version="4.1.0";
+ com.hazelcast.internal.partition.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.cluster,
@@ -2095,12 +2096,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.internal.partition.membergroup;version="4.1.0";
+ com.hazelcast.internal.partition.membergroup;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.spi.discovery.integration,
    com.hazelcast.spi.partitiongroup",
- com.hazelcast.internal.partition.operation;version="4.1.0";
+ com.hazelcast.internal.partition.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.partition.impl,
@@ -2109,7 +2110,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization.impl,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.serialization;version="4.1.0";
+ com.hazelcast.internal.serialization;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.nio,
@@ -2118,7 +2119,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.partition",
- com.hazelcast.internal.serialization.impl;version="4.1.0";
+ com.hazelcast.internal.serialization.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.json,
@@ -2137,9 +2138,9 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.internal.serialization.impl.bufferpool;version="4.1.0";uses:="com.hazelcast.internal.nio,com.hazelcast.internal.serialization",
- com.hazelcast.internal.serialization.impl.defaultserializers;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.internal.serialization.impl.portable;version="4.1.0";
+ com.hazelcast.internal.serialization.impl.bufferpool;version="4.1.1";uses:="com.hazelcast.internal.nio,com.hazelcast.internal.serialization",
+ com.hazelcast.internal.serialization.impl.defaultserializers;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.internal.serialization.impl.portable;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
@@ -2147,7 +2148,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.internal.server;version="4.1.0";
+ com.hazelcast.internal.server;version="4.1.1";
   uses:="com.hazelcast.auditlog,
    com.hazelcast.client.impl,
    com.hazelcast.cluster,
@@ -2162,7 +2163,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.server.tcp;version="4.1.0";
+ com.hazelcast.internal.server.tcp;version="4.1.1";
   uses:="com.hazelcast.auditlog,
    com.hazelcast.client.impl,
    com.hazelcast.cluster,
@@ -2182,7 +2183,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.internal.services;version="4.1.0";
+ com.hazelcast.internal.services;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.config,
@@ -2199,8 +2200,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl,
    com.hazelcast.wan.impl,
    org.w3c.dom",
- com.hazelcast.internal.usercodedeployment;version="4.1.0";uses:="com.hazelcast.internal.services,com.hazelcast.internal.usercodedeployment.impl,com.hazelcast.spi.impl",
- com.hazelcast.internal.usercodedeployment.impl;version="4.1.0";
+ com.hazelcast.internal.usercodedeployment;version="4.1.1";uses:="com.hazelcast.internal.services,com.hazelcast.internal.usercodedeployment.impl,com.hazelcast.spi.impl",
+ com.hazelcast.internal.usercodedeployment.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.internal.serialization,
@@ -2209,13 +2210,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl",
- com.hazelcast.internal.usercodedeployment.impl.filter;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.config,com.hazelcast.internal.util.filter",
- com.hazelcast.internal.usercodedeployment.impl.operation;version="4.1.0";
+ com.hazelcast.internal.usercodedeployment.impl.filter;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.config,com.hazelcast.internal.util.filter",
+ com.hazelcast.internal.usercodedeployment.impl.operation;version="4.1.1";
   uses:="com.hazelcast.internal.usercodedeployment.impl,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.internal.util;version="4.1.0";
+ com.hazelcast.internal.util;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.iteration,
@@ -2231,43 +2232,47 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.version,
-   javax.annotation",
- com.hazelcast.internal.util.collection;version="4.1.0";
+   javax.annotation,
+   javax.xml.parsers,
+   javax.xml.transform,
+   javax.xml.validation,
+   org.xml.sax",
+ com.hazelcast.internal.util.collection;version="4.1.1";
   uses:="com.hazelcast.internal.memory,
    com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.function",
- com.hazelcast.internal.util.comparators;version="4.1.0";uses:="com.hazelcast.config,com.hazelcast.internal.serialization",
- com.hazelcast.internal.util.concurrent;version="4.1.0",
- com.hazelcast.internal.util.counters;version="4.1.0",
- com.hazelcast.internal.util.executor;version="4.1.0";
+ com.hazelcast.internal.util.comparators;version="4.1.1";uses:="com.hazelcast.config,com.hazelcast.internal.serialization",
+ com.hazelcast.internal.util.concurrent;version="4.1.1",
+ com.hazelcast.internal.util.counters;version="4.1.1",
+ com.hazelcast.internal.util.executor;version="4.1.1";
   uses:="com.hazelcast.internal.metrics,
    com.hazelcast.internal.util,
    com.hazelcast.logging,
    com.hazelcast.spi.impl,
    javax.annotation",
- com.hazelcast.internal.util.filter;version="4.1.0",
- com.hazelcast.internal.util.function;version="4.1.0",
- com.hazelcast.internal.util.futures;version="4.1.0";uses:="com.hazelcast.spi.impl",
- com.hazelcast.internal.util.graph;version="4.1.0",
- com.hazelcast.internal.util.hashslot;version="4.1.0";uses:="com.hazelcast.internal.nio",
- com.hazelcast.internal.util.hashslot.impl;version="4.1.0";uses:="com.hazelcast.internal.memory,com.hazelcast.internal.util.hashslot",
- com.hazelcast.internal.util.iterator;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.internal.cluster,com.hazelcast.internal.util.futures",
- com.hazelcast.internal.util.scheduler;version="4.1.0";uses:="com.hazelcast.spi.impl.executionservice",
- com.hazelcast.internal.util.sort;version="4.1.0";uses:="com.hazelcast.internal.memory",
- com.hazelcast.internal.yaml;version="4.1.0";uses:="com.hazelcast.core",
- com.hazelcast.json.internal;version="4.1.0";uses:="com.hazelcast.internal.json,com.hazelcast.internal.serialization.impl,com.hazelcast.query.impl.getters",
- com.hazelcast.logging;version="4.1.0";
+ com.hazelcast.internal.util.filter;version="4.1.1",
+ com.hazelcast.internal.util.function;version="4.1.1",
+ com.hazelcast.internal.util.futures;version="4.1.1";uses:="com.hazelcast.spi.impl",
+ com.hazelcast.internal.util.graph;version="4.1.1",
+ com.hazelcast.internal.util.hashslot;version="4.1.1";uses:="com.hazelcast.internal.nio",
+ com.hazelcast.internal.util.hashslot.impl;version="4.1.1";uses:="com.hazelcast.internal.memory,com.hazelcast.internal.util.hashslot",
+ com.hazelcast.internal.util.iterator;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.internal.cluster,com.hazelcast.internal.util.futures",
+ com.hazelcast.internal.util.scheduler;version="4.1.1";uses:="com.hazelcast.spi.impl.executionservice",
+ com.hazelcast.internal.util.sort;version="4.1.1";uses:="com.hazelcast.internal.memory",
+ com.hazelcast.internal.yaml;version="4.1.1";uses:="com.hazelcast.core",
+ com.hazelcast.json.internal;version="4.1.1";uses:="com.hazelcast.internal.json,com.hazelcast.internal.serialization.impl,com.hazelcast.query.impl.getters",
+ com.hazelcast.logging;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.spi.annotation,
    javax.annotation,
    org.apache.logging.log4j.spi",
- com.hazelcast.logging.impl;version="4.1.0";
+ com.hazelcast.logging.impl;version="4.1.1";
   uses:="com.hazelcast.cluster.impl,
    com.hazelcast.instance,
    com.hazelcast.logging,
    javax.annotation",
- com.hazelcast.map;version="4.1.0";
+ com.hazelcast.map;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.cluster,
    com.hazelcast.config,
@@ -2280,7 +2285,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    com.hazelcast.spi.eviction,
    javax.annotation",
- com.hazelcast.map.impl;version="4.1.0";
+ com.hazelcast.map.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -2326,7 +2331,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.map.impl.event;version="4.1.0";
+ com.hazelcast.map.impl.event;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.partition,
@@ -2342,7 +2347,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.properties,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.map.impl.eviction;version="4.1.0";
+ com.hazelcast.map.impl.eviction;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.eviction,
    com.hazelcast.internal.partition,
@@ -2354,7 +2359,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.eviction,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.iterator;version="4.1.0";
+ com.hazelcast.map.impl.iterator;version="4.1.1";
   uses:="com.hazelcast.internal.iteration,
    com.hazelcast.internal.serialization,
    com.hazelcast.map,
@@ -2364,7 +2369,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.projection,
    com.hazelcast.query",
- com.hazelcast.map.impl.journal;version="4.1.0";
+ com.hazelcast.map.impl.journal;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.journal,
@@ -2378,7 +2383,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.ringbuffer.impl,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.mapstore;version="4.1.0";
+ com.hazelcast.map.impl.mapstore;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.serialization,
    com.hazelcast.logging,
@@ -2386,15 +2391,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.map.impl.mapstore.writebehind,
    com.hazelcast.map.impl.mapstore.writebehind.entry,
    com.hazelcast.spi.impl",
- com.hazelcast.map.impl.mapstore.writebehind;version="4.1.0";
+ com.hazelcast.map.impl.mapstore.writebehind;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.map.impl.mapstore,
    com.hazelcast.map.impl.mapstore.writebehind.entry,
    com.hazelcast.spi.properties,
    javax.annotation",
- com.hazelcast.map.impl.mapstore.writebehind.entry;version="4.1.0";uses:="javax.annotation",
- com.hazelcast.map.impl.mapstore.writethrough;version="4.1.0";uses:="com.hazelcast.internal.serialization,com.hazelcast.map.impl.mapstore,com.hazelcast.map.impl.mapstore.writebehind.entry",
- com.hazelcast.map.impl.nearcache;version="4.1.0";
+ com.hazelcast.map.impl.mapstore.writebehind.entry;version="4.1.1";uses:="javax.annotation",
+ com.hazelcast.map.impl.mapstore.writethrough;version="4.1.1";uses:="com.hazelcast.internal.serialization,com.hazelcast.map.impl.mapstore,com.hazelcast.map.impl.mapstore.writebehind.entry",
+ com.hazelcast.map.impl.nearcache;version="4.1.1";
   uses:="com.hazelcast.internal.nearcache,
    com.hazelcast.internal.nearcache.impl,
    com.hazelcast.internal.nearcache.impl.invalidation,
@@ -2402,7 +2407,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.serialization,
    com.hazelcast.map.impl,
    com.hazelcast.spi.impl",
- com.hazelcast.map.impl.nearcache.invalidation;version="4.1.0";
+ com.hazelcast.map.impl.nearcache.invalidation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.cluster,
    com.hazelcast.internal.nearcache.impl.invalidation,
@@ -2413,7 +2418,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.operation;version="4.1.0";
+ com.hazelcast.map.impl.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -2441,13 +2446,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.merge,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.map.impl.proxy;version="4.1.0";
+ com.hazelcast.map.impl.proxy;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.journal,
    com.hazelcast.internal.nearcache,
    com.hazelcast.internal.serialization,
+   com.hazelcast.internal.util.collection,
    com.hazelcast.map,
    com.hazelcast.map.impl,
    com.hazelcast.map.impl.nearcache.invalidation,
@@ -2460,7 +2466,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.map.impl.query;version="4.1.0";
+ com.hazelcast.map.impl.query;version="4.1.1";
   uses:="com.hazelcast.aggregation,
    com.hazelcast.config,
    com.hazelcast.internal.cluster,
@@ -2484,7 +2490,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query.impl.predicates,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.querycache;version="4.1.0";
+ com.hazelcast.map.impl.querycache;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.internal.serialization,
@@ -2496,7 +2502,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query.impl.getters,
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.querycache.accumulator;version="4.1.0";
+ com.hazelcast.map.impl.querycache.accumulator;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.logging,
    com.hazelcast.map.impl.querycache,
@@ -2505,7 +2511,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.nio.serialization,
    com.hazelcast.query,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.querycache.event;version="4.1.0";
+ com.hazelcast.map.impl.querycache.event;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -2513,15 +2519,15 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.map.impl.event,
    com.hazelcast.map.impl.querycache.event.sequence,
    com.hazelcast.nio",
- com.hazelcast.map.impl.querycache.event.sequence;version="4.1.0",
- com.hazelcast.map.impl.querycache.publisher;version="4.1.0";
+ com.hazelcast.map.impl.querycache.event.sequence;version="4.1.1",
+ com.hazelcast.map.impl.querycache.publisher;version="4.1.1";
   uses:="com.hazelcast.internal.util,
    com.hazelcast.map.impl.querycache,
    com.hazelcast.map.impl.querycache.accumulator,
    com.hazelcast.map.impl.querycache.event.sequence,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.eventservice",
- com.hazelcast.map.impl.querycache.subscriber;version="4.1.0";
+ com.hazelcast.map.impl.querycache.subscriber;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -2542,23 +2548,23 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    com.hazelcast.query.impl.getters,
    com.hazelcast.spi.impl.eventservice",
- com.hazelcast.map.impl.querycache.subscriber.operation;version="4.1.0";
+ com.hazelcast.map.impl.querycache.subscriber.operation;version="4.1.1";
   uses:="com.hazelcast.map.impl.operation,
    com.hazelcast.map.impl.querycache.accumulator,
    com.hazelcast.nio,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.map.impl.querycache.subscriber.record;version="4.1.0";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.serialization",
- com.hazelcast.map.impl.querycache.utils;version="4.1.0";
+ com.hazelcast.map.impl.querycache.subscriber.record;version="4.1.1";uses:="com.hazelcast.internal.eviction,com.hazelcast.internal.serialization",
+ com.hazelcast.map.impl.querycache.utils;version="4.1.1";
   uses:="com.hazelcast.map.impl.querycache,
    com.hazelcast.map.impl.querycache.accumulator,
    com.hazelcast.map.impl.querycache.publisher,
    javax.annotation",
- com.hazelcast.map.impl.record;version="4.1.0";
+ com.hazelcast.map.impl.record;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.query.impl",
- com.hazelcast.map.impl.recordstore;version="4.1.0";
+ com.hazelcast.map.impl.recordstore;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -2581,7 +2587,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.merge,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.map.impl.tx;version="4.1.0";
+ com.hazelcast.map.impl.tx;version="4.1.1";
   uses:="com.hazelcast.internal.nearcache.impl,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.serialization,
@@ -2598,7 +2604,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl,
    javax.annotation",
- com.hazelcast.map.impl.wan;version="4.1.0";
+ com.hazelcast.map.impl.wan;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
@@ -2607,10 +2613,10 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.wan,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.map.listener;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.map",
- com.hazelcast.memory;version="4.1.0",
- com.hazelcast.multimap;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.map,javax.annotation",
- com.hazelcast.multimap.impl;version="4.1.0";
+ com.hazelcast.map.listener;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.map",
+ com.hazelcast.memory;version="4.1.1",
+ com.hazelcast.multimap;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.map,javax.annotation",
+ com.hazelcast.multimap.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.locksupport,
@@ -2632,7 +2638,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl,
    javax.annotation",
- com.hazelcast.multimap.impl.operations;version="4.1.0";
+ com.hazelcast.multimap.impl.operations;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -2645,7 +2651,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.impl.operationservice.impl.operations,
    com.hazelcast.spi.merge",
- com.hazelcast.multimap.impl.txn;version="4.1.0";
+ com.hazelcast.multimap.impl.txn;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.serialization,
    com.hazelcast.multimap.impl,
@@ -2655,35 +2661,35 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl",
- com.hazelcast.nearcache;version="4.1.0";uses:="com.hazelcast.instance",
- com.hazelcast.nio;version="4.1.0";uses:="com.hazelcast.version",
- com.hazelcast.nio.serialization;version="4.1.0";
+ com.hazelcast.nearcache;version="4.1.1";uses:="com.hazelcast.instance",
+ com.hazelcast.nio;version="4.1.1";uses:="com.hazelcast.version",
+ com.hazelcast.nio.serialization;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.serialization.impl.portable,
    com.hazelcast.nio,
    com.hazelcast.spi.annotation,
    javax.annotation",
- com.hazelcast.nio.serialization.impl;version="4.1.0";uses:="com.hazelcast.nio.serialization,com.hazelcast.version",
- com.hazelcast.nio.ssl;version="4.1.0";uses:="javax.net.ssl",
- com.hazelcast.osgi;version="4.1.0";uses:="com.hazelcast.config,com.hazelcast.core,org.osgi.framework",
- com.hazelcast.osgi.impl;version="4.1.0";uses:="com.hazelcast.osgi,javax.script,org.osgi.framework",
- com.hazelcast.partition;version="4.1.0";
+ com.hazelcast.nio.serialization.impl;version="4.1.1";uses:="com.hazelcast.nio.serialization,com.hazelcast.version",
+ com.hazelcast.nio.ssl;version="4.1.1";uses:="javax.net.ssl",
+ com.hazelcast.osgi;version="4.1.1";uses:="com.hazelcast.config,com.hazelcast.core,org.osgi.framework",
+ com.hazelcast.osgi.impl;version="4.1.1";uses:="com.hazelcast.osgi,javax.script,org.osgi.framework",
+ com.hazelcast.partition;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.partition.strategy;version="4.1.0";uses:="com.hazelcast.internal.serialization,com.hazelcast.partition",
- com.hazelcast.projection;version="4.1.0",
- com.hazelcast.projection.impl;version="4.1.0";
+ com.hazelcast.partition.strategy;version="4.1.1";uses:="com.hazelcast.internal.serialization,com.hazelcast.partition",
+ com.hazelcast.projection;version="4.1.1",
+ com.hazelcast.projection.impl;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.projection",
- com.hazelcast.query;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.instance,com.hazelcast.internal.serialization",
- com.hazelcast.query.extractor;version="4.1.0",
- com.hazelcast.query.impl;version="4.1.0";
+ com.hazelcast.query;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.instance,com.hazelcast.internal.serialization",
+ com.hazelcast.query.extractor;version="4.1.1",
+ com.hazelcast.query.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.iteration,
@@ -2699,8 +2705,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query.impl.getters,
    com.hazelcast.query.impl.predicates,
    org.w3c.dom",
- com.hazelcast.query.impl.bitmap;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.query",
- com.hazelcast.query.impl.getters;version="4.1.0";
+ com.hazelcast.query.impl.bitmap;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.query",
+ com.hazelcast.query.impl.getters;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.internal.json,
    com.hazelcast.internal.serialization,
@@ -2708,7 +2714,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.internal.util.collection,
    com.hazelcast.json.internal,
    com.hazelcast.query.impl",
- com.hazelcast.query.impl.predicates;version="4.1.0";
+ com.hazelcast.query.impl.predicates;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.internal.util,
    com.hazelcast.nio,
@@ -2716,13 +2722,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    com.hazelcast.query.impl,
    com.hazelcast.spi.properties",
- com.hazelcast.replicatedmap;version="4.1.0";
+ com.hazelcast.replicatedmap;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.map,
    com.hazelcast.query,
    javax.annotation",
- com.hazelcast.replicatedmap.impl;version="4.1.0";
+ com.hazelcast.replicatedmap.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -2740,7 +2746,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.splitbrainprotection,
    javax.annotation",
- com.hazelcast.replicatedmap.impl.operation;version="4.1.0";
+ com.hazelcast.replicatedmap.impl.operation;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.scheduler,
@@ -2752,7 +2758,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.impl.operationservice.impl.operations,
    com.hazelcast.spi.merge",
- com.hazelcast.replicatedmap.impl.record;version="4.1.0";
+ com.hazelcast.replicatedmap.impl.record;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.monitor.impl,
@@ -2766,12 +2772,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.merge",
- com.hazelcast.ringbuffer;version="4.1.0";
+ com.hazelcast.ringbuffer;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.spi.exception,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.ringbuffer.impl;version="4.1.0";
+ com.hazelcast.ringbuffer.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.partition,
@@ -2785,7 +2791,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.splitbrainprotection,
    javax.annotation",
- com.hazelcast.ringbuffer.impl.operations;version="4.1.0";
+ com.hazelcast.ringbuffer.impl.operations;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.services,
@@ -2795,13 +2801,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.ringbuffer.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.scheduledexecutor;version="4.1.0";
+ com.hazelcast.scheduledexecutor;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.exception,
    javax.annotation",
- com.hazelcast.scheduledexecutor.impl;version="4.1.0";
+ com.hazelcast.scheduledexecutor.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance.impl,
@@ -2822,14 +2828,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge,
    javax.annotation",
- com.hazelcast.scheduledexecutor.impl.operations;version="4.1.0";
+ com.hazelcast.scheduledexecutor.impl.operations;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.scheduledexecutor,
    com.hazelcast.scheduledexecutor.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.security;version="4.1.0";
+ com.hazelcast.security;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.config.security,
@@ -2844,26 +2850,26 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    javax.security.auth,
    javax.security.auth.callback,
    javax.security.auth.login",
- com.hazelcast.security.jsm;version="4.1.0",
- com.hazelcast.security.permission;version="4.1.0",
- com.hazelcast.spi;version="4.1.0";uses:="com.hazelcast.instance",
- com.hazelcast.spi.annotation;version="4.1.0",
- com.hazelcast.spi.discovery;version="4.1.0";
+ com.hazelcast.security.jsm;version="4.1.1",
+ com.hazelcast.security.permission;version="4.1.1",
+ com.hazelcast.spi;version="4.1.1";uses:="com.hazelcast.instance",
+ com.hazelcast.spi.annotation;version="4.1.1",
+ com.hazelcast.spi.discovery;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config.properties,
    com.hazelcast.logging,
    com.hazelcast.spi.partitiongroup",
- com.hazelcast.spi.discovery.impl;version="4.1.0";uses:="com.hazelcast.spi.discovery,com.hazelcast.spi.discovery.integration",
- com.hazelcast.spi.discovery.integration;version="4.1.0";uses:="com.hazelcast.config,com.hazelcast.logging,com.hazelcast.spi.discovery",
- com.hazelcast.spi.discovery.multicast;version="4.1.0";
+ com.hazelcast.spi.discovery.impl;version="4.1.1";uses:="com.hazelcast.spi.discovery,com.hazelcast.spi.discovery.integration",
+ com.hazelcast.spi.discovery.integration;version="4.1.1";uses:="com.hazelcast.config,com.hazelcast.logging,com.hazelcast.spi.discovery",
+ com.hazelcast.spi.discovery.multicast;version="4.1.1";
   uses:="com.hazelcast.config.properties,
    com.hazelcast.logging,
    com.hazelcast.spi.discovery,
    com.hazelcast.spi.partitiongroup",
- com.hazelcast.spi.discovery.multicast.impl;version="4.1.0";uses:="com.hazelcast.internal.serialization,com.hazelcast.logging,com.hazelcast.spi.discovery",
- com.hazelcast.spi.eviction;version="4.1.0",
- com.hazelcast.spi.exception;version="4.1.0";uses:="com.hazelcast.cluster,com.hazelcast.core",
- com.hazelcast.spi.impl;version="4.1.0";
+ com.hazelcast.spi.discovery.multicast.impl;version="4.1.1";uses:="com.hazelcast.internal.serialization,com.hazelcast.logging,com.hazelcast.spi.discovery",
+ com.hazelcast.spi.eviction;version="4.1.1",
+ com.hazelcast.spi.exception;version="4.1.1";uses:="com.hazelcast.cluster,com.hazelcast.core",
+ com.hazelcast.spi.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.config,
@@ -2901,13 +2907,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.version,
    com.hazelcast.wan.impl,
    javax.annotation",
- com.hazelcast.spi.impl.eventservice;version="4.1.0";
+ com.hazelcast.spi.impl.eventservice;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.nio,
    com.hazelcast.internal.services,
    com.hazelcast.nio.serialization,
    javax.annotation",
- com.hazelcast.spi.impl.eventservice.impl;version="4.1.0";
+ com.hazelcast.spi.impl.eventservice.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.internal.metrics,
@@ -2921,20 +2927,20 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.operationservice,
    javax.annotation",
- com.hazelcast.spi.impl.eventservice.impl.operations;version="4.1.0";
+ com.hazelcast.spi.impl.eventservice.impl.operations;version="4.1.1";
   uses:="com.hazelcast.internal.cluster,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.eventservice.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.spi.impl.executionservice;version="4.1.0";uses:="com.hazelcast.internal.util.executor,com.hazelcast.spi.impl",
- com.hazelcast.spi.impl.executionservice.impl;version="4.1.0";
+ com.hazelcast.spi.impl.executionservice;version="4.1.1";uses:="com.hazelcast.internal.util.executor,com.hazelcast.spi.impl",
+ com.hazelcast.spi.impl.executionservice.impl;version="4.1.1";
   uses:="com.hazelcast.internal.util.executor,
    com.hazelcast.map.impl,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.executionservice",
- com.hazelcast.spi.impl.merge;version="4.1.0";
+ com.hazelcast.spi.impl.merge;version="4.1.1";
   uses:="com.hazelcast.cache.impl.record,
    com.hazelcast.cache.impl.wan,
    com.hazelcast.cardinality.impl.hyperloglog,
@@ -2955,8 +2961,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.merge",
- com.hazelcast.spi.impl.operationexecutor;version="4.1.0";uses:="com.hazelcast.internal.nio,com.hazelcast.spi.impl,com.hazelcast.spi.impl.operationservice",
- com.hazelcast.spi.impl.operationexecutor.impl;version="4.1.0";
+ com.hazelcast.spi.impl.operationexecutor;version="4.1.1";uses:="com.hazelcast.internal.nio,com.hazelcast.spi.impl,com.hazelcast.spi.impl.operationservice",
+ com.hazelcast.spi.impl.operationexecutor.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.metrics,
@@ -2967,13 +2973,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationexecutor,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.properties",
- com.hazelcast.spi.impl.operationexecutor.slowoperationdetector;version="4.1.0";
+ com.hazelcast.spi.impl.operationexecutor.slowoperationdetector;version="4.1.1";
   uses:="com.hazelcast.internal.management.dto,
    com.hazelcast.logging,
    com.hazelcast.spi.impl.operationexecutor,
    com.hazelcast.spi.properties",
- com.hazelcast.spi.impl.operationparker;version="4.1.0";uses:="com.hazelcast.spi.impl.operationservice",
- com.hazelcast.spi.impl.operationparker.impl;version="4.1.0";
+ com.hazelcast.spi.impl.operationparker;version="4.1.1";uses:="com.hazelcast.spi.impl.operationservice",
+ com.hazelcast.spi.impl.operationparker.impl;version="4.1.1";
   uses:="com.hazelcast.cluster.impl,
    com.hazelcast.internal.metrics,
    com.hazelcast.internal.partition,
@@ -2981,7 +2987,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationparker,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.spi.impl.operationservice;version="4.1.0";
+ com.hazelcast.spi.impl.operationservice;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.management.dto,
@@ -2995,7 +3001,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.executionservice,
    com.hazelcast.spi.impl.operationservice.impl",
- com.hazelcast.spi.impl.operationservice.impl;version="4.1.0";
+ com.hazelcast.spi.impl.operationservice.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.cluster.impl,
    com.hazelcast.cp,
@@ -3015,16 +3021,16 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice.impl.responses,
    com.hazelcast.spi.impl.sequence,
    com.hazelcast.spi.properties",
- com.hazelcast.spi.impl.operationservice.impl.operations;version="4.1.0";
+ com.hazelcast.spi.impl.operationservice.impl.operations;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice",
- com.hazelcast.spi.impl.operationservice.impl.responses;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.spi.impl.proxyservice;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.internal.services",
- com.hazelcast.spi.impl.proxyservice.impl;version="4.1.0";
+ com.hazelcast.spi.impl.operationservice.impl.responses;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.spi.impl.proxyservice;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.internal.services",
+ com.hazelcast.spi.impl.proxyservice.impl;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.metrics,
    com.hazelcast.internal.services,
@@ -3034,32 +3040,32 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.eventservice,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.impl.proxyservice",
- com.hazelcast.spi.impl.proxyservice.impl.operations;version="4.1.0";
+ com.hazelcast.spi.impl.proxyservice.impl.operations;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.spi.impl.proxyservice.impl",
- com.hazelcast.spi.impl.securestore;version="4.1.0";uses:="com.hazelcast.config,com.hazelcast.core,javax.annotation",
- com.hazelcast.spi.impl.sequence;version="4.1.0";uses:="com.hazelcast.internal.util",
- com.hazelcast.spi.impl.servicemanager;version="4.1.0";uses:="com.hazelcast.spi.impl,javax.annotation",
- com.hazelcast.spi.impl.servicemanager.impl;version="4.1.0";uses:="com.hazelcast.spi.impl,com.hazelcast.spi.impl.servicemanager,javax.annotation",
- com.hazelcast.spi.impl.tenantcontrol;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.spi.tenantcontrol",
- com.hazelcast.spi.merge;version="4.1.0";
+ com.hazelcast.spi.impl.securestore;version="4.1.1";uses:="com.hazelcast.config,com.hazelcast.core,javax.annotation",
+ com.hazelcast.spi.impl.sequence;version="4.1.1";uses:="com.hazelcast.internal.util",
+ com.hazelcast.spi.impl.servicemanager;version="4.1.1";uses:="com.hazelcast.spi.impl,javax.annotation",
+ com.hazelcast.spi.impl.servicemanager.impl;version="4.1.1";uses:="com.hazelcast.spi.impl,com.hazelcast.spi.impl.servicemanager,javax.annotation",
+ com.hazelcast.spi.impl.tenantcontrol;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.spi.tenantcontrol",
+ com.hazelcast.spi.merge;version="4.1.1";
   uses:="com.hazelcast.cardinality.impl.hyperloglog,
    com.hazelcast.nio.serialization,
    com.hazelcast.ringbuffer.impl,
    com.hazelcast.scheduledexecutor.impl,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.merge",
- com.hazelcast.spi.partitiongroup;version="4.1.0";uses:="com.hazelcast.cluster",
- com.hazelcast.spi.properties;version="4.1.0";uses:="com.hazelcast.config",
- com.hazelcast.spi.tenantcontrol;version="4.1.0";uses:="com.hazelcast.spi.annotation",
- com.hazelcast.splitbrainprotection;version="4.1.0";
+ com.hazelcast.spi.partitiongroup;version="4.1.1";uses:="com.hazelcast.cluster",
+ com.hazelcast.spi.properties;version="4.1.1";uses:="com.hazelcast.config",
+ com.hazelcast.spi.tenantcontrol;version="4.1.1";uses:="com.hazelcast.spi.annotation",
+ com.hazelcast.splitbrainprotection;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.spi.exception,
    com.hazelcast.transaction,
    javax.annotation",
- com.hazelcast.splitbrainprotection.impl;version="4.1.0";
+ com.hazelcast.splitbrainprotection.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -3069,8 +3075,8 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.splitbrainprotection,
    javax.annotation",
- com.hazelcast.sql;version="4.1.0";uses:="com.hazelcast.core,com.hazelcast.spi.annotation,javax.annotation",
- com.hazelcast.sql.impl;version="4.1.0";
+ com.hazelcast.sql;version="4.1.1";uses:="com.hazelcast.core,com.hazelcast.spi.annotation,javax.annotation",
+ com.hazelcast.sql.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.nio,
@@ -3094,7 +3100,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.type,
    com.hazelcast.version,
    javax.annotation",
- com.hazelcast.sql.impl.client;version="4.1.0";
+ com.hazelcast.sql.impl.client;version="4.1.1";
   uses:="com.hazelcast.client.impl.clientside,
    com.hazelcast.client.impl.protocol,
    com.hazelcast.client.impl.protocol.codec,
@@ -3105,7 +3111,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql,
    com.hazelcast.sql.impl,
    javax.annotation",
- com.hazelcast.sql.impl.exec;version="4.1.0";
+ com.hazelcast.sql.impl.exec;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.collection,
    com.hazelcast.sql.impl,
@@ -3117,21 +3123,21 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.plan.node.io,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.worker",
- com.hazelcast.sql.impl.exec.io;version="4.1.0";
+ com.hazelcast.sql.impl.exec.io;version="4.1.1";
   uses:="com.hazelcast.sql.impl,
    com.hazelcast.sql.impl.exec,
    com.hazelcast.sql.impl.exec.io.flowcontrol,
    com.hazelcast.sql.impl.operation,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.worker",
- com.hazelcast.sql.impl.exec.io.flowcontrol;version="4.1.0";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.operation",
- com.hazelcast.sql.impl.exec.io.flowcontrol.simple;version="4.1.0";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.exec.io.flowcontrol,com.hazelcast.sql.impl.operation",
- com.hazelcast.sql.impl.exec.root;version="4.1.0";
+ com.hazelcast.sql.impl.exec.io.flowcontrol;version="4.1.1";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.operation",
+ com.hazelcast.sql.impl.exec.io.flowcontrol.simple;version="4.1.1";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.exec.io.flowcontrol,com.hazelcast.sql.impl.operation",
+ com.hazelcast.sql.impl.exec.root;version="4.1.1";
   uses:="com.hazelcast.sql.impl,
    com.hazelcast.sql.impl.exec,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.worker",
- com.hazelcast.sql.impl.exec.scan;version="4.1.0";
+ com.hazelcast.sql.impl.exec.scan;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.collection,
    com.hazelcast.map.impl,
@@ -3142,7 +3148,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.type,
    com.hazelcast.sql.impl.worker",
- com.hazelcast.sql.impl.exec.scan.index;version="4.1.0";
+ com.hazelcast.sql.impl.exec.scan.index;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.collection,
    com.hazelcast.map.impl,
@@ -3153,36 +3159,37 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.expression,
    com.hazelcast.sql.impl.extract,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.expression;version="4.1.0";
+ com.hazelcast.sql.impl.expression;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.expression.math;version="4.1.0";
-  uses:="com.hazelcast.nio,
-   com.hazelcast.nio.serialization,
-   com.hazelcast.sql.impl.expression,
-   com.hazelcast.sql.impl.row,
-   com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.expression.predicate;version="4.1.0";
+ com.hazelcast.sql.impl.expression.math;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.sql.impl.expression,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.expression.string;version="4.1.0";
+ com.hazelcast.sql.impl.expression.predicate;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.sql.impl.expression,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.extract;version="4.1.0";
+ com.hazelcast.sql.impl.expression.string;version="4.1.1";
+  uses:="com.hazelcast.nio,
+   com.hazelcast.nio.serialization,
+   com.hazelcast.sql.impl.expression,
+   com.hazelcast.sql.impl.row,
+   com.hazelcast.sql.impl.type",
+ com.hazelcast.sql.impl.extract;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.query.impl.getters,
-   com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.operation;version="4.1.0";
+   com.hazelcast.sql.impl.type,
+   javax.annotation",
+ com.hazelcast.sql.impl.operation;version="4.1.1";
   uses:="com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.util.collection,
@@ -3196,22 +3203,22 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.plan.node,
    com.hazelcast.sql.impl.row,
    com.hazelcast.sql.impl.state",
- com.hazelcast.sql.impl.optimizer;version="4.1.0";uses:="com.hazelcast.sql.impl.schema,com.hazelcast.sql.impl.security",
- com.hazelcast.sql.impl.plan;version="4.1.0";
+ com.hazelcast.sql.impl.optimizer;version="4.1.1";uses:="com.hazelcast.sql.impl.schema,com.hazelcast.sql.impl.security",
+ com.hazelcast.sql.impl.plan;version="4.1.1";
   uses:="com.hazelcast.internal.util.collection,
    com.hazelcast.sql,
    com.hazelcast.sql.impl,
    com.hazelcast.sql.impl.plan.cache,
    com.hazelcast.sql.impl.plan.node,
    com.hazelcast.sql.impl.security",
- com.hazelcast.sql.impl.plan.cache;version="4.1.0";
+ com.hazelcast.sql.impl.plan.cache;version="4.1.1";
   uses:="com.hazelcast.internal.util.collection,
    com.hazelcast.spi.impl,
    com.hazelcast.sql.impl.extract,
    com.hazelcast.sql.impl.optimizer,
    com.hazelcast.sql.impl.schema,
    com.hazelcast.sql.impl.schema.map",
- com.hazelcast.sql.impl.plan.node;version="4.1.0";
+ com.hazelcast.sql.impl.plan.node;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.sql.impl.exec.scan.index,
@@ -3219,14 +3226,14 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.extract,
    com.hazelcast.sql.impl.plan.node.io,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.plan.node.io;version="4.1.0";
+ com.hazelcast.sql.impl.plan.node.io;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.sql.impl.plan.node,
    com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.row;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.sql.impl.schema;version="4.1.0";uses:="com.hazelcast.sql.impl.plan.cache,com.hazelcast.sql.impl.type,javax.annotation",
- com.hazelcast.sql.impl.schema.map;version="4.1.0";
+ com.hazelcast.sql.impl.row;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.sql.impl.schema;version="4.1.1";uses:="com.hazelcast.sql.impl.plan.cache,com.hazelcast.sql.impl.type,javax.annotation",
+ com.hazelcast.sql.impl.schema.map;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.map.impl,
@@ -3238,13 +3245,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.schema,
    com.hazelcast.sql.impl.type,
    javax.annotation",
- com.hazelcast.sql.impl.schema.map.sample;version="4.1.0";
+ com.hazelcast.sql.impl.schema.map.sample;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.sql.impl.extract,
    com.hazelcast.sql.impl.schema,
    com.hazelcast.sql.impl.schema.map",
- com.hazelcast.sql.impl.security;version="4.1.0",
- com.hazelcast.sql.impl.state;version="4.1.0";
+ com.hazelcast.sql.impl.security;version="4.1.1",
+ com.hazelcast.sql.impl.state;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.sql,
    com.hazelcast.sql.impl,
@@ -3254,9 +3261,9 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.plan.cache,
    com.hazelcast.sql.impl.worker,
    javax.annotation",
- com.hazelcast.sql.impl.type;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.sql.impl.type.converter",
- com.hazelcast.sql.impl.type.converter;version="4.1.0";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.type",
- com.hazelcast.sql.impl.worker;version="4.1.0";
+ com.hazelcast.sql.impl.type;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization,com.hazelcast.sql.impl.type.converter",
+ com.hazelcast.sql.impl.type.converter;version="4.1.1";uses:="com.hazelcast.sql.impl,com.hazelcast.sql.impl.type",
+ com.hazelcast.sql.impl.worker;version="4.1.1";
   uses:="com.hazelcast.internal.nio,
    com.hazelcast.internal.serialization,
    com.hazelcast.logging,
@@ -3266,12 +3273,12 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.sql.impl.expression,
    com.hazelcast.sql.impl.operation,
    com.hazelcast.sql.impl.state",
- com.hazelcast.topic;version="4.1.0";
+ com.hazelcast.topic;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.instance,
    javax.annotation",
- com.hazelcast.topic.impl;version="4.1.0";
+ com.hazelcast.topic.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.core,
    com.hazelcast.internal.metrics,
@@ -3285,7 +3292,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.topic,
    javax.annotation",
- com.hazelcast.topic.impl.reliable;version="4.1.0";
+ com.hazelcast.topic.impl.reliable;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.config,
    com.hazelcast.core,
@@ -3300,7 +3307,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.spi.impl,
    com.hazelcast.topic,
    javax.annotation",
- com.hazelcast.transaction;version="4.1.0";
+ com.hazelcast.transaction;version="4.1.1";
   uses:="com.hazelcast.collection,
    com.hazelcast.core,
    com.hazelcast.internal.serialization,
@@ -3311,7 +3318,7 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.query,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.transaction.impl;version="4.1.0";
+ com.hazelcast.transaction.impl;version="4.1.1";
   uses:="com.hazelcast.cluster,
    com.hazelcast.internal.serialization,
    com.hazelcast.internal.services,
@@ -3321,13 +3328,13 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction,
    com.hazelcast.transaction.impl.operations,
    javax.annotation",
- com.hazelcast.transaction.impl.operations;version="4.1.0";
+ com.hazelcast.transaction.impl.operations;version="4.1.1";
   uses:="com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction.impl",
- com.hazelcast.transaction.impl.xa;version="4.1.0";
+ com.hazelcast.transaction.impl.xa;version="4.1.1";
   uses:="com.hazelcast.core,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.serialization,
@@ -3340,21 +3347,21 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.transaction.impl,
    javax.annotation,
    javax.transaction.xa",
- com.hazelcast.transaction.impl.xa.operations;version="4.1.0";
+ com.hazelcast.transaction.impl.xa.operations;version="4.1.1";
   uses:="com.hazelcast.internal.serialization,
    com.hazelcast.nio,
    com.hazelcast.nio.serialization,
    com.hazelcast.spi.impl.operationservice,
    com.hazelcast.transaction.impl,
    com.hazelcast.transaction.impl.xa",
- com.hazelcast.version;version="4.1.0";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
- com.hazelcast.wan;version="4.1.0";
+ com.hazelcast.version;version="4.1.1";uses:="com.hazelcast.nio,com.hazelcast.nio.serialization",
+ com.hazelcast.wan;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.core,
    com.hazelcast.internal.partition,
    com.hazelcast.internal.services,
    javax.annotation",
- com.hazelcast.wan.impl;version="4.1.0";
+ com.hazelcast.wan.impl;version="4.1.1";
   uses:="com.hazelcast.config,
    com.hazelcast.instance.impl,
    com.hazelcast.internal.monitor,
@@ -3368,4 +3375,4 @@ Export-Package: com.hazelcast.aggregation;version="4.1.0",
    com.hazelcast.version,
    com.hazelcast.wan,
    javax.annotation",
- com.hazelcast.wan.impl.merkletree;version="4.1.0"
+ com.hazelcast.wan.impl.merkletree;version="4.1.1"

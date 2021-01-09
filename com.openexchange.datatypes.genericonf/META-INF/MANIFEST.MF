@@ -17,3 +17,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.json
 Export-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.json
+Automatic-Module-Name: com.openexchange.datatypes.genericonf

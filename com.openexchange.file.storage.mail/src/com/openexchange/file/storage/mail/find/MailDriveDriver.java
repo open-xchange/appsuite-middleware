@@ -91,7 +91,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess;
 import com.openexchange.file.storage.mail.FullName;
 import com.openexchange.file.storage.mail.MailDriveAccountAccess;
 import com.openexchange.file.storage.mail.MailDriveConstants;

@@ -76,3 +76,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.calendar.json.osgi.AppointmentJSONActivator
 Export-Package: com.openexchange.calendar.json
+Automatic-Module-Name: com.openexchange.calendar.json

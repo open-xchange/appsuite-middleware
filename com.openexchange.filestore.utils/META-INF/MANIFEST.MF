@@ -20,10 +20,11 @@ Import-Package: com.google.common.annotations,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.uploaddir,
- javax.annotation.concurrent;version="1.1.0",
+ javax.annotation.concurrent,
  org.apache.commons.io,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.filestore.utils
 Bundle-Activator: com.openexchange.filestore.utils.osgi.FileStorageUtilsActivator
+Automatic-Module-Name: com.openexchange.filestore.utils

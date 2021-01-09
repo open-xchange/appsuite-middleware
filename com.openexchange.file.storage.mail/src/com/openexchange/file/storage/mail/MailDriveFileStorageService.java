@@ -83,8 +83,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailDriveFileStorageService implements AccountAware, RootFolderPermissionsAware {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageService.class);
-
     private static final String SERVICE_ID = MailDriveConstants.ID;
 
     /**

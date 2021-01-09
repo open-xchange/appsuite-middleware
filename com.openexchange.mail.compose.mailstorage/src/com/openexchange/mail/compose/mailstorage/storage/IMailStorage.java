@@ -192,13 +192,14 @@ public interface IMailStorage {
      * Deletes the draft mail referenced by given mail path.
      *
      * @param mailStorageId The mail storage identifier
-     * @param deleteSharedAttachmentsFolderIfPresent Whether to delete the possibly existent shared attachments folder
+     * @param hardDelete Whether associated draft message is supposed to be permanently deleted or a backup should be moved to standard trash folder
+     * @param deleteSharedAttachmentsFolderIfPresent Whether to delete the possibly existent shared attachments folder. Only effective if parameter <code>hardDelete</code> is set to <code>true</code>
      * @param clientToken The client token
      * @param session The session providing user data
      * @return <code>true</code> if mail has been successfully deleted; otherwise <code>false</code>
      * @throws OXException If deletion fails
      */
-    MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException;
+    MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean hardDelete, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException;
 
     /**
      * Adds the attachments from referenced original mail to draft message.

@@ -67,10 +67,10 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class WhiteboardGenericConfigurationStorageService implements GenericConfigurationStorageService {
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<?,?> tracker;
 
     public WhiteboardGenericConfigurationStorageService(BundleContext context) {
-        this.tracker = new ServiceTracker(context, GenericConfigurationStorageService.class.getName(), null);
+        this.tracker = new ServiceTracker<>(context, GenericConfigurationStorageService.class.getName(), null);
         tracker.open();
     }
 

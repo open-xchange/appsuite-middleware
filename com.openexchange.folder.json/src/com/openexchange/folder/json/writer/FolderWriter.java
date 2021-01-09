@@ -565,6 +565,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
 
+            @SuppressWarnings("deprecation")
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Type obj = folder.getType();
@@ -799,6 +800,7 @@ public final class FolderWriter {
         return new EntityInfo(String.valueOf(forUserId), null, null, null, null, null, forUserId, null, EntityInfo.Type.USER);
     }
 
+    @SuppressWarnings("deprecation")
     static FolderObject turnIntoFolderObject(UserizedFolder folder) {
         FolderObject fo = new FolderObject();
         final int numFolderId = Tools.getUnsignedInteger(folder.getID());

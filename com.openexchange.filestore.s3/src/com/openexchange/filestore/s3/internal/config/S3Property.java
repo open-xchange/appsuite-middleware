@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.internal.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Optional;
 import com.openexchange.config.Interests;
@@ -135,7 +136,7 @@ public enum S3Property implements Property {
      * <p>
      * com.openexchange.filestore.s3.maxNumberOfMonitoredClients
      */
-    MAX_NUMBER_OF_MONITORED_CLIENTS("com.openexchange.filestore.s3.", "maxNumberOfMonitoredClients", 20),
+    MAX_NUMBER_OF_MONITORED_CLIENTS("com.openexchange.filestore.s3.", "maxNumberOfMonitoredClients", I(20)),
 
     ;
 

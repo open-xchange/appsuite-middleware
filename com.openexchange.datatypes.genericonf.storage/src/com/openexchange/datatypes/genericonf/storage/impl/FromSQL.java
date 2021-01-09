@@ -64,7 +64,7 @@ public class FromSQL implements WidgetSwitcher {
     private SQLException exception;
 
     @Override
-    public Object checkbox(Object[] args) {
+    public Object checkbox(Object... args) {
         ResultSet rs = (ResultSet) args[0];
         String columnName = (String) args[1];
 

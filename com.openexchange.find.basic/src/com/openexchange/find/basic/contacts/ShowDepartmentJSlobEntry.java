@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.contacts;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Map;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactProperty;
@@ -92,7 +93,7 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
     @Override
     public Object getValue(Session session) throws OXException {
         LeanConfigurationService configService = Services.getLeanConfigurationService();
-        return configService.getBooleanProperty(ContactProperty.showDepartments);
+        return B(configService.getBooleanProperty(ContactProperty.showDepartments));
     }
 
     @Override

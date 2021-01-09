@@ -37,3 +37,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker,
  org.slf4j,
  sun.misc
+Automatic-Module-Name: com.openexchange.config.cascade.user

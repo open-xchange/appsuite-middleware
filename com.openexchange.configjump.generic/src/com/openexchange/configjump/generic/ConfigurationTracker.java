@@ -49,11 +49,14 @@
 
 package com.openexchange.configjump.generic;
 
+import java.io.IOException;
 import java.util.Properties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 
 /**
  * This customizer handles an appearing Configuration service and activates then this bundles service.
@@ -81,11 +84,16 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer<Configurat
      */
     @Override
     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configuration = context.getService(reference);
-        final Properties props = configuration.getFile("configjump.properties");
-        context.ungetService(reference);
-        services.registerService(props);
-        return null;
+        try {
+            ConfigurationService configuration = context.getService(reference);
+            Properties props = ConfigurationServices.loadPropertiesFrom(configuration.getFileByName("configjump.properties"));
+            context.ungetService(reference);
+            services.registerService(props);
+            return null;
+        } catch (IOException e) {
+            LoggerFactory.getLogger(ConfigurationTracker.class).error("", e);
+            return null;
+        }
     }
 
     /**

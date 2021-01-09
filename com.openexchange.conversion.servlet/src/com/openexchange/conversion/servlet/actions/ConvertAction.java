@@ -138,7 +138,7 @@ public final class ConvertAction extends AbstractConversionAction {
         return new AJAXRequestResult(result.toString(), "string");
     }
 
-    private AJAXRequestResult getResultFromConversion(final Object result) throws JSONException {
+    private AJAXRequestResult getResultFromConversion(final Object result) {
         ConversionResult conversionResult = (ConversionResult) result;
         AJAXRequestResult requestResult = new AJAXRequestResult(conversionResult.getData(), "json");
 

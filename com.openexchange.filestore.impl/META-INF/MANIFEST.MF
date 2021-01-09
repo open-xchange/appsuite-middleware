@@ -81,3 +81,4 @@ Import-Package: com.google.common.cache,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.filestore.impl.osgi.FileStorageCompositeActivator
+Automatic-Module-Name: com.openexchange.filestore.impl

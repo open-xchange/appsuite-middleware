@@ -18,3 +18,4 @@ Import-Package: com.hazelcast.cluster,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.cluster.timer.impl.osgi.ClusterTimerActivator
+Automatic-Module-Name: com.openexchange.cluster.timer.impl

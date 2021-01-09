@@ -28,3 +28,4 @@ Import-Package: com.openexchange.database,
  org.slf4j
 Export-Package: com.openexchange.datatypes.genericonf.storage,
  com.openexchange.datatypes.genericonf.storage.osgi.tools
+Automatic-Module-Name: com.openexchange.datatypes.genericonf.storage

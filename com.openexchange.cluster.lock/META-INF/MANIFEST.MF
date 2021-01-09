@@ -12,6 +12,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.groupware.update,
  com.openexchange.hazelcast.configuration,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.policy.retry,
@@ -23,3 +24,4 @@ Import-Package: com.hazelcast.core,
  org.slf4j
 Export-Package: com.openexchange.cluster.lock
 Bundle-Activator: com.openexchange.cluster.lock.osgi.ClusterLockActivator
+Automatic-Module-Name: com.openexchange.cluster.lock

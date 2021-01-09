@@ -125,7 +125,7 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
 
         try {
             if (autoDeleteIfKeyIsMissing(session)) {
-                delegate.closeCompositionSpace(compositionSpaceUUID, ClientToken.NONE);
+                delegate.closeCompositionSpace(compositionSpaceUUID, true, ClientToken.NONE);
                 LoggerHolder.LOG.debug("Closed composition space '{}' due to missing key and enabled option \"com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing\"", getUnformattedString(compositionSpaceUUID));
             }
         } catch (Exception e) {
@@ -175,9 +175,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
         try {
-            return delegate.closeCompositionSpace(compositionSpaceId, clientToken);
+            return delegate.closeCompositionSpace(compositionSpaceId, hardDelete, clientToken);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);

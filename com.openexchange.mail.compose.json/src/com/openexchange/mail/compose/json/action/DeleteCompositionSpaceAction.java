@@ -86,7 +86,7 @@ public class DeleteCompositionSpaceAction extends AbstractMailComposeAction {
 
         CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
 
-        boolean closed = compositionSpaceService.closeCompositionSpace(compositionSpaceId.getId(), getClientToken(requestData));
+        boolean closed = compositionSpaceService.closeCompositionSpace(compositionSpaceId.getId(), false, getClientToken(requestData));
         LOG.debug("Closed composition space '{}' as per client request", sId);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", closed), "json").addWarnings(compositionSpaceService.getWarnings());

@@ -662,11 +662,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         if (deleteAfterTransport) {
             try {
-                boolean closed = closeCompositionSpace(compositionSpaceId, ClientToken.NONE);
-                if (!closed) {
-                    LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
-                } else {
+                boolean closed = removeCompositionSpaceFromStorage(compositionSpaceId);
+                if (closed) {
                     LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
+                } else {
+                    LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
                 }
             } catch (OXException e) {
                 LOG.warn("Failed to close composition space {} after being transported", getUnformattedString(compositionSpaceId), e);
@@ -981,11 +981,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             if (deleteAfterSave) {
                 try {
-                    boolean closed = closeCompositionSpace(compositionSpaceId, ClientToken.NONE);
-                    if (!closed) {
-                        LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
-                    } else {
+                    boolean closed = removeCompositionSpaceFromStorage(compositionSpaceId);
+                    if (closed) {
                         LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedString(compositionSpaceId));
+                    } else {
+                        LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
                     }
                 } catch (OXException e) {
                     LOG.warn("Failed to close composition space {} after being saved to draft mail {}", getUnformattedString(compositionSpaceId), draftPath, e);
@@ -1532,10 +1532,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Determine the meta information for the message (draft)
             if (Type.NEW == type) {
+                LOG.debug("Opening new composition space '{}'", getUnformattedString(uuid));
                 message.setMeta(Meta.META_NEW);
             } else if (Type.FAX == type) {
+                LOG.debug("Opening fax composition space '{}'", getUnformattedString(uuid));
                 message.setMeta(Meta.META_FAX);
             } else if (Type.SMS == type) {
+                LOG.debug("Opening SMS composition space '{}'", getUnformattedString(uuid));
                 message.setMeta(Meta.META_SMS);
             } else {
                 OpenState args = new OpenState(uuid, message, encrypt, Meta.builder());
@@ -1544,12 +1547,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
 
                     if (type == Type.FORWARD) {
+                        LOG.debug("Opening forward composition space '{}'", getUnformattedString(uuid));
                         new Forward(attachmentStorageService, services).doOpenForForward(parameters, args, session);
                     } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
+                        LOG.debug("Opening reply composition space '{}'", getUnformattedString(uuid));
                         new Reply(attachmentStorageService, services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
-                    } else if (type == Type.EDIT || type == Type.COPY) {
-                        new EditCopy(attachmentStorageService, services).doOpenForEditCopy(type == Type.EDIT, parameters, args, session);
+                    } else if (type == Type.EDIT) {
+                        LOG.debug("Opening edit-draft composition space '{}'", getUnformattedString(uuid));
+                        new EditCopy(attachmentStorageService, services).doOpenForEditCopy(true, parameters, args, session);
+                    } else if (type == Type.COPY) {
+                        LOG.debug("Opening copy-draft composition space '{}'", getUnformattedString(uuid));
+                        new EditCopy(attachmentStorageService, services).doOpenForEditCopy(false, parameters, args, session);
                     } else if (type == Type.RESEND) {
+                        LOG.debug("Opening resend composition space '{}'", getUnformattedString(uuid));
                         new Resend(attachmentStorageService, services).doOpenForResend(parameters, args, session);
                     }
 
@@ -2134,18 +2144,49 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public boolean closeCompositionSpace(UUID compositionSpaceId, ClientToken clientToken) throws OXException {
+    public boolean closeCompositionSpace(UUID compositionSpaceId, boolean hardDelete, ClientToken clientToken) throws OXException {
+        CompositionSpace compositionSpace = getStorageService().getCompositionSpace(session, compositionSpaceId);
+        if (compositionSpace == null) {
+            // No such composition space
+            return false;
+        }
+
         if (clientToken.isPresent()) {
-            CompositionSpace compositionSpace = getStorageService().getCompositionSpace(session, compositionSpaceId);
-            if (compositionSpace == null) {
-                // No such composition space
-                return false;
-            }
             if (clientToken.isNotEquals(compositionSpace.getClientToken())) {
                 throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
             }
         }
 
+        // Auto-delete referenced draft message on edit-draft
+        MailPath editFor = getEditForFrom(compositionSpace);
+        if (null != editFor) {
+            MailServletInterface mailInterface = null;
+            try {
+                mailInterface = MailServletInterface.getInstance(session);
+                mailInterface.deleteMessages(editFor.getFolderArgument(), new String[] { editFor.getMailID() }, true);
+            } catch (Exception e) {
+                LOG.warn("Failed to delete edited draft mail '{}'", editFor, e);
+            } finally {
+                if (null != mailInterface) {
+                    mailInterface.close();
+                }
+            }
+        }
+
+        return removeCompositionSpaceFromStorage(compositionSpaceId);
+    }
+
+    private MailPath getEditForFrom(CompositionSpace compositionSpace) {
+        Message message = compositionSpace.getMessage();
+        if (message == null) {
+            return null;
+        }
+
+        Meta meta = message.getMeta();
+        return meta == null ? null : meta.getEditFor();
+    }
+
+    private boolean removeCompositionSpaceFromStorage(UUID compositionSpaceId) throws OXException {
         boolean closed = getStorageService().closeCompositionSpace(session, compositionSpaceId);
         if (closed) {
             if (LOG.isInfoEnabled()) {

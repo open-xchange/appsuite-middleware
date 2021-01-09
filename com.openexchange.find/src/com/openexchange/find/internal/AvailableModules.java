@@ -61,7 +61,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 
-
 /**
  * Injects a setting into the configuration tree that denotes which find modules
  * are available for the given user.
@@ -92,6 +91,7 @@ public class AvailableModules extends FindSetting {
                 return true;
             }
 
+            @SuppressWarnings({ "null", "synthetic-access" })
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 List<ModuleSearchDriver> available = driverManager.determineDrivers(new ServerSessionAdapter(session, ctx, user, userConfig));

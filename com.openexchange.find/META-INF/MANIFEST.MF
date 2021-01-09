@@ -49,3 +49,4 @@ Export-Package: com.openexchange.find,
  com.openexchange.find.spi,
  com.openexchange.find.tasks,
  com.openexchange.find.util
+Automatic-Module-Name: com.openexchange.find

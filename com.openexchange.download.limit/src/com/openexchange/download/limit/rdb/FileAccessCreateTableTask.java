@@ -67,7 +67,6 @@ public class FileAccessCreateTableTask extends CreateTableUpdateTask {
      * @param databaseService The database service to use
      */
     public FileAccessCreateTableTask(DatabaseService databaseService) {
-        super(new FileAccessCreateTableService(), new String[0], databaseService);
+        super(new FileAccessCreateTableService(), new String[0]);
     }
-
 }

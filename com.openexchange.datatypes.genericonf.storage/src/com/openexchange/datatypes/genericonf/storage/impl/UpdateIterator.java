@@ -77,8 +77,8 @@ public class UpdateIterator implements MapIterator<String, Object> {
     private static final String DELETE_BOOL = "DELETE FROM genconf_attributes_bools WHERE cid = ? AND id = ? AND name = ?";
 
 
-    private final Map<Class, PreparedStatement> updateStatements = new HashMap<Class, PreparedStatement>();
-    private final List<PreparedStatement> deleteStatements = new LinkedList<PreparedStatement>();
+    private final Map<Class<?>, PreparedStatement> updateStatements = new HashMap<>();
+    private final List<PreparedStatement> deleteStatements = new LinkedList<>();
 
     private SQLException exception;
 

@@ -52,7 +52,6 @@ package com.openexchange.datatypes.genericonf.json;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,8 +81,8 @@ public class FormContentParserTest {
     }
 
     @Test
-    public void testParsing() throws JSONException {
-        Map<String, Object> content = new FormContentParser().parse(object, form);
+    public void testParsing() {
+        Map<String, Object> content = FormContentParser.parse(object, form);
 
         assertNotNull("Content was null!", content);
         assertEquals("login was wrong", "blupp", content.get("login"));

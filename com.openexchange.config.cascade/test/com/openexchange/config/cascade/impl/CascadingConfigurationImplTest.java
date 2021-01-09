@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.impl;
 
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -72,7 +73,7 @@ public class CascadingConfigurationImplTest {
     private ConfigView view = null;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         cascade.setProvider(ConfigViewScope.SERVER.getScopeName(), new InMemoryConfigProvider());
         cascade.setProvider(ConfigViewScope.CONTEXT.getScopeName(), new InMemoryConfigProvider());
         cascade.setProvider(ConfigViewScope.USER.getScopeName(), new InMemoryConfigProvider());
@@ -109,7 +110,7 @@ public class CascadingConfigurationImplTest {
      public void testPropertyMetadata() throws OXException {
         view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("published", "true");
 
-        assertTrue(view.property("com.openexchange.test.property", String.class).get("published", boolean.class));
+        assertTrue(b(view.property("com.openexchange.test.property", String.class).get("published", boolean.class)));
 
         view.property(ConfigViewScope.SERVER.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.SERVER.getScopeName());
         view.property(ConfigViewScope.CONTEXT.getScopeName(), "com.openexchange.test.property", String.class).set("final", ConfigViewScope.CONTEXT.getScopeName());

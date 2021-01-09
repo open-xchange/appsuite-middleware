@@ -15,3 +15,4 @@ Import-Package: com.openexchange.conversion,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.conversion.engine.osgi.ConversionEngineActivator
+Automatic-Module-Name: com.openexchange.conversion.engine

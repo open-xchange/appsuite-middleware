@@ -64,6 +64,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
  */
 public class UserConfigurationAnalyzerTest {
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testSample() {
         UserPermissionBits permissionBits = new UserPermissionBits(0, 0, Mockito.mock(Context.class));

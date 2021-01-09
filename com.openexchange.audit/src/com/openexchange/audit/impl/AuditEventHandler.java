@@ -103,6 +103,7 @@ import ch.qos.logback.core.util.FileSize;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a> - refactoring
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Switched from appointments to calendar events
  */
+@SuppressWarnings("deprecation")
 public class AuditEventHandler implements EventHandler {
 
     private Logger createLogger() throws OXException {

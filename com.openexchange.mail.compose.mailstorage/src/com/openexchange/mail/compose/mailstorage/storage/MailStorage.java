@@ -620,7 +620,7 @@ public class MailStorage implements IMailStorage {
     }
 
     @Override
-    public MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException {
+    public MailStorageResult<Boolean> delete(MailStorageId mailStorageId, boolean hardDelete, boolean deleteSharedAttachmentsFolderIfPresent, ClientToken clientToken, Session session) throws OXException {
         MailPath draftPath = mailStorageId.getDraftPath();
         if (draftPath.getAccountId() != MailAccount.DEFAULT_ID) {
             throw CompositionSpaceErrorCode.ERROR.create("Cannot operate on drafts outside of the default mail account!");
@@ -637,7 +637,7 @@ public class MailStorage implements IMailStorage {
             MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess, false);
             checkClientToken(clientToken, parseClientToken(draftMail));
 
-            if (deleteSharedAttachmentsFolderIfPresent) {
+            if (hardDelete && deleteSharedAttachmentsFolderIfPresent) {
                 String headerValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
                 SharedAttachmentsInfo sharedAttachmentsInfo = HeaderUtility.headerValue2SharedAttachments(headerValue);
 
@@ -656,13 +656,28 @@ public class MailStorage implements IMailStorage {
             IMailMessageStorageEnhancedDeletion enhancedDeletion = mailAccess.getMessageStorage().supports(IMailMessageStorageEnhancedDeletion.class);
             if (enhancedDeletion != null && enhancedDeletion.isEnhancedDeletionSupported()) {
                 // Try to delete current draft mail in storage
-                MailPath[] removedPaths = enhancedDeletion.hardDeleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() });
-                Boolean deleted = Boolean.valueOf(removedPaths != null && removedPaths.length > 0 && draftPath.equals(removedPaths[0]));
-                return MailStorageResult.resultFor(mailStorageId, deleted, false, mailAccess);
+                if (hardDelete) {
+                    MailPath[] removedPaths = enhancedDeletion.hardDeleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() });
+                    Boolean deleted = Boolean.valueOf(removedPaths != null && removedPaths.length > 0 && draftPath.equals(removedPaths[0]));
+                    return MailStorageResult.resultFor(mailStorageId, deleted, false, mailAccess);
+                }
+
+                MailPath[] movedPaths = enhancedDeletion.deleteMessagesEnhanced(draftPath.getFolder(), new String[] { draftPath.getMailID() }, false);
+                if (movedPaths == null || movedPaths.length != 1) {
+                    return MailStorageResult.resultFor(mailStorageId, Boolean.FALSE, false, mailAccess);
+                }
+
+                try {
+                    MailPath trashed = movedPaths[0];
+                    mailAccess.getMessageStorage().updateMessageFlags(trashed.getFolder(), new String[] { trashed.getMailID() }, MailMessage.FLAG_SEEN, true);
+                } catch (Exception e) {
+                    LOG.warn("Failed to set \\Seen flag on trashed draft message {} in folder {}", draftPath.getMailID(), draftPath.getFolder());
+                }
+                return MailStorageResult.resultFor(mailStorageId, Boolean.TRUE, false, mailAccess);
             }
 
             // Delete by best guess...
-            mailAccess.getMessageStorage().deleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() }, true);
+            mailAccess.getMessageStorage().deleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() }, hardDelete);
             return MailStorageResult.resultFor(mailStorageId, Boolean.TRUE, false, mailAccess);
         } catch (MissingDraftException e) {
             return MailStorageResult.resultFor(mailStorageId, Boolean.FALSE, false, mailAccess);

@@ -45,3 +45,4 @@ Import-Package: com.fasterxml.jackson.core,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.appsuite.osgi.AppsuiteActivator
 Export-Package: com.openexchange.appsuite
+Automatic-Module-Name: com.openexchange.appsuite
