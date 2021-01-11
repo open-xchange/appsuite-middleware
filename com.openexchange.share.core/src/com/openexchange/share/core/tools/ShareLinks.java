@@ -83,6 +83,9 @@ import com.openexchange.share.core.exception.ShareCoreExceptionCodes;
  */
 public class ShareLinks {
 
+    /** Start of "app"-fragment, see also {@link com.openexchange.share.Links.FRAGMENT_APP} */
+    private static final String IO_OX = "io.ox/";
+
     /**
      * Generates an (absolute) share link for a guest user based on the passed share token. If configured, the share link will use the
      * guest hostname as supplied by an installed hostname service, or via the config cascade property
@@ -329,10 +332,9 @@ public class ShareLinks {
      * See also {@link com.openexchange.share.Links#generateInternalLink(String, String, String, HostData)}
      * 
      * @param shareLink The share link to parse
-     * @return The share target
-     * @throws OXException - {@link ShareExceptionCodes#INVALID_LINK}
+     * @return The share target or <code>null</code> if the link is not an internal share link
      */
-    public static ShareTarget parseInternal(String shareLink) throws OXException {
+    public static ShareTarget parseInternal(String shareLink) {
         /*
          * Parse fragment
          */
@@ -340,11 +342,12 @@ public class ShareLinks {
         try {
             String fragment = new URIBuilder(shareLink).getFragment();
             if (Strings.isEmpty(fragment)) {
-                throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
+                return null;
             }
             fragments = URLEncodedUtils.parse(fragment, Charset.forName("UTF-8"));
         } catch (URISyntaxException e) {
-            throw ShareExceptionCodes.INVALID_LINK.create(e, shareLink);
+            getLogger(ShareLinks.class).debug("Unable to parse link {}", shareLink, e);
+            return null;
         }
         /*
          * Translate to share target
@@ -364,7 +367,7 @@ public class ShareLinks {
                     item = pair.getValue();
                     break;
                 case "app":
-                    String app = pair.getValue().startsWith("io.ox/") ? pair.getValue().substring(5) : pair.getValue();
+                    String app = pair.getValue().startsWith(IO_OX) ? pair.getValue().substring(IO_OX.length()) : pair.getValue();
                     module = Module.getForName(app);
                     break;
                 default:
@@ -372,7 +375,7 @@ public class ShareLinks {
             }
         }
         if (null == module || Strings.isEmpty(folder)) {
-            throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
+            return null;
         }
         return new ShareTarget(module.getFolderConstant(), folder, item);
     }

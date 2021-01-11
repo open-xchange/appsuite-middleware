@@ -116,18 +116,13 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
         if (Strings.isEmpty(shareLink)) {
             return false;
         }
-        try {
-            return null != ShareLinks.parseInternal(shareLink);
-        } catch (OXException e) {
-            LOGGER.debug("Unable to parse link", e);
-        }
-        return false;
+        return null != ShareLinks.parseInternal(shareLink);
     }
 
     @Override
     public ShareLinkAnalyzeResult analyze(Session session, String shareLink) throws OXException {
         ShareTarget target = ShareLinks.parseInternal(shareLink);
-        if (Strings.isNotEmpty(target.getItem())) {
+        if (null == target || Strings.isNotEmpty(target.getItem())) {
             return new ShareLinkAnalyzeResult(ShareLinkState.UNSUPPORTED, ShareSubscriptionExceptions.NOT_USABLE.create(shareLink), null);
         }
         /*
@@ -160,10 +155,10 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
          * Get the folder to subscribe
          */
         ShareTarget target = ShareLinks.parseInternal(shareLink);
-        if (Strings.isNotEmpty(target.getItem())) {
+        if (null == target || Strings.isNotEmpty(target.getItem())) {
             throw ShareExceptionCodes.INVALID_LINK.create(shareLink);
         }
-        
+
         FolderService folderService = services.getServiceSafe(FolderService.class);
         String folderId = target.getFolder();
         UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
@@ -211,10 +206,10 @@ public class ContextInternalSubscriptionProvider implements ShareSubscriptionPro
          * Get the folder to subscribe
          */
         ShareTarget target = ShareLinks.parseInternal(shareLink);
-        if (Strings.isNotEmpty(target.getItem())) {
+        if (null == target || Strings.isNotEmpty(target.getItem())) {
             return false;
         }
-        
+
         FolderService folderService = services.getServiceSafe(FolderService.class);
         String folderId = target.getFolder();
         UserizedFolder folder = folderService.getFolder(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), folderId, session, null);
