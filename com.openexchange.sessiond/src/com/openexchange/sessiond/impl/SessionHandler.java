@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import java.util.ArrayList;
@@ -1468,7 +1469,7 @@ public final class SessionHandler {
             SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
             if (unwrappedSession == sc.getSession()) {
                 // This thread restored the session first
-                LOG.info("Restored session {} from session storage for user {} in context {}.", sessionId, I(sc.getUserId()), I(sc.getContextId()));
+                LOG.info("Restored session {} from session storage for user {} in context {}: staySignedIn={}, transient={}", sessionId, I(sc.getUserId()), I(sc.getContextId()), B(unwrappedSession.isStaySignedIn()), B(unwrappedSession.isTransient()));
                 for (SessionSerializationInterceptor interceptor : interceptors) {
                     interceptor.deserialize(unwrappedSession);
                 }
