@@ -69,7 +69,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
@@ -84,7 +83,6 @@ import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
 import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
 import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.MailData;
@@ -104,7 +102,6 @@ import com.openexchange.testing.httpclient.models.SubscribeShareResponseData;
 import com.openexchange.testing.httpclient.modules.FilestorageApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
-import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link AbstractShareManagementTest} - Test for the <code>analyze</code> action of the share management module.
@@ -285,35 +282,16 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
      */
     protected SubscribeShareResponseData addOXShareAccount(ShareManagementApi smApi, String shareLink, String password) throws ApiException {
         ExtendedSubscribeShareBody body = getExtendedBody(shareLink, password, "Share from " + testUser.getLogin());
-        SubscribeShareResponse mountResponse = smApi.subscribeShare(smApi.getApiClient().getSession(), body);
+        SubscribeShareResponse subscribeResponse = smApi.subscribeShare(smApi.getApiClient().getSession(), body);
 
-        SubscribeShareResponseData data = checkResponse(mountResponse.getError(), mountResponse.getErrorDesc(), mountResponse.getData());
+        SubscribeShareResponseData data = checkResponse(subscribeResponse.getError(), subscribeResponse.getErrorDesc(), subscribeResponse.getData());
 
-        String accountId = data.getAccount();
-        assertThat(accountId, notNullValue());
-        addTearDownOperation(() -> deleteOXShareAccount(smApi.getApiClient(), accountId));
-        assertThat(data.getFolder(), notNullValue());
+        assertThat(data.getAccount(), notNullValue());
         assertThat(data.getModule(), is(Module.INFOSTORE.getName()));
+        assertThat(data.getFolder(), notNullValue());
 
         analyze(smApi, shareLink, StateEnum.SUBSCRIBED);
         return data;
-    }
-
-    /**
-     * Deletes the account.
-     * <p>
-     * Note: The account is deleted not unsubscribed!
-     *
-     * @param client The client to use
-     * @param accountId The account ID
-     * @throws Exception
-     */
-    protected void deleteOXShareAccount(ApiClient client, String fqFolderId) throws Exception {
-        FilestorageApi filestorageApi = new FilestorageApi(client);
-        List<String> unmangle = IDMangler.unmangle(fqFolderId);
-        Assert.assertTrue(fqFolderId + "isn't the correct full qualified folder ID with embeded account ID", unmangle.size() > 1);
-        FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(unmangle.get(0), unmangle.get(1));
-        checkResponse(response.getError(), response.getErrorDesc());
     }
 
     /**

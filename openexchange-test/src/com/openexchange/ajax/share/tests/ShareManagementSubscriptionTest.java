@@ -60,9 +60,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
@@ -107,7 +107,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     private TestUser testUserC2;
     private ApiClient apiClientC2;
     private ShareManagementApi smApiC2;
-    private FilestorageApi filestorageApiC2;
+    private SubscribeShareResponseData accountData;
 
     @Override
     public void setUp() throws Exception {
@@ -115,21 +115,28 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
 
         context2 = this.testContextList.get(1);
         testUserC2 = context2.acquireUser();
+        addTearDownOperation(() -> context2.backUser(testUserC2));
         apiClientC2 = generateApiClient(testUserC2);
         addTearDownOperation(() -> logoutClient(apiClientC2, true));
         smApiC2 = new ShareManagementApi(apiClientC2);
-        filestorageApiC2 = new FilestorageApi(apiClientC2);
         cleanInbox(apiClientC2);
-        
-
-        AJAXClient ajaxClientC2 = generateClient(testUserC2);
-        addTearDownOperation(() -> ajaxClientC2.logout());
 
         sharedFolderName = this.getClass().getSimpleName() + UUID.randomUUID().toString();
         smApi = new ShareManagementApi(apiClient);
         folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
         remember(folderManager);
         infostoreRoot = folderManager.findInfostoreRoot();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (null != accountData) {
+                deleteOXShareAccount();
+            }
+        } finally {
+            super.tearDown();
+        }
     }
 
     @Override
@@ -230,7 +237,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         /*
          * Add share and verify analyze changed
          */
-        addOXShareAccount(smApiC2, shareLink, null);
+        accountData = addOXShareAccount(smApiC2, shareLink, null);
 
         /*
          * Remove guest from folder permission
@@ -249,6 +256,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
          */
         unsubscribe(shareLink);
         analyze(shareLink, StateEnum.ADDABLE);
+        accountData = null;
     }
 
     /**
@@ -277,10 +285,8 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         String shareLink = receiveShareLink(apiClientC2, testUser.getLogin());
         analyze(shareLink, StateEnum.ADDABLE);
 
-        /*
-         * Add share and verify analyze changed
-         */
-        SubscribeShareResponseData accountData = addOXShareAccount(smApiC2, shareLink, null);
+        accountData = addOXShareAccount(smApiC2, shareLink, null);
+        FilestorageApi filestorageApiC2 = new FilestorageApi(apiClientC2);
         FileAccountResponse fileAccountResponse = filestorageApiC2.getFileAccount(IDMangler.unmangle(accountData.getFolder()).get(0), accountData.getAccount());
         FileAccountData fileAccountData = checkResponse(fileAccountResponse.getError(), fileAccountResponse.getErrorDesc(), fileAccountResponse.getData());
 
@@ -321,6 +327,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
          */
         unsubscribe(shareLink);
         analyze(shareLink, StateEnum.ADDABLE_WITH_PASSWORD);
+        accountData = null;
     }
 
     private void analyze(ShareLinkData shareLink, StateEnum e) throws ApiException {
@@ -358,5 +365,23 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
         body.setLink(shareLink);
         CommonResponse response = smApiC2.unsubscribeShare(smApiC2.getApiClient().getSession(), body);
         checkResponse(response);
+    }
+
+    /**
+     * Deletes the account.
+     * <p>
+     * Note: The account is deleted not unsubscribed!
+     *
+     * @param client The client to use
+     * @param accountId The account ID
+     * @throws Exception
+     */
+    protected void deleteOXShareAccount() {
+        try {
+            FilestorageApi filestorageApi = new FilestorageApi(apiClientC2);
+            filestorageApi.deleteFileAccount(accountData.getModule(), accountData.getAccount());
+        } catch (ApiException e) {
+            LoggerFactory.getLogger(ShareManagementSubscriptionTest.class).info("Unable to remove account", e);
+        }
     }
 }
