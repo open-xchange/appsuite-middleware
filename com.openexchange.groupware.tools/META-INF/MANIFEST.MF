@@ -52,3 +52,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.jdom2,
  org.json,
  org.slf4j
+Automatic-Module-Name: com.openexchange.groupware.tools

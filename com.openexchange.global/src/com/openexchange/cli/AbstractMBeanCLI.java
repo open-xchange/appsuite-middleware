@@ -261,6 +261,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @param authenticator The authenticator MBean
      * @throws MBeanException If operation fails
      */
+    @Override
     protected boolean isAuthEnabled(AuthenticatorMBean authenticator) throws MBeanException {
         return !authenticator.isMasterAuthenticationDisabled();
     }
@@ -276,6 +277,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @param authenticator The authenticator MBean
      * @throws Exception If authentication fails
      */
+    @Override
     protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException;
 
     /**

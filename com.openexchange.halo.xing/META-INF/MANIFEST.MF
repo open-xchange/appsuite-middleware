@@ -44,3 +44,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.event,
  org.slf4j
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.openexchange.halo.xing

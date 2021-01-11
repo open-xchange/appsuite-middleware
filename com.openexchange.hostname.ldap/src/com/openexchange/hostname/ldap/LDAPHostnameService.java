@@ -222,23 +222,21 @@ public class LDAPHostnameService implements HostnameService {
 
     @Override
     public String getHostname(int userId, int contextId) {
-        return getHostname(userId, contextId, 0);
+        return getHostnameFromLDAP(contextId, 0);
     }
 
     @Override
     public String getGuestHostname(int userId, int contextId) {
-        return getHostname(userId, contextId, 1);
+        return getHostnameFromLDAP(contextId, 1);
     }
 
-    private String getHostname(int userId, int contextId, int index) {
+    private String getHostnameFromLDAP(int contextId, int index) {
         try {
             String[] hostnamesFromCache = instance.getHostnamesFromCache(contextId);
             if (null == hostnamesFromCache) {
                 LOG.debug("Hostnames for context {} is not contained in the cache any more, fetching from LDAP", Integer.valueOf(contextId));
                 final String[] hostnames = fetchFromLdap(contextId);
-                if (null != hostnames) {
-                    instance.addHostnamesToCache(contextId, hostnames);
-                }
+                instance.addHostnamesToCache(contextId, hostnames);
                 return hostnames[index];
             }
             LOG.debug("Using hostnames for context {} from cache", Integer.valueOf(contextId));
@@ -256,5 +254,4 @@ public class LDAPHostnameService implements HostnameService {
         }
         return null;
     }
-
 }

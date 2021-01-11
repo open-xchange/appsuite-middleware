@@ -64,8 +64,6 @@ import com.openexchange.session.Session;
  */
 public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DateMapping.class);
-
 	/**
 	 * Initializes a new {@link DateMapping}.
 	 *
@@ -91,11 +89,11 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
                     try {
                         set(to, new Date(Long.parseLong(sObject)));
                     } catch (NumberFormatException e) {
-                        throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                        throw new JSONException("JSONObject[\"" + ajaxName + "\"] is not a number: " + object);
                     }
                 }
             } else {
-                throw new JSONException("JSONObject[\""+ajaxName+"\"] is not a number: " + object);
+                throw new JSONException("JSONObject[\"" + ajaxName + "\"] is not a number: " + object);
             }
         }
 	}

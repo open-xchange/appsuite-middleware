@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.gmail.send.config.IGmailSendProperties;
 import com.openexchange.gmail.send.dataobjects.GmailSendMailMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -72,30 +71,24 @@ import com.openexchange.session.Session;
  */
 public final class GmailSendMessageFiller extends MimeMessageFiller {
 
-    private final IGmailSendProperties gmailSendProperties;
-
     /**
      * Constructor
-     *
-     * @param gmailSendProperties
+     * 
      * @param session The session
      * @param ctx The context
      * @param usm The user's mail settings
      */
-    public GmailSendMessageFiller(IGmailSendProperties gmailSendProperties, Session session, Context ctx, UserSettingMail usm) {
+    public GmailSendMessageFiller(Session session, Context ctx, UserSettingMail usm) {
         super(new SessionCompositionParameters(session, ctx, usm));
-        this.gmailSendProperties = gmailSendProperties;
     }
 
     /**
      * Constructor
-     *
-     * @param gmailSendProperties
+     * 
      * @param compositionParameters
      */
-    public GmailSendMessageFiller(IGmailSendProperties gmailSendProperties, CompositionParameters compositionParameters) {
+    public GmailSendMessageFiller(CompositionParameters compositionParameters) {
         super(compositionParameters);
-        this.gmailSendProperties = gmailSendProperties;
     }
 
     /**

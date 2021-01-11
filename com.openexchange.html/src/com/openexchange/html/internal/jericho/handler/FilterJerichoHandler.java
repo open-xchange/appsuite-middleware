@@ -84,7 +84,6 @@ import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.HTMLElements;
-import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 
@@ -433,18 +432,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             }
         }
-    }
-
-    /**
-     * Indicates whether this segment consists entirely of white spaces.
-     */
-    private boolean isWhiteSpace(CharSequence content) {
-        for (int i = content.length(); i-- > 0;) {
-            if (!Segment.isWhiteSpace(content.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

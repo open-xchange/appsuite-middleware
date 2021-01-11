@@ -92,6 +92,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
+@SuppressWarnings("synthetic-access")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ GuestStorage.class, GuestStorageServiceLookup.class, Databases.class })
 public class DefaultGuestServiceTest {

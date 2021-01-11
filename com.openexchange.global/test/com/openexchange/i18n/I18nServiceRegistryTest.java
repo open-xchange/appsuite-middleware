@@ -64,7 +64,7 @@ import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 public class I18nServiceRegistryTest {
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
 
         I18nService en_US = PowerMockito.mock(I18nService.class);
         PowerMockito.when(en_US.getLocale()).thenReturn(new Locale("en", "US"));

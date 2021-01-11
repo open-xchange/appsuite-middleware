@@ -27,3 +27,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.guard.api
+Automatic-Module-Name: com.openexchange.guard.api

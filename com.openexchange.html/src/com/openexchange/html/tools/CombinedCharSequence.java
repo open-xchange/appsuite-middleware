@@ -106,7 +106,7 @@ public class CombinedCharSequence implements CharSequence {
 
     @Override
     public CharSequence subSequence(int st, int en) {
-        List<CharSequence> seqs = null;
+        List<CharSequence> seqs = new LinkedList<>();
 
         int start = 0;
         int end;
@@ -116,7 +116,6 @@ public class CombinedCharSequence implements CharSequence {
                 return sequence.subSequence(st - start, en - start);
             }
             if (st >= start && st < end && en > end) {
-                seqs = new LinkedList<>();
                 seqs.add(sequence.subSequence(st - start, end));
             } else if (st < start && st < end && en <= end) {
                 seqs.add(sequence.subSequence(0, en - start));

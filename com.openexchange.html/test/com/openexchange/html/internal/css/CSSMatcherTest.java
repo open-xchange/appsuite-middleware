@@ -432,7 +432,7 @@ public class CSSMatcherTest {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
-        Future future = Mockito.mock(Future.class);
+        Future<Boolean> future = Mockito.mock(Future.class);
         PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
         PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
@@ -449,7 +449,7 @@ public class CSSMatcherTest {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(threadPoolService);
-        Future future = Mockito.mock(Future.class);
+        Future<Boolean>future = Mockito.mock(Future.class);
         PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
         PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
@@ -466,7 +466,7 @@ public class CSSMatcherTest {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
-        Future future = Mockito.mock(Future.class);
+        Future<Boolean>future = Mockito.mock(Future.class);
         PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
         PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 
@@ -483,7 +483,7 @@ public class CSSMatcherTest {
         PowerMockito.mockStatic(ThreadPools.class);
         ThreadPoolService threadPoolService = Mockito.mock(ThreadPoolService.class);
         PowerMockito.when(ThreadPools.getThreadPool()).thenReturn(null);
-        Future future = Mockito.mock(Future.class);
+        Future<Boolean> future = Mockito.mock(Future.class);
         PowerMockito.when(threadPoolService.submit((Task<Boolean>) ArgumentMatchers.any())).thenReturn(future);
         PowerMockito.when(future.get(ArgumentMatchers.anyLong(), (TimeUnit) ArgumentMatchers.any())).thenReturn(Boolean.TRUE);
 

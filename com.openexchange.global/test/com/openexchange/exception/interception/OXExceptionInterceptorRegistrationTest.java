@@ -66,11 +66,9 @@ import com.openexchange.test.mock.MockUtils;
  * @since 7.6.1
  */
 public class OXExceptionInterceptorRegistrationTest {
-    /**
-     * @throws java.lang.Exception
-     */
+    
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         OXExceptionInterceptorRegistration.initInstance();
     }
 

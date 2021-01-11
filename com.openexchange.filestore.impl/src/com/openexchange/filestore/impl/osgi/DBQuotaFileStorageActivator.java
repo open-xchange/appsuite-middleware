@@ -131,7 +131,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         // Update tasks
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable(), new AddInitialUserFilestoreUsage(), new MakeQuotaMaxConsistentInUserTable()));
         registerService(DeleteListener.class, new UnifiedQuotaDeleteListener(unifiedQuotaServices), null);
-        registerService(FilestoreDataMoveListener.class, new UnifiedQuotaFilestoreDataMoveListener(unifiedQuotaServices), null);
+        registerService(FilestoreDataMoveListener.class, new UnifiedQuotaFilestoreDataMoveListener(), null);
 
         logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }

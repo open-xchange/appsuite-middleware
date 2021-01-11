@@ -50,10 +50,7 @@
 package com.openexchange.session;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
-import com.openexchange.session.SessionHolderExtended;
 import com.openexchange.user.User;
-
 
 /**
  * {@link ThreadLocalSessionHolder} - The session holder using a {@link ThreadLocal} instance.

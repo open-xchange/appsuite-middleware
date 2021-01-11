@@ -478,6 +478,8 @@ public class SystemPropertiesUtils {
 
     private static class ChangeSignalingProperties extends Properties {
 
+        private static final long serialVersionUID = -6198696951470526331L;
+        
         private final Properties delegate;
 
         /**
@@ -600,6 +602,7 @@ public class SystemPropertiesUtils {
             return new ChangeSignalingCollection<>(delegate.values());
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public void save(OutputStream out, String comments) {
             delegate.save(out, comments);

@@ -38,3 +38,4 @@ Import-Package: com.google.common.cache,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.halo.osgi.HaloActivator
 Export-Package: com.openexchange.halo
+Automatic-Module-Name: com.openexchange.halo
