@@ -934,78 +934,64 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
-    private ImmutableReference<DispatcherNotes> determineActionMetadata(ModuleAndAction key, AJAXActionServiceFactory factory) {
-        DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(key.action, factory));
-        ImmutableReference<DispatcherNotes> actionMetadataReference = new ImmutableReference<DispatcherNotes>(actionMetadata);
-        dispatcherNotesCache.put(key, actionMetadataReference);
-        return actionMetadataReference;
-    }
-
-    @Override
-    public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
+    private Optional<ImmutableReference<DispatcherNotes>> determineActionMetadata(String module, String action) {
         ModuleAndAction key = new ModuleAndAction(module, action);
         ImmutableReference<DispatcherNotes> actionMetadataReference = dispatcherNotesCache.getIfPresent(key);
         if (actionMetadataReference == null) {
             AJAXActionServiceFactory factory = lookupFactory(module);
             if (factory == null) {
-                return false;
+                // No such factory
+                return Optional.empty();
             }
 
-            actionMetadataReference = determineActionMetadata(key, factory);
+            DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            actionMetadataReference = new ImmutableReference<DispatcherNotes>(actionMetadata);
+            dispatcherNotesCache.put(key, actionMetadataReference);
+        }
+        return Optional.of(actionMetadataReference);
+    }
+
+    @Override
+    public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
+        Optional<ImmutableReference<DispatcherNotes>> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (!optionalActionMetadataReference.isPresent()) {
+            return false;
         }
 
-        DispatcherNotes actionMetadata = actionMetadataReference.getValue();
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.get().getValue();
         return actionMetadata == null ? false : actionMetadata.allowPublicSession();
     }
 
     @Override
     public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
-        ModuleAndAction key = new ModuleAndAction(module, action);
-        ImmutableReference<DispatcherNotes> actionMetadataReference = dispatcherNotesCache.getIfPresent(key);
-        if (actionMetadataReference == null) {
-            AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                return false;
-            }
-
-            actionMetadataReference = determineActionMetadata(key, factory);
+        Optional<ImmutableReference<DispatcherNotes>> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (!optionalActionMetadataReference.isPresent()) {
+            return false;
         }
 
-        DispatcherNotes actionMetadata = actionMetadataReference.getValue();
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.get().getValue();
         return actionMetadata == null ? false : actionMetadata.publicSessionAuth();
     }
 
     @Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-        ModuleAndAction key = new ModuleAndAction(module, action);
-        ImmutableReference<DispatcherNotes> actionMetadataReference = dispatcherNotesCache.getIfPresent(key);
-        if (actionMetadataReference == null) {
-            AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                return false;
-            }
-
-            actionMetadataReference = determineActionMetadata(key, factory);
+        Optional<ImmutableReference<DispatcherNotes>> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (!optionalActionMetadataReference.isPresent()) {
+            return false;
         }
 
-        DispatcherNotes actionMetadata = actionMetadataReference.getValue();
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.get().getValue();
         return actionMetadata == null ? false : actionMetadata.noSession();
     }
 
     @Override
     public boolean noSecretCallback(String module, String action) throws OXException {
-        ModuleAndAction key = new ModuleAndAction(module, action);
-        ImmutableReference<DispatcherNotes> actionMetadataReference = dispatcherNotesCache.getIfPresent(key);
-        if (actionMetadataReference == null) {
-            AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                return false;
-            }
-
-            actionMetadataReference = determineActionMetadata(key, factory);
+        Optional<ImmutableReference<DispatcherNotes>> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (!optionalActionMetadataReference.isPresent()) {
+            return false;
         }
 
-        DispatcherNotes actionMetadata = actionMetadataReference.getValue();
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.get().getValue();
         return actionMetadata == null ? false : actionMetadata.noSecretCallback();
     }
 
