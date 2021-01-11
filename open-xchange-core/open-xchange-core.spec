@@ -863,13 +863,13 @@ EOF
     SCR=SCR-758
     if ox_scr_todo ${SCR}
     then
+      unset GLOBIGNORE
       props="com.openexchange.capabilities.allowIllegalPermissionProvisioning com.openexchange.capabilities.applyIllegalPermissions"
       for prop in ${props}
       do
         matches="$(grep -Hs "^\s*$prop" /opt/open-xchange/etc/*.properties)"
         if [ $? -eq 0 ]
         then
-          set -e
           IFS=$'\n'
           for match in ${matches}
           do
@@ -884,6 +884,7 @@ EOF
       done
       ox_scr_done ${SCR}
     fi
+    GLOBIGNORE='*'
 
 fi
 
