@@ -62,6 +62,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationException;
@@ -69,6 +71,7 @@ import com.openexchange.continuation.ContinuationExceptionCodes;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ImmutableReference;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -85,11 +88,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
 
-    private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
-    private final ConcurrentMap<StrPair, Boolean> publicSessionAuthCache;
-    private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
-    private final ConcurrentMap<StrPair, Boolean> noSecretCallbackCache;
-
+    private final Cache<ModuleAndAction, ImmutableReference<DispatcherNotes>> dispatcherNotesCache;
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
 
@@ -98,11 +97,7 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public DefaultDispatcher() {
         super();
-        fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-
+        dispatcherNotesCache = CacheBuilder.newBuilder().initialCapacity(128).expireAfterAccess(30, TimeUnit.MINUTES).build();
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
     }
@@ -482,84 +477,81 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
+    private ImmutableReference<DispatcherNotes> determineActionMetadata(String module, String action) {
+        ModuleAndAction key = new ModuleAndAction(module, action);
+        ImmutableReference<DispatcherNotes> actionMetadataReference = dispatcherNotesCache.getIfPresent(key);
+        if (actionMetadataReference == null) {
+            AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                // No such factory
+                return null;
+            }
+
+            DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            actionMetadataReference = new ImmutableReference<DispatcherNotes>(actionMetadata);
+            dispatcherNotesCache.put(key, actionMetadataReference);
+        }
+        return actionMetadataReference;
+    }
+
 	@Override
 	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
-        Boolean ret = fallbackSessionActionsCache.get(key);
-	    if (null == ret) {
-	        final AJAXActionServiceFactory factory = lookupFactory(module);
-	        if (factory == null) {
-	            return false;
-	        }
-            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
-	        fallbackSessionActionsCache.put(key, ret);
+	    ImmutableReference<DispatcherNotes> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (optionalActionMetadataReference == null) {
+            return false;
         }
-	    return ret.booleanValue();
+
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.getValue();
+        return actionMetadata == null ? false : actionMetadata.allowPublicSession();
 	}
 
 	@Override
 	public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
-        Boolean ret = publicSessionAuthCache.get(key);
-        if (null == ret) {
-            final AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                return false;
-            }
-            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.publicSessionAuth());
-            publicSessionAuthCache.put(key, ret);
+	    ImmutableReference<DispatcherNotes> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (optionalActionMetadataReference == null) {
+            return false;
         }
-        return ret.booleanValue();
+
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.getValue();
+        return actionMetadata == null ? false : actionMetadata.publicSessionAuth();
 	}
 
 	@Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
-        Boolean ret = omitSessionActionsCache.get(key);
-        if (null == ret) {
-            final AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                return false;
-            }
-            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
-            omitSessionActionsCache.put(key, ret);
+	    ImmutableReference<DispatcherNotes> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (optionalActionMetadataReference == null) {
+            return false;
         }
-        return ret.booleanValue();
+
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.getValue();
+        return actionMetadata == null ? false : actionMetadata.noSession();
 	}
 
 	@Override
 	public boolean noSecretCallback(String module, String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
-        Boolean ret = noSecretCallbackCache.get(key);
-        if (null == ret) {
-            final AJAXActionServiceFactory factory = lookupFactory(module);
-            if (factory == null) {
-                ret = Boolean.FALSE;
-            } else {
-                final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSecretCallback());
-            }
-            noSecretCallbackCache.put(key, ret);
+	    ImmutableReference<DispatcherNotes> optionalActionMetadataReference = determineActionMetadata(module, action);
+        if (optionalActionMetadataReference == null) {
+            return false;
         }
-        return ret.booleanValue();
+
+        DispatcherNotes actionMetadata = optionalActionMetadataReference.getValue();
+        return actionMetadata == null ? false : actionMetadata.noSecretCallback();
 	}
 
-	private static final class StrPair {
-	    private final String str1;
-	    private final String str2;
-	    private final int hash;
+	private static final class ModuleAndAction {
 
-        StrPair(String str1, String str2) {
+        final String module;
+        final String action;
+        private final int hash;
+
+        ModuleAndAction(String module, String action) {
             super();
-            this.str1 = str1;
-            this.str2 = str2;
+            this.module = module;
+            this.action = action;
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((str1 == null) ? 0 : str1.hashCode());
-            result = prime * result + ((str2 == null) ? 0 : str2.hashCode());
+            result = prime * result + ((module == null) ? 0 : module.hashCode());
+            result = prime * result + ((action == null) ? 0 : action.hashCode());
             hash = result;
         }
 
@@ -573,27 +565,27 @@ public class DefaultDispatcher implements Dispatcher {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof StrPair)) {
+            if (!(obj instanceof ModuleAndAction)) {
                 return false;
             }
-            StrPair other = (StrPair) obj;
-            if (str1 == null) {
-                if (other.str1 != null) {
+            ModuleAndAction other = (ModuleAndAction) obj;
+            if (module == null) {
+                if (other.module != null) {
                     return false;
                 }
-            } else if (!str1.equals(other.str1)) {
+            } else if (!module.equals(other.module)) {
                 return false;
             }
-            if (str2 == null) {
-                if (other.str2 != null) {
+            if (action == null) {
+                if (other.action != null) {
                     return false;
                 }
-            } else if (!str2.equals(other.str2)) {
+            } else if (!action.equals(other.action)) {
                 return false;
             }
             return true;
         }
 
-	} // End of class Strings
+    } // End of class ModuleAndAction
 
 }
