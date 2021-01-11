@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.share.tests;
+package com.openexchange.ajax.share.federated;
 
 import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
 import static com.openexchange.java.Autoboxing.I;
@@ -185,7 +185,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
     protected String setFolderPermission(String folderId, ArrayList<FolderPermission> permissions) throws ApiException {
         FolderData deltaFolder = new FolderData();
         deltaFolder.setPermissions(permissions);
-        return folderManager.updateFolder(folderId, deltaFolder, null);
+        return folderManager.updateFolder(folderId, deltaFolder, "A test share for you");
     }
 
     protected static SubscribeShareBody getBody(String link) {

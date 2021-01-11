@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.share.tests;
+package com.openexchange.ajax.share.federated;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
