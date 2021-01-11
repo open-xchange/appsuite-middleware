@@ -429,6 +429,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
      * @param imageFormatStr
      * @return
      */
+    @SuppressWarnings("null")
     public static ImageFormat parseImageFormat(final String imageFormatStr) {
         ImageFormat ret = null;
 

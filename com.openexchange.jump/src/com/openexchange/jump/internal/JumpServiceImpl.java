@@ -69,6 +69,7 @@ import com.openexchange.jump.JumpService;
 public final class JumpServiceImpl extends ServiceTracker<Endpoint, Endpoint> implements JumpService {
 
     private final ConcurrentMap<String, Endpoint> endpoints;
+    @SuppressWarnings("hiding")
     private final BundleContext context;
 
     /**

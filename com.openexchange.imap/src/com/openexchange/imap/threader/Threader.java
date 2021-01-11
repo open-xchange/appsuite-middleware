@@ -408,6 +408,7 @@ public class Threader {
      * <p>
      * This is so that messages which don't have <code>References</code> headers at all still get threaded (to the extent possible, at least.)
      */
+    @SuppressWarnings("null")
     private void gatherSubjects() {
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {

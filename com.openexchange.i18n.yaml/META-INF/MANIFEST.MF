@@ -32,3 +32,4 @@ Export-Package: com.openexchange.i18n.yaml,
 Bundle-Activator: com.openexchange.i18n.yaml.osgi.I18NYamlParserActivator
 Bundle-ClassPath: .,
  lib/jgettext-0.14.jar
+Automatic-Module-Name: com.openexchange.i18n.yaml

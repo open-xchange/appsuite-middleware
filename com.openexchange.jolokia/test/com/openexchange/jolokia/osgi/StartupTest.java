@@ -80,7 +80,7 @@ public class StartupTest {
     CustomJolokiaBundleActivator myActivator;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         myActivator = Mockito.spy(new CustomJolokiaBundleActivator());
 
         // Prevent/stub logic in super.save()

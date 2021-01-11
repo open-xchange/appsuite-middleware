@@ -119,7 +119,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 			return (R) extractReader(resp);
 		}
 
-		for(Class inputType: Arrays.asList(InputStream.class, Reader.class, String.class)) {
+		for(Class<?> inputType: Arrays.asList(InputStream.class, Reader.class, String.class)) {
 			List<HTTPResponseProcessor> procList = processors.get(inputType);
 			if (null != procList){
 				for (HTTPResponseProcessor processor : procList) {

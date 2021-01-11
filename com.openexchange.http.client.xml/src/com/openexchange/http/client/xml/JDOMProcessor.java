@@ -58,23 +58,24 @@ import com.openexchange.xml.jdom.JDOMParser;
 
 public class JDOMProcessor implements HTTPResponseProcessor {
 
-	private final JDOMParser parser;
+    private final JDOMParser parser;
 
-	public JDOMProcessor(final JDOMParser parser) {
-		this.parser = parser;
-	}
+    public JDOMProcessor(final JDOMParser parser) {
+        this.parser = parser;
+    }
 
-	public Class<?>[] getTypes() {
-		return new Class[]{InputStream.class, Document.class};
-	}
+    @Override
+    public Class<?>[] getTypes() {
+        return new Class[] { InputStream.class, Document.class };
+    }
 
-	public Object process(final Object response)
-			throws OXException {
-		try {
-			return parser.parse((InputStream) response);
-		} catch (Exception x) {
-			throw OxHttpClientExceptionCodes.CATCH_ALL.create(x.getMessage(), x);
-		}
-	}
+    @Override
+    public Object process(final Object response) throws OXException {
+        try {
+            return parser.parse((InputStream) response);
+        } catch (Exception x) {
+            throw OxHttpClientExceptionCodes.CATCH_ALL.create(x.getMessage(), x);
+        }
+    }
 
 }

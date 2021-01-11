@@ -22,3 +22,4 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.osgi,
  org.json,
  org.osgi.framework
+Automatic-Module-Name: com.openexchange.http.client.json

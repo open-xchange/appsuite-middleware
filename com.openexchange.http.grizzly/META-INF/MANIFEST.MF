@@ -74,3 +74,4 @@ Export-Package: com.openexchange.http.grizzly,
  org.glassfish.grizzly.websockets,
  org.glassfish.grizzly.websockets.frametypes
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
+Automatic-Module-Name: com.openexchange.http.grizzly

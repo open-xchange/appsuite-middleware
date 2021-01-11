@@ -19,3 +19,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Export-Package: com.openexchange.jump
 Bundle-Activator: com.openexchange.jump.osgi.JumpActivator
+Automatic-Module-Name: com.openexchange.jump

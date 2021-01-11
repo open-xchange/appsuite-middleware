@@ -134,6 +134,7 @@ public class OXHttpServer extends HttpServer {
 
     private volatile ExecutorService auxExecutorService;
 
+    @SuppressWarnings("hiding")
     volatile DelayedExecutor delayedExecutor;
 
     private final GrizzlyConfig grizzlyConfig;
@@ -481,7 +482,7 @@ public class OXHttpServer extends HttpServer {
             LOGGER.log(Level.WARNING, null, e);
         } finally {
             for (final NetworkListener listener : listeners.values()) {
-                final Processor p = listener.getTransport().getProcessor();
+                final Processor<?> p = listener.getTransport().getProcessor();
                 if (p instanceof FilterChain) {
                     ((FilterChain) p).clear();
                 }
@@ -635,6 +636,7 @@ public class OXHttpServer extends HttpServer {
     // --------------------------------------------------------- Private Methods
 
 
+    @SuppressWarnings("deprecation")
     private void configureListener(final NetworkListener listener) {
         FilterChain chain = listener.getFilterChain();
         if (chain == null) {

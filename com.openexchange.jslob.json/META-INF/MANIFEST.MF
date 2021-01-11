@@ -52,3 +52,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.slf4j
 Bundle-Activator: com.openexchange.jslob.json.osgi.JSlobJSONActivator
+Automatic-Module-Name: com.openexchange.jslob.json

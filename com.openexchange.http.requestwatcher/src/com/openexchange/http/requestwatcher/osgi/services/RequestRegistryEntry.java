@@ -52,7 +52,6 @@ package com.openexchange.http.requestwatcher.osgi.services;
 import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link HttpServletRequestRegistryEntry} keeps track of the incoming Request and its associated thread. The Date of instantiation is saved
@@ -66,7 +65,6 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
     private final Thread thread;
     private final Map<String, String> propertyMap;
     private final HttpServletRequest request;
-    private final HttpServletResponse response;
     private final long birthTime;
     private final int hash;
 
@@ -78,13 +76,12 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @param thread the thread associated with the request
      * @param propertyMap
      */
-    public RequestRegistryEntry(long number, HttpServletRequest request, HttpServletResponse response, Thread thread,  Map<String, String> propertyMap) {
+    public RequestRegistryEntry(long number, HttpServletRequest request, Thread thread, Map<String, String> propertyMap) {
         super();
         this.number = number;
         this.thread = thread;
         this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;
         this.request = request;
-        this.response = response;
         this.birthTime = System.currentTimeMillis();
 
         final int prime = 31;
@@ -118,7 +115,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      */
     public String getRequestParameters() {
         final StringBuilder sa = new StringBuilder();
-        @SuppressWarnings("unchecked") final Map<String, String[]> parameterMap = request.getParameterMap();
+        final Map<String, String[]> parameterMap = request.getParameterMap();
         final String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
         for (int i = 0; i < parameterNames.length; i++) {
             final String[] parameterValues = parameterMap.get(parameterNames[i]);

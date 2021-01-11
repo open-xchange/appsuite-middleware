@@ -22,3 +22,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.w3c.dom,
  org.xml.sax
+Automatic-Module-Name: com.openexchange.http.client.xml

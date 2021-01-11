@@ -67,7 +67,6 @@ import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -98,7 +97,6 @@ public final class DBJSlobStorage implements JSlobStorage {
     private static final String ID = "io.ox.wd.jslob.storage.db";
 
     private final ServiceLookup services;
-    private volatile Boolean streamBasedJDBC;
 
     /**
      * Initializes a new {@link DBJSlobStorage}.
@@ -106,21 +104,6 @@ public final class DBJSlobStorage implements JSlobStorage {
     public DBJSlobStorage(final ServiceLookup services) {
         super();
         this.services = services;
-    }
-
-    private boolean streamBasedJDBC() {
-        Boolean tmp = streamBasedJDBC;
-        if (null == tmp) {
-            synchronized (DBJSlobStorage.class) {
-                tmp = streamBasedJDBC;
-                if (null == tmp) {
-                    final ConfigurationService service = services.getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.jslob.storage.db.streamBasedJDBC", true));
-                    streamBasedJDBC = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
     }
 
     @Override

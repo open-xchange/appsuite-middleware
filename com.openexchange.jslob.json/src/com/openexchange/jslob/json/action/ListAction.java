@@ -72,8 +72,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class ListAction extends JSlobAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListAction.class);
-
     /**
      * Initializes a new {@link ListAction}.
      *

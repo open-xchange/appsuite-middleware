@@ -52,7 +52,6 @@ package com.openexchange.java;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.java.ExceptionAwarePipedInputStream;
 
 /**
  * {@link ExceptionForwardingPipedOutputStream} - Forwards possible exceptions to linked instance of <code>ExceptionAwarePipedInputStream</code>.

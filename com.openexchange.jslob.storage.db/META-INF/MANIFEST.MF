@@ -66,3 +66,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.jslob.storage.db.osgi.DBJSlobStorageActivcator
+Automatic-Module-Name: com.openexchange.jslob.storage.db

@@ -126,6 +126,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
      *
      * @return server side {@link SSLEngineConfigurator}.
      */
+    @SuppressWarnings("deprecation")
     private static SSLEngineConfigurator createSslConfiguration(GrizzlyConfig grizzlyConfig) {
         // Initialize SSLContext configuration
         SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();

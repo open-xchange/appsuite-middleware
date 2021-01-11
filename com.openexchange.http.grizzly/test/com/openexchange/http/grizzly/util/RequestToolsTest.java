@@ -81,7 +81,7 @@ public class RequestToolsTest {
     private HttpServletRequest servletRequest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         RequestTools.USM_PATH_CACHE.invalidateAll();

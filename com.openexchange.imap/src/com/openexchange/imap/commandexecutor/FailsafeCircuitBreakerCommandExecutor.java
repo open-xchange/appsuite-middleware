@@ -54,7 +54,6 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.sun.mail.imap.ProtocolAccess;
 import com.sun.mail.util.ProtocolInfo;
 import net.jodah.failsafe.util.Ratio;
 

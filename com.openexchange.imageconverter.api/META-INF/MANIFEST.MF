@@ -19,3 +19,4 @@ Import-Package:
  org.json,
  org.slf4j
 Export-Package: com.openexchange.imageconverter.api
+Automatic-Module-Name: com.openexchange.imageconverter.api
