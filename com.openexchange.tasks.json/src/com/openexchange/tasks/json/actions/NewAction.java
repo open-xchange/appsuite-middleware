@@ -72,8 +72,6 @@ import com.openexchange.tools.session.ServerSession;
 @RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends TaskAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
-
     /**
      * Initializes a new {@link NewAction}.
      *
@@ -91,7 +89,7 @@ public class NewAction extends TaskAction {
         final TaskParser taskParser = new TaskParser(req.getTimeZone());
         taskParser.parse(task, jsonobject, session.getUser().getLocale());
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
-        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
+        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext());
         sqlinterface.insertTaskObject(task);
         countObjectUse(session, task);
         final Date timestamp = task.getLastModified();

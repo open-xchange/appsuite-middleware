@@ -77,7 +77,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         if (lifecycle == null) {
             lifecycle = DEFAULT_LIFECYCLE;
         }
-        SessionScopedContainerImpl<T> newValue = new SessionScopedContainerImpl<T>(name, lifecycle, initial, cleanUp, this);
+        SessionScopedContainerImpl<T> newValue = new SessionScopedContainerImpl<T>(name, lifecycle, initial, cleanUp);
         SessionScopedContainerImpl<?> other = containers.putIfAbsent(name, newValue);
         if (other != null) {
             return (SessionScopedContainer<T>) other;

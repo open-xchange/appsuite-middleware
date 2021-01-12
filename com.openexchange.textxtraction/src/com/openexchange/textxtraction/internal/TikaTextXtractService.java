@@ -50,6 +50,7 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -78,7 +79,6 @@ import com.openexchange.xml.util.XMLUtils;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
-
 
 /**
  * {@link TikaTextXtractService}
@@ -205,10 +205,10 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                 throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (tempFile != null) {
-                    IOUtils.closeQuietly(inputStream);
+                    closeQuietly(inputStream);
                 }
-                IOUtils.closeQuietly(fos);
-                IOUtils.closeQuietly(fis);
+                closeQuietly(fos);
+                closeQuietly(fis);
             }
 
             if (null != text) {
@@ -231,7 +231,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
         } catch (TikaException e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            IOUtils.closeQuietly(tikaInputStream);
+            closeQuietly(tikaInputStream);
         }
     }
 
@@ -252,5 +252,14 @@ public class TikaTextXtractService extends AbstractTextXtractService {
         }
         return super.extractFrom(content, optMimeType);
     }
-
+    
+    private static void closeQuietly(final Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (final IOException ioe) {
+            // ignore
+        }
+    }
 }

@@ -75,6 +75,7 @@ public class TaskJSONActivator extends AJAXModuleActivator {
         return new Class<?>[] { UserService.class, ICalEmitter.class };
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void startBundle() throws Exception {
         registerModule(new TaskActionFactory(this), "tasks");

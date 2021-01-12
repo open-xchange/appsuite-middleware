@@ -36,3 +36,4 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerActivator
+Automatic-Module-Name: com.openexchange.spamhandler.cloudmark

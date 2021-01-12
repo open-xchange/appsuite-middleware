@@ -84,7 +84,7 @@ public class Bug30843Test {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         this.configService = PowerMockito.mock(ConfigurationService.class);
         PowerMockito.when(configService.getProperty(ArgumentMatchers.anyString())).thenReturn("");

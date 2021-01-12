@@ -49,6 +49,8 @@
 
 package com.openexchange.switchboard;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -111,7 +113,7 @@ public class Switchboard {
     public void update(Conference conference, Event update, long timestamp) {
         try {
             post(serialize(UPDATED, conference, update, timestamp));
-            LOG.info("Successfully sent {} for event {} and conference {} to switchboard.", UPDATED, update.getId(), conference.getId());
+            LOG.info("Successfully sent {} for event {} and conference {} to switchboard.", UPDATED, update.getId(), I(conference.getId()));
         } catch (JSONException | OXException e) {
             LOG.error("Unable to send conference update to the switchboard.", e);
         }
@@ -127,7 +129,7 @@ public class Switchboard {
     public void delete(Conference conference, Event original, long timestamp) {
         try {
             post(serialize(DELETED, conference, original, timestamp));
-            LOG.info("Successfully sent {} for conference {} to switchboard.", DELETED, conference.getId());
+            LOG.info("Successfully sent {} for conference {} to switchboard.", DELETED, I(conference.getId()));
         } catch (JSONException | OXException e) {
             LOG.error("Unable to send conference delete to the switchboard.", e);
         }
@@ -199,7 +201,7 @@ public class Switchboard {
                 payload.putSafe("appointment", eventJson);
             }
         }
-        return new JSONObject(2).putSafe("event", action).putSafe("timestamp", timestamp).putSafe("payload", payload);
+        return new JSONObject(2).putSafe("event", action).putSafe("timestamp", L(timestamp)).putSafe("payload", payload);
     }
 
     private JSONObject convertEvent(Event event) throws OXException {

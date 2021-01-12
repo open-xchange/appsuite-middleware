@@ -29,3 +29,4 @@ Import-Package: com.google.common.base,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.session.management.json.osgi.SessionManagementJSONActivator
+Automatic-Module-Name: com.openexchange.session.management.json

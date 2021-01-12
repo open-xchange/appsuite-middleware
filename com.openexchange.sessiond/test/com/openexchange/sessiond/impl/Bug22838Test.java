@@ -106,12 +106,12 @@ public class Bug22838Test {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         SessionHandler.close();
     }
 
     @Test
-    public void testMergeEmptyArrayWithNull() throws Exception {
+    public void testMergeEmptyArrayWithNull() {
         Session[] retval = SessionHandler.removeUserSessions(0, 0);
         assertEquals("Array length not 0", 0, retval.length);
     }

@@ -33,3 +33,4 @@ Import-Package: com.hazelcast.config,
  org.slf4j
 Export-Package: com.openexchange.sessionstorage.hazelcast.serialization
 Bundle-Activator: com.openexchange.sessionstorage.hazelcast.serialization.osgi.PortableSessionActivator
+Automatic-Module-Name: com.openexchange.sessionstorage.hazelcast.serialization

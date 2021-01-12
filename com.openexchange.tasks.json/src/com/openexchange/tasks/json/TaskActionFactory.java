@@ -74,6 +74,7 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class TaskActionFactory implements AJAXActionServiceFactory {
 

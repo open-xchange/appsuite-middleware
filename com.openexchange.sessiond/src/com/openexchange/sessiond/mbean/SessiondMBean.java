@@ -61,6 +61,7 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @deprecated Use {@link SessiondRMIService} or {@link SessiondRESTService} instead.
  */
+@Deprecated
 public interface SessiondMBean {
 
     public static final String MBEAN_NAME = "SessionD Toolkit";

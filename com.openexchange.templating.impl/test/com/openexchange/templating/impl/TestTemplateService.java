@@ -99,8 +99,9 @@ public class TestTemplateService {
     @Mock
     private User user;
 
+    @SuppressWarnings("null")
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         configService = new SimConfigurationService();
@@ -135,7 +136,7 @@ public class TestTemplateService {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         configService = null;
         templateService = null;
     }

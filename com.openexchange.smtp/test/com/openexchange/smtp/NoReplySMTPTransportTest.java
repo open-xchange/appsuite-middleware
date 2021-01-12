@@ -115,13 +115,12 @@ public class NoReplySMTPTransportTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         server = SimpleSmtpServer.start(8025);
     }
 
     @After
-    public void tearDown()
- throws Exception {
+    public void tearDown() {
         if (server != null) {
             server.stop();
         }
@@ -189,7 +188,7 @@ public class NoReplySMTPTransportTest {
         assertEquals(body, received.getBody());
     }
 
-    private static void prepareMockServices() throws Exception {
+    private static void prepareMockServices() {
         mockStatic(ContextStorage.class);
         ContextService contextServiceMock = mock(ContextService.class);
         ConfigurationService configServiceMock = mock(ConfigurationService.class);

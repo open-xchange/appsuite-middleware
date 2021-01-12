@@ -145,7 +145,7 @@ public class TemplateServiceImplTest {
         PowerMockito.mockStatic(ServerSessionAdapter.class);
 
         Mockito.when(this.configService.getProperty(TemplateServiceImpl.PATH_PROPERTY)).thenReturn("thePath");
-        PowerMockito.when(ServerSessionAdapter.valueOf((Session) ArgumentMatchers.anyObject())).thenReturn(serverSession);
+        PowerMockito.when(ServerSessionAdapter.valueOf(ArgumentMatchers.any(Session.class))).thenReturn(serverSession);
     }
 
     @Test

@@ -93,10 +93,6 @@ public class MimeSnippetManagementTest {
 
     private BodyPart bodypart;
 
-    private final String identifier = "77";
-
-    private final int creator = 11;
-
     /**
      * Initializes a new {@link MimeSnippetManagementTest}.
      */

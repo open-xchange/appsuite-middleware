@@ -50,7 +50,6 @@
 package com.openexchange.snippet.rdb.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
-import java.util.Dictionary;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;

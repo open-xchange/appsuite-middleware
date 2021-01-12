@@ -112,6 +112,7 @@ public final class SMTPSessionProperties {
     static {
         SmtpReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 sessionProperties = null;
