@@ -497,10 +497,11 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * ######################## HELPER CLASSES ########################
      */
 
+    @SuppressWarnings("synthetic-access")
     private static final class CustomExecutorCompletionService<V> implements CompletionService<V> {
 
         private final Executor executor;
-        private final RefusedExecutionBehavior behavior;
+        private final RefusedExecutionBehavior<V> behavior;
         private final BlockingQueue<Future<V>> completionQueue;
         private final Map<String, String> mdcMap;
 
@@ -527,7 +528,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
          * @param mdcMap The MDC map
          * @throws NullPointerException if executor is <tt>null</tt>
          */
-        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior, Map<String, String> mdcMap) {
+        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior<V> behavior, Map<String, String> mdcMap) {
             if (executor == null) {
                 throw new NullPointerException();
             }

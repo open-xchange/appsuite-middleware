@@ -38,3 +38,4 @@ Export-Package: com.openexchange.processing,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer
 Bundle-Activator: com.openexchange.threadpool.osgi.ThreadPoolActivator
+Automatic-Module-Name: com.openexchange.threadpool
