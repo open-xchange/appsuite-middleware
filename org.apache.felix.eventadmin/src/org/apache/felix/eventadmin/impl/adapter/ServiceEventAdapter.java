@@ -20,7 +20,6 @@ package org.apache.felix.eventadmin.impl.adapter;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -53,6 +52,7 @@ public class ServiceEventAdapter extends AbstractAdapter implements ServiceListe
         context.addServiceListener(this);
     }
 
+    @Override
     public void destroy(BundleContext context) {
         context.removeServiceListener(this);
     }
@@ -63,6 +63,7 @@ public class ServiceEventAdapter extends AbstractAdapter implements ServiceListe
      *
      * @param event The event to adapt.
      */
+    @Override
     public void serviceChanged(final ServiceEvent event)
     {
         final Dictionary properties = new Hashtable();

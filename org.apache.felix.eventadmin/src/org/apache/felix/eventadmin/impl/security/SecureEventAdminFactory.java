@@ -18,7 +18,9 @@
  */
 package org.apache.felix.eventadmin.impl.security;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 
 /**
@@ -95,7 +97,7 @@ public class SecureEventAdminFactory implements ServiceFactory<EventAdmin>
      */
     private void checkNull(final Object object, final String name)
     {
-        if(null == object)
+        if (null == object)
         {
             throw new NullPointerException(name + " may not be null");
         }

@@ -16,9 +16,12 @@
  */
 package org.apache.felix.eventadmin.impl.tasks;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 
-import EDU.oswego.cs.dl.util.concurrent.*;
 
 /**
  * A thread pool that allows to execute tasks using pooled threads in order
@@ -27,18 +30,22 @@ import EDU.oswego.cs.dl.util.concurrent.*;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DefaultThreadPool
-    extends PooledExecutor
 {
+
+    private volatile ExecutorService executor;
+
+    private final ThreadFactory threadFactory;
+
+    private final AtomicInteger oldSize = new AtomicInteger(-1);
 
     /**
      * Create a new pool.
      */
     public DefaultThreadPool(final int poolSize, final boolean syncThreads)
     {
-   	    super(new LinkedQueue());
-   	    if ( syncThreads )
-   	    {
-            this.setThreadFactory(new ThreadFactory()
+        if ( syncThreads )
+        {
+            threadFactory = new ThreadFactory()
             {
 
                 @Override
@@ -50,11 +57,11 @@ public class DefaultThreadPool
 
                     return thread;
                 }
-            });
-   	    }
-   	    else
-   	    {
-            this.setThreadFactory(new ThreadFactory()
+            };
+        }
+        else
+        {
+            threadFactory = new ThreadFactory()
             {
 
                 @Override
@@ -66,20 +73,34 @@ public class DefaultThreadPool
 
                     return thread;
                 }
-            });
-   	    }
+            };
+        }
    	    configure(poolSize);
-        setKeepAliveTime(60000);
-        runWhenBlocked();
     }
 
     /**
      * Configure a new pool size.
      */
-    public void configure(final int poolSize)
+    public synchronized void configure(final int poolSize)
     {
-        setMinimumPoolSize(poolSize);
-        setMaximumPoolSize(poolSize + 10);
+        if ( oldSize.get() != poolSize)
+        {
+            oldSize.set(poolSize);
+            final ExecutorService oldService = this.executor;
+            this.executor = Executors.newFixedThreadPool(poolSize, threadFactory);
+            if ( oldService != null )
+            {
+                oldService.shutdown();
+            }
+        }
+    }
+
+    /**
+     * Returns current pool size.
+     */
+    public int getPoolSize()
+    {
+    	return oldSize.get();
     }
 
     /**
@@ -88,26 +109,36 @@ public class DefaultThreadPool
      */
     public void close()
     {
-        shutdownNow();
-
+        ExecutorService executor = this.executor;
+        if (null != executor)
+        {
+            executor.shutdownNow();
+        }
     }
 
     /**
      * Execute the task in a free thread or create a new one.
      * @param task The task to execute
+     * @return <code>true</code> if successfully submitted; otherwise <code>false</code>
      */
-    public void executeTask(final Runnable task)
+    public boolean executeTask(final Runnable task)
     {
         try
         {
-            super.execute(task);
+            ExecutorService executor = this.executor;
+            if (null != executor)
+            {
+                executor.submit(task);
+                return true;
+            }
         }
-        catch (final Throwable t)
+        catch (Throwable t)
         {
             LogWrapper.getLogger().log(
                     LogWrapper.LOG_WARNING,
                     "Exception: " + t, t);
             // ignore this
         }
+        return false;
     }
 }
