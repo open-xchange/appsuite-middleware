@@ -63,7 +63,7 @@ import com.openexchange.find.DocumentVisitor;
 public class FolderDocument implements Document {
 
     private static final long serialVersionUID = -2512496183337208649L;
-    private FileStorageFolder folder;
+    private transient FileStorageFolder folder;
 
     public FolderDocument(FileStorageFolder folder) {
         super();
