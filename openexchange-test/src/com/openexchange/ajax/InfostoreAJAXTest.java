@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.UUID;
 import org.json.JSONException;
@@ -84,11 +85,13 @@ public class InfostoreAJAXTest extends AbstractAJAXSession {
         File file1 = InfostoreTestManager.createFile(folderId, "test knowledge", "text/plain");
         file1.setDescription("test knowledge description");
         itm.newAction(file1, upload);
+        assertFalse("Unexpected error: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         File file2 = InfostoreTestManager.createFile(folderId, "test url", "text/plain");
         file2.setURL("http://www.open-xchange.com");
         file2.setDescription("test url description");
         itm.newAction(file2, upload);
+        assertFalse("Unexpected error: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
     }
 
     private int createFolderForTest() throws JSONException, OXException, IOException {
