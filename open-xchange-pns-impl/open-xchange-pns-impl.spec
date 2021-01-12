@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,6 +54,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/etc/security/pns.list
 
 %changelog
+* Tue Jan 05 2021 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2021-01-11 (5930)
 * Wed Dec 09 2020 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2020-12-14 (5924)
 * Mon Nov 16 2020 Thorben Betten <thorben.betten@open-xchange.com>
