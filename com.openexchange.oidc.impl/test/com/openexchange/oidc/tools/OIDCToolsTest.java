@@ -307,6 +307,7 @@ public class OIDCToolsTest {
         assertTrue("Wrong prefix build, dispatcher/oidc/backend/ expected", result.equals("dispatcher/oidc/backend/"));
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void getPrefix_NoBackendConfigTest() throws Exception {
         PowerMockito.stub(PowerMockito.method(OIDCTools.class, "getRedirectPathPrefix")).toReturn("dispatcher/");

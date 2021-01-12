@@ -50,6 +50,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
+@SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AbstractOIDCBackend.class, OIDCTools.class, LoginPerformer.class, SessionUtility.class, LoginConfiguration.class, Services.class, OIDCLoginRequestHandler.OIDCHandler.class})
 public class OIDCBackendTest {

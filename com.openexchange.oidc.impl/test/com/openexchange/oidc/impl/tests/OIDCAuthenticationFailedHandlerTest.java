@@ -49,6 +49,8 @@
 
 package com.openexchange.oidc.impl.tests;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -90,6 +92,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.3
  */
+@SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 public class OIDCAuthenticationFailedHandlerTest {
 
@@ -120,6 +123,7 @@ public class OIDCAuthenticationFailedHandlerTest {
     @Spy
     private OIDCBackendConfig config = new TestBackendConfig();
 
+    @SuppressWarnings("unused")
     private MockablePasswordGrantAuthentication authenticationService;
 
     private int userId;
@@ -130,6 +134,7 @@ public class OIDCAuthenticationFailedHandlerTest {
 
     private String loginmapping;
 
+    @SuppressWarnings("unused")
     private String password;
 
     private OIDCAuthenticationFailedHandler authenticationFailedHandler;
@@ -147,10 +152,10 @@ public class OIDCAuthenticationFailedHandlerTest {
         loginmapping = "example.com";
         password = "Secret123!";
 
-        when(user.getId()).thenReturn(userId);
+        when(I(user.getId())).thenReturn(I(userId));
         when(user.getLoginInfo()).thenReturn(username);
 
-        when(context.getContextId()).thenReturn(contextId);
+        when(I(context.getContextId())).thenReturn(I(contextId));
         when(context.getLoginInfo()).thenReturn(new String[] { loginmapping });
 
         when(userService.getUser(userId, context)).thenReturn(user);
@@ -191,7 +196,7 @@ public class OIDCAuthenticationFailedHandlerTest {
     public void testIgnoreNonOIDCSessions() throws Exception {
         Session session = Mockito.mock(Session.class);
         when(session.getParameter(OIDCTools.IDTOKEN)).thenReturn(null);
-        when(session.containsParameter(OIDCTools.IDTOKEN)).thenReturn(false);
+        when(B(session.containsParameter(OIDCTools.IDTOKEN))).thenReturn(B(false));
         MailConfig mailConfig = Mockito.mock(MailConfig.class);
         when(mailConfig.getAuthType()).thenReturn(AuthType.OAUTHBEARER);
 

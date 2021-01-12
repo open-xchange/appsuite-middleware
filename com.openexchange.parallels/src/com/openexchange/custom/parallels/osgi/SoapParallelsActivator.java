@@ -4,7 +4,6 @@ package com.openexchange.custom.parallels.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.withRanking;
 import java.rmi.Remote;
-import java.util.Dictionary;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -22,7 +21,6 @@ import com.openexchange.custom.parallels.impl.ParallelsOptions;
 import com.openexchange.custom.parallels.soap.OXServerServicePortType;
 import com.openexchange.custom.parallels.soap.OXServerServicePortTypeImpl;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -98,7 +96,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         LOG.debug("Trying to register POA authentication plugin");
         registerService(AuthenticationService.class.getName(), new ParallelsOXAuthentication(), null);
         LOG.debug("Successfully registered POA authentication plugin");
-        // regitser hostname service to modify hostnames in directlinks
+        // register hostname service to modify hostnames in direct-links
         LOG.debug("Trying to register POA hostname/directlinks plugin");
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
         LOG.debug("Successfully registered POA hostname/directlinks plugin");
@@ -115,7 +113,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
-    private String getFromConfig(final String key) throws OXException {
+    private String getFromConfig(final String key) {
         return getService(ConfigurationService.class).getProperty(key);
     }
 }

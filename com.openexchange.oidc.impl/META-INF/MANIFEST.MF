@@ -134,3 +134,4 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.openexchange.oidc.spi,
  com.openexchange.oidc.tools
 Bundle-Activator: com.openexchange.oidc.osgi.OIDCActivator
+Automatic-Module-Name: com.openexchange.oidc.impl

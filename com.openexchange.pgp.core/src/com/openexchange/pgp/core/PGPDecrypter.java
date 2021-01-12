@@ -166,6 +166,7 @@ public class PGPDecrypter {
      * @throws OXException if no key was found
      * @throws Exception
      */
+    @SuppressWarnings("synthetic-access")
     private PGPDataContainer getDataContainer(PGPEncryptedDataList encryptedDataList, String userID, char[] password) throws Exception {
         //Processing decrypted data
         PGPPrivateKey privateKey = null;

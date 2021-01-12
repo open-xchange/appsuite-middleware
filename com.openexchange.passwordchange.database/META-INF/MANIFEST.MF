@@ -24,3 +24,4 @@ Import-Package: com.openexchange.database,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.passwordchange.database.osgi.DatabasePasswordChangeActivator
+Automatic-Module-Name: com.openexchange.passwordchange.database

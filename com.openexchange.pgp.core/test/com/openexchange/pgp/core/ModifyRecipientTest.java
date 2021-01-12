@@ -84,7 +84,6 @@ import com.openexchange.pgp.core.packethandling.RemoveRecipientPacketProcessorHa
 @RunWith(value = Parameterized.class)
 public class ModifyRecipientTest extends AbstractPGPTest {
 
-    private static final String BEGIN_PGP_MARKER = "-----BEGIN PGP MESSAGE-----";
     private final boolean armored;
     private PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private Identity identity;
@@ -102,7 +101,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      * @return An iterable of Arrays which can be injected into the constructor when running the tests
      */
     @Parameters(name = "{index} - Ascii-armored: {0}")
-    public static Iterable parameters() {
+    public static Iterable<?> parameters() {
         return Arrays.asList(new Object[][] {
             { Boolean.TRUE /* Runs the tests in ASCII-Armored mode */},
             { Boolean.FALSE /* Runs the tests in Binary-Mode */}
@@ -292,7 +291,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Make sure removed
         for (Identity encryptingIdentity : verifyFail) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults = null;
             boolean failed = false;
             try {
                 PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
@@ -300,7 +298,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
-                verifyResults = result.getSignatureVerificationResults();
+                result.getSignatureVerificationResults();
             } catch (Exception ex) {
                 failed = true;
             }

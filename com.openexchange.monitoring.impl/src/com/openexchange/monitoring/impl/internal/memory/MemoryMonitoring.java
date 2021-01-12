@@ -272,6 +272,7 @@ public class MemoryMonitoring implements Runnable {
 
         List<GarbageCollectionInfo> gcSingles = new ArrayList<GarbageCollectionInfo>(4);
         double gcTimePercentSum;
+        @SuppressWarnings("unused")
         long cpuTimePercent;
 
         GarbageCollectionInfos() {

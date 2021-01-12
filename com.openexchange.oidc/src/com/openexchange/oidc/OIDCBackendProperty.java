@@ -48,6 +48,8 @@
  */
 package com.openexchange.oidc;
 
+import static com.openexchange.java.Autoboxing.I;
+
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.openexchange.authentication.NamePart;
 import com.openexchange.config.lean.Property;
@@ -134,7 +136,7 @@ public enum OIDCBackendProperty implements Property {
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
      * grant type must be registered for this client.
      */
-    oauthRefreshTime(OIDCProperty.PREFIX, 60000),
+    oauthRefreshTime(OIDCProperty.PREFIX, I(60000)),
     /**
      * uiWebPath - This backends UI path
      */
@@ -191,7 +193,7 @@ public enum OIDCBackendProperty implements Property {
      * of a timeout, this is logged as a temporary issue and the request continued
      * as usual.
      */
-    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, 5),
+    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, I(5)),
     /**
      * tryRecoverStoredTokens - Whether token refresh should try to recover valid tokens from
      * the session instance that is present in {@link SessionStorageService}.

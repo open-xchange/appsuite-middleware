@@ -22,3 +22,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.json
 Export-Package: com.openexchange.modules.json,
  com.openexchange.modules.json.actions
+Automatic-Module-Name: com.openexchange.modules.json

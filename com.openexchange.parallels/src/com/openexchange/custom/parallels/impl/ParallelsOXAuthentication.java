@@ -98,7 +98,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
         super();
     }
 
-    public static String getFromConfig(final String key) throws OXException{
+    public static String getFromConfig(final String key) {
         final ConfigurationService configservice = Services.getService(ConfigurationService.class);
         return configservice.getProperty(key);
     }

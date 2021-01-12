@@ -90,16 +90,14 @@ public class PGPSecretKeyDecoder {
      * @throws PGPException
      */
     public static PGPPrivateKey decodePrivateKey(PGPSecretKeyRing secretKeyRing, char[] password) throws PGPException {
-        PGPSecretKey sec_key = null;
         Iterator<PGPSecretKey> it = secretKeyRing.getSecretKeys();
         PGPSecretKey master = null;
-        while (sec_key == null && it.hasNext()) {
+        while (it.hasNext()) {
             PGPSecretKey key = it.next();
             if (!key.isMasterKey()) { // We prefer to not return the master.  Only return master if no other encr keys found
                 return decodePrivateKey(key, password);
-            } else {
-                master = key;
             }
+            master = key;
         }
         if (master != null) {
             return decodePrivateKey(master, password);

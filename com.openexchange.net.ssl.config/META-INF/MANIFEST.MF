@@ -10,3 +10,4 @@ Export-Package: com.openexchange.net.ssl.config
 Import-Package: com.openexchange.groupware.contexts,
  com.openexchange.osgi.annotation,
  org.slf4j
+Automatic-Module-Name: com.openexchange.net.ssl.config

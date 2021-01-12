@@ -49,11 +49,11 @@
 
 package com.openexchange.metrics.micrometer.binders;
 
+import static com.openexchange.java.Autoboxing.D;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.prometheus.client.hotspot.VersionInfoExports;
-
 
 /**
  * This resembles {@link VersionInfoExports}.
@@ -66,7 +66,7 @@ public class JvmInfoMetrics implements MeterBinder {
     @Override
     public void bindTo(MeterRegistry registry) {
 
-        Gauge.builder("jvm.info", () -> 1.0)
+        Gauge.builder("jvm.info", () -> D(1.0))
             .description("JVM version info")
             .tags(
                 "version", System.getProperty("java.runtime.version", "unknown"),

@@ -13,6 +13,8 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "InvalidDataException", targetNamespace = "http://soap.parallels.custom.openexchange.com")
 public class InvalidDataException_Exception extends java.lang.Exception {
     
+    private static final long serialVersionUID = -709766544820480294L;
+    
     private com.openexchange.custom.parallels.soap.InvalidDataException invalidDataException;
 
     public InvalidDataException_Exception() {

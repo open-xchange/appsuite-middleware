@@ -80,9 +80,9 @@ public class AsciiArmoredKeyParserTest {
      * @param userId The user ID
      * @return true, if the secret key contains the given user ID, false otherwise.
      */
-    private boolean hasUserId(Iterator userIdIterator, String userId) {
+    private boolean hasUserId(Iterator<String> userIdIterator, String userId) {
         while (userIdIterator.hasNext()) {
-            String keyUserId = (String) userIdIterator.next();
+            String keyUserId = userIdIterator.next();
             if (userId.equals(keyUserId)) {
                 return true;
             }

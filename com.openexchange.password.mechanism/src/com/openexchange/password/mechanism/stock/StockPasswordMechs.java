@@ -61,6 +61,7 @@ import com.openexchange.password.mechanism.impl.mech.SHAMech;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.2
  */
+@SuppressWarnings("deprecation")
 public enum StockPasswordMechs {
 
     SHA1(new SHAMech(SHACrypt.SHA1)),

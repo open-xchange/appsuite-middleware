@@ -18,3 +18,4 @@ Bundle-Activator: com.openexchange.metrics.dropwizard.osgi.MetricActivator
 Bundle-ClassPath: lib/metrics-core-4.0.3-SNAPSHOT.jar,
  lib/metrics-jmx-4.0.3-SNAPSHOT.jar,
  .
+Automatic-Module-Name: com.openexchange.metrics.dropwizard

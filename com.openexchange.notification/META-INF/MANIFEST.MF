@@ -41,3 +41,4 @@ Import-Package: com.google.common.io;version="18.0.0",
 Export-Package: com.openexchange.notification,
  com.openexchange.notification.mail
 Bundle-Activator: com.openexchange.notification.osgi.NotificationActivator
+Automatic-Module-Name: com.openexchange.notification

@@ -25,3 +25,4 @@ Export-Package: com.openexchange.password.mechanism,
  com.openexchange.password.mechanism.exceptions,
  com.openexchange.password.mechanism.stock
 Bundle-Activator: com.openexchange.password.mechanism.osgi.PasswordMechImplActivator
+Automatic-Module-Name: com.openexchange.password.mechanism

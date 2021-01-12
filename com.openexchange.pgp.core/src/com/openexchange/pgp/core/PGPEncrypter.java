@@ -142,7 +142,7 @@ public class PGPEncrypter {
         //Initialize signing if a signing key was provided
         PGPSignatureGenerator signatureGenerator = null;
         if (signing) {
-            int algorithm = signingKey.getPublicKey().getAlgorithm();
+            @SuppressWarnings("null") int algorithm = signingKey.getPublicKey().getAlgorithm(); // Guarded by 'signing'
             signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(algorithm, PGPUtil.SHA512).setProvider("BC"));
             try {
                 PBESecretKeyDecryptor extractor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(password);

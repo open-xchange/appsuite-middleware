@@ -24,3 +24,4 @@ Import-Package: com.openexchange.exception,
 Export-Package: com.openexchange.pgp.keys.common,
  com.openexchange.pgp.keys.parsing,
  com.openexchange.pgp.keys.tools
+Automatic-Module-Name: com.openexchange.pgp.keys

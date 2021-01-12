@@ -65,6 +65,7 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @deprecated Use {@link ListUpdateTasksCLT} instead. Scheduled to be removed on the next release.
  */
+@Deprecated
 public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
     /**

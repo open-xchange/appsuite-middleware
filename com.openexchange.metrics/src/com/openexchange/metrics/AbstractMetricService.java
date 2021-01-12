@@ -70,6 +70,7 @@ import com.openexchange.metrics.types.Timer;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractMetricService implements MetricService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricService.class);
