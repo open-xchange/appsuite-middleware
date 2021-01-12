@@ -433,6 +433,7 @@ public final class HTML2TextHandler implements HtmlHandler {
 
     private static final String STR_BLANK = " ";
 
+    @SuppressWarnings("unused")
     @Override
     public void handleText(final String text, final boolean ignorable) {
         if (insideBody && !ignore) {

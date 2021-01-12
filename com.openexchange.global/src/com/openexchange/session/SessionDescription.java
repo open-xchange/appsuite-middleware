@@ -298,6 +298,7 @@ public class SessionDescription implements PutIfAbsent {
      *
      * @return <code>true</code> to annotate with "stay signed in"; otherwise <code>false</code>
      */
+    @Override
     public boolean isStaySignedIn() {
         return staySignedIn;
     }

@@ -62,9 +62,11 @@ import org.junit.Before;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AbstractHashingFileStorageTest {
+
     protected File tmpFile;
     protected HashingFileStorage fs;
 
+    @SuppressWarnings("unused")
     @Before
     public void setUp() throws Exception {
         tmpFile = new File("/tmp/" + this.getClass().getCanonicalName() + "_" + System.currentTimeMillis());
@@ -78,6 +80,7 @@ public class AbstractHashingFileStorageTest {
         tmpFile.delete();
     }
 
+    @SuppressWarnings("unused")
     protected InputStream IS(String data) throws UnsupportedEncodingException {
         return new ByteArrayInputStream(data.getBytes(com.openexchange.java.Charsets.UTF_8));
     }

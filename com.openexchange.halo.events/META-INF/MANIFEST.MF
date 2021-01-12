@@ -34,3 +34,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.halo.events

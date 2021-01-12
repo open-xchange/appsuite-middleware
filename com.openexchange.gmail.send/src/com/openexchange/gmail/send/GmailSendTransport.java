@@ -632,7 +632,7 @@ public class GmailSendTransport extends MailTransport {
             }
 
             // Set common headers
-            new GmailSendMessageFiller(gmailSendConfig.getGmailSendProperties(), session, ctx, usm).setAccountId(accountId).setCommonHeaders(mimeMessage);
+            new GmailSendMessageFiller(session, ctx, usm).setAccountId(accountId).setCommonHeaders(mimeMessage);
 
             // Compose body
             String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1140,8 +1140,8 @@ public class GmailSendTransport extends MailTransport {
         }
     }
 
-    private GmailSendMessageFiller createGmailSendMessageFiller(UserSettingMail optMailSettings) throws OXException {
-        return new GmailSendMessageFiller(getTransportConfig().getGmailSendProperties(), session, ctx, null == optMailSettings ? usm : optMailSettings);
+    private GmailSendMessageFiller createGmailSendMessageFiller(UserSettingMail optMailSettings) {
+        return new GmailSendMessageFiller(session, ctx, null == optMailSettings ? usm : optMailSettings);
     }
 
     @Override

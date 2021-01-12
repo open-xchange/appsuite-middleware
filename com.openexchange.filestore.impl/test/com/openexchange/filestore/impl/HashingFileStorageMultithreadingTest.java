@@ -127,9 +127,5 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
                 }
             }
         }
-
-        public Map<String, String> getDataMap() {
-            return dataMap;
-        }
     }
 }

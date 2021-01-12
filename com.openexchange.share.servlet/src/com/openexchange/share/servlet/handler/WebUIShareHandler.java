@@ -141,21 +141,31 @@ public class WebUIShareHandler extends AbstractShareHandler {
         ShareTargetPath targetPath = shareRequest.getTargetPath();
         switch (targetPath.getModule()) {
             // Mail
-            case FolderObject.MAIL: 
+            case FolderObject.MAIL:
                 return  t -> String.format(t.translate(ShareServletStrings.SHARE_PASSWORD));
             // Other share
-            default: 
+            default:
                 if (null != sharingUser) {
+                    String toTranslate;
+                    if (RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType())) {
+                        toTranslate = targetPath.isFolder() ? ShareServletStrings.SHARE_FOLDER_WITH_TARGET : ShareServletStrings.SHARE_FILE_WITH_TARGET;
+                    } else {
+                        toTranslate = targetPath.isFolder() ? ShareServletStrings.SHARE_FOLDER_WITH_TARGET_AND_GUEST_PASSWORD : ShareServletStrings.SHARE_FILE_WITH_TARGET_AND_GUEST_PASSWORD;
+                    }
                     return t -> String.format(
-                        t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD),
+                        t.translate(toTranslate),
                         FullNameBuilder.buildFullName(sharingUser, t),
-                        t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
                         shareRequest.getTargetProxy().getLocalizedTitle(t));
                 }
+
+                String toTranslate;
+                if (RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType())) {
+                    toTranslate = targetPath.isFolder() ? ShareServletStrings.SHARE_FOLDER_WITH_TARGET_UNKNOWN_SHARING_USER : ShareServletStrings.SHARE_FILE_WITH_TARGET_UNKNOWN_SHARING_USER;
+                } else {
+                    toTranslate = targetPath.isFolder() ? ShareServletStrings.SHARE_FOLDER_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER : ShareServletStrings.SHARE_FILE_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER;
+                }
                 return t -> String.format(
-                    t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET_UNKNOWN_SHARING_USER
-                        : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER),
-                    t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
+                    t.translate(toTranslate),
                     shareRequest.getTargetProxy().getLocalizedTitle(t));
         }
     }

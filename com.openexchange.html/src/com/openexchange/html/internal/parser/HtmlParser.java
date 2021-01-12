@@ -247,6 +247,7 @@ public final class HtmlParser {
         return sb.toString();
     }
 
+    @SuppressWarnings("deprecation")
     private static void dumpHtml(final String html, final StringBuilder sb) {
         final String[] lines = Strings.splitByCRLF(html);
         final DecimalFormat df = new DecimalFormat("0000");

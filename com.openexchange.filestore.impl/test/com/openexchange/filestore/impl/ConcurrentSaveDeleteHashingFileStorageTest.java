@@ -81,6 +81,7 @@ public class ConcurrentSaveDeleteHashingFileStorageTest extends AbstractHashingF
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +91,7 @@ public class ConcurrentSaveDeleteHashingFileStorageTest extends AbstractHashingF
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         fs.remove();
@@ -153,6 +155,7 @@ public class ConcurrentSaveDeleteHashingFileStorageTest extends AbstractHashingF
             return exception;
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void run() {
 

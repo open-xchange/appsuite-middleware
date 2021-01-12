@@ -61,7 +61,7 @@ import org.mockito.Mockito;
 
 public class MockingServiceLookup implements ServiceLookup {
 
-    private Map<Class, Object> services = new HashMap<Class, Object>();
+    private Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
 
     public <S> S mock(Class<? extends S> clazz) {
         Object object = services.get(clazz);

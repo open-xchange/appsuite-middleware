@@ -65,6 +65,7 @@ import org.junit.Test;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SuppressWarnings("synthetic-access")
 public class Bug27708Test {
     private static final int NUM_THREADS = 20;
     private static final int NUM_RUNS = 100;
@@ -78,7 +79,7 @@ public class Bug27708Test {
         super();
     }
 
-         @Test
+    @Test
      public void testThreadSafety() throws Exception {
         Thread[] threads = new Thread[NUM_THREADS];
         CheckHtmlCleaner[] runnables = new CheckHtmlCleaner[NUM_THREADS];

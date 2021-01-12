@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,20 +47,23 @@
  *
  */
 
-package com.openexchange.session;
+package com.openexchange.ajax.share.federated;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link SessionHolderExtended} - Extends the {@link SessionHolder} interface by {@link #optSessionObject()} method.
+ * {@link FederatedSharingTestSuite}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.5
  */
-public interface SessionHolderExtended extends SessionHolder {
-
-    /**
-     * Optionally gets the {@link Session session}.
-     *
-     * @return The session or <code>null</code>
-     */
-    public Session optSessionObject();
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    ShareManagementInternalSubscriptionTest.class,
+    ShareManagementSubscriptionTest.class,
+})
+public class FederatedSharingTestSuite {
 
 }

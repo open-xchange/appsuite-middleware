@@ -349,9 +349,6 @@ public final class CSSMatcher {
     /** Matches a starting CSS block */
     protected static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:\\*|#|\\.|@|[a-zA-Z])[^{/;]*?\\{");
 
-    /** Matches a complete CSS block, but not appropriate for possible nested blocks */
-    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:\\*|#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
-
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -1029,14 +1026,6 @@ public final class CSSMatcher {
         cssBuilder.setLength(0);
         cssBuilder.append(repl);
     }
-
-    private static final MatcherReplacer.Condition NO_EVENT_HANDLER_CONDITION = new MatcherReplacer.Condition() {
-
-        @Override
-        public CharSequence acceptTail(CharSequence tail) {
-            return HtmlServices.containsEventHandler(tail.toString()) ? null : tail;
-        }
-    };
 
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map<br>

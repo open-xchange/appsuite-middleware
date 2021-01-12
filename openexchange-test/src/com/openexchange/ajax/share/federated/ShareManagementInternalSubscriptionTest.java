@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.share.tests;
+package com.openexchange.ajax.share.federated;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -79,8 +79,14 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
     }
 
     @Test
-    public void testInternalLink_Error() throws Exception {
-        String shareLink = "http://localhost/appsuite/ui!&app=io.ox/2&folder=9001&id=9001";
+    public void testInternalLink_WithItem() throws Exception {
+        String shareLink = "http://localhost/appsuite/ui!&app=io.ox/files&folder=9001&id=9001";
+        analyze(smApi2, shareLink, StateEnum.UNSUPPORTED);
+    }
+    
+    @Test
+    public void testInternalLink_UnkownResource() throws Exception {
+        String shareLink = "https://localhost/appsuite/ui#!&app=io.ox/files&folder=999999";
         analyze(smApi2, shareLink, StateEnum.INACCESSIBLE);
     }
 

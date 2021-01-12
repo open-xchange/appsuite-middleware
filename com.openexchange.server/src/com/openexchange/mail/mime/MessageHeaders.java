@@ -293,17 +293,17 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_COMPOSITION_SPACE_ID = HeaderName.valueOf(HDR_X_OX_COMPOSITION_SPACE_ID);
 
-    /** {@value #HDR_X_OX_ATTACHMENT_ORIGIN} */
+    /** "X-OX-Attachment-Origin" */
     public static final String HDR_X_OX_ATTACHMENT_ORIGIN = "X-OX-Attachment-Origin";
 
     public static final HeaderName X_OX_ATTACHMENT_ORIGIN = HeaderName.valueOf(HDR_X_OX_ATTACHMENT_ORIGIN);
 
-    /** {@value #HDR_SENDER} */
+    /** "Sender" */
     public static final String HDR_SENDER = "Sender";
 
     public static final HeaderName SENDER = HeaderName.valueOf(HDR_SENDER);
 
-    /** {@value #HDR_X_OX_CLIENT_TOKEN} */
+    /** "X-OX-Client-Token" */
     public static final String HDR_X_OX_CLIENT_TOKEN = "X-OX-Client-Token";
 
     public static final HeaderName X_OX_CLIENT_TOKEN = HeaderName.valueOf(HDR_X_OX_CLIENT_TOKEN);

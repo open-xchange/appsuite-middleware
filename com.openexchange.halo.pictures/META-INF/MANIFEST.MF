@@ -25,3 +25,4 @@ Import-Package: com.openexchange.ajax.container,
  javax.servlet,
  javax.servlet.http,
  org.osgi.framework
+Automatic-Module-Name: com.openexchange.halo.pictures

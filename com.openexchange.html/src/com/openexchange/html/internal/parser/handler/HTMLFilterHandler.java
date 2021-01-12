@@ -121,8 +121,6 @@ public final class HTMLFilterHandler implements HtmlHandler {
 
     private boolean body;
 
-    private boolean withinSuppress;
-
     /**
      * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed.
      */

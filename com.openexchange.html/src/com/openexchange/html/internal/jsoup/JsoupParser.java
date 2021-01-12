@@ -281,6 +281,7 @@ public class JsoupParser {
             this.handler = handler;
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void head(Node node, int depth) {
             if (Thread.interrupted()) { // clears flag if set

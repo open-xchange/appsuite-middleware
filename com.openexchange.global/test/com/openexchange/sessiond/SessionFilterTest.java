@@ -119,7 +119,7 @@ public class SessionFilterTest {
     }
 
      @Test
-     public void testParser5() throws Exception {
+     public void testParser5() {
         final Map<String, String> values = new HashMap<String, String>();
         Matchee mapMatchee = new Matchee() {
             @Override

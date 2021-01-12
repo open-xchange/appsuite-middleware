@@ -65,9 +65,11 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings("synthetic-access")
 public class MergingSearchIteratorTest {
-         @Test
-     public void testMerge() throws OXException {
+    
+    @Test
+    public void testMerge() throws OXException {
         final Integer[] a = new Integer[] { I(0), I(3), I(4), I(7), I(9), I(12), I(13), I(16) };
         final Integer[] b = new Integer[] { I(1), I(2), I(5), I(10), I(18) };
         final Integer[] c = new Integer[] { I(1), I(6), I(8), I(11), I(14), I(20) };
@@ -90,8 +92,8 @@ public class MergingSearchIteratorTest {
         assertFalse(complete.hasNext());
     }
 
-         @Test
-     public void testMergeEmptyWithFull() throws OXException {
+    @Test
+    public void testMergeEmptyWithFull() throws OXException {
         final Integer[] a = new Integer[0];
         final Integer[] b = new Integer[] { I(1), I(2), I(5), I(10), I(18) };
 
