@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -87,7 +89,8 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagingMessageWriterTest {
-         @Test
+         
+    @Test
      public void testWriteSimpleFields() throws JSONException, OXException {
 
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
@@ -105,15 +108,15 @@ public class MessagingMessageWriterTest {
 
         final JSONObject messageJSON = new MessagingMessageWriter().write(message, "com.openexchange.test2://account/folder/subfolder", new SimServerSession(new SimContext(1), new SimUser(), null), null);
 
-        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
-            "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f\u00fcnf").inAnyOrder().hasKey(
-            "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(I(2)).hasKey("flags").withValue(I(12)).hasKey(
+            "receivedDate").withValue(I(1337)).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f\u00fcnf").inAnyOrder().hasKey(
+            "size").withValue(I(13)).hasKey("threadLevel").withValue(I(15)).hasKey("id").withValue("message123").hasKey("folder").withValue(
             "com.openexchange.test2://account/folder/subfolder/niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png").hasKey("url").withValue("http://www.somesite.invalid/messageid");
 
         assertValidates(assertion, messageJSON);
     }
-
-         @Test
+        
+    @Test
      public void testHeaders() throws JSONException, OXException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
@@ -183,8 +186,9 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testSpecialHeader() throws OXException, JSONException {
+    @SuppressWarnings("synthetic-access")
+    @Test
+    public void testSpecialHeader() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
@@ -198,15 +202,14 @@ public class MessagingMessageWriterTest {
 
         final JSONObject messageJSON = writer.write(message, "", null, null);
 
-        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
-            "1eulaV").objectEnds().objectEnds();
+        final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue("1eulaV").objectEnds().objectEnds();
 
         assertValidates(assertion, messageJSON);
 
     }
 
-         @Test
-     public void testPlainMessage() throws OXException, JSONException {
+    @Test
+    public void testPlainMessage() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
@@ -218,8 +221,8 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testReferenceContent() throws OXException, JSONException {
+    @Test
+    public void testReferenceContent() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContentReference("coolReferenceId");
 
@@ -231,8 +234,8 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
+    @Test
+    public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content".getBytes("UTF-8"));
 
@@ -244,8 +247,8 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
+    @Test
+    public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
         final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
         binMessage.setContent("content".getBytes("UTF-8"));
@@ -305,8 +308,9 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testCustomContentWriter() throws OXException, JSONException {
+    @SuppressWarnings("synthetic-access")
+    @Test
+    public void testCustomContentWriter() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent("content");
 
@@ -320,8 +324,8 @@ public class MessagingMessageWriterTest {
         assertValidates(assertion, messageJSON);
     }
 
-         @Test
-     public void testWriteSimpleArrayFields() throws OXException, JSONException {
+    @Test
+    public void testWriteSimpleArrayFields() throws OXException, JSONException {
         // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
@@ -347,13 +351,13 @@ public class MessagingMessageWriterTest {
 
         final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", new SimServerSession(new SimContext(1), new SimUser(), null), null);
 
-        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic", "http://url.tld").inStrictOrder();
+        final JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "com.openexchange.test1://account12/folder12", "the subject", L(1337l), L(1234567l), I(313), I(12), I(13), "Supercontent!", "pic", "http://url.tld").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }
 
-         @Test
-     public void testWritePostiveNumbersAsNullIfNegative() throws OXException, JSONException {
+    @Test
+    public void testWritePostiveNumbersAsNullIfNegative() throws OXException, JSONException {
      // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
            MessagingField.SIZE, MessagingField.RECEIVED_DATE, MessagingField.THREAD_LEVEL};
@@ -380,8 +384,8 @@ public class MessagingMessageWriterTest {
 
     }
 
-         @Test
-     public void testWriteHeaderArrayField() throws OXException, JSONException {
+    @Test
+    public void testWriteHeaderArrayField() throws OXException, JSONException {
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.HEADERS};
 

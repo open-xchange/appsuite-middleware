@@ -52,7 +52,6 @@ package com.openexchange.messaging.twitter;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MultipartContent;
-import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 
 /**
@@ -68,10 +67,10 @@ public final class TwitterMultipartContent implements MultipartContent {
      * @param status The twitter status to turn into a multipart/alternative content
      * @return A newly created instance of {@link TwitterMultipartContent}
      */
-    public static TwitterMultipartContent newInstance(final Status status, final Session session) throws OXException {
+    public static TwitterMultipartContent newInstance(final Status status) throws OXException {
         final TwitterMultipartContent tmp = new TwitterMultipartContent();
-        tmp.parts[0] = new TwitterMessagingBodyPart(status, false, tmp, session);
-        tmp.parts[1] = new TwitterMessagingBodyPart(status, true, tmp, session);
+        tmp.parts[0] = new TwitterMessagingBodyPart(status, false, tmp);
+        tmp.parts[1] = new TwitterMessagingBodyPart(status, true, tmp);
         return tmp;
     }
 

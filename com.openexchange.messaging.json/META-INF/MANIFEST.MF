@@ -65,3 +65,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.messaging.json

@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.rss.osgi;
 
-import org.slf4j.Logger;
 import com.openexchange.html.HtmlService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
@@ -66,6 +65,7 @@ public class Activator extends HousekeepingActivator {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
     }
 

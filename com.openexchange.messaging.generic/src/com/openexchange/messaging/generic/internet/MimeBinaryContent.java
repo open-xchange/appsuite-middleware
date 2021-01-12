@@ -89,8 +89,7 @@ public class MimeBinaryContent implements BinaryContent {
     public MimeBinaryContent(final InputStream inputStream) throws OXException {
         super();
         part = null;
-        try {
-            final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(8192 << 1);
+        try (ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(8192 << 1)) {
             final byte[] buf = new byte[8192];
             int read;
             while ((read = inputStream.read(buf, 0, buf.length)) > 0) {

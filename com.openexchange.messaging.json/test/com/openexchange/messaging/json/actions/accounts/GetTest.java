@@ -75,9 +75,10 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetTest {
+
     // Success Case
-         @Test
-     public void testGet() throws OXException {
+    @Test
+    public void testGet() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -119,8 +120,8 @@ public class GetTest {
 
     // Error Cases
 
-         @Test
-     public void testMissingParameterID() throws OXException {
+    @Test
+    public void testMissingParameterID() {
 
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -137,8 +138,8 @@ public class GetTest {
         }
     }
 
-         @Test
-     public void testMissingParameterMessagingService() throws OXException {
+    @Test
+    public void testMissingParameterMessagingService() {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
@@ -154,8 +155,8 @@ public class GetTest {
         }
     }
 
-         @Test
-     public void testNumberFormatExceptionInID() throws OXException {
+    @Test
+    public void testNumberFormatExceptionInID() {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -173,8 +174,8 @@ public class GetTest {
 
     }
 
-         @Test
-     public void testOXExceptionInRegistry() throws OXException {
+    @Test
+    public void testOXExceptionInRegistry() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
 
@@ -201,8 +202,8 @@ public class GetTest {
 
     }
 
-         @Test
-     public void testOXExceptionInAccountManager() throws OXException {
+    @Test
+    public void testOXExceptionInAccountManager() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

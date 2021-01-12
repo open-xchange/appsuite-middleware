@@ -64,15 +64,16 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 
-
 /**
  * {@link MessagingAccountParserTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Firstname Lastname</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingAccountParserTest {         @Test
-     public void testParse() throws JSONException, OXException {
+public class MessagingAccountParserTest {
+
+    @Test
+    public void testParse() throws JSONException, OXException {
 
         final SimMessagingService messagingService = new SimMessagingService();
 
@@ -102,8 +103,8 @@ public class MessagingAccountParserTest {         @Test
         assertEquals("My nice input value", account.getConfiguration().get("inputField"));
     }
 
-         @Test
-     public void testMandatoryFieldsOnly() throws OXException, JSONException {
+    @Test
+    public void testMandatoryFieldsOnly() throws OXException, JSONException {
         final SimMessagingService messagingService = new SimMessagingService();
 
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
@@ -117,18 +118,17 @@ public class MessagingAccountParserTest {         @Test
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("messagingService", "com.openexchange.twitter");
 
-
         final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
 
         assertNotNull("Account was null!", account);
-        assertTrue("Expected unset ID, but was: "+account.getId(), 0 >= account.getId());
-        assertTrue("Expected unset displayName, but was: '"+account.getDisplayName()+"'", null == account.getDisplayName());
-        assertTrue("Expected unset configuration, but was: "+account.getConfiguration(), null == account.getConfiguration());
+        assertTrue("Expected unset ID, but was: " + account.getId(), 0 >= account.getId());
+        assertTrue("Expected unset displayName, but was: '" + account.getDisplayName() + "'", null == account.getDisplayName());
+        assertTrue("Expected unset configuration, but was: " + account.getConfiguration(), null == account.getConfiguration());
         assertSame(messagingService, account.getMessagingService());
     }
 
-         @Test
-     public void testUnknownMessagingService() throws JSONException {
+    @Test
+    public void testUnknownMessagingService() throws JSONException {
         final OXException exception = new OXException();
         final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.setException(exception);
@@ -136,7 +136,7 @@ public class MessagingAccountParserTest {         @Test
         try {
             final JSONObject accountJSON = new JSONObject();
             accountJSON.put("messagingService", "com.openexchange.twitter");
-            final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
+            new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
             fail("Should have failed with exception from message service lookup");
         } catch (OXException x) {
             assertSame(exception, x);

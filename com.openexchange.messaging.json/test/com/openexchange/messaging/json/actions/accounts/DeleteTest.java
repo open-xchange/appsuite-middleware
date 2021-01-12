@@ -63,7 +63,6 @@ import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
 
-
 /**
  * {@link DeleteTest}
  *
@@ -71,8 +70,8 @@ import com.openexchange.tools.session.SimServerSession;
  */
 public class DeleteTest {    // Success Case
 
-         @Test
-     public void testDelete() throws OXException {
+    @Test
+    public void testDelete() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -98,8 +97,8 @@ public class DeleteTest {    // Success Case
 
     // Error Cases
 
-         @Test
-     public void testMissingParameterID() throws OXException {
+    @Test
+    public void testMissingParameterID() {
 
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -116,8 +115,8 @@ public class DeleteTest {    // Success Case
         }
     }
 
-         @Test
-     public void testMissingParameterMessagingService() throws OXException {
+    @Test
+    public void testMissingParameterMessagingService() {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
 
@@ -133,8 +132,8 @@ public class DeleteTest {    // Success Case
         }
     }
 
-         @Test
-     public void testNumberFormatExceptionInID() throws OXException {
+    @Test
+    public void testNumberFormatExceptionInID() {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
@@ -152,8 +151,8 @@ public class DeleteTest {    // Success Case
 
     }
 
-         @Test
-     public void testMessagingExceptionInRegistry() throws OXException {
+    @Test
+    public void testMessagingExceptionInRegistry() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException(-1));
 
@@ -180,8 +179,8 @@ public class DeleteTest {    // Success Case
 
     }
 
-         @Test
-     public void testMessagingExceptionInAccountManager() throws OXException {
+    @Test
+    public void testMessagingExceptionInAccountManager() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

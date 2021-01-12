@@ -49,11 +49,11 @@
 
 package com.openexchange.messaging;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link SimMessageAccess}
@@ -106,13 +106,13 @@ public class SimMessageAccess implements MessagingMessageAccess {
 
     @Override
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
-        called.add(new Call("copyMessages", sourceFolder, destFolder, messageIds, fast));
+        called.add(new Call("copyMessages", sourceFolder, destFolder, messageIds, B(fast)));
         return new ArrayList<String>(Arrays.asList("blupp"));
     }
 
     @Override
     public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws OXException {
-        called.add(new Call("deleteMessages", folder, messageIds, hardDelete));
+        called.add(new Call("deleteMessages", folder, messageIds, B(hardDelete)));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
 
     @Override
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
-        called.add(new Call("getMessage", folder, id, peek));
+        called.add(new Call("getMessage", folder, id, B(peek)));
         return templateMessage;
     }
 
@@ -136,7 +136,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
 
     @Override
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
-        called.add(new Call("moveMessages", sourceFolder, destFolder, messageIds, fast));
+        called.add(new Call("moveMessages", sourceFolder, destFolder, messageIds, B(fast)));
         return null;
     }
 

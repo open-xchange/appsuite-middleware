@@ -42,4 +42,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.slf4j
 Export-Package: com.openexchange.messaging.sms.service
+Automatic-Module-Name: com.openexchange.messaging.sms
 

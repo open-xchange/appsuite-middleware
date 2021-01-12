@@ -74,8 +74,6 @@ public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
 
     private String serviceId;
 
-    private int[] staticRootPermissions;
-
     private transient MessagingService messagingService;
 
     /**

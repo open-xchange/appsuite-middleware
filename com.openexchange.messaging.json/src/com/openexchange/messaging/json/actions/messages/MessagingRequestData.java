@@ -157,13 +157,12 @@ public class MessagingRequestData {
     public String getMessagingServiceId() throws OXException {
         if (hasLongFolder()) {
             return getLongFolder().getMessagingService();
-        } else {
-            if (isset("messagingService")) {
-                return request.getParameter("messagingService");
-            }
-            missingParameter("folder");
-            return null;
         }
+        if (isset("messagingService")) {
+            return request.getParameter("messagingService");
+        }
+        missingParameter("folder");
+        return null;
     }
 
     private void missingParameter(final String string) throws OXException {
@@ -373,7 +372,7 @@ public class MessagingRequestData {
         return null;
     }
 
-    private boolean hasLongFolder() throws OXException {
+    private boolean hasLongFolder() {
         return isset("folder") && MessagingFolderAddress.matches(request.getParameter("folder"));
     }
 

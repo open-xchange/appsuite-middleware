@@ -65,6 +65,8 @@ import com.openexchange.exception.OXException;
  */
 public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPart {
 
+    private static final long serialVersionUID = -5015210482990734316L;
+
     private int colorLabel;
 
     private int flags;

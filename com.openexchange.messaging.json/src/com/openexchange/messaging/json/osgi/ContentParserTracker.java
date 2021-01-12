@@ -55,13 +55,13 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.messaging.json.MessagingContentParser;
 import com.openexchange.messaging.json.MessagingMessageParser;
 
-
 /**
  * {@link ContentParserTracker}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContentParserTracker extends ServiceTracker {
+public class ContentParserTracker extends ServiceTracker<MessagingContentParser, MessagingContentParser> {
+
     private final MessagingMessageParser parser;
 
     public ContentParserTracker(final BundleContext context, final MessagingMessageParser parser) {
@@ -70,15 +70,15 @@ public class ContentParserTracker extends ServiceTracker {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MessagingContentParser parser = (MessagingContentParser) super.addingService(reference);
+    public MessagingContentParser addingService(ServiceReference<MessagingContentParser> reference) {
+        MessagingContentParser parser = super.addingService(reference);
         this.parser.addContentParser(parser);
         return parser;
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        parser.removeContentParser((MessagingContentParser) service);
+    public void removedService(ServiceReference<MessagingContentParser> reference, MessagingContentParser service) {
+        parser.removeContentParser(service);
         super.removedService(reference, service);
     }
 }
