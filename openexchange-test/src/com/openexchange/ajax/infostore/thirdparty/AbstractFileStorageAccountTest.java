@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.infostore.thirdparty;
 
-import static java.lang.Boolean.TRUE;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static java.lang.Boolean.TRUE;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -542,7 +542,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
 
         //There was a bug which causes a duplicated, null byte, file. Check that this file is not being created anymore
         String mustNotExist = fileName + " (1)";
-        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(getPrivateInfostoreFolderID(getApiClient()), "700" /* title */, null, null, null, null, null, null);
+        InfoItemsResponse allResponse = infostoreApi.getAllInfoItems(newItem.getFolder(), "700" /* title */, null, null, null, null, null, null);
         List<List<String>> ret = (List<List<String>>) checkResponse(allResponse.getError(), allResponse.getErrorDesc(), allResponse.getData());
         for (List<String> itemData : ret) {
             for (String data : itemData) {

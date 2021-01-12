@@ -49,47 +49,29 @@
 
 package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.cleanInbox;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.prepareGuest;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.receiveShareLink;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
-import com.openexchange.java.Strings;
+import com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.PermissionLevel;
 import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.models.FolderBody;
-import com.openexchange.testing.httpclient.models.FolderBodyNotification;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
-import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
-import com.openexchange.testing.httpclient.models.MailData;
-import com.openexchange.testing.httpclient.models.MailListElement;
-import com.openexchange.testing.httpclient.models.MailResponse;
-import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
-import com.openexchange.testing.httpclient.models.MailsResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
-import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
@@ -101,11 +83,10 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 @RunWith(Parameterized.class)
 public class FederatedSharingFileStorageAccountTests extends AbstractFileStorageAccountTest {
 
-
     private static final String XOX8 = "xox8";
     private static final String XCTX8 = "xctx8";
 
-    protected static final String XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME = "Federated Sharing test storage";
+    protected static final String FILE_STORAGE_SERVICE_DISPLAY_NAME = "Federated Sharing test storage";
 
     protected ShareManagementApi shareApi;
 
@@ -116,18 +97,24 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     private TestContext context2;
     private final String fileStorageServiceId;
 
-    public static class XOXFileAccountConfiguration {
+    /**
+     * {@link FederatedSharingFileAccountConfiguration}
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v7.10.5
+     */
+    public static class FederatedSharingFileAccountConfiguration {
 
         private final String shareLink;
         private final String password;
 
         /**
-         * Initializes a new {@link XOXFileAccountConfiguration}.
+         * Initializes a new {@link FederatedSharingFileAccountConfiguration}.
          *
          * @param shareLink The share link to use
          * @param password The, optional, password
          */
-        public XOXFileAccountConfiguration(String shareLink, String password) {
+        public FederatedSharingFileAccountConfiguration(String shareLink, String password) {
             super();
             this.shareLink = shareLink;
             this.password = password;
@@ -153,6 +140,11 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         }
     }
 
+    /**
+     * The file storages to test
+     *
+     * @return The storages
+     */
     @SuppressWarnings("rawtypes")
     @Parameterized.Parameters(name = "{0} filestorage provider")
     public static Collection getFileStorageServicesToTest() {
@@ -164,11 +156,10 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         //@formatter:on
     }
 
-
     /**
      * Initializes a new {@link FederatedSharingFileStorageAccountTests}.
      *
-     * @param fileStorageService The ID of the service to test
+     * @param fileStorageServiceId The ID of the service to test
      */
     public FederatedSharingFileStorageAccountTests(String fileStorageServiceId) {
         this.fileStorageServiceId = fileStorageServiceId;
@@ -186,11 +177,15 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     public void setUp() throws Exception {
         super.setUp();
         this.shareApi = new ShareManagementApi(getApiClient());
+        
+        // Clear inbox for the user who will receive the share
+        cleanInbox(getApiClient());
 
         //Acquire a user who shares a folder
-        context2 = TestContextPool.acquireContext(this.getClass().getSimpleName());
+        context2 = this.testContextList.get(1);
         TestUser sharingUser = context2.acquireUser();
         sharingClient = generateApiClient(sharingUser);
+        rememberClient(sharingClient);
         sharingFoldersApi = new FoldersApi(sharingClient);
         FolderManager folderManager = new FolderManager(sharingFoldersApi, "0");
         remember(folderManager);
@@ -200,14 +195,14 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         sharedFolderId = sharedFolder.getId();
 
         //Share it
-        shareFolder(sharedFolder, sharingFoldersApi, testUser);
+        shareFolder(sharedFolder, testUser, folderManager);
 
         //Get the share link
-        String shareLink = receiveShareLinkFor(sharedFolder, getApiClient());
+        String shareLink = receiveShareLink(getApiClient(), sharingUser.getLogin(), sharedFolder.getTitle());
 
         //Register an XOX account which integrates the share
-        XOXFileAccountConfiguration configuration = new XOXFileAccountConfiguration(shareLink, null);
-        account = createAccount(fileStorageServiceId, XOX_FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
+        FederatedSharingFileAccountConfiguration configuration = new FederatedSharingFileAccountConfiguration(shareLink, null);
+        account = createAccount(fileStorageServiceId, FILE_STORAGE_SERVICE_DISPLAY_NAME, configuration);
     }
 
     @Override
@@ -224,111 +219,30 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         return "CapabilityReloadable";
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        TestContextPool.backContext(context2);
-        super.tearDown();
-    }
-
-
-    /**
-     * Extracts a share link related to the given folder from the notification email received.
-     *
-     * @param folder The folder to get the link for
-     * @param client The client to use
-     * @return The Share-Link
-     * @throws Exception
-     */
-    private String receiveShareLinkFor(FolderData folder, ApiClient client) throws Exception {
-        MailData mail = lookupMail(client, "default0%2FINBOX", "shared the folder \"" + folder.getTitle() + "\" with you");
-        assertThat("The share mail was not found", mail, is(notNullValue()));
-        @SuppressWarnings("unchecked") Map<String, String> headers = (Map<String, String>) mail.getHeaders();
-        for (Iterator<Entry<String, String>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
-            Entry<String, String> entry = iterator.next();
-            if ("X-Open-Xchange-Share-URL".equals(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        throw new AssertionError("No \"X-Open-Xchange-Share-URL\" header in mail");
-    }
-
-    /**
-     * Tries to get an email with the given subject
-     *
-     * @param apiClient The client to sue
-     * @param folder The folder to get the mail from
-     * @param subjectToMatch The subject to match
-     * @return The (first) email with the given subject in the given folder
-     * @throws Exception
-     */
-    private MailData lookupMail(ApiClient apiClient, String folder, String subjectToMatch) throws Exception {
-        MailApi mailApi = new MailApi(apiClient);
-        for (int i = 0; i < 30; i++) {
-            MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
-            checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
-            for (List<String> mail : mailsResponse.getData()) {
-                String subject = mail.get(2);
-                if (Strings.isEmpty(subject) || false == subject.contains(subjectToMatch)) {
-                    continue;
-                }
-
-                //Get The mail
-                MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
-                MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
-
-                //Delete the mail
-                MailListElement mailToDelete = new MailListElement();
-                mailToDelete.setFolder(mailData.getFolderId());
-                mailToDelete.setId(mailData.getId());
-                MailsCleanUpResponse deleteResponse = mailApi.deleteMails(Collections.singletonList(mailToDelete), L(Long.MAX_VALUE), B(true), B(false));
-                List<String> deletedMailIds = checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
-                assertThat(deletedMailIds, is(empty()));
-
-                return mailData;
-            }
-            TimeUnit.SECONDS.sleep(1);
-        }
-        return null;
-    }
-
     /**
      * Shares a folder to another user
      *
      * @param folderToShare The folder to share
-     * @param api The {@link FoldersApi} to use
      * @param to The user to share the folder with
+     * @param folderManager The folder manager to update the folder with
      * @throws ApiException
      */
-    private void shareFolder(FolderData folderToShare, FoldersApi api, TestUser to) throws ApiException {
-
+    private void shareFolder(FolderData folderToShare, TestUser to, FolderManager folderManager) throws ApiException {
         List<FolderPermission> permissions = new ArrayList<FolderPermission>(folderToShare.getPermissions().size() + 1);
 
         //Take over existing permissions
         permissions.addAll(folderToShare.getPermissions());
 
         //And ..create new guest permission
-        FolderPermission permission = new FolderPermission();
-        permission.setBits(I(4227332)); //Author
-        permission.setEmailAddress(to.getLogin());
-        permission.setDisplayName(to.getLogin());
-        permission.setType("guest");
-        permissions.add(permission);
+        permissions.add(prepareGuest(to, PermissionLevel.AUTHOR));
 
         //Set permission
         FolderData data = new FolderData();
         data.setId(folderToShare.getId());
         data.setPermissions(permissions);
-        FolderBody body = new FolderBody();
-        body.setFolder(data);
 
-        //Send mail notification
-        FolderBodyNotification notification = new FolderBodyNotification();
-        notification.setTransport("mail");
-        body.notification(notification);
-
-        //update with new guest permission
-        FolderUpdateResponse updateResponse = api.updateFolder(folderToShare.getId(), body, B(false), null, null, null, null, null, null, null);
-        checkResponse(updateResponse.getError(), updateResponse.getErrorDesc(), updateResponse.getData());
+        //update with new guest permission and send mail notification
+        folderManager.updateFolder(sharedFolderId, data, null);
     }
 
     @Override
@@ -351,5 +265,10 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     @Override
     protected Object getWrongFileStorageConfiguration() {
         return null;
+    }
+
+    @Override
+    protected int getNumerOfContexts() {
+        return 2;
     }
 }

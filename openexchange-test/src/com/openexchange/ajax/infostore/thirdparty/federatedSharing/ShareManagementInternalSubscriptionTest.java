@@ -47,8 +47,10 @@
  *
  */
 
-package com.openexchange.ajax.share.federated;
+package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.cleanInbox;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.prepareUser;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -100,7 +102,7 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         FolderData folder = folderManager.getFolder(folderId);
         ArrayList<FolderPermission> originalPermissions = new ArrayList<>(folder.getPermissions());
         ArrayList<FolderPermission> updatedPermissions = new ArrayList<>(folder.getPermissions());
-        updatedPermissions.add(prepareUser(testUser2, apiClient2));
+        updatedPermissions.add(prepareUser(testUser2, apiClient2.getUserId()));
 
         folderId = setFolderPermission(folderId, updatedPermissions);
 

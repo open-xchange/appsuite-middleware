@@ -47,48 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.share.federated;
+package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
 import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
-import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
-import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
-import com.openexchange.testing.httpclient.models.MailData;
-import com.openexchange.testing.httpclient.models.MailListElement;
-import com.openexchange.testing.httpclient.models.MailResponse;
-import com.openexchange.testing.httpclient.models.MailsResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData;
 import com.openexchange.testing.httpclient.models.ShareLinkAnalyzeResponseData.StateEnum;
@@ -99,8 +79,6 @@ import com.openexchange.testing.httpclient.models.ShareTargetData;
 import com.openexchange.testing.httpclient.models.SubscribeShareBody;
 import com.openexchange.testing.httpclient.models.SubscribeShareResponse;
 import com.openexchange.testing.httpclient.models.SubscribeShareResponseData;
-import com.openexchange.testing.httpclient.modules.FilestorageApi;
-import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
@@ -113,8 +91,6 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  * @since v7.10.5
  */
 public class AbstractShareManagementTest extends AbstractEnhancedApiClientSession {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractShareManagementTest.class);
 
     /* Context 1 */
     protected String sharedFolderName;
@@ -145,33 +121,6 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
 
     protected static Long now() {
         return L(System.currentTimeMillis());
-    }
-
-    /**
-     * Prepares a guest permission
-     *
-     * @return the guest
-     */
-    protected static FolderPermission prepareGuest(TestUser testUser) {
-        FolderPermission guest = new FolderPermission();
-        guest.setBits(I(257));
-        guest.setEmailAddress(testUser.getLogin());
-        guest.setType("guest");
-        return guest;
-    }
-
-    /**
-     * Prepares a guest permission
-     *
-     * @return the guest
-     */
-    protected static FolderPermission prepareUser(TestUser testUser, ApiClient apiClient) {
-        FolderPermission guest = new FolderPermission();
-        guest.setBits(I(257));
-        guest.setEmailAddress(testUser.getLogin());
-        guest.setEntity(apiClient.getUserId());
-        guest.setType("user");
-        return guest;
     }
 
     /**
@@ -339,120 +288,7 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
     }
 
     protected String receiveShareLink(ApiClient apiClient, String fromToMatch) throws Exception {
-        return receiveShareLink(apiClient, fromToMatch, sharedFolderName);
-    }
-
-    /**
-     * Receives the share link from the <code>X-Open-Xchange-Share-URL</code> header
-     *
-     * @param apiClient The client to use
-     * @param fromToMatch The sender of the mail
-     * @param subjectToMatch A part of the subject the mail must have
-     * @return The share link
-     * @throws Exception In case of error
-     */
-    protected String receiveShareLink(ApiClient apiClient, String fromToMatch, String subjectToMatch) throws Exception {
-        MailData mail = receiveShareMail(apiClient, fromToMatch, subjectToMatch);
-        @SuppressWarnings("unchecked") Map<String, String> headers = (Map<String, String>) mail.getHeaders();
-        for (Iterator<Entry<String, String>> iterator = headers.entrySet().iterator(); iterator.hasNext();) {
-            Entry<String, String> entry = iterator.next();
-            if ("X-Open-Xchange-Share-URL".equals(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        throw new AssertionError("No \"X-Open-Xchange-Share-URL\" header in mail");
-    }
-
-    /**
-     * Receive the share mail from the inbox
-     *
-     * @param apiClient The {@link ApiClient} to use
-     * @param fromToMatch The mail of the originator of the message
-     * @param subjectToMatch The summary of the event
-     * @return The mail as {@link MailData}
-     * @throws Exception If the mail can't be found or something mismatches
-     */
-    protected MailData receiveShareMail(ApiClient apiClient, String fromToMatch, String subjectToMatch) throws Exception {
-        LOGGER.info("Searching for mail with subject \"{}\" from {}", subjectToMatch, fromToMatch);
-        for (int i = 0; i < 10; i++) {
-            MailData mailData = lookupMail(apiClient, "default0%2FINBOX", fromToMatch, subjectToMatch);
-            if (null != mailData) {
-                return mailData;
-            }
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
-        }
-        throw new AssertionError("No mail with \"" + subjectToMatch + "\" from " + fromToMatch + " received");
-    }
-
-    private MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch) throws Exception {
-        MailApi mailApi = new MailApi(apiClient);
-        MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
-        checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
-        for (List<String> mail : mailsResponse.getData()) {
-            String subject = mail.get(2);
-            if (Strings.isEmpty(subject)) {
-                LOGGER.info("Mail with ID {} has no subject", mail.get(0));
-                continue;
-            }
-            if (false == subject.contains(subjectToMatch)) {
-                LOGGER.info("\"{}\" doesn't contain expected subject", subject);
-                continue;
-            }
-            MailResponse mailResponse = mailApi.getMail(mail.get(1), mail.get(0), null, null, "noimg", Boolean.FALSE, Boolean.TRUE, null, null, null, null, null, null, null);
-            MailData mailData = checkResponse(mailResponse.getError(), mailsResponse.getErrorDesc(), mailResponse.getData());
-            if (null == extractMatchingAddress(mailData.getFrom(), fromToMatch)) {
-                LOGGER.info("Found potential matching sharing mail but expected sender {} is not in the FROM header {}", fromToMatch, mailData.getFrom());
-                continue;
-            }
-            rememberMail(mailApi, mailData);
-            return mailData;
-        }
-        return null;
-    }
-
-    protected void rememberMail(MailApi mailApi, MailData data) {
-        if (null == mailApi || null == data) {
-            return;
-        }
-        MailListElement elm = new MailListElement();
-        elm.setId(data.getId());
-        elm.setFolder(data.getFolderId());
-        addTearDownOperation(() -> {
-            mailApi.deleteMails(Collections.singletonList(elm), null, Boolean.TRUE, Boolean.FALSE);
-        });
-    }
-
-    private static List<String> extractMatchingAddress(List<List<String>> addresses, String email) {
-        if (null != addresses) {
-            for (List<String> address : addresses) {
-                assertEquals(2, address.size());
-                if (null != address.get(1) && address.get(1).contains(email)) {
-                    return address;
-                }
-            }
-        }
-        return null;
-    }
-
-    protected void clearAccountError(FilestorageApi filestorageApi, FileAccountData data) throws Exception {
-        FileAccountData fileAccountData = new FileAccountData();
-        fileAccountData.setId(data.getId());
-        fileAccountData.setFilestorageService(data.getFilestorageService());
-        fileAccountData.setDisplayName(data.getDisplayName());
-        fileAccountData.setConfiguration(new JSONObject());
-        FileAccountCreationResponse resp = filestorageApi.updateFileAccount(fileAccountData);
-        assertThat("Password still wrong", resp.getError(), notNullValue());
-    }
-
-    /**
-     * Clears the INBOX by removing all mail in it
-     *
-     * @param apiClient The API client
-     * @throws ApiException In case clearing fails
-     */
-    protected void cleanInbox(ApiClient apiClient) throws ApiException {
-        MailApi mailApi = new MailApi(apiClient);
-        mailApi.clearMailFolders(Collections.singletonList("default0/INBOX"), now());
+        return FederatedSharingUtil.receiveShareLink(apiClient, fromToMatch, sharedFolderName);
     }
 
 }

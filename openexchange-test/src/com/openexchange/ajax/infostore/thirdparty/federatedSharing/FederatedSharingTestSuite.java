@@ -61,6 +61,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    FederatedSharingFileStorageAccountTests.class
+    FederatedSharingFileStorageAccountTests.class,
+    ShareManagementInternalSubscriptionTest.class,
+    ShareManagementSubscriptionTest.class,
 })
 public class FederatedSharingTestSuite { /** empty **/ }
