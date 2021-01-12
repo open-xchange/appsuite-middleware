@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -261,6 +262,7 @@ public class InfostoreTestManager implements TestManager {
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);
         lastResponse = getResponse;
+        assertNotNull(getResponse.getData());
         return getResponse.getDocumentMetadata(getClient().getValues().getTimeZone());
     }
 
