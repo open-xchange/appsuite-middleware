@@ -90,7 +90,6 @@ public class DAVTools {
         } catch (OXException e) {
             LOGGER.warn("ConfigView is not available.", e);
         }
-        LOGGER.debug("\"{}\" not configured, using default value.", PREFIX_PATH_NAME);
         return DEFAULT_PREFIX_PATH;
     }
 
@@ -117,7 +116,6 @@ public class DAVTools {
         } catch (OXException e) {
             LOGGER.warn("ConfigView is not available.", e);
         }
-        LOGGER.debug("\"{}\" not configured, using default value.", PROXY_PREFIX_PATH_NAME);
         return DEFAULT_PROXY_PREFIX_PATH;
     }
 
