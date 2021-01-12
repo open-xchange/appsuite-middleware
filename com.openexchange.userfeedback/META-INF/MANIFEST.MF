@@ -40,3 +40,4 @@ Export-Package: com.openexchange.userfeedback,
  com.openexchange.userfeedback.fields,
  com.openexchange.userfeedback.filter
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.userfeedback

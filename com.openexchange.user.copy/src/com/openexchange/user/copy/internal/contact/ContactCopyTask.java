@@ -174,7 +174,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         if (!contacts.isEmpty()) {
             loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId.intValue());
             exchangeIds(contacts, folderMapping, dstCon, i(dstCtxId), i(srcUsrId), i(dstUsrId));
-            writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
+            writeContactsToDB(contacts, contactFields, dstCon);
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
 
             for (Map.Entry<Integer, Contact> entry : contacts.entrySet()) {
@@ -259,7 +259,8 @@ public class ContactCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void writeContactsToDB(final Map<Integer, Contact> contacts, final List<ContactField> contactFields, final Connection con, final int cid, final int uid) throws OXException {
+    @SuppressWarnings("deprecation")
+    private void writeContactsToDB(final Map<Integer, Contact> contacts, final List<ContactField> contactFields, final Connection con) throws OXException {
         final String insertSql = buildInsertContactsSql(contactFields);
         PreparedStatement stmt = null;
         try {
@@ -431,6 +432,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     Map<Integer, Contact> loadContactsFromDB(final List<ContactField> contactFields, final List<Integer> folderIds, final Connection con, final int cid, final int uid) throws OXException {
         final Map<Integer, Contact> contacts = new HashMap<Integer, Contact>();
         final String selectSql = buildSelectContactsSql(contactFields, folderIds);
@@ -471,6 +473,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {}
 
+    @SuppressWarnings("deprecation")
     private String buildSelectContactsSql(final List<ContactField> contactFields, final List<Integer> folderIds) {
         final StringBuilder sb = new StringBuilder("SELECT ");
         boolean first = true;
@@ -492,6 +495,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         return query;
     }
 
+    @SuppressWarnings("deprecation")
     private String buildInsertContactsSql(final List<ContactField> contactFields) {
         final StringBuilder sb = new StringBuilder("INSERT INTO prg_contacts (");
         boolean first = true;
@@ -522,6 +526,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         return sb.toString();
     }
 
+    @SuppressWarnings("deprecation")
     List<ContactField> getCleanedContactFields() {
         final List<ContactField> fields = new ArrayList<ContactField>();
         final List<String> dbFields = new ArrayList<String>();

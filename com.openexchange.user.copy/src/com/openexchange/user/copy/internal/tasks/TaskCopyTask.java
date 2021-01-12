@@ -180,6 +180,7 @@ public class TaskCopyTask implements CopyUserTaskService {
         return tasks;
     }
 
+    @SuppressWarnings("deprecation")
     private void writeTasksToDatabase(final Connection dstCon, final Context dstCtx, final Context srcCtx, final int dstUserId, final Map<Integer, Task> tasks) throws OXException {
         final Set<Folder> newFolders = new HashSet<Folder>();
         for (Iterator<Entry<Integer, Task>> iterator = tasks.entrySet().iterator(); iterator.hasNext();) {
@@ -248,6 +249,7 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void convertInternalToExternalParticipant(final Task task) {
         if (task.getParticipants() != null) {
             final List<Participant> participants = new ArrayList<Participant>();
@@ -276,6 +278,7 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
         final Map<Integer, Task> series = new HashMap<Integer, Task>();
         try {

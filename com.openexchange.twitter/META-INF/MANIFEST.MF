@@ -113,3 +113,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.twitter.osgi.TwitterActivator
 Export-Package: com.openexchange.twitter
+Automatic-Module-Name: com.openexchange.twitter

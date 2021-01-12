@@ -13,3 +13,4 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.slf4j
 Export-Package: com.openexchange.tokenlogin
+Automatic-Module-Name: com.openexchange.tokenlogin

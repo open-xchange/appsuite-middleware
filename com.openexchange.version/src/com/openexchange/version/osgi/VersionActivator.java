@@ -61,6 +61,7 @@ import com.openexchange.version.internal.VersionServiceImpl;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@SuppressWarnings("deprecation")
 public class VersionActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VersionActivator.class);

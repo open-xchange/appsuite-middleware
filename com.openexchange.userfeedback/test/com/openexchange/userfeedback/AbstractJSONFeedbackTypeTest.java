@@ -251,7 +251,7 @@ public class AbstractJSONFeedbackTypeTest {
     @Test
     public void testNormalizeFeedback_contentSizeNotChangedAndKeysLowerCased() throws JSONException {
         JSONObject origin = new JSONObject(wellPreparedFeedbackStr);
-        JSONObject normalizeFeedback = (JSONObject) classUnderTest.normalize(origin);
+        JSONObject normalizeFeedback = JSONObject.class.cast(classUnderTest.normalize(origin));
         assertFalse(normalizeFeedback.has("Screen_Resolution"));
         assertTrue(normalizeFeedback.has("screen_resolution"));
 

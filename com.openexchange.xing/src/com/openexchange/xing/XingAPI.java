@@ -590,6 +590,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
+    @SuppressWarnings("null") // 'orderBy' Guarded by 'serverSort'
     public Contacts getSharedContactsWith(final String userId, final int limit, final int offset, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
         if (limit < 0 || limit > MAX_LIMIT) {
             throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);

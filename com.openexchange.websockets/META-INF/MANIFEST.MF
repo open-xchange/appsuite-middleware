@@ -12,3 +12,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi.annotation,
  com.openexchange.session
 Export-Package: com.openexchange.websockets
+Automatic-Module-Name: com.openexchange.websockets

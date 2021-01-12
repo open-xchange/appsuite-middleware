@@ -184,7 +184,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         Map<String, List<Attendee>> attendees = exchangeAttendeesIds(folderMapping, eventAttendeeMapping, dstEventMapping, dstUsrId, srcUsrId);
         insertDestinationAttendees(attendees);
         //Alarms
-        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, srcUsrId, dstUsrId);
+        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, dstUsrId);
         insertDestinationAlarms(new ArrayList<>(dstEventMapping.values()), alarmByEventByUser, attendees);
         //AlarmTrigger
         insertDestinationAlarmTriggers(alarmByEventByUser, new ArrayList<>(dstEventMapping.values()));
@@ -345,7 +345,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         return dstAttendees;
     }
 
-    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, List<Alarm>> alarmByEvent, Map<String, Event> dstEventMapping, int srcUsrId, int dstUsrId) throws OXException {
+    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, List<Alarm>> alarmByEvent, Map<String, Event> dstEventMapping, int dstUsrId) throws OXException {
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<>(alarmByEvent.size());
         Map<Integer, List<Alarm>> alarmsByUser = null;
         List<Alarm> alarmList;

@@ -18,3 +18,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.tx
+Automatic-Module-Name: com.openexchange.tx

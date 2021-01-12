@@ -197,7 +197,7 @@ public final class UnifiedInboxMessageCopier {
                 // Accounts differ
                 KF2AFDifferCallable callable = otherCallableMap.get(accountId);
                 if (null == callable) {
-                    callable = new KF2AFDifferCallable(tmp.getAccountId(), destAccountId, destFullname, fast, move, retval, session);
+                    callable = new KF2AFDifferCallable(tmp.getAccountId(), destAccountId, destFullname, move, retval, session);
                     otherCallableMap.put(accountId, callable);
                 }
                 callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullName(), i);

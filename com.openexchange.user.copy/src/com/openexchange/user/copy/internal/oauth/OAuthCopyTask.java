@@ -145,7 +145,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
             final boolean hasOAuth = DBUtils.tableExists(srcCon, "oauthAccounts");
             if (hasOAuth) {
                 final List<OAuthAccount> accounts = loadOAuthAccountsFromDB(srcCon, i(srcUsrId), i(srcCtxId));
-                final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(dstCon, accounts, dstCtx);
+                final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(accounts, dstCtx);
                 writeOAuthAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
 
                 for (final Entry<Integer, Integer> entry : oAuthMapping.entrySet()) {
@@ -169,7 +169,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
         // Nothing
     }
 
-    public Map<Integer, Integer> exchangeOAuthIds(final Connection con, final List<OAuthAccount> accounts, final Context ctx) throws OXException {
+    public Map<Integer, Integer> exchangeOAuthIds(final List<OAuthAccount> accounts, final Context ctx) throws OXException {
         final Map<Integer, Integer> mapping = new HashMap<>();
         for (final OAuthAccount account : accounts) {
             try {
