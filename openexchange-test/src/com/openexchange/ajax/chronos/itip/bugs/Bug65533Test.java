@@ -55,10 +55,16 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.parseICalAttachment;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -187,9 +193,8 @@ public class Bug65533Test extends AbstractITipTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals("homer.jpg", attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        assertTrue(null != attachment.getSize());
-        assertTrue(attachment.getSize().longValue() >= 177103);
-        assertTrue(attachment.getSize().longValue() <= 177115);
+        assertNotNull(attachment.getSize());
+        assertThat("Invalid attachment size", attachment.getSize(), is(both(greaterThanOrEqualTo(L(177103l))).and(lessThanOrEqualTo(L(177115l)))));
         byte[] attachmentData = chronosApi.getEventAttachment(eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
