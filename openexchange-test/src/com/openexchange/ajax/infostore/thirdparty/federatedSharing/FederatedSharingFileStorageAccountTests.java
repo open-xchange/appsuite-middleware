@@ -262,8 +262,8 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
      * @throws Exception
      */
     private MailData lookupMail(ApiClient apiClient, String folder, String subjectToMatch) throws Exception {
-        for (int i = 0; i < 10; i++) {
-            MailApi mailApi = new MailApi(apiClient);
+        MailApi mailApi = new MailApi(apiClient);
+        for (int i = 0; i < 30; i++) {
             MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
             checkResponse(mailsResponse.getError(), mailsResponse.getErrorDesc(), mailsResponse.getData());
             for (List<String> mail : mailsResponse.getData()) {
