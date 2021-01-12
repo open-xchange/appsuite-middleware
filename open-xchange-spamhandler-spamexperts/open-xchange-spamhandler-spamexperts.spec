@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define        ox_release 29
+%define        ox_release 30
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -58,6 +58,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Tue Jan 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-01-11 (5931)
 * Wed Dec 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2020-12-14 (5923)
 * Mon Nov 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
