@@ -8,7 +8,7 @@ BuildRequires: open-xchange-realtime-json
 BuildRequires: open-xchange-realtime-events
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 56
+%define        ox_release 57
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jan 12 2021 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2021-01-15 (5932)
 * Mon Nov 23 2020 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2020-11-23 (5916)
 * Thu Sep 17 2020 Marc Arens <marc.arens@open-xchange.com>
