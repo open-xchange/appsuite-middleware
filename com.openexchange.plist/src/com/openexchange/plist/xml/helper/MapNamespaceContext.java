@@ -102,6 +102,9 @@ public class MapNamespaceContext {
         return null;
     }
 
+    /**
+     * @param namespaceURI  
+     */
     public Iterator<String> getPrefixes(final String namespaceURI) {
         return null;
     }

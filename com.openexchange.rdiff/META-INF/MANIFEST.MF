@@ -34,3 +34,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.rdiff
+Automatic-Module-Name: com.openexchange.rdiff

@@ -80,15 +80,9 @@ import com.openexchange.session.Session;
  */
 public final class POP3MessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure {
 
-    /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = 1467121647337217270L;
-
     /*-
      * Members
      */
-
     private final IMailMessageStorage pop3MessageStorage;
 
     private final int accountId;

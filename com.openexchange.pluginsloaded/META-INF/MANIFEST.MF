@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
  com.openexchange.osgi.annotation
 Export-Package: com.openexchange.pluginsloaded
+Automatic-Module-Name: com.openexchange.pluginsloaded

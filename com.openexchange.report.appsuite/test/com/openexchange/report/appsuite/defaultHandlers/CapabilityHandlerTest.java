@@ -416,6 +416,7 @@ public class CapabilityHandlerTest {
         // Start thread that locks the existing file and replaces the data inside with correct data
         eService.execute(new Runnable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void run() {
                 FileLock fileLock = null;
@@ -432,9 +433,7 @@ public class CapabilityHandlerTest {
                     if (fileLock != null) {
                         fileLock.release();
                     }
-                    if (raf != null) {
-                        raf.close();
-                    }
+                    raf.close();
                 } catch (FileNotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -454,6 +453,7 @@ public class CapabilityHandlerTest {
         }
         eService.execute(new Runnable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void run() {
                 capabilityHandlerTest.storeAndMergeReportParts(reportStoringLocks);
@@ -540,19 +540,12 @@ public class CapabilityHandlerTest {
     }
 
     private static void copyFileUsingStream(File source, File dest) throws IOException {
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            is = new FileInputStream(source);
-            os = new FileOutputStream(dest);
+        try (InputStream is = new FileInputStream(source); OutputStream os = new FileOutputStream(dest);) {
             byte[] buffer = new byte[1024];
             int length;
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
-        } finally {
-            is.close();
-            os.close();
         }
     }
 

@@ -39,4 +39,5 @@ Export-Package: com.openexchange.scripting.rhino,
  org.mozilla.javascript.xml.impl.xmlbeans,
  org.mozilla.javascript.xmlimpl
 Eclipse-BuddyPolicy: global
+Automatic-Module-Name: com.openexchange.scripting.rhino
 

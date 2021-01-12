@@ -49,6 +49,8 @@
 
 package com.openexchange.saml;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.saml.utils.SAMLTestUtils.buildAddSessionParameter;
 import static com.openexchange.saml.utils.SAMLTestUtils.prepareHTTPRequest;
 import java.net.URI;
@@ -126,7 +128,7 @@ public class SAMLLoginRequestHandlerTest {
     private User user;
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
         // static dependency of c.o.ajax.SessionUtility
         SimConfigurationService simConfigurationService = new SimConfigurationService();
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
@@ -161,16 +163,16 @@ public class SAMLLoginRequestHandlerTest {
         userService = new SimUserService();
         services.add(UserService.class, userService);
         user = Mockito.mock(User.class);
-        Mockito.when(user.getId()).thenReturn(1);
+        Mockito.when(I(user.getId())).thenReturn(I(1));
         Mockito.when(user.getLoginInfo()).thenReturn("user");
-        Mockito.when(user.isMailEnabled()).thenReturn(true);
+        Mockito.when(B(user.isMailEnabled())).thenReturn(B(true));
         userService.addUser(user, 1);
 
         services.add(ContextService.class, contextService);
         context = Mockito.mock(Context.class);
-        Mockito.when(context.getContextId()).thenReturn(1);
+        Mockito.when(I(context.getContextId())).thenReturn(I(1));
         Mockito.when(context.getLoginInfo()).thenReturn(new String[] {"example.com"});
-        Mockito.when(context.isEnabled()).thenReturn(true);
+        Mockito.when(B(context.isEnabled())).thenReturn(B(true));
         Mockito.when(contextService.getContext(1)).thenReturn(context);
 
         loginConfigurationLookup = new TestLoginConfigurationLookup();
@@ -180,7 +182,7 @@ public class SAMLLoginRequestHandlerTest {
     @Test
     public void deepLinkWithNewSession() throws Exception {
         Session session = Mockito.mock(Session.class);
-        Mockito.when(session.getContextId()).thenReturn(1);
+        Mockito.when(I(session.getContextId())).thenReturn(I(1));
 
         LoginResultImpl loginResult = new LoginResultImpl(session, context, user);
         handler.setResult(loginResult);

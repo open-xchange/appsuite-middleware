@@ -92,7 +92,7 @@ public class Total implements ContextReportCumulator{
         long contextOnlyUsers = 0l;
 
         for (Map.Entry<String, Object> entry : macdetail.entrySet()) {
-            HashMap<String, Long> counts = (HashMap) entry.getValue();
+            HashMap<String, Long> counts = HashMap.class.cast(entry.getValue());
             if (counts != null) {
                 if (counts.containsKey(Report.TOTAL)) {
                     users += counts.get(Report.TOTAL).longValue();

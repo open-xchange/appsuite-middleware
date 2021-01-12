@@ -157,6 +157,9 @@ public abstract class AbstractDOMStreamReader<T, I> implements XMLStreamReader {
         return currentEvent;
     }
 
+    /**
+     * @param newFrame  
+     */
     protected void newFrame(final ElementFrame<T, I> newFrame) {
     }
 

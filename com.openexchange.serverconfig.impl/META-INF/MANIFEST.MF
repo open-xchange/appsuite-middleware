@@ -44,3 +44,4 @@ Import-Package: com.google.common.annotations,
  org.yaml.snakeyaml.serializer,
  org.yaml.snakeyaml.tokens,
  org.yaml.snakeyaml.util
+Automatic-Module-Name: com.openexchange.serverconfig.impl

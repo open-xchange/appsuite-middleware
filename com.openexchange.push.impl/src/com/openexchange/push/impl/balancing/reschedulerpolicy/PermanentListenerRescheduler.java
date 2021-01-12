@@ -641,7 +641,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             int retryCount = 3;
                             while (retryCount-- > 0) {
                                 try {
-                                    boolean stopped = future.get().booleanValue();
+                                    future.get().booleanValue();
                                     retryCount = 0;
                                 } catch (InterruptedException e) {
                                     // Interrupted - Keep interrupted state

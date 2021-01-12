@@ -108,3 +108,4 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.openexchange.preview,
  com.openexchange.preview.cache
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.preview

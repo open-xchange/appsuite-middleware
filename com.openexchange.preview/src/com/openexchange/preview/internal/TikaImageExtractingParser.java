@@ -78,22 +78,15 @@ public final class TikaImageExtractingParser implements Parser {
 
     private static final long serialVersionUID = -8054020195071839180L;
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(TikaImageExtractingParser.class);
-
     private static final Set<MediaType> TYPES_IMAGE = ImmutableSet.of(MediaType.image("bmp"), MediaType.image("gif"), MediaType.image("jpg"), MediaType.image("jpeg"), MediaType.image("png"), MediaType.image("tiff"), MediaType.image("heic"), MediaType.image("heif"));
-
     private static final Set<MediaType> TYPES_EXCEL = ImmutableSet.of(MediaType.image("vnd.ms-excel"));
-
     private static final Set<MediaType> TYPES = ImmutableSet.<MediaType> builder().addAll(TYPES_IMAGE).addAll(TYPES_EXCEL).build();
 
     private final TikaDocumentHandler documentHandler;
-
+    @SuppressWarnings("unused")
     private final TikaConfig config;
-
+    @SuppressWarnings("unused")
     private final ManagedFileManagement fileManagement;
-
-    private final int count = 0;
 
     public TikaImageExtractingParser(final TikaDocumentHandler documentHandler) {
         super();
@@ -112,20 +105,20 @@ public final class TikaImageExtractingParser implements Parser {
         if (handledImage(stream, metadata)) {
             return;
         }
-        if (handledExcel(stream, metadata)) {
+        if (handledExcel(metadata)) {
             return;
         }
     }
 
-    private boolean handledExcel(final InputStream stream, final Metadata metadata) throws IOException {
-        final String fileName = metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY);
+    private boolean handledExcel(final Metadata metadata) {
         final String type = metadata.get(HttpHeaders.CONTENT_TYPE);
-        if (type != null) {
-            for (final MediaType mt : TYPES_EXCEL) {
-                if (mt.toString().equals(type)) {
-                    //handleImage(stream, fileName, type);
-                    return true;
-                }
+        if (type == null) {
+            return false;
+        }
+        for (final MediaType mt : TYPES_EXCEL) {
+            if (mt.toString().equals(type)) {
+                //handleImage(stream, fileName, type);
+                return true;
             }
         }
         return false;

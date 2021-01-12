@@ -28,3 +28,4 @@ Import-Package: com.openexchange.annotation,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.pluginsloaded.mbean

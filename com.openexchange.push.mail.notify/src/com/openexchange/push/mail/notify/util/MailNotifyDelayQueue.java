@@ -183,14 +183,13 @@ public final class MailNotifyDelayQueue extends AbstractQueue<DelayedNotificatio
             DelayedNotification first = q.peek();
             if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                 return null;
-            } else {
-                DelayedNotification x = q.poll();
-                assert x != null;
-                if (q.size() != 0) {
-                    available.signalAll();
-                }
-                return x;
             }
+            DelayedNotification x = q.poll();
+            assert x != null;
+            if (q.size() != 0) {
+                available.signalAll();
+            }
+            return x;
         } finally {
             lock.unlock();
         }
@@ -215,7 +214,7 @@ public final class MailNotifyDelayQueue extends AbstractQueue<DelayedNotificatio
                 } else {
                     long delay =  first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay > 0) {
-                        long tl = available.awaitNanos(delay);
+                        available.awaitNanos(delay);
                     } else {
                         DelayedNotification x = q.poll();
                         assert x != null;
@@ -253,9 +252,8 @@ public final class MailNotifyDelayQueue extends AbstractQueue<DelayedNotificatio
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
                     }
+                    nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay > 0) {
@@ -545,6 +543,7 @@ public final class MailNotifyDelayQueue extends AbstractQueue<DelayedNotificatio
             return (DelayedNotification)array[cursor++];
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void remove() {
             if (lastRet < 0) {
@@ -556,7 +555,7 @@ public final class MailNotifyDelayQueue extends AbstractQueue<DelayedNotificatio
             // not just a .equals element.
             lock.lock();
             try {
-                for (Iterator it = q.iterator(); it.hasNext(); ) {
+                for (Iterator<?> it = q.iterator(); it.hasNext(); ) {
                     if (it.next() == x) {
                         it.remove();
                         return;

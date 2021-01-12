@@ -31,3 +31,4 @@ Bundle-Activator: com.openexchange.push.osgi.PushActivator
 Export-Package: com.openexchange.push,
  com.openexchange.push.credstorage,
  com.openexchange.push.rmi
+Automatic-Module-Name: com.openexchange.push

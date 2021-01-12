@@ -19,3 +19,4 @@ Import-Package: com.openexchange.ajax.tools,
  org.slf4j;version="1.7.5"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization
+Automatic-Module-Name: com.openexchange.report.appsuite.serialization

@@ -255,6 +255,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
         final RegistrationContext registrationContext_tmp = this.registrationContext;
         final boolean permanent_tmp = this.permanent;
         return new Runnable() {
+            @SuppressWarnings("synthetic-access")
             @Override
             public void run() {
                 try {

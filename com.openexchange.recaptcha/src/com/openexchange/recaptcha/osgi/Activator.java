@@ -52,6 +52,7 @@ package com.openexchange.recaptcha.osgi;
 import java.util.Properties;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.service.http.HttpServices;
@@ -77,8 +78,8 @@ public class Activator extends HousekeepingActivator {
     protected synchronized void startBundle() throws Exception {
         ConfigurationService config = getService(ConfigurationService.class);
 
-        Properties props = config.getFile("recaptcha.properties");
-        Properties options = config.getFile("recaptcha_options.properties");
+        Properties props = ConfigurationServices.loadPropertiesFrom(config.getFileByName("recaptcha.properties"));
+        Properties options = ConfigurationServices.loadPropertiesFrom(config.getFileByName("recaptcha_options.properties"));
         registerService(ReCaptchaService.class, new ReCaptchaServiceImpl(props, options), null);
 
         registerServlet();

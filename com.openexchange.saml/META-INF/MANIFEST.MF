@@ -568,3 +568,4 @@ Export-Package: com.openexchange.saml,
  org.opensaml.xmlsec.signature,
  org.opensaml.xmlsec.signature.support
 Bundle-Activator: com.openexchange.saml.osgi.SAMLActivator
+Automatic-Module-Name: com.openexchange.saml

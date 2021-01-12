@@ -61,7 +61,6 @@ import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPAccess;
-import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;

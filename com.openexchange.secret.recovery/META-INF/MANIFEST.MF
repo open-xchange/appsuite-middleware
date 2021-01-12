@@ -32,3 +32,4 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.secret.recovery
+Automatic-Module-Name: com.openexchange.secret.recovery
