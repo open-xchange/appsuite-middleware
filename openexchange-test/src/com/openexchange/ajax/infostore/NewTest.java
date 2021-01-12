@@ -3,6 +3,7 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
@@ -155,6 +156,7 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
+        assertNotNull("Expect to find an object", obj);
         assertFalse(upload.getName().equals(obj.getFileName()));
     }
 
