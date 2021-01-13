@@ -13532,7 +13532,7 @@
           }
         }, {
           "in" : "query",
-          "name" : "accoutn_id",
+          "name" : "account_id",
           "description" : "The account identifier of an specific account belonging to the user of the session.\nIf the account ID is set, the search will be delegated to the matching account, if found.\n",
           "required" : false,
           "schema" : {
@@ -38485,7 +38485,7 @@
             "type" : "array",
             "description" : "An array of already selected facets, meaning categories the user has filtered by before.",
             "items" : {
-              "$ref" : "#/components/schemas/FindFacetData"
+              "$ref" : "#/components/schemas/FindActiveFacet"
             }
           },
           "options" : {
