@@ -100,6 +100,7 @@ public class LockTest extends InfostoreAJAXTest {
          */
         File testFile = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         file = itm.createFileOnServer(folder.getObjectID(), "test.bin", "application/octet-stream");
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
         for (int i = 0; i < 5; i++) {
             itm.updateAction(file, testFile, new com.openexchange.file.storage.File.Field[] {}, itm.getLastResponse().getTimestamp());
             checkForError(itm);
