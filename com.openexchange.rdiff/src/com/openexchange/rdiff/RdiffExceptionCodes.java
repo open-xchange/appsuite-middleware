@@ -64,11 +64,11 @@ public enum RdiffExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
+    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2, null),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2),
 
     ;
 
@@ -83,7 +83,7 @@ public enum RdiffExceptionCodes implements DisplayableOXExceptionCode {
     private String displayMessage;
 
 
-    private RdiffExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
+    private RdiffExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
         this.category = category;

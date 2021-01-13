@@ -13,3 +13,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.session.management
+Automatic-Module-Name: com.openexchange.session.management

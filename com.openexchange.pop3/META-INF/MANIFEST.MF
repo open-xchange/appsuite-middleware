@@ -78,3 +78,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator
 Export-Package: com.openexchange.pop3.config
+Automatic-Module-Name: com.openexchange.pop3

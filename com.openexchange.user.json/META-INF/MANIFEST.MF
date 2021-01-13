@@ -92,3 +92,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.user.json.osgi.UserJSONActivator
 Require-Bundle: slf4j.api
+Automatic-Module-Name: com.openexchange.user.json

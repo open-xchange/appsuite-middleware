@@ -1,6 +1,7 @@
-package com.openexchange.messaging;
-import java.util.Map;
 
+package com.openexchange.messaging;
+
+import java.util.Map;
 
 /*
  *
@@ -57,7 +58,9 @@ import java.util.Map;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SimMessagingAccount implements MessagingAccount{
+public class SimMessagingAccount implements MessagingAccount {
+
+    private static final long serialVersionUID = 6493213880114296019L;
 
     private MessagingService messagingService;
     private int id;
@@ -84,21 +87,17 @@ public class SimMessagingAccount implements MessagingAccount{
         return messagingService;
     }
 
-
     public void setMessagingService(final MessagingService messagingService) {
         this.messagingService = messagingService;
     }
-
 
     public void setId(final int id) {
         this.id = id;
     }
 
-
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
-
 
     public void setConfiguration(final Map<String, Object> configuration) {
         this.configuration = configuration;

@@ -59,3 +59,4 @@ Import-Package: ch.qos.logback.classic,
  org.slf4j.impl,
  org.slf4j.spi
 Export-Package: com.openexchange.logging
+Automatic-Module-Name: com.openexchange.logging

@@ -237,7 +237,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         this.userId = reader.readInt(FIELD_USER_ID);
         this.message = reader.readUTF(FIELD_MESSAGE);
         this.filter = reader.readUTF(FIELD_FILTER);
-        boolean async = reader.readBoolean(FIELD_ASYNC);
+        reader.readBoolean(FIELD_ASYNC);
     }
 
 }

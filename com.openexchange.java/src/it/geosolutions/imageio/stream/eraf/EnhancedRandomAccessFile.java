@@ -338,9 +338,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
      * will occur.
      *
      * @return the offset from the start of the eraf in bytes.
-     * @exception IOException
-     *                if an I/O error occurrs.
      */
+    @SuppressWarnings("unused")
     public long getFilePointer() throws IOException {
         return filePosition;
     }
@@ -366,9 +365,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
         long fileLength = eraf.length();
         if (fileLength < dataEnd) {
             return dataEnd;
-        } else {
-            return fileLength;
         }
+        return fileLength;
     }
 
     /**
@@ -943,9 +941,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
         }
         if (bigEndian) {
             return (short) (((b[0] & 0xFF) << 8) + (b[1] & 0xFF));
-        } else {
-            return (short) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
         }
+        return (short) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
     }
 
     /**
@@ -997,9 +994,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
         }
         if (bigEndian) {
             return ((b[0] & 0xFF) << 8) + (b[1] & 0xFF) & 0xFFFF;
-        } else {
-            return ((b[1] & 0xFF) << 8) + (b[0] & 0xFF) & 0xFFFF;
         }
+        return ((b[1] & 0xFF) << 8) + (b[0] & 0xFF) & 0xFFFF;
     }
 
     /**
@@ -1031,9 +1027,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
         }
         if (bigEndian) {
             return (char) (((b[0] & 0xFF) << 8) + (b[1] & 0xFF));
-        } else {
-            return (char) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
         }
+        return (char) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
     }
 
     /**
@@ -1067,10 +1062,9 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
         if (bigEndian) {
             return (((b[0] & 0xFF) << 24) + ((b[1] & 0xFF) << 16)
                     + ((b[2] & 0xFF) << 8) + ((b[3] & 0xFF)));
-        } else {
-            return (((b[3] & 0xFF) << 24) + ((b[2] & 0xFF) << 16)
-                    + ((b[1] & 0xFF) << 8) + ((b[0] & 0xFF)));
         }
+        return (((b[3] & 0xFF) << 24) + ((b[2] & 0xFF) << 16)
+                + ((b[1] & 0xFF) << 8) + ((b[0] & 0xFF)));
     }
 
     public long readUnsignedInt() throws IOException {
@@ -1099,9 +1093,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
         if (bigEndian) {
             return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
-        } else {
-            return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
         }
+        return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
     }
 
     /**
@@ -1180,12 +1173,11 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
                     + ((b[2] & 0xFFL) << 40) + ((b[3] & 0xFFL) << 32)
                     + ((b[4] & 0xFFL) << 24) + ((b[5] & 0xFFL) << 16)
                     + ((b[6] & 0xFFL) << 8) + ((b[7] & 0xFFL)));
-        } else {
-            return (((b[7] & 0xFFL) << 56) + ((b[6] & 0xFFL) << 48)
-                    + ((b[5] & 0xFFL) << 40) + ((b[4] & 0xffL) << 32)
-                    + ((b[3] & 0xFFL) << 24) + ((b[2] & 0xFFL) << 16)
-                    + ((b[1] & 0xFFL) << 8) + ((b[0] & 0xFFL)));
         }
+        return (((b[7] & 0xFFL) << 56) + ((b[6] & 0xFFL) << 48)
+                + ((b[5] & 0xFFL) << 40) + ((b[4] & 0xffL) << 32)
+                + ((b[3] & 0xFFL) << 24) + ((b[2] & 0xFFL) << 16)
+                + ((b[1] & 0xFFL) << 8) + ((b[0] & 0xFFL)));
     }
 
     /**
@@ -1794,11 +1786,8 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
     /**
      * _more_
-     *
-     * @throws IOException
-     *             _more_
      */
-    public void synch() throws IOException {
+    public void synch() {
         // nothing to do
     }
 

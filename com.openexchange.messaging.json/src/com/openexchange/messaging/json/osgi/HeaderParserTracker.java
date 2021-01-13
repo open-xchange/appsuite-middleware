@@ -61,7 +61,7 @@ import com.openexchange.messaging.json.MessagingMessageParser;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HeaderParserTracker extends ServiceTracker {
+public class HeaderParserTracker extends ServiceTracker<MessagingHeaderParser, MessagingHeaderParser> {
 
     private final MessagingMessageParser parser;
 
@@ -71,15 +71,15 @@ public class HeaderParserTracker extends ServiceTracker {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MessagingHeaderParser parser = (MessagingHeaderParser) super.addingService(reference);
+    public MessagingHeaderParser addingService(final ServiceReference<MessagingHeaderParser> reference) {
+        final MessagingHeaderParser parser = super.addingService(reference);
         this.parser.addHeaderParser(parser);
         return parser;
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        parser.removeHeaderParser((MessagingHeaderParser) service);
+    public void removedService(final ServiceReference<MessagingHeaderParser> reference, final MessagingHeaderParser service) {
+        parser.removeHeaderParser(service);
         super.removedService(reference, service);
     }
 

@@ -142,7 +142,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     @Override
     public RequestRegistryEntry registerRequest(HttpServletRequest request, HttpServletResponse response, Thread thread, Map<String, String> propertyMap) {
-        RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread, propertyMap);
+        RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, thread, propertyMap);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }
@@ -276,6 +276,12 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             return false;
         }
 
+        /**
+         * For debugging
+         *
+         * @param trace The {@link StackTraceElement}
+         * @param entry The {@link RequestRegistryEntry}
+         */
         private boolean interrupt(StackTraceElement[] trace, RequestRegistryEntry entry) {
             /*-
             StackTraceElement traceElement = trace[0];

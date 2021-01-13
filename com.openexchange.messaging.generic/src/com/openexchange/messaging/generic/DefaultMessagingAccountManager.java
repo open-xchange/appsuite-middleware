@@ -113,10 +113,12 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         modifier = new DefaultModifier(this);
     }
 
+    @SuppressWarnings("unused")
     protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
         return account;
     }
 
+    @SuppressWarnings("unused")
     protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
         return account;
     }

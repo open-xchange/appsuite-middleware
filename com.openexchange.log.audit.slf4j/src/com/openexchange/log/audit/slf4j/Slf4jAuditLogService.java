@@ -81,6 +81,7 @@ import ch.qos.logback.core.util.FileSize;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
+@SuppressWarnings("deprecation")
 public class Slf4jAuditLogService implements AuditLogService, Runnable {
 
     private Logger createLogger(Configuration configuration) throws OXException {
@@ -392,6 +393,7 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
      * @param attributes The associated attributes
      * @return The compiled log message
      */
+    @SuppressWarnings("null")
     private String compileMessage(String eventId, Attribute<?>[] attributes) {
         int length = null == attributes ? 0 : attributes.length;
         if (length == 0) {

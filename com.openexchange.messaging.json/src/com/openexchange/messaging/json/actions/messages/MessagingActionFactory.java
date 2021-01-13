@@ -61,7 +61,6 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link MessagingActionFactory}
  *
@@ -72,15 +71,9 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
     public static volatile MessagingActionFactory INSTANCE = null; // Initialized in Activator
 
     private Map<String, AJAXActionService> actions = null;
-
     private final Cache cache;
-
     private final MessagingMessageParser parser;
-
-    private final MessagingMessageWriter writer;
-
     private final MessagingServiceRegistry registry;
-
 
     public MessagingActionFactory(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super();
@@ -94,7 +87,6 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
         actions.put("update", new UpdateAction(registry, writer, parser, cache));
         actions.put("updates", new UpdatesAction(registry, writer, parser, cache));
 
-        this.writer = writer;
         this.parser = parser;
         this.cache = cache;
         this.registry = registry;

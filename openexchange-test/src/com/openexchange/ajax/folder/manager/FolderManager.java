@@ -174,14 +174,14 @@ public class FolderManager implements CleanableResourceManager {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(FolderFactory.getSimpleFolder(name, module));
         FolderUpdateResponse createFolder = foldersApi.createFolder(parent, body, tree, null, null, null);
-        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
-        rememberFolder(createFolder.getData());
+        String folderId = checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
+        rememberFolder(folderId);
         lastTimestamp = createFolder.getTimestamp();
-        return createFolder.getData();
+        return folderId;
     }
 
     /**
-     * Creates a folder
+     * Creates an infostore folder
      *
      * @param parentFolder The parent folder of the new folder
      * @param title The title of the new folder
@@ -197,11 +197,10 @@ public class FolderManager implements CleanableResourceManager {
         folder.setPermissions(permissions);
         body.setFolder(folder);
         FolderUpdateResponse response = foldersApi.createFolder(parentFolder, body, null, null, null, null);
-        checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-        rememberFolder(response.getData());
-        rememberFolder(response.getData());
+        String folderId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolder(folderId);
         lastTimestamp = response.getTimestamp();
-        return response.getData();
+        return folderId;
     }
 
     /**

@@ -15,3 +15,4 @@ Import-Package: com.openexchange.database,
  com.openexchange.server,
  org.osgi.framework,
  org.slf4j
+Automatic-Module-Name: com.openexchange.net.ssl.management

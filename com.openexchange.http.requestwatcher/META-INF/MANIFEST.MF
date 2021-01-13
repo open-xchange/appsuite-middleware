@@ -23,3 +23,4 @@ Import-Package: com.eaio.util.text,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.http.requestwatcher.osgi.services
+Automatic-Module-Name: com.openexchange.http.requestwatcher

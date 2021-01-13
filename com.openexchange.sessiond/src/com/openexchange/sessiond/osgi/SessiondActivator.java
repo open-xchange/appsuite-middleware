@@ -112,6 +112,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class SessiondActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
 
     /** The logger instance */

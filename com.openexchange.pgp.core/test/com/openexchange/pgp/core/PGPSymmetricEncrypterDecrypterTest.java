@@ -89,7 +89,7 @@ public class PGPSymmetricEncrypterDecrypterTest {
      * @return An iterable of Arrays which can be injected into the constructor when running the tests
      */
     @Parameters(name = "{index} - Ascii-armored: {0}")
-    public static Iterable parameters() {
+    public static Iterable<?> parameters() {
         return Arrays.asList(new Object[][] {
             { Boolean.TRUE /* Runs the tests in ASCII-Armored mode */},
             { Boolean.FALSE /* Runs the tests in Binary-Mode */}

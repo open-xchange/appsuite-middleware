@@ -64,6 +64,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class SessiondMBeanImpl extends AnnotatedStandardMBean implements SessiondMBean {
 
     /**

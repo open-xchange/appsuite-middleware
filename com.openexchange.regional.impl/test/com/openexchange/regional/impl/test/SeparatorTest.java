@@ -49,6 +49,7 @@
 
 package com.openexchange.regional.impl.test;
 
+import static com.openexchange.java.Autoboxing.c;
 import static org.junit.Assert.assertEquals;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -81,8 +82,8 @@ public class SeparatorTest {
     public void testGroupingSeparators() throws Exception {
         RegionalSettings settings = RegionalSettingsImpl.newBuilder().withNumberFormat("1.234,56").build();
         DecimalFormatSymbols unusualSymbols = new DecimalFormatSymbols(Locale.US);
-        unusualSymbols.setDecimalSeparator(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getDecimalSeparator", settings));
-        unusualSymbols.setGroupingSeparator(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getGroupingSeparator", settings));
+        unusualSymbols.setDecimalSeparator(c(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getDecimalSeparator", settings)));
+        unusualSymbols.setGroupingSeparator(c(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getGroupingSeparator", settings)));
 
         String format = "#,###.###";
         DecimalFormat decimalFormat = new DecimalFormat(format, unusualSymbols);

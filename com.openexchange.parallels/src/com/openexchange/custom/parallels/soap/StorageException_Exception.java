@@ -13,6 +13,8 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "StorageException", targetNamespace = "http://soap.parallels.custom.openexchange.com")
 public class StorageException_Exception extends java.lang.Exception {
     
+    private static final long serialVersionUID = -8162722577812839341L;
+    
     private com.openexchange.custom.parallels.soap.StorageException storageException;
 
     public StorageException_Exception() {

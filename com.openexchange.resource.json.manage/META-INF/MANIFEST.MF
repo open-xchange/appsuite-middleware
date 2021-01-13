@@ -41,3 +41,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.resource.json.manage.osgi.ResourceRequestActivator
+Automatic-Module-Name: com.openexchange.resource.json.manage

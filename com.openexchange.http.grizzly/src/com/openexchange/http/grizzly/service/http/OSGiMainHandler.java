@@ -224,7 +224,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     if (SHUTDOWN_REQUESTED.get()) {
                         // 503 - Service Unavailable
                         try {
-                            setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                            setStatusAndWriteErrorPage(shutDownStatus, null, response);
                         } catch (Exception e) {
                             LOG.warn("Failed to commit 503 status.", e);
                         }
@@ -272,7 +272,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             if (SHUTDOWN_REQUESTED.get()) {
                 // 503 - Service Unavailable
                 try {
-                    setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                    setStatusAndWriteErrorPage(shutDownStatus, null, response);
                 } catch (Exception e) {
                     LOG.warn("Failed to commit 503 status.", e);
                 }
@@ -311,7 +311,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
                     try {
-                        setStatusAndWriteErrorPage(HttpStatus.INTERNAL_SERVER_ERROR_500, null, request, response);
+                        setStatusAndWriteErrorPage(HttpStatus.INTERNAL_SERVER_ERROR_500, null, response);
                     } catch (Exception e) {
                         LOG.warn("Failed to commit 500 status.", e);
                     }
@@ -324,7 +324,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
         if (!invoked) {
             try {
-                setStatusAndWriteErrorPage(HttpStatus.NOT_FOUND_404, "Resource does not exist.", request, response);
+                setStatusAndWriteErrorPage(HttpStatus.NOT_FOUND_404, "Resource does not exist.", response);
             } catch (Exception e) {
                 LOG.warn("Failed to commit 404 status.", e);
             }
@@ -361,7 +361,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      */
     public void registerServletHandler(final String alias,
                                        final Servlet servlet,
-                                       final Dictionary initparams,
+                                       final Dictionary<?, ?> initparams,
                                        HttpContext context,
                                        final HttpService httpService)
             throws NamespaceException, ServletException {
@@ -466,7 +466,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      */
     public void registerFilter(final Filter filter,
                                final String urlPattern,
-                               final Dictionary initparams,
+                               final Dictionary<?, ?> initparams,
                                HttpContext context,
                                final HttpService httpService)
             throws ServletException {
@@ -676,23 +676,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     }
 
     /**
-     * Check if <code>servlet</code> has been already registered.
-     * <p/>
-     * An instance of {@link Servlet} can be registered only once, so in case of servlet been registered before will throw
-     * {@link ServletException} as specified in OSGi HttpService Spec.
-     *
-     * @param servlet {@link Servlet} to check if can be registered.
-     * @throws ServletException Iff <code>servlet</code> has been registered before.
-     */
-    private void validateServlet4RegOk(Servlet servlet) throws ServletException {
-        if (OSGiCleanMapper.containsServlet(servlet)) {
-            String msg = "Servlet: '" + servlet + "', already registered.";
-            LOG.warn(msg);
-            throw new ServletException(msg);
-        }
-    }
-
-    /**
      * Looks up {@link OSGiServletHandler}.
      * <p/>
      * If is already registered for <code>httpContext</code> then create new instance based on already registered. Else
@@ -705,7 +688,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @return Found or created {@link OSGiServletHandler}.
      */
     private OSGiServletHandler findOrCreateOSGiServletHandler(
-            Servlet servlet, HttpContext httpContext, Dictionary initparams) {
+            Servlet servlet, HttpContext httpContext, Dictionary<?, ?> initparams) {
         OSGiServletHandler osgiServletHandler;
 
         List<OSGiServletHandler> servletHandlers =
@@ -783,7 +766,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         return errorPageGenerator;
     }
 
-    private void setStatusAndWriteErrorPage(HttpStatus status, String optDescription, Request req, Response res) throws Exception {
+    private void setStatusAndWriteErrorPage(HttpStatus status, String optDescription, Response res) throws Exception {
         res.setStatus(status);
         final ByteBuffer bb = getErrorPage(status.getStatusCode(), status.getReasonPhrase(), null == optDescription ? status.getReasonPhrase() : optDescription);
         res.setContentLength(bb.limit());

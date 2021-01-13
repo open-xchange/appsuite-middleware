@@ -62,3 +62,4 @@ Bundle-ClassPath: .,
  lib/imageio-thumbsdb-3.3.1.jar,
  lib/imageio-tiff-3.3.1.jar
 Bundle-Activator: com.openexchange.imagetransformation.java.osgi.ImageTransformationActivator
+Automatic-Module-Name: com.openexchange.imagetransformation.java

@@ -66,13 +66,9 @@ import com.sun.syndication.feed.synd.SyndFeed;
  */
 public class FeedAdapter {
 
-    private final SyndFeed feed;
-
     private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
 
     public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws OXException {
-        this.feed = feed;
-
         final List<SyndEntry> entries = feed.getEntries();
         for (final SyndEntry syndEntry : entries) {
             remember(new SyndMessage(feed, syndEntry, folder, session));

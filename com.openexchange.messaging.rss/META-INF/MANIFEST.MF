@@ -78,3 +78,4 @@ Export-Package: com.sun.syndication.feed.synd,
  com.sun.syndication.fetcher.impl,
  com.sun.syndication.io,
  org.jdom
+Automatic-Module-Name: com.openexchange.messaging.rss

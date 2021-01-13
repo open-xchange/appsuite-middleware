@@ -105,9 +105,7 @@ public class INSERT extends ModifyCommand {
     public INSERT SET(String columnName, List<Expression> expressions) {
         columns.add(columnName);
         if (values.isEmpty()) {
-            for (Expression expression : expressions) {
-                values.add(new LinkedList<Expression>());
-            }
+            expressions.stream().forEach(e -> values.add(new LinkedList<>()));
         }
         for (int i = 0; i < expressions.size(); i++) {
             values.get(i).add(expressions.get(i));

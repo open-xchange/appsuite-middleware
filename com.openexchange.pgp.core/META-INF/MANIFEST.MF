@@ -34,3 +34,4 @@ Import-Package: com.openexchange.exception,
 Export-Package: com.openexchange.pgp.core,
  com.openexchange.pgp.core.exceptions,
  com.openexchange.pgp.core.packethandling
+Automatic-Module-Name: com.openexchange.pgp.core

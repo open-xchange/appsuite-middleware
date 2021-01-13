@@ -27,3 +27,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Export-Package: com.openexchange.secret,
  com.openexchange.secret.osgi.tools
+Automatic-Module-Name: com.openexchange.secret

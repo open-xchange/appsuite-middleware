@@ -60,7 +60,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -87,7 +86,7 @@ public class UnifiedInboxFolderConverterTest {
 
 
     @Before
-    public void setUp() throws OXException {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 

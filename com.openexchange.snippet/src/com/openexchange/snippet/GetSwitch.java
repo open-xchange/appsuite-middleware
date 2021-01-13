@@ -49,15 +49,12 @@
 
 package com.openexchange.snippet;
 
-
 /**
  * {@link GetSwitch}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetSwitch implements PropertySwitch {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetSwitch.class);
 
     /**
      * The snippet.

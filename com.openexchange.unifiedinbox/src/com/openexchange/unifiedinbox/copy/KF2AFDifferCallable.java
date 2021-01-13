@@ -78,18 +78,15 @@ final class KF2AFDifferCallable implements Task<Object> {
 
     private final TIntList indexList;
 
-    private final boolean fast;
-
     private final boolean move;
 
-    KF2AFDifferCallable(final int accountId, final int destAccountId, final String destFullname, final boolean fast, final boolean move, final String[] toFill, final Session session) {
+    KF2AFDifferCallable(final int accountId, final int destAccountId, final String destFullname, final boolean move, final String[] toFill, final Session session) {
         super();
         this.accountId = accountId;
         this.destAccountId = destAccountId;
         this.session = session;
         this.destFullname = destFullname;
         this.toFill = toFill;
-        this.fast = fast;
         this.move = move;
         idList = new ArrayList<String>();
         srcFullnameList = new ArrayList<String>();

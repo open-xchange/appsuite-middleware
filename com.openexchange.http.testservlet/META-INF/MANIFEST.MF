@@ -27,3 +27,4 @@ Import-Package: com.google.common.annotations,
  org.apache.commons.text,
  org.osgi.framework,
  org.osgi.service.http
+Automatic-Module-Name: com.openexchange.http.testservlet

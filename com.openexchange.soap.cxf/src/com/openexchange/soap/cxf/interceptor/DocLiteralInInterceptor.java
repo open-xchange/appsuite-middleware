@@ -176,7 +176,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                     }
 
                     // loop through each child element
-                    getPara(xmlReader, dr, parameters, itr, message);
+                    getPara(xmlReader, dr, parameters, itr);
                 }
 
             } else {
@@ -337,8 +337,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
     }
 
-    private void getPara(DepthXMLStreamReader xmlReader, DataReader<XMLStreamReader> dr, MessageContentsList parameters, Iterator<MessagePartInfo> itr, Message message) {
-
+    private void getPara(DepthXMLStreamReader xmlReader, DataReader<XMLStreamReader> dr, MessageContentsList parameters, Iterator<MessagePartInfo> itr) {
         boolean hasNext = true;
         while (itr.hasNext()) {
             MessagePartInfo part = itr.next();

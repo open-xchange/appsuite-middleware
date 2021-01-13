@@ -50,8 +50,7 @@
 package com.openexchange.security.manager.configurationReader;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 
@@ -75,18 +74,19 @@ public class ConfigurationFileParser {
     /**
      * Read the data from a file, add each valid line to list
      *
-     * @param file  File to read
-     * @param list  List to store valid lines
+     * @param file File to read
+     * @param list List to store valid lines
      */
-    private void parseFile (File file, ArrayList<String> list) {
+    private void parseFile(File file, List<String> list) {
         String data = configService.getText(file.getName());
-        if (data != null) {
-            String[] lines = data.split("\n");
-            for (String line: lines) {
-                line = line.trim();
-                if (line.indexOf("#") != 0 && !line.isEmpty()) {
-                    list.add(line);
-                }
+        if (data == null) {
+            return;
+        }
+        String[] lines = data.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.indexOf("#") != 0 && !line.isEmpty()) {
+                list.add(line);
             }
         }
     }
@@ -95,24 +95,22 @@ public class ConfigurationFileParser {
      * Read through the security directory and return List of configuration options
      *
      * @return List of configurations found in the files
-     * @throws IOException
      */
-    public List<String> getConfigList () throws IOException {
+    public List<String> getConfigList() {
         File folder = configService.getDirectory(SECURITY_FOLDER);
-        ArrayList<String> list = new ArrayList<String> ();
+        List<String> list = new LinkedList<>();
         if (null != folder && folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles();
-            if (null != files) {
-                for (File file : files) {
-                    if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
-                        parseFile(file, list);
-                    }
+            if (null == files) {
+                return list;
+            }
+            for (File file : files) {
+                if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
+                    parseFile(file, list);
                 }
             }
         }
         return list;
     }
-
-
 
 }

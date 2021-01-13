@@ -76,7 +76,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
@@ -86,6 +85,7 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class TikaDocumentHandler {
 
     protected static final org.slf4j.Logger LOG =
@@ -233,6 +233,7 @@ public final class TikaDocumentHandler {
             }
         }
 
+        @SuppressWarnings("unused")
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             throw new UnsupportedOperationException();
         }
@@ -248,14 +249,6 @@ public final class TikaDocumentHandler {
             } catch (UnsupportedEncodingException e) {
                 throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
-        }
-    };
-
-    private static final OutputType METADATA = new OutputType() {
-
-        @Override
-        protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) {
-            return new DefaultHandler();
         }
     };
 

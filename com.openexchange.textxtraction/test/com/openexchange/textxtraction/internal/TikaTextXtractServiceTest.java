@@ -53,11 +53,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
@@ -134,7 +134,7 @@ public class TikaTextXtractServiceTest {
     }
 
      @Test
-     public void testParserConfig() throws Exception {
+     public void testParserConfig() {
         Assert.assertNotNull("Tika was null", textXtraction.tika);
         Tika tika = textXtraction.tika;
         AutoDetectParser autoDetectParser = (AutoDetectParser) tika.getParser();
@@ -151,62 +151,50 @@ public class TikaTextXtractServiceTest {
     }
 
      @Test
-     public void testWithDelegateAndMimeType() throws OXException {
+     public void testWithDelegateAndMimeType() throws OXException, IOException {
         textXtraction.addDelegateTextXtraction(delegate);
-        InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
-        try {
+        try (InputStream is = new ByteArrayInputStream(TestData.TEST_PDF)) {
             String text = textXtraction.extractFrom(is, TestData.MIME_TYPE);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
 
      @Test
-     public void testWithDestructiveDelegateAndMimeType() throws OXException {
+     public void testWithDestructiveDelegateAndMimeType() throws OXException, IOException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);
-        InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
-        try {
+        try (InputStream is = new ByteArrayInputStream(TestData.TEST_PDF)) {
             String text = textXtraction.extractFrom(is, TestData.MIME_TYPE);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
 
      @Test
-     public void testWithDelegate() throws OXException {
+     public void testWithDelegate() throws OXException, IOException {
         textXtraction.addDelegateTextXtraction(delegate);
-        InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
-        try {
+        try (InputStream is = new ByteArrayInputStream(TestData.TEST_PDF)) {
             String text = textXtraction.extractFrom(is, null);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
 
      @Test
-     public void testWithDoubleDelegate() throws OXException {
+     public void testWithDoubleDelegate() {
         assertTrue(textXtraction.addDelegateTextXtraction(delegate));
         assertFalse(textXtraction.addDelegateTextXtraction(delegate));
     }
 
      @Test
-     public void testremoveDelegate() throws OXException {
+     public void testremoveDelegate() {
         assertTrue(textXtraction.addDelegateTextXtraction(delegate));
         textXtraction.removeDelegateTextXtraction(delegate);
     }
 
      @Test
-     public void testWithDestructiveDelegate() throws OXException {
+     public void testWithDestructiveDelegate() throws OXException, IOException {
         textXtraction.addDelegateTextXtraction(destructiveDelegate);
-        InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
-        try {
+        try (InputStream is = new ByteArrayInputStream(TestData.TEST_PDF)) {
             String text = textXtraction.extractFrom(is, null);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
 
@@ -217,15 +205,12 @@ public class TikaTextXtractServiceTest {
     }
 
      @Test
-     public void testExtractContentNotNull() throws OXException {
+     public void testExtractContentNotNull() throws OXException, IOException {
         textXtraction.addDelegateTextXtraction(delegate);
-        InputStream is = new ByteArrayInputStream(TestData.TEST_PDF);
         String text = null;
-        try {
+        try (InputStream is = new ByteArrayInputStream(TestData.TEST_PDF)) {
             text = textXtraction.extractFrom(is, null);
             assertTrue(text.contains(TestData.PLAIN_TEXT));
-        } finally {
-            IOUtils.closeQuietly(is);
         }
         assertNotNull(text);
         String text2 = textXtraction.extractFrom(text, null);

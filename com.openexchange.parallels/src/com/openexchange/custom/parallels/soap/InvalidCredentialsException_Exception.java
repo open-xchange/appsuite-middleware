@@ -13,6 +13,8 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "InvalidCredentialsException", targetNamespace = "http://soap.parallels.custom.openexchange.com")
 public class InvalidCredentialsException_Exception extends java.lang.Exception {
     
+    private static final long serialVersionUID = 5632427899434402438L;
+    
     private com.openexchange.custom.parallels.soap.InvalidCredentialsException invalidCredentialsException;
 
     public InvalidCredentialsException_Exception() {

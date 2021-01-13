@@ -100,6 +100,7 @@ public abstract class DependentServiceStarter extends ServiceTracker<Object, Obj
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DependentServiceStarter.class);
 
     private final Lock lock = new ReentrantLock();
+    @SuppressWarnings("hiding")
     protected final BundleContext context;
     private final Class<?>[] neededServices;
     private final Class<?>[] optionalServices;
@@ -179,9 +180,7 @@ public abstract class DependentServiceStarter extends ServiceTracker<Object, Obj
             needsStart &= !started;
             if (needsStart) {
                 for (int i = 0; i < neededServices.length; i++) {
-                    if (service != null) {
-                        serviceLookup.add(neededServices[i], foundServices[i]);
-                    }
+                    serviceLookup.add(neededServices[i], foundServices[i]);
                 }
                 startSafe(serviceLookup);
             }

@@ -59,3 +59,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Export-Package: com.openexchange.report.appsuite,
  com.openexchange.report.appsuite.defaultHandlers
+Automatic-Module-Name: com.openexchange.report.appsuite

@@ -982,7 +982,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            ScheduledFutureTask other = (ScheduledFutureTask) obj;
+            ScheduledFutureTask<?> other = (ScheduledFutureTask<?>) obj;
             if (period != other.period) {
                 return false;
             }

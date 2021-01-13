@@ -696,18 +696,6 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         public E nextElement() {
             return iterator.next();
         }
-
-        // Properties
-        //-------------------------------------------------------------------------
-
-        /**
-         *  Returns the underlying iterator.
-         *
-         *  @return the underlying iterator
-         */
-        public Iterator<E> getIterator() {
-            return iterator;
-        }
     }
 
 }

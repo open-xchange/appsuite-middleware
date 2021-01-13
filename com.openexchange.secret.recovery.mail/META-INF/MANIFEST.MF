@@ -14,3 +14,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework
+Automatic-Module-Name: com.openexchange.secret.recovery.mail

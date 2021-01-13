@@ -314,6 +314,7 @@ public class LoggingActivator implements BundleActivator, Reloadable {
     /**
      * Registers the {@link DeprecatedLogstashSocketAppenderMBeanRegisterer}
      */
+    @SuppressWarnings("deprecation")
     protected synchronized void registerDeprecatedLogstashAppenderMBeanTracker(BundleContext context) {
         try {
             DeprecatedLogstashSocketAppenderMBeanRegisterer logstashAppenderRegistration = new DeprecatedLogstashSocketAppenderMBeanRegisterer(context);

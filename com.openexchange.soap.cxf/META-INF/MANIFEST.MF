@@ -171,3 +171,4 @@ Export-Package: com.openexchange.soap.cxf,
  org.apache.cxf.annotations,
  org.apache.cxf.databinding,
  org.apache.cxf.headers
+Automatic-Module-Name: com.openexchange.soap.cxf

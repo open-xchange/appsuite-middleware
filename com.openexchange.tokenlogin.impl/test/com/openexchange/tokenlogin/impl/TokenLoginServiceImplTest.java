@@ -76,6 +76,7 @@ import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -281,7 +282,7 @@ public class TokenLoginServiceImplTest {
     public void testRedeemToken_EverythingFine_ReturnSession() throws OXException {
         PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.peekSession(ArgumentMatchers.anyString())).thenReturn(this.session);
-        PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.addSession(ArgumentMatchers.any(AddSessionParameter.class))).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
@@ -298,7 +299,7 @@ public class TokenLoginServiceImplTest {
         Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
 
         Assert.assertNotNull(returnedSession);
-        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+        Mockito.verify(sessiondService, Mockito.times(1)).addSession(ArgumentMatchers.any(AddSessionParameter.class));
     }
 
     @Test
@@ -443,13 +444,9 @@ public class TokenLoginServiceImplTest {
      * Writes a String to a file creating the file if it does not exist.
      */
     private static void writeStringToFile(File file, String data, Charset encoding, boolean append) throws IOException {
-        OutputStream out = null;
-        try {
-            out = openOutputStream(file, append);
+        try (OutputStream out = openOutputStream(file, append)) {
             write(data, out, encoding);
             out.close(); // don't swallow close Exception if copy completes normally
-        } finally {
-            IOUtils.closeQuietly(out);
         }
     }
 
@@ -458,12 +455,13 @@ public class TokenLoginServiceImplTest {
      * <code>OutputStream</code> using the specified character encoding.
      */
     private static void write(String data, OutputStream output, Charset encoding) throws IOException {
-        if (data != null) {
-            if (encoding == null) {
-                IOUtils.write(data, output);
-            } else {
-                output.write(data.getBytes(encoding));
-            }
+        if (data == null) {
+            return;
+        }
+        if (encoding == null) {
+            IOUtils.write(data, output, Charsets.UTF_8);
+        } else {
+            output.write(data.getBytes(encoding));
         }
     }
 

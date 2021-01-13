@@ -92,19 +92,22 @@ public class JSlobJSONResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         try {
-            final Object resultObject = result.getResultObject();
+            Object resultObject = result.getResultObject();
             if (resultObject instanceof JSlob) {
-                final JSlob jslob = (JSlob) resultObject;
+                JSlob jslob = JSlob.class.cast(resultObject);
                 result.setResultObject(convertJSlob(jslob), "json");
+                return;
+            }
+            if (null == resultObject) {
                 return;
             }
             /*
              * Collection of JSlobs
              */
-            @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
-            final JSONArray jArray = new JSONArray();
+            @SuppressWarnings("unchecked") Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
+            JSONArray jArray = new JSONArray();
             for (final JSlob jslob : jslobs) {
                 jArray.put(convertJSlob(jslob));
             }
@@ -114,8 +117,8 @@ public class JSlobJSONResultConverter implements ResultConverter {
         }
     }
 
-    private JSONObject convertJSlob(final JSlob jslob) throws JSONException {
-        final JSONObject json = new JSONObject();
+    private JSONObject convertJSlob(JSlob jslob) throws JSONException {
+        JSONObject json = new JSONObject();
         json.put("id", jslob.getId().getId());
         json.put("tree", jslob.getJsonObject());
         json.put("meta", jslob.getMetaObject());

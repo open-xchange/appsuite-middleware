@@ -121,3 +121,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
 Export-Package: com.openexchange.plist,
  com.openexchange.plist.xml,
  com.openexchange.plist.xml.helper
+Automatic-Module-Name: com.openexchange.plist

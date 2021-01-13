@@ -69,6 +69,7 @@ import com.openexchange.servlet.StatusKnowing;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@SuppressWarnings("deprecation")
 public class HttpServletResponseWrapper implements StatusKnowing {
 
     private final HttpServletResponse delegate;
@@ -300,5 +301,4 @@ public class HttpServletResponseWrapper implements StatusKnowing {
         this.statusCode = arg0;
         delegate.setStatus(arg0);
     }
-
 }

@@ -61,8 +61,6 @@ import com.openexchange.mail.api.UrlInfo;
  */
 public final class UnifiedInboxConfig extends MailConfig {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxConfig.class);
-
     private IMailProperties mailProperties;
 
     /**

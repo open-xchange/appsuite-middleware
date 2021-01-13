@@ -49,6 +49,8 @@
 
 package com.openexchange.oidc.impl.tests;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -169,10 +171,10 @@ public class OIDCPasswordGrantAuthenticationTest {
         loginmapping = "example.com";
         password = "Secret123!";
 
-        when(user.getId()).thenReturn(userId);
+        when(I(user.getId())).thenReturn(I(userId));
         when(user.getLoginInfo()).thenReturn(username);
 
-        when(context.getContextId()).thenReturn(contextId);
+        when(I(context.getContextId())).thenReturn(I(contextId));
         when(context.getLoginInfo()).thenReturn(new String[] { loginmapping });
 
         when(userService.getUser(userId, context)).thenReturn(user);
@@ -369,9 +371,8 @@ public class OIDCPasswordGrantAuthenticationTest {
 
         @Override
         public void describeTo(Description description) {
-            description.appendText("a timestamp string close to ").appendValue(timestamp);
+            description.appendText("a timestamp string close to ").appendValue(L(timestamp));
 
         }
     }
-
 }

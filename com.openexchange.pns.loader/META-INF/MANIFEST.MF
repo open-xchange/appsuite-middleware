@@ -17,3 +17,4 @@ Import-Package: com.openexchange.java,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.pns.loader
+Automatic-Module-Name: com.openexchange.pns.loader

@@ -94,7 +94,7 @@ public class Bug16158Test {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         threadPoolService.shutdown();
     }
 

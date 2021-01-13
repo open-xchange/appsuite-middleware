@@ -229,9 +229,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * Is called when the circuit breaker is opened: The circuit is opened and not allowing executions to occur.
      *
      * @param breakerInfo The circuit breaker that went into open state
-     * @throws Exception If an error occurs
      */
-    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+    protected void onOpen(CircuitBreakerInfo breakerInfo) {
         LOG.warn("IMAP circuit breaker opened for: {}", breakerInfo.getKey());
         breakerInfo.getMetrics().getOpensCounter().ifPresent(c -> c.increment());
     }
@@ -240,9 +239,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * Is called when the circuit breaker is half-opened: The circuit is temporarily allowing executions to occur.
      *
      * @param breakerInfo The circuit breaker that went into half-open state
-     * @throws Exception If an error occurs
      */
-    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) {
         LOG.info("IMAP circuit breaker half-opened for: {}", breakerInfo.getKey());
     }
 
@@ -250,9 +248,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * Is called when the circuit breaker is closed: The circuit is closed and fully functional, allowing executions to occur.
      *
      * @param breakerInfo The circuit breaker that went into closed state
-     * @throws Exception If an error occurs
      */
-    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
+    protected void onClose(CircuitBreakerInfo breakerInfo) {
         LOG.info("IMAP circuit breaker closed for: {}", breakerInfo.getKey());
     }
 

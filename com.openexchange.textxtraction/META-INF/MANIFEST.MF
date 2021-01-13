@@ -140,3 +140,4 @@ Bundle-ClassPath: lib/poi-3.17.jar,
  lib/poi-ooxml-3.17.jar,
  lib/poi-scratchpad-3.17.jar,
  .
+Automatic-Module-Name: com.openexchange.textxtraction

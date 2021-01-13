@@ -17,3 +17,4 @@ Import-Package: com.openexchange.database,
 Export-Package: com.openexchange.modules.storage.memory,
  com.openexchange.modules.storage.sql,
  com.openexchange.modules.storage.sql.engines
+Automatic-Module-Name: com.openexchange.modules.storage

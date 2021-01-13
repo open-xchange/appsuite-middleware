@@ -13,6 +13,8 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "PushSoapInterfaceException", targetNamespace = "http://soap.push.openexchange.com")
 public class PushSoapInterfaceException_Exception extends java.lang.Exception {
     
+    private static final long serialVersionUID = -2050704907376711148L;
+    
     private com.openexchange.push.soap.PushSoapInterfaceException pushSoapInterfaceException;
 
     public PushSoapInterfaceException_Exception() {

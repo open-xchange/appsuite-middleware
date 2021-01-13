@@ -259,15 +259,14 @@ public final class UnifiedInboxFolderConverter {
      * @param session The session providing needed user data
      * @param fullnames The fullnames
      * @return The default folder's message counts of denoted account
-     * @throws OXException If a mail error occurs
      */
-    public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) throws OXException {
+    public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) {
         final int[][] retval;
         retval = getAccountDefaultFolders0(accountId, session, fullnames);
         return retval;
     }
 
-    private static int[][] getAccountDefaultFolders0(final int accountId, final Session session, final String[] fullnames) throws OXException {
+    private static int[][] getAccountDefaultFolders0(final int accountId, final Session session, final String[] fullnames) {
         final int[][] retval = new int[fullnames.length][];
         // Get & connect appropriate mail access
         MailAccess<?, ?> mailAccess = null;

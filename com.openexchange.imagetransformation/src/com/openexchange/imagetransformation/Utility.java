@@ -196,6 +196,7 @@ public class Utility {
     static {
         ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 waitTimeoutSeconds = null;

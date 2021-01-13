@@ -701,6 +701,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private static class InjectedImapIdlePushListener {
 
         final ImapIdlePushListener injectedPushListener;
+        @SuppressWarnings("unused")
         final ImapIdlePushListener replacedPushListener;
 
         InjectedImapIdlePushListener(ImapIdlePushListener injectedPushListener, ImapIdlePushListener replacedPushListener) {

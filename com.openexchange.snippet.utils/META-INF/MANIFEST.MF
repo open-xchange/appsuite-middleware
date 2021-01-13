@@ -119,3 +119,4 @@ Import-Package: com.adobe.internal.xmp,
  org.slf4j
 Bundle-Activator: com.openexchange.snippet.utils.osgi.SnippetUtilsActivator
 Export-Package: com.openexchange.snippet.utils
+Automatic-Module-Name: com.openexchange.snippet.utils

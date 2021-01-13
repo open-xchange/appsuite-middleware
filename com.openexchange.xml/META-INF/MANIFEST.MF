@@ -84,3 +84,4 @@ Bundle-ClassPath: .,
  lib/spring-jcl-5.2.6.RELEASE.jar,
  lib/javax.inject-1.jar
 Bundle-Activator: com.openexchange.xml.osgi.Activator
+Automatic-Module-Name: com.openexchange.xml

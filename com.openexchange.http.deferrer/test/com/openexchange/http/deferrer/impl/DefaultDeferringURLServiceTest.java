@@ -73,7 +73,7 @@ public class DefaultDeferringURLServiceTest {
     TestDeferringURLService service = new TestDeferringURLService();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         DefaultDeferringURLService.PREFIX.set(new DispatcherPrefixService() {
 
             @Override
@@ -84,7 +84,7 @@ public class DefaultDeferringURLServiceTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         DefaultDeferringURLService.PREFIX.set(null);
     }
 

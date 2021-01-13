@@ -53,7 +53,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.java.Strings;
-import com.openexchange.xml.util.XMLUtils;
 
 /**
  * {@link DOMUtils} - Copy of <code>org.apache.cxf.helpers.DOMUtils</code>.

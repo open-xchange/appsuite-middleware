@@ -39,3 +39,4 @@ Export-Package: com.damienmiller,
  com.openexchange.java.delegate,
  com.openexchange.java.util,
  it.geosolutions.imageio.stream.eraf
+Automatic-Module-Name: com.openexchange.java

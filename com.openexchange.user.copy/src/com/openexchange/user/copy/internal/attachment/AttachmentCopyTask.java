@@ -68,7 +68,6 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Streams;
@@ -157,8 +156,6 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         final CopyTools copyTools = new CopyTools(copied);
         final Integer srcCtxId = copyTools.getSourceContextId();
         final Integer dstCtxId = copyTools.getDestinationContextId();
-        final Context srcCtx = copyTools.getSourceContext();
-        final Context dstCtx = copyTools.getDestinationContext();
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();

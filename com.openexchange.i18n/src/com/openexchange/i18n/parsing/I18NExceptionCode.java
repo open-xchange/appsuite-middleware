@@ -60,28 +60,20 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum I18NExceptionCode implements DisplayableOXExceptionCode {
 
-    UNEXPECTED_TOKEN(101, "Unexpected token %s in .po file %s:%s. Expected one of %s", "Please check that the file is correctly formatted.",
-        CATEGORY_CONFIGURATION),
-    UNEXPECTED_TOKEN_CONSUME(102, "Unexpected token %s in .po file %s:%s. Expected one of %s", "Please check that the file is correctly"
-        + " formatted.", CATEGORY_CONFIGURATION),
-    EXPECTED_NUMBER(103, "Got %s, but expected a number in .po file %s:%s.", "Please check that the file is correctly formatted.",
-        CATEGORY_CONFIGURATION),
-    MALFORMED_TOKEN(104, "Malformed or unsupported token. Got %s but expected %s in .po file %s:%s.", "Please check that the file is"
-        + " correctly formatted.", CATEGORY_CONFIGURATION),
-    IO_EXCEPTION(105, "An I/O error occurred reading .po file %s.", "Please make sure the file is readable by the groupware.",
-        CATEGORY_CONFIGURATION);
+    UNEXPECTED_TOKEN(101, "Unexpected token %s in .po file %s:%s. Expected one of %s", CATEGORY_CONFIGURATION),
+    UNEXPECTED_TOKEN_CONSUME(102, "Unexpected token %s in .po file %s:%s. Expected one of %s", CATEGORY_CONFIGURATION),
+    EXPECTED_NUMBER(103, "Got %s, but expected a number in .po file %s:%s.", CATEGORY_CONFIGURATION),
+    MALFORMED_TOKEN(104, "Malformed or unsupported token. Got %s but expected %s in .po file %s:%s.", CATEGORY_CONFIGURATION),
+    IO_EXCEPTION(105, "An I/O error occurred reading .po file %s.", CATEGORY_CONFIGURATION);
 
     private Category category;
-
-    private String help;
 
     private String message;
 
     private int errorCode;
 
-    private I18NExceptionCode(final int errorCode, final String message, final String help, final Category category) {
+    private I18NExceptionCode(final int errorCode, final String message, final Category category) {
         this.category = category;
-        this.help = help;
         this.message = message;
         this.errorCode = errorCode;
     }

@@ -26,3 +26,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.json,
  org.mozilla.javascript,
  org.osgi.framework
+Automatic-Module-Name: com.openexchange.scripting.rhino.apiBridge

@@ -1086,10 +1086,10 @@ public class Spamc {
                 socket = null;
                 try {
                     // load the class dynamically, since it may not be available in some JVMs
-                    final Class sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
+                    final Class<?> sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
                     final Method getDefault = sslSocketFactory.getMethod("getDefault", (Class) null);
                     final Object defaultSocketFactory = getDefault.invoke(null, (Object) null);
-                    final Class[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
+                    final Class<?>[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
                     final Method createSocket = sslSocketFactory.getMethod("createSocket", parameterTypes);
                     final Object[] args = new Object[] { existingSocket, existingSocket.getInetAddress().getHostName(), Integer.valueOf(existingSocket.getPort()), Boolean.TRUE };
                     socket = (Socket) createSocket.invoke(defaultSocketFactory, args);
@@ -1416,10 +1416,13 @@ public class Spamc {
 
     private static class ConfigurationException extends Exception {
 
+        private static final long serialVersionUID = 5124983961789511702L;
+
         protected ConfigurationException(final String message) {
             super(message);
         }
 
+        @SuppressWarnings("unused")
         public static int getExitCode() {
             return ExitCodes.EX_CONFIG;
         }

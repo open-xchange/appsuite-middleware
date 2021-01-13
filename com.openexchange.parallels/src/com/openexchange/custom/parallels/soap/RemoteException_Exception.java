@@ -13,6 +13,8 @@ import javax.xml.ws.WebFault;
 @WebFault(name = "RemoteException", targetNamespace = "http://soap.parallels.custom.openexchange.com")
 public class RemoteException_Exception extends java.lang.Exception {
     
+    private static final long serialVersionUID = -6173264984754034636L;
+    
     private com.openexchange.custom.parallels.soap.RemoteException remoteException;
 
     public RemoteException_Exception() {

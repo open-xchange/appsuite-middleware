@@ -187,18 +187,5 @@ public class OXJolokiaServlet extends JolokiaServlet {
         public E nextElement() {
             return iterator.next();
         }
-
-        // Properties
-        //-------------------------------------------------------------------------
-
-        /**
-         *  Returns the underlying iterator.
-         *
-         *  @return the underlying iterator
-         */
-        public Iterator<E> getIterator() {
-            return iterator;
-        }
     }
-
 }

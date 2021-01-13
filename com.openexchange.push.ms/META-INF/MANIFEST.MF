@@ -34,3 +34,4 @@ Import-Package: com.google.common.collect,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.push.ms.osgi.PushMsActivator
+Automatic-Module-Name: com.openexchange.push.ms

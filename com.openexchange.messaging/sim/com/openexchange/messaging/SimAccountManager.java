@@ -71,7 +71,7 @@ public class SimAccountManager implements MessagingAccountManager {
     private int id;
     private List<MessagingAccount> accounts;
 
-    public MessagingAccount newAccount() throws OXException {
+    public MessagingAccount newAccount() {
         return new SimMessagingAccount();
     }
 

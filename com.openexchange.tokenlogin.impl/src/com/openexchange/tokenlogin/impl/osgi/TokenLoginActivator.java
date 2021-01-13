@@ -125,6 +125,7 @@ public final class TokenLoginActivator extends HousekeepingActivator implements 
                 // Track HazelcastInstance service
                 final ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
+                    @SuppressWarnings("synthetic-access")
                     @Override
                     public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         removeService(HazelcastInstance.class);
@@ -137,6 +138,7 @@ public final class TokenLoginActivator extends HousekeepingActivator implements 
                         // Ignore
                     }
 
+                    @SuppressWarnings("synthetic-access")
                     @Override
                     public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                         final HazelcastInstance hazelcastInstance = context.getService(reference);

@@ -21,6 +21,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
+ com.openexchange.annotation,
  com.openexchange.api2,
  com.openexchange.data.conversion.ical,
  com.openexchange.exception,
@@ -50,3 +51,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.message.timeline.osgi.MessageTimelineActivator
+Automatic-Module-Name: com.openexchange.message.timeline

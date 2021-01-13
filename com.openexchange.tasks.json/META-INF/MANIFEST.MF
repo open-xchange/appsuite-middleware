@@ -63,4 +63,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.tasks.json
+Automatic-Module-Name: com.openexchange.tasks.json
 

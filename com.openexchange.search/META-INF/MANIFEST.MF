@@ -17,3 +17,4 @@ Import-Package: com.google.common.annotations,
 Export-Package: com.openexchange.search,
  com.openexchange.search.internal.operands
 Bundle-Activator: com.openexchange.search.osgi.SearchActivator
+Automatic-Module-Name: com.openexchange.search

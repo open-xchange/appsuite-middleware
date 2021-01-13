@@ -455,7 +455,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
                 return addr.toUnicodeString();
             }
 
-            String suffix = sAddress.substring(pos);
+            @SuppressWarnings("null") String suffix = sAddress.substring(pos); // Guarded by 'pos'
             if (!"/TYPE=PLMN".equals(Strings.toUpperCase(suffix))) {
                 // Not an MSISDN address
                 return addr.toUnicodeString();

@@ -18,3 +18,4 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Bundle-ClassPath: .
 Export-Package: com.openexchange.proxy
+Automatic-Module-Name: com.openexchange.proxy

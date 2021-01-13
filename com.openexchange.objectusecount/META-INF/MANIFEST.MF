@@ -19,3 +19,4 @@ Import-Package: com.google.common.annotations,
  gnu.trove.map.hash,
  gnu.trove.procedure
 Export-Package: com.openexchange.objectusecount
+Automatic-Module-Name: com.openexchange.objectusecount

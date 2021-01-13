@@ -38,3 +38,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.json,
  org.osgi.framework,
  org.osgi.service.http
+Automatic-Module-Name: com.openexchange.templating.json

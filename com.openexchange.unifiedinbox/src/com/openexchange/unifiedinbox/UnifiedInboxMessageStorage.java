@@ -128,6 +128,7 @@ import gnu.trove.map.TIntObjectMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("synthetic-access")
 public final class UnifiedInboxMessageStorage extends MailMessageStorage implements IMailMessageStorageExt, ISimplifiedThreadStructureEnhanced, UnifiedViewService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxMessageStorage.class);
@@ -226,11 +227,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         }
         return accounts;
-    }
-
-    private MailAccount getAccount(int accountId) throws OXException {
-        MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
-        return srv.getMailAccount(accountId, user, cid);
     }
 
     @Override

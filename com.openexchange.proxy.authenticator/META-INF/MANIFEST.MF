@@ -17,4 +17,5 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j
 Export-Package: com.openexchange.proxy.authenticator
+Automatic-Module-Name: com.openexchange.proxy.authenticator
 

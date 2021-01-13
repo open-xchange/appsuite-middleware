@@ -57,7 +57,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
@@ -198,7 +197,7 @@ public class LoggingActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(ArgumentMatchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 
@@ -216,7 +215,7 @@ public class LoggingActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(Matchers.eq(bundleContext));
+        Mockito.doNothing().when(activatorSpy).registerDeprecatedLogstashAppenderMBeanTracker(ArgumentMatchers.eq(bundleContext));
 
         activatorSpy.start(bundleContext);
 

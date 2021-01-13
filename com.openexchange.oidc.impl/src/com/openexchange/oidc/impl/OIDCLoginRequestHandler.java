@@ -291,6 +291,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
          * @throws OXException
          * @throws JSONException
          */
+        @SuppressWarnings("deprecation")
         private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation, boolean respondWithJson, LoginRequestContext requestContext) throws IOException {
             LOG.trace("performCookieLogin(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), respondWithJson ? Boolean.TRUE : Boolean.FALSE);
             AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(backend.getBackendConfig().autologinCookieMode());

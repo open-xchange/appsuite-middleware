@@ -36,3 +36,4 @@ Export-Package: com.openexchange.http.client,
  com.openexchange.http.client.apache,
  com.openexchange.http.client.builder,
  com.openexchange.http.client.exceptions
+Automatic-Module-Name: com.openexchange.http.client

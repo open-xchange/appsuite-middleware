@@ -1445,9 +1445,6 @@ public final class ConfigJSlobService implements JSlobService {
         /** The property name of the preference item property. */
         protected final String propertyName;
 
-        /** The preference path; ending with <code>"/value"</code>. */
-        protected final String preferencePath;
-
         /** The property representing a preference item. */
         protected final ComposedConfigProperty<String> property;
 
@@ -1461,7 +1458,6 @@ public final class ConfigJSlobService implements JSlobService {
             super();
             this.propertyName = propertyName;
             this.property = property;
-            this.preferencePath = preferencePath;
             this.isProtected = isProtected;
             path = JSONPathElement.parsePath(preferencePath);
         }

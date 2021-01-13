@@ -153,7 +153,6 @@ public class OXHttpServerFilter extends HttpServerFilter {
     }
 
     @Override
-    @SuppressWarnings({"UnusedDeclaration"})
     public HttpHandler getHttpHandler() {
         return httpHandler;
     }
@@ -165,7 +164,6 @@ public class OXHttpServerFilter extends HttpServerFilter {
 
     // ----------------------------------------------------- Methods from Filter
 
-    @SuppressWarnings({"unchecked", "ReturnInsideFinallyBlock"})
     @Override
     public NextAction handleRead(final FilterChainContext ctx)
           throws IOException {
@@ -175,130 +173,127 @@ public class OXHttpServerFilter extends HttpServerFilter {
         assert HttpContext.get(ctx) != null;
 
         final Object message = ctx.getMessage();
-        final Connection connection = ctx.getConnection();
+        final Connection<?> connection = ctx.getConnection();
 
-        if (HttpPacket.isHttp(message)) {
-            // Otherwise cast message to a HttpContent
-            final HttpContent httpContent = (HttpContent) message;
-            final HttpContext context = httpContent.getHttpHeader()
-                    .getProcessingState().getHttpContext();
-            Request handlerRequest = httpRequestInProgress.get(context);
-
-            if (handlerRequest == null) {
-                // It's a new HTTP request
-                final HttpRequestPacket request = (HttpRequestPacket) httpContent.getHttpHeader();
-                final HttpResponsePacket response = request.getResponse();
-                ServerFilterConfiguration config = getConfiguration();
-
-                handlerRequest = OXRequest.create(grizzlyConfig);
-                handlerRequest.parameters.setLimit(config.getMaxRequestParameters());
-                httpRequestInProgress.set(context, handlerRequest);
-                final Response handlerResponse = handlerRequest.getResponse();
-
-                handlerRequest.initialize(request, ctx, this);
-                handlerResponse.initialize(handlerRequest, response,
-                        ctx, suspendedResponseQueue, this);
-
-                if (config.isGracefulShutdownSupported()) {
-                    activeRequestsCounter.incrementAndGet();
-                    handlerRequest.addAfterServiceListener(flushResponseHandler);
-                }
-
-                HttpServerProbeNotifier.notifyRequestReceive(this, connection,
-                        handlerRequest);
-
-                boolean wasSuspended = false;
-
-                try {
-                    ctx.setMessage(handlerResponse);
-
-                    if (shuttingDown.get()) { // if we're in the shutting down phase - serve shutdown page and exit
-                        handlerResponse.getResponse().getProcessingState().setError(true);
-                        HtmlHelper.setErrorAndSendErrorPage(
-                                handlerRequest, handlerResponse,
-                                config.getDefaultErrorPageGenerator(),
-                                503, HttpStatus.SERVICE_UNAVAILABLE_503.getReasonPhrase(),
-                                "The server is being shutting down...", null);
-                    } else if (!config.isPassTraceRequest()
-                            && request.getMethod() == Method.TRACE) {
-                        onTraceRequest(handlerRequest, handlerResponse);
-                    } else if (!checkMaxPostSize(request.getContentLength())) {
-                        handlerResponse.getResponse().getProcessingState().setError(true);
-                        HtmlHelper.setErrorAndSendErrorPage(
-                                handlerRequest, handlerResponse,
-                                config.getDefaultErrorPageGenerator(),
-                                400, HttpStatus.BAD_REQUEST_400.getReasonPhrase(),
-                                "The request payload size exceeds the max post size limitation", null);
-                    } else {
-                        if (guard.mayHandle(handlerRequest)) {
-                            final HttpHandler httpHandlerLocal = httpHandler;
-                            if (httpHandlerLocal != null) {
-                                wasSuspended = !httpHandlerLocal.doHandle(
-                                    handlerRequest, handlerResponse);
-                            }
-                        } else {
-                            handlerResponse.getResponse().getProcessingState().setError(true);
-                            HtmlHelper.setErrorAndSendErrorPage(
-                                    handlerRequest, handlerResponse,
-                                    config.getDefaultErrorPageGenerator(),
-                                    503, "Service Temporary Unavailable",
-                                    "The server is temporary overloaded...", null);
-                        }
-                    }
-                } catch (Exception t) {
-                    LOGGER.log(Level.WARNING,
-                            LogMessages.WARNING_GRIZZLY_HTTP_SERVER_FILTER_HTTPHANDLER_INVOCATION_ERROR(), t);
-
-                    request.getProcessingState().setError(true);
-
-                    if (!response.isCommitted()) {
-                            HtmlHelper.setErrorAndSendErrorPage(
-                                    handlerRequest, handlerResponse,
-                                    config.getDefaultErrorPageGenerator(),
-                                    500, HttpStatus.INTERNAL_SERVER_ERROR_500.getReasonPhrase(),
-                                    HttpStatus.INTERNAL_SERVER_ERROR_500.getReasonPhrase(),
-                                    t);
-                    }
-                } catch (Throwable t) {
-                    ExceptionUtils.handleThrowable(t);
-                    LOGGER.log(Level.WARNING,
-                            LogMessages.WARNING_GRIZZLY_HTTP_SERVER_FILTER_UNEXPECTED(), t);
-                    throw new IllegalStateException(t);
-                }
-
-                if (!wasSuspended) {
-                    return afterService(ctx, connection,
-                            handlerRequest, handlerResponse);
-                } else {
-                    return ctx.getSuspendAction();
-                }
-            } else {
-                // We're working with suspended HTTP request
-                try {
-                    ctx.suspend();
-                    final NextAction action = ctx.getSuspendAction();
-
-                    if (!handlerRequest.getInputBuffer().append(httpContent)) {
-                        // we don't want this thread/context to reset
-                        // OP_READ on Connection
-
-                        // we have enough data? - terminate filter chain execution
-                        ctx.completeAndRecycle();
-                    } else {
-                        ctx.resume(ctx.getStopAction());
-                    }
-
-                    return action;
-                } finally {
-                    httpContent.recycle();
-                }
-            }
-        } else { // this code will be run, when we resume the context
+        if (false == HttpPacket.isHttp(message)) {
+            // this code will be run, when we resume the context
             // We're finishing the request processing
             final Response response = (Response) message;
             final Request request = response.getRequest();
             return afterService(ctx, connection, request, response);
         }
+        
+        // Otherwise cast message to a HttpContent
+        final HttpContent httpContent = (HttpContent) message;
+        final HttpContext context = httpContent.getHttpHeader().getProcessingState().getHttpContext();
+        Request handlerRequest = httpRequestInProgress.get(context);
+
+        if (handlerRequest != null) {
+            // We're working with suspended HTTP request
+            try {
+                ctx.suspend();
+                final NextAction action = ctx.getSuspendAction();
+
+                if (!handlerRequest.getInputBuffer().append(httpContent)) {
+                    // we don't want this thread/context to reset
+                    // OP_READ on Connection
+
+                    // we have enough data? - terminate filter chain execution
+                    ctx.completeAndRecycle();
+                } else {
+                    ctx.resume(ctx.getStopAction());
+                }
+
+                return action;
+            } finally {
+                httpContent.recycle();
+            }
+        }
+        // It's a new HTTP request
+        final HttpRequestPacket request = (HttpRequestPacket) httpContent.getHttpHeader();
+        final HttpResponsePacket response = request.getResponse();
+        ServerFilterConfiguration config = getConfiguration();
+
+        handlerRequest = OXRequest.create(grizzlyConfig);
+        handlerRequest.parameters.setLimit(config.getMaxRequestParameters());
+        httpRequestInProgress.set(context, handlerRequest);
+        final Response handlerResponse = handlerRequest.getResponse();
+
+        handlerRequest.initialize(request, ctx, this);
+        handlerResponse.initialize(handlerRequest, response,
+                ctx, suspendedResponseQueue, this);
+
+        if (config.isGracefulShutdownSupported()) {
+            activeRequestsCounter.incrementAndGet();
+            handlerRequest.addAfterServiceListener(flushResponseHandler);
+        }
+
+        HttpServerProbeNotifier.notifyRequestReceive(this, connection,
+                handlerRequest);
+
+        boolean wasSuspended = false;
+
+        try {
+            ctx.setMessage(handlerResponse);
+
+            if (shuttingDown.get()) { // if we're in the shutting down phase - serve shutdown page and exit
+                handlerResponse.getResponse().getProcessingState().setError(true);
+                HtmlHelper.setErrorAndSendErrorPage(
+                        handlerRequest, handlerResponse,
+                        config.getDefaultErrorPageGenerator(),
+                        503, HttpStatus.SERVICE_UNAVAILABLE_503.getReasonPhrase(),
+                        "The server is being shutting down...", null);
+            } else if (!config.isPassTraceRequest()
+                    && request.getMethod() == Method.TRACE) {
+                onTraceRequest(handlerRequest, handlerResponse);
+            } else if (!checkMaxPostSize(request.getContentLength())) {
+                handlerResponse.getResponse().getProcessingState().setError(true);
+                HtmlHelper.setErrorAndSendErrorPage(
+                        handlerRequest, handlerResponse,
+                        config.getDefaultErrorPageGenerator(),
+                        400, HttpStatus.BAD_REQUEST_400.getReasonPhrase(),
+                        "The request payload size exceeds the max post size limitation", null);
+            } else {
+                if (guard.mayHandle(handlerRequest)) {
+                    final HttpHandler httpHandlerLocal = httpHandler;
+                    if (httpHandlerLocal != null) {
+                        wasSuspended = !httpHandlerLocal.doHandle(
+                            handlerRequest, handlerResponse);
+                    }
+                } else {
+                    handlerResponse.getResponse().getProcessingState().setError(true);
+                    HtmlHelper.setErrorAndSendErrorPage(
+                            handlerRequest, handlerResponse,
+                            config.getDefaultErrorPageGenerator(),
+                            503, "Service Temporary Unavailable",
+                            "The server is temporary overloaded...", null);
+                }
+            }
+        } catch (Exception t) {
+            LOGGER.log(Level.WARNING,
+                    LogMessages.WARNING_GRIZZLY_HTTP_SERVER_FILTER_HTTPHANDLER_INVOCATION_ERROR(), t);
+
+            request.getProcessingState().setError(true);
+
+            if (!response.isCommitted()) {
+                    HtmlHelper.setErrorAndSendErrorPage(
+                            handlerRequest, handlerResponse,
+                            config.getDefaultErrorPageGenerator(),
+                            500, HttpStatus.INTERNAL_SERVER_ERROR_500.getReasonPhrase(),
+                            HttpStatus.INTERNAL_SERVER_ERROR_500.getReasonPhrase(),
+                            t);
+            }
+        } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            LOGGER.log(Level.WARNING,
+                    LogMessages.WARNING_GRIZZLY_HTTP_SERVER_FILTER_UNEXPECTED(), t);
+            throw new IllegalStateException(t);
+        }
+
+        if (!wasSuspended) {
+            return afterService(ctx, connection, handlerRequest, handlerResponse);
+        }
+        return ctx.getSuspendAction();
     }
 
     /**
@@ -352,10 +347,9 @@ public class OXHttpServerFilter extends HttpServerFilter {
 
     private NextAction afterService(
             final FilterChainContext ctx,
-            final Connection connection,
+            final Connection<?> connection,
             final Request request,
-            final Response response)
-            throws IOException {
+            final Response response) {
 
         final HttpContext context = request.getRequest()
                 .getProcessingState().getHttpContext();
@@ -423,6 +417,7 @@ public class OXHttpServerFilter extends HttpServerFilter {
      * The {@link CompletionHandler} to be used to make sure the response data
      * have been flushed.
      */
+    @SuppressWarnings("synthetic-access")
     private final class FlushResponseHandler extends EmptyCompletionHandler<Object> implements AfterServiceListener{
 
         private final FilterChainEvent event = TransportFilter.createFlushEvent(this);
@@ -430,7 +425,7 @@ public class OXHttpServerFilter extends HttpServerFilter {
         FlushResponseHandler() {
             super();
         }
-
+        
         @Override
         public void cancelled() {
             onRequestCompleteAndResponseFlushed();

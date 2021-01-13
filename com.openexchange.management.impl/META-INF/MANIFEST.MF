@@ -42,3 +42,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Export-Package: com.openexchange.management.console
 Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.management.impl

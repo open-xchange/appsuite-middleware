@@ -49,6 +49,7 @@
 
 package com.openexchange.serverconfig.impl;
 
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -189,8 +190,8 @@ public class ServerConfigServiceImplTest {
         //values that come from config-as-default
         configMap.get("productNameMail");
         assertEquals("OX Mail", configMap.get("productNameMail"));
-        assertFalse((boolean)configMap.get("forgotPassword"));
-        assertTrue((boolean)configMap.get("staySignedIn"));
+        assertFalse(b(Boolean.class.cast(configMap.get("forgotPassword"))));
+        assertTrue(b(Boolean.class.cast(configMap.get("staySignedIn"))));
         assertEquals("(c) 2015 Open-Xchange.", configMap.get("copyright"));
 
         //values that come from config-as and are applied because the host1 matches

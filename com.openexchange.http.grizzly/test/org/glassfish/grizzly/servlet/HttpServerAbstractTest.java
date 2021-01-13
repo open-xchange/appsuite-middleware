@@ -101,7 +101,7 @@ public abstract class HttpServerAbstractTest extends TestCase {
         httpServer.shutdownNow();
     }
 
-    protected void newHttpServer(int port) throws IOException {
+    protected void newHttpServer(int port) {
         httpServer = HttpServer.createSimpleServer("./", port);
     }
 

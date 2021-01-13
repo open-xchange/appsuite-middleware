@@ -189,7 +189,7 @@ public abstract class TaskAction implements AJAXActionService {
         return RESULT_JSON_NULL;
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log) {
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx) {
         final Participant[] participants = appointmentObj.getParticipants();
         if (participants == null) {
             return;

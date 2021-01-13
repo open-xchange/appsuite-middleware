@@ -74,7 +74,6 @@ import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -1019,32 +1018,6 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         return Utility.prependPath2Fullname(path, getSeparator(), fullname);
     }
 
-    private static Message[] subarray(final Message[] messages, final int fromIndex, final int toIndex) {
-        if (fromIndex < 0) {
-            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
-        }
-        if (toIndex > messages.length) {
-            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
-        }
-        if (fromIndex > toIndex) {
-            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
-        }
-        final int len = toIndex - fromIndex;
-        final Message[] subarray = new Message[len];
-        System.arraycopy(messages, fromIndex, subarray, 0, len);
-        return subarray;
-    }
-
-    private static Message[] subarray(final Message[] messages, final int fromIndex) {
-        if (fromIndex < 0) {
-            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
-        }
-        final int len = messages.length - fromIndex;
-        final Message[] subarray = new Message[len];
-        System.arraycopy(messages, fromIndex, subarray, 0, len);
-        return subarray;
-    }
-
     private void clear(POP3Message[] messageCache) {
         if (null != messageCache) {
             for (int i = messageCache.length; i-- > 0;) {
@@ -1067,7 +1040,6 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         messageCacheField = f;
     }
 
-    @SuppressWarnings("unchecked")
     private static POP3Message[] getMessageCache(final POP3Folder inbox) throws OXException {
         try {
             final Field messageCacheField = MailAccountPOP3Storage.messageCacheField;

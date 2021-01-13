@@ -1199,16 +1199,4 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return Strings.asciiLowerCase(new ContentType(ct).getSubType());
     }
-
-    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
-        if (misc == null) {
-            return Optional.empty();
-        }
-        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
-        if (!optionalContentType.isPresent()) {
-            return Optional.empty();
-        }
-        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
-    }
-
 }

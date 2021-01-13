@@ -67,6 +67,7 @@ import com.openexchange.snippet.json.action.SnippetAction;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class SnippetActionFactory implements AJAXActionServiceFactory {
 

@@ -22,6 +22,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
+ com.openexchange.annotation,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.json,
@@ -63,3 +64,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.snippet.json.osgi.SnippetJsonActivator
+Automatic-Module-Name: com.openexchange.snippet.json

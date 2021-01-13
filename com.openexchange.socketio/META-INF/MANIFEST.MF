@@ -22,3 +22,4 @@ Bundle-ClassPath: lib/engine.io-client-1.0.0.jar,
  lib/socket.io-client-1.0.0.jar,
  lib/socket.io-server-1.0.0.jar,
  .
+Automatic-Module-Name: com.openexchange.socketio

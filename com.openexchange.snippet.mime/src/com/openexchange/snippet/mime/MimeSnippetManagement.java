@@ -76,7 +76,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -254,6 +253,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return null == quotaProvider ? null : quotaProvider.getFor(session, "0");
     }
 
+    @SuppressWarnings("null")
     @Override
     public List<Snippet> getSnippets(String... types) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
@@ -267,7 +267,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (hasTypes) {
                 sql.append(" AND (");
                 sql.append("type=?");
-                for (int i = 1; i < types.length; i++) {
+                for (int i = 1; i < types.length; i++) { // Guarded by 'hasTypes'
                     sql.append(" OR type=?");
                 }
                 sql.append(')');
@@ -277,7 +277,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             stmt.setInt(++pos, contextId);
             stmt.setInt(++pos, userId);
             if (hasTypes) {
-                for (final String type : types) {
+                for (final String type : types) { // Guarded by 'hasTypes'
                     stmt.setString(++pos, type);
                 }
             }
@@ -1380,16 +1380,4 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return Strings.asciiLowerCase(new ContentType(ct).getSubType());
     }
-
-    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
-        if (misc == null) {
-            return Optional.empty();
-        }
-        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
-        if (!optionalContentType.isPresent()) {
-            return Optional.empty();
-        }
-        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
-    }
-
 }

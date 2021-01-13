@@ -26,3 +26,4 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Export-Package: com.openexchange.management,
  com.openexchange.management.osgi
+Automatic-Module-Name: com.openexchange.management

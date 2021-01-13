@@ -1,6 +1,5 @@
 package com.openexchange.pgp.mail.osgi;
 
-import org.slf4j.Logger;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pgp.mail.PGPMimeService;
 import com.openexchange.pgp.mail.impl.PGPMimeServiceImpl;

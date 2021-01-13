@@ -67,7 +67,6 @@ import com.openexchange.messaging.SimMessagingService;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
 
-
 /**
  * {@link UpdateTest}
  *
@@ -75,8 +74,8 @@ import com.openexchange.tools.session.SimServerSession;
  */
 public class UpdateTest {    // Success Case
 
-         @Test
-     public void testUpdate() throws JSONException, OXException {
+    @Test
+    public void testUpdate() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -112,8 +111,8 @@ public class UpdateTest {    // Success Case
 
     // Error Cases
 
-         @Test
-     public void testMissingID() throws JSONException, OXException {
+    @Test
+    public void testMissingID() throws JSONException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
@@ -146,9 +145,8 @@ public class UpdateTest {    // Success Case
 
     }
 
-
-         @Test
-     public void testMessagingExceptionFromRegistry() throws JSONException, OXException {
+    @Test
+    public void testMessagingExceptionFromRegistry() throws JSONException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException(-1));
 
@@ -181,8 +179,8 @@ public class UpdateTest {    // Success Case
 
     }
 
-         @Test
-     public void testMessagingExceptionFromAccManager() throws JSONException, OXException {
+    @Test
+    public void testMessagingExceptionFromAccManager() throws JSONException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();

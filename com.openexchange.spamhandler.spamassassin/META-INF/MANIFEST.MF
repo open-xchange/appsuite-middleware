@@ -45,3 +45,4 @@ Import-Package: com.google.common.annotations,
 Export-Package: com.openexchange.spamhandler.spamassassin.api
 Bundle-Activator: com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerActivator
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.spamhandler.spamassassin

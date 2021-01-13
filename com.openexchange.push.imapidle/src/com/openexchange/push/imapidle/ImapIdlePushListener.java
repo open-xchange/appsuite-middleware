@@ -73,7 +73,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.Protocol;

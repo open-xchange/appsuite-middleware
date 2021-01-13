@@ -67,3 +67,4 @@ Import-Package: com.openexchange.chronos,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.user.copy
+Automatic-Module-Name: com.openexchange.user.copy

@@ -19,3 +19,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.apache.commons.io,
  org.apache.commons.lang.time,
  org.slf4j
+Automatic-Module-Name: com.openexchange.logback.classic.extensions

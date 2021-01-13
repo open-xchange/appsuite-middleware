@@ -227,6 +227,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return (MessagingMessage) cache.getFromGroup(id, getGroupName(folder));
     }
 
+    @SuppressWarnings("deprecation")
     protected MessagingMessage remember(final MessagingMessage message) throws OXException {
         final String groupName = getGroupName(message.getFolder());
         final String key = message.getId();

@@ -76,7 +76,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
@@ -98,6 +97,7 @@ import com.openexchange.push.impl.jobqueue.PermanentListenerJobQueue;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
@@ -595,7 +595,7 @@ public final class PushManagerRegistry implements PushListenerService {
             LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", clientId, I(session.getUserId()), I(session.getContextId()));
             return false;
         }
-        if (MailAccounts.isGuest(session)) {
+        if (Sessions.isGuest(session)) {
             /*
              * It's a guest
              */
@@ -906,7 +906,7 @@ public final class PushManagerRegistry implements PushListenerService {
             LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
-        if (MailAccounts.isGuest(session)) {
+        if (Sessions.isGuest(session)) {
             /*
              * It's a guest
              */

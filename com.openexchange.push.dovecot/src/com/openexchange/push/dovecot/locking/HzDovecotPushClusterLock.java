@@ -95,7 +95,7 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         try {
             return hzInstance.getMap(mapName_tmp);
         } catch (HazelcastInstanceNotActiveException e) {
-            handleNotActiveException(e);
+            handleNotActiveException();
             // Obviously Hazelcast is absent
             return null;
         } catch (HazelcastException e) {
@@ -105,7 +105,7 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         }
     }
 
-    private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+    private void handleNotActiveException() {
         notActive.set(true);
     }
 

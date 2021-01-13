@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,8 +68,10 @@ import com.openexchange.messaging.SimMessagingService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingAccountWriterTest {         @Test
-     public void testWriteAccount() throws JSONException {
+public class MessagingAccountWriterTest {
+
+    @Test
+    public void testWriteAccount() throws JSONException {
         final SimMessagingAccount account = new SimMessagingAccount();
         account.setId(12);
         account.setDisplayName("My Twitter Account");
@@ -87,7 +90,7 @@ public class MessagingAccountWriterTest {         @Test
 
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
-                .hasKey("id").withValue(12)
+                .hasKey("id").withValue(I(12))
                 .hasKey("displayName").withValue("My Twitter Account")
                 .hasKey("messagingService").withValue("com.openexchange.twitter")
                 .hasKey("configuration").withValueObject()
@@ -103,5 +106,4 @@ public class MessagingAccountWriterTest {         @Test
         assertValidates(assertion, object);
 
     }
-
 }

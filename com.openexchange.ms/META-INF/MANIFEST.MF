@@ -107,3 +107,4 @@ Import-Package: com.hazelcast.cluster,
  org.xml.sax.helpers,
  sun.misc
 Export-Package: com.openexchange.ms
+Automatic-Module-Name: com.openexchange.ms

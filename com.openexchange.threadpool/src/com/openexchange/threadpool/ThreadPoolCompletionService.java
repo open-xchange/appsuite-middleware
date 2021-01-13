@@ -242,7 +242,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
      * @param f The queueing future task
      */
     protected void submitFutureTask(final FutureTask<V> f) {
-        Future<V> submitted = threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior);
+        Future<V> submitted = threadPoolService.submit(ThreadPools.task(f, null, trackable), behavior);
         numberOfSubmits.incrementAndGet();
         submittedFutures.add(submitted);
     }

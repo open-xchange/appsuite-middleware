@@ -100,3 +100,4 @@ Export-Package: com.openexchange.xing,
 Bundle-ClassPath: lib/signpost-1.2.1.2.jar,
  .
 Bundle-Activator: com.openexchange.xing.osgi.XingActivator
+Automatic-Module-Name: com.openexchange.xing

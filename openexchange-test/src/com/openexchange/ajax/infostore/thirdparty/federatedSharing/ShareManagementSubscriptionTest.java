@@ -47,8 +47,11 @@
  *
  */
 
-package com.openexchange.ajax.share.federated;
+package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.cleanInbox;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.clearAccountError;
+import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.prepareGuest;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNotNull;

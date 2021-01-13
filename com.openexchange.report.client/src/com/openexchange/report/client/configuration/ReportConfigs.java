@@ -49,6 +49,10 @@
 
 package com.openexchange.report.client.configuration;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -60,16 +64,12 @@ import java.util.HashMap;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.3
  */
-public class ReportConfigs implements Serializable{
+public class ReportConfigs implements Serializable {
 
     private static final String IS_CONFIG_TIMERANGE = "isConfigTimerange";
-
     private static final String CONSIDERED_TIMEFRAME_END = "consideredTimeframeEnd";
-
     private static final String CONSIDERED_TIMEFRAME_START = "consideredTimeframeStart";
-
     private static final String IS_SINGLE_DEPLOYMENT = "isSingleDeployment";
-
     private static final String TYPE = "type";
 
     /**
@@ -79,14 +79,15 @@ public class ReportConfigs implements Serializable{
 
     private HashMap<String, Object> attributeMap;
 
+    @SuppressWarnings("synthetic-access")
     private ReportConfigs(ReportConfigsBuilder builder) {
         super();
         this.attributeMap = new HashMap<>();
         this.attributeMap.put(TYPE, builder.type);
-        this.attributeMap.put(IS_SINGLE_DEPLOYMENT, builder.isSingleDeployment);
-        this.attributeMap.put(IS_CONFIG_TIMERANGE, builder.isConfigTimerange);
-        this.attributeMap.put(CONSIDERED_TIMEFRAME_START, builder.consideredTimeframeStart);
-        this.attributeMap.put(CONSIDERED_TIMEFRAME_END, builder.consideredTimeframeEnd);
+        this.attributeMap.put(IS_SINGLE_DEPLOYMENT, B(builder.isSingleDeployment));
+        this.attributeMap.put(IS_CONFIG_TIMERANGE, B(builder.isConfigTimerange));
+        this.attributeMap.put(CONSIDERED_TIMEFRAME_START, L(builder.consideredTimeframeStart));
+        this.attributeMap.put(CONSIDERED_TIMEFRAME_END, L(builder.consideredTimeframeEnd));
     }
 
     //--------------------Getters and Setters--------------------
@@ -96,19 +97,19 @@ public class ReportConfigs implements Serializable{
     }
 
     public boolean isSingleDeployment() {
-        return (boolean) this.attributeMap.get(IS_SINGLE_DEPLOYMENT);
+        return b(Boolean.class.cast(this.attributeMap.get(IS_SINGLE_DEPLOYMENT)));
     }
 
     public long getConsideredTimeframeStart() {
-        return (long) this.attributeMap.get(CONSIDERED_TIMEFRAME_START);
+        return l(Long.class.cast(this.attributeMap.get(CONSIDERED_TIMEFRAME_START)));
     }
 
     public long getConsideredTimeframeEnd() {
-        return (long) this.attributeMap.get(CONSIDERED_TIMEFRAME_END);
+        return l(Long.class.cast(this.attributeMap.get(CONSIDERED_TIMEFRAME_END)));
     }
 
     public boolean isConfigTimerange() {
-        return (boolean) this.attributeMap.get(IS_CONFIG_TIMERANGE);
+        return b(Boolean.class.cast(this.attributeMap.get(IS_CONFIG_TIMERANGE)));
     }
 
     public static class ReportConfigsBuilder {
@@ -143,6 +144,7 @@ public class ReportConfigs implements Serializable{
             return this;
         }
 
+        @SuppressWarnings("synthetic-access")
         public ReportConfigs build() {
             return new ReportConfigs(this);
         }

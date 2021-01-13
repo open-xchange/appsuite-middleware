@@ -31,3 +31,4 @@ Export-Package: com.openexchange.jslob,
  com.openexchange.jslob.shared,
  com.openexchange.jslob.storage,
  com.openexchange.jslob.storage.registry
+Automatic-Module-Name: com.openexchange.jslob

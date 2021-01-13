@@ -76,3 +76,4 @@ Import-Package: ch.qos.logback.classic,
  org.slf4j,
  org.slf4j.spi
 Bundle-Activator: com.openexchange.log.audit.slf4j.osgi.Slf4jAuditLogActivator
+Automatic-Module-Name: com.openexchange.log.audit.slf4j

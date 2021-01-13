@@ -55,13 +55,13 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.messaging.json.MessagingContentWriter;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 
-
 /**
  * {@link ContentWriterTracker}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContentWriterTracker extends ServiceTracker {
+public class ContentWriterTracker extends ServiceTracker<MessagingContentWriter, MessagingContentWriter> {
+
     private final MessagingMessageWriter writer;
 
     public ContentWriterTracker(final BundleContext context, final MessagingMessageWriter writer) {
@@ -70,15 +70,15 @@ public class ContentWriterTracker extends ServiceTracker {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final MessagingContentWriter writer = (MessagingContentWriter) super.addingService(reference);
+    public MessagingContentWriter addingService(final ServiceReference<MessagingContentWriter> reference) {
+        final MessagingContentWriter writer = super.addingService(reference);
         this.writer.addContentWriter(writer);
         return writer;
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        writer.removeContentWriter((MessagingContentWriter) service);
+    public void removedService(final ServiceReference<MessagingContentWriter> reference, final MessagingContentWriter service) {
+        writer.removeContentWriter(service);
         super.removedService(reference, service);
     }
 }

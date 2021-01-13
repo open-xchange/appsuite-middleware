@@ -58,6 +58,7 @@ import org.apache.cxf.interceptor.LoggingMessage;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class LoggingUtility {
 
     /**

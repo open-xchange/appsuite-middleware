@@ -61,3 +61,4 @@ Export-Package: com.sun.istack.internal,
  javax.swing.text.html,
  javax.swing.text.html.parser,
  javax.swing.tree
+Automatic-Module-Name: com.openexchange.system.extension

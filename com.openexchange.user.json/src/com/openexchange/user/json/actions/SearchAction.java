@@ -105,6 +105,7 @@ public final class SearchAction extends AbstractUserAction {
         super(services);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*

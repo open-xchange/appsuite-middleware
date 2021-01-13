@@ -63,8 +63,6 @@ public final class RetweetDetailsImpl implements RetweetDetails {
 
     private final twitter4j.Status retweetStatus;
 
-    private final long retweetCount;
-
     private User user;
 
     /**
@@ -76,7 +74,6 @@ public final class RetweetDetailsImpl implements RetweetDetails {
     public RetweetDetailsImpl(final Status retweetStatus, final long retweetCount) {
         super();
         this.retweetStatus = retweetStatus;
-        this.retweetCount = retweetCount;
     }
 
     public int getRateLimitLimit() {

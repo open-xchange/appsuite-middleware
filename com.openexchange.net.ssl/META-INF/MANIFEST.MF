@@ -41,3 +41,4 @@ Import-Package: com.google.common.annotations,
 Bundle-ClassPath: .
 Export-Package: com.openexchange.net.ssl,
  com.openexchange.net.ssl.exception
+Automatic-Module-Name: com.openexchange.net.ssl

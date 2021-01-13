@@ -104,7 +104,7 @@ public class ContentDispositionParser implements MessagingHeaderParser {
         headers.put(MimeContentDisposition.getContentDispositionName(), Arrays.asList((MessagingHeader) contentType));
     }
 
-    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final JSONObject value) throws OXException, JSONException {
+    private void parseObject(final Map<String, Collection<MessagingHeader>> headers, final JSONObject value) throws JSONException {
         final MimeContentDisposition contentType = new MimeContentDisposition();
         final JSONObject jsonCType = value;
         contentType.setDisposition(jsonCType.getString("type"));

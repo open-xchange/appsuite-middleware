@@ -41,3 +41,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Bundle-ClassPath: lib/freemarker-2.3.20.jar,
  .
+Automatic-Module-Name: com.openexchange.templating.impl

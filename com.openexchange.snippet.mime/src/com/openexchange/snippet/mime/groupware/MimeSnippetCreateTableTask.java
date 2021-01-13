@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
-import com.openexchange.snippet.mime.Services;
 
 /**
  * {@link MimeSnippetCreateTableTask}
@@ -136,13 +135,4 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
     public String[] tablesToCreate() {
         return new String[] { Tables.getSnippetTable() };
     }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (RuntimeException e) {
-            throw new OXException(e);
-        }
-    }
-
 }

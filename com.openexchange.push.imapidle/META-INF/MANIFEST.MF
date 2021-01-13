@@ -87,3 +87,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.push.imapidle.osgi.ImapIdleActivator
+Automatic-Module-Name: com.openexchange.push.imapidle

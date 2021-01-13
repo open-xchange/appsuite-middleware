@@ -52,7 +52,6 @@ public class SimpleJob implements Job {
      *             if there is an exception while executing the job.
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void execute(JobExecutionContext context)
         throws JobExecutionException {
 

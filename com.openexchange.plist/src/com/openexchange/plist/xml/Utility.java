@@ -49,17 +49,14 @@
 
 package com.openexchange.plist.xml;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang.time.FastDateFormat;
-import com.openexchange.java.Streams;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -133,24 +130,6 @@ public final class Utility {
 
         // Return result
         return s;
-    }
-
-    private static String toXML(String s) {
-        Formatter formatter = new Formatter();
-        try {
-            int len = s.length();
-            for (int i = 0; i < len; i = s.offsetByCodePoints(i, 1)) {
-                int c = s.codePointAt(i);
-                if (c < 32 || c > 126 || c == '&' || c == '<' || c == '>') {
-                    formatter.format("&#x%x;", I(c));
-                } else {
-                    formatter.format("%c", I(c));
-                }
-            }
-            return formatter.toString();
-        } finally {
-            Streams.close(formatter);
-        }
     }
 
     public static void writeTo(final boolean b, final String localName, final XMLStreamWriter writer) throws XMLStreamException {

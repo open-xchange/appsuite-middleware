@@ -59,6 +59,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SuppressWarnings("deprecation")
 public class MetricActivator extends HousekeepingActivator {
 
     /**

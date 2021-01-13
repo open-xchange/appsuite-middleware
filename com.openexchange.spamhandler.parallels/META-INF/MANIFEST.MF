@@ -35,3 +35,4 @@ Import-Package: com.openexchange.config,
  org.slf4j,
  org.w3c.dom,
  org.xml.sax
+Automatic-Module-Name: com.openexchange.spamhandler.parallels

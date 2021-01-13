@@ -150,6 +150,7 @@ public class DeprecatedLogstashSocketAppenderMBeanRegisterer implements ServiceT
             this.managementService = managementService;
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void bundleChanged(BundleEvent event) {
             if (BundleEvent.STARTED == event.getType() && "com.openexchange.java-commons.logback-extensions".equals(event.getBundle().getSymbolicName())) {

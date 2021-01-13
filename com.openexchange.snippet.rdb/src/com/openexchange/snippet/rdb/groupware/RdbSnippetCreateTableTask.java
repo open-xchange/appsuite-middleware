@@ -63,7 +63,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
-import com.openexchange.snippet.rdb.Services;
 
 /**
  * {@link RdbSnippetCreateTableTask}
@@ -158,13 +157,4 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     public String[] tablesToCreate() {
         return new String[] { Tables.getSnippetName(), RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetMiscName() };
     }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (RuntimeException e) {
-            throw new OXException(e);
-        }
-    }
-
 }
