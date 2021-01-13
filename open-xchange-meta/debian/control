@@ -140,3 +140,10 @@ Section: oldlibs
 Priority: extra
 Description: Empty transitional package.
  This package was discontinued and can be removed.
+
+Package: open-xchange-mobile-config
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package was discontinued and can be removed.
