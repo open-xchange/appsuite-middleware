@@ -99,11 +99,7 @@ public class OIDCSessionSsoProvider implements SessionSsoProvider {
         }
 
         Session session = OIDCTools.getSessionFromSessionCookie(sessionCookie, request);
-        if (session == null) {
-            return false;
-        }
-
-        return true;
+        return isSsoSession(session);
     }
 
 }

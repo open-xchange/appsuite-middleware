@@ -99,8 +99,11 @@ public class SAMLSessionSsoProvider implements SessionSsoProvider {
             return false;
         }
 
-        String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
-        return SAMLLoginTools.isValidSession(httpRequest, session, hash);
+        if (isSsoSession(session)) {
+            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+            return SAMLLoginTools.isValidSession(httpRequest, session, hash);
+        }
+        return false;
     }
 
 }
