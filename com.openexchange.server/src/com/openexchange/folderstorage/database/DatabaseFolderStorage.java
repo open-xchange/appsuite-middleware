@@ -294,6 +294,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
          */
     }
 
+    /**
+     * Clears possible remembered stamps for given context identifier.
+     *
+     * @param contextId The context identifier
+     */
+    public static void clearStampsFor(int contextId) {
+        STAMPS.remove(contextId);
+    }
+
     private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
     private static final long DELAY = 60 * 60 * 1000;
     private static final int MAX = 3;
