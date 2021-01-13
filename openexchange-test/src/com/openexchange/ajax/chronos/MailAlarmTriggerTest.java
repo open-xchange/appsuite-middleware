@@ -220,7 +220,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long delta = TimeUnit.SECONDS.toMillis(5);
         for (List<String> mail : mailResponse.getData()) {
             String subject = mail.get(2);
-            if ( subject != null && subject.contains(summary)) {
+            if (subject != null && subject.contains(summary)) {
                 if (mails == 0) {
                     Assert.fail("Mail found even though no mail should be sent out.");
                 }
@@ -233,8 +233,8 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                 found++;
                 boolean matchAnySentDate = false;
                 long closest = 0;
-                for(Long expectedSentDate : expectedSentDates) {
-                    if (Math.abs(sentDate - expectedSentDate.longValue()) <= delta){
+                for (Long expectedSentDate : expectedSentDates) {
+                    if (Math.abs(sentDate - expectedSentDate.longValue()) <= delta) {
                         matchAnySentDate = true;
                         break;
                     }
@@ -242,7 +242,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                         closest = Math.abs(sentDate - expectedSentDate.longValue());
                     }
                 }
-                Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+closest, matchAnySentDate);
+                Assert.assertTrue("Wrong sent date. Expected a maximal difference of " + delta + " but was " + closest, matchAnySentDate);
             }
         }
         if (mails == 0) {
