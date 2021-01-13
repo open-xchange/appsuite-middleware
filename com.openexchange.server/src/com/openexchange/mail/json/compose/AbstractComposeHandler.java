@@ -948,17 +948,19 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * Security settings
              */
             {
-                ServiceLookup services = MailJSONActivator.SERVICES.get();
-                CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
-                String authentication = null;
-                if (authenticationFactory != null) {
-                    AJAXRequestData request = composeRequest.getRequest();
-                    if (request != null) {
-                        authentication = authenticationFactory.createAuthenticationFrom(request);
-                    }
-                }
                 JSONObject jSecuritySettings = jMail.optJSONObject("security");
                 if (null != jSecuritySettings) {
+
+                    ServiceLookup services = MailJSONActivator.SERVICES.get();
+                    CryptographicServiceAuthenticationFactory authenticationFactory = null == services ? null : services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+                    String authentication = null;
+                    if (authenticationFactory != null) {
+                        AJAXRequestData request = composeRequest.getRequest();
+                        if (request != null) {
+                            authentication = authenticationFactory.createAuthenticationFrom(request);
+                        }
+                    }
+
                     SecuritySettings settings = SecuritySettings.builder()
                         .encrypt(jSecuritySettings.optBoolean("encrypt", false))
                         .pgpInline(jSecuritySettings.optBoolean("pgpInline", false))
