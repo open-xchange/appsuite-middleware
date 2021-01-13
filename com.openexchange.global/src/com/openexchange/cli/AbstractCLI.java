@@ -97,7 +97,10 @@ public abstract class AbstractCLI<R, C> {
             addOptions(options);
 
             // Check if help output is requested
-            helpRequested(args);
+            if (helpRequested(args)) {
+                printHelp(options);
+                System.exit(0);
+            }
 
             // Initialize command-line parser & parse arguments
             CommandLineParser parser = new DefaultParser();
@@ -143,22 +146,21 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
-     * Check if help output is requested
+     * Checks if help output is requested.
      *
-     * @param args The command line arguments
+     * @param args The command line arguments to examine
+     * @return <code>true</code> if help output is requested; otherwise <code>false</code>
      */
-    protected void helpRequested(String[] args) {
+    protected boolean helpRequested(String[] args) {
         if (args == null || args.length == 0) {
-            return;
+            return false;
         }
         for (String s : args) {
-            if (false == s.equals("-h") && false == s.equals("--help")) {
-                continue;
+            if ("-h".equals(s) || "--help".equals(s)) {
+                return true;
             }
-            printHelp(options);
-            System.exit(0);
-            return;
         }
+        return false;
     }
 
     /**
@@ -389,10 +391,10 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Gets the mandatory integer value for the specified option
-     * 
+     *
      * <p>Exits gracefully if <code>int</code> value is invalid or missing
      * (i.e. equals with the default value which should be dictated by the invoker).</p>
-     * 
+     *
      * @param opt The option name
      * @param defaultValue The default value
      * @param cmd The command line

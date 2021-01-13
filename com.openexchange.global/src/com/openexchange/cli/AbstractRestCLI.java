@@ -123,13 +123,13 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         try {
             // Option for help
             options.addOption(createSwitch("h", "help", "Prints this help text", false));
-            boolean requiresAdministrativePermission = optAdministrativeOptions();
+            boolean requiresAdministrativePermission = optAdministrativeOptions(args);
 
             // Add other options
             addOptions(options);
 
             // Check if help output is requested
-            if (showHelp(args)) {
+            if (helpRequested(args)) {
                 printHelp(options);
                 System.exit(0);
                 return null;
@@ -218,15 +218,6 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         return result;
     }
 
-    private boolean showHelp(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-h") || args[i].equals("--help")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     protected Builder getContext() {
         return executionContext;
@@ -286,11 +277,11 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
     /**
      * Returns <code>true</code> if basic auth shall be used.
-     * 
+     *
      * <p>
      * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
      * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
-     * 
+     *
      * @return <code>true</code> if basic auth shall be used; <code>false</code> otherwise
      */
     protected boolean useBasicAuth() {

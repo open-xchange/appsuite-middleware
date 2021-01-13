@@ -147,13 +147,18 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             options.addOption(createArgumentOption(null, "responsetimeout", "timeout", "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
 
             // Check if administrative permission is required and add the admin options if necessary
-            boolean requiresAdministrativePermission = optAdministrativeOptions();
+            boolean requiresAdministrativePermission = optAdministrativeOptions(args);
 
             // Add other options
             addOptions(options);
 
             // Check if help output is requested
-            helpRequested(args);
+            boolean helpRequested = helpRequested(args);
+            if (helpRequested) {
+                printHelp(options);
+                System.exit(0);
+                return null;
+            }
 
             // Initialize command-line parser & parse arguments
             CommandLineParser parser = new DefaultParser();

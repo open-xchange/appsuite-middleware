@@ -108,21 +108,21 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption(createArgumentOption("s", "password", "jmxPassword", "The optional JMX password (if JMX authentication is enabled)", false));
 
             // Check if administrative permission is required and add the admin options if necessary
-            boolean requiresAdministrativePermission = optAdministrativeOptions();
+            boolean requiresAdministrativePermission = optAdministrativeOptions(args);
 
             // Add other options
             addOptions(options);
 
-            // Initialize command-line parser & parse arguments
-            CommandLineParser parser = new DefaultParser();
-            CommandLine cmd = parser.parse(options, args);
-
             // Check if help output is requested
-            if (cmd.hasOption('h')) {
+            if (helpRequested(args)) {
                 printHelp(options);
                 System.exit(0);
                 return null;
             }
+
+            // Initialize command-line parser & parse arguments
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check for JMX host
             String host = cmd.getOptionValue('H', "localhost");
