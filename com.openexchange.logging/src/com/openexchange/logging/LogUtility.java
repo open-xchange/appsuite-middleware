@@ -182,7 +182,8 @@ public class LogUtility {
 
         @Override
         public String toString() {
-            return supplier.get().toString();
+            O stringForMe = supplier.get();
+            return stringForMe == null ? "null" : stringForMe.toString();
         }
     }
 
