@@ -3136,15 +3136,14 @@ public class IMAPProtocol extends Protocol {
 			);
 	args.writeAtom(msgSequence);
 
-	Response[] r;
-
-	if (charset == null) { // text is all US-ASCII
-        r = command("SEARCH", args);
-    } else {
-        r = command("SEARCH CHARSET " + charset, args);
-    }
-
 	while (true) {
+	    Response[] r;
+	    if (charset == null) { // text is all US-ASCII
+	        r = command("SEARCH", args);
+	    } else {
+	        r = command("SEARCH CHARSET " + charset, args);
+	    }
+
     	Response response = r[r.length-1];
     	int[] matches = null;
     	boolean contentChanged = false;
