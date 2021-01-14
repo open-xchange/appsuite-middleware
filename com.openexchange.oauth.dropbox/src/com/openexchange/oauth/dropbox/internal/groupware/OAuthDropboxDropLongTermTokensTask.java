@@ -79,7 +79,7 @@ public class OAuthDropboxDropLongTermTokensTask extends UpdateTaskAdapter {
         Connection writeConnection = params.getConnection();
         PreparedStatement statement = null;
         try {
-            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?");
+            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE serviceId = ?");
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");

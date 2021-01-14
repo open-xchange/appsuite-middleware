@@ -79,7 +79,7 @@ public class OAuthAddIdentityColumnTaskV2 extends AbstractOAuthUpdateTask {
         if (!Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_NAME)) {
             Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_NAME, "varchar(767)"));
         }
-        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
+        String indexName = Tools.existsIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_NAME });
         if (indexName != null) {
             Tools.dropIndex(connection, CreateOAuthAccountTable.TABLE_NAME, indexName);
         }
