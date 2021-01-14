@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.NamesOfExecutedTasks;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.java.Strings;
@@ -70,7 +71,7 @@ public class UpdateTaskSorter {
         super();
     }
 
-    public List<UpdateTaskV2> sort(String[] executed, List<UpdateTaskV2> toExecute) throws OXException {
+    public List<UpdateTaskV2> sort(NamesOfExecutedTasks executed, List<UpdateTaskV2> toExecute) throws OXException {
         List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>(toExecute.size());
         boolean found = true;
         while (!toExecute.isEmpty() && found) {
@@ -90,11 +91,24 @@ public class UpdateTaskSorter {
             }
         }
         if (!toExecute.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
             for (UpdateTaskV2 task : toExecute) {
-                OXException e = UpdateExceptionCodes.UNMET_DEPENDENCY.create(task.getClass().getName(), Strings.join(task.getDependencies(), ","));
+                sb.setLength(0);
+                for (String dependency : task.getDependencies()) {
+                    if (sb.length() > 0) {
+                        sb.append(',');
+                    }
+                    sb.append(dependency);
+                    if (executed.getSuccessfullyExecutedTasks().contains(dependency)) {
+                        sb.append(" (OK)");
+                    } else if (executed.getFailedExecutedTasks().contains(dependency)) {
+                        sb.append(" (FAILED)");
+                    }
+                }
+                OXException e = UpdateExceptionCodes.UNMET_DEPENDENCY.create(task.getClass().getName(), sb.toString());
                 org.slf4j.LoggerFactory.getLogger(UpdateTaskSorter.class).warn(e.getMessage());
             }
-            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed, ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
+            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed.getSuccessfullyExecutedTasks(), ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
         }
         return retval;
     }

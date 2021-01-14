@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Set;
+import com.openexchange.groupware.update.NamesOfExecutedTasks;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -58,26 +60,28 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class DependenciesResolvedChecker implements DependencyChecker {
 
+    /**
+     * Initializes a new {@link DependenciesResolvedChecker}.
+     */
     public DependenciesResolvedChecker() {
         super();
     }
 
     @Override
-    public boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute) {
+    public boolean check(UpdateTaskV2 task, NamesOfExecutedTasks executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute) {
         // Check all dependencies.
+        Set<String> successfullyExecutedTasks = executed.getSuccessfullyExecutedTasks();
         for (String dependency : task.getDependencies()) {
-            if (!dependencyFulfilled(dependency, executed, enqueued)) {
+            if (!dependencyFulfilled(dependency, successfullyExecutedTasks, enqueued)) {
                 return false;
             }
         }
         return true;
     }
 
-    boolean dependencyFulfilled(String dependency, String[] executed, UpdateTaskV2[] enqueued) {
-        for (String taskName : executed) {
-            if (taskName.equals(dependency)) {
-                return true;
-            }
+    private boolean dependencyFulfilled(String dependency, Set<String> successfullyExecuted, UpdateTaskV2[] enqueued) {
+        if (successfullyExecuted.contains(dependency)) {
+            return true;
         }
         for (UpdateTaskV2 task : enqueued) {
             if (task.getClass().getName().equals(dependency)) {
@@ -86,4 +90,5 @@ public class DependenciesResolvedChecker implements DependencyChecker {
         }
         return false;
     }
+
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import com.openexchange.groupware.update.NamesOfExecutedTasks;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -67,6 +68,6 @@ public interface DependencyChecker {
      * @param toExecute list of tasks that have to be executed.
      * @return <code>true</code> if the current task can be now scheduled for execution.
      */
-    boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute);
+    boolean check(UpdateTaskV2 task, NamesOfExecutedTasks executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute);
 
 }

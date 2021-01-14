@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.groupware.update.NamesOfExecutedTasks;
 import com.openexchange.groupware.update.SchemaUpdateState;
 
 /**
@@ -119,6 +120,11 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         executedTasks.addAll(successfullyExecutedTasks);
         executedTasks.addAll(failedExecutedTasks);
         return executedTasks.toArray(new String[executedTasks.size()]);
+    }
+
+    @Override
+    public NamesOfExecutedTasks getExecuted() {
+        return NamesOfExecutedTasks.builder().withSuccessfullyExecutedTasks(successfullyExecutedTasks).withFailedTasks(failedExecutedTasks).build();
     }
 
     void setBlockingUpdatesRunningSince(Date date) {

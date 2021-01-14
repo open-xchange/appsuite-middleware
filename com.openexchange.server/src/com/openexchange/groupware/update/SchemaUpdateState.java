@@ -78,18 +78,25 @@ public interface SchemaUpdateState extends Schema {
 
     /**
      * Gets the names of all updates tasks that have been executed on the schema.
-     * 
+     *
      * @return The executed update tasks on the schema, or an empty array if there are none
      */
     String[] getExecutedList();
 
     /**
      * Gets the names of all updates tasks that have been executed on the schema.
-     * 
+     *
      * @param successfulOnly <code>true</code> to only include those tasks that were executed successfully, <code>false</code> to include all executed tasks
      * @return The executed update tasks on the schema, or an empty array if there are none
      */
     String[] getExecutedList(boolean successfulOnly);
+
+    /**
+     * Gets the names of all updates tasks that have been executed on the schema.
+     *
+     * @return The result for executed update tasks on the schema
+     */
+    NamesOfExecutedTasks getExecuted();
 
     boolean backgroundUpdatesRunning();
 
