@@ -84,22 +84,35 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
     }
 
     /**
-     * Checks if the administrative options are mandatory, configuration based, or optional and adds them
-     * as command line options as such, i.e. as mandatory, optional or not at all.
+     * Checks if the administrative options are mandatory, configuration based, or optional and adds them as command line options as such,
+     * i.e. as mandatory, optional or not at all.
      *
-     * @return <code>true</code> if the administrative are required or configuration based; <code>false</code> otherwise
-     * @throws Exception
+     * @param args The optional command-line arguments
+     * @return <code>true</code> if the administrative options are required or configuration based; <code>false</code> otherwise
+     * @throws Exception If check for administrative options fails
      */
-    protected boolean optAdministrativeOptions() throws Exception {
+    protected boolean optAdministrativeOptions(String... args) throws Exception {
         Boolean requiresAdministrativePermission = requiresAdministrativePermission();
         if (requiresAdministrativePermission != null && false == requiresAdministrativePermission.booleanValue()) {
             return false;
         }
 
-        // If not null, requiresAdministrativePermission is set to Boolean.TRUE at this location
-        boolean mandatory = (requiresAdministrativePermission != null && isAuthEnabled(getAuthenticator()));
-        addAdministrativeOptions(options, mandatory);
-        return true;
+        // If not null, requiresAdministrativePermission is set to Boolean.TRUE
+        try {
+            boolean mandatory = (requiresAdministrativePermission != null && isAuthEnabled(getAuthenticator()));
+            addAdministrativeOptions(options, mandatory);
+            return true;
+        } catch (Exception e) {
+            boolean helpRequested = helpRequested(args);
+            if (helpRequested) {
+                // Assume administrative options are enabled for "--help" output
+                System.out.println("Note: usage output below might not be accurate due to encountered " + e.getClass().getName());
+                System.out.println();
+                addAdministrativeOptions(options, true);
+                return true;
+            }
+            throw e;
+        }
     }
 
     /**

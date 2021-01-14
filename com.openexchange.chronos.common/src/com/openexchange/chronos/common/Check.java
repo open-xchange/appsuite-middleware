@@ -417,6 +417,10 @@ public class Check {
         if (Strings.isEmpty(uri)) {
             throw CalendarExceptionCodes.INVALID_DATA.create(field, uri);
         }
+        if (uri.startsWith("tel:") && 4 < uri.length()) {
+            // allow any URI with "tel:" scheme
+            return uri;
+        }
         try {
             new URI(uri);
         } catch (URISyntaxException e) {

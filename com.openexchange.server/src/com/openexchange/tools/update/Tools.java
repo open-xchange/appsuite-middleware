@@ -710,6 +710,19 @@ public final class Tools {
     }
 
     /**
+     * Checks if specified column does <b>not</b> exist.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if specified column does <b>not</b> exist; otherwise <code>false</code> if existent
+     * @throws SQLException If an SQL error occurs
+     */
+    public static boolean columnNotExists(final Connection con, final String table, final String column) throws SQLException {
+        return columnExists(con, table, column) == false;
+    }
+
+    /**
      * Checks if specified column exists.
      *
      * @param con The connection

@@ -53,6 +53,7 @@ import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicSet;
@@ -64,10 +65,18 @@ import com.openexchange.groupware.update.internal.DynamicSet;
  */
 public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<UpdateTaskProviderService, UpdateTaskProviderService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskCustomizer.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskCustomizer.class);
+    }
 
     private final BundleContext context;
 
+    /**
+     * Initializes a new {@link UpdateTaskCustomizer}.
+     *
+     * @param context The bundle context
+     */
     public UpdateTaskCustomizer(final BundleContext context) {
         super();
         this.context = context;
@@ -82,7 +91,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
         boolean error = false;
         for (final UpdateTaskV2 task : collection) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
+                LoggerHolder.LOG.error("Update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
                 error = true;
                 break;
             }
@@ -120,4 +129,5 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
             }
         }
     }
+
 }

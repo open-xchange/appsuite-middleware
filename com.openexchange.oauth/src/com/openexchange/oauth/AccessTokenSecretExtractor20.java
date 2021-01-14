@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,65 +47,62 @@
  *
  */
 
-package com.openexchange.file.storage.oauth;
+package com.openexchange.oauth;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.extractors.AccessTokenExtractor;
+import org.scribe.model.Token;
+import org.scribe.utils.OAuthEncoder;
+import org.scribe.utils.Preconditions;
 
 /**
- * {@link OAuthFileStorageAccountEventHandler}
+ * {@link AccessTokenSecretExtractor20}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class OAuthFileStorageAccountEventHandler implements EventHandler {
+public class AccessTokenSecretExtractor20 implements AccessTokenExtractor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OAuthFileStorageAccountEventHandler.class);
+    /** The <code>"access_token": &lt;token&gt;</code> pattern */
+    private static final Pattern PATTERN_ACCESS_TOKEN = Pattern.compile("\"access_token\" *: *\"([^&\"]+)\"");
 
-    private final KnownApi api;
-    private final ServiceLookup services;
+    /** The <code>"refresh_token": &lt;token&gt;</code> pattern */
+    private static final Pattern PATTERN_REFRESH_TOKEN = Pattern.compile("\"refresh_token\" *: *\"([^&\"]+)\"");
+
+    /** The <code>"expires_in": &lt;number&gt;</code> pattern */
+    private static final Pattern PATTERN_EXPIRES = Pattern.compile("\"expires_in\" *: *([0-9]+)");
 
     /**
-     * Initialises a new {@link OAuthFileStorageAccountEventHandler}.
-     * 
-     * @param services The service lookup instance
-     * @param api the API
+     * Initializes a new {@link AccessTokenSecretExtractor20}.
      */
-    public OAuthFileStorageAccountEventHandler(ServiceLookup services, KnownApi api) {
+    public AccessTokenSecretExtractor20() {
         super();
-        this.services = services;
-        this.api = api;
     }
 
     @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            return;
+    public Token extract(String response) {
+        Preconditions.checkEmptyString(response, "Response body is incorrect. Can't extract a token from an empty string");
+
+        Matcher matcher = PATTERN_ACCESS_TOKEN.matcher(response);
+        if (false == matcher.find()) {
+            throw new OAuthException("Response body is incorrect. Can't extract a token from this: '" + response + "'", null);
         }
-        try {
-            Integer contextId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID));
-            if (null == contextId) {
-                return;
-            }
-            Integer userId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_USER_ID));
-            if (null == userId) {
-                return;
-            }
-            OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry registry = registryService.get(api.getServiceId());
-            if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
-                LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
-            }
-        } catch (Exception e) {
-            LOG.error("Error while handling SessionD event '{}'", topic, e);
+        String token = OAuthEncoder.decode(matcher.group(1));
+        String refreshToken = "";
+        Matcher refreshMatcher = PATTERN_REFRESH_TOKEN.matcher(response);
+        if (refreshMatcher.find()) {
+            refreshToken = OAuthEncoder.decode(refreshMatcher.group(1));
         }
+        Date expiry = null;
+        Matcher expiryMatcher = PATTERN_EXPIRES.matcher(response);
+        if (expiryMatcher.find()) {
+            int lifeTime = Integer.parseInt(OAuthEncoder.decode(expiryMatcher.group(1)));
+            expiry = new Date(System.currentTimeMillis() + lifeTime * 1000);
+        }
+        return new Token(token, refreshToken, expiry, response);
     }
+
 }

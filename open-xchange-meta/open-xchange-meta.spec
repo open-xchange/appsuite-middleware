@@ -18,6 +18,13 @@ Summary:        Open-Xchange Meta packages
 
 %define all_lang_backend open-xchange-l10n-de-de, open-xchange-l10n-cs-cz, open-xchange-l10n-es-es, open-xchange-l10n-hu-hu, open-xchange-l10n-it-it, open-xchange-l10n-ja-jp, open-xchange-l10n-lv-lv, open-xchange-l10n-nl-nl, open-xchange-l10n-pl-pl, open-xchange-l10n-sk-sk, open-xchange-l10n-zh-cn, open-xchange-l10n-zh-tw
 
+%description
+Open-Xchange Meta packages
+
+Authors:
+--------
+    Open-Xchange
+
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-appsuite-push
 Group:          Applications/Productivity
@@ -257,6 +264,7 @@ Authors:
     Open-Xchange
 
 # --- transitional packages --------------------------------------------------------------------------
+
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-linkedin
 Group:          Applications/Productivity
@@ -271,6 +279,7 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-calendar-printing
 Group:          Applications/Productivity
@@ -374,14 +383,21 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
-%description
-Open-Xchange Meta packages
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-mobile-config
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-mobile-config
+Empty transitional package. This package was discontinued and can be removed.
 
 Authors:
 --------
     Open-Xchange
 
-%prep
+# ----------------------------------------------------------------------------------------------------
+
+prep
 %setup -q
 
 %build
@@ -464,6 +480,9 @@ Authors:
 %defattr(-,root,root)
 
 %files -n open-xchange-dataretrieval
+%defattr(-,root,root)
+
+%files -n open-xchange-mobile-config
 %defattr(-,root,root)
 
 %changelog

@@ -72,6 +72,7 @@ public class TimeZoneMapping {
         .put("Central European Standard Time", "Europe/Warsaw")
         .put("Azores Standard Time", "Atlantic/Azores")
         .put("Arabic Standard Time", "Asia/Baghdad")
+        .put("Yukon Standard Time", "America/Whitehorse")
         .put("Samoa Standard Time", "Pacific/Apia")
         .put("SA Western Standard Time", "America/La_Paz")
         .put("Bahia Standard Time", "America/Bahia")
@@ -299,7 +300,7 @@ public class TimeZoneMapping {
     // @formatter:on
 
     /**
-     * 
+     *
      * Gets the olson timezone identifier for a given timezone identifier, checking all available mappings.
      *
      * @param timezoneId An arbitrary timezone identifier

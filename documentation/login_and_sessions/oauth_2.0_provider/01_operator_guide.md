@@ -56,8 +56,7 @@ Additionally, if you want to persist your data, you can use the following docker
 	      - "DB_PASSWORD=secret"
 	    ports:
 	      - 8085:8080
-    		restart: always
-
+    	restart: always
 
 Here a note, for our test setup a simple test user is sufficient to issue tokens. In order to allow interaction, a user must be registered who is also known to the AppSuite.
 In a real deployment, an appropriate [User Storage SPI](https://www.keycloak.org/docs/latest/server_development/index.html#_user-storage-spi) must be provided to look up users and validate credentials.
@@ -66,6 +65,12 @@ As an example a user can look like this.
 ![Keycloak User Screen](keycloak_user_screen.png "fig:Keycloak User Screen")
 
 After you have successfully created your test user, you must set a password for our test purpose under `Users > anton > Credentials` (e. g. `secret`).
+
+### Step 0 (optional): Create a realm
+
+First you can create a realm for your application or use the default realm. The examples in this document always use the 'demo' realm, but you can use whatever you choose. 
+Just be aware that the paths of the keycloak change depending on which realm you use. 
+
 
 ### Step 1: Configure Client
 
@@ -293,7 +298,7 @@ If HTTP Basic.Auth is supposed to be used for the token information request, thi
 	com.openexchange.oauth.provider.introspection.basicAuthEnabled = true
 
 	#Specifies the client identifier used as user name for HTTP Basic-Auth
-	com.openexchange.oauth.provider.introspection.clientID = OAuthShowcase
+	com.openexchange.oauth.provider.introspection.clientID = MyClient
 
 	#Specifies the client secret used as password for HTTP Basic-Auth
 	com.openexchange.oauth.provider.introspection.clientSecret = bef75a68-f3d8-499c-8c0a-65155de13dbb
@@ -348,7 +353,7 @@ Example configuration:
 	com.openexchange.oauth.provider.contextLookupClaim = email
 	com.openexchange.oauth.provider.userLookupClaim = email
 	com.openexchange.oauth.provider.introspection.endpoint = http://127.0.0.1:8085/auth/realms/demo/protocol/openid-connect/token/introspect
-	com.openexchange.oauth.provider.introspection.clientID = OAuthShowcase
+	com.openexchange.oauth.provider.introspection.clientID = MyClient
 	com.openexchange.oauth.provider.introspection.clientSecret = bef75a68-f3d8-499c-8c0a-65155de13dbb
 
 # Using the internal authorization server

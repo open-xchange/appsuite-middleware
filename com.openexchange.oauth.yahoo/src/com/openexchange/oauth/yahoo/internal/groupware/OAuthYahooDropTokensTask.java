@@ -58,7 +58,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 
 /**
  * {@link OAuthYahooDropTokensTask}
@@ -96,6 +95,6 @@ public class OAuthYahooDropTokensTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
+        return new String[] { "com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2" };
     }
 }

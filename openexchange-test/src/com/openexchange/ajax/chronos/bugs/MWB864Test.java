@@ -47,59 +47,57 @@
  *
  */
 
-package com.openexchange.oidc.impl;
+package com.openexchange.ajax.chronos.bugs;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.exception.OXException;
-import com.openexchange.oidc.tools.OIDCTools;
-import com.openexchange.session.Session;
-import com.openexchange.session.SessionSsoProvider;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import java.util.Collections;
+import java.util.TimeZone;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.testing.httpclient.models.Conference;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.time.TimeTools;
 
 /**
- * {@link OIDCSessionSsoProvider}
+ * {@link MWB864Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.10.3
+ * It's not possible to create appointment with conference with PIN
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.5
  */
-public class OIDCSessionSsoProvider implements SessionSsoProvider {
+public class MWB864Test extends AbstractChronosTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OIDCSessionSsoProvider.class);
-
-    /**
-     * Initializes a new {@link OIDCSessionSsoProvider}.
-     */
-    public OIDCSessionSsoProvider() {
-        super();
+    @Test
+    public void testCreateConference() throws Exception {
+        /*
+         * generate event with conference and tel: URI
+         */
+        String conferenceUri = "tel:+4995518738302,,503676#,,598377#";
+        TimeZone timeZone = TimeZone.getTimeZone("America/New_York");
+        EventData eventData = new EventData();
+        eventData.setFolder(folderId);
+        eventData.setSummary("MWB864Test");
+        eventData.setStartDate(DateTimeUtil.getDateTime(timeZone.getID(), TimeTools.D("Next monday at 10 am", timeZone).getTime()));
+        eventData.setEndDate(DateTimeUtil.getDateTime(timeZone.getID(), TimeTools.D("Next monday at 11 am", timeZone).getTime()));
+        Conference conference = new Conference();
+        conference.setUri(conferenceUri);
+        conference.setFeatures(Collections.singletonList("PHONE"));
+        conference.setLabel("Cloud PBX conference");
+        eventData.setConferences(Collections.singletonList(conference));
+        /*
+         * try and create event
+         */
+        EventData createdEvent = eventManager.createEvent(eventData, true);
+        /*
+         * reload event data and check stored conference
+         */
+        createdEvent = eventManager.getEvent(folderId, createdEvent.getId());
+        assertNotNull(createdEvent.getConferences());
+        assertEquals(1, createdEvent.getConferences().size());
+        Conference createdConference = createdEvent.getConferences().get(0);
+        assertEquals(conferenceUri, createdConference.getUri());
     }
-
-    @Override
-    public boolean isSsoSession(Session session) throws OXException {
-        return session != null && null != session.getParameter(OIDCTools.IDTOKEN);
-    }
-
-    @Override
-    public boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException {
-        LoginConfiguration loginConfiguration = LoginServlet.getLoginConfiguration();
-        if (loginConfiguration == null) {
-            LOG.warn("Cannot verify autologin request due to missing login configuration");
-            return false;
-        }
-
-        Cookie sessionCookie = OIDCTools.loadSessionCookie(request, loginConfiguration);
-        if (sessionCookie == null) {
-            return false;
-        }
-
-        Session session = OIDCTools.getSessionFromSessionCookie(sessionCookie, request);
-        return isSsoSession(session);
-    }
-
 }

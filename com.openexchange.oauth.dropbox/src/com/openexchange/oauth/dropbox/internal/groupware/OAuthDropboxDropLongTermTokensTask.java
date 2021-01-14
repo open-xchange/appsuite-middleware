@@ -47,61 +47,53 @@
  *
  */
 
-package com.openexchange.oauth.dropbox.osgi;
+package com.openexchange.oauth.dropbox.internal.groupware;
 
-import java.util.Arrays;
-import java.util.Collection;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropTokensTask;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.oauth.KnownApi;
 
 /**
- * {@link DatabaseUpdateTaskServiceTracker}
+ * {@link OAuthDropboxDropLongTermTokensTask} - Update task to drop all long-lived OAuth tokens of Dropbox OAuth accounts.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.5
  */
-public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
-
-    private final BundleContext bundleContext;
-
-    private ServiceRegistration<UpdateTaskProviderService> registration;
+public class OAuthDropboxDropLongTermTokensTask extends UpdateTaskAdapter {
 
     /**
-     * Initialises a new {@link DatabaseUpdateTaskServiceTracker}.
+     * Initialises a new {@link OAuthDropboxDropLongTermTokensTask}.
      */
-    public DatabaseUpdateTaskServiceTracker(BundleContext bundleContext) {
+    public OAuthDropboxDropLongTermTokensTask() {
         super();
-        this.bundleContext = bundleContext;
     }
 
     @Override
-    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
-        DatabaseService databaseService = bundleContext.getService(reference);
-        registration = bundleContext.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new OAuthDropboxDropTokensTask());
-            }
-
-        }, null);
-        return databaseService;
+    public void perform(PerformParameters params) throws OXException {
+        Connection writeConnection = params.getConnection();
+        PreparedStatement statement = null;
+        try {
+            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?");
+            int parameterIndex = 1;
+            statement.setString(parameterIndex++, "");
+            statement.setString(parameterIndex++, "");
+            statement.setString(parameterIndex++, KnownApi.DROPBOX.getServiceId());
+            statement.execute();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(statement);
+        }
     }
 
     @Override
-    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
-        // Nothing to do
-
-    }
-
-    @Override
-    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
-        registration.unregister();
-        bundleContext.ungetService(reference);
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.oauth.impl.internal.groupware.OAuthAddExpiryDateColumnTask" };
     }
 }

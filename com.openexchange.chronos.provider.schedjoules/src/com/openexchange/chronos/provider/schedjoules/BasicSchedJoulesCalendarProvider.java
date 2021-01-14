@@ -51,21 +51,21 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.B;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +75,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProviders;
+import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
@@ -211,9 +212,9 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         if (null != colorValue && String.class.isInstance(colorValue)) {
             internalConfig.putSafe(CommonCalendarConfigurationFields.COLOR, colorValue);
         }
-        Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
-        if (null != usedForSync && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync.booleanValue()));
+        Optional<UsedForSync> optUsedForSync = settings.getUsedForSync();
+        if (optUsedForSync.isPresent() && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(optUsedForSync.get().isUsedForSync()));
         }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
@@ -246,13 +247,14 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, settings.getName());
             changed = true;
         }
-        Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
-        if (usedForSync != null) {
-            if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || !Objects.equals(usedForSync, B(internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)))) {
-                if (usedForSync.booleanValue() && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
+        Optional<UsedForSync> optUsedForSync = settings.getUsedForSync();
+        if (optUsedForSync.isPresent()) {
+            boolean usedForSync = optUsedForSync.get().isUsedForSync();
+            if (!internalConfig.has(USED_FOR_SYNC_LITERAL) || usedForSync != internalConfig.optBoolean(USED_FOR_SYNC_LITERAL)) {
+                if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
                     throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
                 }
-                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync));
                 changed = true;
             }
         }

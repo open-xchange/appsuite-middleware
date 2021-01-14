@@ -50,7 +50,7 @@
 package com.openexchange.oauth;
 
 /**
- * {@link DefaultOAuthToken}
+ * {@link DefaultOAuthToken} - The default OAuth token implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -58,6 +58,7 @@ public class DefaultOAuthToken implements OAuthToken {
 
     private String token;
     private String secret;
+    private long expiry;
 
     /**
      * Initializes a new {@link DefaultOAuthToken}.
@@ -71,11 +72,13 @@ public class DefaultOAuthToken implements OAuthToken {
      *
      * @param token The token string
      * @param secret The secret string
+     * @param expiry The expiration time stamp
      */
-    public DefaultOAuthToken(final String token, final String secret) {
+    public DefaultOAuthToken(final String token, final String secret, long expiry) {
         super();
         this.token = token;
         this.secret = secret;
+        this.expiry = expiry;
     }
 
     @Override
@@ -86,6 +89,11 @@ public class DefaultOAuthToken implements OAuthToken {
     @Override
     public String getSecret() {
         return secret;
+    }
+
+    @Override
+    public long getExpiration() {
+        return expiry;
     }
 
     /**
@@ -104,5 +112,14 @@ public class DefaultOAuthToken implements OAuthToken {
      */
     public void setSecret(final String secret) {
         this.secret = secret;
+    }
+
+    /**
+     * Sets the expiration time stamp
+     *
+     * @param expiry The expiration time stamp to set
+     */
+    public void setExpiration(long expiry) {
+        this.expiry = expiry;
     }
 }

@@ -67,10 +67,12 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.FindActiveFacet;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteBody;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteData;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteResponse;
@@ -202,6 +204,11 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         FindAutoCompleteBody body = new FindAutoCompleteBody();
         body.setPrefix("*"); // Check all users
         body.setOptions(options);
+
+        // only check users in the global address book
+        FindActiveFacet facet = new FindActiveFacet();
+        facet.facet("folder").value(FolderStorage.GLOBAL_ADDRESS_BOOK_ID);
+        body.addFacetsItem(facet);
 
         FindAutoCompleteResponse response = findApi.doAutoComplete(CONTACTS_MODULE, body, RESULTS_LIMIT);
         FindAutoCompleteData data = response.getData();

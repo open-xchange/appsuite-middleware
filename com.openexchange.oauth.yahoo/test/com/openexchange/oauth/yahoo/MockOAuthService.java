@@ -142,6 +142,11 @@ public class MockOAuthService implements OAuthService {
                 // TODO Auto-generated method stub
                 return null;
             }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
+            }
 
         };
     }

@@ -2399,7 +2399,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                return contact.containsFolderId() ? contact.getFolderId() : contact.containsParentFolderID() ? String.valueOf(contact.getParentFolderID()) : null;
+                return contact.containsFolderId() ? contact.getFolderId() : (contact.containsParentFolderID() ? Integer.toString(contact.getParentFolderID()) : null);
             }
 
             @Override
