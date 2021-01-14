@@ -62,6 +62,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
@@ -371,7 +372,7 @@ public final class UpdateExecutor {
         DependenciesResolvedChecker checker = new DependenciesResolvedChecker();
         String[] executedTasks = state.getExecutedList(true);
         for (String dependency : dependencies) {
-            if (checker.dependencyFulfilled(dependency, executedTasks, new UpdateTaskV2[0])) {
+            if (checker.dependencyFulfilled(dependency, ImmutableSet.copyOf(executedTasks), new UpdateTaskV2[0])) {
                 continue;
             }
             Exception cause = null;

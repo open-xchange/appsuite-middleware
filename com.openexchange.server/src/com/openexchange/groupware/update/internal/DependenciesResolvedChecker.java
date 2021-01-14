@@ -79,7 +79,15 @@ public class DependenciesResolvedChecker implements DependencyChecker {
         return true;
     }
 
-    private boolean dependencyFulfilled(String dependency, Set<String> successfullyExecuted, UpdateTaskV2[] enqueued) {
+    /**
+     * Checks if given dependency is fulfilled.
+     *
+     * @param dependency The name of the update task that is considered as dependency
+     * @param successfullyExecuted The names of successfully executed update tasks
+     * @param enqueued Currently enqueued updat tasks
+     * @return <code>true</code> if fulfilled; otherwise <code>false</code>
+     */
+    boolean dependencyFulfilled(String dependency, Set<String> successfullyExecuted, UpdateTaskV2[] enqueued) {
         if (successfullyExecuted.contains(dependency)) {
             return true;
         }
