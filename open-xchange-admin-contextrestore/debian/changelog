@@ -1,3 +1,9 @@
+open-xchange-admin-contextrestore (7.10.5-3) stable; urgency=medium
+
+  * First candidate for 7.10.5 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 15 Jan 2021 12:44:24 +0000
+
 open-xchange-admin-contextrestore (7.10.5-2) stable; urgency=medium
 
   * Second preview of 7.10.5 release

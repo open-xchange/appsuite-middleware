@@ -1,3 +1,9 @@
+open-xchange-mail-categories (7.10.5-3) stable; urgency=medium
+
+  * First candidate for 7.10.5 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 15 Jan 2021 12:45:31 +0000
+
 open-xchange-mail-categories (7.10.5-2) stable; urgency=medium
 
   * Second preview of 7.10.5 release
