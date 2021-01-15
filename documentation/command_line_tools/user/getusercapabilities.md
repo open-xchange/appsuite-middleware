@@ -26,7 +26,7 @@ This command line tool lists available capabilities for a certain user.
 : Id of the user.
 
 **-u**, *--username* *username*
-: Username ofthe user.
+: Username of the user.
 
 **-A**, **--adminuser** *contextAdmin*
 : Context admin user name for authentication. Optional, depending on your configuration.
