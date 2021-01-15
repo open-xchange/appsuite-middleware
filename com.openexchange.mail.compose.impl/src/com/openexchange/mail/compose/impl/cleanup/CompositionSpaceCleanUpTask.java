@@ -559,6 +559,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
     private static final byte[] LOCK_UUID_BYTES = UUIDs.toByteArray(UUIDs.fromUnformattedString("753f4fe1b7b24f39bcda244fac53060f"));
 
     private boolean acquireCleanUpTaskLockForSchema(int representativeContextId, DatabaseService databaseService) throws OXException {
+        boolean modified = false;
         PreparedStatement stmt = null;
         Connection writeCon = databaseService.getWritable(representativeContextId);
         try {
@@ -568,7 +569,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
             stmt.setInt(3, 1);
             stmt.setLong(4, 0L);
             try {
-                stmt.executeUpdate();
+                modified = stmt.executeUpdate() > 0;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                     return false;
@@ -580,22 +581,32 @@ public class CompositionSpaceCleanUpTask implements Runnable {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            databaseService.backWritable(representativeContextId, writeCon);
+            if (modified) {
+                databaseService.backWritable(representativeContextId, writeCon);
+            } else {
+                databaseService.backWritableAfterReading(representativeContextId, writeCon);
+            }
         }
     }
 
     private boolean releaseCleanUpTaskLockForSchema(int representativeContextId, DatabaseService databaseService) throws OXException {
+        boolean modified = false;
         PreparedStatement stmt = null;
         Connection writeCon = databaseService.getWritable(representativeContextId);
         try {
             stmt = writeCon.prepareStatement("DELETE FROM compositionSpace WHERE uuid=?");
             stmt.setBytes(1, LOCK_UUID_BYTES);
-            return stmt.executeUpdate() > 0;
+            modified = stmt.executeUpdate() > 0;
+            return modified;
         } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            databaseService.backWritable(representativeContextId, writeCon);
+            if (modified) {
+                databaseService.backWritable(representativeContextId, writeCon);
+            } else {
+                databaseService.backWritableAfterReading(representativeContextId, writeCon);
+            }
         }
     }
 
