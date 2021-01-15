@@ -239,12 +239,16 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
     public int fixOrphanedEntries(List<Integer> filestoreIds) throws RemoteException {
         int fixed = 0;
         try {
+            DataExportStorageService storageService = Services.requireService(DataExportStorageService.class);
+            if (storageService.hasRunningDataExportTasks()) {
+                throw new RemoteException("Detected currently running data export tasks. Please retry when there are currently no running tasks.");
+            }
+
             for (Map.Entry<String, FileStorageAndId> entry : getOrphanedFileStoreLocations_(filestoreIds).entrySet()) {
                 entry.getValue().fileStorage.deleteFile(entry.getKey());
                 fixed++;
             }
 
-            DataExportStorageService storageService = Services.requireService(DataExportStorageService.class);
             for (Pair<DataExportTask, DataExportWorkItem> pair : getOrphanedWorkItems_()) {
                 DataExportTask task = pair.getLeft();
                 DataExportWorkItem workItem = pair.getRight();
