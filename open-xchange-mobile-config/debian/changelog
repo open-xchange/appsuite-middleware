@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.6.3-57) stable; urgency=medium
+
+  * Build for patch 2021-01-15 (5932)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 12 Jan 2021 09:19:47 +0000
+
 open-xchange-mobile-config (7.6.3-56) stable; urgency=medium
 
   * Build for patch 2020-11-23 (5916)
