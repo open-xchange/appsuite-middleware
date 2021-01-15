@@ -162,6 +162,15 @@ public class DataExportCleanUpTask implements Runnable {
             return;
         }
 
+        Boolean hasRunningTasks = checkForRunningDataExportTasks();
+        if (hasRunningTasks == null) {
+            // Check failed and has already been logged
+            return;
+        } else if (hasRunningTasks.booleanValue()) {
+            LOG.info("Detected currently running data export tasks. Aborting clean-up run...");
+            return;
+        }
+
         boolean acquired = false;
         Thread currentThread = Thread.currentThread();
         String prevName = currentThread.getName();
@@ -189,12 +198,21 @@ public class DataExportCleanUpTask implements Runnable {
             LOG.info("Data export clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.warn("Failed to delete orphaned data export files", t);
+            LOG.warn("Failed clean-up run for data exports", t);
         } finally {
             if (acquired) {
                 releaseCleanUpTaskLockSafe(databaseService);
             }
             currentThread.setName(prevName);
+        }
+    }
+
+    private Boolean checkForRunningDataExportTasks() {
+        try {
+            return Boolean.valueOf(dataExportService.hasRunningDataExportTasks());
+        } catch (Exception e) {
+            LOG.warn("Failed to check for running data export tasks. Assuming there are running tasks for safety's sake and therefore aborting clean-up run...", e);
+            return null;
         }
     }
 
@@ -482,6 +500,7 @@ public class DataExportCleanUpTask implements Runnable {
     private static final int LOCK_ID = 1496146671;
 
     private boolean acquireCleanUpTaskLock(DatabaseService databaseService) throws OXException {
+        boolean modified = false;
         PreparedStatement stmt = null;
         Connection writeCon = databaseService.getWritable();
         try {
@@ -489,7 +508,7 @@ public class DataExportCleanUpTask implements Runnable {
             stmt.setInt(1, LOCK_ID);
             stmt.setString(2, "LOCKED");
             try {
-                stmt.executeUpdate();
+                modified = stmt.executeUpdate() > 0;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                     return false;
@@ -501,7 +520,11 @@ public class DataExportCleanUpTask implements Runnable {
             throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            databaseService.backWritable(writeCon);
+            if (modified) {
+                databaseService.backWritable(writeCon);
+            } else {
+                databaseService.backWritableAfterReading(writeCon);
+            }
         }
     }
 
@@ -514,17 +537,23 @@ public class DataExportCleanUpTask implements Runnable {
     }
 
     private boolean releaseCleanUpTaskLock(DatabaseService databaseService) throws OXException {
+        boolean modified = false;
         PreparedStatement stmt = null;
         Connection writeCon = databaseService.getWritable();
         try {
             stmt = writeCon.prepareStatement("DELETE FROM reason_text WHERE id=?");
             stmt.setInt(1, LOCK_ID);
-            return stmt.executeUpdate() > 0;
+            modified = stmt.executeUpdate() > 0;
+            return modified;
         } catch (SQLException e) {
             throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            databaseService.backWritable(writeCon);
+            if (modified) {
+                databaseService.backWritable(writeCon);
+            } else {
+                databaseService.backWritableAfterReading(writeCon);
+            }
         }
     }
 

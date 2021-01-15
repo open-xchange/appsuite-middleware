@@ -259,6 +259,16 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     @Override
+    public List<DataExportTask> getRunningDataExportTasks() throws OXException {
+        return storageService.getRunningDataExportTasks();
+    }
+
+    @Override
+    public boolean hasRunningDataExportTasks() throws OXException {
+        return storageService.hasRunningDataExportTasks();
+    }
+
+    @Override
     public List<DataExportTask> getDataExportTasks(boolean checkValidity) throws OXException {
         if (checkValidity == false) {
             return storageService.getDataExportTasks();

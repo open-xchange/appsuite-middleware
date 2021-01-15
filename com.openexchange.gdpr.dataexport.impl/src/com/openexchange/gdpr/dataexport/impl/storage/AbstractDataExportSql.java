@@ -307,6 +307,92 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     /**
+     * Gets all data export tasks that are currently considered as running.
+     *
+     * @return The running data export tasks
+     * @throws OXException If running data export tasks cannot be returned
+     */
+    List<DataExportTask> selectRunningDataExportTasks() throws OXException {
+        List<DataExportTask> tasks = null;
+        long now = System.currentTimeMillis();
+        long expirationThreshold = now - config.getExpirationTimeMillis();
+
+        for (R schemaReference : getSchemaReferences()) {
+            Connection connection = getReadOnly(schemaReference);
+            try {
+                if (tableExists(connection, connection.getCatalog())) {
+                    try (PreparedStatement stmt = connection.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp")) {
+                        stmt.setString(1, DataExportStatus.PAUSED.toString());
+                        stmt.setString(2, DataExportStatus.PENDING.toString());
+                        stmt.setString(3, DataExportStatus.RUNNING.toString());
+                        stmt.setLong(4, expirationThreshold);
+                        try (ResultSet rs = stmt.executeQuery()) {
+                            if (rs.next()) {
+                                if (tasks == null) {
+                                    tasks = new ArrayList<>();
+                                }
+                                do {
+                                    DataExportTask task = parsetTask(rs);
+                                    task.setWorkItems(selectWorkItems(task.getId(), connection));
+                                    List<DataExportResultFile> resultFiles = selectResultFiles(task.getId(), connection);
+                                    if (resultFiles != null && !resultFiles.isEmpty()) {
+                                        task.setResultFiles(resultFiles);
+                                    }
+                                    tasks.add(task);
+                                } while (rs.next());
+                            }
+                        }
+                    }
+                }
+            } catch (OXException e) {
+                handleOXException(e);
+            } catch (SQLException e) {
+                throw handleException(e);
+            } finally {
+                backReadOnly(schemaReference, connection);
+            }
+        }
+        return tasks == null ? Collections.emptyList() : tasks;
+    }
+
+    /**
+     * Checks if there are data export tasks that are currently considered as running.
+     *
+     * @return <code>true</code> if there are such data export tasks; otherwise <code>false</code>
+     * @throws OXException If check for running data export tasks fails
+     */
+    boolean hasRunningDataExportTasks() throws OXException {
+        long now = System.currentTimeMillis();
+        long expirationThreshold = now - config.getExpirationTimeMillis();
+
+        for (R schemaReference : getSchemaReferences()) {
+            Connection connection = getReadOnly(schemaReference);
+            try {
+                if (tableExists(connection, connection.getCatalog())) {
+                    try (PreparedStatement stmt = connection.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp LIMIT 1")) {
+                        stmt.setString(1, DataExportStatus.PAUSED.toString());
+                        stmt.setString(2, DataExportStatus.PENDING.toString());
+                        stmt.setString(3, DataExportStatus.RUNNING.toString());
+                        stmt.setLong(4, expirationThreshold);
+                        try (ResultSet rs = stmt.executeQuery()) {
+                            if (rs.next()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            } catch (OXException e) {
+                handleOXException(e);
+            } catch (SQLException e) {
+                throw handleException(e);
+            } finally {
+                backReadOnly(schemaReference, connection);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Deletes all completed or aborted tasks of all contexts and checks for tasks with pending notification.
      *
      * @return A List of Tasks
@@ -1227,9 +1313,8 @@ public abstract class AbstractDataExportSql<R> {
         // Iterate schemas
         Collection<R> schemaReferences = getSchemaReferences();
         for (R schemaReference : schemaReferences) {
-            Connection con = null;
+            Connection con = getReadOnly(schemaReference);
             try {
-                con = getReadOnly(schemaReference);
                 if (tableExists(con, con.getCatalog())) {
                     try (PreparedStatement stmt = con.prepareStatement("SELECT uuid, cid, user, timestamp FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp ASC LIMIT 1")) {
                         stmt.setString(1, DataExportStatus.PAUSED.toString());
