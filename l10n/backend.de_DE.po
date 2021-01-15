@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-08-19 15:28+0200\n"
+"PO-Revision-Date: 2021-01-15 11:22+0100\n"
 "Last-Translator: Harald Petry <harald.petry@open-xchange.com>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -3444,6 +3444,8 @@ msgid ""
 "The account name is too long. Please limit the account name to a maximum of "
 "%1$s characters."
 msgstr ""
+"Der Kontoname ist zu lang. Bitte beschränken Sie den Kontonamen auf maximal "
+"%1$s Zeichen."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4633,21 +4635,21 @@ msgstr ""
 #. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
-#, fuzzy
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d "
 "characters."
-msgstr "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d lang sein."
+msgstr ""
+"Ungültige Passwortlänge. Das Passwort muss mindestens %1$d Zeichen lang sein."
 
 #. *
 #. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
-#, fuzzy
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d "
 "characters."
-msgstr "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d lang sein."
+msgstr ""
+"Ungültige Passwortlänge. Das Passwort darf höchstens %1$d Zeichen lang sein."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -12725,9 +12727,9 @@ msgstr "Das Signaturbild überschreitet die maximal zulässige Größe von '%1$s
 
 #. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
-#, fuzzy
 msgid "The signature size exceeds the maximum allowed size of '%1$s'."
-msgstr "Das Signaturbild überschreitet die maximal zulässige Größe von '%1$s'."
+msgstr ""
+"Die Signaturgröße überschreitet die maximal zulässige Größe von '%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
