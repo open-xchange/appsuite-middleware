@@ -117,13 +117,13 @@ systemctl restart mysql
 
 # Configure your OX
 ## Copy the certificates
-Before we can configure the OX Middleware we need to copy some certificates. For the rest of the guide we assume the certificates were copied to `/opt/openexchange/etc/ssl/database`.
+Before we can configure the OX Middleware we need to copy some certificates. For the rest of the guide we assume the certificates were copied to `/opt/open-xchange/etc/ssl/database`.
 
 For a two way authentication we need 
 
 * ca-cert.pem
 * client-cert.pem
-* client-key-pem
+* client-key.pem
 
 Note: You can generate the certificates on the client, too, but keep in mind to use the same CA certificate. If you don't, your connections will fail with a generic `CommunicationLinkFailure`.
 
@@ -131,8 +131,8 @@ Note: You can generate the certificates on the client, too, but keep in mind to 
 Before you configure the Middleware to use SSL you should test if the configuration. Therefore run e.g.:
 
 ```
-mysql -uopenexchange -p -h10.50.0.170 --ssl-mode=VERIFY_CA --ssl-ca=/opt/openexchange/etc/ssl/database/ca-cert.pem --ssl-cert=/opt/openexchange/etc/ssl/database/client-cert.pem \
-      --ssl-key=/opt/openexchange/etc/ssl/database/client-key.pem
+mysql -uopenexchange -p -h10.50.0.170 --ssl-mode=VERIFY_CA --ssl-ca=/opt/open-xchange/etc/ssl/database/ca-cert.pem --ssl-cert=/opt/open-xchange/etc/ssl/database/client-cert.pem \
+      --ssl-key=/opt/open-xchange/etc/ssl/database/client-key.pem
 ```
 
 It is possible to use a connection without client certificates, too:
@@ -149,7 +149,7 @@ The JDBC connector uses Java KeyStore to manage the different certificates. Ther
 * A keystore file for the client certificate
 
 ```
-# Change to dir beforehand (cd /opt/openexchange/etc/ssl)
+# Change to dir beforehand (cd /opt/open-xchange/etc/ssl/database)
 keytool -importcert -alias MySQLCACert -file ca-cert.pem -keystore truststore -storepass changeit
 openssl pkcs12 -export -in client-cert.pem -inkey client-key.pem -name "mysqlclient" -passout pass:changeit -out client-keystore.p12
 keytool -importkeystore -srckeystore client-keystore.p12 -srcstoretype pkcs12 -srcstorepass changeit -destkeystore keystore -deststoretype JKS -deststorepass changeit
@@ -189,7 +189,7 @@ com.mysql.jdbc:
 In the step above we have created an PKCS#12 key store. This can be used instead of the JKS store, too:
 
 ```
-clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/client-keystore.p12
+clientCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/database/client-keystore.p12
 clientCertificateKeyStorePassword: changeit
 clientCertificateKeyStoreType: PKCS12
 ```
