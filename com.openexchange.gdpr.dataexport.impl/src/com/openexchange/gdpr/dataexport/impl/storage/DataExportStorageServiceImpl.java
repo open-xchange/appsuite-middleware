@@ -111,6 +111,16 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
     }
 
     @Override
+    public List<DataExportTask> getRunningDataExportTasks() throws OXException {
+        return sql.selectRunningDataExportTasks();
+    }
+
+    @Override
+    public boolean hasRunningDataExportTasks() throws OXException {
+        return sql.hasRunningDataExportTasks();
+    }
+
+    @Override
     public List<DataExportTaskInfo> deleteCompletedOrAbortedTasksAndGetTasksWithPendingNotification() throws OXException {
         return sql.deleteCompletedOrAbortedTasksAndGetTasksWithPendingNotification();
     }
