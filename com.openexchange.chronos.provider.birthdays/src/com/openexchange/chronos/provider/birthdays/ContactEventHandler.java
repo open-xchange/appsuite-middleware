@@ -234,7 +234,7 @@ public class ContactEventHandler implements EventHandler {
         services.getService(CalendarEventNotificationService.class).notifyHandlers(event);
     }
 
-    private CalendarEvent getEvent(EventType type, Context context, CalendarAccount account, com.openexchange.chronos.Event original, com.openexchange.chronos.Event updated) throws OXException {
+    private CalendarEvent getEvent(EventType type, Context context, CalendarAccount account, com.openexchange.chronos.Event original, com.openexchange.chronos.Event updated) {
         List<CreateResult> creations = null;
         List<UpdateResult> updates = null;
         List<DeleteResult> deletions = null;

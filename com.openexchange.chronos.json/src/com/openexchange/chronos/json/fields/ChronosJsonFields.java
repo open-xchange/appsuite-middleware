@@ -58,6 +58,7 @@ import com.openexchange.chronos.json.converter.mapper.EventMapper;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
+@SuppressWarnings("hiding")
 public class ChronosJsonFields {
 
     /**

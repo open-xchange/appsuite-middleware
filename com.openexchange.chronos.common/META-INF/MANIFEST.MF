@@ -36,3 +36,4 @@ Export-Package: com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset
+Automatic-Module-Name: com.openexchange.chronos.common

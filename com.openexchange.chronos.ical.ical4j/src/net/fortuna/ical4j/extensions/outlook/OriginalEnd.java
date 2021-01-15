@@ -43,6 +43,7 @@ import net.fortuna.ical4j.model.property.DateProperty;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class OriginalEnd extends DateProperty {
 
     private static final long serialVersionUID = -4581216613476177094L;
@@ -81,10 +82,12 @@ public class OriginalEnd extends DateProperty {
         
         private static final long serialVersionUID = 596282786680252116L;
 
+        @Override
         public Property createProperty(String name) {
             return new OriginalEnd(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) throws ParseException {
             OriginalEnd property = new OriginalEnd(parameters, this, value);
             return property;

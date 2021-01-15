@@ -121,11 +121,11 @@ public class RecurrencePositionTest {
         /*
          * test all-day appointments
          */
-        testAllDay(timeZone);
-        testAllDayTwoDays(timeZone);
+        testAllDay();
+        testAllDayTwoDays();
     }
 
-    private void testAllDay(TimeZone timeZone) throws Exception {
+    private void testAllDay() throws Exception {
         /*
          * prepare all day event series
          */
@@ -147,7 +147,7 @@ public class RecurrencePositionTest {
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
-    private void testAllDayTwoDays(TimeZone timeZone) throws Exception {
+    private void testAllDayTwoDays() throws Exception {
         /*
          * prepare all day event series
          */
@@ -279,7 +279,7 @@ public class RecurrencePositionTest {
         assertEquals(datePosition, Event2Appointment.getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getValue())));
     }
 
-    private Event getEventSeries(String rrule, TimeZone timeZone, String start, String end) throws Exception {
+    private Event getEventSeries(String rrule, TimeZone timeZone, String start, String end) {
         Event event = new Event();
         event.setRecurrenceRule(rrule);
         event.setSummary("RecurrencePositionTest");
@@ -288,7 +288,7 @@ public class RecurrencePositionTest {
         return event;
     }
 
-    private Event getAllDayEventSeries(String rrule, String start, String end) throws Exception {
+    private Event getAllDayEventSeries(String rrule, String start, String end) {
         Event event = new Event();
         event.setRecurrenceRule(rrule);
         event.setSummary("RecurrencePositionTest");

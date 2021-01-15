@@ -38,3 +38,4 @@ Export-Package: com.openexchange.chronos,
  org.dmfs.rfc5545.calendarmetrics
 Bundle-ClassPath: .,
  lib/rfc5545-datetime-0.2.4.jar
+Automatic-Module-Name: com.openexchange.chronos

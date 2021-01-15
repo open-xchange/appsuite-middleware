@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -225,6 +226,7 @@ public class AttendeeDescriptionTest extends AbstractDescriptionTest {
         descriptionMessage = ADD_MESSAGE[0];
 
         Description description = describer.describe(eventUpdate);
+        assertNotNull(description);
         testDescription(description);
         assertThat("Not matching size", I(description.getSentences().size()), is((I(multipeAttendees.size()))));
 
@@ -240,6 +242,7 @@ public class AttendeeDescriptionTest extends AbstractDescriptionTest {
         descriptionMessage = ADD_MESSAGE[0];
 
         Description description = describer.describe(eventUpdate);
+        assertNotNull(description);
         testDescription(description);
         assertThat("Not matching size", I(description.getSentences().size()), is((I(multipeAttendeesWithExternal.size()))));
 

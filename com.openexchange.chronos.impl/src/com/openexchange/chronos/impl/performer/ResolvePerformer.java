@@ -479,7 +479,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * @return A new list of the event's attendees, with possibly injected data from other event copies, or the original attendee list if not applicable
      * @see CalendarConfig#isLookupPeerAttendeesForSameMailDomainOnly()
      */
-    public List<Attendee> resolveFromAttendeeCopies(Event event, CalendarFolder folder) throws OXException {
+    public List<Attendee> resolveFromAttendeeCopies(Event event, CalendarFolder folder) {
         if (null == event.getAttendees()) {
             return null;
         }

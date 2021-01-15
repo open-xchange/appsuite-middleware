@@ -29,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package net.fortuna.ical4j.extensions.property;
 
 import net.fortuna.ical4j.model.Parameter;
@@ -42,16 +43,17 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class WrCalName extends Property {
 
     private static final long serialVersionUID = 3529181417508181637L;
 
     public static final String PROPERTY_NAME = "X-WR-CALNAME";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -73,7 +75,7 @@ public class WrCalName extends Property {
      */
     @Override
     public void setValue(String aValue) {
-        this.value = aValue;
+        value = aValue;
     }
 
     /**
@@ -81,8 +83,7 @@ public class WrCalName extends Property {
      */
     @Override
     public void validate() throws ValidationException {
-        ParameterValidator.getInstance().assertOneOrLess(Parameter.VALUE,
-                getParameters());
+        ParameterValidator.getInstance().assertOneOrLess(Parameter.VALUE, getParameters());
     }
 
     /**
@@ -100,15 +101,17 @@ public class WrCalName extends Property {
     public boolean isCalendarProperty() {
         return true;
     }
-    
+
     private static class Factory implements PropertyFactory {
 
         private static final long serialVersionUID = -202687610325706085L;
 
+        @Override
         public Property createProperty(String name) {
             return new WrCalName(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrCalName property = new WrCalName(parameters, this, value);
             return property;

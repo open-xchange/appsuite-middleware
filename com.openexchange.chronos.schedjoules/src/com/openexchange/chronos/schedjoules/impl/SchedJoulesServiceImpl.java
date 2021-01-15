@@ -131,10 +131,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
-     *
-     * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
-    public SchedJoulesServiceImpl() throws OXException {
+    public SchedJoulesServiceImpl() {
         super();
         initialiseBlackListedItems();
     }

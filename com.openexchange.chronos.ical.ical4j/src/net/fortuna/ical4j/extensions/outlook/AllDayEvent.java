@@ -40,6 +40,7 @@ import net.fortuna.ical4j.model.ValidationException;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class AllDayEvent extends Property {
 
     private static final long serialVersionUID = -3514682572599864426L;
@@ -97,10 +98,12 @@ public class AllDayEvent extends Property {
         
         private static final long serialVersionUID = 596282786680252116L;
 
+        @Override
         public Property createProperty(String name) {
             return new AllDayEvent(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             AllDayEvent property = null;
             if (FALSE.getValue().equals(value)) {

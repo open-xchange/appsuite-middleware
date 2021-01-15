@@ -138,7 +138,7 @@ public class BasicCachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_configNullAndProviderIntervalBiggerThanOneDay_useFromProvider() throws OXException {
+    public void testGetLatestUpdateStates_configNullAndProviderIntervalBiggerThanOneDay_useFromProvider() {
         final long refreshInterval = 600000;
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
 
@@ -153,7 +153,7 @@ public class BasicCachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_configEmptyAndProviderIntervalBiggerThanOneDay_useFromProvider() throws OXException {
+    public void testGetLatestUpdateStates_configEmptyAndProviderIntervalBiggerThanOneDay_useFromProvider() {
         final long refreshInterval = 600000;
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
 
@@ -242,7 +242,7 @@ public class BasicCachingCalendarAccessTest {
     }
 
     @Test
-    public void testUpdateCacheIfNeeded_cacheUpdateRequestedButInBlockingTime_throwException() throws OXException {
+    public void testUpdateCacheIfNeeded_cacheUpdateRequestedButInBlockingTime_throwException() {
         JSONObject lastUpdate = new JSONObject();
         lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60L)));
         JSONObject internalConfig = new JSONObject();

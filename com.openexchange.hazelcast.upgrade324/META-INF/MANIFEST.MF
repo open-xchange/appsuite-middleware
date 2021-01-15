@@ -37,3 +37,4 @@ Import-Package: com.openexchange.caching,
 Bundle-Activator: com.openexchange.hazelcast.upgrade324.osgi.HazelcastUpgradeActivator
 Bundle-ClassPath: lib/hazelcast-all-3.2.4.jar,
  .
+Automatic-Module-Name: com.openexchange.hazelcast.upgrade324

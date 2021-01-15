@@ -167,7 +167,7 @@ public class ImportedTimeZone extends net.fortuna.ical4j.model.TimeZone implemen
         /*
          * init simple timezone from parsed observances
          */
-        if (null != standardOffset && null != standardMonthAndDayAndDayOfWeek && null != daylightOffset && null != daylightMonthAndDayAndDayOfWeek) {
+        if (null != standardMonthAndDayAndDayOfWeek && null != daylightMonthAndDayAndDayOfWeek) {
             return new SimpleTimeZone(i(standardOffset), ID,
                 daylightMonthAndDayAndDayOfWeek[0], daylightMonthAndDayAndDayOfWeek[1], daylightMonthAndDayAndDayOfWeek[2],
                 null == daylightStartHour ? 0 : (int) TimeUnit.HOURS.toMillis(i(daylightStartHour)), SimpleTimeZone.WALL_TIME,

@@ -319,7 +319,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             return sharedFolderOwner;
         }
 
-        public ITipEventUpdate getDiff() throws OXException {
+        public ITipEventUpdate getDiff() {
             if (diff == null) {
                 diff = new ITipEventUpdate(oldEvent, newEvent, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
             }
@@ -460,7 +460,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             }
         }
 
-        private boolean isAlreadyInformed(NotificationParticipant participant, Event mostRecent, Integer contextId) throws OXException {
+        private boolean isAlreadyInformed(NotificationParticipant participant, Event mostRecent, Integer contextId) {
             Event alreadySent = removeFromSent(participant, mostRecent, contextId);
             if (alreadySent != null) {
                 ITipEventUpdate diff = new ITipEventUpdate(alreadySent, mostRecent, true, (EventField[]) null);
@@ -469,7 +469,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             return false;
         }
 
-        private Set<Integer> getSelfRemoved() throws OXException {
+        private Set<Integer> getSelfRemoved() {
             Set<Integer> retval = new HashSet<>();
             for (Update u : updates) {
                 if (u.getDiff().isAboutCertainParticipantsRemoval(u.getSession().getUserId())) {

@@ -29,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package net.fortuna.ical4j.extensions.property;
 
 import net.fortuna.ical4j.model.Parameter;
@@ -42,16 +43,17 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class WrTimezone extends Property {
 
     private static final long serialVersionUID = 7248705823074186148L;
 
     public static final String PROPERTY_NAME = "X-WR-TIMEZONE";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -73,7 +75,7 @@ public class WrTimezone extends Property {
      */
     @Override
     public void setValue(String aValue) {
-        this.value = aValue;
+        value = aValue;
     }
 
     /**
@@ -81,8 +83,7 @@ public class WrTimezone extends Property {
      */
     @Override
     public void validate() throws ValidationException {
-        ParameterValidator.getInstance().assertOneOrLess(Parameter.VALUE,
-                getParameters());
+        ParameterValidator.getInstance().assertOneOrLess(Parameter.VALUE, getParameters());
     }
 
     /**
@@ -105,10 +106,12 @@ public class WrTimezone extends Property {
 
         private static final long serialVersionUID = 3538377735326578201L;
 
+        @Override
         public Property createProperty(String name) {
             return new WrTimezone(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrTimezone property = new WrTimezone(parameters, this, value);
             return property;

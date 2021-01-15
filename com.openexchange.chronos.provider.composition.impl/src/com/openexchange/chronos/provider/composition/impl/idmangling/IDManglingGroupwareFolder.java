@@ -64,6 +64,7 @@ import com.openexchange.groupware.EntityInfo;
 public class IDManglingGroupwareFolder extends IDManglingFolder implements GroupwareCalendarFolder {
 
     protected final String newParentId;
+    @SuppressWarnings("hiding")
     protected final GroupwareCalendarFolder delegate;
 
     /**

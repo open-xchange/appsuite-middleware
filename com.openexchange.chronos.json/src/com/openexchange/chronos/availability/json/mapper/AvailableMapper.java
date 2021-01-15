@@ -75,6 +75,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
     private static final AvailableMapper INSTANCE = new AvailableMapper();
 
+    @SuppressWarnings("hiding")
     private final AvailableField[] mappedFields;
 
     /**

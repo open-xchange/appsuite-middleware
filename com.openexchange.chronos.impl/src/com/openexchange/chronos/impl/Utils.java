@@ -308,6 +308,7 @@ public class Utils {
      * @param email2 The second email address to check
      * @return <code>true</code> if both addresses end with the same domain, <code>false</code>, otherwise
      */
+    @SuppressWarnings("null") // Guarded by idx1 and idx2
     public static boolean isSameMailDomain(String email1, String email2) {
         int idx1 = null != email1 ? email1.lastIndexOf('@') : -1;
         if (0 > idx1) {

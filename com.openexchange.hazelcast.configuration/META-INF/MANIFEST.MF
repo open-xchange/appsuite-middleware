@@ -38,3 +38,4 @@ Import-Package: com.google.common.annotations,
 Bundle-ClassPath: .
 Export-Package: com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.configuration.ssl
+Automatic-Module-Name: com.openexchange.hazelcast.configuration

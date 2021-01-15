@@ -205,7 +205,7 @@ public class NotificationMail {
         this.event = updated;
     }
 
-    public ITipEventUpdate getDiff() throws OXException {
+    public ITipEventUpdate getDiff() {
         if (diff == null && original != null && event != null) {
             diff = new ITipEventUpdate(original, event, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
         }
@@ -255,7 +255,7 @@ public class NotificationMail {
         this.principal = principal;
     }
 
-    public NotificationParticipant getOnBehalfOf() throws OXException {
+    public NotificationParticipant getOnBehalfOf() {
         if (isAboutActorsStateChangeOnly()) {
             return actor;
         }
@@ -349,14 +349,14 @@ public class NotificationMail {
      * ============= FUNCTIONS =============
      */
 
-    public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
+    public boolean actionIsDoneOnBehalfOfAnother() {
         if (actor == null || actor.hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
         return !actor.equals(getOnBehalfOf());
     }
 
-    public boolean actionIsDoneOnMyBehalf() throws OXException {
+    public boolean actionIsDoneOnMyBehalf() {
         if (isAboutActorsStateChangeOnly()) {
             return false;
         }
@@ -367,7 +367,7 @@ public class NotificationMail {
         return recipient.equals(principal) || recipient.equals(sharedCalendarOwner);
     }
 
-    public boolean isAboutStateChangesOnly() throws OXException {
+    public boolean isAboutStateChangesOnly() {
         if (getDiff() == null) {
             return false;
         }
@@ -382,7 +382,7 @@ public class NotificationMail {
         return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
-    public boolean isAboutStateChanges() throws OXException {
+    public boolean isAboutStateChanges() {
         if (getDiff() == null) {
             return false;
         }
@@ -390,7 +390,7 @@ public class NotificationMail {
         return diff.isAboutStateChanges();
     }
 
-    public boolean isAboutActorsStateChangeOnly() throws OXException {
+    public boolean isAboutActorsStateChangeOnly() {
         if (!isAboutStateChangesOnly()) {
             return false;
         }
@@ -482,12 +482,7 @@ public class NotificationMail {
 
     private String getUserDiff() {
         // Try to get diff
-        ITipEventUpdate eventUpdate = null;
-        try {
-            eventUpdate = getDiff();
-        } catch (OXException e) {
-            LOG.debug("Unable to get EventUpdate", e);
-        }
+        ITipEventUpdate eventUpdate = getDiff();
         if (null == eventUpdate) {
             return null;
         }
@@ -579,7 +574,7 @@ public class NotificationMail {
 
     private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER };
 
-    private boolean anInterestingFieldChanged() throws OXException {
+    private boolean anInterestingFieldChanged() {
         if (getDiff() == null) {
             return true;
         }

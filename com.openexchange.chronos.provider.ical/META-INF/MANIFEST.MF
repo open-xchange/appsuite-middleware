@@ -61,3 +61,4 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.provider.ical.osgi.ICalCalendarProviderActivator
+Automatic-Module-Name: com.openexchange.chronos.provider.ical

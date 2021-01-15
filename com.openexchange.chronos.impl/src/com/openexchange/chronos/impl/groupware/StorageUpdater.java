@@ -441,6 +441,7 @@ public class StorageUpdater {
         SearchOptions searchOptions = new SearchOptions().setLimits(0, BATCH_SIZE);
         return new OSGiCalendarStorageOperation<Integer>(Services.getServiceLookup(), session.getContextId(), ACCOUNT_ID) {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             protected Integer call(CalendarStorage storage) throws OXException {
                 int totalDeleted = 0;

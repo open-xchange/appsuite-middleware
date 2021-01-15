@@ -77,6 +77,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
 
     private static final AlarmTriggerMapper INSTANCE = new AlarmTriggerMapper();
 
+    @SuppressWarnings("hiding")
     private final AlarmTriggerField[] mappedFields;
 
     /**

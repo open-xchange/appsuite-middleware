@@ -55,3 +55,4 @@ Import-Package: com.google.common.collect,
 Export-Package: com.openexchange.chronos.provider.caching,
  com.openexchange.chronos.provider.caching.basic
 Bundle-Activator: com.openexchange.chronos.provider.caching.osgi.CachingCalendarAccessActivator
+Automatic-Module-Name: com.openexchange.chronos.provider.caching

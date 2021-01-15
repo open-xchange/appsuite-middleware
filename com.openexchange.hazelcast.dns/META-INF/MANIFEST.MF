@@ -22,3 +22,4 @@ Import-Package: com.hazelcast.config,
  org.xbill.DNS.utils
 Bundle-ClassPath: .
 Export-Package: com.openexchange.hazelcast.dns
+Automatic-Module-Name: com.openexchange.hazelcast.dns

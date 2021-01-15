@@ -144,6 +144,15 @@ public class EventConverter {
         return event;
     }
 
+    /**
+     * Returns the master series of the specified contacts
+     *
+     * @param contacts The contacts
+     * @param from The from date
+     * @param until The until date
+     * @param timeZone The timezone
+     * @return The master series
+     */
     public List<Event> getSeriesMasters(List<Contact> contacts, Date from, Date until, TimeZone timeZone) {
         if (null == contacts || 0 == contacts.size()) {
             return Collections.emptyList();

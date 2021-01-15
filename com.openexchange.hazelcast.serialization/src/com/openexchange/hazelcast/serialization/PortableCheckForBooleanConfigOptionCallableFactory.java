@@ -49,9 +49,6 @@
 
 package com.openexchange.hazelcast.serialization;
 
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-
 /**
  * {@link PortableCheckForBooleanConfigOptionCallableFactory} - The portable factory for {@link PortableMessageDistributor} type.
  *

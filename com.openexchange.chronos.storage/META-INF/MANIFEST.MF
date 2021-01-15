@@ -32,3 +32,4 @@ Import-Package: com.openexchange.chronos,
  org.slf4j
 Export-Package: com.openexchange.chronos.storage,
  com.openexchange.chronos.storage.operation
+Automatic-Module-Name: com.openexchange.chronos.storage

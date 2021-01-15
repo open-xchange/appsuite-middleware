@@ -319,7 +319,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return null;
     }
 
-    public boolean doAppointmentsDiffer(final Event update, final Event original, final CalendarSession session) throws OXException {
+    public boolean doAppointmentsDiffer(final Event update, final Event original, final CalendarSession session) {
         if (original == update) {
             // Can be the same object .. so avoid roundtrip of diff
             return false;

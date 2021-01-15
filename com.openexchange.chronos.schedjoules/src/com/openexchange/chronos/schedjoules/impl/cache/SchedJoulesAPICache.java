@@ -136,17 +136,4 @@ public class SchedJoulesAPICache {
         }
         return value;
     }
-
-    /**
-     * Retrieves the desired {@link SchedJoulesProperty} for the specified context
-     *
-     * @param contextId The context identifier
-     * @param property The {@link SchedJoulesProperty} to get
-     * @return The integer property
-     * @throws OXException if no property is configured
-     */
-    private int getIntProperty(int contextId, SchedJoulesProperty property) throws OXException {
-        LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
-        return leanConfigService.getIntProperty(-1, contextId, property);
-    }
 }

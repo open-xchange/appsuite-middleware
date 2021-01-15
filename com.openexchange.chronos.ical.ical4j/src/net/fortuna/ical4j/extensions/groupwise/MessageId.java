@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings({ "synthetic-access", "unused" })
 public class MessageId extends Property {
 
     private static final long serialVersionUID = -7910360817210293089L;
@@ -97,10 +98,12 @@ public class MessageId extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Property createProperty(String name) {
             return new MessageId(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             MessageId property = new MessageId(parameters, this, value);
             return property;

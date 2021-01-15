@@ -56,16 +56,17 @@ import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Test;
+
 /**
  * {@link UtilsTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UtilsTest  {
+public class UtilsTest {
 
     @Test
-    public void testShiftRecurrenceIdDate() throws Exception {
+    public void testShiftRecurrenceIdDate() {
         assertEquals(new DefaultRecurrenceId("20180103"), shiftRecurrenceId(new DefaultRecurrenceId("20180103"), parse("20180101"), parse("20180101")));
         assertEquals(new DefaultRecurrenceId("20180203"), shiftRecurrenceId(new DefaultRecurrenceId("20180103"), parse("20180101"), parse("20180201")));
         assertEquals(new DefaultRecurrenceId("20180103"), shiftRecurrenceId(new DefaultRecurrenceId("20180203"), parse("20180201"), parse("20180101")));
@@ -74,7 +75,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testShiftRecurrenceIdDateTimeWithSameTimeZone() throws Exception {
+    public void testShiftRecurrenceIdDateTimeWithSameTimeZone() {
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
         assertEquals(new DefaultRecurrenceId("20180103T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180103T130000Z"), parse(timeZone, "20180101T140000"), parse(timeZone, "20180101T140000")));
         assertEquals(new DefaultRecurrenceId("20180203T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180103T130000Z"), parse(timeZone, "20180101T140000"), parse(timeZone, "20180201T140000")));
@@ -84,7 +85,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testGetDurationDate() throws Exception {
+    public void testGetDurationDate() {
         assertEquals("P0D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171205")).toString());
         assertEquals("P1D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171206")).toString());
         assertEquals("-P1D", getDuration(DateTime.parse("20171206"), DateTime.parse("20171205")).toString());
@@ -95,7 +96,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testGetDurationDateTimeWithSameTimeZone() throws Exception {
+    public void testGetDurationDateTimeWithSameTimeZone() {
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
         assertEquals("P0D", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171205T160000")).toString());
         assertEquals("PT1M", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171205T160100")).toString());
@@ -109,7 +110,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testGetDurationDateTimeWithMixedTimeZone() throws Exception {
+    public void testGetDurationDateTimeWithMixedTimeZone() {
         TimeZone timeZone1 = TimeZone.getTimeZone("Europe/Berlin");
         TimeZone timeZone2 = TimeZone.getTimeZone("America/New_York");
         assertEquals("P0D", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T100000")).toString());
@@ -124,7 +125,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testGetDurationDateAndDateTime() throws Exception {
+    public void testGetDurationDateAndDateTime() {
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
         assertEquals("P0D", getDuration(DateTime.parse("20171205"), DateTime.parse(timeZone, "20171205T000000")).toString());
         assertEquals("P1D", getDuration(DateTime.parse("20171205"), DateTime.parse(timeZone, "20171206T000000")).toString());
@@ -136,7 +137,7 @@ public class UtilsTest  {
     }
 
     @Test
-    public void testGetDurationDateTimeAndDate() throws Exception {
+    public void testGetDurationDateTimeAndDate() {
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
         assertEquals("P0D", getDuration(DateTime.parse(timeZone, "20171205T000000"), DateTime.parse("20171205")).toString());
         assertEquals("P1D", getDuration(DateTime.parse(timeZone, "20171205T000000"), DateTime.parse("20171206")).toString());

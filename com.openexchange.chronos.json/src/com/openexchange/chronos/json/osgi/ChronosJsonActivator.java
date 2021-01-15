@@ -130,6 +130,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
         return new Class<?>[] { ThreadPoolService.class, PrincipalUseCountService.class };
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void startBundle() throws Exception {
         try {

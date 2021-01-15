@@ -63,7 +63,6 @@ import org.junit.Test;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.AbstractCombineTest;
 import com.openexchange.chronos.service.UpdatesResult;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link UpdatesPerformerTest}
@@ -77,7 +76,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     private List<Event> newAndModifiedEvents;
 
     @Before
-    public void setup() throws OXException {
+    public void setup() {
         deletedEvents = new ArrayList<Event>();
         for (int i = 1; i <= 100; i++) {
             deletedEvents.add(event(i, 30, UUID.randomUUID().toString(), i));
@@ -89,52 +88,52 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testLimitedResults1() throws Exception {
+    public void testLimitedResults1() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 0), 100, 100, 100);
     }
 
     @Test
-    public void testLimitedResults2() throws Exception {
+    public void testLimitedResults2() {
         assertUpdatesResult(getResult(newAndModifiedEvents, null, 0), 100, -1, 100);
     }
 
     @Test
-    public void testLimitedResults3() throws Exception {
+    public void testLimitedResults3() {
         assertUpdatesResult(getResult(null, deletedEvents, 0), -1, 100, 100);
     }
 
     @Test
-    public void testLimitedResults4() throws Exception {
+    public void testLimitedResults4() {
         assertUpdatesResult(getResult(null, null, 0), -1, -1, 0);
     }
 
     @Test
-    public void testLimitedResults5() throws Exception {
+    public void testLimitedResults5() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 200), 100, 100, 100);
     }
 
     @Test
-    public void testLimitedResults6() throws Exception {
+    public void testLimitedResults6() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 100), 99, 99, 99);
     }
 
     @Test
-    public void testLimitedResults7() throws Exception {
+    public void testLimitedResults7() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 25), 25, 25, 25);
     }
 
     @Test
-    public void testLimitedResults8() throws Exception {
+    public void testLimitedResults8() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 1), 1, 1, 1);
     }
 
     @Test
-    public void testLimitedResults9() throws Exception {
+    public void testLimitedResults9() {
         assertUpdatesResult(getResult(newAndModifiedEvents, deletedEvents, 400), 100, 100, 100);
     }
 
     @Test
-    public void testLimitedResults10() throws Exception {
+    public void testLimitedResults10() {
         List<Event> newAndModifiedEvents = new ArrayList<Event>();
         newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
@@ -149,7 +148,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testLimitedResults11() throws Exception {
+    public void testLimitedResults11() {
         List<Event> newAndModifiedEvents = new ArrayList<Event>();
         newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
@@ -164,7 +163,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testLimitedResults12() throws Exception {
+    public void testLimitedResults12() {
         List<Event> newAndModifiedEvents = new ArrayList<Event>();
         newAndModifiedEvents.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         newAndModifiedEvents.add(event(2, 30, UUID.randomUUID().toString(), 12L));
@@ -178,7 +177,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testTruncateList1() throws Exception {
+    public void testTruncateList1() {
         List<Event> events = new ArrayList<Event>();
         events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
@@ -189,7 +188,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testTruncateList2() throws Exception {
+    public void testTruncateList2() {
         List<Event> events = new ArrayList<Event>();
         events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
@@ -200,17 +199,17 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testTruncateList3() throws Exception {
+    public void testTruncateList3() {
         assertFalse(UpdatesPerformer.truncateEvents(null, 3));
     }
 
     @Test
-    public void testTruncateList4() throws Exception {
+    public void testTruncateList4() {
         assertFalse(UpdatesPerformer.truncateEvents(new ArrayList<Event>(), 3));
     }
 
     @Test
-    public void testTruncateList5() throws Exception {
+    public void testTruncateList5() {
         List<Event> events = new ArrayList<Event>();
         events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         events.add(event(1, 30, UUID.randomUUID().toString(), 12L));
@@ -221,7 +220,7 @@ public class UpdatesPerformerTest extends AbstractCombineTest {
     }
 
     @Test
-    public void testTruncateList6() throws Exception {
+    public void testTruncateList6() {
         List<Event> events = new ArrayList<Event>();
         events.add(event(1, 30, UUID.randomUUID().toString(), 9L));
         events.add(event(1, 30, UUID.randomUUID().toString(), 12L));

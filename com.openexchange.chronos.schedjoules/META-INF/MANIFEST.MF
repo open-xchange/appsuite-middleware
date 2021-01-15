@@ -40,3 +40,4 @@ Export-Package: com.openexchange.chronos.schedjoules,
  com.openexchange.chronos.schedjoules.api,
  com.openexchange.chronos.schedjoules.api.auxiliary,
  com.openexchange.chronos.schedjoules.exception
+Automatic-Module-Name: com.openexchange.chronos.schedjoules

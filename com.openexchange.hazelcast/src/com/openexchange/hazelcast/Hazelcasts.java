@@ -334,7 +334,7 @@ public class Hazelcasts {
         }
     }
 
-    private static <V, R> void cancelRest(final Iterator<Map.Entry<Member, Future<R>>> it) {
+    private static <R> void cancelRest(final Iterator<Map.Entry<Member, Future<R>>> it) {
         while (it.hasNext()) {
             Future<R> future = it.next().getValue();
             cancelFutureSafe(future);

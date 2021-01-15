@@ -70,3 +70,4 @@ Import-Package: com.google.common.collect,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.scheduling.changes.impl.osgi.SchedulingChangesActivator
+Automatic-Module-Name: com.openexchange.chronos.scheduling.changes.impl

@@ -97,3 +97,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.chronos.itip,
  com.openexchange.chronos.itip.generators,
  com.openexchange.chronos.itip.tools
+Automatic-Module-Name: com.openexchange.chronos.itip

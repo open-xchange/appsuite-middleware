@@ -28,3 +28,4 @@ Import-Package: com.openexchange.chronos,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.compat.impl.osgi.ChronosCompatActivator
+Automatic-Module-Name: com.openexchange.chronos.compat.impl

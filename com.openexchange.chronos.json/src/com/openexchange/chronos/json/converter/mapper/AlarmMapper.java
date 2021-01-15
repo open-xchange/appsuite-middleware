@@ -97,6 +97,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
         return INSTANCE;
     }
 
+    @SuppressWarnings("hiding")
     private final AlarmField[] mappedFields;
 
     /**

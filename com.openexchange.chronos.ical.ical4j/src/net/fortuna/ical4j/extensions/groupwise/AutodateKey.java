@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings({ "synthetic-access" })
 public class AutodateKey extends Property {
 
     private static final long serialVersionUID = -4722251591472186896L;
@@ -97,10 +98,12 @@ public class AutodateKey extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Property createProperty(String name) {
             return new AutodateKey(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             AutodateKey property = new AutodateKey(parameters, this, value);
             return property;

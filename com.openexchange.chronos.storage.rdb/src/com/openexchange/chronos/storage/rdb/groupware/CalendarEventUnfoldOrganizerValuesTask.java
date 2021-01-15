@@ -104,7 +104,7 @@ public class CalendarEventUnfoldOrganizerValuesTask extends UpdateTaskAdapter {
         }
     }
 
-    private static int unfoldOrganizerValues(Connection connection) throws SQLException, OXException {
+    private static int unfoldOrganizerValues(Connection connection) throws SQLException {
         String sql = "UPDATE calendar_event SET organizer=REPLACE(organizer,'\\r\\n ', '') WHERE organizer LIKE '%\\r\\n %';";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             return stmt.executeUpdate();

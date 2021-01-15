@@ -40,6 +40,7 @@ import net.fortuna.ical4j.model.ValidationException;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class ShowAs extends Property {
 
     private static final long serialVersionUID = 1777126874405580074L;
@@ -97,10 +98,12 @@ public class ShowAs extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Property createProperty(String name) {
             return new ShowAs(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             ShowAs property = null;
             if (BUSY.getValue().equals(value)) {

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.birthdays;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -109,26 +110,33 @@ public class SearchAdapter {
         return compositeTerm;
     }
 
-    private static SearchTerm<?> getQueryTerm(List<String> queries) throws OXException {
+    private static SearchTerm<?> getQueryTerm(List<String> queries) {
         return getContactFieldTerm(queries, CompositeOperation.AND, SUMMARY_FIELDS);
     }
 
     private static List<SearchTerm<?>> getFieldFilterTerms(List<SearchFilter> filters) throws OXException {
         List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>();
-        if (null != filters && 0 < filters.size()) {
-            for (SearchFilter filter : filters) {
-                List<String> fields = filter.getFields();
-                if (null != fields && 0 < fields.size()) {
-                    for (String field : fields) {
-                        SearchTerm<?> searchTerm = getFieldFilterTerm(field, filter.getQueries());
-                        if (null != searchTerm) {
-                            searchTerms.add(searchTerm);
-                        }
-                    }
-                }
+        if (null == filters || 0 >= filters.size()) {
+            return new LinkedList<>();
+        }
+        for (SearchFilter filter : filters) {
+            List<String> fields = filter.getFields();
+            if (null == fields || 0 >= fields.size()) {
+                continue;
             }
+            processFields(searchTerms, filter, fields);
         }
         return searchTerms;
+    }
+
+    private static void processFields(List<SearchTerm<?>> searchTerms, SearchFilter filter, List<String> fields) throws OXException {
+        for (String field : fields) {
+            SearchTerm<?> searchTerm = getFieldFilterTerm(field, filter.getQueries());
+            if (null == searchTerm) {
+                continue;
+            }
+            searchTerms.add(searchTerm);
+        }
     }
 
     private static SearchTerm<?> getFieldFilterTerm(String field, List<String> queries) throws OXException {
@@ -160,7 +168,7 @@ public class SearchAdapter {
         }
     }
 
-    private static boolean isSeriesTypeOnly(List<String> recurringTypeQueries) throws OXException {
+    private static boolean isSeriesTypeOnly(List<String> recurringTypeQueries) {
         if (null != recurringTypeQueries && 0 < recurringTypeQueries.size()) {
             for (String query : recurringTypeQueries) {
                 if (false == "series".equals(query)) {

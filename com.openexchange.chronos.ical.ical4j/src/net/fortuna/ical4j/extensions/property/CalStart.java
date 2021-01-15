@@ -43,6 +43,7 @@ import net.fortuna.ical4j.model.property.UtcProperty;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class CalStart extends UtcProperty {
 
     private static final long serialVersionUID = -1823078836099613956L;
@@ -89,10 +90,12 @@ public class CalStart extends UtcProperty {
         
         private static final long serialVersionUID = 596282786680252116L;
 
+        @Override
         public Property createProperty(String name) {
             return new CalStart(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) throws ParseException {
             CalStart property = new CalStart(parameters, this, value);
             return property;

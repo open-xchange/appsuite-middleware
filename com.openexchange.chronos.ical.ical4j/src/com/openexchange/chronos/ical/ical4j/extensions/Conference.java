@@ -62,6 +62,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.4
  */
+@SuppressWarnings("synthetic-access")
 public class Conference extends Property {
 
     private static final long serialVersionUID = -6643503491181832264L;

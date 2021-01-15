@@ -24,3 +24,4 @@ Import-Package: com.google.common.collect,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.push.osgi.ChronosPushActivator
+Automatic-Module-Name: com.openexchange.chronos.push

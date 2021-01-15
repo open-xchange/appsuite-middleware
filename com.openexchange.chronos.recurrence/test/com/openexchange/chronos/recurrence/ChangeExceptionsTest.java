@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
@@ -443,6 +444,7 @@ public class ChangeExceptionsTest extends AbstractSingleTimeZoneTest {
                 fail("Bad occurrence/exception found.");
             }
             if (count++ > 0) {
+                assertNotNull(previous);
                 assertFalse("Bad order of occurrences.", previous.after(instance.getStartDate()));
             }
             if (count >= 5) {
@@ -500,6 +502,7 @@ public class ChangeExceptionsTest extends AbstractSingleTimeZoneTest {
                 fail("Bad occurrence/exception found.");
             }
             if (count++ > 0) {
+                assertNotNull(previous);
                 assertFalse("Bad order of occurrences.", previous.after(instance.getStartDate()));
             }
             if (count >= 5) {

@@ -48,6 +48,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author probert
  *
  */
+@SuppressWarnings("synthetic-access")
 public class AlarmAgent extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
@@ -112,6 +113,7 @@ public class AlarmAgent extends Property implements Escapable {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
     
+    @SuppressWarnings("unused")
     ImmutableAlarmAgent(String s, ImmutableAlarmAgent immutableclazz) {
       this(s);
     }

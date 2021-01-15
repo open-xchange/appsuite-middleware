@@ -92,3 +92,4 @@ Import-Package: com.hazelcast.cluster,
  org.w3c.dom.traversal
 Bundle-ClassPath: .
 Export-Package: com.openexchange.hazelcast
+Automatic-Module-Name: com.openexchange.hazelcast

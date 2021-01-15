@@ -96,7 +96,7 @@ public class CreateTimeZoneMappings {
         System.out.println(stringBuilder.toString());
     }
 
-    private static Map<String, String> parse(Document document) throws Exception {
+    private static Map<String, String> parse(Document document) {
         Set<String> availableIDs = new HashSet<String>(Arrays.asList(TimeZone.getAvailableIDs()));
         Map<String, String> mappings = new HashMap<String, String>(150);
         NodeList nodeList = document.getElementsByTagName("mapZone");

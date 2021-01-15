@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.b;
@@ -396,10 +397,10 @@ public class CalendarUtils {
      *
      * @param collection1 The first collection to check
      * @param collection2 The second collection to check
-     * @return <code>true</code> if the collections <i>match</i>, i.e. their elememts are targeting the same calendar users, <code>false</code>, otherwise
+     * @return <code>true</code> if the collections <i>match</i>, i.e. their elements are targeting the same calendar users, <code>false</code>, otherwise
      */
     public static <T extends CalendarUser> boolean matches(Collection<T> collection1, Collection<T> collection2) {
-        return matches(collection1, collection2, (item1, item2) -> matches(item1, item2));
+        return matches(collection1, collection2, (item1, item2) -> B(matches(item1, item2)));
     }
 
     /**

@@ -49,6 +49,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author probert
  *
  */
+@SuppressWarnings({ "synthetic-access", "unused" })
 public class CalendarServerAttendeeComment extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;

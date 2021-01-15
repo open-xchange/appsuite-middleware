@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.converter;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -88,6 +87,7 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
         super(services);
     }
 
+    @SuppressWarnings("hiding")
     public static final String INPUT_FORMAT = "calendarResultsPerEventId";
 
     @Override

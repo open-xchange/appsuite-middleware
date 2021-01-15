@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class InstType extends Property {
 
     private static final long serialVersionUID = -3495027929173808410L;
@@ -97,10 +98,12 @@ public class InstType extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Property createProperty(String name) {
             return new InstType(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             InstType property = new InstType(parameters, this, value);
             return property;

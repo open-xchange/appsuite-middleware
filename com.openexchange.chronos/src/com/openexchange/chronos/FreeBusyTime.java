@@ -173,12 +173,16 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
 
     @Override
     public int compareTo(FreeBusyTime o) {
-        int value = null == o ? 1 : startTime.compareTo(o.getStartTime());
+        if (null == o) {
+            return 1;
+        }
+        int value = startTime.compareTo(o.getStartTime());
+        if (0 != value) {
+            return value;
+        }
+        value = endTime.compareTo(o.getEndTime());
         if (0 == value) {
-            value = endTime.compareTo(o.getEndTime());
-            if (0 == value) {
-                value = fbType.compareTo(o.getFbType());
-            }
+            value = fbType.compareTo(o.getFbType());
         }
         return value;
     }

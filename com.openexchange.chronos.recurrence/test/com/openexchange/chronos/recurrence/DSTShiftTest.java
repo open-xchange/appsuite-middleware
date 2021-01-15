@@ -63,6 +63,7 @@ import com.openexchange.time.TimeTools;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
+@SuppressWarnings("unused")
 public class DSTShiftTest extends AbstractSingleTimeZoneTest {
 
     private Date oct_26_2008_02_00_CEST;

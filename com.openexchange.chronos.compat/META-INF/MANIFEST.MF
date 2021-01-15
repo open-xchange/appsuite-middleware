@@ -28,3 +28,4 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.chronos.compat
+Automatic-Module-Name: com.openexchange.chronos.compat

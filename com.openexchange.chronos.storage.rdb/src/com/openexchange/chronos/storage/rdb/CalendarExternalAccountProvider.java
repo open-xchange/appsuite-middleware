@@ -140,7 +140,7 @@ public class CalendarExternalAccountProvider implements ExternalAccountProvider 
         }
         CalendarProvider calendarProvider = services.getServiceSafe(CalendarProviderRegistry.class).getCalendarProvider(storedAccount.getProviderId());
         if (AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
-            if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
+            if (AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
                 getLogger(CalendarExternalAccountProvider.class).warn("Unable to delete auto-provisioned calendar account {} from provider '{}'.",
                     storedAccount, calendarProvider.getId(), CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId()));
                 return false;

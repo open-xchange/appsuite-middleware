@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,6 +110,7 @@ public class OrganizerDescriptionTest extends AbstractDescriptionTest {
         setOrganizer(oldOrganizer, null);
 
         Description description = describer.describe(eventUpdate);
+        assertNotNull(description);
         assertTrue(description.getSentences().isEmpty());
     }
 

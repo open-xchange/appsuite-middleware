@@ -543,18 +543,14 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         if (!mail.getEvent().containsAttachments() || mail.getEvent().getAttachments() == null || mail.getEvent().getAttachments().isEmpty()) {
             return;
         }
-        try {
-            ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), true, (EventField[]) null);
-            if (update.getAttachmentUpdates() != null && !update.getAttachmentUpdates().isEmpty()) {
+        ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), true, (EventField[]) null);
+        if (update.getAttachmentUpdates() != null && !update.getAttachmentUpdates().isEmpty()) {
 
-                mail.setAttachmentUpdate(true);
-                List<Attachment> atts = mail.getEvent().getAttachments();
-                for (Attachment attachment : atts) {
-                    mail.addAttachment(attachment);
-                }
+            mail.setAttachmentUpdate(true);
+            List<Attachment> atts = mail.getEvent().getAttachments();
+            for (Attachment attachment : atts) {
+                mail.addAttachment(attachment);
             }
-        } catch (OXException e) {
-            LOGGER.error("Error when checking for attachment updates.", e);
         }
     }
 

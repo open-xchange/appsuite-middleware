@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class LicLocation extends Property {
 
     private static final long serialVersionUID = -9063118211308272499L;
@@ -95,10 +96,14 @@ public class LicLocation extends Property {
 
     private static class Factory implements PropertyFactory {
 
+        private static final long serialVersionUID = -4792710336502994199L;
+
+        @Override
         public Property createProperty(String name) {
             return new LicLocation(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             LicLocation property = new LicLocation(parameters, this, value);
             return property;

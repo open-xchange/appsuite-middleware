@@ -159,7 +159,7 @@ public class XctxFreeBusyProvider implements FreeBusyProvider {
         return resultsPerAccountId;
     }
 
-    private Map<Attendee, Map<Integer, FreeBusyResult>> getFreeBusy(Session session, CalendarAccount account, CalendarParameters parameters, List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
+    private Map<Attendee, Map<Integer, FreeBusyResult>> getFreeBusy(Session session, CalendarAccount account, CalendarParameters parameters, List<Attendee> attendees, Date from, Date until, boolean merge) {
         Map<Attendee, Map<Integer, FreeBusyResult>> resultsPerAccountId = new HashMap<Attendee, Map<Integer, FreeBusyResult>>(attendees.size());
         XctxCalendarAccess calendarAccess = null;
         try {

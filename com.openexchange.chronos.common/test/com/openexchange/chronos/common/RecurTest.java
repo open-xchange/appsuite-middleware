@@ -58,7 +58,7 @@ import org.junit.Test;
 public class RecurTest  {
 
     @Test
-    public void testRecur() throws Exception {
+    public void testRecur() {
         //TODO implement test
     }
 

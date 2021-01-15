@@ -63,6 +63,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class ChronosAccountActionFactory implements AJAXActionServiceFactory {
 

@@ -60,6 +60,7 @@ import com.openexchange.chronos.service.ImportResult;
  */
 public class IDManglingImportResult extends IDManglingErrorAwareCalendarResult implements ImportResult {
 
+    @SuppressWarnings("hiding")
     private final ImportResult delegate;
 
     /**

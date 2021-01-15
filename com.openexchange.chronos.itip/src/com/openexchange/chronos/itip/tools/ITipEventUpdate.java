@@ -67,7 +67,6 @@ import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link ITipEventUpdate}
@@ -91,7 +90,7 @@ public class ITipEventUpdate implements EventUpdate {
 
     private EventUpdate delegate;
 
-    public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
+    public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) {
         // Make sure EventField.EXTENDED_PROPERTIES is contained in ignordeFields.
         if (ignoredFields == null || ignoredFields.length == 0) {
             this.delegate = new DefaultEventUpdate(originalEvent, updatedEvent, considerUnset, IGNOREES, EventField.EXTENDED_PROPERTIES);

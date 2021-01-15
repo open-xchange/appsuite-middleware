@@ -169,18 +169,18 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
              */
             if (ShareExceptionCodes.UNKNOWN_SHARE.equals(e) && isAutoRemoveUnknownShares(session)) {
                 boolean deleted = false;
-                LOG.info("Guest account for cross-context share subscription no longer exists, removing calendar account {}.", I(account.getAccountId()), e);
+                LOG.info("Guest account for cross-context share subscription no longer exists, removing calendar account {}.", getAccountId(account), e);
                 try {
                     services.getServiceSafe(CalendarAccountService.class).deleteAccount(session, account.getAccountId(), account.getLastModified().getTime(), parameters);
                     deleted = true;
                 } catch (OXException x) {
-                    LOG.error("Unexpected error removing calendar account {}.", I(account.getAccountId()), x);
+                    LOG.error("Unexpected error removing calendar account {}.", getAccountId(account), x);
                 }
                 if (deleted) {
                     throw e;
                 }
             }
-            LOG.info("Error connecting calendar account {}, remembering error in account config before trying again later.", I(account.getAccountId()), e);
+            LOG.info("Error connecting calendar account {}, remembering error in account config before trying again later.", getAccountId(account), e);
             storeAccountError(session, account, e);
             throw e;
         }
@@ -219,7 +219,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
                 Pair<OXException, Date> lastError = optAccountError(calendarAccount);
                 if (null != lastError) {
                     LOG.info("Clearing previously remembered error \"{}\" in calendar account {} to try again after reconfiguration.",
-                        lastError.getFirst().getErrorCode(), I(calendarAccount.getAccountId()));
+                        lastError.getFirst().getErrorCode(), getAccountId(calendarAccount));
                     setAccountError(calendarAccount, null);
                 }
             }
@@ -305,7 +305,7 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
             /*
              * client-initiated "retry now", or regular retry-after interval elapsed, clear persisted error & continue
              */
-            LOG.info("Clearing previously remembered error \"{}\" in calendar account {} to try again.", lastError.getFirst().getErrorCode(), I(account.getAccountId()));
+            LOG.info("Clearing previously remembered error \"{}\" in calendar account {} to try again.", lastError.getFirst().getErrorCode(), getAccountId(account));
             storeAccountError(session, account, null);
             return;
         }
@@ -414,22 +414,33 @@ public class XctxCalendarProvider implements FolderCalendarProvider, FallbackAwa
      * @return The account error, paired with the time it occurred, or <code>null</code> if there is none
      */
     private Pair<OXException, Date> optAccountError(CalendarAccount account) {
-        if (null != account.getInternalConfiguration()) {
-            JSONObject jsonObject = account.getInternalConfiguration().optJSONObject("lastError");
-            if (null != jsonObject) {
-                long timestamp = jsonObject.optLong("timestamp", 0L);
-                try {
-                    DataHandler dataHandler = services.getServiceSafe(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-                    ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
-                    if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
-                        return new Pair<OXException, Date>((OXException) result.getData(), new Date(timestamp));
-                    }
-                } catch (OXException e) {
-                    LOG.error("Unable to process data.", e);
-                }
+        if (null == account.getInternalConfiguration()) {
+            return null;
+        }
+        JSONObject jsonObject = account.getInternalConfiguration().optJSONObject("lastError");
+        if (null == jsonObject) {
+            return null;
+        }
+        long timestamp = jsonObject.optLong("timestamp", 0L);
+        try {
+            DataHandler dataHandler = services.getServiceSafe(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+            if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
+                return new Pair<OXException, Date>((OXException) result.getData(), new Date(timestamp));
             }
+        } catch (OXException e) {
+            LOG.error("Unable to process data.", e);
         }
         return null;
     }
-
+    
+    /**
+     * Returns the account identifier of the specified account
+     *
+     * @param calendarAccount The calendar account
+     * @return The account identifier
+     */
+    private Integer getAccountId(CalendarAccount calendarAccount) {
+        return I(calendarAccount.getAccountId());
+    }
 }

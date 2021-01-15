@@ -343,11 +343,12 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
      */
     public static List<Alarm> haveReleativeTriggers(List<Alarm> alarms) throws OXException {
-        if (null != alarms && 0 < alarms.size()) {
-            for (Alarm alarm : alarms) {
-                if (false == AlarmUtils.hasRelativeTrigger(alarm)) {
-                    throw CalendarExceptionCodes.INVALID_ALARM.create(String.valueOf(alarm));
-                }
+        if (null == alarms || 0 >= alarms.size()) {
+            return alarms;
+        }
+        for (Alarm alarm : alarms) {
+            if (false == AlarmUtils.hasRelativeTrigger(alarm)) {
+                throw CalendarExceptionCodes.INVALID_ALARM.create(String.valueOf(alarm));
             }
         }
         return alarms;
@@ -359,9 +360,8 @@ public class Check {
      * @param recurrenceService A reference to the recurrence service
      * @param availability The availability to check
      * @return The passed availability, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    public static Available[] availabilityIsValid(RecurrenceService recurrenceService, Available[] availability) throws OXException {
+    public static Available[] availabilityIsValid(RecurrenceService recurrenceService, Available[] availability) {
         if (null != availability) {
             for (int j = availability.length; j-- > 0;) {
                 availability[j] = Check.availableIsValid(recurrenceService, availability[j]);
@@ -376,9 +376,8 @@ public class Check {
      * @param recurrenceService A reference to the recurrence service
      * @param available The available to check
      * @return The passed available, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    private static Available availableIsValid(RecurrenceService recurrenceService, Available available) throws OXException {
+    private static Available availableIsValid(RecurrenceService recurrenceService, Available available) {
         //TODO
         return available;
     }
@@ -413,6 +412,7 @@ public class Check {
      * @return The URI string, after it has been checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
      */
+    @SuppressWarnings("unused")
     public static String requireValidURI(String uri, String field) throws OXException {
         if (Strings.isEmpty(uri)) {
             throw CalendarExceptionCodes.INVALID_DATA.create(field, uri);

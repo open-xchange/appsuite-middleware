@@ -54,7 +54,6 @@ import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.hazelcast.serialization.osgi.Services;
 
 /**

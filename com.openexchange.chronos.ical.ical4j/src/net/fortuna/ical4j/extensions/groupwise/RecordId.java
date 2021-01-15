@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class RecordId extends Property {
 
     private static final long serialVersionUID = -3377034395408250616L;
@@ -97,10 +98,12 @@ public class RecordId extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        @Override
         public Property createProperty(String name) {
             return new RecordId(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             RecordId property = new RecordId(parameters, this, value);
             return property;

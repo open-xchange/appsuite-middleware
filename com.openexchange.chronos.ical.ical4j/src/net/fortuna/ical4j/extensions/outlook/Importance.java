@@ -42,6 +42,7 @@ import net.fortuna.ical4j.util.ParameterValidator;
  * @author fortuna
  *
  */
+@SuppressWarnings("synthetic-access")
 public class Importance extends Property {
 
     private static final long serialVersionUID = 3044453382694356302L;
@@ -95,10 +96,14 @@ public class Importance extends Property {
 
     private static class Factory implements PropertyFactory {
 
+        private static final long serialVersionUID = -6407630693557526127L;
+
+        @Override
         public Property createProperty(String name) {
             return new Importance(this);
         }
         
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             Importance property = new Importance(parameters, this, value);
             return property;

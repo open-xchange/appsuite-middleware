@@ -99,3 +99,4 @@ Import-Package: com.google.common.collect,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.impl.osgi.ChronosActivator
+Automatic-Module-Name: com.openexchange.chronos.impl

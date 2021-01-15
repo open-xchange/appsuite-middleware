@@ -133,6 +133,13 @@ public final class ParserTools {
         return value.getDate() instanceof DateTime;
     }
 
+    /**
+     * Returns whether the specified property is in UTC
+     *
+     * @param dateProperty The date property
+     * @param timeZone The timezone
+     * @return <code>true</cod> if the date is in UTC timezone; <code>false</code> otherwise 
+     */
     public static boolean inDefaultTimeZone(final DateProperty dateProperty, final TimeZone timeZone) {
         if (dateProperty.getParameter("TZID") != null) {
             return false;
@@ -180,6 +187,13 @@ public final class ParserTools {
         return inTimeZone.getTime();
     }
 
+    /**
+     * Converts the specified {@link DateProperty} to {@link Date} 
+     *
+     * @param dateProperty The date property to convert
+     * @param tz The timezone
+     * @return The {@link Date}
+     */
     public static Date toDate(final DateProperty dateProperty, final TimeZone tz) {
         return new Date(dateProperty.getDate().getTime());
     }

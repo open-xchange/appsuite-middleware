@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.converter;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
@@ -75,6 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EventsPerFolderResultConverter extends EventResultConverter {
 
+    @SuppressWarnings("hiding")
     public static final String INPUT_FORMAT = "eventsResults";
 
     /**

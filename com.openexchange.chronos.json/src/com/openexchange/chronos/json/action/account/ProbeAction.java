@@ -79,6 +79,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @RestrictedAction(type = RestrictedAction.Type.READ, module = ProbeAction.MODULE)
 public class ProbeAction extends ChronosAction {
 
+    @SuppressWarnings("hiding")
     public static final String MODULE = "calendar";
 
     /**

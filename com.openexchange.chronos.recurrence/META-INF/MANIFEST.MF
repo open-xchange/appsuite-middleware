@@ -24,3 +24,4 @@ Import-Package: com.openexchange.chronos,
  org.dmfs.rfc5545.recurrenceset,
  org.osgi.framework,
  org.slf4j
+Automatic-Module-Name: com.openexchange.chronos.recurrence

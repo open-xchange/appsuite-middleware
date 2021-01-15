@@ -64,6 +64,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class ChronosActionFactory implements AJAXActionServiceFactory {
 

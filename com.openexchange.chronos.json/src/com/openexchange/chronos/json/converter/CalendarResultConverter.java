@@ -86,6 +86,7 @@ public class CalendarResultConverter extends EventResultConverter {
         super(services);
     }
 
+    @SuppressWarnings("hiding")
     public static final String INPUT_FORMAT = "calendarResult";
 
     @Override
