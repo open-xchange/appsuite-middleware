@@ -64,6 +64,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link UserizedFileStorageFolder}
@@ -90,7 +91,8 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setExists(true);
         setId(folder.getID());
         setLastModifiedDate(folder.getLastModifiedUTC());
-        String defaultName = folder.getLocalizedName(folder.getLocale(), folder.isAltNames());
+        String defaultName = folder.getLocalizedName(LocaleTools.DEFAULT_LOCALE, folder.isAltNames());
+        // String defaultName = folder.getLocalizedName(folder.getLocale(), folder.isAltNames());
         setName(null != defaultName ? defaultName : folder.getName());
         setParentId(folder.getParentID());
         setPermissions(getFileStoragePermissions(folder.getPermissions()));
