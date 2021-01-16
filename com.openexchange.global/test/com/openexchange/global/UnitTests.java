@@ -78,7 +78,8 @@ import com.openexchange.tools.filename.MWB_692;
     com.openexchange.tools.filename.Bug56499Test.class,
     com.openexchange.tools.filename.Bug58052Test.class,
     I18nServiceRegistryTest.class,
-    MWB_692.class
+    MWB_692.class,
+    org.json.JSONInputStreamTest.class
 })
 public class UnitTests {
 }
