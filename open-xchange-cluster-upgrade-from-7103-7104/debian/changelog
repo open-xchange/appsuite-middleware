@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-7103-7104 (7.10.5-3) stable; urgency=medium
+
+  * First candidate for 7.10.5 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 15 Jan 2021 12:45:25 +0000
+
 open-xchange-cluster-upgrade-from-7103-7104 (7.10.5-2) stable; urgency=medium
 
   * Second preview of 7.10.5 release
