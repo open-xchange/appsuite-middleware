@@ -453,7 +453,8 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             // Delete associated composition space (and rename shared attachments folder)
             if (deleteAfterTransport) {
                 try {
-                    if (result.getMeta().getType() == MetaType.EDIT && false == MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
+                    MailPath editFor = result.getMeta().getEditFor();
+                    if (null != editFor && false == MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
                         // Draft mail should NOT be deleted
                         LOG.debug("Keeping draft mail '{}' associated with composition space '{}' after transport", association.getDraftPath(), getUnformattedString(compositionSpaceId));
                         MailStorageResult<MailPath> saveAsDraftResult = mailStorage.saveAsFinalDraft(association, ClientToken.NONE, serverSession);
