@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-12-13 18:19+0800\n"
+"PO-Revision-Date: 2021-01-14 21:54+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -1002,82 +1002,86 @@ msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "約會重複日期已變更至: %1$s。"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The appointment series now ends on %1$s."
+msgstr "此系列約會將於 %1$s 結束。"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr "約會時間調整。原日期/時間：%1$s，新日期/時間：%2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "Resources"
 msgstr "資源"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "The entire day"
 msgstr "全日"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "New appointment: %1$s"
 msgstr "新約會: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
 msgid "Appointment changed: %1$s"
 msgstr "約會已更改: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
 msgid "Appointment canceled: %1$s"
 msgstr "約會已取消: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
 msgid "Proposed changes for appointment: %1$s"
 msgstr "已提議修改約會: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:330
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:332
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s 已因下列原因將狀態設定為「無」: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s 已 %2$s 邀請: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
 msgid "Resend the invitation for: %1$s"
 msgstr "重送邀請給: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
 msgid "Change not accepted for: %1$s"
 msgstr "更改未被接受: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
 msgid "All times will be shown in the timezone %1$s"
 msgstr "所有時刻以 %1$s 時區顯示"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:342
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:344
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s 已經 %2$s 約會，但同時想提出一個反提案: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "因為您為此約會的主席所以收到這封信。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "因為您為此約會的發起人所以收到這封信。"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:351
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
 msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這封信。"
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:352
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:354
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -1086,35 +1090,35 @@ msgstr "您收到一封包含不是您主辦的約會的相關回復，最好忽
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:357
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:359
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr "約會主辦人已變更，新主辦人是: %1$s"
 
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:362
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:364
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr "約會主辦人已變更，不允許此操作。"
 
 #. * Used when there are multiple changes in the appointment's conference properties
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:365
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:367
 msgid "The meeting access information was changed."
 msgstr "會議存取資訊已變更。"
 
 #. * Used when there is one particular conference property in the appointment with URI
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:368
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:370
 msgid "The meeting access information was changed: %1$s;"
 msgstr "會議存取資訊已變更：%1$s；"
 
 #. * Used when there is one particular conference property in the appointment with URI and additional label
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:371
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:373
 msgid "The meeting access information was changed. %1$s: %2$s"
 msgstr "會議存取資訊已變更。%1$s：%2$s"
 
 #. * Used when all conference properties in the appointment were removed
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:374
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:376
 msgid "The meeting access information was removed."
 msgstr "會議存取資訊已移除。"
 
@@ -1940,7 +1944,7 @@ msgstr "內部連絡人"
 #.
 #: com.openexchange.contact.provider/src/com/openexchange/contact/provider/ContactsProviderExceptionMessages.java:65
 msgid "The requested contact account was not found."
-msgstr "找不到要求的聯絡人帳號"
+msgstr "找不到要求的聯絡人帳號。"
 
 #. *
 #. * The contacts provider '%1$s' is not available.
@@ -3131,24 +3135,24 @@ msgstr "移動至帳號「%3$s」後，「%2$s」資料夾將無法再被其他�
 msgid ""
 "The file \"%1$s\" was not updated due to possible data loss. Please review "
 "the warnings for details."
-msgstr "因為可能已損失資料，並未更新「%1$s」檔案。請參考警告中的詳細資訊。"
+msgstr "資料可能已有損失，並未更新 \"%1$s\" 檔案。請確認警告資訊中的紀錄。"
 
 #. The file(s) were not moved due to possible data loss. Please review the warnings for details.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:119
 msgid ""
 "The file(s) were not moved due to possible data loss. Please review the "
 "warnings for details."
-msgstr "可能資料已有損失，檔案並未移動。請確認警告資訊中的紀錄。"
+msgstr "資料可能已有損失，並未移動檔案。請確認警告資訊中的紀錄。"
 
 #. The %1$s URL does not denote a file: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
 msgid "The %1$s URL does not denote a file: %1$s"
-msgstr "%1$s 網址不是一個檔案: %1$s"
+msgstr "%1$s 網址不是一個檔案：%1$s"
 
 #. The %1$s URL does not denote a directory: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:125
 msgid "The %1$s URL does not denote a directory: %2$s"
-msgstr "%1$s 網址不是一個資料夾: %2$s"
+msgstr "%1$s 網址不是一個資料夾：%2$s"
 
 #. Missing file name.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:128
@@ -3159,12 +3163,12 @@ msgstr "缺少檔案名。"
 #. Update denied for %1$s resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Update denied for \"%1$s\" resource: %2$s"
-msgstr "更新「%1$s」資源被拒絕: %2$s"
+msgstr "更新 \"%1$s\" 資源被拒絕：%2$s"
 
 #. Delete denied for \"%1$s\" resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
 msgid "Delete denied for \"%1$s\" resource: %2$s"
-msgstr "刪除「%1$s」資源被拒絕: %2$s"
+msgstr "刪除 \"%1$s\" 資源被拒絕：%2$s"
 
 #. Missing configuration for %1$s account "%2$s".
 #. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
@@ -3176,7 +3180,7 @@ msgstr "缺少 %1$s 帳號的設定「%2$s」。"
 #. The provided %1$s resource does not exist: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The provided %1$s resource does not exist: %2$s"
-msgstr "提供的 %1$s 資源不存在: %2$s"
+msgstr "提供的 %1$s 資源不存在：%2$s"
 
 #. Authentication failed. Please check the provided credentials and try again.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
@@ -3282,8 +3286,8 @@ msgid ""
 "With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
 "\"%3$s\" people will lose access."
 msgstr ""
-"將檔案 \"%1$s\" 從分享資料夾 \"%2$s \" 移出至 \"%3$s\"，部分人員將失去存取權"
-"限"
+"將檔案 \"%1$s\" 從分享資料夾 \"%2$s\" 移出至 \"%3$s\"，部分人員將失去存取權"
+"限。"
 
 #. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
@@ -3308,7 +3312,7 @@ msgstr "移動檔案 \"%1$s\" 後，將失去它的存取權限設定。"
 #. The account could not be updated 1$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:208
 msgid "The account could not be updated: 1$s"
-msgstr "無法更新帳號: %1$s"
+msgstr "無法更新帳號：%1$s"
 
 #. Searching folder by folder name is not supported
 #. User tries to search folder by folder name, but that functionality is not supported
@@ -3316,6 +3320,11 @@ msgstr "無法更新帳號: %1$s"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
 msgid "Searching folder by folder name is not supported"
 msgstr "不支援以資料夾名稱搜尋資料夾"
+
+#. The maximum number of accounts is exceeded.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:214
+msgid "The maximum number of accounts is exceeded."
+msgstr "已達最大帳號數量。"
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4853,6 +4862,11 @@ msgid ""
 "Update of folder failed. Owner is required to keep administrative rights."
 msgstr "資料夾更新失敗。需要擁有者才能保留管理權限。"
 
+#: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Too many messages requested (limit is %1$s). Please query a smaller range."
+msgstr "要求了太多訊息（限制為 %1$s），請查詢小一點的範圍。"
+
 #. The specified group \"%4$s\" is not supported.
 #: com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
 msgid "The specified group \"%4$s\" is not supported."
@@ -5950,7 +5964,7 @@ msgstr "無法刪除資料夾 %1$s"
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:132
 msgid "POP3 default folder %1$s could not be created"
-msgstr "無法建立預設  POP3 資料夾 %1$s"
+msgstr "無法建立預設 POP3 資料夾 %1$s"
 
 #. *
 #. * Missing default %1$s folder in user mail settings
@@ -5964,7 +5978,7 @@ msgstr "在用戶郵件設置中缺少預設 %1$s 文件夾"
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:140
 msgid "Update of folder %1$s failed"
-msgstr "更新 %1$d 資料夾失敗"
+msgstr "更新 %1$s 資料夾失敗"
 
 #. *
 #. * Folder %1$s must not be deleted
@@ -6166,7 +6180,7 @@ msgstr "伺服器不支援草稿。"
 msgid ""
 "The POP3 storage name is missing for user %1$s. Please provide one and try "
 "again."
-msgstr "使用者  %1$S 缺少 POP3 儲存空間名稱，請指定一個並再試一次。"
+msgstr "使用者 %1$s 缺少 POP3 儲存空間名稱，請指定一個並再試一次。"
 
 #. *
 #. * Missing POP3 storage for user %1$s in context %2$s.
@@ -6237,7 +6251,7 @@ msgstr ""
 msgid ""
 "The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be "
 "created for user %2$s"
-msgstr "POP3 儲存路徑無效。無法為使用者 %2$s 建立POP3 儲存路徑「%1$s」"
+msgstr "POP3 儲存路徑無效。無法為使用者 %2$s 建立 POP3 儲存路徑 \"%1$s\""
 
 #. *
 #. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
@@ -9969,14 +9983,14 @@ msgstr "包含要用來分享的資料夾，與資料夾中可用的附件並不
 #. *
 #. * The description of the read-only scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:65
 msgid "Read all your mails"
 msgstr "讀取您的所有郵件"
 
 #. *
 #. * The description of the writable scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:70
 msgid "Create, modify, delete, import and send mails"
 msgstr "建立、編輯、刪除、匯入與寄出郵件"
 
@@ -10932,72 +10946,103 @@ msgstr "找不到指示符為 %1$s 的工作階段"
 msgid "guest"
 msgstr "訪客"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:64
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
-msgid "file"
-msgstr "檔案"
-
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:66
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
-msgid "folder"
-msgstr "資料夾"
-
 #. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:65
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"%1$s has shared the folder \"%2$s\" with you. Please enter the share "
+"password to view it."
+msgstr "%1$s 已與您分享 \"%2$s\" 資料夾。請輸入共享密碼即可開啟檢視。"
+
+#. John Doe has shared the file "document.pdf" with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
-msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入共享密碼即可開啟檢視。"
+msgstr "%1$s 已與您分享 \"%2$s\" 檔案。請輸入共享密碼即可開啟檢視。"
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+"%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
 "view it."
-msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入您的密碼即可開啟檢視。"
+msgstr "%1$s 已與您分享 \"%2$s\" 資料夾。請輸入您的密碼即可開啟檢視。"
+
+#. John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter your password to "
+"view it."
+msgstr "%1$s 已與您分享 \"%2$s\" 檔案。請輸入您的密碼即可開啟檢視。"
+
+#. The folder "Photos" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
+msgid ""
+"The folder \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr "有人分享 \"%1$s\" 資料夾給您。請輸入共享密碼即可開啟檢視。"
+
+#. The file "document.pdf" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr "有人分享 \"%1$s\" 檔案給您。請輸入共享密碼即可開啟檢視。"
+
+#. The folder "Photos" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
+msgid ""
+"The folder \"%1$s\" is shared with you. Please enter your password to view "
+"it."
+msgstr "有人分享 \"%1$s\" 資料夾給您。請輸入您的密碼即可開啟檢視。"
+
+#. The file "document.pdf" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter your password to view it."
+msgstr "有人分享 \"%1$s\" 檔案給您。請輸入您的密碼即可開啟檢視。"
 
 #. Login when opening a share protected with a password
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
 msgid "Please enter your password to log into this account."
 msgstr "請輸入您的密碼，以登入此帳號。"
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 msgstr "我們已傳送訊息到 %1$s，當中包含如何設定新密碼的詳細資訊。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid "Please set a new password to regain access."
 msgstr "請設定新密碼以恢復使用權限。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid "The share you are looking for does not exist."
 msgstr "您正尋找的分享內容不存在。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:98
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "無法以網頁瀏覽器存取此分享。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
 msgid "We were unable to process your request."
 msgstr "我們無法處理您的請求。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
 msgstr "您尋找的資料夾或物件已不再可用，請點擊「繼續」以檢視其他的分享項目。"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:104
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
 msgstr "您的訪客帳號目前並未以密碼保護，將中止密碼重設。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:107
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11005,14 +11050,14 @@ msgstr ""
 "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:110
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:113
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11021,7 +11066,7 @@ msgstr ""
 "者。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:116
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11029,21 +11074,21 @@ msgstr ""
 "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:119
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:122
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
 msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:125
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11053,7 +11098,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:128
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11063,7 +11108,7 @@ msgstr ""
 "您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:131
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11073,7 +11118,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:134
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11083,7 +11128,7 @@ msgstr ""
 "視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:137
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11093,7 +11138,7 @@ msgstr ""
 "他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:140
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11103,7 +11148,7 @@ msgstr ""
 "分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:143
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11113,7 +11158,7 @@ msgstr ""
 "要檢視您其他分享的檔案，請登入。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:146
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11122,7 +11167,7 @@ msgstr ""
 "您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:149
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11132,7 +11177,7 @@ msgstr ""
 "者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:152
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -11142,7 +11187,7 @@ msgstr ""
 "視您其他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:155
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11152,7 +11197,7 @@ msgstr ""
 "他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:158
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11242,8 +11287,8 @@ msgid "You don't have sufficient permissions to subscribe to a share."
 msgstr "您沒有足夠的權限來訂閱分享內容。"
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
-msgid "Subscribing to a single file is not allowed"
-msgstr "不允許訂閱單一檔案"
+msgid "Subscribing to a single file is not supported"
+msgstr "不支援訂閱單一檔案"
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
 msgid "You are not allowed to subscribe to a share for %1$s"
@@ -11260,6 +11305,14 @@ msgstr "您未被允許取消訂閱 %1$s 資料夾"
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "圖片"
+
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
+msgid "file"
+msgstr "檔案"
+
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
+msgid "folder"
+msgstr "資料夾"
 
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:69
 msgid "calendar"
@@ -11844,6 +11897,26 @@ msgstr "已達簽名檔中能包含的圖片數量「%1$s」。"
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "您不被允許修改簽名"
+
+#. The user entered a very long display name, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:86
+msgid "The entered display name is too long. Please use a shorter one."
+msgstr "輸入的顯示名稱太長，請縮短一點。"
+
+#. The user entered a very long snippet identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:89
+msgid "The entered identifier is too long. Please use a shorter one."
+msgstr "輸入的指示符太長，請縮短一點。"
+
+#. The user entered a very long module identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:92
+msgid "The entered module identifier is too long. Please use a shorter one."
+msgstr "輸入的模組指示符太長，請縮短一點。"
+
+#. The user entered a very long type identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:95
+msgid "The entered type identifier is too long. Please use a shorter one."
+msgstr "輸入的類型指示符太長，請縮短一點。"
 
 #: com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
@@ -14385,6 +14458,29 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
+#~ "password to view it."
+#~ msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入共享密碼即可開啟檢視。"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+#~ "view it."
+#~ msgstr "%1$s 已與您分享「%3$s」%2$s。請輸入您的密碼即可開啟檢視。"
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+#~ "view it."
+#~ msgstr "已與您分享「%2$s」%1$s。請輸入共享密碼來檢視。"
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter your password to view "
+#~ "it."
+#~ msgstr "已與您分享「%2$s」%1$s。請輸入您的密碼來檢視。"
+
+#~ msgid "Subscribing to a single file is not allowed"
+#~ msgstr "不允許訂閱單一檔案"
 
 #~ msgid "The given iCal file contains too many entities."
 #~ msgstr "提供的 iCal 檔案有太多實體。"
