@@ -1,3 +1,9 @@
+open-xchange-parallels (7.10.3-31) stable; urgency=medium
+
+  * Build for patch 2021-01-25 (5936)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Jan 2021 15:26:11 +0000
+
 open-xchange-parallels (7.10.3-30) stable; urgency=medium
 
   * Build for patch 2021-01-11 (5931)
