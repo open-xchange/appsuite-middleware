@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -708,13 +709,19 @@ public final class FolderWriter {
         });
         m.put(FolderField.USED_FOR_SYNC.getColumn(), new FolderFieldWriter() {
 
+            private final JSONObject defaultJUsedForSync = ImmutableJSONObject.immutableFor(new JSONObject(2).putSafe("value", "true").putSafe("protected", "false"));
+
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-                JSONObject value = new JSONObject();
                 UsedForSync usedForSync = folder.getUsedForSync();
-                value.put("value", String.valueOf(usedForSync==null ? Boolean.TRUE : Boolean.valueOf(usedForSync.isUsedForSync())));
-                value.put("protected", String.valueOf(usedForSync==null ? Boolean.FALSE : Boolean.valueOf(usedForSync.isProtected())));
-                jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, value);
+                if (usedForSync == null) {
+                    jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, defaultJUsedForSync);
+                } else {
+                    JSONObject jUsedForSync = new JSONObject(2);
+                    jUsedForSync.put("value", String.valueOf(usedForSync.isUsedForSync()));
+                    jUsedForSync.put("protected", String.valueOf(usedForSync.isProtected()));
+                    jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, jUsedForSync);
+                }
             }
         });
         // Capabilities
