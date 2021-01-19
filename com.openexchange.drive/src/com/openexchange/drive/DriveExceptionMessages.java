@@ -97,6 +97,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String FILE_ALREADY_EXISTS_MSG = "A file named \"%1$s\" already exists at \"%2$s\".";
     public static final String DIRECTORY_ALREADY_EXISTS_MSG = "A directory named \"%1$s\" already exists at \"%2$s\".";
     public static final String LONG_POLLING_DISABLED_MSG = "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\"";
+    public static final String NOT_ACCESSIBLE_DIRECTORY_MSG = "The directory is no longer accessible. Please select another directory.";
 
     /**
      * Prevent instantiation.
