@@ -182,37 +182,21 @@ public class DriveServiceImpl implements DriveService {
          */
         DriveConfig driveConfig = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         if (session.getApiVersion() < driveConfig.getMinApiVersion()) {
-            OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
-            LOG.debug("Client synchronization aborted for {}", session, error);
-            List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
-            actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
-            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+            return getErrorResult(session, DriveExceptionCodes.CLIENT_OUTDATED.create(), true);
         }
         DriveClientVersion clientVersion = session.getClientVersion();
         if (null != clientVersion) {
             DriveClientVersion hardVersionLimit = driveConfig.getHardMinimumVersion(session.getClientType(), serverSession);
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
-                OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
-                LOG.debug("Client synchronization aborted for {}", session, error);
-                List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
-                actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
-                return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+                return getErrorResult(session, DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit), true);
             }
         }
         if (false == DriveUtils.isSynchronizable(session.getRootFolderID(), driveConfig)) {
-            OXException error = DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID());
-            LOG.debug("Client synchronization aborted for {}", session, error);
-            List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
-            actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
-            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+            return getErrorResult(session, DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID()), true);
         }
         int maxDirectories = driveConfig.getMaxDirectories();
         if (-1 != maxDirectories && null != clientVersions && maxDirectories < clientVersions.size()) {
-            OXException error = DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(maxDirectories));
-            LOG.debug("Client synchronization aborted for {}", session, error);
-            List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
-            actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
-            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+            return getErrorResult(session, DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(maxDirectories)), true);
         }
         /*
          * sync folders
@@ -224,20 +208,29 @@ public class DriveServiceImpl implements DriveService {
         int retryCount = 0;
         while (true) {
             /*
-             * get server directories
+             * init sync session & check root folder validity
              */
             final SyncSession driveSession = new SyncSession(session);
+            FileStorageFolder rootFolder;
+            try {
+                rootFolder = driveSession.getStorage().getFolder(DriveConstants.ROOT_PATH);
+            } catch (OXException e) {
+                if ("FLD-0003".equals(e.getErrorCode()) || "FLD-0008".equals(e.getErrorCode())) { // folder not found, folder not visible
+                    return getErrorResult(session, DriveExceptionCodes.NOT_ACCESSIBLE_DIRECTORY.create(session.getRootFolderID()), true);
+                }
+                throw e;
+            }
+            if (driveSession.getStorage().isExcludedSubfolder(rootFolder, DriveConstants.ROOT_PATH)) {
+                return getErrorResult(driveSession, DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID()), true);
+            }
+            /*
+             * get server directories
+             */
             try {
                 serverVersions = serverVersionsProvider.getVersions(driveSession);
             } catch (OXException e) {
                 if ("DRV-0035".equals(e.getErrorCode())) {
-                    /*
-                     * Maximum number of synchronizable directories exceeded - stop synchronization
-                     */
-                    LOG.debug("Client synchronization aborted for {}", session, e);
-                    List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
-                    actionsForClient.add(new ErrorDirectoryAction(null, null, null, e, false, true));
-                    return new DefaultSyncResult<DirectoryVersion>(actionsForClient, e.getLogMessage());
+                    return getErrorResult(driveSession, e, true); // Too many directories
                 }
                 if (tryAgain(driveSession, e, retryCount, "Error collecting server directories")) {
                     retryCount++;
@@ -313,33 +306,42 @@ public class DriveServiceImpl implements DriveService {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
-        int maxFilesPerDirectory = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId()).getMaxFilesPerDirectory();
+        DriveConfig driveConfig = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
+        int maxFilesPerDirectory = driveConfig.getMaxFilesPerDirectory();
         if (-1 != maxFilesPerDirectory && null != clientVersions && maxFilesPerDirectory < clientVersions.size()) {
-            OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path);
-            LOG.debug("Client synchronization aborted for {}", session, error);
-            List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>(1);
-            actionsForClient.add(new ErrorFileAction(null, null, null, path, error, false, true));
-            return new DefaultSyncResult<FileVersion>(actionsForClient, error.getLogMessage());
+            return getErrorResult(session, path, DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path), true);
+        }
+        if (false == DriveUtils.isSynchronizable(session.getRootFolderID(), driveConfig)) {
+            return getErrorResult(session, path, DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID()), true);
         }
         int retryCount = 0;
         while (true) {
             /*
-             * get server files
+             * init sync session & check root folder validity
              */
             final SyncSession driveSession = new SyncSession(session);
+            FileStorageFolder rootFolder;
+            try {
+                rootFolder = driveSession.getStorage().getFolder(DriveConstants.ROOT_PATH);
+            } catch (OXException e) {
+                if ("FLD-0003".equals(e.getErrorCode()) || "FLD-0008".equals(e.getErrorCode())) { // folder not found, folder not visible
+                    return getErrorResult(session, path, DriveExceptionCodes.NOT_ACCESSIBLE_DIRECTORY.create(session.getRootFolderID()), true);
+                }
+                throw e;
+            }
+            if (driveSession.getStorage().isExcludedSubfolder(rootFolder, DriveConstants.ROOT_PATH)) {
+                return getErrorResult(driveSession, path, DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID()), true);
+            }
+            /*
+             * get server files in path
+             */
             driveSession.getStorage().createFolder(path);
             List<ServerFileVersion> serverVersions;
             try {
                 serverVersions = driveSession.getServerFiles(path, maxFilesPerDirectory);
             } catch (OXException e) {
                 if ("DRV-0036".equals(e.getErrorCode())) {
-                    /*
-                     * Maximum number of synchronizable files exceeded - stop synchronization
-                     */
-                    LOG.debug("Client synchronization aborted for {}", session, e);
-                    List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>(1);
-                    actionsForClient.add(new ErrorFileAction(null, null, null, path, e, false, true));
-                    return new DefaultSyncResult<FileVersion>(actionsForClient, e.getLogMessage());
+                    return getErrorResult(driveSession, path, e, true); // too many files
                 }
                 if (tryAgain(driveSession, e, retryCount, "Error collecting server files")) {
                     retryCount++;
@@ -717,6 +719,82 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return DriveUtilityImpl.getInstance();
+    }
+
+    /**
+     * Wraps an exception into an appropriate <code>error</code> action for the client, optionally setting the <code>stop</code> flag.
+     * <p/>
+     * An appropriate debug error message is logged implicitly, and the sync result is traced if enabled.
+     *
+     * @param session The sync session
+     * @param path The path to the currently synchronized directory
+     * @param error The error to take over for the action
+     * @param stop <code>true</code> to set the <code>stop</code>-flag in the error action, <code>false</code>, otherwise
+     * @return A sync result holding the error action
+     */
+    private static DefaultSyncResult<FileVersion> getErrorResult(SyncSession session, String path, OXException error, boolean stop) {
+        LOG.debug("Client synchronization aborted for {}", session, error);
+        IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
+        syncResult.addActionForClient(new ErrorFileAction(null, null, null, path, error, false, stop));
+        if (session.isTraceEnabled()) {
+            session.trace(syncResult);
+        }
+        return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), session.getDiagnosticsLog());
+    }
+
+    /**
+     * Wraps an exception into an appropriate <code>error</code> action for the client, optionally setting the <code>stop</code> flag.
+     * <p/>
+     * An appropriate debug error message is logged implicitly, and the sync result is traced if enabled.
+     *
+     * @param session The sync session
+     * @param error The error to take over for the action
+     * @param stop <code>true</code> to set the <code>stop</code>-flag in the error action, <code>false</code>, otherwise
+     * @return A sync result holding the error action
+     */
+    private static DefaultSyncResult<DirectoryVersion> getErrorResult(SyncSession session, OXException error, boolean stop) {
+        LOG.debug("Client synchronization aborted for {}", session, error);
+        IntermediateSyncResult<DirectoryVersion> syncResult = new IntermediateSyncResult<DirectoryVersion>();
+        syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, stop));
+        if (session.isTraceEnabled()) {
+            session.trace(syncResult);
+        }
+        return new DefaultSyncResult<DirectoryVersion>(syncResult.getActionsForClient(), session.getDiagnosticsLog());
+    }
+
+    /**
+     * Wraps an exception into an appropriate <code>error</code> action for the client, optionally setting the <code>stop</code> flag.
+     * <p/>
+     * An appropriate debug error message is logged implicitly.
+     *
+     * @param session The drive session
+     * @param path The path to the currently synchronized directory
+     * @param error The error to take over for the action
+     * @param stop <code>true</code> to set the <code>stop</code>-flag in the error action, <code>false</code>, otherwise
+     * @return A sync result holding the error action
+     */
+    private static DefaultSyncResult<FileVersion> getErrorResult(DriveSession session, String path, OXException error, boolean stop) {
+        LOG.debug("Client synchronization aborted for {}", session, error);
+        List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>(1);
+        actionsForClient.add(new ErrorFileAction(null, null, null, path, error, false, stop));
+        return new DefaultSyncResult<FileVersion>(actionsForClient, error.getLogMessage());
+    }
+
+    /**
+     * Wraps an exception into an appropriate <code>error</code> action for the client, optionally setting the <code>stop</code> flag.
+     * <p/>
+     * An appropriate debug error message is logged implicitly.
+     *
+     * @param session The drive session
+     * @param error The error to take over for the action
+     * @param stop <code>true</code> to set the <code>stop</code>-flag in the error action, <code>false</code>, otherwise
+     * @return A sync result holding the error action
+     */
+    private static DefaultSyncResult<DirectoryVersion> getErrorResult(DriveSession session, OXException error, boolean stop) {
+        LOG.debug("Client synchronization aborted for {}", session, error);
+        List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+        actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
+        return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
     }
 
 }
