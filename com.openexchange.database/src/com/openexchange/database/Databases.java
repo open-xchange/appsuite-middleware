@@ -1022,8 +1022,6 @@ public final class Databases {
      * @param statement The statement to execute
      * @param producer The producer to produce the result object
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @param rc The consumer of the result to use transform into a concrete java object
-     * @param valueSetters The valueSetters to fill the statement with variables
      * @return The result
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
@@ -1108,6 +1106,7 @@ public final class Databases {
             connection.setAutoCommit(false);
             rollback = 1;
             result = executeUpdate(connection, statement, valueSetters);
+            connection.commit();
             rollback = 2;
             return result;
         } finally {
