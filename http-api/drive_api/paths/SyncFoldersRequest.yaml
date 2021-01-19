@@ -183,6 +183,39 @@
                   }
                 ]
               }
+      - Example3: null
+        description: Example with error (not synchronizable root folder)
+        example: >
+          ==> PUT
+          http://drive.local.ox/ajax/drive?action=syncfolders&root=41766&session=eb280e1624bd48f3b236b1dc815eb443
+            > Content:
+              {
+                "clientVersions" : [],
+                "originalVersions" : []
+              }
+            
+          <== HTTP 200 OK (4.3595 ms elapsed, 379 bytes received)
+
+          <   Content: 
+              {
+                "data" : [{
+                    "action": "error",
+                    "stop": true,
+                    "quarantine": false,
+                    "error": {
+                      "error": "The directory is no longer accessible. Please select another directory.",
+                      "error_params": [
+                        "41768"
+                      ],
+                      "categories": "USER_INPUT",
+                      "category": 1,
+                      "code": "DRV-0044",
+                      "error_id": "1891144233-6",
+                      "error_desc": "Directory 41768 not accessible."
+                    }
+                  }
+                ]
+              }
     requestBody:
       content:
         application/json:
