@@ -429,10 +429,10 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         if (null != optStorageIdentifier) {
             try {
                 if (false == deleteData(optStorageIdentifier, session)) {
-                    LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier);
+                    LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier.getIdentifier());
                 }
             } catch (Exception e) {
-                LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier, e);
+                LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier.getIdentifier(), e);
             }
         }
     }
