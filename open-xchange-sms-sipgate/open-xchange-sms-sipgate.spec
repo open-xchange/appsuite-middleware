@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,8 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
+* Tue Jan 19 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2021-01-25 (5937)
 * Tue Jan 05 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2021-01-11 (5930)
 * Wed Dec 09 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
