@@ -71,6 +71,7 @@ import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_PA
 import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_DISABLED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.METDATA_PARSE_ERROR_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.NOT_ACCESSIBLE_DIRECTORY_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NOT_SYNCHRONIZABLE_DIRECTORY_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_FILE_PERMISSION_MSG;
@@ -230,6 +231,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Push via long polling is disabled for user \"%1$s\" in context \"%2$s\". */
     LONG_POLLING_DISABLED("Push via long polling is disabled for user \"%1$s\" in context \"%1$s\".", LONG_POLLING_DISABLED_MSG, Category.CATEGORY_CONFIGURATION, 43),
+
+    /** Directory %1$s not accessible. */
+    NOT_ACCESSIBLE_DIRECTORY("Directory %1$s not accessible.", NOT_ACCESSIBLE_DIRECTORY_MSG, Category.CATEGORY_USER_INPUT, 44),
 
     ;
 
