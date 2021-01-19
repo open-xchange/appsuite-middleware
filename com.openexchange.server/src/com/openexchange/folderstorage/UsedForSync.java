@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link UsedForSync}
+ * {@link UsedForSync} - Provides information whether a folder is used for synchronization or not.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.4
@@ -58,18 +58,31 @@ package com.openexchange.folderstorage;
 public class UsedForSync {
 
     /**
-     * The default {@link UsedForSync} value
+     * The default {@link UsedForSync} value.
      */
     public static final UsedForSync DEFAULT = new UsedForSync(true, false);
+
     /**
-     * The {@link UsedForSync} value in case it is deactivated
+     * The {@link UsedForSync} value in case it is deactivated.
      */
     public static final UsedForSync DEACTIVATED = new UsedForSync(false, true);
 
     /**
-     * The {@link UsedForSync} value for always activated
+     * The {@link UsedForSync} value for always activated.
      */
     public static final UsedForSync FORCED_ACTIVE = new UsedForSync(true, true);
+
+    /**
+     * Creates an unprotected {@link UsedForSync} object with the given value.
+     *
+     * @param isUsedForSync Whether the folder is used for synchronization or not
+     * @return The unprotected {@link UsedForSync} value
+     */
+    public static UsedForSync of(boolean isUsedForSync) {
+        return new UsedForSync(isUsedForSync, false);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final boolean value;
     private final boolean isProtected;
@@ -77,7 +90,7 @@ public class UsedForSync {
     /**
      * Initializes a new {@link UsedForSync}.
      *
-     * @param isUsedForSync Whether the folder is used for sync or not
+     * @param isUsedForSync Whether the folder is used for synchronization or not
      * @param isProtected Whether this field is protected or not
      */
     public UsedForSync(boolean isUsedForSync, boolean isProtected) {
@@ -87,29 +100,19 @@ public class UsedForSync {
     }
 
     /**
-     * Whether the folder is used for sync or not
+     * Whether the folder is used for synchronization or not.
      */
     public boolean isUsedForSync() {
         return value;
     }
 
     /**
-     * Whether this value is protected
+     * Whether this value is protected.
      *
      * @return <code>true</code> if this value is protected, <code>false</code> otherwise
      */
     public boolean isProtected() {
         return isProtected;
-    }
-
-    /**
-     * Creates an unprotected {@link UsedForSync} object with the given value
-     *
-     * @param isUsedForSync Whether the folder is used for sync or not
-     * @return The unprotected {@link UsedForSync} value
-     */
-    public static UsedForSync of(boolean isUsedForSync) {
-        return new UsedForSync(isUsedForSync, false);
     }
 
     @Override

@@ -709,7 +709,11 @@ public final class FolderWriter {
         });
         m.put(FolderField.USED_FOR_SYNC.getColumn(), new FolderFieldWriter() {
 
-            private final JSONObject defaultJUsedForSync = ImmutableJSONObject.immutableFor(new JSONObject(2).putSafe("value", "true").putSafe("protected", "false"));
+            private final JSONObject defaultJUsedForSync = ImmutableJSONObject.immutableFor(
+                new JSONObject(2)
+                .putSafe("value", String.valueOf(UsedForSync.DEFAULT.isUsedForSync()))
+                .putSafe("protected", String.valueOf(UsedForSync.DEFAULT.isProtected()))
+            );
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
