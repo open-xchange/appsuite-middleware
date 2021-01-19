@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.compose.impl;
 
-import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.java.util.UUIDs.getUnformattedStringObjectFor;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
@@ -59,7 +59,6 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentResult;
@@ -126,10 +125,10 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
         try {
             if (autoDeleteIfKeyIsMissing(session)) {
                 delegate.closeCompositionSpace(compositionSpaceUUID, true, ClientToken.NONE);
-                LoggerHolder.LOG.debug("Closed composition space '{}' due to missing key and enabled option \"com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing\"", getUnformattedString(compositionSpaceUUID));
+                LoggerHolder.LOG.debug("Closed composition space '{}' due to missing key and enabled option \"com.openexchange.mail.compose.security.autoDeleteIfKeyIsMissing\"", getUnformattedStringObjectFor(compositionSpaceUUID));
             }
         } catch (Exception e) {
-            LoggerHolder.LOG.debug("Failed to delete compositon space {} due to missing key", UUIDs.getUnformattedString(compositionSpaceUUID), e);
+            LoggerHolder.LOG.debug("Failed to delete compositon space {} due to missing key", getUnformattedStringObjectFor(compositionSpaceUUID), e);
         }
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.java.util.UUIDs.getUnformattedStringObjectFor;
 import static com.openexchange.mail.compose.AttachmentResults.attachmentResultFor;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.Closeable;
@@ -664,7 +665,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             try {
                 boolean closed = removeCompositionSpaceFromStorage(compositionSpaceId);
                 if (closed) {
-                    LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
+                    LOG.debug("Closed composition space '{}' after transport", getUnformattedStringObjectFor(compositionSpaceId));
                 } else {
                     LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
                 }
@@ -983,7 +984,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 try {
                     boolean closed = removeCompositionSpaceFromStorage(compositionSpaceId);
                     if (closed) {
-                        LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedString(compositionSpaceId));
+                        LOG.debug("Closed composition space '{}' after saved as draft", getUnformattedStringObjectFor(compositionSpaceId));
                     } else {
                         LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", getUnformattedString(compositionSpaceId));
                     }
@@ -1532,13 +1533,13 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Determine the meta information for the message (draft)
             if (Type.NEW == type) {
-                LOG.debug("Opening new composition space '{}'", getUnformattedString(uuid));
+                LOG.debug("Opening new composition space '{}'", getUnformattedStringObjectFor(uuid));
                 message.setMeta(Meta.META_NEW);
             } else if (Type.FAX == type) {
-                LOG.debug("Opening fax composition space '{}'", getUnformattedString(uuid));
+                LOG.debug("Opening fax composition space '{}'", getUnformattedStringObjectFor(uuid));
                 message.setMeta(Meta.META_FAX);
             } else if (Type.SMS == type) {
-                LOG.debug("Opening SMS composition space '{}'", getUnformattedString(uuid));
+                LOG.debug("Opening SMS composition space '{}'", getUnformattedStringObjectFor(uuid));
                 message.setMeta(Meta.META_SMS);
             } else {
                 OpenState args = new OpenState(uuid, message, encrypt, Meta.builder());
@@ -1547,19 +1548,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
 
                     if (type == Type.FORWARD) {
-                        LOG.debug("Opening forward composition space '{}'", getUnformattedString(uuid));
+                        LOG.debug("Opening forward composition space '{}'", getUnformattedStringObjectFor(uuid));
                         new Forward(attachmentStorageService, services).doOpenForForward(parameters, args, session);
                     } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
-                        LOG.debug("Opening reply composition space '{}'", getUnformattedString(uuid));
+                        LOG.debug("Opening reply composition space '{}'", getUnformattedStringObjectFor(uuid));
                         new Reply(attachmentStorageService, services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
                     } else if (type == Type.EDIT) {
-                        LOG.debug("Opening edit-draft composition space '{}'", getUnformattedString(uuid));
+                        LOG.debug("Opening edit-draft composition space '{}'", getUnformattedStringObjectFor(uuid));
                         new EditCopy(attachmentStorageService, services).doOpenForEditCopy(true, parameters, args, session);
                     } else if (type == Type.COPY) {
-                        LOG.debug("Opening copy-draft composition space '{}'", getUnformattedString(uuid));
+                        LOG.debug("Opening copy-draft composition space '{}'", getUnformattedStringObjectFor(uuid));
                         new EditCopy(attachmentStorageService, services).doOpenForEditCopy(false, parameters, args, session);
                     } else if (type == Type.RESEND) {
-                        LOG.debug("Opening resend composition space '{}'", getUnformattedString(uuid));
+                        LOG.debug("Opening resend composition space '{}'", getUnformattedStringObjectFor(uuid));
                         new Resend(attachmentStorageService, services).doOpenForResend(parameters, args, session);
                     }
 

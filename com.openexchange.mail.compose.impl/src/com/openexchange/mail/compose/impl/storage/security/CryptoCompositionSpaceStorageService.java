@@ -291,14 +291,14 @@ public class CryptoCompositionSpaceStorageService extends AbstractCryptoAware im
                 message.setContentEncrypted(false);
             }
             CompositionSpace compositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc, Optional.empty());
-            LoggerHolder.LOG.debug("Opened composition space {}: encrypted=false", UUIDs.getUnformattedString(compositionSpace.getId().getId()));
+            LoggerHolder.LOG.debug("Opened composition space {}: encrypted=false", UUIDs.getUnformattedStringObjectFor(compositionSpace.getId().getId()));
             return compositionSpace;
         }
 
         encryptCompositionSpaceDescription(compositionSpaceDesc, true, session);
         CompositionSpace openedCompositionSpace = delegate.openCompositionSpace(session, compositionSpaceDesc, Optional.of(B(encrypt)));
         CompositionSpace compositionSpace = decryptCompositionSpace(openedCompositionSpace, session, true).compositionSpace;
-        LoggerHolder.LOG.debug("Opened composition space {}: encrypted=true", UUIDs.getUnformattedString(compositionSpace.getId().getId()));
+        LoggerHolder.LOG.debug("Opened composition space {}: encrypted=true", UUIDs.getUnformattedStringObjectFor(compositionSpace.getId().getId()));
         return compositionSpace;
     }
 

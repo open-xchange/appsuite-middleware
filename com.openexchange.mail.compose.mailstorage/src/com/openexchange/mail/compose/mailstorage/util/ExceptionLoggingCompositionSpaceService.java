@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.mailstorage.util;
 
+import static com.openexchange.java.util.UUIDs.getUnformattedStringObjectFor;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +58,6 @@ import java.util.UUID;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentResult;
@@ -107,7 +107,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.transportCompositionSpace(compositionSpaceId, optionalUploadedAttachments, mailSettings, requestData, warnings, deleteAfterTransport, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling transportCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling transportCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -117,7 +117,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.saveCompositionSpaceToDraftMail(compositionSpaceId, optionalUploadedAttachments, deleteAfterSave, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling saveCompositionSpaceToDraftMail() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling saveCompositionSpaceToDraftMail() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -137,7 +137,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.closeCompositionSpace(compositionSpaceId, hardDelete, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling closeCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling closeCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -157,7 +157,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.getCompositionSpace(compositionSpaceId);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling getCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling getCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -177,7 +177,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.updateCompositionSpace(compositionSpaceId, messageDescription, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling updateCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling updateCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -187,7 +187,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.replaceAttachmentInCompositionSpace(compositionSpaceId, attachmentId, uploadedAttachments, disposition, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling replaceAttachmentInCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling replaceAttachmentInCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -197,7 +197,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.addAttachmentToCompositionSpace(compositionSpaceId, uploadedAttachments, disposition, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling addAttachmentToCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling addAttachmentToCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -207,7 +207,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.addAttachmentToCompositionSpace(compositionSpaceId, attachment, data, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling addAttachmentToCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling addAttachmentToCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -217,7 +217,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.addVCardToCompositionSpace(compositionSpaceId, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling addVCardToCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling addVCardToCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -227,7 +227,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.addContactVCardToCompositionSpace(compositionSpaceId, contactId, folderId, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling addContactVCardToCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling addContactVCardToCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -237,7 +237,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.addOriginalAttachmentsToCompositionSpace(compositionSpaceId, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling addOriginalAttachmentsToCompositionSpace() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling addOriginalAttachmentsToCompositionSpace() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -247,7 +247,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.deleteAttachment(compositionSpaceId, attachmentId, clientToken);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling deleteAttachment() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling deleteAttachment() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -257,7 +257,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.getAttachment(compositionSpaceId, attachmentId);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling getAttachment() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling getAttachment() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }
@@ -267,7 +267,7 @@ public class ExceptionLoggingCompositionSpaceService implements CompositionSpace
         try {
             return service.getAttachmentUploadLimits(compositionSpaceId);
         } catch (OXException e) {
-            LOG.debug("Exception occurred while calling getAttachmentUploadLimits() with composition space identifier {}", UUIDs.getUnformattedString(compositionSpaceId), e);
+            LOG.debug("Exception occurred while calling getAttachmentUploadLimits() with composition space identifier {}", getUnformattedStringObjectFor(compositionSpaceId), e);
             throw e;
         }
     }

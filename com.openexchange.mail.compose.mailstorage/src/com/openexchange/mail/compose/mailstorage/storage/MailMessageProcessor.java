@@ -810,7 +810,7 @@ public class MailMessageProcessor {
                         it.remove();
                     }
                 }
-                warnings.add(CompositionSpaceErrorCode.MISSING_SHARED_ATTACHMENTS_FOLDER.create(sharedFolderRef.getFolderId(), UUIDs.getUnformattedString(compositionSpaceId)));
+                warnings.add(CompositionSpaceErrorCode.MISSING_SHARED_ATTACHMENTS_FOLDER.create(sharedFolderRef.getFolderId(), getUnformattedString(compositionSpaceId)));
                 return true;
             }
 
@@ -836,7 +836,7 @@ public class MailMessageProcessor {
                         // No such file item in shared attachments folder
                         it.remove();
                         changed = true;
-                        warnings.add(CompositionSpaceErrorCode.INCONSISTENT_SHARED_ATTACHMENTS.create(sharedFolderRef.getFolderId(), UUIDs.getUnformattedString(compositionSpaceId)));
+                        warnings.add(CompositionSpaceErrorCode.INCONSISTENT_SHARED_ATTACHMENTS.create(sharedFolderRef.getFolderId(), getUnformattedString(compositionSpaceId)));
                     }
                 }
             }
@@ -876,7 +876,7 @@ public class MailMessageProcessor {
 
                         this.attachments.add(forwardingAttachment);
                         changed = true;
-                        warnings.add(CompositionSpaceErrorCode.INCONSISTENT_SHARED_ATTACHMENTS.create(sharedFolderRef.getFolderId(), UUIDs.getUnformattedString(compositionSpaceId)));
+                        warnings.add(CompositionSpaceErrorCode.INCONSISTENT_SHARED_ATTACHMENTS.create(sharedFolderRef.getFolderId(), getUnformattedString(compositionSpaceId)));
                     } catch (OXException e) {
                         LOG.warn("Failed to add shared attachment to draft message during validation.", e);
                     }
@@ -1805,7 +1805,7 @@ public class MailMessageProcessor {
 
     private static void applyCompositionSpaceHeaders(UUID compositionSpaceId, MessageDescription draftMessage, MimeMessage mimeMessage) throws MessagingException, OXException {
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID,
-            MimeMessageUtility.forceFold(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
+            MimeMessageUtility.forceFold(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, getUnformattedString(compositionSpaceId)));
         if (draftMessage.containsContentType() && draftMessage.getContentType() != null) {
             mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE, HeaderUtility.encodeHeaderValue(19, draftMessage.getContentType().getId()));
         }
@@ -1839,7 +1839,7 @@ public class MailMessageProcessor {
 
     private void applyCompositionSpaceHeadersForNew(UUID compositionSpaceId, ContentType contentType, Optional<SharedFolderReference> optionalSharedFolderRef, ClientToken clientToken, MimeMessage mimeMessage) throws MessagingException {
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID, MimeMessageUtility.forceFold(
-            HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
+            HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, getUnformattedString(compositionSpaceId)));
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE, HeaderUtility.encodeHeaderValue(19, contentType.getId()));
         mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_META, HeaderUtility.encodeHeaderValue(11, HeaderUtility.meta2HeaderValue(Meta.META_NEW)));
         if (optionalSharedFolderRef.isPresent()) {
@@ -2189,7 +2189,7 @@ public class MailMessageProcessor {
                 default:
                     // Ensure identifier is contained in headers
                     String hdr = HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID;
-                    mimeMessage.setHeader(hdr, MimeMessageUtility.forceFold(hdr.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
+                    mimeMessage.setHeader(hdr, MimeMessageUtility.forceFold(hdr.length() + 2, getUnformattedString(compositionSpaceId)));
                     break;
             }
 
@@ -2413,7 +2413,7 @@ public class MailMessageProcessor {
         }
 
         // Id
-        draftMessageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, UUIDs.getUnformattedString(attachment.getId()));
+        draftMessageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, getUnformattedString(attachment.getId()));
 
         // Origin
         if (compileMode == CompileMode.COMPOSITION_SPACE) {
@@ -2488,7 +2488,7 @@ public class MailMessageProcessor {
         }
 
         // Id
-        draftMessageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, UUIDs.getUnformattedString(attachment.getId()));
+        draftMessageBodyPart.setHeader(MessageHeaders.HDR_X_PART_ID, getUnformattedString(attachment.getId()));
 
         // Shared attachment reference
         if (sharedAttachmentRef != null) {
@@ -2564,7 +2564,7 @@ public class MailMessageProcessor {
 
     private static void applyCompositionSpaceHeadersToMailMessage(UUID compositionSpaceId, MessageDescription draftMessage, MailMessage mailMessage) throws OXException {
         mailMessage.setHeader(HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID, MimeMessageUtility.forceFold(
-            HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, UUIDs.getUnformattedString(compositionSpaceId)));
+            HeaderUtility.HEADER_X_OX_COMPOSITION_SPACE_ID.length() + 2, getUnformattedString(compositionSpaceId)));
         if (draftMessage.containsContentType()) {
             mailMessage.setHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE, HeaderUtility.encodeHeaderValue(19, draftMessage.getContentType().getId()));
         }
@@ -2841,7 +2841,7 @@ public class MailMessageProcessor {
         public String toString() {
             String lf = System.lineSeparator();
             StringBuilder sb = new StringBuilder(1024)
-                .append("Composition space: ").append(UUIDs.getUnformattedString(processor.compositionSpaceId)).append(lf)
+                .append("Composition space: ").append(getUnformattedString(processor.compositionSpaceId)).append(lf)
                 .append("Content type: ").append(processor.contentType.getId()).append(lf)
                 .append("Content (web): ").append(processor.contentForWeb).append(lf)
                 .append("Content (draft): ").append(processor.contentForDraft).append(lf);
@@ -2859,7 +2859,7 @@ public class MailMessageProcessor {
                     } else {
                         sb.append("  ---").append(lf);
                     }
-                    sb.append("  ID: ").append(UUIDs.getUnformattedString(attachment.getId())).append(lf);
+                    sb.append("  ID: ").append(getUnformattedString(attachment.getId())).append(lf);
                     sb.append("  Name: ").append(attachment.getName()).append(lf);
                     sb.append("  Size: ").append(attachment.getSize()).append(lf);
                     sb.append("  MIME Type: ").append(attachment.getMimeType()).append(lf);

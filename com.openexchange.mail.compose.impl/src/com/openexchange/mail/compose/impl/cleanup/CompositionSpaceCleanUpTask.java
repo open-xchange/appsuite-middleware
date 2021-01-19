@@ -249,7 +249,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         for (UUID compositionSpaceId : expiredCompositionSpaces) {
             try {
                 deleteExpiredCompositionSpace(compositionSpaceId, user, databaseService);
-                LOG.debug("Successfully deleted expired composition space '{}' of user {} in context {}", UUIDs.getUnformattedString(compositionSpaceId), I(user.getUserId()), I(user.getContextId()));
+                LOG.debug("Successfully deleted expired composition space '{}' of user {} in context {}", UUIDs.getUnformattedStringObjectFor(compositionSpaceId), I(user.getUserId()), I(user.getContextId()));
             } catch (Exception e) {
                 LOG.warn("Failed to delete expired composition space '{}' of user {} in context {}", UUIDs.getUnformattedString(compositionSpaceId), I(user.getUserId()), I(user.getContextId()), e);
             }

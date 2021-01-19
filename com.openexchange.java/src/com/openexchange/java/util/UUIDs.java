@@ -97,6 +97,30 @@ public final class UUIDs {
         return toUUID0(randomBytes);
     }
 
+    private static class UnformattedUUIDString<O> {
+
+        private final UUID uuid;
+
+        UnformattedUUIDString(UUID uuid) {
+            super(); this.uuid = uuid;
+        }
+
+        @Override
+        public String toString() {
+            return uuid == null ? "null" : getUnformattedString(uuid);
+        }
+    }
+
+    /**
+     * Creates a {@link #toString()} object for given UUID.
+     *
+     * @param uuid The UUID
+     * @return The object providing unformatted string representation of given UUID when {@link #toString()} is invoked
+     */
+    public static <O> Object getUnformattedStringObjectFor(final UUID uuid) {
+        return new UnformattedUUIDString<O>(uuid);
+    }
+
     /**
      * Gets the unformatted string representation from a random {@link UUID} instance.
      * <p>

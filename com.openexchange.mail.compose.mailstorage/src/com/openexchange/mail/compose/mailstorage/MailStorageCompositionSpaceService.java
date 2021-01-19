@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.java.util.UUIDs.getUnformattedStringObjectFor;
 import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.compose.AttachmentResults.attachmentResultFor;
 import static com.openexchange.mail.compose.CompositionSpaces.getUUIDForLogging;
@@ -456,7 +457,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                     MailPath editFor = result.getMeta().getEditFor();
                     if (null != editFor && false == MailProperties.getInstance().isDeleteDraftOnTransport(session.getUserId(), session.getContextId())) {
                         // Draft mail should NOT be deleted
-                        LOG.debug("Keeping draft mail '{}' associated with composition space '{}' after transport", association.getDraftPath(), getUnformattedString(compositionSpaceId));
+                        LOG.debug("Keeping draft mail '{}' associated with composition space '{}' after transport", association.getDraftPath(), getUnformattedStringObjectFor(compositionSpaceId));
                         MailStorageResult<MailPath> saveAsDraftResult = mailStorage.saveAsFinalDraft(association, ClientToken.NONE, serverSession);
                         warnings.addAll(saveAsDraftResult.getWarnings());
                     } else {
@@ -465,7 +466,7 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                         boolean closed = deleteResult.getResult().booleanValue();
 
                         if (closed) {
-                            LOG.debug("Closed composition space '{}' after transport", getUnformattedString(compositionSpaceId));
+                            LOG.debug("Closed composition space '{}' after transport", getUnformattedStringObjectFor(compositionSpaceId));
                         } else {
                             LOG.warn("Compositon space {} could not be closed after transport.", getUnformattedString(compositionSpaceId));
                         }
@@ -698,13 +699,13 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
             SharedFolderReference sharedFolderRef = null;
             boolean referencesOpenCompositionSpace = false;
             if (Type.NEW == type) {
-                LOG.debug("Opening new composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                LOG.debug("Opening new composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_NEW);
             } else if (Type.FAX == type) {
-                LOG.debug("Opening fax composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                LOG.debug("Opening fax composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_FAX);
             } else if (Type.SMS == type) {
-                LOG.debug("Opening SMS composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                LOG.debug("Opening SMS composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                 messageDesc.setMeta(Meta.META_SMS);
             } else {
                 OpenState args = new OpenState(compositionSpaceId, messageDesc, encrypt, Meta.builder());
@@ -713,20 +714,20 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                     metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
 
                     if (type == Type.FORWARD) {
-                        LOG.debug("Opening forward composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                        LOG.debug("Opening forward composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                         new Forward(services).doOpenForForward(parameters, args, session);
                     } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
-                        LOG.debug("Opening reply composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                        LOG.debug("Opening reply composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                         new Reply(services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
                     } else if (type == Type.EDIT) {
-                        LOG.debug("Opening edit-draft composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                        LOG.debug("Opening edit-draft composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                         new EditCopy(services).doOpenForEditCopy(true, parameters, args, session);
                         editFor = parameters.getReferencedMails().get(0);
                     } else if (type == Type.COPY) {
-                        LOG.debug("Opening copy-draft composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                        LOG.debug("Opening copy-draft composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                         new EditCopy(services).doOpenForEditCopy(false, parameters, args, session);
                     } else if (type == Type.RESEND) {
-                        LOG.debug("Opening resend composition space '{}' with client token '{}'", UUIDs.getUnformattedString(compositionSpaceId), parameters.getClientToken());
+                        LOG.debug("Opening resend composition space '{}' with client token '{}'", getUnformattedStringObjectFor(compositionSpaceId), parameters.getClientToken());
                         new Resend(services).doOpenForResend(parameters, args, session);
                     }
 
@@ -1267,11 +1268,11 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                 if (optionalMailStorageId.isPresent()) {
                     // Draft message does still exist as proven through look-up by composition space identifier
                     existingDraftPaths.put(optionalMailStorageId.get().getDraftPath(), compositionSpaceId);
-                    LOG.debug("Found composition-space-related draft message for composition space identifier", UUIDs.getUnformattedString(compositionSpaceId));
+                    LOG.debug("Found composition-space-related draft message for composition space identifier", getUnformattedStringObjectFor(compositionSpaceId));
                 } else {
                     // Draft message does not exist
                     associationStorage.delete(compositionSpaceId, false);
-                    LOG.debug("Found no composition-space-related draft message for composition space identifier", UUIDs.getUnformattedString(compositionSpaceId));
+                    LOG.debug("Found no composition-space-related draft message for composition space identifier", getUnformattedStringObjectFor(compositionSpaceId));
                 }
             }
 
