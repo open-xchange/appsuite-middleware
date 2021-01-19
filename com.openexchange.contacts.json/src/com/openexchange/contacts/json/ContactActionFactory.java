@@ -80,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class ContactActionFactory implements AJAXActionServiceFactory {
 

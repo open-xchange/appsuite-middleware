@@ -70,6 +70,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SuppressWarnings("unchecked") 
 public class DeduplicatorTest {
 
     private static final ContactField[] TEXTUAL_FIELDS = {

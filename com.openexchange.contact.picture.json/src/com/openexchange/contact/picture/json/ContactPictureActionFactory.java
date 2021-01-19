@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class ContactPictureActionFactory implements AJAXActionServiceFactory {
 

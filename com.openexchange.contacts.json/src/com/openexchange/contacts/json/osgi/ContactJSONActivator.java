@@ -85,6 +85,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
         return new Class[] { ContactService.class, VCardService.class, ConfigViewFactory.class, IDBasedContactsAccessFactory.class };
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void startBundle() throws Exception {
         /*

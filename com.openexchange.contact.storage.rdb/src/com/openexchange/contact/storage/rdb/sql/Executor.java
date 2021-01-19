@@ -1306,7 +1306,7 @@ public class Executor {
             ResultSet resultSet = stmt.executeQuery();
             LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), Long.valueOf(System.currentTimeMillis() - start));
             return resultSet;
-        } catch (StringLiteralSQLException e) {
+        } catch (@SuppressWarnings("unused") StringLiteralSQLException e) {
             // Cannot return any match
             return EmptyResultSet.getInstance();
         } catch (SQLException e) {

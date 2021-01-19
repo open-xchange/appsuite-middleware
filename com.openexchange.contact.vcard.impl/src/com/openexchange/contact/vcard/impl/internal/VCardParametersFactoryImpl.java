@@ -73,7 +73,6 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     private boolean defaultValidateContactEMail;
     private final boolean defaultStrict;
     private final VCardVersion defaultVersion;
-    private final boolean enforceUtf8;
     private long defaultMaxVCardSize;
     private boolean defaultKeepOriginalVCard;
     private boolean defaultRemoveImageFromKeptVCard;
@@ -85,7 +84,6 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         super();
         defaultPhotoScaleDimension = new Dimension(200, 200);
         defaultMaxContactImageSize = 4194304;
-        enforceUtf8 = true;
         defaultValidateContactEMail = true;
         defaultStrict = false;
         defaultVersion = VCardVersion.VERSION_3_0;
@@ -142,5 +140,4 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     public VCardParameters createParameters() {
         return createParameters(null);
     }
-
 }

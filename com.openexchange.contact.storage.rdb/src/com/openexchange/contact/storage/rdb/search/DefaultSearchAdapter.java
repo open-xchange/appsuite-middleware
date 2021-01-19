@@ -181,7 +181,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	    StringBuilder builder = new StringBuilder();
         try {
             builder.append(Table.CONTACTS.getName()).append(".").append(Mappers.CONTACT.get(ContactField.NUMBER_OF_IMAGES).getColumnLabel()).append(" > 0");
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             // Should not occur
             builder.setLength(0);
         }

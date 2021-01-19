@@ -192,7 +192,7 @@ public final class ContactImageDataSource implements ImageDataSource {
                 properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
                 properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
                 properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-                return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+                return new SimpleData<D>((D) (newEmptyStream()), properties);
             }
 
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
@@ -210,6 +210,10 @@ public final class ContactImageDataSource implements ImageDataSource {
         } finally {
             Streams.close(fileHolder);
         }
+    }
+    
+    private UnsynchronizedByteArrayInputStream newEmptyStream() {
+        return new UnsynchronizedByteArrayInputStream(new byte[0]);
     }
 
     /**

@@ -116,6 +116,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
      * @return The url to the contact picture
      * @throws OXException
      */
+    @SuppressWarnings("deprecation")
     private String getPictureUrl(int contactId, int folderId, int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException {
         URIBuilder builder = new URIBuilder();
         if (false == preferRelativeUrl) {

@@ -360,7 +360,6 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     }
 
     private static EnumSet<ContactField> getConfiguredIndexFields() {
-
         ArrayList<ContactField> contacFields = new ArrayList<ContactField>();
         try {
             ConfigurationService confServ = RdbServiceLookup.getService(ConfigurationService.class);
@@ -371,7 +370,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
             for (String field : fields) {
                 try {
                     contacFields.add(ContactField.valueOf(field));
-                } catch (IllegalArgumentException ex) {
+                } catch (@SuppressWarnings("unused") IllegalArgumentException ex) {
                     LOG.warn("\"{}\" is not a valid column and will be skipped!", field);
                 }
             }

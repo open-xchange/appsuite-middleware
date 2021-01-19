@@ -140,7 +140,7 @@ public final class Tools {
      * @param table The database table
      * @return The exception
      */
-    public static OXException getIncorrectStringException(Session session, @SuppressWarnings("unused") Connection connection, IncorrectStringSQLException e, Contact contact, @SuppressWarnings("unused") Table table) throws OXException {
+    public static OXException getIncorrectStringException(Session session, Connection connection, IncorrectStringSQLException e, Contact contact, Table table) throws OXException {
         /*
          * create problematic attributes
          */
