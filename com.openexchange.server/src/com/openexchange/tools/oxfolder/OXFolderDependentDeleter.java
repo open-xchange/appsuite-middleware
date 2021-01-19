@@ -66,6 +66,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
@@ -119,13 +120,12 @@ public class OXFolderDependentDeleter {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         Context context = serverSession.getContext();
         /*
-         * gather all folder identifiers
+         * gather all folder identifiers by module & collect potentially affected user permission entities
          */
+        TIntSet affectedEntities = new TIntHashSet();
         TIntObjectMap<List<Integer>> byModule = new TIntObjectHashMap<>();
-        List<Integer> folderIDs;
         if (handDown) {
-            folderIDs = new LinkedList<>();
-            byModule = new TIntObjectHashMap<>();
+            List<Integer> folderIDs = new LinkedList<>();
             for (FolderObject folder : folders) {
                 List<Integer> subfolderIDs;
                 try {
@@ -145,8 +145,14 @@ public class OXFolderDependentDeleter {
                 folderIDs.add(Integer.valueOf(folder.getObjectID()));
                 folderIDs.addAll(subfolderIDs);
             }
+            if (false == folderIDs.isEmpty()) {
+                try {
+                    affectedEntities.addAll(OXFolderSQL.getPermissionEntities(folderIDs, con, context, false));
+                } catch (SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                }
+            }
         } else {
-            folderIDs = new ArrayList<>(folders.size());
             for (FolderObject folder : folders) {
                 List<Integer> list = byModule.get(folder.getModule());
                 if (null == list) {
@@ -155,20 +161,16 @@ public class OXFolderDependentDeleter {
                 }
                 list.add(Integer.valueOf(folder.getObjectID()));
 
-                folderIDs.add(Integer.valueOf(folder.getObjectID()));
+                for (OCLPermission permission : folder.getPermissions()) {
+                    if (false == permission.isGroupPermission()) {
+                        affectedEntities.add(permission.getEntity());
+                    }
+                }
             }
         }
         /*
-         * determine potentially affected guest user entities
+         * collect potentially affected object permission entities, too
          */
-        TIntSet affectedEntities = new TIntHashSet(folderIDs.size());
-        if (false == folderIDs.isEmpty()) {
-            try {
-                affectedEntities.addAll(OXFolderSQL.getPermissionEntities(folderIDs, con, context, false));
-            } catch (SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
-        }
         TIntObjectIterator<List<Integer>> iterator = byModule.iterator();
         for (int i = byModule.size(); i-- > 0;) {
             iterator.advance();
