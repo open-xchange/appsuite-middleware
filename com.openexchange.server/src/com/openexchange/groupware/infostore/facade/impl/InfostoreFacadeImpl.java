@@ -359,6 +359,39 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
     }
 
+    /**
+     * {@link ObjectPermissionCustomizer} - Loads object permissions
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.5
+     */
+    private static class ObjectPermissionCustomizer implements DocumentCustomizer {
+
+        private final ObjectPermissionLoader objectPermissionLoader;
+        private final Context context;
+        private final DocumentCustomizer optSuccessor;
+
+        /**
+         * Initializes a new {@link InfostoreFacadeImpl.ObjectPermissionCustomizer}.
+         * 
+         * @param objectPermissionLoader The loader for permissions
+         * @param context The context
+         * @param optSuccessor The optional {@link DocumentCustomizer} to call afterwards
+         */
+        public ObjectPermissionCustomizer(ObjectPermissionLoader objectPermissionLoader, Context context, DocumentCustomizer optSuccessor) {
+            super();
+            this.objectPermissionLoader = objectPermissionLoader;
+            this.context = context;
+            this.optSuccessor = optSuccessor;
+        }
+
+        @Override
+        public DocumentMetadata handle(DocumentMetadata document) throws OXException {
+            objectPermissionLoader.add(document, context, null);
+            return null == optSuccessor ? document : optSuccessor.handle(document);
+        }
+    }
+
     private static class LoadEntityInfoCustomizer implements DocumentCustomizer {
 
         private final ServerSession session;
@@ -3412,6 +3445,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         boolean addCreatedFrom = contains(columns, Metadata.CREATED_FROM_LITERAL);
         boolean addModifiedFrom = contains(columns, Metadata.MODIFIED_FROM_LITERAL);
+        boolean addObjectPermission = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
+        
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
         cols = addDateFieldsIfNeeded(cols, sort);
         if (shouldTriggerMediaDataExtraction) {
@@ -3433,6 +3468,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (addCreatedFrom || addModifiedFrom) {
                 customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
+            }
+            if (addObjectPermission) {
+                customizer = new ObjectPermissionCustomizer(objectPermissionLoader, context, customizer);
             }
             newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             newIter.setCustomizer(customizer);
@@ -3458,6 +3496,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             if (addCreatedFrom || addModifiedFrom) {
                 customizer = new LoadEntityInfoCustomizer(entityInfoLoader, addCreatedFrom, addModifiedFrom, session, customizer);
+            }
+            if (addObjectPermission) {
+                customizer = new ObjectPermissionCustomizer(objectPermissionLoader, context, customizer);
             }
 
             if (onlyOwn) {
