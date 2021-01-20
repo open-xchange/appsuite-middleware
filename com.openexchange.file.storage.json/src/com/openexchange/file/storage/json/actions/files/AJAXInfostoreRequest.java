@@ -103,6 +103,7 @@ import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.java.FileKnowingInputStream;
+import com.openexchange.java.Lists;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -1155,7 +1156,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     if (null != additionalField) {
                         Field[] requiredFields = additionalField.getRequiredFields();
                         if (null != requiredFields && 0 < requiredFields.length) {
-                            fieldsToLoad.addAll(Arrays.asList(requiredFields));
+                            /*
+                             * Add required fields only if necessary
+                             */
+                            Lists.addIfAbsent(fieldsToLoad, requiredFields);
                         }
                         requestedColumns[i] = additionalField.getColumnID();
                     } else {
