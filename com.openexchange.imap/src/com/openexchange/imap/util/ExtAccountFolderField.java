@@ -281,6 +281,9 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                 // * METADATA INBOX/teppo.testaaja.in@gmail.com (/shared/vendor/vendor.dovecot/ext-account {27} teppo.testaaja.in@gmail.com /shared/vendor/vendor.dovecot/alias NIL)
                                 // * METADATA INBOX/QUARANTAINE (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias NIL)
                                 String fullName = ir.readAtomString();
+                                if (!ir.supportsUtf8()) {
+                                    fullName = BASE64MailboxDecoder.decode(fullName);
+                                }
                                 String[] metadatas = ir.readAtomStringList();
                                 int length = metadatas == null ? -1 : metadatas.length;
                                 int index = 0;
@@ -369,7 +372,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         metadataResponse.skipSpaces();
         String fullName = metadataResponse.readAtomString();
         if (!metadataResponse.supportsUtf8()) {
-            fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+            fullName = BASE64MailboxDecoder.decode(fullName);
         }
 
         // Read until opening parenthesis or EOF
