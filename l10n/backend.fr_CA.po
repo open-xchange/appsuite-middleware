@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-04 11:21+0900\n"
+"PO-Revision-Date: 2021-01-12 19:20+0900\n"
 "Last-Translator: Sandrine Burriel <sandrine@workshop-chapina.com>\n"
 "Language-Team: French <fr@workshop-chapina.com>\n"
 "Language: fr_CA\n"
@@ -266,8 +266,8 @@ msgid ""
 "The given iCal file contains too many entities. A max of %1$s entities are "
 "allowed per file."
 msgstr ""
-"Le fichier iCal fourni contient trop d'entités. Le maximum autorisé est "
-"de %1$s entités par fichier."
+"Le fichier iCal fourni contient trop d'entités. Le maximum autorisé est de "
+"%1$s entités par fichier."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1076,74 +1076,78 @@ msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "La règle de répétition du rendez-vous a été modifiée ainsi : %1$s."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The appointment series now ends on %1$s."
+msgstr "La série de rendez-vous se termine désormais le %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Reprogrammation du rendez-vous. Date/heure d'origine : %1$s. Nouvelle date/"
 "heure : %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "Resources"
 msgstr "Ressources"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "The entire day"
 msgstr "Toute la journée"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "New appointment: %1$s"
 msgstr "Nouveau rendez-vous : %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
 msgid "Appointment changed: %1$s"
 msgstr "Rendez-vous modifié : %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
 msgid "Appointment canceled: %1$s"
 msgstr "Rendez-vous annulé : %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Modifications du rendez-vous proposées : %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:330
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:332
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s définit l'état à « aucun » pour : %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s a %2$s l'invitation : %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
 msgid "Resend the invitation for: %1$s"
 msgstr "Envoyer à nouveau l'invitation pour : %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
 msgid "Change not accepted for: %1$s"
 msgstr "Modification non acceptée pour : %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Toutes les heures seront affichées relativement au fuseau horaire %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:342
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:344
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr ""
 "%1$s a %2$s le rendez-vous, mais souhaiterait faire une contre-proposition : "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 "Vous avez reçu ce courrier électronique parce que vous présidez ce rendez-"
 "vous."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
@@ -1151,7 +1155,7 @@ msgstr ""
 "Vous avez reçu ce courrier électronique parce que vous êtes l'organisateur "
 "de ce rendez-vous."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:351
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -1160,7 +1164,7 @@ msgstr ""
 "%1$s que vous gérez."
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:352
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:354
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -1171,7 +1175,7 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:357
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:359
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr ""
 "L'organisateur du rendez-vous a changé. Le nouvel organisateur est : %1$s"
@@ -1179,28 +1183,28 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:362
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:364
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr "L'organisateur du rendez-vous a changé. Cette opération est interdite."
 
 #. * Used when there are multiple changes in the appointment's conference properties
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:365
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:367
 msgid "The meeting access information was changed."
 msgstr "Les informations d'accès à la réunion ont été modifiées."
 
 #. * Used when there is one particular conference property in the appointment with URI
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:368
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:370
 msgid "The meeting access information was changed: %1$s;"
 msgstr "Les informations d'accès à la réunion ont été modifiées : %1$s ;"
 
 #. * Used when there is one particular conference property in the appointment with URI and additional label
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:371
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:373
 msgid "The meeting access information was changed. %1$s: %2$s"
 msgstr "Les informations d'accès à la réunion ont été modifiées. %1$s : %2$s"
 
 #. * Used when all conference properties in the appointment were removed
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:374
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:376
 msgid "The meeting access information was removed."
 msgstr "Les informations d'accès à la réunion ont été supprimées."
 
@@ -2822,8 +2826,7 @@ msgid ""
 "'checkcountsconsistency' tool."
 msgstr ""
 "Il semble que les tables des décomptes d'administration soient devenues "
-"incohérentes. "
-"Envisagez d'exécuter l'outil 'checkcountsconsistency'."
+"incohérentes. Envisagez d'exécuter l'outil 'checkcountsconsistency'."
 
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
@@ -3596,8 +3599,8 @@ msgstr ""
 msgid ""
 "The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
 msgstr ""
-"Le fichier \"%1$s\" sera partagé avec toutes les personnes ayant accès à \"%"
-"3$s\"."
+"Le fichier \"%1$s\" sera partagé avec toutes les personnes ayant accès à "
+"\"%3$s\"."
 
 #. With moving file \"%1$s\" its permissions will get lost.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
@@ -3617,6 +3620,11 @@ msgstr "Impossible de mettre à jour le compte : 1$s"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
 msgid "Searching folder by folder name is not supported"
 msgstr "La recherche de dossier par nom de dossier n'est pas prise en charge"
+
+#. The maximum number of accounts is exceeded.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:214
+msgid "The maximum number of accounts is exceeded."
+msgstr "Le nombre maximal de comptes autorisé est dépassé."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -5289,6 +5297,13 @@ msgid ""
 msgstr ""
 "Échec de la mise à jour du dossier. Le propriétaire est requis pour "
 "conserver les droits d'administration."
+
+#: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Too many messages requested (limit is %1$s). Please query a smaller range."
+msgstr ""
+"Le nombre de messages demandé est trop élevé (la limite est de %1$s). "
+"Veuillez restreindre la plage de requête."
 
 #. The specified group \"%4$s\" is not supported.
 #: com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -7315,8 +7330,8 @@ msgstr "Impossible de supprimer tous les dossiers"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
 msgid "The folder was not updated. Please review the warnings for details."
 msgstr ""
-"Le dossier n'a pas été mis à jour. Veuillez consulter les avertissements pour "
-"en savoir plus."
+"Le dossier n'a pas été mis à jour. Veuillez consulter les avertissements "
+"pour en savoir plus."
 
 #. Folder name contains not allowed characters: \"%1$s\"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
@@ -7341,15 +7356,14 @@ msgid ""
 "This folder will be shared with everyone who has access to \"%3$s\". "
 "Everyone who can see \"%1$s\" will lose access."
 msgstr ""
-"Ce dossier sera partagé avec tous les utilisateurs ayant accès à "
-"\"%3$s\". Toutes les personnes ayant accès à \"%1$s\" perdront leur accès."
+"Ce dossier sera partagé avec tous les utilisateurs ayant accès à \"%3$s\". "
+"Toutes les personnes ayant accès à \"%1$s\" perdront leur accès."
 
 #. This folder will be shared with everyone who has access to \"%3$s\.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
 msgid "This folder will be shared with everyone who has access to \"%3$s\"."
 msgstr ""
-"Ce dossier sera partagé avec tous les utilisateurs ayant accès à "
-"\"%3$s\"."
+"Ce dossier sera partagé avec tous les utilisateurs ayant accès à \"%3$s\"."
 
 #. You are moving a folder that contains shares. People will lose access.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:122
@@ -7364,9 +7378,9 @@ msgid ""
 "This folder will be shared with everyone who has access to \"%3$s\". "
 "Everyone who can see the subfolders of \"%1$s\" will lose access."
 msgstr ""
-"Ce dossier sera partagé avec tous les utilisateurs ayant accès à "
-"\"%3$s\". Toutes les personnes ayant accès aux sous-dossiers "
-"de \"%1$s\" perdront leur accès."
+"Ce dossier sera partagé avec tous les utilisateurs ayant accès à \"%3$s\". "
+"Toutes les personnes ayant accès aux sous-dossiers de \"%1$s\" perdront leur "
+"accès."
 
 #. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
 #: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
@@ -10867,14 +10881,14 @@ msgstr ""
 #. *
 #. * The description of the read-only scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:65
 msgid "Read all your mails"
 msgstr "Lire tous vos courriels"
 
 #. *
 #. * The description of the writable scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:70
 msgid "Create, modify, delete, import and send mails"
 msgstr "Créer, modifier, supprimer, importer et envoyer des courriels"
 
@@ -11990,13 +12004,30 @@ msgstr ""
 "%1$s a partagé l'objet %2$s \"%3$s\" avec vous. Veuillez saisir votre mot de "
 "passe pour le consulter."
 
-#. Login when opening a share protected with a password
+#. The folder "Photos" is shared with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+msgid ""
+"The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr ""
+"Le %1$s \"%2$s\" a été partagé avec vous. Veuillez saisir le mot de passe de "
+"partage pour le consulter."
+
+#. The folder "Photos" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+msgid ""
+"The %1$s \"%2$s\" is shared with you. Please enter your password to view it."
+msgstr ""
+"Le %1$s \"%2$s\" a été partagé avec vous. Veuillez saisir votre mot de passe "
+"pour le consulter."
+
+#. Login when opening a share protected with a password
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "Please enter your password to log into this account."
 msgstr "Veuillez saisir votre mot de passe pour vous connecter à ce compte."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -12004,23 +12035,23 @@ msgstr ""
 "Nous avons envoyé à %1$s un message comportant des instructions pour définir "
 "un nouveau mot de passe."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
 msgid "Please set a new password to regain access."
 msgstr "Veuillez définir un nouveau mot de passe pour rétablir votre accès."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
 msgid "The share you are looking for does not exist."
 msgstr "Le partage que vous recherchez n'existe pas."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "Ce partage n'est pas accessible à travers votre navigateur web."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
 msgid "We were unable to process your request."
 msgstr "Nous n'avons pas pu traiter votre requête."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -12028,7 +12059,7 @@ msgstr ""
 "Le dossier ou l'élément que vous recherchez n'est plus disponible. Veuillez "
 "cliquer sur « Continuer » pour afficher les autres partages."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -12037,7 +12068,7 @@ msgstr ""
 "passe. La réinitialisation du mot de passe est annulée."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -12046,7 +12077,7 @@ msgstr ""
 "propriétaire si vous souhaitez y accéder de nouveau."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -12055,7 +12086,7 @@ msgstr ""
 "%1$s si vous souhaitez y accéder de nouveau."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -12064,7 +12095,7 @@ msgstr ""
 "propriétaire si vous souhaitez y accéder de nouveau."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -12073,7 +12104,7 @@ msgstr ""
 "%1$s si vous souhaitez y accéder de nouveau."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -12082,7 +12113,7 @@ msgstr ""
 "propriétaire si vous souhaitez y accéder de nouveau."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -12091,7 +12122,7 @@ msgstr ""
 "%1$s si vous souhaitez y accéder de nouveau."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -12102,7 +12133,7 @@ msgstr ""
 "autres fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -12113,7 +12144,7 @@ msgstr ""
 "fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -12124,7 +12155,7 @@ msgstr ""
 "autres fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -12135,7 +12166,7 @@ msgstr ""
 "fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -12146,7 +12177,7 @@ msgstr ""
 "autres fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -12157,7 +12188,7 @@ msgstr ""
 "fichiers partagés, cliquez sur « Continuer »."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12168,7 +12199,7 @@ msgstr ""
 "autres fichiers partagés, veuillez vous authentifier."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12178,7 +12209,7 @@ msgstr ""
 "fichiers partagés, veuillez vous authentifier."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12189,7 +12220,7 @@ msgstr ""
 "autres fichiers partagés, veuillez vous authentifier."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -12200,7 +12231,7 @@ msgstr ""
 "fichiers partagés, veuillez vous authentifier."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:147
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12211,7 +12242,7 @@ msgstr ""
 "autres fichiers partagés, veuillez vous authentifier."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:150
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12308,8 +12339,8 @@ msgid "You don't have sufficient permissions to subscribe to a share."
 msgstr "Vous n'avez pas les droits requis pour vous abonner à un partage."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
-msgid "Subscribing to a single file is not allowed"
-msgstr "L'abonnement à un fichier unique n'est pas autorisé"
+msgid "Subscribing to a single file is not supported"
+msgstr "L'abonnement à un fichier unique n'est pas pris en charge"
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
 msgid "You are not allowed to subscribe to a share for %1$s"
@@ -12936,8 +12967,8 @@ msgid ""
 "After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
 "will be removed."
 msgstr ""
-"Une fois que vous êtes désabonné de \"%1$s\", tous les dossiers du compte \"%"
-"2$s\" seront supprimés."
+"Une fois que vous êtes désabonné de \"%1$s\", tous les dossiers du compte "
+"\"%2$s\" seront supprimés."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -13003,6 +13034,26 @@ msgstr ""
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "Vous n'êtes pas autorisé à modifier la signature"
+
+#. The user entered a very long display name, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:86
+msgid "The entered display name is too long. Please use a shorter one."
+msgstr "Le nom d'affichage saisi est trop long. Veuillez le raccourcir."
+
+#. The user entered a very long snippet identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:89
+msgid "The entered identifier is too long. Please use a shorter one."
+msgstr "L'identifiant saisi est trop long. Veuillez le raccourcir."
+
+#. The user entered a very long module identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:92
+msgid "The entered module identifier is too long. Please use a shorter one."
+msgstr "L'identifiant de module saisi est trop long. Veuillez le raccourcir."
+
+#. The user entered a very long type identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:95
+msgid "The entered type identifier is too long. Please use a shorter one."
+msgstr "L'identifiant de type saisi est trop long. Veuillez le raccourcir."
 
 #: com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
@@ -15587,6 +15638,9 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid "Subscribing to a single file is not allowed"
+#~ msgstr "L'abonnement à un fichier unique n'est pas autorisé"
 
 #~ msgid "The given iCal file contains too many entities."
 #~ msgstr "Le fichier iCal fourni contient trop d'entités."
