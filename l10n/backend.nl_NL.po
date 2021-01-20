@@ -1,5 +1,5 @@
 # Ivar Snaaijer <ivar@workshop-chapina.com>, 2010, 2011, 2012, 2013, 2016, 2017, 2018, 2019, 2020.
-# Tim van Oosten <tim@workshop-chapina.com>, 2020.
+# Tim van Oosten <tim@workshop-chapina.com>, 2020, 2021.
 # Reinout van Schouwen <reinout@workshop-chapina.com>, 2012, 2013, 2014, 2015.
 # Antje Faber <antje.faber@open-xchange.com>, 2010, 2012.
 msgid ""
@@ -7,15 +7,15 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-12-15 21:46+0100\n"
-"Last-Translator: Ivar Snaaijer <Ivar@workshop-chapina.com>\n"
+"PO-Revision-Date: 2021-01-13 16:55+0100\n"
+"Last-Translator: Tim <tim@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 19.12.3\n"
+"X-Generator: Lokalize 20.04.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -68,8 +68,8 @@ msgstr "Om de link te benaderen heeft u aanmeldgegevens nodig."
 msgid ""
 "The access to the share was revoked. Please contact the owner of the share"
 msgstr ""
-"De toegang tot het gedeelde item is ingetrokken. Neem contact op met de"
-" eigenaar van het gedeelde item"
+"De toegang tot het gedeelde item is ingetrokken. Neem contact op met de "
+"eigenaar van het gedeelde item"
 
 #: com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
@@ -1054,72 +1054,76 @@ msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "De herhalingsregel van de afspraak is veranderd naar: %1$s."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The appointment series now ends on %1$s."
+msgstr "De afspraakreeks eindigt nu op %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Verplaatste afspraak. Originele datum/tijd: %1$s. Nieuwe datum/tijd: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "Resources"
 msgstr "Bron"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "The entire day"
 msgstr "De gehele dag"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "New appointment: %1$s"
 msgstr "Nieuwe afspraak: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
 msgid "Appointment changed: %1$s"
 msgstr "Afspraak gewijzigd: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:325
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
 msgid "Appointment canceled: %1$s"
 msgstr "Afspraak afgezegd: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:327
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Voorgestelde wijziging voor afspraak: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:330
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:332
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s zet de status naar 'geen' : %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$ heeft de uitnodiging %2$s: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
 msgid "Resend the invitation for: %1$s"
 msgstr "Stuur de uitnodiging opnieuw voor: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:337
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
 msgid "Change not accepted for: %1$s"
 msgstr "Wijziging niet geaccepteerd voor: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:339
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Alle tijden worden getoond in de tijdzone %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:342
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:344
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s heeft de afspraak %2$s, maar wil een tegenvoorstel doen: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr ""
 "U heeft dit e-mailbericht ontvangen omdat u de voorzitter bent voor deze "
 "afspraak."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:347
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
@@ -1127,7 +1131,7 @@ msgstr ""
 "U heeft dit e-mailbericht ontvangen omdat u de organisator bent voor deze "
 "afspraak."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:349
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:351
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -1136,7 +1140,7 @@ msgstr ""
 "waarvoor u de beheerder bent."
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:352
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:354
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -1147,7 +1151,7 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:357
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:359
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr ""
 "De organisator van de afspraak is veranderd. De nieuwe organisator is: %1$s"
@@ -1155,29 +1159,29 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:362
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:364
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr ""
 "De organisator van de afspraak is veranderd. Deze actie is niet toegestaan."
 
 #. * Used when there are multiple changes in the appointment's conference properties
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:365
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:367
 msgid "The meeting access information was changed."
 msgstr "De toegangsgegevens voor de vergadering zijn gewijzigd."
 
 #. * Used when there is one particular conference property in the appointment with URI
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:368
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:370
 msgid "The meeting access information was changed: %1$s;"
 msgstr "De toegangsgegevens voor de vergadering zijn gewijzigd: %1$s;"
 
 #. * Used when there is one particular conference property in the appointment with URI and additional label
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:371
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:373
 msgid "The meeting access information was changed. %1$s: %2$s"
 msgstr "De toegangsgegevens voor de vergadering zijn gewijzigd. %1$s: %2$s"
 
 #. * Used when all conference properties in the appointment were removed
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:374
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:376
 msgid "The meeting access information was removed."
 msgstr "De toegangsgegevens voor de vergadering zijn verwijderd."
 
@@ -2775,8 +2779,8 @@ msgid ""
 "Apparently administrative count tables became inconsistent. Consider running "
 "'checkcountsconsistency' tool."
 msgstr ""
-"Blijkbaar werden de administratieve tellingstabellen inconsistent. Overweeg"
-" om de 'checkcountsconsistency' applicatie te starten."
+"Blijkbaar werden de administratieve tellingstabellen inconsistent. Overweeg "
+"om de 'checkcountsconsistency' applicatie te starten."
 
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
@@ -3526,8 +3530,8 @@ msgid ""
 "With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder "
 "\"%3$s\" people will lose access."
 msgstr ""
-"Door het bestand \"%1$s\" uit de gedeelde map \"%2$s\" te verplaatsen"
-" verliezen \"%3$s\" mensen toegang."
+"Door het bestand \"%1$s\" uit de gedeelde map \"%2$s\" te verplaatsen "
+"verliezen \"%3$s\" mensen toegang."
 
 #. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:199
@@ -3535,16 +3539,16 @@ msgid ""
 "The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". "
 "Everyone who can see \"%2$s\" will lose access."
 msgstr ""
-"Het bestand \"%1$s\" wordt gedeeld met iedereen die toegang heeft tot \""
-"%3$s\". Iedereen die \"%2$s\" kan zien verliest de toegang."
+"Het bestand \"%1$s\" wordt gedeeld met iedereen die toegang heeft tot \"%3$s"
+"\". Iedereen die \"%2$s\" kan zien verliest de toegang."
 
 #. The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:202
 msgid ""
 "The file \"%1$s\" will be shared with everyone who has access to \"%3$s\"."
 msgstr ""
-"Het bestand \"%1$s\" wordt gedeeld met iedereen die toegang heeft tot \""
-"%3$s\"."
+"Het bestand \"%1$s\" wordt gedeeld met iedereen die toegang heeft tot \"%3$s"
+"\"."
 
 #. With moving file \"%1$s\" its permissions will get lost.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:205
@@ -3562,6 +3566,11 @@ msgstr "Het account kan niet worden bijgewerkt: %1$s"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:128
 msgid "Searching folder by folder name is not supported"
 msgstr "Zoeken naar een map op mapnaam wordt niet ondersteund"
+
+#. The maximum number of accounts is exceeded.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:214
+msgid "The maximum number of accounts is exceeded."
+msgstr "Het maximale aantal accounts is overschreden."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -5196,6 +5205,12 @@ msgid ""
 msgstr ""
 "Het bijwerken van de map is mislukt. De eigenaar moet de administratieve "
 "rechten houden."
+
+#: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Too many messages requested (limit is %1$s). Please query a smaller range."
+msgstr ""
+"Te veel berichten aangevraagd (limiet is %1$s). Bevraag een kleiner bereik."
 
 #. The specified group \"%4$s\" is not supported.
 #: com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -7189,8 +7204,8 @@ msgstr "Het verwijderen van alle mappen is mislukt"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
 msgid "The folder was not updated. Please review the warnings for details."
 msgstr ""
-"De map is niet bijgewerkt. Controleer alstublieft de waarschuwingen voor"
-" details."
+"De map is niet bijgewerkt. Controleer alstublieft de waarschuwingen voor "
+"details."
 
 #. Folder name contains not allowed characters: \"%1$s\"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
@@ -7213,8 +7228,8 @@ msgid ""
 "This folder will be shared with everyone who has access to \"%3$s\". "
 "Everyone who can see \"%1$s\" will lose access."
 msgstr ""
-"De map wordt gedeeld met iedereen die toegang heeft tot \"%3$s\". Iedereen"
-" die \"%1$s\" kan zien verliest de toegang."
+"De map wordt gedeeld met iedereen die toegang heeft tot \"%3$s\". Iedereen "
+"die \"%1$s\" kan zien verliest de toegang."
 
 #. This folder will be shared with everyone who has access to \"%3$s\.
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:119
@@ -7233,8 +7248,8 @@ msgid ""
 "This folder will be shared with everyone who has access to \"%3$s\". "
 "Everyone who can see the subfolders of \"%1$s\" will lose access."
 msgstr ""
-"De map wordt gedeeld met iedereen die toegang heeft tot \"%3$s\". Iedereen"
-" die de submappen kan zien van \"%1$s\" verliest de toegang."
+"De map wordt gedeeld met iedereen die toegang heeft tot \"%3$s\". Iedereen "
+"die de submappen kan zien van \"%1$s\" verliest de toegang."
 
 #. User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
 #: com.openexchange.server/src/com/openexchange/folderstorage/oauth/OAuthFolderErrorMessages.java:62
@@ -10730,14 +10745,14 @@ msgstr ""
 #. *
 #. * The description of the read-only scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:10
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:65
 msgid "Read all your mails"
 msgstr "Lees al uw e-mailberichten"
 
 #. *
 #. * The description of the writable scope for OAuth requests
 #.
-#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:15
+#: com.openexchange.server/src/com/openexchange/mail/json/OAuthScopeDescription.java:70
 msgid "Create, modify, delete, import and send mails"
 msgstr "Maak, wijzig, verwijder, importeer en verzend e-mailberichten"
 
@@ -11810,8 +11825,8 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Geef het gedeelde wachtwoord om "
-"deze te zien."
+"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Voer het gedeelde wachtwoord in"
+" om het te bekijken."
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -11819,16 +11834,33 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Geef uw wachtwoord om het te "
-"zien."
+"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Voer uw wachtwoord in om het te"
+" bekijken."
+
+#. The folder "Photos" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+msgid ""
+"The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr ""
+"De %1$s \"%2$s\" wordt met u gedeeld. Voer het gedeelde wachtwoord in om het"
+" te bekijken."
+
+#. The folder "Photos" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+msgid ""
+"The %1$s \"%2$s\" is shared with you. Please enter your password to view it."
+msgstr ""
+"De %1$s \"%2$s\" wordt met u gedeeld. Voer uw wachtwoord in om het te"
+" bekijken."
 
 #. Login when opening a share protected with a password
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "Please enter your password to log into this account."
 msgstr "Voer alstublieft uw wachtwoord in om aan te melden bij dit account."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -11836,23 +11868,23 @@ msgstr ""
 "We hebben een bericht naar %1$s gestuurd met instructies hoe een nieuw "
 "wachtwoord ingesteld moet worden."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
 msgid "Please set a new password to regain access."
 msgstr "Stel een nieuw wachtwoord in om opnieuw toegang te krijgen."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
 msgid "The share you are looking for does not exist."
 msgstr "Het gedeelde item waar u naar zoekt bestaat niet."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "Dit gedeelde element kan niet benaderd worden met uw webbrowser."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
 msgid "We were unable to process your request."
 msgstr "We zijn niet in staat uw verzoek te verwerken."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -11860,7 +11892,7 @@ msgstr ""
 "De map of het item waar u naar zoekt is niet meer beschikbaar. Klik "
 "alstublieft op \"doorgaan\" om uw andere gedeelde items te tonen."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -11869,7 +11901,7 @@ msgstr ""
 "herstel wordt afgebroken."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11878,7 +11910,7 @@ msgstr ""
 "met de eigenaar als u deze opnieuw wilt benaderen."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11887,7 +11919,7 @@ msgstr ""
 "met %1$s als u deze opnieuw wilt benaderen."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11896,7 +11928,7 @@ msgstr ""
 "eigenaar als u deze opnieuw wilt benaderen."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11905,7 +11937,7 @@ msgstr ""
 "%1$s als u deze opnieuw wilt benaderen."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11914,7 +11946,7 @@ msgstr ""
 "op met de eigenaar als u deze opnieuw wilt benaderen."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11923,7 +11955,7 @@ msgstr ""
 "op met %1$s als u deze opnieuw wilt benaderen."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11934,7 +11966,7 @@ msgstr ""
 "bestanden te zien klikt u op \"Doorgaan\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11945,7 +11977,7 @@ msgstr ""
 "te zien klikt u op \"Doorgaan\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11956,7 +11988,7 @@ msgstr ""
 "te zien klikt u op \"Doorgaan\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11967,7 +11999,7 @@ msgstr ""
 "zien klikt u op \"Doorgaan\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11978,7 +12010,7 @@ msgstr ""
 "bestanden te zien klikt u op \"Doorgaan\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11989,7 +12021,7 @@ msgstr ""
 "bestanden wilt zien klikt u op \"Doorgaan\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12000,7 +12032,7 @@ msgstr ""
 "bestanden te zien moet u aanmelden."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12010,7 +12042,7 @@ msgstr ""
 "te zien moet u aanmelden."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12021,7 +12053,7 @@ msgstr ""
 "te zien moet u aanmelden."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -12032,7 +12064,7 @@ msgstr ""
 "zien moet u aanmelden."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:147
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12043,7 +12075,7 @@ msgstr ""
 "bestanden te zien moet u aanmelden."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:150
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12138,8 +12170,8 @@ msgid "You don't have sufficient permissions to subscribe to a share."
 msgstr "U heeft onvoldoende rechten om op een koppeling te abonneren."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:102
-msgid "Subscribing to a single file is not allowed"
-msgstr "Abonneren op een individueel bestand is niet toegestaan"
+msgid "Subscribing to a single file is not supported"
+msgstr "Abonneren op een enkel bestand wordt niet ondersteund"
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:104
 msgid "You are not allowed to subscribe to a share for %1$s"
@@ -12771,8 +12803,8 @@ msgid ""
 "After unsubscribing from \"%1$s\", all folders from the account \"%2$s\" "
 "will be removed."
 msgstr ""
-"Na het beëindigen van het abonnement op \"%1$s\" worden alle mappen uit het"
-" account \"%2$s\" verwijderd."
+"Na het beëindigen van het abonnement op \"%1$s\" worden alle mappen uit het "
+"account \"%2$s\" verwijderd."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
@@ -12835,6 +12867,26 @@ msgstr ""
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "U heeft geen toestemming om de handtekening te bewerken"
+
+#. The user entered a very long display name, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:86
+msgid "The entered display name is too long. Please use a shorter one."
+msgstr "De ingevoerde weergavenaam is te lang. Gebruik een kortere."
+
+#. The user entered a very long snippet identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:89
+msgid "The entered identifier is too long. Please use a shorter one."
+msgstr "Het ingevoerde kenmerk is te lang. Gebruik een kortere."
+
+#. The user entered a very long module identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:92
+msgid "The entered module identifier is too long. Please use a shorter one."
+msgstr "Het ingevoerde modulekenmerk is te lang. Gebruik een kortere."
+
+#. The user entered a very long type identifier, which cannot be stored due to data truncation
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:95
+msgid "The entered type identifier is too long. Please use a shorter one."
+msgstr "Het ingevoerde typekenmerk is te lang. Gebruik een kortere."
 
 #: com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
@@ -15401,6 +15453,9 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid "Subscribing to a single file is not allowed"
+#~ msgstr "Abonneren op een individueel bestand is niet toegestaan"
 
 #~ msgid "The given iCal file contains too many entities."
 #~ msgstr "Het aangeleverde iCal bestand bevat te veel elementen."
