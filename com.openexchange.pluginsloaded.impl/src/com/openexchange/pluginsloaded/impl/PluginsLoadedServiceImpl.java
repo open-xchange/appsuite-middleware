@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import com.openexchange.osgi.Tools;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 
-
 /**
  * {@link PluginsLoadedServiceImpl}
  *
@@ -70,7 +69,12 @@ public class PluginsLoadedServiceImpl implements PluginsLoadedService {
 
     private final BundleContext context;
 
-    public PluginsLoadedServiceImpl(BundleContext context){
+    /**
+     * Initializes a new {@link PluginsLoadedServiceImpl}.
+     *
+     * @param context The bundle context
+     */
+    public PluginsLoadedServiceImpl(BundleContext context) {
         super();
         this.context = context;
     }
@@ -78,24 +82,32 @@ public class PluginsLoadedServiceImpl implements PluginsLoadedService {
     @Override
     public boolean allPluginsloaded() {
         Bundle[] bundles = context.getBundles();
-        List<Bundle> fragments = new ArrayList<Bundle>();
-        List<Bundle> notStarted = new ArrayList<Bundle>();
+        List<Bundle> fragments = null;
+        List<Bundle> notStarted = null;
         for (Bundle bundle : bundles) {
             if (Tools.isFragment(bundle)) {
+                if (fragments == null) {
+                    fragments = new ArrayList<Bundle>();
+                }
                 fragments.add(bundle);
             } else if (Bundle.ACTIVE != bundle.getState()) {
+                if (notStarted == null) {
+                    notStarted = new ArrayList<Bundle>();
+                }
                 notStarted.add(bundle);
             }
         }
-        if (notStarted.isEmpty()) {
+
+        if (notStarted == null) {
+            // Nothing added to not-started collection
             return true;
         }
-        if (!fragments.isEmpty()) {
-            LOGGER.info("System contains the following fragments which will not be started: {}", fragments);
+
+        if (fragments != null) {
+            LOGGER.info("System contains the following fragments that stay in RESOLVED state: {}", fragments);
         }
-            LOGGER.error("The following bundles aren't started: {}", notStarted);
+        LOGGER.error("The following bundles aren't started: {}", notStarted);
         return false;
     }
-
 
 }
