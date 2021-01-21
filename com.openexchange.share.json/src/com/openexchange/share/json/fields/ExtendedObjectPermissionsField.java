@@ -111,7 +111,7 @@ public class ExtendedObjectPermissionsField implements AdditionalFileField {
         }
         PermissionResolver resolver = new PermissionResolver(services, session);
         resolver.cacheFilePermissionEntities(files);
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<Object>(files.size());
         for (File file : files) {
             List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
             if (null != objectPermissions) {
