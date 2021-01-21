@@ -53,10 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -71,6 +70,11 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public class ExtendedObjectPermissionsField implements AdditionalFileField {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class);
+    }
 
     private final ServiceLookup services;
 
@@ -136,8 +140,8 @@ public class ExtendedObjectPermissionsField implements AdditionalFileField {
                 if (ExtendedObjectPermission.class.isInstance(item)) {
                     try {
                         jsonArray.put(((ExtendedObjectPermission) item).toJSON(requestData));
-                    } catch (JSONException | OXException e) {
-                        org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).error("Error serializing extended permissions", e);
+                    } catch (Exception e) {
+                        LoggerHolder.LOG.error("Error serializing extended permissions", e);
                     }
                 }
             }
