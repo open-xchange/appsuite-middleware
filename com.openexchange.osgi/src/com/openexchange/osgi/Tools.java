@@ -155,13 +155,33 @@ public class Tools {
     }
 
     /**
+     * Checks if specified bundle is a fragment bundle by testing presence of special <code>"Fragment-Host"</code> header (specified in
+     * <code>MANIFEST.MF</code> file) in given bundle.
+     * <p>
+     * Example:
+     * <pre>
+     *     Manifest-Version: 1.0
+     *     Bundle-ManifestVersion: 2
+     *     Bundle-SymbolicName: com.openexchange.logback.classic.extensions
+     *     Fragment-Host: ch.qos.logback.classic
+     *     ...
+     * </pre>
+     *
+     * @param bundle The bundle to check
+     * @return <code>true</code> if specified bundle is a fragment bundle; else <code>false</code>
+     */
+    public static boolean isFragment(final Bundle bundle) {
+        return (null != bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+    }
+
+    /**
      * Checks if specified bundle is <b>not</b> a fragment bundle.
      *
      * @param bundle The bundle to check
      * @return <code>true</code> if specified bundle is <b>not</b> a fragment bundle; else <code>false</code>
      */
     public static boolean isNoFragment(final Bundle bundle) {
-        return (null == bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+        return isFragment(bundle) == false;
     }
 
     /**

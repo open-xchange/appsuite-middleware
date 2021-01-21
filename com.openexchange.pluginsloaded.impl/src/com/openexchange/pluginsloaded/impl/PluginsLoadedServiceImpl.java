@@ -81,7 +81,7 @@ public class PluginsLoadedServiceImpl implements PluginsLoadedService {
         List<Bundle> fragments = new ArrayList<Bundle>();
         List<Bundle> notStarted = new ArrayList<Bundle>();
         for (Bundle bundle : bundles) {
-            if (!Tools.isNoFragment(bundle)) {
+            if (Tools.isFragment(bundle)) {
                 fragments.add(bundle);
             } else if (Bundle.ACTIVE != bundle.getState()) {
                 notStarted.add(bundle);
