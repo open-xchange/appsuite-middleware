@@ -55,7 +55,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.api.client.ApiClientExceptions;
 import com.openexchange.api.client.LoginInformation;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultLoginInformation}
@@ -222,8 +224,9 @@ public class DefaultLoginInformation implements LoginInformation {
      *
      * @param values values to parse
      * @return Login information
+     * @throws OXException In case the remote server indicates an error
      */
-    public static DefaultLoginInformation parse(Map<String, ? extends Object> values) {
+    public static DefaultLoginInformation parse(Map<String, ? extends Object> values) throws OXException {
         DefaultLoginInformation information = new DefaultLoginInformation();
         for (Entry<String, ? extends Object> entry : values.entrySet()) {
             String key = entry.getKey();
@@ -242,8 +245,9 @@ public class DefaultLoginInformation implements LoginInformation {
      * @param key The key to identify the property
      * @param value The value to set
      * @return <code>true</code> if the value was set, <code>false</code> otherwise
+     * @throws OXException In case the remote server indicates an error
      */
-    protected static boolean parseForLoginInformation(DefaultLoginInformation information, String key, Object value) {
+    protected static boolean parseForLoginInformation(DefaultLoginInformation information, String key, Object value) throws OXException {
         switch (key) {
             case "session":
                 information.setRemoteSessionId(parseString(value));
@@ -271,6 +275,8 @@ public class DefaultLoginInformation implements LoginInformation {
             case "login_type":
                 information.setLoginType(parseString(value));
                 return true;
+            case "error":
+                throw ApiClientExceptions.REMOTE_SERVER_ERROR.create(value);
             default:
                 // Fall trough
         }
