@@ -467,7 +467,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * 
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
-     * @param filename The file's name
+     * @param fileId The optional file identifier (For existing files)
+     * @param filename The optional file name (For new files)
      * @param contentType The content type of the file
      * @param inputStream A stream with the actual data
      * @return A {@link JSONObject} with the metadata of the newly uploaded file.
@@ -475,8 +476,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0">Upload small files</a>
      * 
      */
-    public JSONObject oneshotUpload(String accessToken, String folderId, String filename, String contentType, InputStream inputStream) throws OXException {
-        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/content";
+    public JSONObject oneshotUpload(String accessToken, String folderId, String fileId, String filename, String contentType, InputStream inputStream) throws OXException {
+        String path = compileUploadURL(folderId, fileId, filename, true);
         return putResource(accessToken, path, contentType, inputStream);
     }
 
@@ -487,7 +488,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      *
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
-     * @param filename The file's name
+     * @param fileId The optional file identifier (For existing files)
+     * @param filename The optional file name (For new files)
      * @param contentLength The file's size
      * @param inputStream A stream with the actual data
      * @return A {@link JSONObject} with the metadata of the newly uploaded file.
@@ -495,11 +497,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws IllegalArgumentException if the content length of the file is less than or equal to zero.
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_createuploadsession">Resumable Upload</a>
      */
-    public JSONObject streamingUpload(String accessToken, String folderId, String filename, long contentLength, InputStream inputStream) throws OXException {
+    public JSONObject streamingUpload(String accessToken, String folderId, String fileId, String filename, long contentLength, InputStream inputStream) throws OXException {
         if (contentLength <= 0) {
             throw new IllegalArgumentException("The content length of the file must be greater than zero!");
         }
-        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
+        String path = compileUploadURL(folderId, fileId, filename, false);
         try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
             JSONObject body = new JSONObject();
             body.put("name", filename);
@@ -552,5 +554,26 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_ERROR.create(e);
         }
+    }
+
+    /**
+     * Compiles the upload URL. Either one of fileId or filename MUST be present. The oneShot indicates
+     * whether a stream upload URL will be compiled, or the one-shot
+     *
+     * @param folderId The folder identifier
+     * @param fileId The optional file identifier (For existing files)
+     * @param filename The optional file name (For new files)
+     * @param oneShot Whether an oneShot URL or a streaming URL shall be compiled
+     * @return The URL
+     * @throws OXException if both fileId and filename are missing
+     */
+    private String compileUploadURL(String folderId, String fileId, String filename, boolean oneShot) throws OXException {
+        if (Strings.isEmpty(fileId) && Strings.isEmpty(filename)) {
+            throw MicrosoftGraphAPIExceptionCodes.INVALID_REQUEST.create("Either filename or fileId must be present");
+        }
+        if (Strings.isEmpty(filename)) {
+            return BASE_URL + "/items/" + fileId + "/" + (oneShot ? "content" : "createUploadSession"); // Update path
+        }
+        return BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/" + (oneShot ? "content" : "createUploadSession"); // New path
     }
 }

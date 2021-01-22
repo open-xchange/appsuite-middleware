@@ -385,9 +385,9 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
 
         if (contentLength > ONESHOT_LIMIT) {
-            responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), contentLength, is);
+            responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getId(), file.getFileName(), contentLength, is);
         } else {
-            responseBody = api.oneshotUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), is);
+            responseBody = api.oneshotUpload(accessToken, file.getFolderId(), file.getId(), file.getFileName(), file.getFileMIMEType(), is);
         }
         return responseBody.optString("id");
     }
