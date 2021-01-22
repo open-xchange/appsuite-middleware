@@ -332,9 +332,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 } catch (TimeoutException e) {
                     optRampUp.cancel(true);
                     if (LOG.isDebugEnabled()) {
-                        LOG.warn("Ramp-up information could not be added to login JSON response within {} seconds. Skipping...", Integer.valueOf(timeoutSecs));
-                    } else {
                         LOG.warn("Ramp-up information could not be added to login JSON response within {} seconds. Skipping...", Integer.valueOf(timeoutSecs), e);
+                    } else {
+                        LOG.warn("Ramp-up information could not be added to login JSON response within {} seconds. Skipping...", Integer.valueOf(timeoutSecs));
                     }
                 } catch (ExecutionException e) {
                     // Cannot occur
