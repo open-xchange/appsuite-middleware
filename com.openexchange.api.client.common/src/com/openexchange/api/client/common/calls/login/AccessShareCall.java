@@ -121,8 +121,9 @@ public class AccessShareCall extends AbstractGetCall<ShareLoginInformation> {
      * <li> com.openexchange.share.servlet.utils.LoginLocation</li>
      *
      * @param location The location header
+     * @throws OXException In case the remote server indicates an error
      */
-    protected ShareLoginInformation parseLocationHeader(String location) {
+    protected ShareLoginInformation parseLocationHeader(String location) throws OXException {
         return ShareLoginInformation.parse(parseParameters(location));
     }
 

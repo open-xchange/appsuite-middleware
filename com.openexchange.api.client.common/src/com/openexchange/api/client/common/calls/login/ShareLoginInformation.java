@@ -53,6 +53,7 @@ import static com.openexchange.api.client.common.ApiClientUtils.parseString;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.api.client.common.DefaultLoginInformation;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ShareLoginInformation}
@@ -232,8 +233,9 @@ public class ShareLoginInformation extends DefaultLoginInformation {
      *
      * @param values values to parse
      * @return Login information
+     * @throws OXException In case the remote server indicates an error
      */
-    public static ShareLoginInformation parse(Map<String, ? extends Object> values) {
+    public static ShareLoginInformation parse(Map<String, ? extends Object> values) throws OXException {
         ShareLoginInformation information = new ShareLoginInformation();
         for (Entry<String, ? extends Object> entry : values.entrySet()) {
             String key = entry.getKey();
