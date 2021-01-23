@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -302,11 +304,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                 long timeoutMillis = getTimeoutMillis(task.getNumberOfMails());
                 try {
                     future.get(timeoutMillis, TimeUnit.MILLISECONDS);
-                    LOGGER.debug("Verified mail authenticity for mails \"{}\" ({}) in folder {} after {}\u00b5s", task.getMailIds(),
-                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()));
+                    LOGGER.debug("Verified mail authenticity for mails \"{}\" ({}) in folder {} after {}\u00b5s",
+                        task.getMailIds(), I(task.getNumberOfMails()), task.getMailFolder(), L(task.getDurationMicros()));
                 } catch (ExecutionException e) {
-                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}\u00b5s", task.getMailIds(),
-                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
+                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}\u00b5s",
+                        task.getMailIds(), I(task.getNumberOfMails()), task.getMailFolder(), L(task.getDurationMicros()), e.getCause());
                     task.markAsNeutral();
                 } catch (TimeoutException e) {
                     task.interrupt();
@@ -314,11 +316,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     long durationMicros = task.getDurationMicros();
                     if (durationMicros == 0) {
                         // Task not yet in execution; still enqueued in thread pool
-                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}ms. Task has not been executed.", task.getMailIds(),
-                            Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(timeoutMillis));
+                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}ms. Task has not been executed.",
+                            task.getMailIds(), I(task.getNumberOfMails()), task.getMailFolder(), L(timeoutMillis));
                     } else {
-                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}ms", task.getMailIds(),
-                            Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(timeoutMillis));
+                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {}ms",
+                            task.getMailIds(), I(task.getNumberOfMails()), task.getMailFolder(), L(timeoutMillis));
                     }
                     task.markAsNeutral();
                 }
@@ -446,37 +448,48 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         /**
-         * Gets a comma-separated string containing the identifiers of the mails processed by this task
+         * Gets an object whose <code>toString()</code> method provides the comma-separated string containing the identifiers of the mails
+         * processed by this task.
+         * <p>
+         * This method is for logging reasons.
          *
-         * @return The mail identifiers as a string
+         * @return An object providing the mail identifiers as a string
          */
-        public String getMailIds() {
-            StringBuilder sb = new StringBuilder(mails.length << 2);
-            boolean first = true;
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
+        public Object getMailIds() {
+            MailMessage[] mails = this.mails;
+            return new Object() {
+
+                @Override
+                public String toString() {
+                    StringBuilder sb = new StringBuilder(mails.length << 2);
+                    boolean first = true;
+                    for (MailMessage mail : mails) {
+                        if (null != mail) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                sb.append(", ");
+                            }
+                            sb.append(mail.getMailId());
+                        }
                     }
-                    sb.append(mail.getMailId());
+                    return sb.toString();
                 }
-            }
-            return sb.toString();
+            };
         }
 
         /**
          * Gets the identifier of the mail folder
          *
-         * @return The mail folder, or null if there are no {@link MailMessage}s
+         * @return The mail folder, or <code>null</code> if there are no mails
          */
         public String getMailFolder() {
             return mails.length == 0 || mails[0] == null ? null : mails[0].getFolder();
         }
 
         /**
-         * Marks the mails processed by this task as <code>neutral</code> by applying {@link MailAuthenticityResult#NEUTRAL_RESULT the special authenticity result} to all of them.
+         * Marks the mails processed by this task as <code>neutral</code> by applying {@link MailAuthenticityResult#NEUTRAL_RESULT the
+         * special authenticity result} to all of them.
          */
         public void markAsNeutral() {
             for (MailMessage mail : mails) {
