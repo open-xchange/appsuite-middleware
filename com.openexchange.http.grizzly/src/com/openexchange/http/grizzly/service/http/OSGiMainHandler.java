@@ -237,14 +237,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     processingLock.lock();
                     try {
                         updateMappingInfo(request, alias, originalAlias);
-
-                        OXThreadMarker threadMarker = threadMarker();
-                        threadMarker.setHttpRequestProcessing(true);
-                        try {
-                            httpHandler.service(request, response);
-                        } finally {
-                            threadMarker.setHttpRequestProcessing(false);
-                        }
+                        doHttpService(request, response, httpHandler);
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
                         StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
@@ -295,14 +288,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 processingLock.lock();
                 try {
                     updateMappingInfo(request, alias, originalAlias);
-
-                    OXThreadMarker threadMarker = threadMarker();
-                    threadMarker.setHttpRequestProcessing(true);
-                    try {
-                        httpHandler.service(request, response);
-                    } finally {
-                        threadMarker.setHttpRequestProcessing(false);
-                    }
+                    doHttpService(request, response, httpHandler);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
@@ -328,6 +314,22 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             } catch (Exception e) {
                 LOG.warn("Failed to commit 404 status.", e);
             }
+        }
+    }
+
+    private static void doHttpService(Request request, Response response, HttpHandler httpHandler) throws Exception {
+        Thread t = Thread.currentThread();
+        if (!(t instanceof OXThreadMarker)) {
+            httpHandler.service(request, response);
+            return;
+        }
+
+        OXThreadMarker threadMarker = (OXThreadMarker) t;
+        threadMarker.setHttpRequestProcessing(true);
+        try {
+            httpHandler.service(request, response);
+        } finally {
+            threadMarker.setHttpRequestProcessing(false);
         }
     }
 
@@ -794,26 +796,6 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         reponseBuffer.flip();
         return encoder.encode(reponseBuffer);
 
-    }
-
-    // -----------------------------------------------------------------------------------------
-
-    private static final OXThreadMarker DUMMY = new OXThreadMarker() {
-
-        @Override
-        public void setHttpRequestProcessing(boolean httpProcessing) {
-            // Nothing
-        }
-
-        @Override
-        public boolean isHttpRequestProcessing() {
-            return false;
-        }
-    };
-
-    private static OXThreadMarker threadMarker() {
-        Thread t = Thread.currentThread();
-        return t instanceof OXThreadMarker ? (OXThreadMarker) t : DUMMY;
     }
 
 }
