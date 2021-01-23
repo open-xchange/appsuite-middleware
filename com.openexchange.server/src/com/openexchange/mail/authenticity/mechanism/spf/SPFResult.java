@@ -166,4 +166,22 @@ public enum SPFResult implements AuthenticityMechanismResult {
     public int getCode() {
         return ordinal();
     }
+
+    /**
+     * Gets the SPF result for given technical name.
+     *
+     * @param technicalName The technical name to look-up by
+     * @return The associated SPF result or <code>null</code>
+     */
+    public static SPFResult spfResultFor(String technicalName) {
+        if (technicalName != null) {
+            for (SPFResult spfResult : SPFResult.values()) {
+                if (spfResult.technicalName.equals(technicalName)) {
+                    return spfResult;
+                }
+            }
+        }
+        return null;
+    }
+
 }

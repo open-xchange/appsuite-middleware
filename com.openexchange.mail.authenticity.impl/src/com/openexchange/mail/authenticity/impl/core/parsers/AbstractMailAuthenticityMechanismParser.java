@@ -71,9 +71,9 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
     private final String[] domainHeaders;
 
     /**
-     * Initialises a new {@link AbstractMailAuthenticityMechanismParser}.
+     * Initializes a new {@link AbstractMailAuthenticityMechanismParser}.
      */
-    public AbstractMailAuthenticityMechanismParser(DefaultMailAuthenticityMechanism mechanism, String... domainHeaders) {
+    protected AbstractMailAuthenticityMechanismParser(DefaultMailAuthenticityMechanism mechanism, String... domainHeaders) {
         super();
         this.mechanism = mechanism;
         this.domainHeaders = domainHeaders;
@@ -81,36 +81,35 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
 
     @Override
     public MailAuthenticityMechanismResult apply(Map<String, String> attributes, MailAuthenticityResult overallResult) {
-        String value = attributes.remove(mechanism.getTechnicalName());
-        AuthenticityMechanismResult authenticityMechanismResult = parseMechanismResult(extractOutcome(value.toUpperCase()));
+        String result = attributes.remove(mechanism.getTechnicalName());
+        AuthenticityMechanismResult authenticityMechanismResult = parseMechanismResult(result == null ? null : extractOutcome(Strings.asciiLowerCase(result)));
 
         String domain = extractDomain(attributes, domainHeaders);
         boolean domainMatch = checkDomainMatch(overallResult, domain);
 
-        return createResult(domain, authenticityMechanismResult, value, domainMatch, attributes);
+        return createResult(domain, authenticityMechanismResult, result, domainMatch, attributes);
     }
 
     /**
-     * Parses the specified value to a valid {@link AuthenticityMechanismResult} via the {@link Enum#valueOf(Class, String)}
-     * method of the corresponding {@link AuthenticityMechanismResult}
+     * Parses the specified value to a valid mechanism result.
      *
      * @param value The value
-     * @return The {@link AuthenticityMechanismResult}
+     * @return The mechanism result
      * @throws IllegalArgumenException if an invalid value is passed as argument
      */
-    abstract AuthenticityMechanismResult parseMechanismResult(String value);
+    protected abstract AuthenticityMechanismResult parseMechanismResult(String value);
 
     /**
      * Creates a new {@link MailAuthenticityMechanismResult} with the specified domain, {@link AuthenticityMechanismResult}, mechanism name
      *
      * @param domain The domain
-     * @param mechResult the {@link AuthenticityMechanismResult}
-     * @param mechanismName The mechanism's name (may contain a comment in parenthesis)
+     * @param mechResult The mechanism result
+     * @param mechanismResult The mechanism's result string (may contain a comment in parenthesis); e.g. <code>"pass(p=REJECT)"</code>
      * @param domainMatch Whether there is a domain match
      * @param attributes
      * @return The new {@link MailAuthenticityMechanismResult}
      */
-    abstract MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes);
+    protected abstract MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismResult, boolean domainMatch, Map<String, String> attributes);
 
     /**
      * Checks whether there is a domain match between the domain extracted from the <code>From</code> header
@@ -138,9 +137,9 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      */
     private String extractDomain(Map<String, String> attributes, String... keys) {
         for (String key : keys) {
-            String value = attributes.get(key);
-            if (Strings.isNotEmpty(value)) {
-                return cleanseDomain(value);
+            String attrValue = attributes.get(key);
+            if (Strings.isNotEmpty(attrValue)) {
+                return cleanseDomain(attrValue);
             }
         }
         return null;
@@ -150,20 +149,25 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * Removes the optional version (if present) from the specified domain
      * and the preceding "at" symbol ('@') (if present) from the domain.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      * @param domain The domain to cleanse
      * @return The cleansed domain or <code>null</code> if the specified domain is <code>null</code>
      *         or empty in the first place
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      */
     private String cleanseDomain(String domain) {
         if (Strings.isEmpty(domain)) {
             return domain;
         }
-        String[] split = domain.split(" ");
+
+        if (domain.indexOf(' ') < 0) {
+            return domain;
+        }
+
         // Cleanse the optional version
-        domain = split.length == 0 ? domain : split[0];
-        int index = domain.indexOf('@');
-        return index < 0 ? domain : domain.substring(index + 1);
+        String[] split = Strings.splitBy(domain, ' ', true);
+        String domein = split.length == 0 ? domain : split[0];
+        int index = domein.indexOf('@');
+        return index < 0 ? domein : domein.substring(index + 1);
     }
 
     /**
@@ -173,8 +177,10 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * @return The extracted outcome
      */
     private String extractOutcome(String value) {
-        int index = value.indexOf(' ');
-        return (index < 0) ? value : value.substring(0, index);
+        int index = value.indexOf('(');
+        String retval = (index < 0) ? value : value.substring(0, index);
+        index = retval.indexOf(' ');
+        return (index < 0) ? retval : retval.substring(0, index);
     }
 
     /**

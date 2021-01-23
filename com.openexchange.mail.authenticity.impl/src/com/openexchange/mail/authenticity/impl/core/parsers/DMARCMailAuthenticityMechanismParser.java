@@ -76,48 +76,44 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
     }
 
     @Override
-    AuthenticityMechanismResult parseMechanismResult(String value) {
+    protected AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
-            return DMARCResult.valueOf(value);
+            DMARCResult dmarcResult = DMARCResult.dmarcResultFor(value);
+            return dmarcResult == null ? DMARCResult.FAIL : dmarcResult;
         } catch (IllegalArgumentException e) {
             return DMARCResult.FAIL;
         }
     }
 
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
+    protected MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismResult, boolean domainMatch, Map<String, String> attributes) {
         DMARCAuthMechResult result = new DMARCAuthMechResult(domain, (DMARCResult) mechResult);
         result.setReason(mechResult.getDisplayName());
         result.setDomainMatch(domainMatch);
         result.addProperty(DMARCProperty.FROM_DOMAIN, result.getDomain());
-        result.addProperty(DMARCProperty.POLICY, extractPolicy(mechanismName));
+        result.addProperty(DMARCProperty.POLICY, extractPolicy(mechanismResult));
         return result;
     }
 
-    private static final Pattern POLICY_MATCHER = Pattern.compile("([a-zA-Z]+(\\s+)?=(\\s+)?[a-zA-Z]+\\s?)+");
+    private static final Pattern REGEX_POLICY = Pattern.compile("([a-zA-Z]+(\\s*)=(\\s*)[a-zA-Z]+\\s?)+");
 
     /**
      * Extracts the optional policy of the DMARC mechanism
-     * 
+     *
      * @param mechComment The mechanism comment
      * @return the policy if present, otherwise an empty string
      */
     private String extractPolicy(String mechComment) {
-        Matcher m = POLICY_MATCHER.matcher(mechComment);
-        if (!m.find()) {
-            return "";
-        }
-        String comment = m.group();
-        String[] p = Strings.splitByWhitespaces(comment);
-        for (String s : p) {
-            String[] split = Strings.splitBy(s, '=', true);
-            if (split.length != 2) {
-                continue;
-            }
-            if (split[0].equalsIgnoreCase("p")) {
-                return split[1].toLowerCase();
+        Matcher m = REGEX_POLICY.matcher(mechComment);
+        if (m.find()) {
+            for (String pair : Strings.splitByWhitespaces(m.group())) {
+                String[] split = Strings.splitBy(pair, '=', true);
+                if (split.length == 2 && "p".equalsIgnoreCase(split[0])) {
+                    return Strings.asciiLowerCase(split[1]);
+                }
             }
         }
         return "";
     }
+
 }

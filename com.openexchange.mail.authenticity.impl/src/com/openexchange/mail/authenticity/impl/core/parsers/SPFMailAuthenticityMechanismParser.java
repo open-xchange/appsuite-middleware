@@ -75,16 +75,17 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
     }
 
     @Override
-    AuthenticityMechanismResult parseMechanismResult(String value) {
+    protected AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
-            return SPFResult.valueOf(value);
+            SPFResult spfResult = SPFResult.spfResultFor(value);
+            return spfResult == null ? SPFResult.FAIL : spfResult;
         } catch (IllegalArgumentException e) {
             return SPFResult.FAIL;
         }
     }
 
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
+    protected MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismResult, boolean domainMatch, Map<String, String> attributes) {
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
         result.setDomainMatch(domainMatch);
         result.addProperty(SPFProperty.MAIL_FROM, result.getDomain());

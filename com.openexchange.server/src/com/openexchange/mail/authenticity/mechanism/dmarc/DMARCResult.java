@@ -55,7 +55,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
  * {@link DMARCResult} - Defines the possible results as defined in
  * <a href="https://tools.ietf.org/html/rfc7489#section-11.2">RFC-7489, Section 11.2</a>.
  * The ordinal defines the significance of each result.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7489#section-11.2">RFC-7489, Section 11.2</a>
  */
@@ -113,4 +113,22 @@ public enum DMARCResult implements AuthenticityMechanismResult {
     public int getCode() {
         return ordinal();
     }
+
+    /**
+     * Gets the DMARC result for given technical name.
+     *
+     * @param technicalName The technical name to look-up by
+     * @return The associated DMARC result or <code>null</code>
+     */
+    public static DMARCResult dmarcResultFor(String technicalName) {
+        if (technicalName != null) {
+            for (DMARCResult dmarcResult : DMARCResult.values()) {
+                if (dmarcResult.technicalName.equals(technicalName)) {
+                    return dmarcResult;
+                }
+            }
+        }
+        return null;
+    }
+
 }

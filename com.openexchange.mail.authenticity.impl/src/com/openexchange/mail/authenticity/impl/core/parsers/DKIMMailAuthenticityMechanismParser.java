@@ -74,16 +74,17 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
     }
 
     @Override
-    AuthenticityMechanismResult parseMechanismResult(String value) {
+    protected AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
-            return DKIMResult.valueOf(value);
+            DKIMResult dkimResult = DKIMResult.dkimResultFor(value);
+            return dkimResult == null ? DKIMResult.FAIL : dkimResult;
         } catch (IllegalArgumentException e) {
             return DKIMResult.FAIL;
         }
     }
 
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
+    protected MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismResult, boolean domainMatch, Map<String, String> attributes) {
         DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
         result.setDomainMatch(domainMatch);
         result.addProperty(DKIMProperty.SIGNING_DOMAIN, result.getDomain());

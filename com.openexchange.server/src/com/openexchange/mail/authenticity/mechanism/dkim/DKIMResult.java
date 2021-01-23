@@ -128,4 +128,22 @@ public enum DKIMResult implements AuthenticityMechanismResult {
     public int getCode() {
         return ordinal();
     }
+
+    /**
+     * Gets the DKIM result for given technical name.
+     *
+     * @param technicalName The technical name to look-up by
+     * @return The associated DKIM result or <code>null</code>
+     */
+    public static DKIMResult dkimResultFor(String technicalName) {
+        if (technicalName != null) {
+            for (DKIMResult dkimResult : DKIMResult.values()) {
+                if (dkimResult.technicalName.equals(technicalName)) {
+                    return dkimResult;
+                }
+            }
+        }
+        return null;
+    }
+
 }

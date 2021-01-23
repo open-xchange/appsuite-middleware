@@ -60,7 +60,10 @@ public class MailAuthenticityAttribute {
     private final String value;
 
     /**
-     * Initialises a new {@link MailAuthenticityAttribute}.
+     * Initializes a new {@link MailAuthenticityAttribute}.
+     *
+     * @param key The key
+     * @param value The value
      */
     public MailAuthenticityAttribute(String key, String value) {
         super();
