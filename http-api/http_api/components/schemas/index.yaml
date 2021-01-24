@@ -561,9 +561,9 @@ MailComposeResponse:
 MailComposeGetResponse:
   $ref: ./mailcompose/MailComposeGetResponse.yaml
 MailComposeRequestMessageModel:
-  $ref: ./mailcompose/RequestMessageModel.yaml
+  $ref: ./mailcompose/MailComposeRequestMessageModel.yaml
 MailComposeResponseMessageModel:
-  $ref: ./mailcompose/ResponseMessageModel.yaml
+  $ref: ./mailcompose/MailComposeResponseMessageModel.yaml
 MailComposeMailPathModel:
   $ref: ./mailcompose/MailComposeMailPathModel.yaml
 MailComposeAttachmentResponse:
