@@ -495,7 +495,7 @@ public class MailStorage implements IMailStorage {
 
             String draftsFolder = mailAccess.getFolderStorage().getDraftsFolder();
             IMailMessageStorage draftMessageStorage = mailAccess.getMessageStorage();
-            MailMessage savedDraft = saveDraftMail(composedMessage, draftsFolder, false, draftMessageStorage);
+            MailMessage savedDraft = saveDraftMail(composedMessage, draftsFolder, true, draftMessageStorage);
             long size = savedDraft.getSize();
             MailPath mailPath = savedDraft.getMailPath();
             if (size < 0) {
@@ -1561,7 +1561,7 @@ public class MailStorage implements IMailStorage {
         newDraftMail.setSendType(ComposeType.DRAFT);
 
         // Save new draft mail (and thus delete previous draft mail)
-        MailMessage savedDraft = saveDraftMail(newDraftMail, draftPath.getFolder(), false, messageStorage);
+        MailMessage savedDraft = saveDraftMail(newDraftMail, draftPath.getFolder(), true, messageStorage);
 
         // Delete with conflict detection in case enhanced deletion is supported
         boolean deleteFailed = true;
@@ -1844,13 +1844,16 @@ public class MailStorage implements IMailStorage {
         } catch (OXException e) {
             LOG.debug("Failed to save new draft", e);
             throw e;
+        } catch (Exception e) {
+            LOG.debug("Failed to save new draft", e);
+            throw CompositionSpaceErrorCode.ERROR.create(e, e.getMessage());
         }
 
         if (markAsSeen) {
             try {
                 messageStorage.updateMessageFlags(draftFullName, new String[] { savedDraft.getMailId() }, MailMessage.FLAG_SEEN, true);
                 LOG.debug("Marked new draft {} as seen", savedDraft.getMailPath());
-            } catch (OXException e) {
+            } catch (Exception e) {
                 LOG.debug("Failed to mark new draft {} as seen", savedDraft.getMailPath(), e);
             }
         }
