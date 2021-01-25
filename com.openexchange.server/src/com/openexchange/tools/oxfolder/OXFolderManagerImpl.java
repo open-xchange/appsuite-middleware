@@ -577,14 +577,13 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
             }
         }
 
-        boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         checkFolderPermissions(fo, Optional.ofNullable(originalFolder));
         int oldParentId = originalFolder.getParentFolderID();
         FolderObject storageObject = originalFolder.clone();
 
         int optionz = options;
-        if (((optionz & OPTION_TRASHING) > 0) && performMove) {
+        if (((optionz & OPTION_TRASHING) > 0) && fo.containsParentFolderID()) {
             int newParentFolderID = fo.getParentFolderID();
             if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
@@ -628,7 +627,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
         try {
             if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta() || fo.containsOriginPath()) {
                 int newParentFolderID = fo.getParentFolderID();
-                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if (fo.containsParentFolderID() && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                     // Reload storage's folder for following update
@@ -642,17 +641,20 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
                 update(fo, optionz, storageObject, lastModified, handDown);
             } else if (fo.containsFolderName()) {
                 int newParentFolderID = fo.getParentFolderID();
-                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if (fo.containsParentFolderID() && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     // Perform move
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                 } else {
                     rename(fo, storageObject, lastModified);
                 }
-            } else if (performMove) {
-                // Perform move
-                folderId2OldOwner = determineCurrentOwnerships(originalFolder);
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
+            } else if (fo.containsParentFolderID()) {
+                int newParentFolderID = fo.getParentFolderID();
+                if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    // Perform move
+                    folderId2OldOwner = determineCurrentOwnerships(originalFolder);
+                    move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
+                }
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
