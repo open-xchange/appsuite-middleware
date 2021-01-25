@@ -72,6 +72,7 @@ import com.openexchange.mail.autoconfig.tools.ProxyInfo;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -143,6 +144,8 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
 
         ProxyInfo proxy = getHttpProxyIfEnabled(view);
         HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb");
+        HttpGet req = null;
+        HttpResponse rsp = null;
         try {
             int port = url.getPort();
             if (port < 0) {
@@ -153,10 +156,10 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             }
 
             HttpHost target = new HttpHost(url.getHost(), port, url.getProtocol());
-            HttpGet req = new HttpGet(url.getPath());
+            req = new HttpGet(url.getPath());
 
             LOG.info("Executing request to retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
-            HttpResponse rsp = httpclient.execute(target, req, httpContextFor(contextId, userId));
+            rsp = httpclient.execute(target, req, httpContextFor(contextId, userId));
 
             int httpCode = rsp.getStatusLine().getStatusCode();
             if (httpCode != 200) {
@@ -188,6 +191,8 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         } catch (IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
+        } finally {
+            HttpClients.close(req, rsp);
         }
     }
 
