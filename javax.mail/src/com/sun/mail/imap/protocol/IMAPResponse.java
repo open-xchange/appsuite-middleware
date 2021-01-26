@@ -56,26 +56,29 @@ import com.sun.mail.util.ASCIIUtility;
  */
 
 public class IMAPResponse extends Response {
-    private String key;
-    private int number;
+
+    private static final com.google.common.collect.Interner<String> KEY_INTERNER = com.google.common.collect.Interners.newWeakInterner();
+
+    private final String key;
+    private final int number;
 
     public IMAPResponse(Protocol c) throws IOException, ProtocolException {
 	super(c);
-	init();
-    }
-
-    private void init() throws IOException, ProtocolException {
 	// continue parsing if this is an untagged response
+	String key = null;
+	int number = 0;
 	if (isUnTagged() && !isOK() && !isNO() && !isBAD() && !isBYE()) {
 	    key = readAtom();
-
+	    
 	    // Is this response of the form "* <number> <command>"
 	    int num = parseUnsignedInt(key);
 	    if (num >= 0) {
 	        number = num;
 	        key = readAtom();
-        }
+	    }
 	}
+	this.key = key == null ? null : KEY_INTERNER.intern(key);
+    this.number = number;
     }
 
     /**
@@ -112,7 +115,21 @@ public class IMAPResponse extends Response {
     public IMAPResponse(String r, boolean utf8)
 				throws IOException, ProtocolException {
 	super(r, utf8);
-	init();
+    // continue parsing if this is an untagged response
+    String key = null;
+    int number = 0;
+    if (isUnTagged() && !isOK() && !isNO() && !isBAD() && !isBYE()) {
+        key = readAtom();
+        
+        // Is this response of the form "* <number> <command>"
+        int num = parseUnsignedInt(key);
+        if (num >= 0) {
+            number = num;
+            key = readAtom();
+        }
+    }
+    this.key = key == null ? null : KEY_INTERNER.intern(key);
+    this.number = number;
     }
 
     /**
