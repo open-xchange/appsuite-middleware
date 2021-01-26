@@ -61,8 +61,8 @@ public interface AssignmentFactory {
 
     /**
      * Returns an {@link Assignment} based on the given context identifier
-     * 
-     * @param poolId The context id to get an {@link Assignment} for
+     *
+     * @param contextId The context identifier to get an {@link Assignment} for
      * @return {@link Assignment} for the given parameters or <code>null</code> if no {@link Assignment} can be found
      * @throws OXException
      */
@@ -70,7 +70,7 @@ public interface AssignmentFactory {
 
     /**
      * Returns an {@link Assignment} based on the given schema name
-     * 
+     *
      * @param schemaName The schemaName to get an {@link Assignment} for
      * @return {@link Assignment} for the given parameters or <code>null</code> if no {@link Assignment} can be found
      * @throws OXException
@@ -79,7 +79,7 @@ public interface AssignmentFactory {
 
     /**
      * Reloads the previously read {@link Assignment}s
-     * 
+     *
      * @throws OXException
      */
     void reload() throws OXException;
