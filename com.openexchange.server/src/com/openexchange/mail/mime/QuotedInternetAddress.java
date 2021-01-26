@@ -377,9 +377,16 @@ public final class QuotedInternetAddress extends InternetAddress {
         } else {
             // Possible comments. Parse with EmailAddressParser to maintain CFWS personal names (if any)
             try {
-                emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.DEFAULT, true);
+                emailAddressParserAddresses = EmailAddressParser.extractHeaderAddresses(s, EmailAddressCriteria.RFC_COMPLIANT, true);
             } catch (Exception e) {
                 LOG.warn("Failed to parse address listing with EmailAddress RFC2822: {}", s, e);
+                emailAddressParserAddresses = null;
+            } catch (StackOverflowError e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("A stack overflow occurred (application recursed too deeply) while parsing address listing with EmailAddress RFC2822: {}", s, e);
+                } else {
+                    LOG.warn("A stack overflow occurred (application recursed too deeply) while parsing address listing with EmailAddress RFC2822: {}", s);
+                }
                 emailAddressParserAddresses = null;
             }
         }
