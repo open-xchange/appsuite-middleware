@@ -68,6 +68,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
@@ -228,6 +229,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
         trackService(UnifiedInboxManagement.class);
         trackService(UploadDirService.class);
+        trackService(AssignmentFactory.class);
 
         openTrackers();
 
