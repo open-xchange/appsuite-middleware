@@ -1906,6 +1906,7 @@ public class SMTPTransport extends Transport {
 	}
 
 	// try the addresses one at a time
+	Set<String> alreadyOccurredExceptions = new HashSet<>();
 	for (int i = 0; i < addresses.length; i++) {
 
 	    sfex = null;
@@ -1950,8 +1951,10 @@ public class SMTPTransport extends Transport {
 							lastServerResponse);
 		if (mex == null)
 		    mex = sfex;
-		else
-		    mex.setNextException(sfex);
+		else {
+		    if (alreadyOccurredExceptions.add(sfex.toString()))
+		        mex.setNextException(sfex); // Prevent adding equal exceptions
+		}
 		break;
 
 	    case 550: case 553: case 503: case 551: case 501:
@@ -1964,8 +1967,10 @@ public class SMTPTransport extends Transport {
 							lastServerResponse);
 		if (mex == null)
 		    mex = sfex;
-		else
-		    mex.setNextException(sfex);
+	    else {
+	        if (alreadyOccurredExceptions.add(sfex.toString()))
+	            mex.setNextException(sfex); // Prevent adding equal exceptions
+	    }
 		break;
 
 	    case 552: case 450: case 451: case 452:
@@ -1978,8 +1983,10 @@ public class SMTPTransport extends Transport {
 							lastServerResponse);
 		if (mex == null)
 		    mex = sfex;
-		else
-		    mex.setNextException(sfex);
+		else {
+            if (alreadyOccurredExceptions.add(sfex.toString()))
+                mex.setNextException(sfex); // Prevent adding equal exceptions
+		}
 		break;
 
 	    default:
@@ -2011,8 +2018,10 @@ public class SMTPTransport extends Transport {
 							lastServerResponse);
 		if (mex == null)
 		    mex = sfex;
-		else
-		    mex.setNextException(sfex);
+		else {
+            if (alreadyOccurredExceptions.add(sfex.toString()))
+                mex.setNextException(sfex); // Prevent adding equal exceptions
+		}
 		break;
 	    }
 	}
