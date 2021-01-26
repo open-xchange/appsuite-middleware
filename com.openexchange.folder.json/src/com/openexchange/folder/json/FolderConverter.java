@@ -136,7 +136,7 @@ public class FolderConverter implements ResultConverter {
 
         private static final long serialVersionUID = 8565331942511382772L;
 
-        private final FileStorageFolder fileStorageFolder;
+        private transient final FileStorageFolder fileStorageFolder;
 
         /**
          * Initializes a new {@link FileStorageFolderImplementation}.

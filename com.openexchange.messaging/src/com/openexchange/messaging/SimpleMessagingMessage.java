@@ -85,13 +85,13 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     private String sectionId;
 
-    private MessagingContent content;
+    private transient MessagingContent content;
 
     private long size;
 
     private int threadLevel;
 
-    private MultipartContent parent;
+    private transient MultipartContent parent;
 
     private ContentType contentType;
 

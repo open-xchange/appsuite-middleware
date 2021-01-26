@@ -75,7 +75,7 @@ public class ReCaptchaServlet extends DataServlet {
 
     // -----------------------------------------------------------------------------------------------------
 
-    private final ServiceLookup services;
+    private transient final ServiceLookup services;
 
     /**
      * Initializes a new {@link ReCaptchaServlet}.
