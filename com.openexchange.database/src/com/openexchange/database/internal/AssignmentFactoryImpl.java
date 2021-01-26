@@ -69,6 +69,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link AssignmentFactoryImpl}
@@ -76,6 +77,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.1
  */
+@SingletonService
 public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /** Simple class to delay initialization until needed */
