@@ -80,7 +80,7 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         try {
             DMARCResult dmarcResult = DMARCResult.dmarcResultFor(value);
             return dmarcResult == null ? DMARCResult.FAIL : dmarcResult;
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             return DMARCResult.FAIL;
         }
     }

@@ -78,7 +78,7 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         try {
             DKIMResult dkimResult = DKIMResult.dkimResultFor(value);
             return dkimResult == null ? DKIMResult.FAIL : dkimResult;
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             return DKIMResult.FAIL;
         }
     }

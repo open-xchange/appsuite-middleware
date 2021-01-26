@@ -79,7 +79,7 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         try {
             SPFResult spfResult = SPFResult.spfResultFor(value);
             return spfResult == null ? SPFResult.FAIL : spfResult;
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             return SPFResult.FAIL;
         }
     }

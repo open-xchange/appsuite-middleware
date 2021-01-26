@@ -82,7 +82,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
     @Override
     public MailAuthenticityMechanismResult apply(Map<String, String> attributes, MailAuthenticityResult overallResult) {
         String result = attributes.remove(mechanism.getTechnicalName());
-        AuthenticityMechanismResult authenticityMechanismResult = parseMechanismResult(result == null ? null : extractOutcome(Strings.asciiLowerCase(result)));
+        AuthenticityMechanismResult authenticityMechanismResult = parseMechanismResult(extractOutcome(Strings.asciiLowerCase(result)));
 
         String domain = extractDomain(attributes, domainHeaders);
         boolean domainMatch = checkDomainMatch(overallResult, domain);
@@ -174,9 +174,12 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * Extracts the outcome of the specified value.
      *
      * @param value the value to extract the outcome from
-     * @return The extracted outcome
+     * @return The extracted outcome or <code>null</code> if the value is <code>null</code>
      */
     private String extractOutcome(String value) {
+        if (Strings.isEmpty(value)) {
+            return null;
+        }
         int index = value.indexOf('(');
         String retval = (index < 0) ? value : value.substring(0, index);
         index = retval.indexOf(' ');
