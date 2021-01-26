@@ -144,12 +144,15 @@ public class UserConfigProvider implements ConfigProviderService {
             try {
                 loaded = new BasicPropertyImpl(propertyName, userId, contextId, services);
             } catch (OXException e) {
-                if (false == USER_NOT_FOUND.equals(e)) {
-                    throw e;
+                if (e.equalsCode(2, "CTX")) {
+                    // "CTX-0002" --> No such context
+                    return NO_PROPERTY;
                 }
-
-                // "USR-0010" --> No such user
-                loaded = NO_PROPERTY;
+                if (USER_NOT_FOUND.equals(e)) {
+                    // "USR-0010" --> No such user
+                    loaded = NO_PROPERTY;
+                }
+                throw e;
             }
 
             basicProperty = propertyMap.putIfAbsent(propertyName, loaded);
