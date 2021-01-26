@@ -147,12 +147,12 @@ public class UserConfigProvider implements ConfigProviderService {
                 if (e.equalsCode(2, "CTX")) {
                     // "CTX-0002" --> No such context
                     return NO_PROPERTY;
-                }
-                if (USER_NOT_FOUND.equals(e)) {
+                } else if (USER_NOT_FOUND.equals(e)) {
                     // "USR-0010" --> No such user
-                    loaded = NO_PROPERTY;
+                    return NO_PROPERTY;
+                } else {
+                    throw e;
                 }
-                throw e;
             }
 
             basicProperty = propertyMap.putIfAbsent(propertyName, loaded);
