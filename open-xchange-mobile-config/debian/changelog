@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.10.4-17) stable; urgency=medium
+
+  * Build for patch 2021-01-25 (5937)
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 19 Jan 2021 09:54:49 +0000
+
 open-xchange-mobile-config (7.10.4-16) stable; urgency=medium
 
   * Build for patch 2021-01-11 (5930)

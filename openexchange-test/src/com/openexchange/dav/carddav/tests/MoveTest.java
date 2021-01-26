@@ -74,14 +74,17 @@ public class MoveTest extends CardDAVTest {
     @Test
     public void testMoveContactToSubfolderOnServer() throws Exception {
         /*
+         * create subfolder on server
+         */
+        String subFolderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(subFolderName);
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
-         * create subfolder and contact on server
+         * create contact on server
          */
-        String subFolderName = "testfolder_" + randomUID();
-        FolderObject subFolder = super.createFolder(subFolderName);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "jaqueline";
@@ -121,14 +124,17 @@ public class MoveTest extends CardDAVTest {
     @Test
     public void testMoveContactToDefaultFolderOnServer() throws Exception {
         /*
+         * create subfolder on server
+         */
+        String subFolderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(subFolderName);
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
-         * create subfolder and contact on server
+         * create contact on server
          */
-        String subFolderName = "testfolder_" + randomUID();
-        FolderObject subFolder = super.createFolder(subFolderName);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "jaqueline";

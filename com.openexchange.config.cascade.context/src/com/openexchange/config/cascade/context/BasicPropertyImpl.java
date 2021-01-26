@@ -78,20 +78,20 @@ final class BasicPropertyImpl implements BasicProperty {
     private boolean loaded;
     private String value;
     private final int contextId;
-    private final String property;
+    private final String propertyName;
     private Map<String, String> metadata;
 
     /**
      * Initializes a new {@link BasicPropertyImplementation}.
      *
-     * @param property The property name
+     * @param propertyName The property name
      * @param context The associated context
      * @param services The associated service look-up
      */
-    BasicPropertyImpl(String property, Context context, ServiceLookup services) {
+    BasicPropertyImpl(String propertyName, Context context, ServiceLookup services) {
         super();
         loaded = false;
-        this.property = property;
+        this.propertyName = propertyName;
         this.contextId = context.getContextId();
         this.services = services;
         forceLoad(context);
@@ -119,10 +119,7 @@ final class BasicPropertyImpl implements BasicProperty {
     public void set(String newValue) throws OXException {
         load();
         if (Boolean.parseBoolean(metadata.get("protected"))) {
-            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "context");
-        }
-        if (Strings.isEmpty(newValue)) {
-            throw ConfigCascadeExceptionCodes.UNEXPECTED_ERROR.create("New value is null");
+            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(propertyName, "context");
         }
 
         newValue = ConvertUtils.saveConvert(newValue, false, true);
@@ -133,32 +130,36 @@ final class BasicPropertyImpl implements BasicProperty {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
-        // Compose the attribute string to set
-        StringBuilder newValueBuilder = new StringBuilder(newValue.length() << 1).append(newValue.replace("%", "%25").replace(";", "%3B"));
-        if (null == this.value) {
-            // Newly set value
-            newValueBuilder.append("; protected=false");
-        } else {
-            // Keep old meta-data
-            int size = metadata.size();
-            if (size > 0) {
-                if (1 == size) {
-                    // Check if meta-data only contains "protected=true" (which is default)
-                    if (false == Boolean.parseBoolean(metadata.get("protected"))) {
+        StringBuilder newValueBuilder = null;
+
+        if (newValue != null) {
+            // Compose the attribute string to set
+            newValueBuilder = new StringBuilder(newValue.length() << 1).append(newValue.replace("%", "%25").replace(";", "%3B"));
+            if (null == this.value) {
+                // Newly set value
+                newValueBuilder.append("; protected=false");
+            } else {
+                // Keep old meta-data
+                int size = metadata.size();
+                if (size > 0) {
+                    if (1 == size) {
+                        // Check if meta-data only contains "protected=true" (which is default)
+                        if (false == Boolean.parseBoolean(metadata.get("protected"))) {
+                            for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
+                                newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
+                            }
+                        }
+                    } else {
                         for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
                             newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                         }
-                    }
-                } else {
-                    for (Map.Entry<String, String> metaEntry : metadata.entrySet()) {
-                        newValueBuilder.append("; ").append(metaEntry.getKey()).append('=').append(metaEntry.getValue());
                     }
                 }
             }
         }
 
         // Set and unload
-        contextService.setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), newValueBuilder.toString(), contextId);
+        contextService.setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(propertyName).toString(), newValueBuilder == null ? null : newValueBuilder.toString(), contextId);
         unload();
     }
 
@@ -183,7 +184,7 @@ final class BasicPropertyImpl implements BasicProperty {
     }
 
     private void forceLoad(Context context) {
-        List<String> values = context.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        List<String> values = context.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(propertyName).toString());
         if (values == null || values.isEmpty()) {
             // No such property
             this.value = null;
@@ -195,7 +196,8 @@ final class BasicPropertyImpl implements BasicProperty {
         String value = values.get(0);
         int pos = value.indexOf(';');
         if (pos < 0) {
-            value = value.replaceAll("%3B", ";").replace("%25", "%");
+            value = Strings.replaceSequenceWith(value, "%3B", ";");
+            value = Strings.replaceSequenceWith(value, "%25", "%");
             this.value = ConvertUtils.loadConvert(value);
             // Assume "protected=true" by default
             metadata = new HashMap<String, String>(2);
@@ -206,7 +208,8 @@ final class BasicPropertyImpl implements BasicProperty {
 
         // Parameters available
         String params = value.substring(pos).trim();
-        value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
+        value = Strings.replaceSequenceWith(value.substring(0, pos).trim(), "%3B", ";");
+        value = Strings.replaceSequenceWith(value, "%25", "%");
         this.value = ConvertUtils.loadConvert(value);
         metadata = new LinkedHashMap<String, String>(2);
         pos = 0;

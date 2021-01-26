@@ -138,8 +138,9 @@ public class DriveActivator extends HousekeepingActivator {
         /*
          * set references
          */
+        DriveConfig globalConfig = new DriveConfig(-1, -1);
         DriveServiceLookup.set(this);
-        BucketInputStream.setTokenBucket(new DriveTokenBucket());
+        BucketInputStream.setTokenBucket(new DriveTokenBucket(globalConfig.getMaxBandwidth(), globalConfig.getMaxBandwidthPerClient()));
         /*
          * register Drive client info
          */
@@ -171,9 +172,9 @@ public class DriveActivator extends HousekeepingActivator {
             public synchronized ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
                 LOG.debug("Initializing periodic checksum cleaner task");
                 ClusterTimerService timerService = context.getService(reference);
-                long interval = DriveConfig.getInstance().getChecksumCleanerInterval();
+                long interval = globalConfig.getChecksumCleanerInterval();
                 if (0 < interval) {
-                    PeriodicChecksumCleaner checksumCleaner = new PeriodicChecksumCleaner(DriveConfig.getInstance().getChecksumCleanerMaxAge());
+                    PeriodicChecksumCleaner checksumCleaner = new PeriodicChecksumCleaner(globalConfig.getChecksumCleanerMaxAge());
                     this.checksumCleaner = checksumCleaner;
                     timerService.scheduleWithFixedDelay(PeriodicChecksumCleaner.class.getName(), checksumCleaner, interval, interval);
                 }

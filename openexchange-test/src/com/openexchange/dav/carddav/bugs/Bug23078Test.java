@@ -51,13 +51,19 @@ package com.openexchange.dav.carddav.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Map;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
-import com.openexchange.dav.reports.SyncCollectionResponse;
+import com.openexchange.dav.reports.SyncCollectionReportInfo;
+import com.openexchange.dav.reports.SyncCollectionReportMethod;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -77,14 +83,17 @@ public class Bug23078Test extends CardDAVTest {
     @Test
     public void testReportItemsFromDeletedFolder() throws Exception {
         /*
+         * create subfolder on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(folderName);
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
-         * create subfolder and contacts on server
+         * create contact on server
          */
-        String folderName = "testfolder_" + randomUID();
-        FolderObject subFolder = super.createFolder(folderName);
         String uid = randomUID();
         String firstName = "doktor";
         String lastName = "horst";
@@ -109,18 +118,27 @@ public class Bug23078Test extends CardDAVTest {
          */
         super.deleteFolder(subFolder);
         /*
+         * verify deletion on client (assuming that the sync-token has been invalidated)
+         */
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.GETETAG);
+        SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
+        SyncCollectionReportMethod report = null;
+        try {
+            report = new SyncCollectionReportMethod(getBaseUri() + Config.getPathPrefix() + "/carddav/Contacts", reportInfo);
+            getWebDAVClient().doReport(report, StatusCodes.SC_FORBIDDEN);
+        } finally {
+            release(report);
+        }
+        /*
          * verify deletion on client
          */
-        SyncCollectionResponse syncCollectionResponse = super.syncCollection(syncToken);
-        assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());
-        boolean found = false;
-        for (String href : syncCollectionResponse.getHrefsStatusNotFound()) {
+        eTags = getAllETags();
+        for (String href : eTags.keySet()) {
             if (null != href && href.contains(uid)) {
-                found = true;
-                break;
+                fail("contact still found when listing etags");
             }
         }
-        assertTrue("contact not reported as deleted", found);
     }
 
 }

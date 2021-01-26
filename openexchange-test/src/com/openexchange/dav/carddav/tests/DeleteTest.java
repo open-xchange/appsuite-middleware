@@ -117,14 +117,17 @@ public class DeleteTest extends CardDAVTest {
     @Test
     public void testDeleteContactInSubfolderOnServer() throws Exception {
         /*
+         * create folder on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        FolderObject folder = super.createFolder(folderName);
+        /*
          * fetch sync token for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
-         * create folder and contact on server
+         * create contact on server
          */
-        String folderName = "testfolder_" + randomUID();
-        FolderObject folder = super.createFolder(folderName);
         String uid = randomUID();
         String firstName = "test";
         String lastName = "otto";

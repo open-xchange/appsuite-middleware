@@ -157,9 +157,10 @@ public class InternalEventUpdate implements EventUpdate {
      * @param originalSeriesMasterEvent The original series master event when a change exception is updated, or <code>null</code> if not applicable
      * @param updatedEvent The updated event, as passed by the client
      * @param timestamp The timestamp to apply in the updated event data
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public InternalEventUpdate(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event originalSeriesMasterEvent, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
+    public InternalEventUpdate(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event originalSeriesMasterEvent, Event updatedEvent, Date timestamp, boolean assumeExternalOrganizerUpdate, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -169,7 +170,7 @@ public class InternalEventUpdate implements EventUpdate {
         /*
          * apply, check, adjust event update as needed
          */
-        Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
+        Event changedEvent = apply(originalEvent, updatedEvent, assumeExternalOrganizerUpdate, ignoredFields);
         checkIntegrity(originalEvent, changedEvent, originalSeriesMasterEvent);
         ensureConsistency(originalEvent, changedEvent);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
@@ -526,10 +527,11 @@ public class InternalEventUpdate implements EventUpdate {
      *
      * @param originalEvent The original event being updated
      * @param updatedEvent The updated event, as passed by the client
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @param ignoredFields Optional event fields to ignore during the update
      * @return The changed event
      */
-    private Event apply(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    private Event apply(Event originalEvent, Event updatedEvent, boolean assumeExternalOrganizerUpdate, EventField... ignoredFields) throws OXException {
         /*
          * determine relevant changes in passed event update
          */
@@ -544,7 +546,7 @@ public class InternalEventUpdate implements EventUpdate {
          */
         boolean isAttendeeSchedulingResource = isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity());
         boolean ignoreForbiddenAttendeenChanges = b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE));
-        if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
+        if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges && !assumeExternalOrganizerUpdate) {
             //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
             updatedFields.retainAll(EnumSet.of(
                 EventField.ALARMS, EventField.ATTENDEES, /* EventField.TRANSP,*/ EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED

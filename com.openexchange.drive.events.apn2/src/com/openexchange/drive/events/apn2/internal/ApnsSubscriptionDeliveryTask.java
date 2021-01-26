@@ -94,9 +94,7 @@ public class ApnsSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
             return null;
         }
         ApnsHttp2Notification.Builder builder = new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
-            .withCustomField("root", subscription.getRootFolderID())
-            .withCustomField("action", "sync")
-            .withContentAvailable(true)
+            .withCustomField("container-identifier", "NSFileProviderRootContainerItemIdentifier")
             .withExpiration(TimeUnit.DAYS.toMillis(1L))
         ;
         if (event.isContentChangesOnly() && SubscriptionMode.SEPARATE.equals(subscription.getMode())) {
@@ -111,7 +109,7 @@ public class ApnsSubscriptionDeliveryTask extends SubscriptionDeliveryTask {
             }
         }
         builder.withPriority(DeliveryPriority.CONSERVE_POWER);
-        builder.withPushType(PushType.BACKGROUND);
+        builder.withPushType(PushType.FILEPROVIDER);
         return builder.build();
     }
 

@@ -64,6 +64,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FolderStats;
@@ -75,7 +77,6 @@ import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.drive.impl.storage.filter.FileNameFilter;
 import com.openexchange.exception.OXException;
@@ -104,7 +105,6 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -122,8 +122,9 @@ public class DriveStorage {
 
     private IDBasedFileAccess fileAccess;
     private IDBasedFolderAccess folderAccess;
-    private FileStorageFolder trashFolder;
     private Boolean hasTrashFolder;
+    private FileStorageFolder trashFolder;
+    private Optional<String> trashPath;
 
     /**
      * Initializes a new {@link DriveStorage}.
@@ -675,7 +676,7 @@ public class DriveStorage {
                 @Override
                 protected boolean accept(String fileName) throws OXException {
                     return false == FilenameValidationUtils.isInvalidFileName(fileName) &&
-                        false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName) &&
+                        false == DriveUtils.isIgnoredFileName(session, path, fileName) &&
                         false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
             };
@@ -849,6 +850,26 @@ public class DriveStorage {
     }
 
     /**
+     * Gets the directory path for the account's trash folder, relative to the root synchronization folder.
+     *
+     * @return The path to the trash folder, or <code>null</code> if trash is not available or relative to the root folder
+     */
+    public String getTrashPath() throws OXException {
+        if (false == hasTrashFolder()) {
+            return null;
+        }
+        if (null == trashPath) {
+            FileStorageFolder trashFolder = getTrashFolder();
+            if (Objects.equals(trashFolder.getParentId(), getRootFolder().getParentId())) {
+                trashPath = Optional.empty(); // trash on same level as root
+            } else {
+                trashPath = Optional.ofNullable(getPath(trashFolder.getId()));
+            }
+        }
+        return trashPath.orElse(null);
+    }
+
+    /**
      * Gets the directory path to internal 'real' root folder with id '9'
      *
      * @param folderId The folder identifier to get the path for
@@ -1006,9 +1027,8 @@ public class DriveStorage {
     }
 
     public String getVersionComment() {
-        Session serverSession = session.getServerSession();
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        String product = DriveConfig.getInstance().getShortProductName(serverSession.getContextId(), serverSession.getUserId());
+        String product = session.getConfig().getShortProductName();
         String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
         return String.format(format, product, device);
     }
