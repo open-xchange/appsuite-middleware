@@ -1623,7 +1623,7 @@ public final class OXFolderSQL {
                         .append("WHERE NOT EXISTS ")
                         .append("(SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
                         .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin " : "utf8_bin ")
-                        .append("AND parent>?);")
+                        .append("FOR UPDATE)")
                     .toString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(1, newFolderID);
@@ -1654,7 +1654,6 @@ public final class OXFolderSQL {
                     stmt.setInt(15, ctx.getContextId());
                     stmt.setInt(16, folder.getParentFolderID());
                     stmt.setString(17, folder.getFolderName());
-                    stmt.setInt(18, FolderObject.MIN_FOLDER_ID);
                     if (0 == executeUpdate(stmt)) {
                         // Due to already existing subfolder with the same name
                         throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
