@@ -3,6 +3,8 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -55,23 +57,25 @@ public class PreviewThumbResultConverterTest {
     private ResourceCache resourceCache;
     private CachedResource aResource = new CachedResource(new byte[] { 1 }, "cachedResource", "image/jpeg", 1);
     private CachedResource noResource = null;
+    @SuppressWarnings("rawtypes")
     private Future voidFuture = null;
     private ExecutorService executorService;
     private PreviewThumbResultConverter converter;
     private PreviewDocument previewDocument;
     private PreviewService previewService;
 
+    @SuppressWarnings("synthetic-access")
     @Before
     public void setUp() throws Exception {
         allowedConfig = mock(ConfigurationService.class);
-        when(allowedConfig.getBoolProperty(anyString(), anyBoolean())).thenReturn(true);
+        when(B(allowedConfig.getBoolProperty(anyString(), anyBoolean()))).thenReturn(B(true));
 
         forbiddenConfig = mock(ConfigurationService.class);
-        when(forbiddenConfig.getBoolProperty(anyString(), anyBoolean())).thenReturn(false);
+        when(B(forbiddenConfig.getBoolProperty(anyString(), anyBoolean()))).thenReturn(B(false));
 
         session = mock(ServerSession.class);
-        when(session.getContextId()).thenReturn(1);
-        when(session.getUserId()).thenReturn(1);
+        when(I(session.getContextId())).thenReturn(I(1));
+        when(I(session.getUserId())).thenReturn(I(1));
         User user = mock(User.class);
         when(user.getPreferredLanguage()).thenReturn("de/de");
         when(session.getUser()).thenReturn(user);
@@ -92,7 +96,7 @@ public class PreviewThumbResultConverterTest {
         result.setHeader(ETAG, ETAG_VALUE);
 
         resourceCache = mock(ResourceCache.class);
-        when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(true);
+        when(B(resourceCache.isEnabledFor(anyInt(), anyInt()))).thenReturn(B(true));
         ResourceCaches.setResourceCache(resourceCache);
 
         previewService = mock(PreviewService.class);
@@ -117,14 +121,14 @@ public class PreviewThumbResultConverterTest {
      */
     @Test
     public void testConvertWithoutCachedResult() throws OXException {
-        when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(true);
+        when(B(resourceCache.isEnabledFor(anyInt(), anyInt()))).thenReturn(B(true));
         when(resourceCache.get(anyString(), anyInt(), anyInt())).thenReturn(noResource);
 
         converter = new PreviewThumbResultConverter(allowedConfig);
 
         converter.convert(requestData, result, session, null);
         assertNotNull(result.getResultObject());
-        FileHolder resultObject = (FileHolder) result.getResultObject();
+        FileHolder resultObject = FileHolder.class.cast(result.getResultObject());
         assertEquals(PreviewConst.MISSING_THUMBNAIL.length, resultObject.getLength());
         assertEquals(200, result.getHttpStatusCode());
         //        assertEquals(202, result.getHttpStatusCode());
@@ -138,7 +142,7 @@ public class PreviewThumbResultConverterTest {
      */
     @Test
     public void testConvertWithCachedResult() throws OXException {
-        when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(true);
+        when(B(resourceCache.isEnabledFor(anyInt(), anyInt()))).thenReturn(B(true));
         when(resourceCache.get(anyString(), anyInt(), anyInt())).thenReturn(aResource);
         converter = new PreviewThumbResultConverter(allowedConfig);
 
@@ -156,7 +160,7 @@ public class PreviewThumbResultConverterTest {
      */
     @Test
     public void testConvertWithoutCacheBlockingAllowed() throws OXException {
-        when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(false);
+        when(B(resourceCache.isEnabledFor(anyInt(), anyInt()))).thenReturn(B(false));
         result.setResultObject(new ByteArrayFileHolder(new byte[] { 1 }));
         previewDocument = mock(PreviewDocument.class);
         when(previewDocument.getThumbnail()).thenReturn(new ByteArrayInputStream(new byte[] { 1 }));
@@ -179,7 +183,7 @@ public class PreviewThumbResultConverterTest {
      */
     @Test(expected = OXException.class)
     public void testConvertWithoutCacheBlockingForbiden() throws OXException {
-        when(resourceCache.isEnabledFor(anyInt(), anyInt())).thenReturn(false);
+        when(B(resourceCache.isEnabledFor(anyInt(), anyInt()))).thenReturn(B(false));
         converter = new PreviewThumbResultConverter(forbiddenConfig);
         converter.convert(requestData, result, session, null);
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
 public class ProcessUploadStaticTest {
     /**
@@ -79,7 +81,7 @@ public class ProcessUploadStaticTest {
         super();
     }
 
-         @Test
+    @Test
      public void testProcessUploadStatic() {
         try {
             final CountDownLatch startUpLatch = new CountDownLatch(1);
@@ -125,7 +127,7 @@ public class ProcessUploadStaticTest {
                             };
                             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);
                             PowerMockito.when(mockRequest.getContentType()).thenReturn("multipart/form-data; boundary=---------------------------1902770288168124293960248547");
-                            PowerMockito.when(mockRequest.getContentLength()).thenReturn(-1);
+                            PowerMockito.when(I(mockRequest.getContentLength())).thenReturn(I(-1));
                             PowerMockito.when(mockRequest.getCharacterEncoding()).thenReturn("UTF-8");
                             PowerMockito.when(mockRequest.getParameter("action")).thenReturn("new");
 
@@ -160,7 +162,7 @@ public class ProcessUploadStaticTest {
         }
     }
 
-         @Test
+    @Test
      public void testProcessUploadStatic2() {
         try {
             // Mocking
@@ -201,7 +203,7 @@ public class ProcessUploadStaticTest {
             };
             PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);
             PowerMockito.when(mockRequest.getContentType()).thenReturn("multipart/form-data; boundary=---------------------------1902770288168124293960248547");
-            PowerMockito.when(mockRequest.getContentLength()).thenReturn(-1);
+            PowerMockito.when(I(mockRequest.getContentLength())).thenReturn(I(-1));
             PowerMockito.when(mockRequest.getCharacterEncoding()).thenReturn("UTF-8");
             PowerMockito.when(mockRequest.getParameter("action")).thenReturn("new");
 

@@ -55,9 +55,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
-import com.openexchange.user.interceptor.UserServiceInterceptor;
-import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 
 
 /**
@@ -97,7 +94,7 @@ public class UserServiceInterceptorRegistryTest {
     }
 
      @Test
-     public void testRanking() throws Exception {
+     public void testRanking() {
         interceptorRegistry.addInterceptor(highest);
         interceptorRegistry.addInterceptor(middle);
         interceptorRegistry.addInterceptor(lowest);

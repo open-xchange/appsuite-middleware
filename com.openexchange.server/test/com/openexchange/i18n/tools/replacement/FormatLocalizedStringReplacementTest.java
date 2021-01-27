@@ -63,7 +63,6 @@ import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * Unit tests for {@link FormatLocalizedStringReplacement}
  *
@@ -92,10 +91,9 @@ public class FormatLocalizedStringReplacementTest {
     private I18nService i18nService;
 
     /**
-     * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         formatLocalizedStringReplacement = new FormatLocalizedStringReplacement(templateToken, format, replacement);
         formatLocalizedStringReplacement.setChanged(false);
         formatLocalizedStringReplacement.setLocale(locale);
@@ -111,8 +109,8 @@ public class FormatLocalizedStringReplacementTest {
         // TODO check with new implementation
     }
 
-     @Test
-     public void testGetReplacement_replacementObjectStateFine_returnTranslatedPrioritySentence() {
+    @Test
+    public void testGetReplacement_replacementObjectStateFine_returnTranslatedPrioritySentence() {
         String replacedString = formatLocalizedStringReplacement.getReplacement();
         Assert.assertEquals("String not localized", result, replacedString);
     }

@@ -71,15 +71,15 @@ public class SearchIteratorDelegatorTest {
     @Test
     public void testZeroSizeCollection() throws Throwable {
         List<Object> list = new ArrayList<Object>();
-        SearchIteratorDelegator<Object> delegator = new SearchIteratorDelegator<Object>(list);
-        assertTrue("Collection do have a determined size.", delegator.hasSize());
-        assertEquals("Size should be zero.", 0, delegator.size());
-        assertFalse("There should be no available element.", delegator.hasNext());
-        try {
+        try (SearchIteratorDelegator<Object> delegator = new SearchIteratorDelegator<Object>(list)) {
+            assertTrue("Collection do have a determined size.", delegator.hasSize());
+            assertEquals("Size should be zero.", 0, delegator.size());
+            assertFalse("There should be no available element.", delegator.hasNext());
             delegator.next();
             fail("An exception must be given.");
         } catch (NoSuchElementException e) {
             // Everythign is fine.
         }
+
     }
 }

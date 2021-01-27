@@ -103,7 +103,7 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
-    public void testBug56407() throws Exception {
+    public void testBug56407() {
         ensureNoWhitespaceOrControl("=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
         ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3Y=?=\" <demo@mailsploit.com>");
         ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3YiIDxwb3R1c0B3aGl0ZWhvdXNlLmdvdj4=?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
@@ -147,7 +147,7 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
-    public void testBug55360_2() throws Exception {
+    public void testBug55360_2() {
         try {
             QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?b?c2VydmljZUBwYXlwYWwuY29tKFBheVBhbClgYGA=?==?utf-8?Q?=0A=00?=@pwnsdx.pw", false);
             String personal = addr.getPersonal();
@@ -177,11 +177,12 @@ public class QuotedInternetAddressTest {
         assertEquals("\"oxwebgppri Jane Doe\"\"", personal);
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void testBug55360() throws Exception {
         try {
             QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?Q?=42=45=47=49=4E=20=2F=20=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20=45=4E=44?=@companyemail.com", false);
-            fail("Address hsould not be parseable");
+            fail("Address should not be parseable");
         } catch (AddressException e) {
             // All fine
             String reference = e.getRef();
@@ -260,7 +261,7 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
-    public void testBug36095() throws Exception {
+    public void testBug36095() {
         String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
         InternetAddress[] parsed = MimeMessageUtility.getAddressHeader(s);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);

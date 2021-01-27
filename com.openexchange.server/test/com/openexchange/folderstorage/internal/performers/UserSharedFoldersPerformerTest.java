@@ -84,7 +84,7 @@ public class UserSharedFoldersPerformerTest {
     }
 
     @After
-    public void tearDown() throws Exception {}
+    public void tearDown() {}
 
     @Test
     public void testCallAndWait_interrupted_getInterruptError() throws InterruptedException {
@@ -128,9 +128,9 @@ public class UserSharedFoldersPerformerTest {
         CompletionService<Object> completionService = Mockito.mock(CompletionService.class);
         ExecutionException executionException = Mockito.mock(ExecutionException.class);
         Mockito.when(executionException.getCause()).thenReturn(new IllegalArgumentException());
-        java.util.concurrent.Future<Object> future = (java.util.concurrent.Future<Object>) Mockito.mock(java.util.concurrent.Future.class);
+        java.util.concurrent.Future<Object> future = Mockito.mock(java.util.concurrent.Future.class);
         Mockito.when(future.get()).thenThrow(executionException);
-        Mockito.when(completionService.take()).thenReturn((java.util.concurrent.Future<Object>) future);
+        Mockito.when(completionService.take()).thenReturn(future);
 
         try {
 

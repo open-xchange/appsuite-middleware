@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,11 +76,11 @@ public class KeyValueHolder {
     }
 
     public void put(int key, Object value) {
-        getMap().put(key, value);
+        getMap().put(I(key), value);
     }
 
     public void remove(int key) {
-        getMap().remove(key);
+        getMap().remove(I(key));
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -95,7 +96,7 @@ public class KeyValueHolder {
     }
 
     public Object get(int key) {
-        return getMap().get(key);
+        return getMap().get(I(key));
     }
 
 }

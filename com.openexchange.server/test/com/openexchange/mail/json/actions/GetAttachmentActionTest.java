@@ -150,7 +150,7 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
         assertEquals("Wrong caching value", Boolean.FALSE, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
-        assertEquals("Wrong content type", "image/jpeg", ((IFileHolder) object).getContentType());
+        assertEquals("Wrong content type", "image/jpeg", (IFileHolder.class.cast(object)).getContentType());
     }
 
     @Test
@@ -189,7 +189,7 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
         assertEquals("Wrong caching value", Boolean.FALSE, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
-        assertEquals("Wrong content type", "text/html; charset=ISO-8859-1", ((IFileHolder) object).getContentType());
+        assertEquals("Wrong content type", "text/html; charset=ISO-8859-1", (IFileHolder.class.cast(object)).getContentType());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class GetAttachmentActionTest {
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
         assertEquals("Wrong caching value", Boolean.FALSE, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
-        assertEquals("Wrong content type", "application/pdf", ((IFileHolder) object).getContentType());
+        assertEquals("Wrong content type", "application/pdf", (IFileHolder.class.cast(object)).getContentType());
     }
 
 }

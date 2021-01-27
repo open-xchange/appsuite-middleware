@@ -113,12 +113,13 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@SuppressWarnings({ "deprecation", "synthetic-access" })
 public class OAuthDispatcherServletTest {
 
     private static final AJAXRequestResult RESULT = new AJAXRequestResult(new Response(new JSONObject()));
     static {
         try {
-            ((Response) RESULT.getResultObject()).setData(new JSONObject("{'ok':true}"));
+            Response.class.cast(RESULT.getResultObject()).setData(new JSONObject("{'ok':true}"));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -158,6 +159,10 @@ public class OAuthDispatcherServletTest {
                 return RESULT;
             }
 
+            /**
+             * @param requestData  
+             */
+            @SuppressWarnings("unused")
             @OAuthScopeCheck
             public boolean checkScope(AJAXRequestData requestData, ServerSession session, OAuthAccess access) {
                 return access.getScope().has("r_test") && access.getScope().has("w_test");
@@ -209,7 +214,7 @@ public class OAuthDispatcherServletTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         resourceService = new SimOAuthResourceService(new SimOAuthResourceService.SessionProvider() {
             @Override
             public Session createSession(TestGrant grant) {

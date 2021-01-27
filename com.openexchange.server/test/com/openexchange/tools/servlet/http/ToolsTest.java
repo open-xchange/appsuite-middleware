@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import org.junit.Assert;
@@ -82,9 +83,9 @@ public class ToolsTest {
     private ConfigurationService configurationService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Mockito.when(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)).thenReturn(Boolean.TRUE);
+        Mockito.when(B(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true))).thenReturn(Boolean.TRUE);
         Tools.setConfigurationService(configurationService);
 
         request = new SimHttpServletRequest();
@@ -98,7 +99,7 @@ public class ToolsTest {
 
     @Test
     public void testCheckNonExistence_paramNull_doNothing() throws OXException {
-        Tools.checkNonExistence(request, null);
+        Tools.checkNonExistence(request, (String) null);
     }
 
     @Test
@@ -176,7 +177,7 @@ public class ToolsTest {
 
     @Test
     public void testCheckNonExistence_configuredToNotCheck_ignore() throws OXException {
-        Mockito.when(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)).thenReturn(Boolean.FALSE);
+        Mockito.when(B(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true))).thenReturn(Boolean.FALSE);
 
         request.setQueryString(QUERY_STRING_WITHOUT_PASSWORD);
 

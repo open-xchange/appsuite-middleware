@@ -49,6 +49,7 @@
 
 package com.openexchange.test.mock;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.mockito.Mockito;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.ServerSession;
@@ -72,16 +73,16 @@ public class MockFactory {
     public static ServerSession getServerSession() {
         ServerSession serverSession = Mockito.mock(ServerSession.class);
         Mockito.when(serverSession.getContext()).thenReturn(context);
-        Mockito.when(serverSession.getContextId()).thenReturn(getContextId());
-        
+        Mockito.when(I(serverSession.getContextId())).thenReturn(I(getContextId()));
+
         Mockito.when(serverSession.getUser()).thenReturn(user);
-        Mockito.when(serverSession.getUserId()).thenReturn(getUserId());
+        Mockito.when(I(serverSession.getUserId())).thenReturn(I(getUserId()));
         return serverSession;
     }
 
     public static Context getContext() {
         Context lContext = Mockito.mock(Context.class);
-        Mockito.when(lContext.getContextId()).thenReturn(getContextId());
+        Mockito.when(I(lContext.getContextId())).thenReturn(I(getContextId()));
         return lContext;
     }
 
@@ -91,7 +92,7 @@ public class MockFactory {
 
     public static User getUser() {
         User lUser = Mockito.mock(User.class);
-        Mockito.when(lUser.getId()).thenReturn(getUserId());
+        Mockito.when(I(lUser.getId())).thenReturn(I(getUserId()));
 
         return lUser;
     }

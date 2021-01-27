@@ -82,7 +82,7 @@ import com.openexchange.tools.session.SimServerSession;
 public class JsonMessageHandlerTest {
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MimeType2ExtMap.addMimeType("application/pdf", "pdf");
     }
 

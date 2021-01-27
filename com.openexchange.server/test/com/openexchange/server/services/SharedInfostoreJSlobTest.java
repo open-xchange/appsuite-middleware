@@ -1,6 +1,9 @@
 
 package com.openexchange.server.services;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URI;
 import org.json.JSONException;
 import org.junit.Assert;
@@ -62,13 +65,13 @@ public class SharedInfostoreJSlobTest {
 
     private final int maxBodySize = 11111;
 
-    private final Long infostoreMaxUploadSize = 22222L;
+    private final Long infostoreMaxUploadSize = L(22222L);
 
-    private final Long attachmentMaxUploadSize = 33333L;
+    private final Long attachmentMaxUploadSize = L(33333L);
 
-    private final Long quotaUsage = 44444L;
+    private final Long quotaUsage = L(44444L);
 
-    private final Long maxQuota = 55555L;
+    private final Long maxQuota = L(55555L);
 
     @Before
     public void setUp() throws Exception {
@@ -80,17 +83,17 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.when(session.getContext()).thenReturn(context);
         PowerMockito.when(session.getUserPermissionBits()).thenReturn(permissionBits);
 
-        PowerMockito.when(permissionBits.hasInfostore()).thenReturn(true);
-        PowerMockito.when(permissionBits.hasWebMail()).thenReturn(true);
+        PowerMockito.when(B(permissionBits.hasInfostore())).thenReturn(B(true));
+        PowerMockito.when(B(permissionBits.hasWebMail())).thenReturn(B(true));
 
         PowerMockito.mockStatic(ServerConfig.class);
-        PowerMockito.when(ServerConfig.getInt((Property) ArgumentMatchers.any())).thenReturn(this.maxBodySize);
+        PowerMockito.when(I(ServerConfig.getInt((Property) ArgumentMatchers.any()))).thenReturn(I(this.maxBodySize));
 
         PowerMockito.mockStatic(InfostoreConfig.class);
-        PowerMockito.when(InfostoreConfig.getMaxUploadSize()).thenReturn(infostoreMaxUploadSize);
+        PowerMockito.when(L(InfostoreConfig.getMaxUploadSize())).thenReturn(infostoreMaxUploadSize);
 
         PowerMockito.mockStatic(AttachmentConfig.class);
-        PowerMockito.when(AttachmentConfig.getMaxUploadSize()).thenReturn(attachmentMaxUploadSize);
+        PowerMockito.when(L(AttachmentConfig.getMaxUploadSize())).thenReturn(attachmentMaxUploadSize);
 
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(ArgumentMatchers.eq(context))).thenReturn(new URI(""));
@@ -101,8 +104,8 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.mockStatic(FileStorages.class);
         Mockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(qfsService);
 
-        PowerMockito.when(quotaFileStorage.getQuota()).thenReturn(maxQuota);
-        PowerMockito.when(quotaFileStorage.getUsage()).thenReturn(quotaUsage);
+        PowerMockito.when(L(quotaFileStorage.getQuota())).thenReturn(maxQuota);
+        PowerMockito.when(L(quotaFileStorage.getUsage())).thenReturn(quotaUsage);
 
         PowerMockito.mockStatic(UserSettingMailStorage.class);
         UserSettingMailStorage userSettingMailStorage = Mockito.mock(UserSettingMailStorage.class);
@@ -116,7 +119,7 @@ public class SharedInfostoreJSlobTest {
     public void testGetJSlob_fine_maxBodySizeSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(this.maxBodySize, jSlob.getJsonObject().get("maxBodySize"));
+        Assert.assertEquals(I(this.maxBodySize), jSlob.getJsonObject().get("maxBodySize"));
     }
 
     @Test
@@ -151,13 +154,13 @@ public class SharedInfostoreJSlobTest {
     public void testGetJSlob_fine_attachmentQuotaSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(-1L, jSlob.getJsonObject().get("attachmentQuota"));
+        Assert.assertEquals(L(-1L), jSlob.getJsonObject().get("attachmentQuota"));
     }
 
     @Test
     public void testGetJSlob_fine_attachmentQuotaPerFileSet() throws OXException, JSONException {
         JSlob jSlob = sharedInfostoreJSlob.getJSlob(session);
 
-        Assert.assertEquals(-1L, jSlob.getJsonObject().get("attachmentQuotaPerFile"));
+        Assert.assertEquals(L(-1L), jSlob.getJsonObject().get("attachmentQuotaPerFile"));
     }
 }

@@ -81,7 +81,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * {@link FileStoreResourceCacheImplTest}
  *
@@ -91,23 +90,22 @@ import com.openexchange.server.services.ServerServiceRegistry;
 @PrepareForTest({ FileStoreResourceCacheImpl.class, ServerServiceRegistry.class })
 public class FileStoreResourceCacheImplTest {
 
-     @Test
-     public void testFileIsDeletedOnDataTruncation() throws Exception {
+    @Test
+    public void testFileIsDeletedOnDataTruncation() throws Exception {
         testFileIsDeletedOnRollback(DataTruncation.class);
     }
 
-     @Test
-     public void testFileIsDeletedOnSqlException() throws Exception {
+    @Test
+    public void testFileIsDeletedOnSqlException() throws Exception {
         testFileIsDeletedOnRollback(SQLException.class);
     }
 
     /**
      * Verify that a created file is deleted if the subsequent db transaction throws a given exception
      */
-    @SuppressWarnings("unchecked")
     private void testFileIsDeletedOnRollback(Class<? extends Exception> exceptionClass) throws Exception {
         PreparedStatement statement = mock(PreparedStatement.class);
-        when(statement.executeUpdate()).thenThrow(exceptionClass);
+        when(I(statement.executeUpdate())).thenThrow(exceptionClass);
         when(statement.executeQuery()).thenReturn(mock(ResultSet.class));
         Connection connection = mock(Connection.class);
         when(connection.prepareStatement(anyString())).thenReturn(statement);

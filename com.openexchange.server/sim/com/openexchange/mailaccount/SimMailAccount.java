@@ -56,6 +56,8 @@ import java.util.Map;
  */
 public class SimMailAccount implements MailAccount {
 
+    private static final long serialVersionUID = -8723018808153206584L;
+
     private String login;
 
     private int mailPort;
@@ -93,6 +95,7 @@ public class SimMailAccount implements MailAccount {
     private Map<String, String> properties;
     private Map<String, String> transportProperties;
 
+    @SuppressWarnings("unused")
     private int failedAuthCount;
 
     public void setProperties(final Map<String, String> properties) {

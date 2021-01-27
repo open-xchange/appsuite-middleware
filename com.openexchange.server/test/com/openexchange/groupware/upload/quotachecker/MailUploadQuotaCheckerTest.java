@@ -1,5 +1,6 @@
 package com.openexchange.groupware.upload.quotachecker;
 
+import static com.openexchange.java.Autoboxing.L;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,14 +49,14 @@ public class MailUploadQuotaCheckerTest {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerConfig.class);
-        PowerMockito.when(ServerConfig.getLong((Property) ArgumentMatchers.any())).thenReturn(quotaFromFile);
+        PowerMockito.when(ServerConfig.getLong((Property) ArgumentMatchers.any())).thenReturn(L(quotaFromFile));
     }
 
     @Test
      public void testMailUploadQuotaCheckerUserSettingMail_userSettingsNull_throwException() {
         try {
             this.mailUploadQuotaChecker = new MailUploadQuotaChecker(null);
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             Assert.fail("No exception was expected");
         }
     }
@@ -80,7 +81,7 @@ public class MailUploadQuotaCheckerTest {
 
      @Test
      public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaSetInDB_setUploadQuota() {
-        Mockito.when(userSettingMail.getUploadQuota()).thenReturn(this.quota);
+        Mockito.when(L(userSettingMail.getUploadQuota())).thenReturn(L(this.quota));
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 
@@ -91,7 +92,7 @@ public class MailUploadQuotaCheckerTest {
 
      @Test
      public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaPerFileSetInDB_setUploadQuotaPerFile() {
-        Mockito.when(userSettingMail.getUploadQuotaPerFile()).thenReturn(this.quota);
+        Mockito.when(L(userSettingMail.getUploadQuotaPerFile())).thenReturn(L(this.quota));
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 
@@ -102,7 +103,7 @@ public class MailUploadQuotaCheckerTest {
 
      @Test
      public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativ_setUploadQuotaFromServerProperties() {
-        Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
+        Mockito.when(L(userSettingMail.getUploadQuota())).thenReturn(L(-1L));
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 
@@ -114,7 +115,7 @@ public class MailUploadQuotaCheckerTest {
 
      @Test
      public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativAndServerConfigException_setUploadQuotaToZero() throws OXException {
-        Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
+        Mockito.when(L(userSettingMail.getUploadQuota())).thenReturn(L(-1L));
         PowerMockito.when(ServerConfig.getLong((Property) ArgumentMatchers.any())).thenThrow(new OXException());
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);

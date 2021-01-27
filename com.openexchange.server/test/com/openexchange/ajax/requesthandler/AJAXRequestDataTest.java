@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
@@ -82,6 +83,7 @@ public class AJAXRequestDataTest {
         AJAXRequestData requestData = new AJAXRequestData(group);
         Group data = requestData.getData(Group.class);
 
+        assertNotNull(data);
         assertTrue(data.getDisplayName().equals("theDisplayName"));
         assertTrue(data.getIdentifier() == 1111);
         assertTrue(data.getLastModified().equals(new Date(1111111111L)));
@@ -119,6 +121,7 @@ public class AJAXRequestDataTest {
         AJAXRequestData requestData = new AJAXRequestData(groupJson);
         Group data = requestData.getData(Group.class);
 
+        assertNotNull(data);
         assertTrue(data.getDisplayName().equals("theDisplayName"));
         assertTrue(data.getIdentifier() == 1111);
         assertTrue(data.getLastModified().equals(new Date(1111111111L)));
@@ -138,6 +141,7 @@ public class AJAXRequestDataTest {
         AJAXRequestData requestData = new AJAXRequestData(groupJson);
         Group data = requestData.getData(Group.class);
 
+        assertNotNull(data);
         assertNull(data.getDisplayName());
         assertTrue(data.getIdentifier() == -1);
         assertTrue(data.getLastModified().equals(new Date(1111111111L)));

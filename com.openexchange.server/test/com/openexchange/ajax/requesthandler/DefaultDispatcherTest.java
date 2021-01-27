@@ -64,9 +64,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings({ "synthetic-access", "unused" })
 public class DefaultDispatcherTest {
-         @Test
-     public void testDispatchesToActionService() throws OXException {
+
+    @Test
+    public void testDispatchesToActionService() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -85,8 +87,8 @@ public class DefaultDispatcherTest {
         assertSame(res, receivedResult);
     }
 
-         @Test
-     public void testChain() throws OXException {
+    @Test
+    public void testChain() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -125,8 +127,8 @@ public class DefaultDispatcherTest {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c3:outgoing", "c2:outgoing", "c1:outgoing"));
     }
 
-         @Test
-     public void testLaterIncoming() throws OXException {
+    @Test
+    public void testLaterIncoming() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -167,8 +169,8 @@ public class DefaultDispatcherTest {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
 
-         @Test
-     public void testLaterIncomingTwice() throws OXException {
+    @Test
+    public void testLaterIncomingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -209,8 +211,8 @@ public class DefaultDispatcherTest {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
 
-         @Test
-     public void testLaterOutgoing() throws OXException {
+    @Test
+    public void testLaterOutgoing() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -220,12 +222,12 @@ public class DefaultDispatcherTest {
 
         final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1");
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
-        final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3"){
+        final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3") {
 
             private boolean skipped = false;
 
             @Override
-            public AJAXRequestResult outgoing(final AJAXRequestData requestData,final AJAXRequestResult res, final ServerSession session) throws OXException {
+            public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (!skipped) {
                     skipped = true;
                     throw new FlowControl.Later();
@@ -251,8 +253,8 @@ public class DefaultDispatcherTest {
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
 
-         @Test
-     public void testLaterOutgoingTwice() throws OXException {
+    @Test
+    public void testLaterOutgoingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -262,12 +264,12 @@ public class DefaultDispatcherTest {
 
         final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1");
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
-        final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3"){
+        final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3") {
 
             private int skipCount = 0;
 
             @Override
-            public AJAXRequestResult outgoing(final AJAXRequestData requestData,final AJAXRequestResult res, final ServerSession session) throws OXException {
+            public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (skipCount < 2) {
                     skipCount++;
                     throw new FlowControl.Later();
@@ -295,8 +297,8 @@ public class DefaultDispatcherTest {
 
     // Error Cases
 
-         @Test
-     public void testUnknownModule() throws OXException {
+    @Test
+    public void testUnknownModule() {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
@@ -311,8 +313,8 @@ public class DefaultDispatcherTest {
 
     }
 
-         @Test
-     public void testUnknownAction() throws OXException {
+    @Test
+    public void testUnknownAction() {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
         final StaticActionFactory factory = new StaticActionFactory(null);
@@ -331,8 +333,8 @@ public class DefaultDispatcherTest {
         }
     }
 
-         @Test
-     public void testNullCustomizer() throws OXException {
+    @Test
+    public void testNullCustomizer() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestResult res = new AJAXRequestResult();
 
@@ -351,6 +353,7 @@ public class DefaultDispatcherTest {
     }
 
     private static class SimAJAXCustomizer implements AJAXActionCustomizer {
+
         public static List<String> LOG = new LinkedList<String>();
 
         private AJAXRequestData request;
@@ -364,14 +367,14 @@ public class DefaultDispatcherTest {
         @Override
         public AJAXRequestData incoming(final AJAXRequestData requestData, final ServerSession session) throws OXException {
             this.request = requestData;
-            LOG.add(name+":incoming");
+            LOG.add(name + ":incoming");
             return requestData;
         }
 
         @Override
         public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
             this.result = result;
-            LOG.add(name+":outgoing");
+            LOG.add(name + ":outgoing");
             return result;
         }
 

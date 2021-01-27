@@ -53,34 +53,36 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.ajax.login.LoginTools;
 
-
 /**
  * {@link LoginAddFragmentTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings("synthetic-access")
 public class LoginAddFragmentTest {
 
     public void assertFragment(String original, String expected) {
         assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
     }
 
-         @Test
-     public void testSimple() {
+    @Test
+    public void testSimple() {
         assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
     }
 
-         @Test
-     public void testEnhanceExistingFragment() {
+    @Test
+    public void testEnhanceExistingFragment() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
     }
 
-         @Test
-     public void testDelimitedByQuestionMark() {
+    @Test
+    public void testDelimitedByQuestionMark() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
     }
 
     private static final class TestLogin extends LoginServlet {
+        private static final long serialVersionUID = 6740060632253781537L;
+
         public String addFragmentParam(String url, String param, String value) {
             return LoginTools.addFragmentParameter(url, param, value);
         }

@@ -142,7 +142,7 @@ public final class MailConfigTest {
 
                 @Override
                 public <T> SecretEncryptionService<T> createService(SecretEncryptionStrategy<T> strategy) {
-                    return new SecretEncryptionService() {
+                    return new SecretEncryptionService<T>() {
 
                         @Override
                         public String encrypt(Session session, String toEncrypt) throws OXException {

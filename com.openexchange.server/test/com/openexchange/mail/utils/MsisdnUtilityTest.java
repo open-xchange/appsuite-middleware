@@ -1,6 +1,7 @@
 
 package com.openexchange.mail.utils;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +51,7 @@ public class MsisdnUtilityTest {
 
     Contact contact = new Contact();
 
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() throws OXException {
         MockitoAnnotations.initMocks(this);
@@ -58,9 +60,9 @@ public class MsisdnUtilityTest {
         PowerMockito.mockStatic(ServerServiceRegistry.class);
         PowerMockito.mockStatic(ContactUtil.class);
 
-        PowerMockito.when(mockedSession.getUserId()).thenReturn(1);
-        PowerMockito.when(mockedSession.getContextId()).thenReturn(1);
-        PowerMockito.when(mockedUser.getContactId()).thenReturn(1);
+        PowerMockito.when(I(mockedSession.getUserId())).thenReturn(I(1));
+        PowerMockito.when(I(mockedSession.getContextId())).thenReturn(I(1));
+        PowerMockito.when(I(mockedUser.getContactId())).thenReturn(I(1));
         PowerMockito.when(serverServiceRegistry.getService(ContactService.class)).thenReturn(contactService);
         PowerMockito.when(
             contactService.getContact(mockedSession, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(1))).thenReturn(
@@ -111,7 +113,7 @@ public class MsisdnUtilityTest {
 
     @Test
     public final void testAddMsisdnAddress_noContactFound_return() {
-        PowerMockito.when(mockedUser.getContactId()).thenReturn(0);
+        PowerMockito.when(I(mockedUser.getContactId())).thenReturn(I(0));
 
         final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>();
 

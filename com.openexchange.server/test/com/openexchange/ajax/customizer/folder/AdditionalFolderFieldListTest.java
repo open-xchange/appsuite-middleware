@@ -69,7 +69,7 @@ public class AdditionalFolderFieldListTest {
     private AdditionalFolderFieldList fields;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         field = new SimFolderField();
         field.setColumnId(12);
         field.setColumnName("someField");

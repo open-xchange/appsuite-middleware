@@ -206,6 +206,10 @@ public class DefaultConverterTest {
             return quality;
         }
 
+        /**
+         * @param request  
+         * @param result 
+         */
         public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
             return true;
         }
