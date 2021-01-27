@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-12 13:31+0100\n"
+"PO-Revision-Date: 2021-01-26 15:32+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3496,7 +3496,7 @@ msgstr ""
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
+"Das Speichern von Notizen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
 "nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
