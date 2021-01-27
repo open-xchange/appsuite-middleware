@@ -53,6 +53,7 @@ import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.Objects;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
@@ -146,7 +147,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder to no-link folder; Inherit permissions from D        
+        // Move sub-folder to no-link folder; Inherit permissions from D
         folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
@@ -156,7 +157,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder back to parent folder; Inherit permissions from A    
+        // Move sub-folder back to parent folder; Inherit permissions from A
         folderManager.moveFolder(B, A, Boolean.TRUE);
 
         // Check sub-folder
@@ -249,7 +250,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
      */
     private void checkExtendedPermission(FolderData folder, Integer entity, boolean isInherited) {
         for (FolderExtendedPermission perm : folder.getComOpenexchangeShareExtendedPermissions()) {
-            if (perm.getEntity() == entity) {
+            if (Objects.equals(perm.getEntity(), entity)) {
                 assertTrue("The extended permission does not have the expected inherited types", perm.getIsInherited().booleanValue() == isInherited);
                 return;
             }

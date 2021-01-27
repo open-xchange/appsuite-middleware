@@ -2225,10 +2225,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private void inheritFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis, boolean mergePermissions) throws OXException {
-        inheritFolderPermissions(folder, parent, context, con, storageParameters, folderManager, millis, mergePermissions, false);
-    }
-
-    private void inheritFolderPermissions(FolderObject folder, FolderObject parent, Context context, Connection con, StorageParameters storageParameters, OXFolderManager folderManager, Date millis, boolean mergePermissions, boolean performUpdate) throws OXException {
         // Only merge/inherit permission for infostore folders
         if (parent.getModule() != FolderObject.INFOSTORE) {
             return;
@@ -2244,14 +2240,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         Optional<List<OCLPermission>> optPermissions = processInheritedPermissions(parent, Optional.of(folder.getPermissions()), Optional.empty());
         optPermissions.ifPresent(p -> folder.setPermissions(p));
 
-        if (performUpdate) {
-            folderManager.updateFolder(folder, false, false, millis.getTime());
-        }
+        folderManager.updateFolder(folder, false, false, millis.getTime());
         if (folder.hasSubfolders()) {
             SortableId[] subFolderIds = getSubfolders(FolderStorage.REAL_TREE_ID, String.valueOf(folder.getObjectID()), storageParameters);
             for (SortableId subfolderId : subFolderIds) {
                 FolderObject subfolder = getFolderObject(Integer.parseInt(subfolderId.getId()), context, con, storageParameters);
-                inheritFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis, mergePermissions, true);
+                inheritFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis, mergePermissions);
             }
         }
     }
