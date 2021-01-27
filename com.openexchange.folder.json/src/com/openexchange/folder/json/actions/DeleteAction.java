@@ -380,7 +380,7 @@ public final class DeleteAction extends AbstractFolderAction implements Enqueuab
             jKeyDesc.put(PARAM_HARD_DELETE, hardDelete);
             jKeyDesc.put("body", hash);
 
-            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

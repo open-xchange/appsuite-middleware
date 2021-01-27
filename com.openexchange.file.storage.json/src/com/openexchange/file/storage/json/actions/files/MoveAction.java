@@ -194,7 +194,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
     }
 
     private Result isEnqueueable(InfostoreRequest request, List<IdVersionPair> pairs) throws OXException {
@@ -225,7 +225,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
     }
 
 }

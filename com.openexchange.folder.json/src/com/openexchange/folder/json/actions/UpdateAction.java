@@ -123,7 +123,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
             jKeyDesc.put("id", id);
             jKeyDesc.put("parent", newParent);
 
-            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

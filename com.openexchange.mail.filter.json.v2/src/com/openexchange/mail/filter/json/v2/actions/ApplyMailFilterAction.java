@@ -212,7 +212,7 @@ public class ApplyMailFilterAction extends AbstractMailFilterAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
     }
 
 }

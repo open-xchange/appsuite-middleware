@@ -60,68 +60,48 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 public class ImportRequest {
 
-	private AJAXRequestData request;
-	private ServerSession session;
+	private final AJAXRequestData request;
+	private final ServerSession session;
 	private final List<String> folders;
-	private InputStream inputStream;
+	private final UploadFile uploadFile;
+
+	/**
+	 * Initializes a new {@link ImportRequest}.
+	 *
+	 * @param uploadFile The upload file providing data of the file to import
+	 * @param request The request data
+	 * @param session The session
+	 * @throws OXException If initialization fails
+	 */
+	public ImportRequest(UploadFile uploadFile, AJAXRequestData request, ServerSession session) throws OXException {
+	    super();
+	    if (!request.containsParameter("callback")) {
+	        request.putParameter("callback", "import"); // hack to stay backwards-compatible with 6.20 version that did not comply to the HTTP API
+	    }
+	    String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+	    if (folderId == null) {
+	        throw ImportExportExceptionCodes.NEED_FOLDER.create();
+	    }
+		this.session = session;
+		this.request = request;
+		this.folders = Arrays.asList(Strings.splitByComma(folderId));
+		this.uploadFile = uploadFile;
+	}
 
 	public AJAXRequestData getRequest() {
-		return request;
-	}
+        return request;
+    }
 
-	public void setRequest(AJAXRequestData request) {
-		this.request = request;
-	}
-
-	public ServerSession getSession() {
-		return session;
-	}
-
-	public void setSession(ServerSession session) {
-		this.session = session;
-	}
-
-	public ImportRequest(AJAXRequestData request, ServerSession session) throws OXException {
-		this.session = session;
-		this.request = request;
-		if (!request.containsParameter("callback")) {
-			request.putParameter("callback", "import"); // hack to stay backwards-compatible with 6.20 version that did not comply to the HTTP API
-		}
-        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        if (folderId == null) {
-            throw ImportExportExceptionCodes.NEED_FOLDER.create();
-        }
-		this.folders = Arrays.asList(folderId.split(","));
-
-		long maxSize = sysconfMaxUpload();
-		if (!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
-			throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
-		}
-		if (request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
-			throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
-		}
-		UploadFile uploadFile = request.getFiles().get(0);
-		try {
-			inputStream = new FileInputStream(uploadFile.getTmpFile());
-		} catch (FileNotFoundException e) {
-			throw ImportExportExceptionCodes.TEMP_FILE_NOT_FOUND.create();
-		}
-	}
-
-	private static long sysconfMaxUpload() {
-        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if (null == sizeS) {
-            return 0;
-        }
-        return Long.parseLong(sizeS);
+    public ServerSession getSession() {
+        return session;
     }
 
 	public int getContextId() {
@@ -132,12 +112,16 @@ public class ImportRequest {
 		return this.folders;
 	}
 
-	public InputStream getImportFileAsStream() {
-		return this.inputStream;
+	public InputStream getImportFileAsStream() throws OXException {
+	    try {
+            return new FileInputStream(uploadFile.getTmpFile());
+        } catch (FileNotFoundException e) {
+            throw ImportExportExceptionCodes.TEMP_FILE_NOT_FOUND.create();
+        }
 	}
 
 	/**
-	 * Gets all optional parameters as found in the underlying request wrapped into a set.
+	 * Gets all optional parameters as found in the underlying request wrapped into a map.
 	 *
 	 * @return The optional parameters
 	 */
