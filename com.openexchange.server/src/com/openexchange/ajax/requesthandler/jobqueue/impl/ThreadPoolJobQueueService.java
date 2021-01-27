@@ -92,7 +92,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ThreadPoolJobQueueService implements JobQueueService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolJobQueueService.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolJobQueueService.class);
 
     private static JobTask jobTaskFor(Job job) {
         return jobTaskFor(job, null, null);
@@ -123,6 +124,11 @@ public class ThreadPoolJobQueueService implements JobQueueService {
 
         @Override
         public void afterExecute(Throwable throwable) {
+            if (throwable == null) {
+                LOG.debug("Job for action \"{}\" of module \"{}\" successfully executed for user {} in context {}.", job.getRequestData().getAction(), job.getRequestData().getModule(), I(job.getSession().getUserId()), I(job.getSession().getContextId()));
+            } else {
+                LOG.debug("Job for action \"{}\" of module \"{}\" failed for user {} in context {}.", job.getRequestData().getAction(), job.getRequestData().getModule(), I(job.getSession().getUserId()), I(job.getSession().getContextId()), throwable);
+            }
             synchronized (job) {
                 if (null != optionalKey) {
                     jobsByKey.invalidate(optionalKey.getIdentifier());
