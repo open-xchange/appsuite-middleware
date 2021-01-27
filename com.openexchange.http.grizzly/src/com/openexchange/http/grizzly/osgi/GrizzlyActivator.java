@@ -374,7 +374,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
      * @throws OXException If the transport cannot be build
      */
     private TCPNIOTransport buildTcpNioTransport(ConfigurationService configurationService, ThreadPoolService threadPool) throws OXException {
-        if (getService(ThreadPoolService.class) == null) {
+        if (threadPool == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
 
