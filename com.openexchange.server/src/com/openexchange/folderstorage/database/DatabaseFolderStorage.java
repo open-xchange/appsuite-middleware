@@ -126,6 +126,8 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.cache.memory.FolderMap;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
@@ -2275,9 +2277,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         f.setTreeID(REAL_TREE_ID);
 
                         if (f.isCacheable()) {
-                            Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                            CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(fo.getObjectID()));
-                            globalCache.putInGroup(cacheKey, Integer.toString(storageParameters.getContextId()), f, true);
+                            if (f.isGlobalID()) {
+                                Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                                CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(fo.getObjectID()));
+                                globalCache.putInGroup(cacheKey, Integer.toString(storageParameters.getContextId()), f, true);
+                            } else {
+                                FolderMap folderMap = FolderMapManagement.getInstance().optFor(storageParameters.getSession());
+                                folderMap.remove(f.getID(), FolderStorage.REAL_TREE_ID, storageParameters.getSession());
+                                folderMap.put(FolderStorage.REAL_TREE_ID, f, storageParameters.getSession());
+                            }
                         }
                     } catch (OXException e) {
                         LOG.warn("", e);
