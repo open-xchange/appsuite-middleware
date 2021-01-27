@@ -65,6 +65,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 
 /**
@@ -100,7 +101,7 @@ public interface CalendarService {
      * @return The calendar service utilities
      */
     CalendarServiceUtilities getUtilities();
-    
+
     /**
      * Provides access to additional utilities for scheduling.
      * 
@@ -162,6 +163,27 @@ public interface CalendarService {
      * @return The found events per folder
      */
     Map<String, EventsResult> searchEvents(CalendarSession session, List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+
+    /**
+     * Searches for events by using the specified search term.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
+     * 
+     * @param <O> The search term type
+     * @param session The calendar session
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param term The {@link SearchTerm}
+     * @return The found events per folder
+     */
+    <O> Map<String, EventsResult> searchEvents(CalendarSession session, List<String> folderIds, SearchTerm<O> term) throws OXException;
 
     /**
      * Gets all change exceptions of a recurring event series.

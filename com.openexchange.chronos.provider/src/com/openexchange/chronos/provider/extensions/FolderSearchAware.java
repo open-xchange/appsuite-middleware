@@ -56,6 +56,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 
 /**
  * {@link FolderSearchAware}
@@ -86,5 +87,23 @@ public interface FolderSearchAware extends SearchAware {
      * @return The found events per folder
      */
     Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
-
+    
+    /**
+     * Searches for events by the specified {@link SearchTerm}
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
+     * 
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param term The {@link SearchTerm}
+     * @return The found events per folder
+     */
+    Map<String, EventsResult> searchEvents(List<String> folderIds, SearchTerm<?> term) throws OXException;
 }

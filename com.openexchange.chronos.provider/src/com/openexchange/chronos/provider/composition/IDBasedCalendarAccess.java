@@ -84,6 +84,7 @@ import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
 
@@ -325,6 +326,26 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The found events per folder, or an empty map if there are none
      */
     Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+
+    /**
+     * Searches for events in the specified folders using the specified {@link SearchTerm}.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * 
+     * @param <O> The search term type
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     *            of the user's {@link SearchAware} calendar accounts
+     * @param term The {@link SearchTerm}
+     * @return The found events per folder, or an empty map if there are none
+     */
+    <O> Map<String, EventsResult> searchEvents(List<String> folderIds, SearchTerm<O> term) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.

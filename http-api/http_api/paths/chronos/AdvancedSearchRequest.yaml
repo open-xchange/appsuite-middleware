@@ -1,0 +1,73 @@
+/chronos?action=advancedSearch:
+  put:
+    operationId: searchChronosAdvanced
+    tags:
+      - Chronos
+    summary: Search for events by filter.
+    security:
+        - session: []
+        - oauth:
+          - read_calendar
+    parameters:
+      - in: query
+        name: rangeStart
+        description: >
+          Lower inclusive limit of the queried range as a utc date-time value as
+          specified in RFC 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only
+          events which start on or after this date are returned.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: rangeEnd
+        description: >
+          Upper exclusive limit of the queried range as a utc date-time value as
+          specified in RFC 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only
+          events which end before this date are returned.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - $ref: '#/components/parameters/QueryParamChronosOrder'
+      - $ref: '#/components/parameters/QueryParamChronosSort'
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array with events. The events are
+
+          sorted in ascending order by the field `start_date`. In case of errors
+          the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultipleFolderEventsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: string
+      description: >
+        A JSON object describing the search term as introducted in [Advanced
+        search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html).
+        Example:
+
+        `{"filter":["and",["=",
+        {"field":"summary"},"FooBar Meeting"],["=",{"field":"createdBy"},"1337"]]}`
+
+        which represents 'summary = "FooBar Meeting" AND createdBy = "1337"'.
+        Valid fields are the following ones specified in [Event
+        data](#/definitions/EventData) model: `summary`, `location`, `description`, `organizer`, `attendees`, 
+        `url`, `uid`, `timestamp`, `created`, `createdBy`, `lastModified`, `modifiedBy`, `sequence`, 
+        `categories`, `color`, `rrule`, `transp`, `status`, `class`.
+        Calendar users in `organizer` / `attendees` can either be matched by their internal entity identifier, 
+        or based on their email address.
+        The fields `startDate` and `endDate` can be defined with the `rangeStart` and `rangeEnd` URL parameters.
+      required: true

@@ -343,6 +343,15 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     @Override
+    public List<Event> searchEvents(SearchTerm<?> term) throws OXException {
+        List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(term));
+        if (isExpandOccurrences()) {
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
+        }
+        return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+    }
+
+    @Override
     public String getCTag() throws OXException {
         return getLastModifiedChecksum();
     }

@@ -62,7 +62,9 @@ import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.test.common.asset.AssetManager;
 import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -94,9 +96,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     private Set<String> folderToDelete;
     private long lastTimeStamp;
 
-    private static final String CONTACT_FOLDER = "Contacts";
     private static final String CONTACT_MODULE = "contacts";
-    private static final String BIRTHDAY_FOLDER = "Birthdays";
     private static final String EVENT_MODULE = "event";
     private static final String CALENDAR_MODULE = "calendar";
 
@@ -232,22 +232,26 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     /**
      * Gets the birthday calendar folder
      *
-     * @return String The identifier of the birthday calendar folder
      * @throws Exception if the birthday calendar folder cannot be found
      */
     protected String getBirthdayCalendarFolder() throws Exception {
-        return getPrivateFolder(defaultUserApi.getFoldersApi(), EVENT_MODULE, BIRTHDAY_FOLDER);
+        return getBirthdayCalendarFolder(foldersApi);
     }
 
     /**
      * Gets the birthday calendar folder
      *
-     * @param client The {@link ApiClient}
-     * @return String The identifier of the birthday calendar folder
+     * @param foldersApi The folders API to use
      * @throws Exception if the birthday calendar folder cannot be found
      */
-    protected String getBirthdayCalendarFolder(ApiClient client) throws Exception {
-        return getPrivateFolder(new FoldersApi(client), EVENT_MODULE, BIRTHDAY_FOLDER);
+    protected String getBirthdayCalendarFolder(FoldersApi foldersApi) throws Exception {
+        ArrayList<ArrayList<?>> folderArrays = getPrivateFolderList(foldersApi, EVENT_MODULE, "1,300,308,3203", "1");
+        for (ArrayList<?> folderArray : folderArrays) {
+            if (CalendarProviders.ID_BIRTHDAYS.equals(folderArray.get(3))) {
+                return String.valueOf(folderArray.get(0));
+            }
+        }
+        throw new Exception("Unable to find birthdays calendar folder");
     }
 
     /**
@@ -257,7 +261,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the default contact folder cannot be found
      */
     protected String getDefaultContactFolder() throws Exception {
-        return getPrivateFolder(defaultUserApi.getFoldersApi(), CONTACT_MODULE, CONTACT_FOLDER);
+        return getDefaultContactFolder(foldersApi);
     }
 
     /**
@@ -267,8 +271,14 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return String The identifier of the default contact folder
      * @throws Exception if the default contact folder cannot be found
      */
-    protected String getDefaultContactFolder(ApiClient client) throws Exception {
-        return getPrivateFolder(new FoldersApi(client), "contacts", "Contacts");
+    protected String getDefaultContactFolder(FoldersApi foldersApi) throws Exception {
+        ArrayList<ArrayList<?>> folderArrays = getPrivateFolderList(foldersApi, CONTACT_MODULE, "1,300,302,308", "1");
+        for (ArrayList<?> folderArray : folderArrays) {
+            if (I(PrivateType.getInstance().getType()).equals(folderArray.get(2)) && Boolean.TRUE.equals(folderArray.get(3))) {
+                return String.valueOf(folderArray.get(0));
+            }
+        }
+        throw new Exception("Unable to find default contacts folder");
     }
 
     /**
@@ -289,25 +299,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             }
         }
         throw new Exception("Unable to find default calendar folder!");
-    }
-
-    /**
-     * Gets the private folder with the given name
-     *
-     * @param foldersApi the {@link FoldersApi} to use
-     * @param module The folder module
-     * @param folder The name of the folder
-     * @return folderId The folderId as string
-     * @throws Exception if the folder cannot be found
-     */
-    private String getPrivateFolder(FoldersApi foldersApi, String module, String folder) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, module, "1,300,308", "1");
-        for (ArrayList<?> folderName : privateList) {
-            if (folderName.get(1).equals(folder)) {
-                return folderName.get(0).toString();
-            }
-        }
-        throw new Exception("Unable to find default " + module + " folder!");
     }
 
     /**
@@ -365,7 +356,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return An {@link UpdateBody}.
      */
     protected UpdateEventBody getUpdateBody(EventData eventData) {
-    	UpdateEventBody body = new UpdateEventBody();
+        UpdateEventBody body = new UpdateEventBody();
         body.setEvent(eventData);
         return body;
     }
@@ -393,7 +384,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 }
                 long dateTime1 = CalendarUtils.decode(recurrenceId1).getTimestamp();
                 long dateTime2 = CalendarUtils.decode(recurrenceId2).getTimestamp();
-                if (dateTime1 == dateTime2 ) {
+                if (dateTime1 == dateTime2) {
                     return 0;
                 }
                 return dateTime1 < dateTime2 ? -1 : 1;

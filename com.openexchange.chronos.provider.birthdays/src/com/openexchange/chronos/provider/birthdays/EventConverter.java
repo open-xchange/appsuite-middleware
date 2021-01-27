@@ -75,6 +75,7 @@ import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -97,6 +98,15 @@ import com.openexchange.server.ServiceLookup;
  */
 public class EventConverter {
 
+    /** The static recurrence rule used for birthday event */
+    static final String BIRTHDAYS_RRULE = "FREQ=YEARLY;SKIP=BACKWARD";
+
+    /** The static time transparency used for birthday event */
+    static final Transp BIRTHDAYS_TRANSP = TimeTransparency.TRANSPARENT;
+
+    /** The static classification used for birthday event */
+    static final Classification BIRTHDAYS_CLASSIFICATION = Classification.PUBLIC;
+
     private final Locale locale;
     private final ServiceLookup services;
     private final String folderId;
@@ -118,9 +128,9 @@ public class EventConverter {
         CalendarUser calendarUser = new CalendarUser();
         calendarUser.setEntity(calendarUserId);
         event.setCalendarUser(calendarUser);
-        event.setRecurrenceRule("FREQ=YEARLY;SKIP=BACKWARD");
-        event.setTransp(TimeTransparency.TRANSPARENT);
-        event.setClassification(Classification.PUBLIC);
+        event.setRecurrenceRule(BIRTHDAYS_RRULE);
+        event.setTransp(BIRTHDAYS_TRANSP);
+        event.setClassification(BIRTHDAYS_CLASSIFICATION);
         Calendar calendar = truncateTime(initCalendar(TimeZones.UTC, contact.getBirthday()));
         //        event.setStartDate(new DateTime(null, calendar.getTimeInMillis()).toAllDay());
         event.setStartDate(new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)));

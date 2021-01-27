@@ -90,7 +90,14 @@ public enum SearchExceptionMessages implements DisplayableOXExceptionCode {
     /**
      * Unknown operation: %1$s.
      */
-    UNKNOWN_OPERATION(SearchExceptionMessages.UNKNOWN_OPERATION_MSG, CATEGORY_ERROR, 6);
+    UNKNOWN_OPERATION(SearchExceptionMessages.UNKNOWN_OPERATION_MSG, CATEGORY_ERROR, 6),
+
+    /**
+     * The operand '%1$s' in the search term is not supported.
+     */
+    PARSING_FAILED_UNSUPPORTED_OPERAND(SearchExceptionMessages.PARSING_FAILED_UNSUPPORTED_OPERAND_MSG, CATEGORY_USER_INPUT, 7),
+
+    ;
 
     // Search failed: %1$s.
     private static final String SEARCH_FAILED_MSG = "Search failed: %1$s.";
@@ -109,6 +116,9 @@ public enum SearchExceptionMessages implements DisplayableOXExceptionCode {
 
     // Unknown operation: %1$s.
     private static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
+
+    // The operand '%1$s' in the search term is not supported.
+    private static final String PARSING_FAILED_UNSUPPORTED_OPERAND_MSG = "The operand '%1$s' in the search term is not supported.";
 
     /**
      * Message of the exception.
@@ -155,7 +165,6 @@ public enum SearchExceptionMessages implements DisplayableOXExceptionCode {
         number = detailNumber;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
-
 
     @Override
     public String getPrefix() {

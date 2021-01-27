@@ -63,17 +63,19 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
 import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
@@ -94,6 +96,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.principalusecount.PrincipalUseCountService;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -160,20 +163,57 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Gets the timezone used to interpret <i>Time</i> parameters in for the underlying request.
      *
-     * @param requestData The resuest data sent by the client
+     * @param requestData The request data sent by the client
      * @return The timezone
      */
     protected static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
             ServerSession session = requestData.getSession();
-
             if (session != null) {
-
                 timezoneId = session.getUser().getTimeZone();
             }
         }
         return CalendarUtils.optTimeZone(timezoneId, TimeZones.UTC);
+    }
+    
+    /**
+     * Returns the {@link SearchTerm} from the JSON array field 'filter' in the specified request.
+     * 
+     * @return the search term The search term
+     * @throws OXException if the data or the field 'filter' is missing or any other error is occurred
+     */
+    protected static SearchTerm<?> getSearchTerm(AJAXRequestData requestData) throws OXException {
+        JSONObject data = getJSONData(requestData);
+        JSONArray jsonArray = data.optJSONArray(AJAXServlet.PARAMETER_FILTER);
+        if (null == jsonArray) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create(AJAXServlet.PARAMETER_FILTER);
+        }
+        return ChronosSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
+    }
+    
+    /**
+     * Returns the folder identifiers from the specified request data body.
+     *
+     * @param requestData The request data
+     * @return The folder identifiers as {@link List}
+     * @throws OXException if no body present or any of the required fields are absent
+     */
+    protected static List<String> getFolderIds(AJAXRequestData requestData) throws OXException {
+        JSONObject data = getJSONData(requestData);
+        try {
+            JSONArray jsonArray = data.optJSONArray("folders");
+            if (null == jsonArray) {
+                return ImmutableList.of();
+            }
+            List<String> folderIds = new ArrayList<>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                folderIds.add(jsonArray.getString(i));
+            }
+            return folderIds;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
     }
 
     /**

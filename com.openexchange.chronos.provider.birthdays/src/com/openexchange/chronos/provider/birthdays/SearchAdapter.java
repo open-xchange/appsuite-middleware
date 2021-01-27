@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.birthdays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.SearchFilter;
@@ -61,6 +62,8 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -78,7 +81,7 @@ public class SearchAdapter {
     private static final ContactField[] SUMMARY_FIELDS = { ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME };
 
     /** A synthetic search term that leads to no results */
-    private static final SearchTerm<?> NO_RESULTS_TERM = new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
+    private static final SingleSearchTerm NO_RESULTS_TERM = new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
 
     /**
      * Gets a contact search term for the supplied list of search filters an general queries.
@@ -108,6 +111,124 @@ public class SearchAdapter {
             compositeTerm.addSearchTerm(searchTerm);
         }
         return compositeTerm;
+    }
+
+    /**
+     * Gets a contact search term for the supplied calendar search term.
+     *
+     * @param calendarTerm The calendar term to get the contact search term for
+     * @return The search term, or <code>null</code> if all contacts would be matched
+     */
+    public static SearchTerm<?> getContactSearchTerm(SearchTerm<?> calendarTerm) throws OXException {
+        if (SingleSearchTerm.class.isInstance(calendarTerm)) {
+            SingleSearchTerm singleSearchTerm = (SingleSearchTerm) calendarTerm;
+            Operand<?> constantOperand = requireSingleOperand(singleSearchTerm, Operand.Type.CONSTANT);
+            Operand<?> columnOperand = requireSingleOperand(singleSearchTerm, Operand.Type.COLUMN);
+            if (false == EventField.class.isInstance(columnOperand.getValue())) {
+                throw SearchExceptionMessages.PARSING_FAILED_UNSUPPORTED_OPERAND.create(columnOperand);
+            }
+            return getContactSearchTerm((EventField) columnOperand.getValue(), singleSearchTerm.getOperation(), constantOperand);
+        }
+        if (CompositeSearchTerm.class.isInstance(calendarTerm)) {
+            CompositeSearchTerm contactCompositeSearchTerm = new CompositeSearchTerm((CompositeOperation) calendarTerm.getOperation());
+            for (SearchTerm<?> calendarTermOperand : ((CompositeSearchTerm) calendarTerm).getOperands()) {
+                contactCompositeSearchTerm.addSearchTerm(getContactSearchTerm(calendarTermOperand));
+            }
+            return contactCompositeSearchTerm;
+        }
+        throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+    }
+
+    /**
+     * Extracts a single operand of a certain type from the supplied single search term, ensuring that exactly one operand of this type is
+     * present in the term.
+     * 
+     * @param searchTerm The search term to extract the operand from
+     * @param type The type of the operand to extract
+     * @return The operand
+     * @throws IllegalArgumentException If no or more than one operands of this type are found in the term
+     */
+    private static Operand<?> requireSingleOperand(SingleSearchTerm searchTerm, Operand.Type type) {
+        Operand<?> singleOperand = null;
+        for (Operand<?> operand : searchTerm.getOperands()) {
+            if (type.equals(operand.getType())) {
+                if (null != singleOperand) {
+                    throw new IllegalArgumentException("Multiple operands of type " + type + " in term " + searchTerm);
+                }
+                singleOperand = operand; 
+            }            
+        }
+        if (null == singleOperand) {
+            throw new IllegalArgumentException("No operand of type " + type + " in term " + searchTerm);
+        }                
+        return singleOperand;
+    }
+
+    /**
+     * Gets a search term for looking up contacts matching a certain event field criteria.
+     * 
+     * @param matchedField The event field to match
+     * @param singleOperation The underlying search term's operation
+     * @param constantOperand The underlying search term's constant operand
+     * @return The contact search term
+     * @throws OXException If search is not supported
+     */
+    private static SearchTerm<?> getContactSearchTerm(EventField matchedField, SingleOperation singleOperation, Operand<?> constantOperand) throws OXException {
+        switch (matchedField) {
+            case LOCATION:
+            case DESCRIPTION:
+            case ORGANIZER:
+            case URL:
+            case COLOR:
+            case SEQUENCE:
+            case CATEGORIES:
+            case STATUS:
+                return new SingleSearchTerm(singleOperation).addOperand(new ConstantOperand<String>("")).addOperand(constantOperand);
+            case RECURRENCE_RULE:
+                return new SingleSearchTerm(singleOperation).addOperand(new ConstantOperand<String>(EventConverter.BIRTHDAYS_RRULE)).addOperand(constantOperand);
+            case TRANSP:
+                return new SingleSearchTerm(singleOperation).addOperand(new ConstantOperand<String>(EventConverter.BIRTHDAYS_TRANSP.getValue())).addOperand(constantOperand);
+            case CLASSIFICATION:
+                return new SingleSearchTerm(singleOperation).addOperand(new ConstantOperand<String>(EventConverter.BIRTHDAYS_CLASSIFICATION.getValue())).addOperand(constantOperand);
+            case TIMESTAMP:
+            case LAST_MODIFIED:
+                return getContactFieldTerm(ContactField.LAST_MODIFIED, singleOperation, constantOperand);
+            case CREATED:
+                return getContactFieldTerm(ContactField.CREATION_DATE, singleOperation, constantOperand);
+            case UID:
+                return getContactFieldTerm(ContactField.UID, singleOperation, constantOperand);
+            case SUMMARY:
+                return getSummaryTerm(singleOperation, constantOperand);
+            case ATTENDEES:
+                return getAttendeesTerm(singleOperation, constantOperand);
+            default:
+                throw SearchExceptionMessages.PARSING_FAILED_UNSUPPORTED_OPERAND.create(matchedField);
+        }
+    }
+
+    private static CompositeSearchTerm getSummaryTerm(SingleOperation singleOperation, Operand<?> constantOperand) {
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (ContactField field : SUMMARY_FIELDS) {
+            orTerm.addSearchTerm(getContactFieldTerm(field, singleOperation, constantOperand));
+        }
+        return orTerm;
+    }
+
+    private static SingleSearchTerm getAttendeesTerm(SingleOperation singleOperation, Operand<?> constantOperand) {
+        if (Number.class.isInstance(constantOperand.getValue())) {
+            /*
+             * match against contact user id (as attendee entity identifier)
+             */
+            return new SingleSearchTerm(singleOperation).addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID)).addOperand(constantOperand);
+        }
+        /*
+         * match against contact email1 (as attendee uri), otherwise
+         */
+        return new SingleSearchTerm(singleOperation).addOperand(new ContactFieldOperand(ContactField.EMAIL1)).addOperand(constantOperand);
+    }
+
+    private static SingleSearchTerm getContactFieldTerm(ContactField matchedField, SingleOperation singleOperation, Operand<?> constantOperand) {
+        return new SingleSearchTerm(singleOperation).addOperand(new ContactFieldOperand(matchedField)).addOperand(constantOperand);
     }
 
     private static SearchTerm<?> getQueryTerm(List<String> queries) {

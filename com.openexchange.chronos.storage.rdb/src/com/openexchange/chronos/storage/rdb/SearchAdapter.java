@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -62,16 +63,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Enums;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -81,6 +87,8 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -123,11 +131,12 @@ public class SearchAdapter {
     /**
      * Appends the supplied search term to the resulting SQL statement.
      *
-     * @param term The search term to append
+     * @param searchTerm The search term to append
      * @return A self reference
      */
-    public SearchAdapter append(SearchTerm<?> term) throws OXException {
-        if (null != term) {
+    public SearchAdapter append(SearchTerm<?> searchTerm) throws OXException {
+        if (null != searchTerm) {
+            SearchTerm<?> term = adjustIfNeeded(searchTerm);
             if (SingleSearchTerm.class.isInstance(term)) {
                 append((SingleSearchTerm) term);
             } else if (CompositeSearchTerm.class.isInstance(term)) {
@@ -339,7 +348,7 @@ public class SearchAdapter {
             stringBuilder.append(partStatMapping.getColumnLabel(prefixAttendees)).append(" = ?");
             parameters.add(((ParticipationStatus) partStats.get(0)).getValue());
         } else {
-            appendAsInClause(partStatMapping, prefixAttendees, partStats);
+            appendAsInClause(partStatMapping, prefixAttendees, partStats, null);
         }
         usesAttendees = true;
         stringBuilder.append(") ");
@@ -383,6 +392,136 @@ public class SearchAdapter {
         }
     }
 
+    /**
+     * Adjusts an incoming search term based on storage internals, which includes:
+     * <ul>
+     * <li>{@link EventField#ATTENDEES} column operands are routed to {@link AttendeeField#URI} or {@link AttendeeField#ENTITY}, and their 
+     * respective constant operands are adjusted accordingly</li>
+     * <li>Matches against {@link EventField#ORGANIZER} are translated to their encoded representation, using either the internal resource 
+     * identifier, or a <code>mailto:</code> calendar user address</li>
+     * <li>Matches against {@link EventField#TRANSP} are translated to their encoded representation</li>
+     * </ul>
+     * 
+     * @param term The term to adjust if applicable
+     * @return The adjusted search term to use, or the passed search term reference if not applicable
+     */
+    private SearchTerm<?> adjustIfNeeded(SearchTerm<?> term) {
+        if (false == SingleSearchTerm.class.isInstance(term)) {
+            return term;
+        }
+        SingleSearchTerm singleSearchTerm = (SingleSearchTerm) term;
+        Operand<?> columnOperand = getFirstOperandOfType(singleSearchTerm, Operand.Type.COLUMN);
+        if (null == columnOperand) {
+            return term;
+        }
+        if (EventField.ATTENDEES.equals(columnOperand.getValue())) {
+            return adjustAttendeesTerm(singleSearchTerm);
+        }
+        if (EventField.ORGANIZER.equals(columnOperand.getValue())) {
+            return adjustOrganizerTerm(singleSearchTerm);
+        }
+        if (EventField.TRANSP.equals(columnOperand.getValue())) {
+            return adjustEncodedPropertyTerm(singleSearchTerm, TimeTransparency.class, 
+                (value) -> Enums.parse(TimeTransparency.class, value), 
+                (transp) -> I(TimeTransparency.TRANSPARENT.equals(transp) ? 0 : 1)
+            );
+        }
+        return term;
+    }
+
+    /**
+     * Adjusts a single search term targeting an enumeration property to match against the encoded storage representation instead.
+     * 
+     * @param singleSearchTerm The search term to adjust
+     * @param clazz The property's class
+     * @param parser The function to parse the client-supplied textual representation of the property value
+     * @param encoder The function to get the storage representation for the enumeration value
+     * @return The adjusted search term
+     */
+    private <E> SingleSearchTerm adjustEncodedPropertyTerm(SingleSearchTerm singleSearchTerm, Class<E> clazz, Function<String, E> parser, Function<E, ?> encoder) {
+        SingleSearchTerm adjustedTerm = new SingleSearchTerm(singleSearchTerm.getOperation());
+        for (Operand<?> operand : singleSearchTerm.getOperands()) {
+            if (Operand.Type.CONSTANT.equals(operand.getType()) && clazz.isInstance(operand.getValue())) {
+                /*
+                 * match against encoded enum value instead
+                 */
+                adjustedTerm.addOperand(new ConstantOperand<Object>(encoder.apply(clazz.cast(operand.getValue()))));
+            } else if (Operand.Type.CONSTANT.equals(operand.getType()) && String.class.isInstance(operand.getValue())) {
+                /*
+                 * parse operand & match against encoded enum value instead
+                 */
+                E value = parser.apply((String) operand.getValue());
+                adjustedTerm.addOperand(new ConstantOperand<Object>(encoder.apply(value)));
+            } else {
+                adjustedTerm.addOperand(operand);
+            }
+        }
+        return adjustedTerm;
+    }
+
+    /**
+     * Adjusts a single search term targeting {@link EventField#ORGANIZER} to match against storage representation instead.
+     * 
+     * @param singleSearchTerm The search term to adjust
+     * @return The adjusted search term
+     */
+    private SingleSearchTerm adjustOrganizerTerm(SingleSearchTerm singleSearchTerm) {
+        ColumnFieldOperand<EventField> adjustedColumnOperand = null;
+        Operand<?> constantOperand = getFirstOperandOfType(singleSearchTerm, Operand.Type.CONSTANT);
+        if (null != constantOperand && String.class.isInstance(constantOperand.getValue())) {
+            /*
+             * match against encoded organizer, trimming the X:mailto: prefix as needed
+             */
+            adjustedColumnOperand = new FormattingColumnFieldOperand<EventField>(EventField.ORGANIZER,
+                (label) -> String.format("SUBSTRING_INDEX(LOWER(%1$s),'mailto:',-1)", label)
+            );                
+        }
+        SingleSearchTerm adjustedTerm = new SingleSearchTerm(singleSearchTerm.getOperation());
+        for (Operand<?> operand : singleSearchTerm.getOperands()) {
+            if (EventField.ORGANIZER.equals(operand.getValue()) && null != adjustedColumnOperand) {
+                adjustedTerm.addOperand(adjustedColumnOperand);
+            } else if (Operand.Type.CONSTANT.equals(operand.getType()) && Number.class.isInstance(operand.getValue())) {
+                /*
+                 * match against organizer's resource id
+                 */
+                String resoureceId = ResourceId.forUser(contextID, ((Number) operand.getValue()).intValue());
+                adjustedTerm.addOperand(new ConstantOperand<String>(resoureceId));
+            } else {
+                adjustedTerm.addOperand(operand);
+            }
+        }
+        return adjustedTerm;
+    }
+    
+    /**
+     * Adjusts a single search term targeting {@link EventField#ATTENDEES} to match against appropriate attendee fields instead. 
+     * 
+     * @param singleSearchTerm The search term to adjust
+     * @return The adjusted search term
+     */
+    private SingleSearchTerm adjustAttendeesTerm(SingleSearchTerm singleSearchTerm) {
+        ColumnFieldOperand<AttendeeField> adjustedColumnOperand;
+        Operand<?> constantOperand = getFirstOperandOfType(singleSearchTerm, Operand.Type.CONSTANT);
+        if (null != constantOperand && Number.class.isInstance(constantOperand.getValue())) {
+            /*
+             * match against attendee entity
+             */
+            adjustedColumnOperand = new ColumnFieldOperand<AttendeeField>(AttendeeField.ENTITY);
+        } else {
+            /*
+             * match against attendee uri, trimming the mailto: prefix as needed
+             */
+            adjustedColumnOperand = new FormattingColumnFieldOperand<AttendeeField>(AttendeeField.URI, 
+                (label) -> String.format("TRIM(LEADING 'mailto:' FROM LOWER(%1$s))", label)
+            );                
+        }
+        SingleSearchTerm adjustedTerm = new SingleSearchTerm(singleSearchTerm.getOperation());
+        for (Operand<?> operand : singleSearchTerm.getOperands()) {
+            adjustedTerm.addOperand(EventField.ATTENDEES.equals(operand.getValue()) ? adjustedColumnOperand : operand);
+        }
+        return adjustedTerm;
+    }
+
     private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping) {
         stringBuilder.append('(');
         for (int i = 0; i < operands.length; i++) {
@@ -391,7 +530,7 @@ public class SearchAdapter {
             }
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
                 Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
-                appendColumnOperand(entry.getValue(), entry.getKey());
+                appendColumnOperand(entry.getValue(), entry.getKey(), optColumnLabelFormatFunction(operands[i]));
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
                 appendConstantOperand(operands[i].getValue(), mapping.getSqlType());
             } else {
@@ -446,60 +585,60 @@ public class SearchAdapter {
             return false; // at least 2 operands
         }
         List<Object> constantValues = new ArrayList<Object>();
-        Object commonColumnValue = null;
+        Operand<?> commonColumnOperand = null;
         for (SearchTerm<?> term : compositeTerm.getOperands()) {
             if (false == SingleSearchTerm.class.isInstance(term) || false == SingleOperation.EQUALS.equals(term.getOperation())) {
                 return false; // only nested single search terms with 'EQUALS' operations
             }
-            Object columnValue = null;
+            Operand<?> columnOperand = null;
             Object constantValue = null;
             for (Operand<?> operand : ((SingleSearchTerm) term).getOperands()) {
                 if (Type.COLUMN.equals(operand.getType())) {
-                    columnValue = operand.getValue();
+                    columnOperand = operand;
                 } else if (Type.CONSTANT.equals(operand.getType())) {
                     constantValue = operand.getValue();
                 } else {
                     return false; // only 'COLUMN' = 'CONSTANT' operations
                 }
             }
-            if (null == columnValue || null == constantValue) {
+            if (null == columnOperand || null == constantValue) {
                 return false; // only 'COLUMN' = 'CONSTANT' operations
             }
             if (String.class.isInstance(constantValue) && StringCollection.containsWildcards((String) constantValue)) {
                 return false; // no wildcard comparisons
             }
-            if (null == commonColumnValue) {
-                commonColumnValue = columnValue; // first column value
-            } else if (false == commonColumnValue.equals(columnValue)) {
+            if (null == commonColumnOperand) {
+                commonColumnOperand = columnOperand; // first column value
+            } else if (false == Objects.equals(commonColumnOperand.getValue(), columnOperand.getValue())) {
                 return false; // only equal column value
             }
             constantValues.add(constantValue);
         }
-        if (null == commonColumnValue || 2 > constantValues.size()) {
+        if (null == commonColumnOperand || 2 > constantValues.size()) {
             return false;
         }
         /*
          * all checks passed, build IN clause
          */
-        Iterator<Entry<String, DbMapping<? extends Object, ?>>> iterator = getMappings(commonColumnValue).entrySet().iterator();
+        Iterator<Entry<String, DbMapping<? extends Object, ?>>> iterator = getMappings(commonColumnOperand.getValue()).entrySet().iterator();
         Entry<String, DbMapping<? extends Object, ?>> firstMapping = iterator.next();
         if (false == iterator.hasNext()) {
-            appendAsInClause(firstMapping.getValue(), firstMapping.getKey(), constantValues);
+            appendAsInClause(firstMapping.getValue(), firstMapping.getKey(), constantValues, optColumnLabelFormatFunction(commonColumnOperand));
         } else {
             stringBuilder.append("(");
-            appendAsInClause(firstMapping.getValue(), firstMapping.getKey(), constantValues);
+            appendAsInClause(firstMapping.getValue(), firstMapping.getKey(), constantValues, optColumnLabelFormatFunction(commonColumnOperand));
             do {
                 stringBuilder.append(" OR ");
                 Entry<String, DbMapping<? extends Object, ?>> mapping = iterator.next();
-                appendAsInClause(mapping.getValue(), mapping.getKey(), constantValues);
+                appendAsInClause(mapping.getValue(), mapping.getKey(), constantValues, optColumnLabelFormatFunction(commonColumnOperand));
             } while (iterator.hasNext());
             stringBuilder.append(")");
         }
         return true;
     }
 
-    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues) {
-        appendColumnOperand(mapping, prefix);
+    private void appendAsInClause(DbMapping<? extends Object, ?> mapping, String prefix, List<Object> constantValues, Function<String, String> optColumnLabelFormat) {
+        appendColumnOperand(mapping, prefix, optColumnLabelFormat);
         stringBuilder.append(" IN (");
         appendConstantOperand(constantValues.get(0), mapping.getSqlType());
         for (int i = 1; i < constantValues.size(); i++) {
@@ -559,8 +698,11 @@ public class SearchAdapter {
         stringBuilder.append('?');
     }
 
-    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix) {
+    private void appendColumnOperand(DbMapping<? extends Object, ?> mapping, String prefix, Function<String, String> optColumnLabelFormat) {
         String columnLabel = null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
+        if (null != optColumnLabelFormat) {
+            columnLabel = optColumnLabelFormat.apply(columnLabel);
+        }
         if (null != charset && Types.VARCHAR == mapping.getSqlType()) {
             stringBuilder.append("CONVERT(").append(columnLabel).append(" USING ").append(charset).append(')');
         } else {
@@ -568,13 +710,18 @@ public class SearchAdapter {
         }
     }
 
-    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) {
+    private static Operand<?> getFirstOperandOfType(SingleSearchTerm term, Operand.Type type) {
         for (Operand<?> operand : term.getOperands()) {
-            if (Operand.Type.COLUMN.equals(operand.getType())) {
-                return getMappings(operand.getValue());
+            if (type.equals(operand.getType())) {
+                return operand;
             }
         }
         return null;
+    }
+
+    private Map<String, DbMapping<? extends Object, ?>> getFirstColumnMappings(SingleSearchTerm term) {
+        Operand<?> operand = getFirstOperandOfType(term, Operand.Type.COLUMN);
+        return null != operand ? getMappings(operand.getValue()) : null;
     }
 
     private Map<String, DbMapping<? extends Object, ?>> getMappings(Object value) {
@@ -603,6 +750,28 @@ public class SearchAdapter {
             throw new IllegalArgumentException("Found multiple mappings for: " + value);
         }
         return entries.iterator().next();
+    }
+
+    private static Function<String, String> optColumnLabelFormatFunction(Operand<?> operand) {
+        if (FormattingColumnFieldOperand.class.isInstance(operand)) {
+            return ((FormattingColumnFieldOperand<?>) operand).getColumnLabelFormatFunction();
+        }
+        return null;
+    }
+
+    private static final class FormattingColumnFieldOperand<E extends Enum<?>> extends ColumnFieldOperand<E> {
+
+        private final Function<String, String> columnLabelFormatFunction;
+
+        public FormattingColumnFieldOperand(E field, Function<String, String> columnLabelFormatFunction) {
+            super(field);
+            this.columnLabelFormatFunction = columnLabelFormatFunction;
+        }
+
+        public Function<String, String> getColumnLabelFormatFunction() {
+            return columnLabelFormatFunction;
+        }
+
     }
 
 }

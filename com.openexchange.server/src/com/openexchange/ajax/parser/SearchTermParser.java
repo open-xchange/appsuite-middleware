@@ -86,11 +86,20 @@ public class SearchTermParser {
      * @return The parsed instance of search term.
      * @throws OXException If parsing fails.
      */
-    public static SearchTerm<?> parse(final JSONArray jsonArray) throws OXException {
+    public static SearchTerm<?> parse(JSONArray jsonArray) throws OXException {
         return INSTANCE.parseSearchTerm(jsonArray);
     }
 
-    public static void parseSingleOperands(final SingleSearchTerm singleSearchTerm, final JSONArray array, final int maxTerms) throws OXException {
+    /**
+     * Parses the single operands from the specified json array and adds them
+     * to the specified {@link SingleSearchTerm}
+     *
+     * @param array The json array containing the operands
+     * @param singleSearchTerm the term to add the operands to
+     * @param maxTerms the maximum amount of allowed terms
+     * @throws OXException if the array does not contain the appropriate amount of terms
+     */
+    public static void parseSingleOperands(SingleSearchTerm singleSearchTerm, JSONArray array, int maxTerms) throws OXException {
         INSTANCE.parseSingleOperands(array, singleSearchTerm, maxTerms);
     }
 
@@ -101,46 +110,55 @@ public class SearchTermParser {
         super();
     }
 
-    public void parseSingleOperands(final JSONArray array, final SingleSearchTerm singleSearchTerm, final int maxTerms) throws OXException {
-        final int len = array.length();
+    /**
+     * Parses the single operands from the specified json array and adds them
+     * to the specified {@link SingleSearchTerm}
+     *
+     * @param array The json array containing the operands
+     * @param singleSearchTerm the term to add the operands to
+     * @param maxTerms the maximum amount of allowed terms
+     * @return The passed single search term reference, with the added operands
+     * @throws OXException if the array does not contain the appropriate amount of terms
+     */
+    public SingleSearchTerm parseSingleOperands(JSONArray array, SingleSearchTerm singleSearchTerm, int maxTerms) throws OXException {
+        int len = array.length();
         if (len < 2) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         } else if (len > maxTerms + 1) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
         for (int i = 1; i < len; i++) {
-            final JSONObject operand = array.optJSONObject(i);
+            JSONObject operand = array.optJSONObject(i);
             if (null == operand) {
-                singleSearchTerm.addOperand(parseConstantOperand(array.optString(i)));
+                singleSearchTerm.addOperand(parseConstantOperand(array.opt(i)));
             } else {
                 singleSearchTerm.addOperand(parseOperand(operand));
             }
         }
+        return singleSearchTerm;
     }
 
-    protected ConstantOperand<?> parseConstantOperand(final String s) throws NumberFormatException {
-        if (s == null) {
+    /**
+     * Parses the specified constant operand
+     *
+     * @param o The constant operand to parse
+     * @return The {@link ConstantOperand}
+     */
+    protected ConstantOperand<?> parseConstantOperand(Object o) {
+        if (o == null) {
             return ConstantOperand.NULL;
         }
-/* TODO: Get type information from other operands.
- * Disabled guessing because e.g. "True" is a female first name.
-        if ("true".equalsIgnoreCase(s)) {
-            return new ConstantOperand<Boolean>(Boolean.TRUE);
-        } else if ("false".equalsIgnoreCase(s)) {
-            return new ConstantOperand<Boolean>(Boolean.FALSE);
-        } else if (isInteger(s)) {
-            return new ConstantOperand<Integer>(Integer.valueOf(s));
-        } else if (isLong(s)) {
-            return new ConstantOperand<Long>(Long.valueOf(s));
-        } else {
-*/
-            return new ConstantOperand<String>(s);
-/*
-        }
-*/
+        return new ConstantOperand<Object>(o);
     }
 
-    protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
+    /**
+     * Parses the specified operand and returns it as {@link Operand}
+     *
+     * @param operand The {@link JSONObject} containing the operand that shall be parsed
+     * @return The parsed {@link Operand}
+     * @throws OXException if an invalid search term is encountered
+     */
+    protected Operand<?> parseOperand(JSONObject operand) throws OXException {
         if (!operand.hasAndNotNull(SearchTermFields.FIELD) && !operand.hasAndNotNull(SearchTermFields.ATTACHMENT) && !operand.hasAndNotNull(SearchTermFields.HEADER)) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();
         }
@@ -158,24 +176,6 @@ public class SearchTermParser {
         }
     }
 
-    private boolean isInteger(final String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private boolean isLong(final String s) {
-        try {
-            Long.parseLong(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     /**
      * Parses specified search term JSON array.
      *
@@ -183,48 +183,59 @@ public class SearchTermParser {
      * @return The parsed instance of search term.
      * @throws OXException If parsing fails.
      */
-    public SearchTerm<?> parseSearchTerm(final JSONArray jsonArray) throws OXException {
+    public SearchTerm<?> parseSearchTerm(JSONArray jsonArray) throws OXException {
         if (null == jsonArray) {
             return null;
         }
 
-        final String operation;
+        String operation;
         try {
             operation = jsonArray.getString(0);
         } catch (JSONException e) {
             throw SearchExceptionMessages.PARSING_FAILED_MISSING_OPERATION.create(e, new Object[0]);
         }
 
-        final SearchTerm<?> retval;
-        final CompositeOperation compositeOperation = CompositeOperation.getCompositeOperation(operation);
+        SearchTerm<?> retval;
+        CompositeOperation compositeOperation = CompositeOperation.getCompositeOperation(operation);
         if (null == compositeOperation) {
-            final SingleOperation singleOperation = SingleOperation.getSingleOperation(operation);
+            SingleOperation singleOperation = SingleOperation.getSingleOperation(operation);
             if (null == singleOperation) {
                 throw SearchExceptionMessages.UNKNOWN_OPERATION.create(operation);
             }
-            final SingleSearchTerm singleSearchTerm = singleOperation.newInstance();
+            SingleSearchTerm singleSearchTerm = singleOperation.newInstance();
             parseSingleOperands(jsonArray, singleSearchTerm, singleOperation.getMaxOperands());
             retval = singleSearchTerm;
         } else {
-            final CompositeSearchTerm compositeSearchTerm = compositeOperation.newInstance();
+            CompositeSearchTerm compositeSearchTerm = compositeOperation.newInstance();
             parseCompositeOperands(jsonArray, compositeSearchTerm, compositeOperation.getMaxTerms());
             retval = compositeSearchTerm;
         }
         return retval;
     }
 
-    protected void parseCompositeOperands(final JSONArray array, final CompositeSearchTerm compositeSearchTerm, final int maxTerms) throws OXException {
-        final int len = array.length();
+    /**
+     * Parses the composite operands from the specified json array and adds them
+     * to the specified {@link CompositeSearchTerm}
+     *
+     * @param array The {@link JSONArray} the operands
+     * @param compositeSearchTerm the term to add the operands to
+     * @param maxTerms the maximum amount of allowed terms
+     * @return The passed composite search term reference, with the added operands
+     * @throws OXException if the array does not contain the appropriate amount of terms
+     */
+    protected CompositeSearchTerm parseCompositeOperands(JSONArray array, CompositeSearchTerm compositeSearchTerm, int maxTerms) throws OXException {
+        int len = array.length();
         if (len < 2) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         } else if (len > maxTerms + 1) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create(new Object[0]);
         }
         for (int i = 1; i < len; i++) {
-            final SearchTerm<?> term = parseSearchTerm(array.optJSONArray(i));
+            SearchTerm<?> term = parseSearchTerm(array.optJSONArray(i));
             if (null != term) {
                 compositeSearchTerm.addSearchTerm(term);
             }
         }
+        return compositeSearchTerm;
     }
 }

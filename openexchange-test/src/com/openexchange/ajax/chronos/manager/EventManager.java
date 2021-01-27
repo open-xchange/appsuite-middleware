@@ -294,6 +294,21 @@ public class EventManager extends AbstractManager {
     public EventData getEvent(String folderId, String eventId) throws ApiException, ChronosApiException {
         return getEvent(folderId, eventId, false);
     }
+    
+    /**
+     * Get an event
+     *
+     * @param folderId The folder identifier
+     * @param eventId The {@link EventId}
+     * @param fields The fields to return
+     * @return The event as {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     * @throws ApiException if API error occurred
+     */
+    public EventData getEvent(String folderId, String eventId, String fields) throws ApiException, ChronosApiException {
+        return getRecurringEvent(folderId, eventId, null, fields, false, false);
+    }
 
     public EventData getEvent(String folderId, String eventId, String recurrenceId, boolean expectException) throws ApiException, ChronosApiException {
         EventResponse eventsResponse = userApi.getChronosApi().getEvent(eventId, null == folderId ? defaultFolder : folderId, recurrenceId, null, null);
@@ -348,7 +363,24 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getRecurringEvent(String folder, String eventId, String reccurenceId, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
-        EventResponse eventsResponse = userApi.getChronosApi().getEvent(eventId, folder != null ? folder : defaultFolder, reccurenceId, null, B(extendedEntities));
+        return getRecurringEvent(folder, eventId, reccurenceId, null, expectException, extendedEntities);
+    }
+    
+    /**
+     * Gets the occurrence of an event
+     *
+     * @param folder The folder or null
+     * @param eventId The {@link EventId}
+     * @param reccurenceId The recurrence identifier
+     * @param fields The fields to return
+     * @param expectException flag to indicate that an exception is expected
+     * @param extendedEntities Whether attendees should be extended with contact field or not
+     * @return the {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData getRecurringEvent(String folder, String eventId, String reccurenceId, String fields, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
+        EventResponse eventsResponse = userApi.getChronosApi().getEvent(eventId, folder != null ? folder : defaultFolder, reccurenceId, fields, B(extendedEntities));
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());

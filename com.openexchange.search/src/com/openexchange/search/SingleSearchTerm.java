@@ -320,7 +320,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
     }
 
     @Override
-    public Operation getOperation() {
+    public SingleOperation getOperation() {
         return operation;
     }
 

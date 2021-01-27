@@ -351,11 +351,11 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
                 }
             } else {
                 String preparedPattern;
-                if (StringCollection.containsWildcards(stringValue)) {
+                int lastEqualsIndex = stringBuilder.lastIndexOf("=");
+                if (-1 != lastEqualsIndex && StringCollection.containsWildcards(stringValue)) {
                     // use "LIKE" search
                     preparedPattern = StringCollection.prepareForSearch(stringValue, false, true);
-                    final int index = stringBuilder.lastIndexOf("=");
-                    stringBuilder.replace(index, index + 1, "LIKE");
+                    stringBuilder.replace(lastEqualsIndex, lastEqualsIndex + 1, "LIKE");
                 } else {
                     // use "EQUALS" search
                     preparedPattern = stringValue;

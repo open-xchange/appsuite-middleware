@@ -49,25 +49,16 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
-import static com.openexchange.chronos.common.CalendarUtils.isInRange;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.RecurrenceIterator;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AccountResponseGenerator}
@@ -83,9 +74,6 @@ public class AccountResponseGenerator extends ResponseGenerator {
 
     public List<Event> generate() throws OXException {
         CalendarParameters parameters = cachedCalendarAccess.getParameters();
-        Date from = getFrom(parameters);
-        Date until = getUntil(parameters);
-        TimeZone timeZone = getTimeZone(parameters, cachedCalendarAccess.getSession());
         SearchOptions searchOptions = new SearchOptions(parameters);
         return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
@@ -95,26 +83,7 @@ public class AccountResponseGenerator extends ResponseGenerator {
                 EventField[] fields = getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
                 List<Event> events = storage.getEventStorage().searchEvents(null, searchOptions, fields);
                 List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
-                List<Event> allEvents = new ArrayList<>();
-                for (Event event : enhancedEvents) {
-                    event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                    if (isSeriesMaster(event) && Strings.isNotEmpty(event.getRecurrenceRule())) {
-                        RecurrenceIterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until);
-                        if (isResolveOccurrences(parameters)) {
-                            while (iterator.hasNext()) {
-                                Event occurrence = iterator.next();
-                                if (isInRange(occurrence, from, until, timeZone)) {
-                                    allEvents.add(occurrence);
-                                }
-                            }
-                        } else if (iterator.hasNext()) {
-                            allEvents.add(event);
-                        }
-                    } else if (isInRange(event, from, until, timeZone)) {
-                        allEvents.add(event);
-                    }
-                }
-                return allEvents;
+                return postProcess(enhancedEvents);
             }
         }.executeQuery();
     }

@@ -103,7 +103,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(2)));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser().intValue(), "testSimpleAcknowledge", startDate, endDate, folderId);
+        EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser().intValue(), "testSimpleAcknowledge", null, startDate, endDate, folderId);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
 
         EventData expectedEventData = eventManager.createEvent(toCreate, true);
@@ -136,7 +136,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2)));
 
         // Create an event with alarm
-        EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser().intValue(), "testSimpleSnooze", startDate, endDate, folderId);
+        EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser().intValue(), "testSimpleSnooze", null, startDate, endDate, folderId);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
 
         EventData expectedEventData = eventManager.createEvent(toCreate, true);

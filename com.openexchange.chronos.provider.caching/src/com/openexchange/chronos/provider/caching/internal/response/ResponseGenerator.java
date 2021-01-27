@@ -49,13 +49,23 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -66,14 +76,58 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ResponseGenerator {
+public abstract class ResponseGenerator {
 
     private static EventField[] IGNORED_FIELDS = { EventField.ATTACHMENTS };
 
     protected final BasicCachingCalendarAccess cachedCalendarAccess;
 
-    public ResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
+    /**
+     * Initializes a new response generator.
+     * 
+     * @param cachedCalendarAccess The underlying calendar access
+     */
+    protected ResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
+        super();
         this.cachedCalendarAccess = cachedCalendarAccess;
+    }
+
+    /**
+     * Post-processes a list of events from the storage. This includes
+     * <ul>
+     * <li>applying flags to the events</li>
+     * <li>resolving occurrences of event series as needed</li>
+     * <li>restricting the returned events to the requested range as needed</li>
+     * </ul>
+     * 
+     * @param events The events to post-process
+     * @return The post processed events, or an empty list if none are left
+     */
+    protected List<Event> postProcess(List<Event> events) throws OXException {
+        CalendarParameters parameters = cachedCalendarAccess.getParameters();
+        Date from = getFrom(parameters);
+        Date until = getUntil(parameters);
+        TimeZone timeZone = getTimeZone(parameters, cachedCalendarAccess.getSession());
+        List<Event> processedEvents = new ArrayList<Event>(events.size());
+        for (Event event : events) {
+            event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
+            if (isSeriesMaster(event) && Strings.isNotEmpty(event.getRecurrenceRule())) {
+                RecurrenceIterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until);
+                if (isResolveOccurrences(parameters)) {
+                    while (iterator.hasNext()) {
+                        Event occurrence = iterator.next();
+                        if (isInRange(occurrence, from, until, timeZone)) {
+                            processedEvents.add(occurrence);
+                        }
+                    }
+                } else if (iterator.hasNext()) {
+                    processedEvents.add(event);
+                }
+            } else if (isInRange(event, from, until, timeZone)) {
+                processedEvents.add(event);
+            }
+        }
+        return processedEvents;
     }
 
     protected static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
@@ -122,7 +176,5 @@ public class ResponseGenerator {
         }
         return timeZone;
     }
-
-
 
 }

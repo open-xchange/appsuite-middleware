@@ -68,6 +68,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 
 /**
  * {@link FallbackFolderCalendarAccess}
@@ -136,6 +137,11 @@ public abstract class FallbackFolderCalendarAccess implements FolderCalendarAcce
 
     @Override
     public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        return Collections.emptyMap();
+    }
+    
+    @Override
+    public Map<String, EventsResult> searchEvents(List<String> folderIds, SearchTerm<?> term) throws OXException {
         return Collections.emptyMap();
     }
 

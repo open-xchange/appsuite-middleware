@@ -47,61 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.provider.extensions;
+package com.openexchange.chronos.provider.caching.internal.response;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
 
 /**
- * {@link BasicSearchAware}
+ * {@link SearchResponseGenerator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @since v8.0.0
  */
-public interface BasicSearchAware extends SearchAware {
+public class SearchResponseGenerator extends ResponseGenerator {
 
-    /**
-     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
-     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
-     * Additional, storage-specific search filters can be applied.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * </ul>
-     *
-     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
-     * @param queries The queries to search for, or <code>null</code> if not specified
-     * @return The found events, or an empty list if there are none
-     */
-    List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException;
+    public SearchResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
+        super(cachedCalendarAccess);
+    }
 
     /**
      * Searches for events using a generic search term.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * </ul>
      *
      * @param term The search term
      * @return The found events, or an empty list if there are none
      */
-    List<Event> searchEvents(SearchTerm<?> term) throws OXException;
+    public List<Event> generate(SearchTerm<?> term) throws OXException {
+        CalendarParameters parameters = cachedCalendarAccess.getParameters();
+        SearchOptions searchOptions = new SearchOptions(parameters);
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), cachedCalendarAccess.getSession().getContextId(), cachedCalendarAccess.getAccount().getAccountId()) {
+
+            @Override
+            protected List<Event> call(CalendarStorage storage) throws OXException {
+                CalendarParameters parameters = cachedCalendarAccess.getParameters();
+                EventField[] fields = getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
+                List<Event> events = storage.getEventStorage().searchEvents(term, searchOptions, fields);
+                List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
+                return postProcess(enhancedEvents);
+            }
+        }.executeQuery();
+    }
 
 }

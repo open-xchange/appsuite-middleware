@@ -128,6 +128,23 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     }
 
     /**
+     * Gets the request's data as JSON object.
+     *
+     * @return the JSON object
+     * @throws OXException if the 'data' field is missing or is of invalid type
+     */
+    protected static JSONObject getJSONData(AJAXRequestData request) throws OXException {
+        Object data = request.getData();
+        if (null == data) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("data");
+        }
+        if (false == JSONObject.class.isInstance(data)) {
+            throw OXJSONExceptionCodes.INVALID_VALUE.create("data", data.toString());
+        }
+        return JSONObject.class.cast(data);
+    }
+
+    /**
      * Retrieves the given parameter as an Entry object
      *
      * @param request The request

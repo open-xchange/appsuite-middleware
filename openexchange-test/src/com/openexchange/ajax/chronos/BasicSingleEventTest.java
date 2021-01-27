@@ -208,7 +208,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
-        EventData eventdata = EventFactory.createSingleEvent(getCalendaruser(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end), folderId);
+        EventData eventdata = EventFactory.createSingleEvent(getCalendaruser(), "testCreateSingle", null, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end), folderId);
         EventData expectedEventData = eventManager.createEvent(eventdata, true);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);

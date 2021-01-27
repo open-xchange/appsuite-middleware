@@ -125,5 +125,4 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     protected boolean acquireUpdateLock() {
         return true;
     }
-
 }

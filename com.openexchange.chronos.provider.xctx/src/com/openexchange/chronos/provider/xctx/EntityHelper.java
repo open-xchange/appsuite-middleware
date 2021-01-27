@@ -676,7 +676,7 @@ public class EntityHelper extends XctxEntityHelper {
         for (Event event : events) {
             mangledEvents.add(mangleRemoteEvent(event));
         }
-        return events;
+        return mangledEvents;
     }
 
     public Event mangleRemoteEvent(Event event) {

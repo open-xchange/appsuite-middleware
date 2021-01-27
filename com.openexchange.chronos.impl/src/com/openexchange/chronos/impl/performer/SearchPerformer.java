@@ -112,6 +112,28 @@ public class SearchPerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Performs the operation
+     *
+     * @param <O> The search term type
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search all visible folders 
+     * @param term The search term
+     * @return The found events
+     */
+    public <O> Map<String, EventsResult> perform(List<String> folderIds, SearchTerm<O> term) throws OXException {
+        List<CalendarFolder> folders = getFolders(folderIds);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        List<Event> foundEvents = storage.getEventStorage().searchEvents(term, new SearchOptions(session), fields);
+        foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields);
+        // Build & return events result per folder
+        Map<String, List<Event>> eventsPerFolderId = getEventsPerFolderId(foundEvents, folders);
+        Map<String, EventsResult> resultsPerFolderId = new HashMap<String, EventsResult>(eventsPerFolderId.size());
+        for (Entry<String, List<Event>> entry : eventsPerFolderId.entrySet()) {
+            resultsPerFolderId.put(entry.getKey(), new DefaultEventsResult(sortEvents(entry.getValue())));
+        }
+        return resultsPerFolderId;
+    }
+
+    /**
      * Performs the operation.
      *
      * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search all visible folders

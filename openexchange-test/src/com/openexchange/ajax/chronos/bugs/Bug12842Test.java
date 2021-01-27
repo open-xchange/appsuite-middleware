@@ -234,7 +234,7 @@ public class Bug12842Test extends AbstractChronosTest {
         DateTimeData startDate = DateTimeUtil.getDateTime(calendar);
         calendar.set(Calendar.HOUR_OF_DAY, end);
         DateTimeData endDate = DateTimeUtil.getDateTime(calendar);
-        EventData event = EventFactory.createSingleEvent(getCalendaruser(), "Bug12842Test", startDate, endDate, folderId);
+        EventData event = EventFactory.createSingleEvent(getCalendaruser(), "Bug12842Test", null, startDate, endDate, folderId);
         event.setRrule(RRuleFactory.getFrequencyWithoutLimit(freq));
         eventManager.createEvent(event, true);
 

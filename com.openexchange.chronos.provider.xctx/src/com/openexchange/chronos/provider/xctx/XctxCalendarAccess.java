@@ -122,6 +122,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.subscription.ShareSubscriptionExceptions;
@@ -309,6 +310,12 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
     @Override
     public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         Map<String, EventsResult> resultsPerFolder = getCalendarService().searchEvents(guestSession, folderIds, filters, queries);
+        return entityHelper.mangleMappedEventsResults(resultsPerFolder);
+    }
+    
+    @Override
+    public Map<String, EventsResult> searchEvents(List<String> folderIds, SearchTerm<?> term) throws OXException {
+        Map<String, EventsResult> resultsPerFolder = getCalendarService().searchEvents(guestSession, folderIds, term);
         return entityHelper.mangleMappedEventsResults(resultsPerFolder);
     }
 

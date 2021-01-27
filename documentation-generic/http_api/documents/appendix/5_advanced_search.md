@@ -165,3 +165,72 @@ Represents `Find files with filename "stuff" and file_size < 100 OR having filen
     ]
 }
 ```
+
+## Chronos Advanced Search
+
+
+### Operators
+
+The following operators are allowed in search terms.
+
+| Operators |
+|:----------|
+| "="       |
+| ">"       |
+| "<"       |
+
+### Operands
+
+The following operands and operators are allowed in search terms.
+
+| Operands               | Valid operator |
+|------------------------|:--------------:|
+| "filename"             | "="            |
+| "sequence"             | "="            |
+| "timestamp"            | "ALL"          |
+| "created"              | "ALL"          |
+| "createdBy"            | "="            |
+| "lastModified"         | "ALL"          |
+| "modifiedBy"           | "="            |
+| "calendarUser"         | "="            |
+| "summary"              | "="            |
+| "location"             | "="            |
+| "description"          | "="            |
+| "categories"           | "="            |
+| "class"                | "="            |
+| "color"                | "="            |
+| "transp"               | "="            |
+| "seriesId"             | "="            |
+| "rrule"                | "="            |
+| "modifiedBy"           | "="            |
+| "recurrenceId"         | "="            |
+| "recurrenceDates"      | "="            |
+| "changeExceptionDates" | "="            |
+| "deleteExceptionDates" | "="            |
+| "status"               | "="            |
+| "url"                  | "="            |
+| "organizer"            | "="            |
+| "comment"              | "="            |
+
+### Examples
+
+Find events that were modified after a certain date.
+
+```json
+{
+  "filter" : [ ">" , { "field" : "lastModified" }, "1612526465493" ]
+}
+```
+
+Find events with summary = "foobar" and created by user 3.
+
+```json
+{
+  "filter" : [ 
+  	"and", 
+  	["=" ,  { "field" : "summary" }, "foobar" ],
+  	["=" ,  { "field" : "createdBy" }, "3" ]
+  ]
+}
+````
+

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,51 +49,48 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.chronos.json.converter.EventsPerFolderResultConverter;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link AdvancedSearchAction}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
  */
-@SuppressWarnings("deprecation")
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+@RestrictedAction(module = ChronosAction.MODULE, type = RestrictedAction.Type.READ)
+public class AdvancedSearchAction extends ChronosAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAM_ORDER_BY, PARAM_ORDER, PARAM_FIELDS);
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builderWithExpectedSize(14);
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        actions.put("zipAttachments", new ZipAttachments(services));
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("needsAction", new NeedsActionAction(services));
-        actions.put("resolve", new ResolveAction(services));
-        actions.put("changeOrganizer", new ChangeOrganizerAction(services));
-        actions.put("advancedSearch", new AdvancedSearchAction(services));
-        this.actions = actions.build();
+    /**
+     * Initialises a new {@link AdvancedSearchAction}.
+     * 
+     * @param services A service lookup reference
+     */
+    public AdvancedSearchAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        return new AJAXRequestResult(calendarAccess.searchEvents(getFolderIds(requestData), getSearchTerm(requestData)), EventsPerFolderResultConverter.INPUT_FORMAT);
+    }
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 }

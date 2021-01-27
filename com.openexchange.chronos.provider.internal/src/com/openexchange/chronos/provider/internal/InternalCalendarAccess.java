@@ -125,6 +125,7 @@ import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.Collators;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -306,6 +307,11 @@ public class InternalCalendarAccess implements com.openexchange.chronos.provider
     @Override
     public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         return getCalendarService().searchEvents(session, folderIds, filters, queries);
+    }
+
+    @Override
+    public Map<String, EventsResult> searchEvents(List<String> folderIds, SearchTerm<?> term) throws OXException {
+        return getCalendarService().searchEvents(session, folderIds, term);
     }
 
     @Override

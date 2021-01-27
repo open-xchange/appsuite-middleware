@@ -118,6 +118,7 @@ import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessC
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.response.AccountResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.SearchResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
@@ -157,6 +158,7 @@ import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.ServiceExceptionCode;
@@ -269,6 +271,16 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         updateCacheIfNeeded();
         throwAccountErrorIfSet();
         return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
+    }
+
+    @Override
+    public List<Event> searchEvents(SearchTerm<?> term) throws OXException {
+        if (null == term) {
+            return getEvents();
+        }
+        updateCacheIfNeeded();
+        throwAccountErrorIfSet();
+        return new SearchResponseGenerator(this).generate(term);
     }
 
     @Override
@@ -1248,5 +1260,4 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }.executeUpdate();
 
     }
-
 }

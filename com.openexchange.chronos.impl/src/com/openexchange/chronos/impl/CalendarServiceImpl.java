@@ -105,6 +105,7 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -199,6 +200,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new SearchPerformer(session, storage).perform(folderIds, filters, queries);
+            }
+        }.executeQuery();
+    }
+    
+    @Override
+    public <O> Map<String, EventsResult> searchEvents(CalendarSession session, List<String> folderIds,SearchTerm<O> term) throws OXException {
+        return new InternalCalendarStorageOperation<Map<String, EventsResult>>(session) {
+
+            @Override
+            protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new SearchPerformer(session, storage).perform(folderIds, term);
             }
         }.executeQuery();
     }
