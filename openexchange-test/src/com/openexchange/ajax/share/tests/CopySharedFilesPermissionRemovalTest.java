@@ -66,9 +66,10 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
- * 
+ *
  * Permission-Tests for MW-178
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -77,6 +78,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTest {
 
     @Test
+    @TryAgain
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
@@ -107,6 +109,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
     }
 
     @Test
+    @TryAgain
     public void testCopySharedFile_guestCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
@@ -164,6 +167,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
     }
 
     @Test
+    @TryAgain
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();

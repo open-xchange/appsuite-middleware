@@ -104,6 +104,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.concurrent.ParallelParameterized;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link ReadFoldersTest}
@@ -234,6 +235,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testFolderTreeNavigation() throws Exception {
         // expect root folders
         Set<Integer> expectedFolderIds = new HashSet<>();
@@ -301,6 +303,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testAllVisibleFolders() throws Exception {
         Set<Integer> expectedFolderIds = new HashSet<>();
         VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
@@ -332,6 +335,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testUpdates() throws Exception {
         UpdatesRequest request = new UpdatesRequest(api, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE);
         request.setAltNames(altNames);
@@ -348,6 +352,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testPath() throws Exception {
         PathRequest request = new PathRequest(api, Integer.toString(privateSubfolder.getObjectID()));
         request.setAltNames(altNames);
@@ -366,6 +371,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testGet() throws Exception {
         Set<Integer> folderIds = new HashSet<>();
         folderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
@@ -386,6 +392,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testInsufficientScopeOnAllVisibleFolders() throws Exception {
         HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);
@@ -399,6 +406,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testInsufficientScopeOnGet() throws Exception {
         HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);

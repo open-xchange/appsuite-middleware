@@ -65,6 +65,7 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug52843Test}
@@ -75,6 +76,7 @@ import com.openexchange.share.recipient.RecipientType;
 public class Bug52843Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testNotifyFolder() throws Exception {
         /*
          * create shared folder

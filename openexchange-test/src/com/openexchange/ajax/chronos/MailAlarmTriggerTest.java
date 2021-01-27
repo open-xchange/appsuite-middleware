@@ -63,6 +63,7 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.data.conversion.ical.Assert;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -103,6 +104,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
         String summary = "mailAlarmTest_" + new UID().toString();
@@ -133,6 +135,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testMoveOut() throws ApiException, ChronosApiException, InterruptedException {
 
         // Create event
@@ -174,6 +177,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testMoveIn() throws ApiException, ChronosApiException, InterruptedException {
 
         // Create event

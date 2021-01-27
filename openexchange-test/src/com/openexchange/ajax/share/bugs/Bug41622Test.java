@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug41622Test}
@@ -123,6 +124,7 @@ public class Bug41622Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testShowSharingUsers() throws Exception {
         /*
          * prepare guest permission

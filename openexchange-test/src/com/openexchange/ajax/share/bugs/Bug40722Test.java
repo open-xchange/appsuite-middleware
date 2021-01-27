@@ -60,6 +60,7 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40722Test}
@@ -71,6 +72,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 public class Bug40722Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testRemoveGuestPassword() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*

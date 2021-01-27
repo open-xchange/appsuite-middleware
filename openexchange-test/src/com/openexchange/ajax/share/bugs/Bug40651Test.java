@@ -69,6 +69,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40651Test}
@@ -80,7 +81,7 @@ public class Bug40651Test extends ShareTest {
 
     /**
      * Initializes a new {@link Bug40651Test}.
-     * 
+     *
      * @param name
      */
     public Bug40651Test() {
@@ -88,6 +89,7 @@ public class Bug40651Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testShareFileLinkAndSearchForItAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");
@@ -110,6 +112,7 @@ public class Bug40651Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testShareFolderLinkAndSearchForContainedItemAsGuest() throws Exception {
         FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
         File file = insertFile(folder.getObjectID(), "Tests.zip");

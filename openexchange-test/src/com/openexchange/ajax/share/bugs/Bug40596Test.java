@@ -64,6 +64,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40596Test}
@@ -84,6 +85,7 @@ public class Bug40596Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testBug40596() throws Exception {
         File file = insertFile(getClient().getValues().getPrivateInfostoreFolder());
         remember(file);

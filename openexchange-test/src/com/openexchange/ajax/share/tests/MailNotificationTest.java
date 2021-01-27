@@ -88,6 +88,7 @@ import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link MailNotificationTest}
@@ -132,92 +133,101 @@ public class MailNotificationTest extends ShareTest {
 
     //---IMAGES-----------------------------------------------------------------------------------------------------------------------------
     @Test
+    @TryAgain
     public void testUserGotAnImage() throws Exception {
-        testUserGotA(   testFolder1, 
-                        image1, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()), 
-                        String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()), 
-                        NotificationStrings.VIEW_IMAGE, 
-                        null, 
+        testUserGotA(   testFolder1,
+                        image1,
+                        String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
+                        String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
+                        NotificationStrings.VIEW_IMAGE,
+                        null,
                         true);
     }
 
     @Test
+    @TryAgain
     public void testUserGotAnImageAndMessage() throws Exception {
-        testUserGotA(   testFolder1, 
-                        image1, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()), 
-                        String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()), 
-                        NotificationStrings.VIEW_IMAGE, 
-                        clientShareMessage, 
+        testUserGotA(   testFolder1,
+                        image1,
+                        String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
+                        String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
+                        NotificationStrings.VIEW_IMAGE,
+                        clientShareMessage,
                         true);
     }
 
     //---FILES------------------------------------------------------------------------------------------------------------------------------
     @Test
+    @TryAgain
     public void testUserGotAFile() throws Exception {
-        testUserGotA(   testFolder1, 
-                        file1, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), 
-                        String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()), 
-                        NotificationStrings.VIEW_FILE, 
-                        null, 
+        testUserGotA(   testFolder1,
+                        file1,
+                        String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+                        String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
+                        NotificationStrings.VIEW_FILE,
+                        null,
                         true);
     }
 
     @Test
+    @TryAgain
     public void testUserGotAFileAndMessage() throws Exception {
-        testUserGotA(   testFolder1, 
-                        file1, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), 
-                        String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()), 
-                        NotificationStrings.VIEW_FILE, 
-                        clientShareMessage, 
+        testUserGotA(   testFolder1,
+                        file1,
+                        String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+                        String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
+                        NotificationStrings.VIEW_FILE,
+                        clientShareMessage,
                         true);
     }
 
     //---FOLDER-----------------------------------------------------------------------------------------------------------------------------
     @Test
+    @TryAgain
     public void testUserGotAFolder() throws Exception {
-        testUserGotA(   testFolder1, 
-                        null, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), 
-                        String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()), 
-                        NotificationStrings.VIEW_FOLDER, 
-                        null, 
+        testUserGotA(   testFolder1,
+                        null,
+                        String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+                        String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+                        NotificationStrings.VIEW_FOLDER,
+                        null,
                         true);
     }
 
     @Test
+    @TryAgain
     public void testUserGotAFolderAndMessage() throws Exception {
-        testUserGotA(   testFolder1, 
-                        null, 
-                        String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), 
-                        String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()), 
-                        NotificationStrings.VIEW_FOLDER, 
-                        clientShareMessage, 
+        testUserGotA(   testFolder1,
+                        null,
+                        String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+                        String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+                        NotificationStrings.VIEW_FOLDER,
+                        clientShareMessage,
                         true);
     }
 
     @Test
+    @TryAgain
     public void testAnonymousGotAFolder() throws Exception {
-        testAnonymousGotA(  testFolder1, 
-                            null, 
-                            String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), 
-                            String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()), 
-                            NotificationStrings.VIEW_FOLDER, 
-                            null, 
-                            randomUID(), 
+        testAnonymousGotA(  testFolder1,
+                            null,
+                            String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+                            String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+                            NotificationStrings.VIEW_FOLDER,
+                            null,
+                            randomUID(),
                             new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
     }
 
     @Test
+    @TryAgain
     public void testDontNotifyInternalsOnPublicFolderShare() throws Exception {
         testUserGotNoNotification(publicDriveFolder, null);
     }
 
     //---PERMISSION APIs--------------------------------------------------------------------------------------------------------------------
     @Test
+    @TryAgain
     public void testGuestGetsMessageIfAddedViaFolderPermission() throws Exception {
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null);
         FolderObject toUpdate = new FolderObject();
@@ -250,6 +260,7 @@ public class MailNotificationTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testGuestGetsMessageIfAddedViaFilePermission() throws Exception {
         FileStorageObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + UUID.randomUUID().toString(), null));
         File testFile = insertFile(testFolder1.getObjectID());
