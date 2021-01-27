@@ -107,7 +107,7 @@ public class QueryAction extends AbstractFindAction implements EnqueuableAJAXAct
             jKeyDesc.put("size", size);
             jKeyDesc.put("facets", jFacets);
 
-            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

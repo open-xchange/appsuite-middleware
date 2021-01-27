@@ -70,7 +70,22 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      */
     Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException;
 
-    // ---------------------------------------------------------------------------------------------------
+    /**
+     * Allows to perform certain actions as preparation prior to submitting as job into job queue.
+     * <p>
+     * E.g. if the action expects binary uploads (files) of possibly big size, which might not be consumed until scheduled as background
+     * task. Then such uploads should be performed before enqeueuing. Otherwise server responds with a job identifier effectively aborting
+     * data upload.
+     *
+     * @param request The request data
+     * @param session The session
+     * @throws OXException If preparations fails
+     */
+    default void prepareForEnqueue(AJAXRequestData request, ServerSession session) throws OXException {
+        // Nothing;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the result for specified enqueue-able flag
@@ -87,14 +102,15 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      *
      * @param enqueueable The enqueue-able flag
      * @param optionalKey The key that identifies a certain job; or <code>null</code>
+     * @param enqueuableAction The enqueue-able action; or <code>null</code>
      * @return The result
      */
-    public static Result resultFor(boolean enqueueable, JobKey optionalKey) {
+    public static Result resultFor(boolean enqueueable, JobKey optionalKey, EnqueuableAJAXActionService enqueuableAction) {
         if (null == optionalKey) {
             return resultFor(enqueueable);
         }
 
-        return new Result(enqueueable, optionalKey);
+        return new Result(enqueueable, optionalKey, enqueuableAction);
     }
 
     /**
@@ -108,14 +124,15 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
 
         private final boolean enqueueable;
         private final JobKey optionalKey;
+        private final EnqueuableAJAXActionService enqueuableAction;
 
         /**
          * Initializes a new {@link Result}.
          *
          * @param enqueueable The enqueue-able flag
          */
-        Result(boolean enqueueable) {
-            this(enqueueable, null);
+        private Result(boolean enqueueable) {
+            this(enqueueable, null, null);
         }
 
         /**
@@ -123,11 +140,13 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
          *
          * @param enqueueable The enqueue-able flag
          * @param optionalKey The key that identifies a certain job; or <code>null</code>
+         * @param enqueuableAction The enqueue-able action; or <code>null</code>
          */
-        Result(boolean enqueueable, JobKey optionalKey) {
+        Result(boolean enqueueable, JobKey optionalKey, EnqueuableAJAXActionService enqueuableAction) {
             super();
             this.enqueueable = enqueueable;
             this.optionalKey = optionalKey;
+            this.enqueuableAction = enqueuableAction;
         }
 
         /**
@@ -146,6 +165,15 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
          */
         public JobKey getOptionalKey() {
             return optionalKey;
+        }
+
+        /**
+         * Gets the enqueue-able action.
+         *
+         * @return The enqueue-able action
+         */
+        public EnqueuableAJAXActionService getEnqueuableAction() {
+            return enqueuableAction;
         }
     }
 

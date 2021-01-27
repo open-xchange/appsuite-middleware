@@ -220,7 +220,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 }
                 jKeyDesc.put("draft", (jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0);
 
-                return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+                return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()), this);
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
