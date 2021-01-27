@@ -46,6 +46,8 @@ Within the middleware core, the following restricted scopes are predefined for t
 
 - ``folders``: read_folders, write_folders
 - ``mail`` / ``mailcompose``: read_mail, write_mail
+- ``mailaccount``: read_mailaccount, write_mailaccount
+- ``snippet``: write_userconfig
 - ``calendar`` / ``chronos``: read_calendar, write_calendar
 - ``contacts``: read_contacts, write_contacts
 - ``infostore`` / ``files`` / ``fileaccount`` / ``fileservice``: read_files, write_files
