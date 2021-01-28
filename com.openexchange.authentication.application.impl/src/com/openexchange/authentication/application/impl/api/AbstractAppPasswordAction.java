@@ -52,8 +52,9 @@ package com.openexchange.authentication.application.impl.api;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.AppPasswordService;
 import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.authentication.application.AppPasswordService;
+import com.openexchange.authentication.application.AppPasswordUtils;
 import com.openexchange.authentication.application.exceptions.AppPasswordExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -100,7 +101,7 @@ public abstract class AbstractAppPasswordAction implements AJAXActionService {
      * @throws OXException if the specified session is not authorised
      */
     protected static void checkPermission(Session session) throws OXException {
-        if (session.containsParameter(Session.PARAM_RESTRICTED)) {
+        if (AppPasswordUtils.isRestricted(session)) {
             throw AppPasswordExceptionCodes.NOT_AUTHORIZED.create();
         }
     }
