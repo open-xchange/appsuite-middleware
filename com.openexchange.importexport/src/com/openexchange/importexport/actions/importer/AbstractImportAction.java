@@ -120,10 +120,10 @@ public abstract class AbstractImportAction implements EnqueuableAJAXActionServic
     public void prepareForEnqueue(AJAXRequestData request, ServerSession session) throws OXException {
         // Initiate & parse upload prior to submitting to job queue
         long maxSize = sysconfMaxUpload();
-        if (!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
+        if (!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
             throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
         }
-        if (request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
+        if (request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1) {
             throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
         }
         request.putParameter(PARAM_UPLOAD_PARSED, "true");
