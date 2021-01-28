@@ -131,6 +131,7 @@ import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -1461,18 +1462,32 @@ public class MailStorage implements IMailStorage {
     private MailMessage getOriginalMail(Session session, MailPath mailPath, MailService mailService, List<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> mailAccesses, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess, String authToken) throws OXException {
         Optional<MailMessage> optionalMail;
         if (mailPath.getAccountId() == MailAccount.DEFAULT_ID) {
-            if (mayDecrypt(session)) {
-                defaultMailAccess = createCryptographicAwareAccess(defaultMailAccess, authToken);
-            }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), defaultMailAccess.getMessageStorage());
+            if (optionalMail.isPresent() && mayDecrypt(session)) {
+                PGPMailRecognizer optPgpRecognizer = services.getOptionalService(PGPMailRecognizer.class);
+                if (optPgpRecognizer != null && !optPgpRecognizer.isPGPMessage(optionalMail.get()) && !optPgpRecognizer.isPGPSignedMessage(optionalMail.get())) {
+                    // Non-encrypted
+                    return optionalMail.get();
+                }
+
+                defaultMailAccess = createCryptographicAwareAccess(defaultMailAccess, authToken);
+                optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), defaultMailAccess.getMessageStorage());
+            }
         } else {
             MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> otherAccess = mailService.getMailAccess(session, mailPath.getAccountId());
             mailAccesses.add(otherAccess);
             otherAccess.connect(false);
-            if (mayDecrypt(session)) {
-                otherAccess = createCryptographicAwareAccess(otherAccess, authToken);
-            }
             optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), otherAccess.getMessageStorage());
+            if (optionalMail.isPresent() && mayDecrypt(session)) {
+                PGPMailRecognizer optPgpRecognizer = services.getOptionalService(PGPMailRecognizer.class);
+                if (optPgpRecognizer != null && !optPgpRecognizer.isPGPMessage(optionalMail.get()) && !optPgpRecognizer.isPGPSignedMessage(optionalMail.get())) {
+                    // Non-encrypted
+                    return optionalMail.get();
+                }
+
+                otherAccess = createCryptographicAwareAccess(otherAccess, authToken);
+                optionalMail = getMail(mailPath.getMailID(), mailPath.getFolder(), otherAccess.getMessageStorage());
+            }
         }
 
         return optionalMail.orElseThrow(() -> MailExceptionCode.MAIL_NOT_FOUND.create(mailPath.getMailID(), mailPath.getFolderArgument()));

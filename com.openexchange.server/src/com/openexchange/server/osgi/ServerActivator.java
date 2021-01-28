@@ -214,6 +214,10 @@ import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistr
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
+import com.openexchange.mail.mime.crypto.impl.CompositePGPMailRecognizer;
+import com.openexchange.mail.mime.crypto.impl.PGPInlineMailRecognizer;
+import com.openexchange.mail.mime.crypto.impl.PGPMimeMailRecognizer;
 import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.osgi.AuthenticationFailedHandlerServiceImpl;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
@@ -776,6 +780,7 @@ public final class ServerActivator extends HousekeepingActivator {
             });
         }
         registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, configViewFactory));
+        registerService(PGPMailRecognizer.class, new CompositePGPMailRecognizer(new PGPMimeMailRecognizer(), new PGPInlineMailRecognizer()));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new LoginNameRecorder(userService));

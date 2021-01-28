@@ -47,36 +47,54 @@
  *
  */
 
-package com.openexchange.mail.mime.crypto;
+package com.openexchange.mail.mime.crypto.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 
 /**
- * {@link PGPMailRecognizer} - Service for detection of possibly PGP-encrypted messages.
+ * {@link CompositePGPMailRecognizer}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.5
  */
-@SingletonService
-public interface PGPMailRecognizer {
+public class CompositePGPMailRecognizer implements PGPMailRecognizer {
+
+    private final PGPMailRecognizer[] recognizers;
 
     /**
-     * Checks whether the given message is a PGP message or not.
+     * Initializes a new {@link CompositePGPMailRecognizer}.
      *
-     * @param message The message
-     * @return True, if the given message is a PGP message, false otherwise.
-     * @throws OXException
+     * @param recognizers A set of {@link PGPMailRecognizer}
      */
-    boolean isPGPMessage(MailMessage message) throws OXException;
+    public CompositePGPMailRecognizer(PGPMailRecognizer... recognizers) {
+        super();
+        this.recognizers = recognizers;
+    }
 
-    /**
-     * Checks whether the given message is a signed PGP message or not.
-     *
-     * @param message The message
-     * @return True, if the given message is a PGP signed message, false otherwise
-     * @throws OXException
-     */
-    boolean isPGPSignedMessage(MailMessage message) throws OXException;
+    @Override
+    public boolean isPGPMessage(MailMessage message) throws OXException {
+        if(recognizers != null) {
+            for(PGPMailRecognizer recognizer : recognizers) {
+                if(recognizer.isPGPMessage(message)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isPGPSignedMessage(MailMessage message) throws OXException {
+        if(recognizers != null) {
+            for(PGPMailRecognizer recognizer : recognizers) {
+                if(recognizer.isPGPSignedMessage(message)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

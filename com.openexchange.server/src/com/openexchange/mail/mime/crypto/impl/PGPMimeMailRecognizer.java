@@ -47,36 +47,76 @@
  *
  */
 
-package com.openexchange.mail.mime.crypto;
+package com.openexchange.mail.mime.crypto.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 
 /**
- * {@link PGPMailRecognizer} - Service for detection of possibly PGP-encrypted messages.
+ * {@link PGPMimeMailRecognizer} detects whether a {@link MailMessage} is a PGP/MIME message or not.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.4
+ * @since v7.10.5
  */
-@SingletonService
-public interface PGPMailRecognizer {
+public class PGPMimeMailRecognizer implements PGPMailRecognizer {
+
+    private static Logger LOG = LoggerFactory.getLogger(PGPMimeMailRecognizer.class);
+
+    private static String MULTIPART_ENCRYPTED = "multipart/encrypted";
+    private static String APPLICATION_PGP_ENCRYPTED = "application/pgp-encrypted";
 
     /**
-     * Checks whether the given message is a PGP message or not.
-     *
-     * @param message The message
-     * @return True, if the given message is a PGP message, false otherwise.
-     * @throws OXException
+     * Initializes a new {@link PGPMimeMailRecognizer}.
      */
-    boolean isPGPMessage(MailMessage message) throws OXException;
+    public PGPMimeMailRecognizer() {
+        super();
+    }
 
     /**
-     * Checks whether the given message is a signed PGP message or not.
-     *
-     * @param message The message
-     * @return True, if the given message is a PGP signed message, false otherwise
-     * @throws OXException
+     * Internal method to check if a mail part has the given content-type
+     * @param part The part
+     * @param contentType The content-type to check
+     * @return true, if the mail part has the given content-type, false otherwise
      */
-    boolean isPGPSignedMessage(MailMessage message) throws OXException;
+    private boolean hasContentType(MailPart part, String contentType) {
+       if(part != null && part.getContentType() != null && contentType != null) {
+           return part.getContentType().toLowerCaseString().contains(contentType);
+       }
+       return false;
+    }
+
+    @Override
+    public boolean isPGPMessage(MailMessage message) {
+        boolean isEncrypted = hasContentType(message, MULTIPART_ENCRYPTED);
+        boolean isPGPEncrypted = false;
+        if(isEncrypted) {
+            try {
+                for (int i = 0; i < message.getEnclosedCount(); i++) {
+                    MailPart part = message.getEnclosedMailPart(i);
+                    if(hasContentType(part, APPLICATION_PGP_ENCRYPTED)) {
+                       isPGPEncrypted = true;
+                       break;
+                    }
+                }
+            } catch (OXException e) {
+                LOG.error("Problem parsing email to check if MIME message", e);
+            }
+        }
+        return isPGPEncrypted;
+    }
+
+    @Override
+    public boolean isPGPSignedMessage(MailMessage message) throws OXException {
+        for (int i = 0; i < message.getEnclosedCount(); i++) {
+            if (message.getEnclosedMailPart(i).getContentType().toString().toUpperCase().contains("PGP-SIGNATURE")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

@@ -81,6 +81,7 @@ import com.openexchange.mail.compose.mailstorage.cleanup.CompositionSpaceCleanUp
 import com.openexchange.mail.compose.mailstorage.storage.MailStorage;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.share.AttachmentStorageRegistry;
+import com.openexchange.mail.mime.crypto.PGPMailRecognizer;
 import com.openexchange.mail.service.EncryptedMailService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -125,6 +126,7 @@ public class MailStorageCompositionSpaceActivator extends HousekeepingActivator 
     protected synchronized void startBundle() throws Exception {
         trackService(UnifiedInboxManagement.class);
         trackService(AttachmentStorageRegistry.class);
+        trackService(PGPMailRecognizer.class);
         trackService(CryptographicAwareMailAccessFactory.class);
         trackService(CryptographicServiceAuthenticationFactory.class);
         trackService(EncryptedMailService.class);
