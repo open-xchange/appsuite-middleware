@@ -581,6 +581,17 @@ public class Strings {
         return splitBy(s, ',', true);
     }
 
+    /**
+     * Splits given string by comma separator and adds the results to the passed collection.
+     *
+     * @param s The string to split
+     * @param matchList The collection to add the strings to
+     * @return The passed collection reference, with the strings added
+     */
+    public static <C extends Collection<String>> C splitByComma(String s, C matchList) {
+        return splitBy(s, ',', true, matchList);
+    }
+
     // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
@@ -637,7 +648,34 @@ public class Strings {
             return new String[] { trimMatches ? s.trim() : s };
         }
 
-        List<String> matchList = new ArrayList<>();
+        List<String> matchList = splitBy(s, delim, trimMatches, new ArrayList<String>());
+        return matchList.toArray(new String[matchList.size()]);
+    }
+
+    /**
+     * Splits given string by specified character and adds the results to the passed collection.
+     *
+     * @param s The string to split
+     * @param delim The delimiter to split by
+     * @param trimMatches <code>true</code> to trim tokens; otherwise <code>false</code>
+     * @param matchList The collection to add the strings to
+     * @return The passed collection reference, with the strings added
+     */
+    public static <C extends Collection<String>> C splitBy(String s, char delim, boolean trimMatches, C matchList) {
+        if (null == s || null == matchList) {
+            return matchList;
+        }
+        int length = s.length();
+        if (length == 0) {
+            matchList.add(trimMatches ? s.trim() : s);
+            return matchList;
+        }
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            matchList.add(trimMatches ? s.trim() : s);
+            return matchList;
+        }
+
         int prevPos = 0;
         do {
             matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
@@ -647,7 +685,7 @@ public class Strings {
         if (prevPos <= length) {
             matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
         }
-        return matchList.toArray(new String[matchList.size()]);
+        return matchList;
     }
 
     // private static final Pattern P_SPLIT_AMP = Pattern.compile("&");

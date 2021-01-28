@@ -49,6 +49,9 @@
 
 package com.openexchange.authentication.application;
 
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -70,17 +73,29 @@ public class AppPasswordUtils {
     }
 
     /**
+     * Gets the scopes from a <i>restricted</i> session.
+     * 
+     * @param session The session to get the scopes from
+     * @return The scopes, or <code>null</code> if there are none defined
+     */
+    public static Set<String> getRestrictedScopes(Session session) {
+        String value = (String) session.getParameter(Session.PARAM_RESTRICTED);
+        return null != value ? Strings.splitByComma(value, new HashSet<String>()) : null;
+    }
+
+    /**
      * Gets a value indicating whether a session originates in the login with an application specific password, and is equipped with certain restricted scopes.
      *
      * @param session The session to check
+     * @param scopes The scopes to check against
      * @return <code>true</code> if the session is <i>restricted</i> and equipped with the given scopes, <code>false</code>, otherwise
      */
     public static boolean hasRestrictedScopes(Session session, String... scopes) {
-        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        Set<String> restrictedScopes = getRestrictedScopes(session);
         if (null != restrictedScopes) {
             if (null != scopes) {
                 for (String scope : scopes) {
-                    if (false == com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, scope)) {
+                    if (false == restrictedScopes.contains(scope)) {
                         return false;
                     }
                 }
@@ -102,10 +117,10 @@ public class AppPasswordUtils {
         if (null == scopes || 0 == scopes.length) {
             return true;
         }
-        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        Set<String> restrictedScopes = getRestrictedScopes(session);
         if (null != restrictedScopes) {
             for (String scope : scopes) {
-                if (false == com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, scope)) {
+                if (false == restrictedScopes.contains(scope)) {
                     return false;
                 }
             }
