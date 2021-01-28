@@ -341,25 +341,9 @@ public class AJAXRequestResult {
         timestamp = other.timestamp;
         requestData = other.requestData;
         postProcessors = new LinkedList<AJAXRequestResultPostProcessor>(other.postProcessors);
-
-        if (other.headers != null) {
-            headers =  new LinkedHashMap<String, String>(other.headers);
-        } else {
-            headers =  new LinkedHashMap<String, String>(8);
-        }
-
-        if (other.parameters != null) {
-            parameters = new HashMap<String, Object>(other.parameters);
-        } else {
-            parameters = new HashMap<String, Object>(8);
-        }
-
-        if (other.responseProperties != null) {
-            responseProperties = new HashMap<String, Object>(other.responseProperties);
-        } else {
-            responseProperties = new HashMap<String, Object>(4);
-        }
-
+        headers =  new LinkedHashMap<String, String>(other.headers);
+        parameters = new HashMap<String, Object>(other.parameters);
+        responseProperties = new HashMap<String, Object>(other.responseProperties);
         if (other.warnings != null) {
             warnings = new HashSet<OXException>(other.warnings);
         } else {
