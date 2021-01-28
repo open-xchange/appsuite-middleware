@@ -106,7 +106,7 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      * @return The result
      */
     public static Result resultFor(boolean enqueueable, JobKey optionalKey, EnqueuableAJAXActionService enqueuableAction) {
-        if (null == optionalKey) {
+        if (null == optionalKey && enqueuableAction == null) {
             return resultFor(enqueueable);
         }
 
