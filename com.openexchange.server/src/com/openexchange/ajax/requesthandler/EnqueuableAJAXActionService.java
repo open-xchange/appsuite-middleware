@@ -74,8 +74,8 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      * Allows to perform certain actions as preparation prior to submitting as job into job queue.
      * <p>
      * E.g. if the action expects binary uploads (files) of possibly big size, which might not be consumed until scheduled as background
-     * task. Then such uploads should be performed before enqeueuing. Otherwise server responds with a job identifier effectively aborting
-     * data upload.
+     * task. Then such uploads should be completed before enqueued. Otherwise server responds with a job identifier while client might still
+     * upload data, which effectively aborts the data upload.
      *
      * @param request The request data
      * @param session The session
@@ -106,7 +106,7 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      * @return The result
      */
     public static Result resultFor(boolean enqueueable, JobKey optionalKey, EnqueuableAJAXActionService enqueuableAction) {
-        if (null == optionalKey) {
+        if (null == optionalKey && enqueuableAction == null) {
             return resultFor(enqueueable);
         }
 
