@@ -50,6 +50,7 @@
 package com.openexchange.caldav.servlet;
 
 import static com.openexchange.java.Autoboxing.b;
+import java.util.HashSet;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -57,6 +58,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
@@ -115,10 +117,10 @@ public class CalDAV extends DAVServlet {
         /*
          * check that an "caldav" scope appropriate for the method is available when session is restricted (authenticated through app-specific password)
          */
-        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        String restrictedScopes = (String) session.getParameter(Session.PARAM_RESTRICTED);
         if (null != restrictedScopes) {
             String requiredScope = null != method && method.isReadOnly() ? RESTRICTED_SCOPE_CALDAV_READ : RESTRICTED_SCOPE_CALDAV_WRITE;
-            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, requiredScope);
+            return Strings.splitByComma(restrictedScopes, new HashSet<String>()).contains(requiredScope);
         }
         /*
          * assume regularly authenticated *DAV session, otherwise

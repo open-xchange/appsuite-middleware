@@ -51,6 +51,7 @@ package com.openexchange.dav;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
@@ -306,9 +308,9 @@ public class DAVServlet extends OXServlet {
         /*
          * check that the general "dav" scope is available when session is restricted (authenticated through app-specific password)
          */
-        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        String restrictedScopes = (String) session.getParameter(Session.PARAM_RESTRICTED);
         if (null != restrictedScopes) {
-            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, RESTRICTED_SCOPE_DAV);
+            return Strings.splitByComma(restrictedScopes, new HashSet<String>()).contains(RESTRICTED_SCOPE_DAV);
         }
         /*
          * assume regularly authenticated *DAV session, otherwise
