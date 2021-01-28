@@ -69,6 +69,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link AnonymousGuestPasswordTest}
@@ -87,6 +88,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testUpdatePasswordForAnonymousGuest() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         /*
@@ -165,6 +167,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testDontAllowAnonymousGuestPasswordUpdate() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission("secret");
         /*

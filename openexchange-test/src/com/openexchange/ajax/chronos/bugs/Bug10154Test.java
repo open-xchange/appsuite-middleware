@@ -105,7 +105,7 @@ public final class Bug10154Test extends AbstractSecondUserChronosTest {
         List<Attendee> attendees = eventData.getAttendees();
         attendees.add(AttendeeFactory.createIndividual(userApi2.getCalUser()));
         eventData.setAttendees(attendees);
-        EventData createEvent = eventManager.createEvent(eventData);
+        EventData createEvent = eventManager.createEvent(eventData, true);
         assertEquals(2, createEvent.getAttendees().size());
 
         EventData update = new EventData();

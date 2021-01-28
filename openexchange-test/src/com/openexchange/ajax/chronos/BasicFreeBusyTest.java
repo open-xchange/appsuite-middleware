@@ -175,7 +175,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         }
         EventData event = createSingleEvent(summary, start, end, attendees);
         event.setFolder(folderId);
-        event = eventManager.createEvent(event);
+        event = eventManager.createEvent(event, true);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
