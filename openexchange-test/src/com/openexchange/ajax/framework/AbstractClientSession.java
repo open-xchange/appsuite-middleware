@@ -62,6 +62,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.test.tryagain.TryAgainTestRule;
 
 /**
  * {@link AbstractClientSession}
@@ -78,6 +80,10 @@ public class AbstractClientSession {
 
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractClientSession.class);
     }
+
+    /** Declare 'try again' rule as public field to allow {@link TryAgain}-annotation for tests */
+    @org.junit.Rule
+    public final TryAgainTestRule tryAgainRule = new TryAgainTestRule();
 
     private List<TearDownOperation> operations;
 
@@ -275,7 +281,7 @@ public class AbstractClientSession {
     }
 
     /**
-     * 
+     *
      * {@link TearDownOperation} - A tear down operation
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>

@@ -112,7 +112,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
         // Create normally
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         long timestamp = eventManager.getLastTimeStamp();

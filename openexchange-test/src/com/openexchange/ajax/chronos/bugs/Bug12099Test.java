@@ -98,7 +98,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
     public void testSeriesChangedFromIsZero() throws Throwable {
         String summary = "Bug12099Test";
         EventData event = EventFactory.createSeriesEvent(getCalendaruser(), summary, 2, folderId);
-        EventData createEvent = eventManager.createEvent(event);
+        EventData createEvent = eventManager.createEvent(event, true);
 
         Date start = DateTimeUtil.parseDateTime(event.getStartDate());
         Date end = DateTimeUtil.parseDateTime(event.getEndDate());

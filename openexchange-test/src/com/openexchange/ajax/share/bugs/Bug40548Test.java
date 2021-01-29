@@ -71,6 +71,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40548Test}
@@ -91,6 +92,7 @@ public class Bug40548Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testFilePreviewWithParallelGuestSessions() throws Exception {
         /*
          * create folder and a shared image inside

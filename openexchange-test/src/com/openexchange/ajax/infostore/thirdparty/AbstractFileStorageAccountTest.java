@@ -78,6 +78,7 @@ import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -459,6 +460,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws Exception
      */
     @Test
+    @TryAgain
     public void testGetAllFileAccounts() throws Exception {
         final boolean connectionCheck = true;
         FileAccountsResponse response = filestorageApi.getAllFileAccounts(null, B(connectionCheck));
@@ -479,6 +481,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws Exception
      */
     @Test
+    @TryAgain
     public void testRegisterIncorrectAccountNotPossible() throws Exception {
         FileAccountData account = getAccountData();
         assertThat("account must not be null", account, is(notNullValue()));
@@ -500,6 +503,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     }
 
     @Test
+    @TryAgain
     public void testListFilesInFolder() throws Exception {
         TestFile newFile = createTestFile();
         assertThat("testfile must not be null", newFile, is(notNullValue()));
@@ -522,6 +526,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     }
 
     @Test
+    @TryAgain
     public void testCreateDeleteFile() throws Exception {
         //Create a new file
         String fileName = getRandomFileName();
@@ -557,6 +562,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws Exception
      */
     @Test
+    @TryAgain
     public void testCopyFile() throws Exception {
         //Create a new file in the root folder
         String newFileId = uploadInfoItem(getRootFolderId(), getRandomFileName(), testContent, "application/text");
@@ -596,6 +602,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      *
      */
     @Test
+    @TryAgain
     public void testMoveFile() throws Exception {
 
         String originalFolderId = getRootFolderId();
@@ -650,6 +657,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws Exception
      */
     @Test
+    @TryAgain
     public void testCreateDeleteFolder() throws Exception {
 
         //Create
@@ -673,6 +681,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
      * @throws Exception
      */
     @Test
+    @TryAgain
     public void testMoveFolder() throws Exception {
 
         // Create a folder
@@ -696,6 +705,7 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     }
 
     @Test
+    @TryAgain
     public void testDownloadDocument() throws Exception {
         TestFile testFile = createTestFile();
         assertThat("testfile must not be null", testFile, is(notNullValue()));

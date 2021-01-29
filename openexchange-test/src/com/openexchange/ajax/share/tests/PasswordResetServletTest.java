@@ -80,6 +80,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link PasswordResetServletTest}
@@ -94,6 +95,7 @@ public final class PasswordResetServletTest extends ShareTest {
     private String shareURL;
 
     @Override
+    @TryAgain
     public void setUp() throws Exception {
         super.setUp();
 
@@ -131,6 +133,7 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testResetPassword_passwordReset() throws Exception {
         // http://localhost/ajax/share/1100ba1e0f0652b8849d7f3f066049e390589313a77026ef
         URI shareUrl = new URI(shareURL);

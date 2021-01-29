@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link NotifyFolderSharesTest}
@@ -72,6 +73,7 @@ import com.openexchange.share.recipient.RecipientType;
 public class NotifyFolderSharesTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testNotifyGuest() throws Exception {
         int module = randomModule();
         testNotifyGuest(module, getDefaultFolder(module));
@@ -79,6 +81,7 @@ public class NotifyFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testNotifyGroup() throws Exception {
         int module = randomModule();
         testNotifyGroup(module, getDefaultFolder(module));
@@ -86,6 +89,7 @@ public class NotifyFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testNotifyUser() throws Exception {
         int module = randomModule();
         testNotifyUser(module, getDefaultFolder(module));

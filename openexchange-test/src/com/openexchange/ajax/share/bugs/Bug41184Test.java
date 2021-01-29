@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug41184Test}
@@ -97,6 +98,7 @@ public class Bug41184Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAccessSharedFileInSharedFolder() throws Exception {
         /*
          * create folder shared to other user

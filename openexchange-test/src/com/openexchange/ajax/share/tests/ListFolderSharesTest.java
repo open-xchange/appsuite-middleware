@@ -63,6 +63,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link ListFolderSharesTest}
@@ -81,18 +82,21 @@ public class ListFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testListSharedFoldersToAnonymous() throws Exception {
         int module = randomModule();
         testListSharedFolders(randomGuestPermission(RecipientType.ANONYMOUS, module), module);
     }
 
     @Test
+    @TryAgain
     public void testListSharedFoldersToGuest() throws Exception {
         int module = randomModule();
         testListSharedFolders(randomGuestPermission(RecipientType.GUEST, module), module);
     }
 
     @Test
+    @TryAgain
     public void testListSharedFoldersToGroup() throws Exception {
         OCLPermission permission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
@@ -101,6 +105,7 @@ public class ListFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testListSharedFoldersToUser() throws Exception {
         AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         int userId = client2.getValues().getUserId();
@@ -135,6 +140,7 @@ public class ListFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testDontListPublicFolders() throws Exception {
         /*
          * create public folder
@@ -171,6 +177,7 @@ public class ListFolderSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testDontListPublicFoldersInSubfolder() throws Exception {
         /*
          * create public folder

@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -89,21 +90,25 @@ import com.openexchange.tools.arrays.Arrays;
 public class Bug40627Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedFolderPermissions(createAnonymousGuestPermission());
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedFolderPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedFolderPermissions(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest"));
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedObjectPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createAnonymousGuestPermission()));
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedObjectPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest")));
     }

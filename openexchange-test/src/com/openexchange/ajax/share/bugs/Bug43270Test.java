@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug43270Test}
@@ -128,201 +129,241 @@ public class Bug43270Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testGetFolderLinkWithShareLinks() throws Exception {
         getFolderLink(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testGetFolderLinkWithShareLinksAndInviteGuests() throws Exception {
         getFolderLink(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testGetFolderLinkWithShareLinksAndInviteGuestsAndReadCreateSharedFolders() throws Exception {
         getFolderLink(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontGetFolderLink() throws Exception {
         getFolderLink(false, Boolean.FALSE, Boolean.FALSE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testDontGetFolderLinkWithInviteGuests() throws Exception {
         getFolderLink(false, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testDontGetFolderLinkWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         getFolderLink(true, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testGetFileLinkWithShareLinks() throws Exception {
         getFileLink(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testGetFileLinkWithShareLinksAndInviteGuests() throws Exception {
         getFileLink(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testGetFileLinkWithShareLinksAndInviteGuestsAndReadCreateSharedFiles() throws Exception {
         getFileLink(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontGetFileLink() throws Exception {
         getFileLink(false, Boolean.FALSE, Boolean.FALSE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testDontGetFileLinkWithInviteGuests() throws Exception {
         getFileLink(false, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testDontGetFileLinkWithInviteGuestsAndReadCreateSharedFiles() throws Exception {
         getFileLink(true, Boolean.FALSE, Boolean.TRUE, "SHR-0018");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFolderWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFolder() throws Exception {
         inviteGuestToFolder(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFolderWithShareLinks() throws Exception {
         inviteGuestToFolder(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFolderWithInviteGuestsAndShareLinks() throws Exception {
         inviteGuestToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFolderWithShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(true, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFileWithInviteGuestsAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFileWithInviteGuestsAndShareLinksAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFile() throws Exception {
         inviteGuestToFile(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFileWithInviteGuests() throws Exception {
         inviteGuestToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFileWithShareLinks() throws Exception {
         inviteGuestToFile(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToFileWithInviteGuestsAndShareLinks() throws Exception {
         inviteGuestToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToFileWithShareLinksAndReadCreateSharedFiles() throws Exception {
         inviteGuestToFile(true, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolder() throws Exception {
         inviteUserToFolder(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithShareLinks() throws Exception {
         inviteUserToFolder(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFolderWithInviteGuestsAndShareLinks() throws Exception {
         inviteUserToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithInviteGuestsAndShareLinksAndReadCreateSharedFolders() throws Exception {
         inviteUserToFile(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFile() throws Exception {
         inviteUserToFile(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithInviteGuests() throws Exception {
         inviteUserToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithShareLinks() throws Exception {
         inviteUserToFile(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToFileWithInviteGuestsAndShareLinks() throws Exception {
         inviteUserToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }

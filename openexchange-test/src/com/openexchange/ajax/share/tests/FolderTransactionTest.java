@@ -65,6 +65,7 @@ import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link FolderTransactionTest}
@@ -74,6 +75,7 @@ import com.openexchange.server.impl.OCLPermission;
 public class FolderTransactionTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testDontCreateShareOnFailingFolderCreate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -102,6 +104,7 @@ public class FolderTransactionTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testDontCreateShareOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
@@ -137,6 +140,7 @@ public class FolderTransactionTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testDontRemoveSharesOnFailingFolderUpdate() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {

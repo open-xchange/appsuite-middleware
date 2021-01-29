@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link AggregateSharesTest}
@@ -111,6 +112,7 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAggregateSharesRandomly() throws Exception {
         testAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -132,6 +134,7 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testRemoveAggregateSharesRandomly() throws Exception {
         testRemoveAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
