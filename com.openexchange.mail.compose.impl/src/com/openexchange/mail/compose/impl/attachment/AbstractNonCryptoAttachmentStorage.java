@@ -68,6 +68,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.lock.AccessControl;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.AttachmentDescription;
@@ -770,6 +772,32 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
 
     @Override
     public void deleteUnreferencedAttachments(Session session) throws OXException {
+        LockService optionalService = services.getOptionalService(LockService.class);
+        if (optionalService == null) {
+            // No lock service available
+            deleteUnreferencedAttachments0(session);
+            return;
+        }
+
+        // Use lock service to synchronize deletion of unreferenced attachments
+        boolean acquired = false;
+        AccessControl accessControl = optionalService.getAccessControlFor("msgcs.attach.unref", 1, session.getUserId(), session.getContextId());
+        try {
+            acquired = accessControl.tryAcquireGrant();
+            if (false == acquired) {
+                // Release manually and null'ify
+                accessControl.release(false);
+                accessControl = null;
+            } else {
+                // Grant acquired...
+                deleteUnreferencedAttachments0(session);
+            }
+        } finally {
+            Streams.close(accessControl);
+        }
+    }
+
+    private void deleteUnreferencedAttachments0(Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getWritable(session.getContextId());
         int rollback = 0;
@@ -807,9 +835,9 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
      * @param con The connection to use
      * @throws OXException If operation fails
      */
-    public void deleteUnreferencedAttachments(Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
+    private void deleteUnreferencedAttachments(Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
-            deleteUnreferencedAttachments(session);
+            deleteUnreferencedAttachments0(session);
             return;
         }
 
