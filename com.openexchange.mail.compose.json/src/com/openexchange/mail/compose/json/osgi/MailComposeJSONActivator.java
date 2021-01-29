@@ -55,6 +55,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.mail.compose.CompositionSpaceServiceFactoryRegistry;
@@ -81,7 +82,7 @@ public class MailComposeJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailComposeJSONActivator.class);
-
+        
         registerModule(new MailComposeActionFactory(this), MailComposeActionFactory.getModule());
         registerService(ResultConverter.class, new CompositionSpaceJSONResultConverter());
         registerService(ResultConverter.class, new AttachmentJSONResultConverter());
@@ -106,6 +107,7 @@ public class MailComposeJSONActivator extends AJAXModuleActivator {
                 HttpServices.unregister(prefix + "mail/compose", service);
             }
         });
+        trackService(CapabilityService.class);
         openTrackers();
         log.info("Bundle successfully started: com.openexchange.mail.compose.json");
     }
