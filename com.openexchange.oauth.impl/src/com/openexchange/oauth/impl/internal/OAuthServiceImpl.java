@@ -65,6 +65,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
+import org.scribe.oauth.OAuth20ServiceImpl;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -533,7 +534,12 @@ public class OAuthServiceImpl implements OAuthService {
                 Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
                 account.setToken(accessToken.getToken());
                 account.setSecret(accessToken.getSecret());
-                account.setExpiration(accessToken.getExpiry() == null ? 0L : accessToken.getExpiry().getTime());
+                
+                // Only OAuth 2.0 tokens have an expiry timestamp 
+                // Temporary fix until we switch to OAuth 2.0 in all bundles
+                if (service instanceof OAuth20ServiceImpl) {
+                    account.setExpiration(accessToken.getExpiry() == null ? 0L : accessToken.getExpiry().getTime());
+                }
             } else {
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());

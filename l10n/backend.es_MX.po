@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-12 22:44+0100\n"
+"PO-Revision-Date: 2021-01-25 22:30+0100\n"
 "Last-Translator: Andrés Herrera <andres@workshop-chapina.com>\n"
 "Language-Team: Spanish <ox7doc@workshop-chapina.com>\n"
 "Language: es_MX\n"
@@ -5222,8 +5222,8 @@ msgstr ""
 msgid ""
 "Too many messages requested (limit is %1$s). Please query a smaller range."
 msgstr ""
-"Se solicitaron demasiados mensajes (el límite es de %1$s). Por favor,"
-" consulte un rango más pequeño."
+"Se solicitaron demasiados mensajes (el límite es de %1$s). Por favor, "
+"consulte un rango más pequeño."
 
 #. The specified group \"%4$s\" is not supported.
 #: com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -5560,8 +5560,8 @@ msgstr ""
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
 msgid "Managing mail filter rules is not available for your account."
 msgstr ""
-"La administración de reglas de filtrado de correo no está disponible para su"
-" cuenta."
+"La administración de reglas de filtrado de correo no está disponible para su "
+"cuenta."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
 msgid ""
@@ -9909,10 +9909,9 @@ msgid ""
 "The version can not be set back if the update tasks handling has been "
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
-"La versión no puede modificarse si la administración de las tareas de"
-" actualización "
-"ha sido migrada a un concepto de recordatorio de tareas de actualización "
-"ejecutadas en el esquema \"%1$s\"."
+"La versión no puede modificarse si la administración de las tareas de "
+"actualización ha sido migrada a un concepto de recordatorio de tareas de "
+"actualización ejecutadas en el esquema \"%1$s\"."
 
 #: com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
@@ -11815,59 +11814,85 @@ msgstr "No se encontró ninguna sesión para el identificador: %1$s"
 msgid "guest"
 msgstr "invitado"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:64
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
-msgid "file"
-msgstr "archivo"
-
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:66
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
-msgid "folder"
-msgstr "carpeta"
-
 #. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:65
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"%1$s has shared the folder \"%2$s\" with you. Please enter the share "
+"password to view it."
+msgstr ""
+"%1$s ha compartido la carpeta \"%2$s\" con usted. Por favor, introduzca la"
+" contraseña de compartición para verla."
+
+#. John Doe has shared the file "document.pdf" with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s ha compartido la %2$s \"%3$s\" con usted. Por favor, indique la "
-"contraseña compartida para verla."
+"%1$s ha compartido el archivo \"%2$s\" con usted. Por favor, introduzca la"
+" contraseña de compartición para verlo."
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+"%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s ha compartido la %2$s \"%3$s\" con usted. Por favor, introduzca su "
-"contraseña para verla."
-
-#. The folder "Photos" is shared with you. Please enter the share password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
-msgid ""
-"The %1$s \"%2$s\" is shared with you. Please enter the share password to "
-"view it."
-msgstr ""
-"La %1$s \"%2$s\" está compartida con usted. Por favor, introduzca la"
-" contraseña compartida para verla."
-
-#. The folder "Photos" is shared with you. Please enter your password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
-msgid ""
-"The %1$s \"%2$s\" is shared with you. Please enter your password to view it."
-msgstr ""
-"La %1$s \"%2$s\" está compartida con usted.  Por favor, introduzca su"
+"%1$s ha compartido la carpeta \"%2$s\" con usted. Por favor, introduzca su"
 " contraseña para verla."
 
+#. John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter your password to "
+"view it."
+msgstr ""
+"%1$s ha compartido el archivo \"%2$s\" con usted. Por favor, introduzca su"
+" contraseña para verlo."
+
+#. The folder "Photos" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
+msgid ""
+"The folder \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr ""
+"La carpeta \"%1$s\" ha sido compartida con usted. Por favor, introduzca la"
+" contraseña de compartición para verla."
+
+#. The file "document.pdf" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr ""
+"El archivo \"%1$s\" ha sido compartida con usted. Por favor, introduzca la"
+" contraseña de compartición para verlo."
+
+#. The folder "Photos" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
+msgid ""
+"The folder \"%1$s\" is shared with you. Please enter your password to view "
+"it."
+msgstr ""
+"La carpeta \"%1$s\" ha sido compartida con usted. Por favor, introduzca su"
+" contraseña para verla."
+
+#. The file "document.pdf" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter your password to view it."
+msgstr ""
+"El archivo \"%1$s\" ha sido compartida con usted. Por favor, introduzca su"
+" contraseña para verlo."
+
 #. Login when opening a share protected with a password
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
 msgid "Please enter your password to log into this account."
 msgstr ""
 "Por favor, indique su contraseña para iniciar la sesión en esta cuenta."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -11875,23 +11900,23 @@ msgstr ""
 "Hemos enviado un mensaje a %1$s con más instrucciones sobre cómo definir una "
 "contraseña nueva."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid "Please set a new password to regain access."
 msgstr "Por favor, defina una contraseña nueva para recuperar el acceso."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid "The share you are looking for does not exist."
 msgstr "El elemento compartido que está buscando no existe."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:98
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "No se puede acceder a este recurso compartido con su navegador web."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
 msgid "We were unable to process your request."
 msgstr "No hemos podido procesar su petición."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -11899,7 +11924,7 @@ msgstr ""
 "La carpeta o el elemento que está buscando ya no está disponible. Por favor, "
 "presione \"continuar\" para ver sus otros elementos compartidos."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:104
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -11908,7 +11933,7 @@ msgstr ""
 "restablecimiento de la contraseña será rechazado."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:107
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11917,7 +11942,7 @@ msgstr ""
 "en contacto con el propietario si desea acceder de nuevo."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:110
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11926,7 +11951,7 @@ msgstr ""
 "en contacto con %1$s si desea acceder de nuevo."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:113
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11935,7 +11960,7 @@ msgstr ""
 "póngase en contacto con el propietario si desea acceder de nuevo."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:116
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11944,7 +11969,7 @@ msgstr ""
 "póngase en contacto con %1$s si desea acceder de nuevo."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:119
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11953,7 +11978,7 @@ msgstr ""
 "favor, póngase en contacto con el propietario si desea acceder de nuevo."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:122
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11962,7 +11987,7 @@ msgstr ""
 "favor, póngase en contacto con %1$s si desea acceder de nuevo."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:125
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11973,7 +11998,7 @@ msgstr ""
 "archivo compartidos, presione \"Continuar\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:128
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11984,7 +12009,7 @@ msgstr ""
 "compartidos, presione \"Continuar\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:131
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11995,7 +12020,7 @@ msgstr ""
 "sus otros archivos compartidos, presione \"Continuar\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:134
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -12006,7 +12031,7 @@ msgstr ""
 "archivos compartidos, presione \"Continuar\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:137
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -12017,7 +12042,7 @@ msgstr ""
 "Para ver sus otros archivos compartidos, presione \"Continuar\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:140
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -12028,7 +12053,7 @@ msgstr ""
 "otros archivos compartidos, presione \"Continuar\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:143
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12039,7 +12064,7 @@ msgstr ""
 "archivos compartidos, por favor inicie la sesión."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:146
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12049,7 +12074,7 @@ msgstr ""
 "compartidos, por favor inicie la sesión."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:149
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12060,7 +12085,7 @@ msgstr ""
 "sus otros archivos compartidos, por favor inicie la sesión."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:152
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -12071,7 +12096,7 @@ msgstr ""
 "archivos compartidos, por favor inicie la sesión."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:147
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:155
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -12082,7 +12107,7 @@ msgstr ""
 "Para ver sus otros archivos compartidos, por favor inicie la sesión."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:150
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:158
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -12199,6 +12224,14 @@ msgstr "No le está permitido desuscribirse de la carpeta %1$s"
 msgid "image"
 msgstr "imagen"
 
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
+msgid "file"
+msgstr "archivo"
+
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
+msgid "folder"
+msgstr "carpeta"
+
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:69
 msgid "calendar"
 msgstr "calendario"
@@ -12311,9 +12344,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido el archivo \"%3$s\" con usted. Por favor, presione"
-" el "
-"botón inferior para visualizarlo."
+"%1$s (%2$s) ha compartido el archivo \"%3$s\" con usted. Por favor, presione "
+"el botón inferior para visualizarlo."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
@@ -12321,8 +12353,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" archivos con usted. Por favor, presione el "
-"botón inferior para visualizarlos."
+"%1$s (%2$s) ha compartido \"%3$s\" archivos con usted. Por favor, presione "
+"el botón inferior para visualizarlos."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
@@ -12330,9 +12362,8 @@ msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido la imagen \"%3$s\" con usted. Por favor, presione"
-" el "
-"botón inferior para visualizarlo."
+"%1$s (%2$s) ha compartido la imagen \"%3$s\" con usted. Por favor, presione "
+"el botón inferior para visualizarlo."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
@@ -12340,8 +12371,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" imágenes con usted. Por favor, presione el "
-"botón inferior para visualizarlas."
+"%1$s (%2$s) ha compartido \"%3$s\" imágenes con usted. Por favor, presione "
+"el botón inferior para visualizarlas."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
@@ -12349,8 +12380,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido el elemento \"%3$s\" con usted. Por favor, presione "
-"el botón inferior para visualizarlo."
+"%1$s (%2$s) ha compartido el elemento \"%3$s\" con usted. Por favor, "
+"presione el botón inferior para visualizarlo."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
@@ -12358,9 +12389,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) ha compartido \"%3$s\" elementos con usted. Por favor, presione"
-" el "
-"botón inferior para visualizarlos."
+"%1$s (%2$s) ha compartido \"%3$s\" elementos con usted. Por favor, presione "
+"el botón inferior para visualizarlos."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
@@ -12368,9 +12398,8 @@ msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido la carpeta \"%3$s\" con usted. Por favor, presione"
-" el "
-"botón de inferior para visualizarla."
+"%1$s (%2$s) ha compartido la carpeta \"%3$s\" con usted. Por favor, presione "
+"el botón de inferior para visualizarla."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
@@ -12378,9 +12407,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha compartido %3$d carpetas con usted. Por favor, presione el"
-" botón "
-"inferior para verlas."
+"%1$s (%2$s) ha compartido %3$d carpetas con usted. Por favor, presione el "
+"botón inferior para verlas."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -12388,9 +12416,8 @@ msgid ""
 "%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the "
 "button below to view it."
 msgstr ""
-"%1$s (%2$s) ha compartido el calendario \"%3$s\" con usted. Por favor,"
-" presione "
-"el botón de abajo para verlo."
+"%1$s (%2$s) ha compartido el calendario \"%3$s\" con usted. Por favor, "
+"presione el botón de abajo para verlo."
 
 #. * $username ($user_email) has shared $number calendars with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
@@ -12880,29 +12907,29 @@ msgstr "No tiene permiso para modificar la firma"
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:86
 msgid "The entered display name is too long. Please use a shorter one."
 msgstr ""
-"El nombre a mostrar introducido es demasiado largo. Por favor, utilice uno"
-" más corto."
+"El nombre a mostrar introducido es demasiado largo. Por favor, utilice uno "
+"más corto."
 
 #. The user entered a very long snippet identifier, which cannot be stored due to data truncation
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:89
 msgid "The entered identifier is too long. Please use a shorter one."
 msgstr ""
-"El identificador introducido es demasiado largo. Por favor, utilice uno más"
-" corto."
+"El identificador introducido es demasiado largo. Por favor, utilice uno más "
+"corto."
 
 #. The user entered a very long module identifier, which cannot be stored due to data truncation
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:92
 msgid "The entered module identifier is too long. Please use a shorter one."
 msgstr ""
-"El identificador de módulo introducido es demasiado largo. Por favor, utilice"
-" uno más corto."
+"El identificador de módulo introducido es demasiado largo. Por favor, "
+"utilice uno más corto."
 
 #. The user entered a very long type identifier, which cannot be stored due to data truncation
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:95
 msgid "The entered type identifier is too long. Please use a shorter one."
 msgstr ""
-"El tipo de identificador introducido es demasiado largo. Por favor, utilice"
-" uno más corto."
+"El tipo de identificador introducido es demasiado largo. Por favor, utilice "
+"uno más corto."
 
 #: com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
@@ -15485,6 +15512,34 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
+#~ "password to view it."
+#~ msgstr ""
+#~ "%1$s ha compartido la %2$s \"%3$s\" con usted. Por favor, indique la "
+#~ "contraseña compartida para verla."
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+#~ "view it."
+#~ msgstr ""
+#~ "%1$s ha compartido la %2$s \"%3$s\" con usted. Por favor, introduzca su "
+#~ "contraseña para verla."
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+#~ "view it."
+#~ msgstr ""
+#~ "La %1$s \"%2$s\" está compartida con usted. Por favor, introduzca la "
+#~ "contraseña compartida para verla."
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter your password to view "
+#~ "it."
+#~ msgstr ""
+#~ "La %1$s \"%2$s\" está compartida con usted.  Por favor, introduzca su "
+#~ "contraseña para verla."
 
 #~ msgid "Subscribing to a single file is not allowed"
 #~ msgstr "No está permitido suscribirse a un fichero individual."

@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
@@ -630,6 +631,19 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
         }
     }
 
+    private static final String CAPABILITY_GUARD = "guard";
+
+    /**
+     * Checks if session-associated user has "guard" capability enabled.
+     *
+     * @param session The session
+     * @return <code>true</code> if "guard" capability is enabled; otherwise <code>false</code>
+     * @throws OXException
+     */
+    protected boolean hasGuardCapability(ServerSession session) throws OXException {
+        CapabilityService optionalCapabilityService = services.getOptionalService(CapabilityService.class);
+        return null == optionalCapabilityService ? false : optionalCapabilityService.getCapabilities(session).contains(CAPABILITY_GUARD);
+    }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {

@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-09 11:25-0700\n"
+"PO-Revision-Date: 2021-01-22 17:03-0700\n"
 "Last-Translator: timothy <timothy@workshop-chapina.com>\n"
 "Language-Team: English <kde-i18n-doc@kde.org>\n"
 "Language: en_GB\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.12.0\n"
+"X-Generator: Lokalize 20.12.1\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -11547,57 +11547,83 @@ msgstr "No session found for identifier: %1$s"
 msgid "guest"
 msgstr "guest"
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:64
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
-msgid "file"
-msgstr "file"
-
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:66
-#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
-msgid "folder"
-msgstr "folder"
-
 #. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:65
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"%1$s has shared the folder \"%2$s\" with you. Please enter the share "
+"password to view it."
+msgstr ""
+"%1$s has shared the folder \"%2$s\" with you. Please enter the share "
+"password to view it."
+
+#. John Doe has shared the file "document.pdf" with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
 msgid ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+"%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+"%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
+"view it."
+
+#. John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+msgid ""
+"%1$s has shared the file \"%2$s\" with you. Please enter your password to "
+"view it."
+msgstr ""
+"%1$s has shared the file \"%2$s\" with you. Please enter your password to "
 "view it."
 
 #. The folder "Photos" is shared with you. Please enter the share password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
 msgid ""
-"The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+"The folder \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 msgstr ""
-"The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+"The folder \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+
+#. The file "document.pdf" is shared with you. Please enter the share password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter the share password to "
+"view it."
+msgstr ""
+"The file \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 
 #. The folder "Photos" is shared with you. Please enter your password to view it.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
 msgid ""
-"The %1$s \"%2$s\" is shared with you. Please enter your password to view it."
+"The folder \"%1$s\" is shared with you. Please enter your password to view "
+"it."
 msgstr ""
-"The %1$s \"%2$s\" is shared with you. Please enter your password to view it."
+"The folder \"%1$s\" is shared with you. Please enter your password to view "
+"it."
+
+#. The file "document.pdf" is shared with you. Please enter your password to view it.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+msgid ""
+"The file \"%1$s\" is shared with you. Please enter your password to view it."
+msgstr ""
+"The file \"%1$s\" is shared with you. Please enter your password to view it."
 
 #. Login when opening a share protected with a password
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
 msgid "Please enter your password to log into this account."
 msgstr "Please enter your password to log into this account."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -11605,23 +11631,23 @@ msgstr ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid "Please set a new password to regain access."
 msgstr "Please set a new password to regain access."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid "The share you are looking for does not exist."
 msgstr "The share you are looking for does not exist."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:98
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "This share cannot be accessed with your Web Browser."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:92
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
 msgid "We were unable to process your request."
 msgstr "We were unable to process your request."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -11629,7 +11655,7 @@ msgstr ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:104
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -11638,7 +11664,7 @@ msgstr ""
 "password will be aborted."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:107
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11647,7 +11673,7 @@ msgstr ""
 "owner if you want access again."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:110
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11656,7 +11682,7 @@ msgstr ""
 "if you want access again."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:113
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11665,7 +11691,7 @@ msgstr ""
 "the owner if you want access again."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:116
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11674,7 +11700,7 @@ msgstr ""
 "%1$s if you want access again."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:119
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11683,7 +11709,7 @@ msgstr ""
 "owner if you want access again."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:122
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11692,7 +11718,7 @@ msgstr ""
 "%1$s if you want access again."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:125
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11703,7 +11729,7 @@ msgstr ""
 "\"Continue\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:128
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11714,7 +11740,7 @@ msgstr ""
 "\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:131
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11725,7 +11751,7 @@ msgstr ""
 "\"Continue\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:134
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11736,7 +11762,7 @@ msgstr ""
 "\"Continue\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:137
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11747,7 +11773,7 @@ msgstr ""
 "\"Continue\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:140
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11758,7 +11784,7 @@ msgstr ""
 "\"Continue\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:143
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11769,7 +11795,7 @@ msgstr ""
 "in."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:146
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11778,7 +11804,7 @@ msgstr ""
 "if you want access again. To view your other shared files, please log in."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:149
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11789,7 +11815,7 @@ msgstr ""
 "log in."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:144
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:152
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -11800,7 +11826,7 @@ msgstr ""
 "in."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:147
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:155
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11811,7 +11837,7 @@ msgstr ""
 "in."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:150
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:158
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11925,6 +11951,14 @@ msgstr "You are not allowed to unsubscribe from folder %1$s"
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "image"
+
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
+msgid "file"
+msgstr "file"
+
+#: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
+msgid "folder"
+msgstr "folder"
 
 #: com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:69
 msgid "calendar"
@@ -15156,6 +15190,34 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
+#~ "password to view it."
+#~ msgstr ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
+#~ "password to view it."
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+#~ "view it."
+#~ msgstr ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to "
+#~ "view it."
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+#~ "view it."
+#~ msgstr ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter the share password to "
+#~ "view it."
+
+#~ msgid ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter your password to view "
+#~ "it."
+#~ msgstr ""
+#~ "The %1$s \"%2$s\" is shared with you. Please enter your password to view "
+#~ "it."
 
 #~ msgid "Subscribing to a single file is not allowed"
 #~ msgstr "Subscribing to a single file is not allowed"

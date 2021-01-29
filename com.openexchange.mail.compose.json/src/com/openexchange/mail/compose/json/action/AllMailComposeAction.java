@@ -70,6 +70,7 @@ import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.MessageField;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -82,6 +83,8 @@ import com.openexchange.tools.session.ServerSession;
 public class AllMailComposeAction extends AbstractMailComposeAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(AllMailComposeAction.class);
+
+    private static final EnumSet<MessageField> ALLOWED_MESSAGE_FIELDS = EnumSet.of(MessageField.META, MessageField.SECURITY, MessageField.SUBJECT);
 
     /**
      * Initializes a new {@link AllMailComposeAction}.
@@ -110,8 +113,20 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
         }
         columns = null;
 
+        // Ensure only allowed fields are requested by client
+        if (fields != null) {
+            for (MessageField field : fields) {
+                if (ALLOWED_MESSAGE_FIELDS.contains(field) == false) {
+                    // CLient request non-allowed message field
+                    throw AjaxExceptionCodes.INVALID_PARAMETER.create("columns");
+                }
+            }
+        }
+
+        // Check if extended DEBUG output is supposed to be performed
         boolean debugEnabled = LOG.isDebugEnabled();
-        if (debugEnabled && fields != null && fields.length > 0) {
+        boolean allowExtendedDebugOutput = debugEnabled && hasGuardCapability(session);
+        if (allowExtendedDebugOutput && fields != null && fields.length > 0) {
             EnumSet<MessageField> set = EnumSet.of(fields[0], fields);
             set.add(MessageField.CONTENT);
             set.add(MessageField.TO);
@@ -148,8 +163,10 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
             return requestResult;
         }
 
-        if (debugEnabled) {
+        if (allowExtendedDebugOutput) {
             LOG.debug("Detected {} open composition space(s) for user {} in context {}:{}{}", I(size), I(session.getUserId()), I(session.getContextId()), Strings.getLineSeparator(), CompositionSpaces.buildConsoleTableFor(allCompositionSpaces, Optional.empty()));
+        } else if (debugEnabled) {
+            LOG.debug("Detected {} open composition space(s) for user {} in context {}", I(size), I(session.getUserId()), I(session.getContextId()));
         }
 
         if (hasColumns) {
