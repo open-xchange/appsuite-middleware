@@ -80,6 +80,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.lock.LockService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.compose.AttachmentStorage;
@@ -226,6 +227,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         AttachmentStorageServiceImpl attachmentStorageService = new AttachmentStorageServiceImpl(keyStorageService, this, context);
         rememberTracker(attachmentStorageService);
 
+        trackService(LockService.class);
         trackService(UnifiedInboxManagement.class);
         trackService(UploadDirService.class);
 
