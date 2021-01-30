@@ -2081,6 +2081,7 @@ final class ListLsubCollection implements Serializable {
                 // Decode the name (using RFC2060's modified UTF7)
                 name = BASE64MailboxDecoder.decode(name);
             }
+            name = fullNameInterner().intern(name);
         } else {
             name = predefinedName;
         }
