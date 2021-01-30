@@ -49,6 +49,8 @@ import com.sun.mail.iap.ParsingException;
  */
 public class X_MAILBOX implements Item {
 
+    private static final com.google.common.collect.Interner<String> FULL_NAME_INTERNER = javax.mail.util.Interners.getFullNameInterner();
+
     static final char[] name = { 'X', '-', 'M', 'A', 'I', 'L', 'B', 'O', 'X' };
 
     public final int seqnum;
@@ -60,7 +62,12 @@ public class X_MAILBOX implements Item {
     public X_MAILBOX(FetchResponse r) throws ParsingException {
         seqnum = r.getNumber();
         r.skipSpaces();
-        mailbox = BASE64MailboxDecoder.decode(r.readAtomString());
+        String mailbox = r.readAtomString();
+        if (!r.supportsUtf8()) {
+            // decode the name (using RFC2060's modified UTF7)
+            mailbox = BASE64MailboxDecoder.decode(mailbox);
+        }
+        this.mailbox = FULL_NAME_INTERNER.intern(mailbox);
     }
 
 }

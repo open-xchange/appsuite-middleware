@@ -90,6 +90,7 @@ public class Status {
 	if (!onlySpaces) {
 	    mbox = (mbox + buffer).trim();
 	}
+	mbox = javax.mail.util.Interners.internFullNamee(mbox);
 
 	if (r.readByte() != '(')
 	    throw new ParsingException("parse error in STATUS");

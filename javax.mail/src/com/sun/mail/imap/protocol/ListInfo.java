@@ -51,7 +51,18 @@ import com.sun.mail.iap.ParsingException;
  * @author  Bill Shannon
  */
 
-public class ListInfo { 
+public class ListInfo {
+
+    private static final String ATTRIBUTE_NOINFERIORS = "\\Noinferiors";
+    private static final String ATTRIBUTE_NOSELECT = "\\Noselect";
+    private static final String ATTRIBUTE_UNMARKED = "\\Unmarked";
+    private static final String ATTRIBUTE_MARKED = "\\Marked";
+
+    private static final com.google.common.collect.Interner<String> FULL_NAME_INTERNER = javax.mail.util.Interners.getFullNameInterner();
+    private static final com.google.common.collect.Interner<String> ATTRIBUTE_INTERNER = javax.mail.util.Interners.getAttributeInterner();
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     public String name = null;
     public char separator = '/';
     public boolean hasInferiors = true;
@@ -65,23 +76,30 @@ public class ListInfo {
 
     public ListInfo(IMAPResponse r) throws ParsingException {
 	String[] s = r.readSimpleList();
-
-	List<String> v = new ArrayList<>();	// accumulate attributes
-	if (s != null) {
+	if (s == null || s.length <= 0) {
+        // empty attribute list
+	    attrs = new String[0];
+	} else {
+	    List<String> v = new ArrayList<>(s.length);	// accumulate attributes
 	    // non-empty attribute list
 	    for (int i = 0; i < s.length; i++) {
-		if (s[i].equalsIgnoreCase("\\Marked"))
+		String attr = s[i];
+        if (attr.equalsIgnoreCase(ATTRIBUTE_MARKED))
 		    changeState = CHANGED;
-		else if (s[i].equalsIgnoreCase("\\Unmarked"))
+		else if (attr.equalsIgnoreCase(ATTRIBUTE_UNMARKED))
 		    changeState = UNCHANGED;
-		else if (s[i].equalsIgnoreCase("\\Noselect"))
+		else if (attr.equalsIgnoreCase(ATTRIBUTE_NOSELECT))
 		    canOpen = false;
-		else if (s[i].equalsIgnoreCase("\\Noinferiors"))
+		else if (attr.equalsIgnoreCase(ATTRIBUTE_NOINFERIORS))
 		    hasInferiors = false;
-		v.add(s[i]);
+		v.add(attr);
+	    }
+	    attrs = new String[v.size()];
+	    int i = 0;
+	    for (String attr : v) {
+	        attrs[i++] = ATTRIBUTE_INTERNER.intern(attr);
 	    }
 	}
-	attrs = v.toArray(new String[v.size()]);
 
 	r.skipSpaces();
 	if (r.readByte() == '"') {
@@ -93,10 +111,11 @@ public class ListInfo {
 	    r.skip(2);
 	
 	r.skipSpaces();
-	name = r.readAtomString();
+	String name = r.readAtomString();
 
 	if (!r.supportsUtf8())
 	    // decode the name (using RFC2060's modified UTF7)
 	    name = BASE64MailboxDecoder.decode(name);
+	this.name = FULL_NAME_INTERNER.intern(name);
     }
 }

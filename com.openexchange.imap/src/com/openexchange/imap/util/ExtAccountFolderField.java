@@ -374,6 +374,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         if (!metadataResponse.supportsUtf8()) {
             fullName = BASE64MailboxDecoder.decode(fullName);
         }
+        fullName = javax.mail.util.Interners.internFullNamee(fullName);
 
         // Read until opening parenthesis or EOF
         byte b = 0;
