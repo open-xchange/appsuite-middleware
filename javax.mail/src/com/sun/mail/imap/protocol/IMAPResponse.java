@@ -57,8 +57,6 @@ import com.sun.mail.util.ASCIIUtility;
 
 public class IMAPResponse extends Response {
 
-    private static final com.google.common.collect.Interner<String> KEY_INTERNER = com.google.common.collect.Interners.newWeakInterner();
-
     private final String key;
     private final int number;
 
@@ -77,7 +75,7 @@ public class IMAPResponse extends Response {
 	        key = readAtom();
 	    }
 	}
-	this.key = key == null ? null : KEY_INTERNER.intern(key);
+	this.key = javax.mail.util.Interners.internCommandKey(key);
     this.number = number;
     }
 
@@ -128,7 +126,7 @@ public class IMAPResponse extends Response {
             key = readAtom();
         }
     }
-    this.key = key == null ? null : KEY_INTERNER.intern(key);
+    this.key = javax.mail.util.Interners.internCommandKey(key);
     this.number = number;
     }
 
