@@ -73,7 +73,7 @@ public class Interners {
      * Interns the given folder full name.
      *
      * @param fullName The folder full name
-     * @return The interned folder full name or <code>null</code>
+     * @return The interned folder full name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internFullName(String fullName) {
         return intern0(fullName, ATTRIBUTE_INTERNER);
@@ -96,7 +96,7 @@ public class Interners {
      * Interns the given attribute.
      *
      * @param attribute The attribute
-     * @return The interned attribute or <code>null</code>
+     * @return The interned attribute or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internAttribute(String attribute) {
         return intern0(attribute, ATTRIBUTE_INTERNER);
@@ -119,7 +119,7 @@ public class Interners {
      * Interns the given transfer encoding name.
      *
      * @param encoding The transfer encoding name
-     * @return The interned transfer encoding name or <code>null</code>
+     * @return The interned transfer encoding name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internTransferEncoding(String encoding) {
         return intern0(encoding, TRANSFER_ENCODING_INTERNER);
@@ -145,10 +145,33 @@ public class Interners {
      * Interns the given name related to content type or disposition.
      *
      * @param type The name related to content type or disposition
-     * @return The interned name or <code>null</code>
+     * @return The interned name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internContentAttribute(String name) {
         return intern0(name, CONTENT_ATTRIBUTE_INTERNER);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final Interner<String> COMMAND_KEY_INTERNER = com.google.common.collect.Interners.newWeakInterner();
+
+    /**
+     * Gets the <code>Interner</code> for command keys; e.g. <code>"FETCH"</code> or <code>"LIST"</code>.
+     *
+     * @return The <code>Interner</code> for command keys
+     */
+    public static Interner<String> getCommandKeyInterner() {
+        return COMMAND_KEY_INTERNER;
+    }
+
+    /**
+     * Interns the given command key.
+     *
+     * @param key The command key
+     * @return The interned command key or <code>null</code> (if passed argument is <code>null</code>)
+     */
+    public static String internCommandKey(String key) {
+        return intern0(key, COMMAND_KEY_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
