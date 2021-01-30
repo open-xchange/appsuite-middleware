@@ -76,7 +76,7 @@ public class Interners {
      * @return The interned folder full name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internFullName(String fullName) {
-        return intern0(fullName, ATTRIBUTE_INTERNER);
+        return internNullable(fullName, ATTRIBUTE_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ public class Interners {
      * @return The interned attribute or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internAttribute(String attribute) {
-        return intern0(attribute, ATTRIBUTE_INTERNER);
+        return internNullable(attribute, ATTRIBUTE_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ public class Interners {
      * @return The interned transfer encoding name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internTransferEncoding(String encoding) {
-        return intern0(encoding, TRANSFER_ENCODING_INTERNER);
+        return internNullable(encoding, TRANSFER_ENCODING_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ public class Interners {
      * @return The interned name or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internContentAttribute(String name) {
-        return intern0(name, CONTENT_ATTRIBUTE_INTERNER);
+        return internNullable(name, CONTENT_ATTRIBUTE_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -171,12 +171,12 @@ public class Interners {
      * @return The interned command key or <code>null</code> (if passed argument is <code>null</code>)
      */
     public static String internCommandKey(String key) {
-        return intern0(key, COMMAND_KEY_INTERNER);
+        return internNullable(key, COMMAND_KEY_INTERNER);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static String intern0(String sample, Interner<String> interner) {
+    private static <V> V internNullable(V sample, Interner<V> interner) {
         return sample == null ? null : interner.intern(sample);
     }
 
