@@ -58,7 +58,7 @@ import com.sun.mail.iap.Response;
 
 public class ID {
 
-    private Map<String, String> serverParams = null;
+    private final Map<String, String> serverParams;
 
     /**
      * Parse the server parameter list out of the response.
@@ -73,16 +73,17 @@ public class ID {
 
 	r.skipSpaces();
 	int c = r.peekByte();
-	if (c == 'N' || c == 'n')	// assume NIL
+	if (c == 'N' || c == 'n') {	// assume NIL
+	    this.serverParams = null;
 	    return;
+	}
 
 	if (c != '(')
 	    throw new ProtocolException("Missing '(' at start of ID");
 
-	serverParams = new HashMap<>();
-
 	String[] v = r.readStringList(true);
 	if (v != null) {
+	    Map<String, String> serverParams = new HashMap<>(v.length);
 	    for (int i = 0; i < v.length; i += 2) {
 		String name = v[i];
 		if (name == null)
@@ -93,8 +94,10 @@ public class ID {
 		String value = v[i + 1];
 		serverParams.put(name, value);
 	    }
+	    this.serverParams = Collections.unmodifiableMap(serverParams);
+	} else {
+	    this.serverParams = Collections.emptyMap();
 	}
-	serverParams = Collections.unmodifiableMap(serverParams);
     }
 
     /**

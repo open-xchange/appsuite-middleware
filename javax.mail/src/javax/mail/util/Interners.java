@@ -75,7 +75,7 @@ public class Interners {
      * @param fullName The folder full name
      * @return The interned folder full name or <code>null</code>
      */
-    public static String internFullNamee(String fullName) {
+    public static String internFullName(String fullName) {
         return intern0(fullName, ATTRIBUTE_INTERNER);
     }
 
