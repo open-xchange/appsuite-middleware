@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache.interner;
 
 import com.google.common.collect.Interner;
-import com.google.common.collect.Interners;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -122,8 +121,8 @@ public class ListLsubInterner {
     private ListLsubInterner(boolean useInterner) {
         super();
         if (useInterner) {
-            fullNameInterner = Interners.newWeakInterner();
-            attribteInterner = Interners.newWeakInterner();
+            fullNameInterner = javax.mail.util.Interners.getFullNameInterner();
+            attribteInterner = javax.mail.util.Interners.getAttributeInterner();
         } else {
             Interner<String> noopInterner = new Interner<String>() {
 
@@ -147,7 +146,7 @@ public class ListLsubInterner {
     }
 
     /**
-     * Gets the interner for attribtes.
+     * Gets the interner for attributes.
      *
      * @return The interner
      */
