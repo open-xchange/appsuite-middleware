@@ -111,7 +111,7 @@ public class ListLsubInterner {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Interner<String> fullNameInterner;
-    private final Interner<String> attribteInterner;
+    private final Interner<String> attributeInterner;
 
     /**
      * Initializes a new {@link ListLsubInterner}.
@@ -122,7 +122,7 @@ public class ListLsubInterner {
         super();
         if (useInterner) {
             fullNameInterner = javax.mail.util.Interners.getFullNameInterner();
-            attribteInterner = javax.mail.util.Interners.getAttributeInterner();
+            attributeInterner = javax.mail.util.Interners.getAttributeInterner();
         } else {
             Interner<String> noopInterner = new Interner<String>() {
 
@@ -132,7 +132,7 @@ public class ListLsubInterner {
                 }
             };
             fullNameInterner = noopInterner;
-            attribteInterner = noopInterner;
+            attributeInterner = noopInterner;
         }
     }
 
@@ -150,8 +150,8 @@ public class ListLsubInterner {
      *
      * @return The interner
      */
-    public Interner<String> getAttribteInterner() {
-        return attribteInterner;
+    public Interner<String> getAttributeInterner() {
+        return attributeInterner;
     }
 
 }

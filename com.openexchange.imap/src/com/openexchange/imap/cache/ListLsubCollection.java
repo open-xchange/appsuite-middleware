@@ -122,7 +122,7 @@ final class ListLsubCollection implements Serializable {
     }
 
     private static Interner<String> attribteInterner() {
-        return ListLsubInterner.getInstance().getAttribteInterner();
+        return ListLsubInterner.getInstance().getAttributeInterner();
     }
 
     // ------------------------------------------------------- End of interner stuff -------------------------------------------------------
