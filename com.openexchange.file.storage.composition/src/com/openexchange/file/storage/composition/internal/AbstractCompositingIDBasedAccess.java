@@ -454,6 +454,9 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         return new FolderID(serviceId, accountId, relativeId).toUniqueID();
     }
 
+    private static final String INFOSTORE_ID = "com.openexchange.infostore/infostore";
+    private static final String INFOSTORE_DEFAULT_ACCOUNT_ID = "infostore";
+
     /**
      * Connects the supplied account access if not already done, remembering the account for closing during the {@link #finish()}.
      *
@@ -461,7 +464,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      * @return The account access, or a previously connected account access.
      */
     private FileStorageAccountAccess connect(FileStorageAccountAccess accountAccess) throws OXException {
-        return connect(accountAccess, new StringBuilder(accountAccess.getService().getId()).append('/').append(accountAccess.getAccountId()).toString());
+        return connect(accountAccess, INFOSTORE_DEFAULT_ACCOUNT_ID.equals(accountAccess.getAccountId()) ? INFOSTORE_ID : new StringBuilder(accountAccess.getService().getId()).append('/').append(accountAccess.getAccountId()).toString());
     }
 
     /**
