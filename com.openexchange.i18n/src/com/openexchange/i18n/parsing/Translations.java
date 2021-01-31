@@ -69,6 +69,9 @@ public class Translations {
     private final Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...])
     private Locale locale;
 
+    /**
+     * Initializes a new {@link Translations}.
+     */
     public Translations() {
         super();
         simpleTranslations = new HashMap<String, Translation>(32);
@@ -76,31 +79,23 @@ public class Translations {
     }
 
     public String translate(String original) {
-        if (!simpleTranslations.containsKey(original)) {
-            return null;
-        }
-        return simpleTranslations.get(original).getMessage();
+        Translation translation = simpleTranslations.get(original);
+        return translation == null ? null : translation.getMessage();
     }
 
     public String translate(String original, int plural) {
-        if (!simpleTranslations.containsKey(original)) {
-            return null;
-        }
-        return simpleTranslations.get(original).getMessage(I(plural));
+        Translation translation = simpleTranslations.get(original);
+        return translation == null ? null : translation.getMessage(I(plural));
     }
 
     public String translate(String context, String original) {
-        if (!contextTranslations.containsKey(context)) {
-            return null;
-        }
-        return contextTranslations.get(context).get(original).getMessage();
+        Map<String, Translation> map = contextTranslations.get(context);
+        return map == null ? null : map.get(original).getMessage();
     }
 
     public String translate(String context, String original, int plural) {
-        if (!contextTranslations.containsKey(context)) {
-            return null;
-        }
-        return contextTranslations.get(context).get(original).getMessage(I(plural));
+        Map<String, Translation> map = contextTranslations.get(context);
+        return map == null ? null : map.get(original).getMessage(I(plural));
     }
 
     public void setTranslation(String key, String value) {
@@ -134,19 +129,18 @@ public class Translations {
     }
 
     public void setContextTranslation(String context, String key, String value) {
-        if (key == null || Strings.isEmpty(key)) {
+        if (Strings.isEmpty(key)) {
             return;
         }
 
         Translation t = new Translation(context, key, null);
         t.setMessage(I(0), value);
-        if (contextTranslations.containsKey(context)) {
-            contextTranslations.get(context).put(key, t);
-        } else {
-            Map<String, Translation> translations = new HashMap<String, Translation>();
-            translations.put(key, t);
-            contextTranslations.put(context, translations);
+        Map<String, Translation> map = contextTranslations.get(context);
+        if (map == null) {
+            map = new HashMap<String, Translation>();
+            contextTranslations.put(context, map);
         }
+        map.put(key, t);
     }
 
     public void setContextTranslationPlural(String context, String key, String keyPlural, List<String> values) {
@@ -168,18 +162,14 @@ public class Translations {
         for (int i = 0; i < values.size(); i++) {
             t.setMessage(I(i), values.get(i));
         }
-        if (contextTranslations.containsKey(context)) {
-            contextTranslations.get(context).put(key, t);
-            if (keyPlural != null) {
-                contextTranslations.get(context).put(keyPlural, t);
-            }
-        } else {
-            Map<String, Translation> translations = new HashMap<String, Translation>();
-            translations.put(key, t);
-            if (keyPlural != null) {
-                translations.put(keyPlural, t);
-            }
-            contextTranslations.put(context, translations);
+        Map<String, Translation> map = contextTranslations.get(context);
+        if (map == null) {
+            map = new HashMap<String, Translation>();
+            contextTranslations.put(context, map);
+        }
+        map.put(key, t);
+        if (keyPlural != null) {
+            map.put(keyPlural, t);
         }
     }
 
@@ -201,11 +191,8 @@ public class Translations {
     }
 
     public Set<String> getKnownStrings(String context) {
-        if (contextTranslations.containsKey(context)) {
-            return contextTranslations.get(context).keySet();
-        } else {
-            return Collections.<String> emptySet();
-        }
+        Map<String, Translation> map = contextTranslations.get(context);
+        return map == null ? Collections.<String> emptySet() : map.keySet();
     }
 
     public Locale getLocale() {
