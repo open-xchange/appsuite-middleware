@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.isNotEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.zip.Adler32;
@@ -74,6 +75,9 @@ import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
+import jonelo.jacksum.JacksumAPI;
+import jonelo.jacksum.adapt.gnu.crypto.hash.Sha256;
+import jonelo.jacksum.algorithm.AbstractChecksum;
 
 
 /**
@@ -122,22 +126,22 @@ public class TransformImageClientAction extends TransformImageAction {
 
     @Override
     protected String getCacheKey(@NonNull final ServerSession session, @NonNull final AJAXRequestData request, @NonNull final AJAXRequestResult result, @NonNull final IFileHolder repetitiveFile, @NonNull final TransformImageParameters xformParams) throws OXException {
-        final long size = repetitiveFile.getLength();
-
         if (null != getImageClientIfValid()) {
-            // calculate Adler32 of image
-            final Checksum crcImage = new Adler32();
-
             try (final InputStream inputStm = repetitiveFile.getStream()) {
                 if (null != inputStm) {
-                    try (CheckedInputStream checkedInputStm = new CheckedInputStream(inputStm, crcImage); OutputStream nullSink = new NullOutputStream()) {
+                    final AbstractChecksum imageChecksum = JacksumAPI.getChecksumInstance("sha-256");
+
+                    imageChecksum.setEncoding("hex");
+
+                    try (final CheckedInputStream checkedInputStm = new CheckedInputStream(inputStm, imageChecksum); 
+                         final OutputStream nullSink = new NullOutputStream()) {
                         IOUtils.copy(checkedInputStm, nullSink);
                     }
 
                     // set IC cache key at given xFormParams to be used for following IC related requests
-                    xformParams.setICCacheKey(new StringBuilder(32).append(size).append('-').append(crcImage.getValue()).toString());
+                    xformParams.setICCacheKey(imageChecksum.getFormattedValue());
                 }
-            } catch (IOException e) {
+            } catch (IOException | NoSuchAlgorithmException e) {
                 LOG.error(Throwables.getRootCause(e).getMessage());
             }
         }
