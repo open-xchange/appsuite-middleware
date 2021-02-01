@@ -96,9 +96,8 @@ public class HttpResponseStream extends CountingOnlyInputStream {
      * @param entityStream The response entity's input stream
      * @param contentLength The length of the content, which is the number of bytes of the content, or a negative number if unknown
      * @param response The HTTP response whose entity stream shall be read from
-     * @throws IOException If initialization fails
      */
-    private HttpResponseStream(InputStream entityStream, long contentLength, HttpResponse response) throws IOException {
+    private HttpResponseStream(InputStream entityStream, long contentLength, HttpResponse response) {
         super(entityStream);
         this.response = response;
         this.contentLength = contentLength;
@@ -113,6 +112,8 @@ public class HttpResponseStream extends CountingOnlyInputStream {
             if (0 < contentLength && contentLength > getCount()) {
                 // Invoke with consumeEntity=false since stream is closed in finally block
                 HttpClients.close(response, false);
+            } else {
+                HttpClients.close(response, true);
             }
         } finally {
             super.close();
