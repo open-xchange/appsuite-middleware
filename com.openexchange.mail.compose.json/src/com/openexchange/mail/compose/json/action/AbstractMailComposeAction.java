@@ -634,11 +634,11 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     private static final String CAPABILITY_GUARD = "guard";
 
     /**
-     * Checks if session-associated user has "guard" capability enabled.
+     * Checks if session-associated user has <code>"guard"</code> capability enabled.
      *
      * @param session The session
-     * @return <code>true</code> if "guard" capability is enabled; otherwise <code>false</code>
-     * @throws OXException
+     * @return <code>true</code> if <code>"guard"</code> capability is enabled; otherwise <code>false</code>
+     * @throws OXException If check for capabilities fails
      */
     protected boolean hasGuardCapability(ServerSession session) throws OXException {
         CapabilityService optionalCapabilityService = services.getOptionalService(CapabilityService.class);
@@ -646,11 +646,11 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     }
 
     /**
-     * Checks if session-associated user has "guard" capability enabled.
+     * Checks if session-associated user has <b>no</b> <code>"guard"</code> capability enabled.
      *
      * @param session The session
-     * @return <code>true</code> if "guard" capability is enabled; otherwise <code>false</code>
-     * @throws OXException
+     * @return <code>true</code> if <b>no</b> <code>"guard"</code> capability is enabled; otherwise <code>false</code>
+     * @throws OXException If check for capabilities fails
      */
     protected boolean hasNoGuardCapability(ServerSession session) throws OXException {
         return hasGuardCapability(session) == false;
