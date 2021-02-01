@@ -125,7 +125,7 @@ public class AllMailComposeAction extends AbstractMailComposeAction {
 
         // Check if extended DEBUG output is supposed to be performed
         boolean debugEnabled = LOG.isDebugEnabled();
-        boolean allowExtendedDebugOutput = debugEnabled && hasGuardCapability(session);
+        boolean allowExtendedDebugOutput = debugEnabled && hasNoGuardCapability(session);
         if (allowExtendedDebugOutput && fields != null && fields.length > 0) {
             EnumSet<MessageField> set = EnumSet.of(fields[0], fields);
             set.add(MessageField.CONTENT);

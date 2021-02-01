@@ -645,6 +645,17 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
         return null == optionalCapabilityService ? false : optionalCapabilityService.getCapabilities(session).contains(CAPABILITY_GUARD);
     }
 
+    /**
+     * Checks if session-associated user has "guard" capability enabled.
+     *
+     * @param session The session
+     * @return <code>true</code> if "guard" capability is enabled; otherwise <code>false</code>
+     * @throws OXException
+     */
+    protected boolean hasNoGuardCapability(ServerSession session) throws OXException {
+        return hasGuardCapability(session) == false;
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
