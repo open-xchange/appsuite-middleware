@@ -316,7 +316,7 @@ public class WebDAVClientImpl implements WebDAVClient {
             response = execute(request);
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status <= 299) {
-                HttpResponseStream responseStream = new HttpResponseStream(response);
+                HttpResponseStream responseStream = HttpResponseStream.createHttpResponseStreamFor(response);
                 response = null;
                 request = null;
                 return responseStream;
