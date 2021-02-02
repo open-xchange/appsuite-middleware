@@ -1,3 +1,9 @@
+open-xchange-authentication-application-storage-rdb (7.10.4-18) stable; urgency=medium
+
+  * Build for patch 2021-02-08 (5945)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 02 Feb 2021 10:09:36 +0000
+
 open-xchange-authentication-application-storage-rdb (7.10.4-17) stable; urgency=medium
 
   * Build for patch 2021-01-25 (5937)

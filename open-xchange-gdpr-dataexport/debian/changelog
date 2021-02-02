@@ -1,3 +1,9 @@
+open-xchange-gdpr-dataexport (7.10.4-18) stable; urgency=medium
+
+  * Build for patch 2021-02-08 (5945)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 02 Feb 2021 10:10:05 +0000
+
 open-xchange-gdpr-dataexport (7.10.4-17) stable; urgency=medium
 
   * Build for patch 2021-01-25 (5937)
