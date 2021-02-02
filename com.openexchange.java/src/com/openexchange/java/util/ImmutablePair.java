@@ -71,7 +71,7 @@ public final class ImmutablePair<T, V> {
 
     /**
      * A builder for an <code>ImmutablePair</code>
-     * 
+     *
      * @param <T> The key of the pair
      * @param <V> The value of the pair
      */
@@ -134,6 +134,24 @@ public final class ImmutablePair<T, V> {
         result = prime * result + ((first == null) ? 0 : first.hashCode());
         result = prime * result + ((second == null) ? 0 : second.hashCode());
         this.hash = result;
+    }
+
+    /**
+     * Gets the first value
+     *
+     * @return The 1st value
+     */
+    public T getFirst() {
+        return first;
+    }
+
+    /**
+     * Gets the second value
+     *
+     * @return The 2nd value
+     */
+    public V getSecond() {
+        return second;
     }
 
     @Override
