@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -55,6 +55,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Feb 01 2021 Karsten Will <karsten.will@open-xchange.com>
+Second candidate for 7.10.5 release
 * Fri Jan 15 2021 Karsten Will <karsten.will@open-xchange.com>
 First candidate for 7.10.5 release
 * Thu Dec 17 2020 Karsten Will <karsten.will@open-xchange.com>
