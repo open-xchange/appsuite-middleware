@@ -68,6 +68,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.uploaddir.UploadDirService;
 
 /**
@@ -185,6 +186,11 @@ public class Services {
     public static UploadDirService getUploadDirService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(UploadDirService.class);
+    }
+
+    public static TimerService getTimerService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(TimerService.class);
     }
 
 }

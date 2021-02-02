@@ -77,6 +77,7 @@ import com.openexchange.rdiff.RdiffService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.uploaddir.UploadDirService;
 
 /**
@@ -91,7 +92,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
             AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
-            ThreadControlService.class };
+            ThreadControlService.class, TimerService.class };
     }
     //@formatter:on
 

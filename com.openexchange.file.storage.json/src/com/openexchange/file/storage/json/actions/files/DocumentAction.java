@@ -53,6 +53,7 @@ import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
 import static com.openexchange.java.Streams.bufferedInputStreamFor;
 import static com.openexchange.tools.images.ImageTransformationUtility.seemsLikeThumbnailRequest;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -74,7 +75,10 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAwares;
@@ -386,10 +390,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
     private static class IDBasedFileAccessRandomAccess implements IFileHolder.RandomAccess, IFileHolder.InputStreamClosure {
 
+        private static final long EXPIRATION_DELAY = 5000L;
+
         private final String id;
         private final String version;
         private final ServerSession session;
         private final long length;
+        private final Reference<LastAccessKnowingStream> documentStreamReference;
+        private final Runnable streamCloser;
+        private ScheduledTimerTask timerTask = null;
         private long pos = 0;
 
         IDBasedFileAccessRandomAccess(String id, String version, long length, ServerSession session) {
@@ -398,6 +407,37 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             this.version = version;
             this.length = length;
             this.session = session;
+            this.documentStreamReference = new Reference<>(null);
+            streamCloser = new Runnable() {
+
+                @Override
+                public void run() {
+                    closeResources(true);
+                }
+            };
+        }
+
+        void closeResources(boolean onlyCloseIfExpired) {
+            synchronized (documentStreamReference) {
+                LastAccessKnowingStream documentStream = documentStreamReference.getValue();
+                if (onlyCloseIfExpired && (documentStream == null || (System.currentTimeMillis() - documentStream.getLastAccessed() <= EXPIRATION_DELAY))) {
+                    return;
+                }
+
+                // Close resources
+                if (documentStream != null) {
+                    // Drop reference
+                    documentStreamReference.setValue(null);
+                    Streams.close(documentStream);
+                }
+
+                // Cancel timer task
+                ScheduledTimerTask timerTask = this.timerTask;
+                if (timerTask != null) {
+                    this.timerTask = null;
+                    timerTask.cancel();
+                }
+            }
         }
 
         @Override
@@ -421,15 +461,45 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 return 0;
             }
 
+            boolean error = true; // pessimistic
+            try {
+                LastAccessKnowingStream documentStream;
+                synchronized (documentStreamReference) {
+                    documentStream = documentStreamReference.getValue();
+                    if (documentStream == null) {
+                        TimerService timerService = Services.getTimerService();
+                        if (timerService == null) {
+                            throw new IOException("No such service: " + TimerService.class.getName());
+                        }
+
+                        documentStream = initStream();
+                        documentStreamReference.setValue(documentStream);
+                        timerTask = timerService.scheduleWithFixedDelay(streamCloser, EXPIRATION_DELAY, EXPIRATION_DELAY >> 1);
+                    }
+                }
+
+                int read = documentStream.read(b, off, length);
+                pos += read;
+                error = false; // All went fine
+                return read;
+            } finally {
+                if (error) {
+                    closeResources(false);
+                }
+            }
+        }
+
+        private LastAccessKnowingStream initStream() throws IOException {
             IDBasedFileAccess newFileAccess = null;
             try {
                 newFileAccess = Services.getFileAccessFactory().createAccess(session);
                 InputStream partialIn = null;
                 try {
-                    partialIn = newFileAccess.getDocument(id, version, pos, length);
-                    int read = partialIn.read(b, off, length);
-                    pos += read;
-                    return read;
+                    partialIn = newFileAccess.getDocument(id, version, pos, -1);
+                    LastAccessKnowingStream documentStream = new LastAccessKnowingStream(TransactionAwares.finishingInputStream(partialIn, newFileAccess));
+                    partialIn = null; // Avoid premature closing
+                    newFileAccess = null; // Avoid premature closing
+                    return documentStream;
                 } catch (OXException e) {
                     Throwable cause = e.getCause();
                     if (cause instanceof IOException) {
@@ -446,12 +516,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
         @Override
         public void close() throws IOException {
-            // Nothing
+            closeResources(false);
         }
 
         @Override
         public void seek(long pos) throws IOException {
             this.pos = pos;
+            closeResources(false);
         }
 
         @Override
@@ -462,7 +533,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         @Override
         public InputStream newStream() throws OXException, IOException {
             IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
-            return bufferedInputStreamFor(newFileAccess.getDocument(id, version));
+            return bufferedInputStreamFor(TransactionAwares.finishingInputStream(newFileAccess.getDocument(id, version), newFileAccess));
         }
 
         @Override
@@ -478,7 +549,49 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             builder.append("length=").append(length).append(", pos=").append(pos).append(']');
             return builder.toString();
         }
-
     }
+
+    private static class LastAccessKnowingStream extends FilterInputStream {
+
+        private long lastAccessed;
+
+        /**
+         * Initializes a new {@link LastAccessKnowingStream}.
+         *
+         * @param in The input stream
+         */
+        LastAccessKnowingStream(InputStream in) {
+            super(in);
+            this.lastAccessed = System.currentTimeMillis();
+        }
+
+        @Override
+        public int read() throws IOException {
+            int read = super.read();
+            this.lastAccessed = System.currentTimeMillis();
+            return read;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return read(b, 0, b.length);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int readLen = super.read(b, off, len);
+            this.lastAccessed = System.currentTimeMillis();
+            return readLen;
+        }
+
+        /**
+         * Gets the last-accessed time stamp, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+         *
+         * @return The last-accessed time stamp
+         */
+        public long getLastAccessed() {
+            return lastAccessed;
+        }
+    } // End of class LastAccessKnowingStream
 
 }

@@ -49,6 +49,10 @@
 
 package com.openexchange.tx;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * {@link TransactionAwares} - Utility class for {@code TransactionAware}.
  *
@@ -92,5 +96,48 @@ public class TransactionAwares {
             }
         }
     }
+
+    /**
+     * Creates a new input stream that cares about finishing given transaction when closed.
+     *
+     * @param stream The stream to delegate to
+     * @param transaction The transaction to finish
+     * @return The transaction-finishing stream
+     */
+    public static InputStream finishingInputStream(InputStream stream, TransactionAware transaction) {
+        if (stream == null) {
+            return null;
+        }
+
+        return stream instanceof FinishingInputStream ? (FinishingInputStream) stream : new FinishingInputStream(stream, transaction);
+    }
+
+    /**
+     * An input stream that also cares about finishing passed instance of <code>TransactionAware</code> when closed.
+     */
+    private static class FinishingInputStream extends FilterInputStream {
+
+        private final TransactionAware transaction;
+
+        /**
+         * Initializes a new {@link FinishingInputStream}.
+         *
+         * @param stream The stream to delegate to
+         * @param transaction The transaction instance to finish when stream is closed
+         */
+        FinishingInputStream(InputStream stream, TransactionAware transaction) {
+            super(stream);
+            this.transaction = transaction;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                super.close();
+            } finally {
+                finishSafe(transaction);
+            }
+        }
+    } // End of class FinishingInputStream
 
 }
