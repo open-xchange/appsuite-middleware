@@ -47,45 +47,40 @@
  *
  */
 
-package com.openexchange.carddav.resources;
-
-import java.util.List;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+package com.openexchange.carddav;
 
 /**
- * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents
- * of a reduced set of folders.
+ * {@link AggregatedCollectionMode}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.5
  */
-public class ReducedAggregatedCollection extends CardDAVCollection {
-
-    private final String displayName;
+public enum AggregatedCollectionMode {
 
     /**
-     * Initializes a new {@link AggregatedCollection}.
-     *
-     * @param factory The factory
-     * @param url The WebDAV path
-     * @param displayName The displayname to use
+     * All visible contact folders are exposed
      */
-    public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
-        super(factory, url, factory.getState().getDefaultFolder());
-        this.displayName = displayName;
-    }
+    ALL,
 
-    @Override
-    protected List<UserizedFolder> getFolders() throws OXException {
-        return factory.getState().getReducedFolders();
-    }
+    /**
+     * All folders that are marked to be <i>used for sync</i> are exposed
+     */
+    ALL_SYNCED,
 
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return displayName;
-    }
+    /**
+     * Only the default personal and the global addressbook folders are exposed
+     */
+    REDUCED,
 
+    /**
+     * Only the default personal and the global addressbook folders are exposed, if marked to be <i>used for sync</i>
+     */
+    REDUCED_SYNCED,
+
+    /**
+     * Only the default personal contact folder is exposed
+     */
+    DEFAULT_ONLY,
+
+    ;
 }
