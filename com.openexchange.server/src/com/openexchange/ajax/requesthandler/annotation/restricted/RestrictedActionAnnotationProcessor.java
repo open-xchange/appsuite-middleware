@@ -53,8 +53,8 @@ package com.openexchange.ajax.requesthandler.annotation.restricted;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.authentication.application.exceptions.AppPasswordExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
@@ -145,10 +146,10 @@ public class RestrictedActionAnnotationProcessor extends AbstractAJAXActionAnnot
         }
 
         // Check the scopes of authentication for this session
-        if (false == (restrParam instanceof String[])) {
+        if (false == (restrParam instanceof String)) {
             throw AppPasswordExceptionCodes.APPLICATION_PASSWORD_GENERIC_ERROR.create("Unkown restricted session type");
         }
-        List<String> restrictedScopes = Arrays.asList((String[]) restrParam);
+        Set<String> restrictedScopes = Strings.splitByComma((String) restrParam, new HashSet<String>());
         LOG.debug("Restricted session hit for module " + requestData.getModule() + " action:" + requestData.getAction() + " required:" + requiredScope);
 
         if (!restrictedScopes.contains(requiredScope)) {
