@@ -60,6 +60,7 @@ import com.openexchange.carddav.photos.PhotoPerformer;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.storage.ContactTombstoneStorage;
@@ -105,7 +106,7 @@ public class CarddavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class,
-            ResourceService.class, VCardService.class, GroupService.class, CapabilityService.class
+            ResourceService.class, VCardService.class, GroupService.class, CapabilityService.class, LeanConfigurationService.class
         };
     }
 

@@ -49,7 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
-import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.carddav.Tools.getFoldersHash;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +60,7 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.SyncToken;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
@@ -76,18 +77,30 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class AggregatedCollection extends CardDAVCollection {
 
-    private final String displayName;
+    private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
+
+    private final List<UserizedFolder> folders;
 
     /**
      * Initializes a new {@link AggregatedCollection}.
      *
      * @param factory The factory
      * @param url The WebDAV path
-     * @param displayName The displayname to use
+     * @param folders The folders aggregated in this collection
      */
-    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
+    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, List<UserizedFolder> folders) throws OXException {
         super(factory, url, factory.getState().getDefaultFolder());
-        this.displayName = displayName;
+        this.folders = folders;
+    }
+
+    @Override
+    protected List<UserizedFolder> getFolders() {
+        return folders;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return AGGREGATED_DISPLAY_NAME;
     }
 
     @Override
@@ -101,12 +114,8 @@ public class AggregatedCollection extends CardDAVCollection {
         if (null == lastModified) {
             return "0";
         }
-        try {
-            String foldersHash = getFoldersHash(getFolders());
-            return new SyncToken(lastModified.getTime(), foldersHash, 0).toString();
-        } catch (OXException e) {
-            throw protocolException(getUrl(), e);
-        }
+        String foldersHash = getFoldersHash(getFolders());
+        return new SyncToken(lastModified.getTime(), foldersHash, 0).toString();
     }
 
     @Override
@@ -116,8 +125,8 @@ public class AggregatedCollection extends CardDAVCollection {
          */
         String foldersHash = getFoldersHash(getFolders());
         if (0L < syncToken.getTimestamp() && false == Objects.equals(syncToken.getAdditional(), foldersHash)) {
-            OXException cause = OXException.general("Mismatching folders hash of aggregated collection (" + syncToken.getAdditional() + " vs " + foldersHash + ")");
-            LOG.debug("", cause);
+            String msg = "Mismatching folders hash of aggregated collection (client token: " + syncToken.getAdditional() + ", current: " + foldersHash + ")";
+            OXException cause = OXException.general(msg).setCategory(Category.CATEGORY_CONFLICT);
             throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         /*
@@ -136,36 +145,6 @@ public class AggregatedCollection extends CardDAVCollection {
             contacts.addAll(getDeletedContacts(since, folder.getID()));
         }
         return contacts;
-    }
-
-    @Override
-    protected List<UserizedFolder> getFolders() throws OXException {
-        return factory.getState().getFolders();
-    }
-
-	@Override
-	public String getDisplayName() throws WebdavProtocolException {
-		return displayName;
-	}
-
-    /**
-     * Calculates a combined hash code for the supplied collection of folders, based on each folder's identifier as well as the user's
-     * <i>own</i> permissions on it.
-     *
-     * @param folders The folders to get the hash code for
-     * @return The hash code
-     */
-    private static String getFoldersHash(List<UserizedFolder> folders) {
-        if (null == folders || folders.isEmpty()) {
-            return null;
-        }
-        final int prime = 31;
-        int result = 1;
-        for (UserizedFolder folder : folders) {
-            result = prime * result + ((null == folder.getID()) ? 0 : folder.getID().hashCode());
-            result = prime * result + ((null == folder.getOwnPermission()) ? 0 : folder.getOwnPermission().hashCode());
-        }
-        return String.valueOf(result);
     }
 
 }
