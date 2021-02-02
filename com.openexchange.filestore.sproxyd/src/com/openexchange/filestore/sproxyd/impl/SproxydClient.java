@@ -67,6 +67,7 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -183,9 +184,8 @@ public class SproxydClient {
                     response = getHttpClient().execute(get);
                     int status = response.getStatusLine().getStatusCode();
                     if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
-                        InputStream content = response.getEntity().getContent();
+                        InputStream content = HttpClients.createHttpResponseStreamFor(response);
                         response = null;
-                        get = null;
                         return content;
                     }
                     if (HttpServletResponse.SC_NOT_FOUND == status) {
