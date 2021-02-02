@@ -49,6 +49,9 @@
 
 package com.openexchange.rest.client.httpclient;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -176,4 +179,156 @@ public final class HttpClients {
             }
         }
     }
+
+    // ----------------------------------------------- Response entity stream --------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link HttpResponseStream} for given HTTP response.
+     *
+     * @param response The HTTP response to create the stream for
+     * @return The newly created response stream
+     * @throws IOException If initialization fails
+     */
+    public static HttpResponseStream createHttpResponseStreamFor(HttpResponse response) throws IOException {
+        if (response == null) {
+            return null;
+        }
+
+        HttpEntity entity = response.getEntity();
+        if (null == entity) {
+            throw new IOException("No response entity");
+        }
+
+        long contentLength = entity.getContentLength();
+        if (contentLength < 0) {
+            // No content length advertised
+            return new HttpResponseStream(entity.getContent(), response);
+        }
+
+        /*-
+         * Content length advertised. Hence, an instance of `org.apache.http.impl.io.ContentLengthInputStream` represents actual entity's
+         * content stream. Closing such an instance results in unnecessarily all remaining data being read from stream:
+         *
+         * public void close() throws IOException {
+         *  ...
+         *  if (pos < contentLength) {
+         *      final byte buffer[] = new byte[BUFFER_SIZE];
+         *      while (read(buffer) >= 0) { <------------------ Read data until EOF
+         *        // do nothing.
+         *      }
+         *  }
+         *  ...
+         * }
+         */
+        return new ContentLengthAwareHttpResponseStream(contentLength, entity.getContent(), response);
+    }
+
+    private static class HttpResponseStream extends FilterInputStream {
+
+        /** The HTTP response whose entity's content is read from */
+        protected final HttpResponse response;
+
+        /**
+         * Initializes a new {@link HttpResponseStream}.
+         *
+         * @param entityStream The response entity's input stream
+         * @param response The HTTP response whose entity stream shall be read from
+         */
+        HttpResponseStream(InputStream entityStream, HttpResponse response) {
+            super(entityStream);
+            this.response = response;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                HttpClients.close(response, true);
+            } finally {
+                super.close();
+            }
+        }
+    } // End of class HttpResponseStream
+
+    private static class ContentLengthAwareHttpResponseStream extends HttpResponseStream {
+
+        /** The current position */
+        private long pos = 0;
+
+        /** The marked position */
+        private long mark = -1;
+
+        /** The length of the content on bytes */
+        private final long contentLength;
+
+        /**
+         * Initializes a new {@link HttpResponseStream}.
+         *
+         * @param contentLength The length of the content, which is the number of bytes of the content, or a negative number if unknown
+         * @param entityStream The response entity's input stream
+         * @param response The HTTP response whose entity stream shall be read from
+         */
+        ContentLengthAwareHttpResponseStream(long contentLength, InputStream entityStream, HttpResponse response) {
+            super(entityStream, response);
+            this.contentLength = contentLength;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                if (0 < contentLength && contentLength > pos) {
+                    // Invoke with consumeEntity=false since stream is closed in finally block
+                    HttpClients.close(response, false);
+                } else {
+                    HttpClients.close(response, true);
+                }
+            } finally {
+                super.close();
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int read = super.read();
+            if (read >= 0) {
+                pos++;
+            }
+            return read;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return read(b, 0, b.length);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int readLen = super.read(b, off, len);
+            if (readLen > 0) {
+                pos += readLen;
+            }
+            return readLen;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipLen = super.skip(n);
+            if (skipLen > 0) {
+                pos += skipLen;
+            }
+            return skipLen;
+        }
+
+        @Override
+        public synchronized void mark(int readlimit) {
+            super.mark(readlimit);
+            mark = pos;
+        }
+
+        @Override
+        public synchronized void reset() throws IOException {
+            super.reset();
+            pos = mark;
+        }
+    } // End of class ContentLengthAwareHttpResponseStream
+
 }
