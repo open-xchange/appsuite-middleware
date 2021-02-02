@@ -85,6 +85,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug68510Test.class,
     //MWB346Test.class, // bug not fixed in 7.10.4
     MWB833Test.class,
+    MWB915Test.class,
 }) // @formatter:on
 public final class CardDAVBugSuite {
 

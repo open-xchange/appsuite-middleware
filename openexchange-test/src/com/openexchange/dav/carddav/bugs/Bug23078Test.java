@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
-import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
@@ -118,14 +117,14 @@ public class Bug23078Test extends CardDAVTest {
          */
         super.deleteFolder(subFolder);
         /*
-         * verify deletion on client (assuming that the sync-token has been invalidated)
+         * verify deletion on client (assuming that the aggregated collection path has changed)
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
         SyncCollectionReportMethod report = null;
         try {
-            report = new SyncCollectionReportMethod(getBaseUri() + Config.getPathPrefix() + "/carddav/Contacts", reportInfo);
+            report = new SyncCollectionReportMethod(getBaseUri() + buildCollectionHref(getDefaultCollectionName(true)), reportInfo);
             getWebDAVClient().doReport(report, StatusCodes.SC_FORBIDDEN);
         } finally {
             release(report);
