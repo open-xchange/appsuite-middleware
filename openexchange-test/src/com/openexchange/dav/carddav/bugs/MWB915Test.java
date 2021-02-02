@@ -50,10 +50,12 @@
 package com.openexchange.dav.carddav.bugs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Map;
+import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
@@ -69,14 +71,14 @@ import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderDataUsedForSync;
 
 /**
- * {@link MWB833Test}
+ * {@link MWB915Test}
  *
  * CardDAV: subscribe / unsubscribe CardDAV folders has no effect on macOS address book
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.10.5
  */
-public class MWB833Test extends CardDAVTest {
+public class MWB915Test extends CardDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
@@ -84,17 +86,18 @@ public class MWB833Test extends CardDAVTest {
     }
 
     @Test
-    public void testUnsubscribeSubfolder() throws Exception {
+    public void testResubscribeSubfolder() throws Exception {
         /*
          * create subfolder on server
          */
         FolderData subfolder = createSubfolder(String.valueOf(getDefaultFolderID()), randomUID());
         /*
-         * fetch sync token for later synchronization
+         * fetch sync token and uri to aggregated collection for later synchronization
          */
         SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        String initialCollectionHref = buildCollectionHref(getDefaultCollectionName());
         /*
-         * create contact on server
+         * create contact in subfolder on server
          */
         String uid = randomUID();
         String firstName = "test";
@@ -110,7 +113,7 @@ public class MWB833Test extends CardDAVTest {
          */
         Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
-        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        List<VCardResource> addressData = addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
         assertEquals("N wrong", firstName, contactCard.getGivenName());
         assertEquals("N wrong", lastName, contactCard.getFamilyName());
@@ -120,20 +123,25 @@ public class MWB833Test extends CardDAVTest {
          */
         updateFolder(subfolder.getId(), new FolderData().permissions(null).usedForSync(new FolderDataUsedForSync().value("false")));
         /*
-         * verify removal of contained contact on client (assuming that the aggregated collection path has changed)
+         * check that the old collection path is no longer reachable
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
         SyncCollectionReportMethod report = null;
         try {
-            report = new SyncCollectionReportMethod(getBaseUri() + buildCollectionHref(getDefaultCollectionName(true)), reportInfo);
-            getWebDAVClient().doReport(report, StatusCodes.SC_FORBIDDEN);
+            report = new SyncCollectionReportMethod(getBaseUri() + initialCollectionHref, reportInfo);
+            getWebDAVClient().doReport(report, StatusCodes.SC_NOT_FOUND);
         } finally {
             release(report);
         }
         /*
-         * verify deletion on client
+         * re-discover new default collection path
+         */
+        String intermediateCollectionHref = buildCollectionHref(getDefaultCollectionName(true));
+        assertNotEquals("collection path unchanged", initialCollectionHref, intermediateCollectionHref);
+        /*
+         * verify removal of contained contact on client at new path
          */
         eTags = getAllETags();
         for (String href : eTags.keySet()) {
@@ -141,6 +149,41 @@ public class MWB833Test extends CardDAVTest {
                 fail("contact still found when listing etags");
             }
         }
+        /*
+         * issue an additional, explicit delete request on the old contact resource uri
+         */
+        DeleteMethod delete = null;
+        try {
+            delete = new DeleteMethod(getBaseUri() + contactCard.getHref());
+            assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(delete));
+        } finally {
+            release(delete);
+        }
+        /*
+         * re-select the folder for sync
+         */
+        updateFolder(subfolder.getId(), new FolderData().permissions(null).usedForSync(new FolderDataUsedForSync().value("true")));
+        /*
+         * check that the intermediate collection path is no longer reachable
+         */
+        try {
+            report = new SyncCollectionReportMethod(getBaseUri() + intermediateCollectionHref, reportInfo);
+            getWebDAVClient().doReport(report, StatusCodes.SC_NOT_FOUND);
+        } finally {
+            release(report);
+        }
+        /*
+         * re-discover new default collection path
+         */
+        String nextCollectionHref = buildCollectionHref(getDefaultCollectionName(true));
+        assertNotEquals("collection path unchanged", intermediateCollectionHref, nextCollectionHref);
+        /*
+         * re-sync contacts under new path & verify that contact appeared again
+         */
+        contactCard = assertContains(uid, getAllVCards());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
     }
 
 }
