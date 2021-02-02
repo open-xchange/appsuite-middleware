@@ -109,6 +109,26 @@ public class Tools {
     	return name;
     }
 
+    /**
+     * Calculates a combined hash code for the supplied collection of folders, based on each folder's identifier as well as the user's
+     * <i>own</i> permissions on it.
+     *
+     * @param folders The folders to get the hash code for
+     * @return The hash code
+     */
+    public static String getFoldersHash(List<UserizedFolder> folders) {
+        if (null == folders || folders.isEmpty()) {
+            return null;
+        }
+        final int prime = 31;
+        int result = 1;
+        for (UserizedFolder folder : folders) {
+            result = prime * result + ((null == folder.getID()) ? 0 : folder.getID().hashCode());
+            result = prime * result + ((null == folder.getOwnPermission()) ? 0 : folder.getOwnPermission().hashCode());
+        }
+        return Integer.toHexString(result);
+    }
+
     public static Date getLatestModified(final Date lastModified1, final Date lastModified2) {
     	return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }

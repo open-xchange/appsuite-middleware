@@ -64,10 +64,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.carddav.CardDAVProperty;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactTombstoneStorage;
@@ -847,9 +849,9 @@ public class ContactResource extends CommonResource<Contact> {
          * default to configuration
          */
         try {
-            return "uri".equalsIgnoreCase(factory.getConfigValue("com.openexchange.carddav.preferredPhotoEncoding", "binary"));
+            return "uri".equals(factory.getServiceSafe(LeanConfigurationService.class).getProperty(CardDAVProperty.PREFERRED_PHOTO_ENCODING));
         } catch (OXException e) {
-            LOG.warn("Error getting \"com.openexchange.carddav.preferredPhotoEncoding\", falling back 'binary'.", e);
+            LOG.warn("Error getting \"{}\", falling back 'binary'.", CardDAVProperty.PREFERRED_PHOTO_ENCODING, e);
         }
         return false;
     }
