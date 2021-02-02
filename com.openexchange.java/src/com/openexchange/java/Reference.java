@@ -110,6 +110,17 @@ public final class Reference<V> {
     }
 
     /**
+     * Gets the current value & sets to the new value.
+     *
+     * @return The current value
+     */
+    public V getAndSetValue(V newValue) {
+        V value = this.value;
+        this.value = newValue;
+        return value;
+    }
+
+    /**
      * Sets the value
      *
      * @param value The value to set
