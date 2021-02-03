@@ -506,7 +506,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
             String fullName = getFullName(info, shareReference, translator);
             translated = String.format(translated, fullName);
-            textBuilder.append(htmlFormat(translated)).append("<br>");
+            textBuilder.append(translated).append("<br>");
         }
 
         // Files
