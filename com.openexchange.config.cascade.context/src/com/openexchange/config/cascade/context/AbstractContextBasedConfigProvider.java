@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -90,7 +91,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         }
 
         try {
-            return get(propertyName, contextService.loadContext(contextId), userId);
+            return get(propertyName, contextService.getContext(contextId, UpdateBehavior.DENY_UPDATE), userId);
         } catch (OXException e) {
             if (false == e.equalsCode(2, "CTX")) {
                 throw e;
@@ -113,7 +114,7 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         }
 
         try {
-            return getAllPropertyNamesFor(contextService.loadContext(contextId), userId);
+            return getAllPropertyNamesFor(contextService.getContext(contextId, UpdateBehavior.DENY_UPDATE), userId);
         } catch (OXException e) {
             if (false == e.equalsCode(2, "CTX")) {
                 throw e;

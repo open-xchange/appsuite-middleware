@@ -65,6 +65,7 @@ import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -170,7 +171,7 @@ public class UserConfigProvider implements ConfigProviderService {
         }
 
         try {
-            Map<String, String> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId)).getAttributes();
+            Map<String, String> attributes = getUser(userId, services.getService(ContextService.class).getContext(contextId, UpdateBehavior.DENY_UPDATE)).getAttributes();
             if (attributes.isEmpty()) {
                 return Collections.emptyList();
             }

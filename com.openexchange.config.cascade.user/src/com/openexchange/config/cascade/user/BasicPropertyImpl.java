@@ -57,6 +57,7 @@ import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.java.ConvertUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.User;
@@ -85,7 +86,8 @@ final class BasicPropertyImpl implements BasicProperty {
     BasicPropertyImpl(final String property, final int userId, final int contextId, final ServiceLookup services) throws OXException {
         super();
         // Preload value
-        User user = services.getServiceSafe(UserService.class).getUser(userId, contextId);
+        Context context = services.getServiceSafe(ContextService.class).getContext(contextId, UpdateBehavior.DENY_UPDATE);
+        User user = services.getServiceSafe(UserService.class).getUser(userId, context);
         value = ConvertUtils.loadConvert(user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString()));
         // Assign rest
         this.contextId = contextId;
