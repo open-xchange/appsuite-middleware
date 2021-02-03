@@ -60,7 +60,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -71,10 +73,13 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
@@ -142,21 +147,45 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         try {
             long start = System.currentTimeMillis();
             ContextService contextService = services.getServiceSafe(ContextService.class);
-            for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
+            Updater updater = Updater.getInstance();
+            NextSchema: for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
+                UpdateStatus status = updater.getStatus(representativeContextId.intValue());
+                if (status.blockingUpdatesRunning()) {
+                    // Context-associated schema is currently updated. Abort clean-up for that schema
+                    Optional<String> optSchema = getSchema(representativeContextId, contextService);
+                    if (optSchema.isPresent()) {
+                        LOG.info("Update running: Skipping clean-up of expired composition spaces for schema {} since that schema is currently updated", optSchema.get());
+                    } else {
+                        LOG.info("Update running: Skipping clean-up of expired composition spaces for schema association with context {} since that schema is currently updated", representativeContextId);
+                    }
+                    continue NextSchema;
+                }
+                if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
+                    // Context-associated schema needs an update. Abort clean-up for that schema
+                    Optional<String> optSchema = getSchema(representativeContextId, contextService);
+                    if (optSchema.isPresent()) {
+                        LOG.info("Update needed: Skipping clean-up of expired composition spaces for schema {} since that schema needs an update", optSchema.get());
+                    } else {
+                        LOG.info("Update needed: Skipping clean-up of expired composition spaces for schema association with context {} since that schema needs an update", representativeContextId);
+                    }
+                    continue NextSchema;
+                }
+
+                // No update running or pending. Continue clean-up for that schema...
                 DatabaseAccess databaseAccess = DatabaseAccessFactory.getInstance().createDatabaseAccessFor(representativeContextId.intValue(), services);
                 Optional<String> optSchema = databaseAccess.getSchema();
                 if (optSchema.isPresent()) {
-                    LOG.debug("Going to delete expired composition spaces for schema {}", optSchema.get());
+                    LOG.debug("Going to clean-up expired composition spaces for schema {}", optSchema.get());
                 } else {
-                    LOG.debug("Going to delete expired composition spaces for schema association with context {}", representativeContextId);
+                    LOG.debug("Going to clean-up expired composition spaces for schema association with context {}", representativeContextId);
                 }
                 try {
                     cleanUpForSchema(databaseAccess, optSchema);
                 } catch (Exception e) {
                     if (optSchema.isPresent()) {
-                        LOG.warn("Failed to delete expired composition spaces for schema {}", optSchema.get(), e);
+                        LOG.warn("Failed to clean-up expired composition spaces for schema {}", optSchema.get(), e);
                     } else {
-                        LOG.warn("Failed to delete expired composition spaces for schema association with context {}", representativeContextId, e);
+                        LOG.warn("Failed to clean-up expired composition spaces for schema association with context {}", representativeContextId, e);
                     }
                 }
             }
@@ -164,9 +193,18 @@ public class CompositionSpaceCleanUpTask implements Runnable {
             LOG.info("Composition space clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.warn("Failed to delete expired composition", t);
+            LOG.warn("Failed to clean-up expired composition spaces", t);
         } finally {
             currentThread.setName(prevName);
+        }
+    }
+
+    private Optional<String> getSchema(Integer representativeContextId, ContextService contextService) {
+        try {
+            Map<PoolAndSchema, List<Integer>> associations = contextService.getSchemaAssociationsFor(Collections.singletonList(representativeContextId));
+            return Optional.of(associations.keySet().iterator().next().getSchema());
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
 
@@ -607,6 +645,8 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         }
     }
 
+    private static final String PROP_MAX_IDLE_TIME_MILLIS = "com.openexchange.mail.compose.maxIdleTimeMillis";
+
     private long getMaxIdleTimeMillis(int userId, int contextId) throws OXException {
         String defaultValue = "1W";
 
@@ -616,7 +656,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         }
 
         ConfigView view = viewFactory.getView(userId, contextId);
-        return ConfigTools.parseTimespan(ConfigViews.getDefinedStringPropertyFrom("com.openexchange.mail.compose.maxIdleTimeMillis", defaultValue, view));
+        return ConfigTools.parseTimespan(ConfigViews.getDefinedStringPropertyFrom(PROP_MAX_IDLE_TIME_MILLIS, defaultValue, view));
     }
 
 }
