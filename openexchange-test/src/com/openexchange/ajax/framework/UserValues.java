@@ -56,6 +56,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.exception.OXException;
@@ -122,7 +123,13 @@ public class UserValues {
 
     public int getPrivateInfostoreFolder() throws OXException, IOException, JSONException {
         if (null == privateInfostoreFolder) {
-            privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
+            GetResponse response = client.execute(new GetRequest(Tree.PrivateInfostoreFolder));
+            Object data = response.getData();
+            if (String.class.isInstance(data)) {
+                privateInfostoreFolder = Integer.valueOf((String) data);
+            } else {
+                privateInfostoreFolder = I(response.getInteger());
+            }
         }
         return privateInfostoreFolder.intValue();
     }
