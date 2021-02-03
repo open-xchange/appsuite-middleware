@@ -55,6 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 
 /**
  * {@link OSGiContextService}
@@ -101,8 +102,8 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
+    public Context getContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return getService().getContext(contextId, updateBehavior);
     }
 
     @Override
@@ -130,8 +131,8 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
+    public Context loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return getService().loadContext(contextId, updateBehavior);
     }
 
 }

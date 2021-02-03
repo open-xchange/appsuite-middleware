@@ -55,6 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
@@ -98,8 +99,8 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public Context getContext(final int contextId) throws OXException {
-        return ContextStorage.getInstance().getContext(contextId);
+    public Context getContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return ContextStorage.getInstance().getContext(contextId, updateBehavior);
     }
 
     @Override
@@ -108,8 +109,8 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public Context loadContext(int contextId) throws OXException {
-        return ContextStorage.getInstance().loadContext(contextId);
+    public Context loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return ContextStorage.getInstance().loadContext(contextId, updateBehavior);
     }
 
     @Override

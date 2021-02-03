@@ -59,6 +59,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 
 
 /**
@@ -131,13 +132,13 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     @Override
-    public Context getContext(int contextId) throws OXException {
-        return getDelegate().getContext(contextId);
+    public Context getContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return getDelegate().getContext(contextId, updateBehavior);
     }
 
     @Override
-    public Context loadContext(int contextId) throws OXException {
-        return getDelegate().loadContext(contextId);
+    public Context loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
+        return getDelegate().loadContext(contextId, updateBehavior);
     }
 
     @Override

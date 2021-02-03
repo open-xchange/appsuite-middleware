@@ -47,80 +47,31 @@
  *
  */
 
-package com.openexchange.context;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.UpdateBehavior;
-
+package com.openexchange.groupware.contexts;
 
 /**
- * {@link SimContextService}
+ * {@link UpdateBehavior} - Specifies the behavior to apply when detecting one or
+ * more pending update task for context-associated database schema.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v8.0.0
  */
-public class SimContextService implements ContextService{
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        // Nothing to do
-        return null;
-    }
+public enum UpdateBehavior {
 
-    @Override
-    public List<Integer> getDistinctContextsPerSchema() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    /**
+     * No explicit update behavior.
+     * <p>
+     * Fall-back to default behavior as specified through configuration property
+     * <code>"com.openexchange.groupware.update.denyImplicitUpdateOnContextLoad"</code> (default is <code>false</code>).
+     */
+    NONE,
+    /**
+     * Trigger update if there are pending update tasks.
+     */
+    TRIGGER_UPDATE,
+    /**
+     * Don't trigger update if there are pending update tasks.
+     */
+    DENY_UPDATE;
 
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
-        return null;
-    }
-
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        return null;
-    }
-
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        // Nothing
-    }
-
-    @Override
-    public Context getContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
-        // Nothing to do
-        return null;
-    }
-
-    @Override
-    public Context loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
-        // Nothing to do
-        return null;
-    }
-
-    @Override
-    public int getContextId(String loginContextInfo) throws OXException {
-        // Nothing to do
-        return 0;
-    }
-
-    @Override
-    public void invalidateContext(int contextId) throws OXException {
-        // Nothing to do
-
-    }
-
-    @Override
-    public void invalidateContexts(int[] contextIDs) throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public void invalidateLoginInfo(String loginContextInfo) throws OXException {
-        // Nothing to do
-
-    }
 }

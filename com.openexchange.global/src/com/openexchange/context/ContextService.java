@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -103,7 +104,19 @@ public interface ContextService {
      * @return The context
      * @throws OXException If the specified context cannot be found or the update is running/started.
      */
-    Context getContext(int contextId) throws OXException;
+    default Context getContext(int contextId) throws OXException {
+        return getContext(contextId, UpdateBehavior.NONE);
+    }
+
+    /**
+     * Gets the context for the given context unique identifier.
+     *
+     * @param contextId The unique identifier of the context.
+     * @param updateBehavior The behavior to apply when detecting one or more pending update task for context-associated database schema
+     * @return The context
+     * @throws OXException If the specified context cannot be found or the update is running/started.
+     */
+    Context getContext(int contextId, UpdateBehavior updateBehavior) throws OXException;
 
     /**
      * This method works like {@link #getContext(int)} but it does not give a {@link OXException} if an update is running or must is
@@ -112,7 +125,19 @@ public interface ContextService {
      * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
      * @throws OXException if an error occurs.
      */
-    Context loadContext(int contextId) throws OXException;
+    default Context loadContext(int contextId) throws OXException {
+        return loadContext(contextId, UpdateBehavior.NONE);
+    }
+
+    /**
+     * This method works like {@link #getContext(int)} but it does not give a {@link OXException} if an update is running or must is
+     * started.
+     * @param contextId unique identifier of the context.
+     * @param updateBehavior The behavior to apply when detecting one or more pending update task for context-associated database schema
+     * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
+     * @throws OXException if an error occurs.
+     */
+    Context loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException;
 
     /**
      * Stores a internal context attribute.

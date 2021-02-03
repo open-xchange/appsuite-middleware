@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
@@ -102,7 +103,7 @@ public class CachingContextStorage extends ContextStorage {
             if (null == context) {
                 contextId = I(NOT_FOUND);
             } else {
-                context = triggerUpdate(context);
+                context = triggerUpdate(context, UpdateBehavior.NONE);
                 contextId = I(context.getContextId());
                 try {
                     cache.put(loginInfo, contextId, false);
@@ -118,10 +119,10 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
-    public ContextExtended loadContext(int contextId) throws OXException {
+    public ContextExtended loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
-            return load(contextId);
+            return load(contextId, updateBehavior);
         }
 
         Cache cache = cacheService.getCache(REGION_NAME);
@@ -132,7 +133,7 @@ public class CachingContextStorage extends ContextStorage {
         }
 
         // Load it
-        ContextExtended contextExtended = load(contextId);
+        ContextExtended contextExtended = load(contextId, updateBehavior);
         cache.put(key, contextExtended, false);
         return contextExtended;
     }
@@ -266,22 +267,22 @@ public class CachingContextStorage extends ContextStorage {
         return persistantImpl;
     }
 
-    private ContextExtended load(final int contextId) throws OXException {
+    private ContextExtended load(int contextId, UpdateBehavior updateBehavior) throws OXException {
         final ContextExtended retval = persistantImpl.loadContext(contextId);
-        return triggerUpdate(retval);
+        return triggerUpdate(retval, updateBehavior);
     }
 
-    private ContextExtended triggerUpdate(ContextExtended context) {
+    private ContextExtended triggerUpdate(ContextExtended context, UpdateBehavior updateBehavior) {
         // TODO We should introduce a logic layer above this context storage
         // layer. That layer should then trigger the update tasks.
         // Nearly all accesses to the ContextStorage need then to be replaced
         // with an access to the ContextService.
-        Updater updater = Updater.getInstance();
         try {
+            Updater updater = Updater.getInstance();
             UpdateStatus status = updater.getStatus(context.getContextId());
             context.setUpdating(status.blockingUpdatesRunning());
             if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                if (denyImplicitUpdateOnContextLoad()) {
+                if (denyImplicitUpdateOnContextLoad(updateBehavior)) {
                     context.setUpdateNeeded(true);
                 } else {
                     if (status.needsBlockingUpdates()) {
@@ -299,7 +300,25 @@ public class CachingContextStorage extends ContextStorage {
         return context;
     }
 
-    private boolean denyImplicitUpdateOnContextLoad() {
+    private static boolean denyImplicitUpdateOnContextLoad(UpdateBehavior updateBehavior) {
+        UpdateBehavior behavior = updateBehavior;
+        if (behavior == null) {
+            behavior = UpdateBehavior.NONE;
+        }
+
+        switch (behavior) {
+            case DENY_UPDATE:
+                return true;
+            case TRIGGER_UPDATE:
+                return false;
+            case NONE:
+                //$FALL-THROUGH$
+            default:
+                return getDenyImplicitUpdateOnContextLoadProperty();
+        }
+    }
+
+    private static boolean getDenyImplicitUpdateOnContextLoadProperty() {
         boolean defaultValue = false;
 
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);

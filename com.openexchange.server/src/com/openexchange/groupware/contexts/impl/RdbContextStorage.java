@@ -70,6 +70,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
@@ -284,7 +285,7 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
-    public ContextExtended loadContext(final int contextId) throws OXException {
+    public ContextExtended loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException {
         DatabaseService databaseService = Database.getDatabaseService();
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);

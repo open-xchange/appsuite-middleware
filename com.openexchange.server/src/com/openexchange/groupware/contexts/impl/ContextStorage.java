@@ -54,6 +54,7 @@ import java.util.Map;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -129,7 +130,19 @@ public abstract class ContextStorage {
      * @throws OXException if an error occurs.
      */
     public Context getContext(final int contextId) throws OXException {
-        final ContextExtended retval = loadContext(contextId);
+        return getContext(contextId, UpdateBehavior.NONE);
+    }
+
+    /**
+     * Creates a context implementation for the given context unique identifier.
+     *
+     * @param contextId unique identifier of the context.
+     * @param updateBehavior The behavior to apply when detecting one or more pending update task for context-associated database schema
+     * @return An implementation of the context or <code>null</code> if the context with the given identifier can't be found.
+     * @throws OXException If an error occurs.
+     */
+    public Context getContext(final int contextId, UpdateBehavior updateBehavior) throws OXException {
+        final ContextExtended retval = loadContext(contextId, updateBehavior);
         if (retval.isUpdating()) {
             OXException exception = ContextExceptionCodes.UPDATE.create();
             LOG.info(exception.getMessage());
@@ -147,10 +160,22 @@ public abstract class ContextStorage {
      * Loads the context object.
      *
      * @param contextId unique identifier of the context to load.
-     * @return the context object.
-     * @throws OXException if loading the context fails.
+     * @return The context object.
+     * @throws OXException If loading the context fails.
      */
-    public abstract ContextExtended loadContext(int contextId) throws OXException;
+    public ContextExtended loadContext(int contextId) throws OXException {
+        return loadContext(contextId, UpdateBehavior.NONE);
+    }
+
+    /**
+     * Loads the context object.
+     *
+     * @param contextId unique identifier of the context to load.
+     * @param updateBehavior The behavior to apply when detecting one or more pending update task for context-associated database schema
+     * @return The context object.
+     * @throws OXException If loading the context fails.
+     */
+    public abstract ContextExtended loadContext(int contextId, UpdateBehavior updateBehavior) throws OXException;
 
     /**
      * Checks if specified context does exist.
