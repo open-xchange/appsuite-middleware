@@ -504,7 +504,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            String fullName = getFullName(info, shareReference, translator);
+            String fullName = getFullName(info, shareReference, translator, false);
             translated = String.format(translated, fullName);
             textBuilder.append(htmlFormat(translated)).append("<br>");
         }
@@ -611,7 +611,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            String fullName = getFullName(info, shareReference, translator);
+            String fullName = getFullName(info, shareReference, translator, true);
             translated = String.format(translated, fullName);
             vars.put(VARIABLE_INTRO, translated);
         }
@@ -683,17 +683,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param info The message info
      * @param shareReference The share reference
      * @param translator The translator
+     * @param escapeHtml <code>true</code> to characters in name using HTML entities, <code>false</code>, otherwise
      * @return The full name to use
      * @throws OXException If full name cannot be determined
      */
-    protected String getFullName(ShareComposeMessageInfo info, ShareReference shareReference, Translator translator) throws OXException {
+    protected String getFullName(ShareComposeMessageInfo info, ShareReference shareReference, Translator translator, boolean escapeHtml) throws OXException {
         // Check by "From" address
         InternetAddress[] from = info.getSource().getFrom();
         if (null != from) {
             for (InternetAddress fromAddr : from) {
                 String personal = fromAddr.getPersonal();
                 if (Strings.isNotEmpty(personal)) {
-                    return StringEscapeUtils.escapeHtml(personal);
+                    return escapeHtml ? StringEscapeUtils.escapeHtml(personal) : personal;
                 }
             }
         }
@@ -725,13 +726,15 @@ public class DefaultMessageGenerator implements MessageGenerator {
                     address = transportAccount.getPrimaryAddress();
                 }
 
-                return StringEscapeUtils.escapeHtml(Strings.isEmpty(personal) ? address : personal);
+                String name = Strings.isEmpty(personal) ? address : personal;
+                return escapeHtml ? StringEscapeUtils.escapeHtml(name) : name;
             }
         }
 
         // Last but not least, build the full name from associated user
         FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-        return StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
+        String name = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
+        return escapeHtml ? StringEscapeUtils.escapeHtml(name) : name;
     }
 
     /**
