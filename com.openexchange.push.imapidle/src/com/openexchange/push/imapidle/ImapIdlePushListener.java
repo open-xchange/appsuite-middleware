@@ -71,6 +71,7 @@ import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPProvider;
@@ -219,7 +220,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean isUserValid() {
         try {
             ContextService contextService = services.getService(ContextService.class);
-            Context context = contextService.loadContext(session.getContextId());
+            Context context = contextService.loadContext(session.getContextId(), UpdateBehavior.DENY_UPDATE);
             if (!context.isEnabled()) {
                 return false;
             }

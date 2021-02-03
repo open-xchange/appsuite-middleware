@@ -71,7 +71,7 @@ import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorManagementService;
@@ -160,15 +160,14 @@ public class MultifactorManagementREST {
      * @throws OXException If services can't be obtained or context or user are unknown
      */
     private Response checkUserAndContext(int contextId, int userId) throws OXException {
-        ContextService contextService = requireService(ContextService.class);
-        UserService userService = requireService(UserService.class);
         try {
-            Context context = contextService.getContext(contextId);
-            userService.getUser(userId, context);
+            ContextService contextService = requireService(ContextService.class);
+            UserService userService = requireService(UserService.class);
+            userService.getUser(userId, contextService.getContext(contextId, UpdateBehavior.DENY_UPDATE));
             return null;
         } catch (OXException e) {
-            if (ContextExceptionCodes.UPDATE.equals(e)) {
-                // update tasks running
+            if (ContextExceptionCodes.UPDATE.equals(e) || ContextExceptionCodes.UPDATE_NEEDED.equals(e)) {
+                // update tasks running or pending
                 return Response.status(Status.SERVICE_UNAVAILABLE).build();
             } else if (ContextExceptionCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 return Response.status(Status.NOT_FOUND).build();

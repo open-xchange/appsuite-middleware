@@ -69,11 +69,12 @@ import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.Tools;
@@ -101,8 +102,13 @@ import com.openexchange.user.UserService;
 @PermitAll
 public class PasswordChangeHistoryREST {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryREST.class);
-    private final ServiceLookup           services;
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryREST.class);
+    }
+
+    /** The service look-up */
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
@@ -166,14 +172,14 @@ public class PasswordChangeHistoryREST {
                 // No fall back. Resource for the user not available. In other terms the user can not see the feature.
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
+            LoggerHolder.LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
             return Response.serverError().build();
         } catch (BadRequestException e) {
             // SortField unknown; 400
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (Exception e) {
             //Unknown error; 500
-            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
+            LoggerHolder.LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
             return Response.serverError().build();
         }
     }
@@ -232,15 +238,14 @@ public class PasswordChangeHistoryREST {
      * @throws OXException If services can't be obtained or context or user are unknown
      */
     private Response checkUserAndContext(int contextId, int userId) throws OXException {
-        ContextService contextService = getService(ContextService.class);
-        UserService userService = getService(UserService.class);
         try {
-            Context context = contextService.getContext(contextId);
-            userService.getUser(userId, context);
+            ContextService contextService = getService(ContextService.class);
+            UserService userService = getService(UserService.class);
+            userService.getUser(userId, contextService.getContext(contextId, UpdateBehavior.DENY_UPDATE));
             return null;
         } catch (OXException e) {
-            if (ContextExceptionCodes.UPDATE.equals(e)) {
-                // update tasks running
+            if (ContextExceptionCodes.UPDATE.equals(e) || ContextExceptionCodes.UPDATE_NEEDED.equals(e)) {
+                // update tasks running or pending
                 return Response.status(Status.SERVICE_UNAVAILABLE).build();
             } else if (ContextExceptionCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 return Response.status(Status.NOT_FOUND).build();
@@ -275,18 +280,18 @@ public class PasswordChangeHistoryREST {
         } else {
             // No valid header, check if unauthorized access is allowed
             if (authenticator.isContextAuthenticationDisabled()) {
-                LOG.warn("Granting access to password change history without basicAuth! 'CONTEXT_AUTHENTICATION_DISABLED' is set to 'true'.");
+                LoggerHolder.LOG.warn("Granting access to password change history without basicAuth! 'CONTEXT_AUTHENTICATION_DISABLED' is set to 'true'.");
                 return null;
             }
             ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
             if (null != configService) {
                 boolean masertAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
                 if (authenticator.isMasterAuthenticationDisabled() && masertAccountOverride) {
-                    LOG.warn("Granting access to password change history without basicAuth! 'MASTER_AUTHENTICATION_DISABLED' and 'MASTER_ACCOUNT_OVERRIDE' are set to 'true' ");
+                    LoggerHolder.LOG.warn("Granting access to password change history without basicAuth! 'MASTER_AUTHENTICATION_DISABLED' and 'MASTER_ACCOUNT_OVERRIDE' are set to 'true' ");
                     return null;
                 }
             } else {
-                LOG.debug("Could not get ConfigurationService. Can not check if access without basicAuth HEADER ist allowed.");
+                LoggerHolder.LOG.debug("Could not get ConfigurationService. Cannot check if access without basicAuth HEADER ist allowed.");
             }
         }
         return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"").build();

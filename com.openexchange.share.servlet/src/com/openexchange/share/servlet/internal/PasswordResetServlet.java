@@ -64,6 +64,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.UpdateBehavior;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
@@ -143,7 +144,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
             int contextID = guestInfo.getContextID();
             int guestID = guestInfo.getGuestID();
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID, UpdateBehavior.DENY_UPDATE);
             User storageUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestID, context);
 
             GuestService guestService = ShareServiceLookup.getService(GuestService.class);
