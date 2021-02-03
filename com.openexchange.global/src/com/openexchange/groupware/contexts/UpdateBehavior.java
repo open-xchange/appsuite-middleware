@@ -67,10 +67,19 @@ public enum UpdateBehavior {
     NONE,
     /**
      * Trigger update if there are pending update tasks.
+     * <p>
+     * Trying to load a context with running update tasks will throw <code>c.o.groupware.contexts.impl.ContextExceptionCodes.UPDATE</code>.
+     * <p>
+     * Trying to load a context with pending update tasks will throw <code>c.o.groupware.contexts.impl.ContextExceptionCodes.UPDATE</code>
+     * since update is triggered.
      */
     TRIGGER_UPDATE,
     /**
      * Don't trigger update if there are pending update tasks.
+     * <p>
+     * Trying to load a context with running update tasks will throw <code>c.o.groupware.contexts.impl.ContextExceptionCodes.UPDATE</code>.
+     * <p>
+     * Trying to load a context with pending update tasks will throw <code>c.o.groupware.contexts.impl.ContextExceptionCodes.UPDATE_NEEDED</code>.
      */
     DENY_UPDATE;
 
