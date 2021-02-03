@@ -80,6 +80,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -172,6 +173,10 @@ public class OXFolderAccess {
      * @throws OXException If operation fails
      */
     public final FolderObject getFolderObject(final int folderId, final boolean fromCache) throws OXException {
+        FolderObject virtualFolder = optVirtualFolder(folderId);
+        if (null != virtualFolder) {
+            return virtualFolder;
+        }
         final FolderObject fo;
         if (fromCache && FolderCacheManager.isEnabled()) {
             fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
@@ -771,6 +776,28 @@ public class OXFolderAccess {
             return OXFolderDependentUtil.hasSubscription(con, contextId, folderId);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * Optionally gets a <i>virtual</i> folder object representing one of the virtual list folders of the different modules where folders
+     * not seen in the tree view are bundled.
+     * 
+     * @param folderId The identifier of the folder to optionally get the virtual folder object representation for
+     * @return The virtual folder with the supplied folder identifier, or <code>null</code> if the identifier refers to a non-virtual folder
+     */
+    private static FolderObject optVirtualFolder(int folderId) {
+        switch (folderId) {
+            case FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID:
+                return FolderObject.createVirtualFolderObject(folderId, FolderObject.getFolderString(folderId, LocaleTools.DEFAULT_LOCALE), FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE);
+            case FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID:
+                return FolderObject.createVirtualFolderObject(folderId, FolderObject.getFolderString(folderId, LocaleTools.DEFAULT_LOCALE), FolderObject.TASK, true, FolderObject.SYSTEM_TYPE);
+            case FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID:
+                return FolderObject.createVirtualFolderObject(folderId, FolderObject.getFolderString(folderId, LocaleTools.DEFAULT_LOCALE), FolderObject.CALENDAR, true, FolderObject.SYSTEM_TYPE);
+            case FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID:
+                return FolderObject.createVirtualFolderObject(folderId, FolderObject.getFolderString(folderId, LocaleTools.DEFAULT_LOCALE), FolderObject.CONTACT, true, FolderObject.SYSTEM_TYPE);
+            default:
+                return null;
         }
     }
 
