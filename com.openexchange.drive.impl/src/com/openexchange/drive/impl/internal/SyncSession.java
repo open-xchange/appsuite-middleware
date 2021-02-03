@@ -381,13 +381,10 @@ public class SyncSession {
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();
-            String folderID = entry.getValue().getId();
             if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(entry.getValue().getName())) {
-                trace("Skipping invalid server directory: " + entry.getKey());
+                trace("Skipping invalid server directory: " + path);
             } else if (DriveUtils.isIgnoredPath(this, path)) {
-                trace("Skipping ignored server directory: " + entry.getKey());
-            } else if (false == DriveUtils.isSynchronizable(folderID, getConfig())) {
-                trace("Skipping not synchronizable server directory: " + entry.getKey());
+                trace("Skipping ignored server directory: " + path);
             } else {
                 folderIDs.add(entry.getValue().getId());
             }

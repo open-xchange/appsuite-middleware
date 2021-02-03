@@ -211,7 +211,9 @@ properties:
       description: |
         Allows to exclude specific root folders from OX Drive synchronization explicitly. 
         Excluded folders may not be used as root folder for the synchronization, 
-        however, this does not apply to their subfolders automatically.
+        however, this does not apply to their subfolders automatically. 
+        This also means that a subfolder defined here will still be synchronized to clients, if 
+        their parent root synchronization folder isn't.
         Excluded folders should be specified in a comma-separated list of their unique identifiers.
         Typical candidates for the blacklist would be folder 15 (the "public folders" root) 
         or folder 10 (the "shared folders" root) in large enterprise installations.      
