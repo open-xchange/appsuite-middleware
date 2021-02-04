@@ -405,16 +405,26 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
                 continue;
             }
 
-            List<FileStorageAccount> accounts = null;
-            if (fsService instanceof AccountAware) {
-                accounts = ((AccountAware) fsService).getAccounts(session);
+            try {
+                List<FileStorageAccount> accounts = null;
+                if (fsService instanceof AccountAware) {
+                    accounts = ((AccountAware) fsService).getAccounts(session);
+                }
+                if (null == accounts) {
+                    accounts = fsService.getAccountManager().getAccounts(session);
+                }
+                for (FileStorageAccount fileStorageAccount : accounts) {
+                    FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
+                    retval.add(connect(accountAccess).getFileAccess());
+                }
             }
-            if (null == accounts) {
-                accounts = fsService.getAccountManager().getAccounts(session);
+            catch(OXException e) {
+                getLogger(AbstractCompositingIDBasedAccess.class).error(
+                    "Error getting file storage access for service {} ", fsService.getId(), e);
             }
-            for (FileStorageAccount fileStorageAccount : accounts) {
-                FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                retval.add(connect(accountAccess).getFileAccess());
+            catch(Exception e) {
+                getLogger(AbstractCompositingIDBasedAccess.class).error(
+                    "Unexpected error getting file storage access for service {} ", fsService.getId(), e);
             }
         }
         return retval;
