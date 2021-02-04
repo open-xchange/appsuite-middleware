@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -79,6 +80,7 @@ import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -101,6 +103,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
+import com.openexchange.testing.httpclient.models.ConfigResponse;
+import com.openexchange.testing.httpclient.modules.ConfigApi;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
@@ -129,6 +133,29 @@ public abstract class CardDAVTest extends WebDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        ConfigApi configApi = new ConfigApi(getApiClient());
+        // Expect contact collect folder to be created (contactCollectEnabled == true)
+        ConfigResponse configResp = configApi.getConfigNode("modules/mail/contactCollectEnabled"); // modules/mail/
+        assertNull(configResp.getErrorDesc(), configResp.getError());
+        Assert.assertTrue(Boolean.valueOf(configResp.getData().toString()).booleanValue());
+        boolean created = false;
+        long start = System.currentTimeMillis();
+        // Wait until the ContactCollectorFolderCreator finished
+        while (created == false && (start + TimeUnit.SECONDS.toMillis(30)) > System.currentTimeMillis()) {
+            ConfigResponse resp = configApi.getConfigNode("modules/mail/contactCollectFolder");
+            assertNull(resp.getErrorDesc(), resp.getError());
+            Object data = resp.getData();
+            if (data != null && data.equals("null") == false) {
+                created = true;
+                break;
+            }
+            Thread.sleep(1000);
+        }
+        if (created == false) {
+            Assert.fail("Contact collect folder not created in time");
+        }
+
         /*
          * init
          */

@@ -126,5 +126,6 @@
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
     
     <logger name="com.openexchange.webdav" level="TRACE"/>
+    <logger name="com.openexchange.carddav.Tools" level="TRACE"/>
 
 </configuration>

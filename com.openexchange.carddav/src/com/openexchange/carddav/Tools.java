@@ -51,6 +51,8 @@ package com.openexchange.carddav;
 
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.exception.OXException;
@@ -75,6 +77,8 @@ import com.openexchange.webdav.protocol.WebdavPath;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Tools {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Tools.class);
 
     /**
      * The OAuth scope token for CardDAV
@@ -125,6 +129,23 @@ public class Tools {
         for (UserizedFolder folder : folders) {
             result = prime * result + ((null == folder.getID()) ? 0 : folder.getID().hashCode());
             result = prime * result + ((null == folder.getOwnPermission()) ? 0 : folder.getOwnPermission().hashCode());
+        }
+
+        if(LOG.isDebugEnabled()) {
+            StringBuilder b = new StringBuilder("Generated folder hash '");
+            b.append(Integer.toHexString(result)).append("' from: ");
+            // @formatter:off
+            folders.forEach((f) -> {
+                b.append("{ name: '")
+                 .append(f.getName())
+                 .append("', id: ")
+                 .append(f.getID())
+                 .append(", perms: ")
+                 .append(f.getOwnPermission().hashCode())
+                 .append(" }, ");
+            });
+            // @formatter:on
+            LOG.debug(b.toString());
         }
         return Integer.toHexString(result);
     }

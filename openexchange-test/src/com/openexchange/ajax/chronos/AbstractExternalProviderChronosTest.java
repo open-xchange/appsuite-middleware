@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,7 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.proxy.ClearRequest;
 import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.MockRequestMethod;
+import com.openexchange.ajax.proxy.MockResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
@@ -161,7 +163,11 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     protected void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
         InputStream stream = new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8.name()));
         MockRequest mockRequest = new MockRequest(method, uri, stream, httpStatus, responseHeaders, delay);
-        getClient().execute(mockRequest);
+        MockResponse mockResponse = getClient().execute(mockRequest);
+        Object data = mockResponse.getData();
+        Assert.assertFalse("Request could not be mocked", null == data);
+        Assert.assertTrue("Request could not be mocked", String.class.isAssignableFrom(data.getClass()));
+        Assert.assertTrue("Request could not be mocked", "ok".equalsIgnoreCase((String) data));
     }
 
     /**
