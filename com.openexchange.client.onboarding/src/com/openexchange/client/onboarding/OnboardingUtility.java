@@ -134,26 +134,54 @@ public class OnboardingUtility {
     }
 
     /**
-     * Crafts a UUID for specified scenario for given user.
+     * Crafts a UUID for specified arguments for given user.
      *
      * @param identifier The identifier to craft from
+     * @param type The optional type identifier; e.g. <code>"scenario"</code> or <code>"provider"</code>
      * @param session The session providing user data
      * @return The crafted UUID
      */
-    public static UUID craftUUIDFrom(String identifier, Session session) {
-        return craftUUIDFrom(identifier, session.getUserId(), session.getContextId());
+    public static UUID craftUUIDFrom(String identifier, String type, Session session) {
+        return craftUUIDFrom(identifier, type, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Crafts a UUID for specified arguments for given user.
+     *
+     * @param identifier The identifier to craft from
+     * @param type The optional type identifier to consider when crafting UUID; e.g. <code>"scenario"</code> or <code>"provider"</code>
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The crafted UUID
+     */
+    public static UUID craftUUIDFrom(String identifier, String type, int userId, int contextId) {
+        return new UUID(longFor(identifier.hashCode(), (Strings.isEmpty(type) ? "open-xchange" : type).hashCode()), longFor(userId, contextId));
     }
 
     /**
      * Crafts a UUID for specified scenario for given user.
      *
      * @param identifier The identifier to craft from
+     * @param type The optional type identifier to consider when crafting UUID; e.g. <code>"scenario"</code> or <code>"provider"</code>
      * @param userId The user id
      * @param contextId The context id
      * @return The crafted UUID
      */
-    public static UUID craftUUIDFrom(String identifier, int userId, int contextId) {
-        return new UUID(longFor(identifier.hashCode(), "open-xchange".hashCode()), longFor(userId, contextId));
+    public static UUID craftScenarioUUIDFrom(String identifier, int userId, int contextId) {
+        return craftUUIDFrom(identifier, "scenario", userId, contextId);
+    }
+
+    /**
+     * Crafts a UUID for specified provider for given user.
+     *
+     * @param identifier The identifier to craft from
+     * @param type The optional type identifier to consider when crafting UUID; e.g. <code>"scenario"</code> or <code>"provider"</code>
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The crafted UUID
+     */
+    public static UUID craftProviderUUIDFrom(String identifier, int userId, int contextId) {
+        return craftUUIDFrom(identifier, "provider", userId, contextId);
     }
 
     private static long longFor(int x, int y) {
