@@ -487,7 +487,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             final int genericConfId;
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
-                final Map<String, Object> configuration = new HashMap<String, Object>(account.getConfiguration());
+                final Map<String, Object> configuration = null == account.getConfiguration() ? Collections.emptyMap() : new HashMap<String, Object>(account.getConfiguration());
                 /*
                  * Encrypt password fields to not having clear-text representation in database
                  */

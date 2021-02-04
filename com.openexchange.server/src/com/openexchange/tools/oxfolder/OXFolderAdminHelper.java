@@ -79,6 +79,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.Databases;
+import com.openexchange.database.RetryingTransactionClosure;
+import com.openexchange.database.SQLClosure;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.NameBuilder;
@@ -1041,8 +1043,9 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
+     * @throws OXException If a SQL error occurs
      */
-    private static void createPublicFolder(final int folderId, final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createPublicFolder(final int folderId, final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException, OXException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
             createSystemPublicFolder(contextId, mailAdmin, writeCon, creatingTime);
         } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
@@ -1062,8 +1065,9 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
+     * @throws OXException If a SQL error occurs
      */
-    private static void createSystemPublicFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException, OXException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -1098,8 +1102,9 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
+     * @throws OXException If a SQL error occurs
      */
-    private static void createSystemInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException, OXException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -1133,8 +1138,9 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
+     * @throws OXException If a SQL error occurs
      */
-    private static void createSystemPublicInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicInfostoreFolder(final int contextId, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException, OXException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -1237,7 +1243,7 @@ public final class OXFolderAdminHelper {
     private static boolean checkFolderExistence(final int contextId, final int folderId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
+            stmt = con.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             return stmt.executeQuery().next();
@@ -1280,43 +1286,56 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
-    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException {
+    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException, OXException {
         createSystemFolder(systemFolderId, systemFolderName, Collections.singleton(systemPermission), parentId, module, insertIntoSpecialFolders, creatingTime, mailAdminId, isPublic, contextId, writeCon);
     }
 
-    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final Collection<OCLPermission> systemPermissions, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException {
+    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final Collection<OCLPermission> systemPermissions, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int contextId, final Connection writeCon) throws SQLException, OXException {
+        RetryingTransactionClosure.execute(new SQLClosure<Void>() {
+
+            @Override
+            public Void execute(Connection con) throws SQLException, OXException {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_FOLDER);
+                    stmt.setInt(1, systemFolderId);
+                    stmt.setInt(2, contextId);
+                    stmt.setInt(3, parentId);
+                    stmt.setString(4, systemFolderName);
+                    stmt.setInt(5, module);
+                    stmt.setInt(6, FolderObject.SYSTEM_TYPE);
+                    stmt.setLong(7, creatingTime);
+                    stmt.setInt(8, mailAdminId); // created_from
+                    stmt.setLong(9, creatingTime); // changing_date
+                    stmt.setInt(10, mailAdminId); // changed_from
+                    stmt.setInt(11, isPublic ? FolderObject.PUBLIC_PERMISSION : FolderObject.CUSTOM_PERMISSION); // permission_flag
+                    stmt.setInt(12, 1); // subfolder_flag
+                    stmt.executeUpdate();
+                } finally {
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                }
+                return null;
+            }
+        }, 3, writeCon);
+        insertPermissionsForSystemFolder(systemFolderId, systemPermissions, contextId, writeCon);
+        if (insertIntoSpecialFolders) {
+            insertIntoSpecialFolders(systemFolderId, systemFolderName, contextId, writeCon);
+        }
+    }
+
+    private static void insertIntoSpecialFolders(final int systemFolderId, final String systemFolderName, final int contextId, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_FOLDER);
-            stmt.setInt(1, systemFolderId);
-            stmt.setInt(2, contextId);
-            stmt.setInt(3, parentId);
-            stmt.setString(4, systemFolderName);
-            stmt.setInt(5, module);
-            stmt.setInt(6, FolderObject.SYSTEM_TYPE);
-            stmt.setLong(7, creatingTime);
-            stmt.setInt(8, mailAdminId); // created_from
-            stmt.setLong(9, creatingTime); // changing_date
-            stmt.setInt(10, mailAdminId); // changed_from
-            stmt.setInt(11, isPublic ? FolderObject.PUBLIC_PERMISSION : FolderObject.CUSTOM_PERMISSION); // permission_flag
-            stmt.setInt(12, 1); // subfolder_flag
+            stmt = writeCon.prepareStatement(SQL_INSERT_SPECIAL_FOLDER);
+            stmt.setString(1, systemFolderName); // tag
+            stmt.setInt(2, contextId); // cid
+            stmt.setInt(3, systemFolderId); // fuid
             stmt.executeUpdate();
-            stmt.close();
-            stmt = null;
-            insertPermissionsForSystemFolder(systemFolderId, systemPermissions, contextId, writeCon);
-            if (insertIntoSpecialFolders) {
-                stmt = writeCon.prepareStatement(SQL_INSERT_SPECIAL_FOLDER);
-                stmt.setString(1, systemFolderName); // tag
-                stmt.setInt(2, contextId); // cid
-                stmt.setInt(3, systemFolderId); // fuid
-                stmt.executeUpdate();
-                stmt.close();
-                stmt = null;
-            }
         } finally {
             if (stmt != null) {
                 stmt.close();
-                stmt = null;
             }
         }
     }
