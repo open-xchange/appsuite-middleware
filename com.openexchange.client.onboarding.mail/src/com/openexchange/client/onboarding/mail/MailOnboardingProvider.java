@@ -280,7 +280,6 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
                 } else {
                     imapLogin = mailSettings.getLogin();
                 }
-                imapLogin = "gruetze";
                 configBuilder.withLogin(imapLogin);
             }
 
