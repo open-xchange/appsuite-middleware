@@ -462,9 +462,9 @@ public final class OXFolderSQL {
      * @param folderId The folder ID
      * @param lastModified The new last-modified time stamp to set
      * @param modifiedBy The user who shall be inserted as modified-by
-     * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
+     * @param writeCon A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If parameter <code>writeCon</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     public static void updateLastModified(final int folderId, final long lastModified, final int modifiedBy, final Context ctx) throws OXException, SQLException {
@@ -485,9 +485,9 @@ public final class OXFolderSQL {
      * @param folderId The folder ID
      * @param lastModified The new last-modified time stamp to set
      * @param modifiedBy The user who shall be inserted as modified-by
-     * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
+     * @param writeCon A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If parameter <code>writeCon</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     public static void updateLastModified(final int folderId, final long lastModified, final int modifiedBy, final Connection writeCon, final Context ctx) throws OXException, SQLException {
@@ -523,11 +523,10 @@ public final class OXFolderSQL {
     /**
      * Updates the last modified time stamp of the folder whose ID matches given parameter <code>folderId</code>.
      *
-     * @param folderId The folder identifier
-     * @param lastModified The new last-modified time stamp to set
-     * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
+     * @param folderId The folder ID
+     * @param lastModified The new last-modified timestamp to set
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     private static void updateLastModified(int folderId, long lastModified, Context ctx) throws OXException, SQLException {
@@ -549,7 +548,7 @@ public final class OXFolderSQL {
      * @param lastModified The new last-modified time stamp to set
      * @param writeCon A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If parameter <code>writeCon</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     static void updateLastModified(final int folderId, final long lastModified, final Connection writeCon, final Context ctx) throws OXException, SQLException {
@@ -784,7 +783,7 @@ public final class OXFolderSQL {
      * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     public static void updateName(FolderObject storedFolder, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
@@ -808,7 +807,7 @@ public final class OXFolderSQL {
      * @param modifiedBy The user who shall be inserted as modified-by
      * @param writeCon A writeable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
-     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws OXException If parameter <code>writeCon</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     public static void updateName(FolderObject storedFolder, String newName, long lastModified, int modifiedBy, Context ctx, Connection writeCon) throws OXException, SQLException {

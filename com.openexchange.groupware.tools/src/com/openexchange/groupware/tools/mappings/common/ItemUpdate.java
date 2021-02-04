@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.groupware.tools.mappings.common;
 
 import java.util.Set;
 

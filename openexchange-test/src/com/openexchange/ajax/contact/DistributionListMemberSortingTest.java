@@ -69,9 +69,9 @@ import com.openexchange.testing.httpclient.models.DistributionListMember.MailFie
 public class DistributionListMemberSortingTest extends AbstractApiClientContactTest {
 
     private ContactData contactObj;
-    private String      conId;
-    private String      conAID;
-    private String      conBID;
+    private String conId;
+    private String conAID;
+    private String conBID;
 
     @Override
     @Before
@@ -113,18 +113,54 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
 
     @Test
     public void testSorting() throws ApiException {
-        ContactResponse response = contactsApi.getContact(conId, contactFolderId);
-        Assert.assertNull(response.getErrorDesc(), response.getError());
-        Assert.assertNotNull("Data shouldn't be null", response.getData());
-        ContactData data = response.getData();
-        List<DistributionListMember> distributionList = data.getDistributionList();
-        Assert.assertNotNull("Missing members", distributionList);
-        Assert.assertEquals("Wrong number of members.", 2, distributionList.size());
+        List<DistributionListMember> distributionList = getDisList();
 
         Assert.assertEquals(conAID, distributionList.get(0).getId());
         Assert.assertNotNull("Sortname must not be null!", distributionList.get(0).getSortName());
         Assert.assertEquals(conBID, distributionList.get(1).getId());
         Assert.assertNotNull("Sortname must not be null!", distributionList.get(1).getSortName());
+    }
+
+    @Test
+    public void testUpdatesDisplayname() throws Exception {
+        List<DistributionListMember> distributionList = getDisList();
+
+        DistributionListMember distributionListMemberA = distributionList.get(0);
+        Assert.assertEquals(conAID, distributionListMemberA.getId());
+        Assert.assertNotNull("Sortname must not be null!", distributionList.get(0).getSortName());
+        Assert.assertEquals(conBID, distributionList.get(1).getId());
+        Assert.assertNotNull("Sortname must not be null!", distributionList.get(1).getSortName());
+
+        /*
+         * Update contact display name, expect new display name in distribution list
+         */
+        ContactData delta = new ContactData();
+        String displayName = "TotallyAwesomeNew Name";
+        delta.setId(distributionListMemberA.getId());
+        delta.setDisplayName(displayName);
+        updateContact(delta, contactFolderId);
+        distributionList = getDisList();
+
+        distributionListMemberA = distributionList.get(0);
+        Assert.assertEquals(conAID, distributionListMemberA.getId());
+        Assert.assertEquals(displayName, distributionListMemberA.getDisplayName());
+        Assert.assertNotNull("Sortname must not be null!", distributionList.get(0).getSortName());
+        Assert.assertEquals(conBID, distributionList.get(1).getId());
+        Assert.assertNotNull("Sortname must not be null!", distributionList.get(1).getSortName());
+
+    }
+
+    private List<DistributionListMember> getDisList() throws ApiException {
+        ContactResponse response = contactsApi.getContact(conId, contactFolderId);
+        Assert.assertNull(response.getErrorDesc(), response.getError());
+        Assert.assertNotNull("Data shouldn't be null", response.getData());
+        ContactData data = response.getData();
+        List<DistributionListMember> distributionList = data.getDistributionList();
+
+        Assert.assertNotNull("Missing members", distributionList);
+        Assert.assertEquals("Wrong number of members.", 2, distributionList.size());
+
+        return distributionList;
     }
 
 }

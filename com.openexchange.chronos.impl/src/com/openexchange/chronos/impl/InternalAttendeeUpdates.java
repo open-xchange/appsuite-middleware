@@ -72,14 +72,14 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
-import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.tools.mappings.common.AbstractCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.DefaultItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 
 /**
  * {@link InternalAttendeeUpdates}

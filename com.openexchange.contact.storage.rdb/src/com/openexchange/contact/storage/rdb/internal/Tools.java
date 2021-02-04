@@ -134,13 +134,12 @@ public final class Tools {
      * Extracts the relevant information from a {@link IncorrectStringSQLException} exception and puts it into a corresponding {@link OXException}.
      *
      * @param session The user session
-     * @param connection A (readable) db connection
      * @param e The incorrect string exception
      * @param contact The affected contact
      * @param table The database table
      * @return The exception
      */
-    public static OXException getIncorrectStringException(Session session, Connection connection, IncorrectStringSQLException e, Contact contact, Table table) throws OXException {
+    public static OXException getIncorrectStringException(Session session, IncorrectStringSQLException e, Contact contact, Table table) throws OXException {
         /*
          * create problematic attributes
          */

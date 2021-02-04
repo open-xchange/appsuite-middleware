@@ -59,8 +59,8 @@ import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
 import com.openexchange.java.Strings;
 
 /**

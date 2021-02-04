@@ -59,7 +59,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 
 /**
  * {@link Bug64119Test}

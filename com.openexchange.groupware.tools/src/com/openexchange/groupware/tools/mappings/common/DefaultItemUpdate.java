@@ -47,17 +47,16 @@
  *
  */
 
-package com.openexchange.chronos.common.mapping;
+package com.openexchange.groupware.tools.mappings.common;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import com.openexchange.chronos.EnumeratedProperty;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.EnumeratedProperty;
 
 /**
  * {@link DefaultItemUpdate}

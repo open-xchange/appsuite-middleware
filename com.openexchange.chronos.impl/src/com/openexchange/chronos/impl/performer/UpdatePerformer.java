@@ -99,7 +99,6 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
-import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -111,14 +110,15 @@ import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.groupware.tools.mappings.common.AbstractSimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 import com.openexchange.tools.arrays.Arrays;
 
 /**

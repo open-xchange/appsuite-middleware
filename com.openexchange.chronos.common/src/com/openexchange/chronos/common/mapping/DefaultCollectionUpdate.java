@@ -51,8 +51,8 @@ package com.openexchange.chronos.common.mapping;
 
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 
 /**
  * {@link DefaultCollectionUpdate}

@@ -125,6 +125,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
+import com.openexchange.database.RetryingTransactionClosure;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -537,12 +538,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private static void deleteTableData(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) throws SQLException {
-        Statement stmt = null;
         try {
-            stmt = con.createStatement();
-            stmt.executeUpdate(stmtBuilder.append(tableName).append(" WHERE cid=").append(contextId).toString());
-        } finally {
-            closeSQLStuff(stmt);
+            RetryingTransactionClosure.execute((c) -> {
+                Statement stmt = null;
+                try {
+                    stmt = c.createStatement();
+                    stmt.executeUpdate(stmtBuilder.append(tableName).append(" WHERE cid=").append(contextId).toString());
+                    return null;
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }, 3, con);
+        } catch (OXException e) {
+            // SQL closure doesn't throw OXException... so this is just for the compiler
+            throw new SQLException(e);
         }
     }
 

@@ -108,20 +108,20 @@ import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.ConferenceMapper;
-import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.DefaultItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 
 /**
  * {@link InternalEventUpdate}

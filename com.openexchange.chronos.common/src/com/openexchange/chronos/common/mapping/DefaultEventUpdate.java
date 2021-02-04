@@ -62,9 +62,11 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.AbstractCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.DefaultItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 import com.openexchange.tools.arrays.Arrays;
 
 /**

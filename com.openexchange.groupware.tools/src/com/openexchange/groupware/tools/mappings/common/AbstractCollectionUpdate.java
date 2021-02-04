@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.common.mapping;
+package com.openexchange.groupware.tools.mappings.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 
 /**

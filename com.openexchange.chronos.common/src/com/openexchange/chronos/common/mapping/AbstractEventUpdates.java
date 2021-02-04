@@ -56,6 +56,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.groupware.tools.mappings.common.AbstractSimpleCollectionUpdate;
 
 /**
  * {@link AbstractEventUpdates}

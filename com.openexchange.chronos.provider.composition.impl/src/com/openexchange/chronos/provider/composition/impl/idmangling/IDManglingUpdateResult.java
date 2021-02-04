@@ -59,9 +59,9 @@ import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 
 /**
  * {@link IDManglingUpdateResult}

@@ -69,9 +69,7 @@ import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
-import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
-import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -84,10 +82,12 @@ import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.common.AbstractSimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.DefaultItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 import com.openexchange.java.Strings;
 
 /**

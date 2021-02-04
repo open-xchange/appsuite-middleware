@@ -75,7 +75,6 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -132,6 +131,8 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.RetryingTransactionClosure;
+import com.openexchange.database.SQLClosure;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.filestore.FileStorages;
@@ -1525,21 +1526,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
-            lockTable("updateTask", con);
         } catch (OXException e) {
             throw StorageException.wrapForRMI("Problem storing the primary mail account.", e);
-        } catch (SQLException e) {
-            throw new StorageException("Problem storing the primary mail account.", e);
-        }
-    }
-
-    private void lockTable(String table, Connection con) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.execute("SELECT 1 FROM " + table + " FOR UPDATE");
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 
@@ -2331,12 +2319,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 LOG.debug("Delete user {}({}) from contacts ...", user.getId(), ctx.getId());
                 int contactID = getContactIdByUserId(contextId, userId, write_ox_con);
-                stmt = write_ox_con.prepareStatement("INSERT INTO del_contacts (creating_date, created_from, changing_date, changed_from, fid, cid, intfield01, uid, filename) SELECT pc.creating_date, pc.created_from, ?, pc.changed_from, pc.fid, pc.cid, pc.intfield01, pc.uid, pc.filename FROM prg_contacts pc WHERE cid = ? AND intfield01 = ?");
-                stmt.setLong(1, System.currentTimeMillis());
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, contactID);
-                stmt.executeUpdate();
-                stmt.close();
+                insertIntoDelContacts(write_ox_con, contextId, contactID);
                 stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts_image WHERE cid = ? AND intfield01 = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, contactID);
@@ -2419,6 +2402,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    private void insertIntoDelContacts(final Connection write_ox_con, int contextId, int contactID) throws StorageException, SQLException, OXException {
+        RetryingTransactionClosure.execute(new SQLClosure<Void>() {
+
+            @Override
+            public Void execute(Connection con) throws SQLException, OXException {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = write_ox_con.prepareStatement("INSERT INTO del_contacts (creating_date, created_from, changing_date, changed_from, fid, cid, intfield01, uid, filename) SELECT pc.creating_date, pc.created_from, ?, pc.changed_from, pc.fid, pc.cid, pc.intfield01, pc.uid, pc.filename FROM prg_contacts pc WHERE cid = ? AND intfield01 = ?");
+                    stmt.setLong(1, System.currentTimeMillis());
+                    stmt.setInt(2, contextId);
+                    stmt.setInt(3, contactID);
+                    stmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                }
+                return null;
+            }
+        }, 3, write_ox_con);
     }
 
     private int getContactIdByUserId(final int ctxId, final int userId, final Connection con) throws StorageException {

@@ -916,6 +916,8 @@ public final class TaskLogic {
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
      *
      * @param ctx Context
+     * @param con The connection to use
+     * @param userId The user ID
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
      * @throws OXException if an exception occurs.

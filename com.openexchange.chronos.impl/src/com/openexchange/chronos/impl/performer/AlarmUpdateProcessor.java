@@ -65,9 +65,9 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
-import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 
 /**
  * {@link AlarmUpdateProcessor}

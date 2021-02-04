@@ -86,9 +86,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.groupware.tools.mappings.common.AbstractCollectionUpdate;
 import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.java.Lists;
 import com.openexchange.java.Streams;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -249,7 +251,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
             rollback = false;
         } catch (IncorrectStringSQLException e) {
-            throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
+            throw Tools.getIncorrectStringException(serverSession, e, contact, Table.CONTACTS);
         } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {
@@ -493,13 +495,14 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * update distlist data if needed
              */
             if (queryFields.hasDistListData()) {
-                // TODO: this is lazy compared to the old implementation
-                // delete any previous entries
-                executor.deleteSingle(connection, Table.DISTLIST, contextID, objectID);
-                if (0 < contact.getNumberOfDistributionLists() && null != contact.getDistributionList()) {
-                    // insert distribution list entries
-                    final DistListMember[] members = DistListMember.create(contact.getDistributionList(), contextID, objectID);
-                    executor.insert(connection, Table.DISTLIST, members, Fields.DISTLIST_DATABASE_ARRAY);
+                List<DistListMember> storedMembers = Lists.toList(executor.select(connection, Table.DISTLIST, contextID, objectID, Fields.DISTLIST_DATABASE_ARRAY));
+                List<DistListMember> members = Lists.toList(DistListMember.create(contact.getDistributionList(), contextID, objectID));
+                AbstractCollectionUpdate<DistListMember, DistListMemberField> distListUpdate = Mappers.getDistListUpdate(storedMembers, members);
+                executor.deleteByUuid(connection, contextID, distListUpdate.getRemovedItems());
+                executor.updateMembers(connection, contextID, distListUpdate.getUpdatedItems());
+                List<DistListMember> addedItems = distListUpdate.getAddedItems();
+                if (null != addedItems && false == addedItems.isEmpty()) {
+                    executor.insert(connection, Table.DISTLIST, addedItems.toArray(new DistListMember[addedItems.size()]), Fields.DISTLIST_DATABASE_ARRAY);
                 }
             }
             /*
@@ -508,7 +511,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
             rollback = false;
         } catch (IncorrectStringSQLException e) {
-            throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
+            throw Tools.getIncorrectStringException(serverSession, e, contact, Table.CONTACTS);
         } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {
@@ -554,6 +557,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             final List<Integer> affectedDistributionLists = new ArrayList<Integer>();
             final List<DistListMember> referencedMembers = executor.select(connectionHelper.getReadOnly(), Table.DISTLIST, contextID, originalContact.getObjectID(), originalContact.getParentFolderID(), DistListMemberField.values());
+            connectionHelper.backReadOnly();
             if (null != referencedMembers && 0 < referencedMembers.size()) {
                 for (final DistListMember member : referencedMembers) {
                     final DistListMemberField[] updatedFields = Tools.updateMember(member, updatedContact);
@@ -582,7 +586,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
             rollback = false;
         } catch (IncorrectStringSQLException e) {
-            throw Tools.getIncorrectStringException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
+            throw Tools.getIncorrectStringException(session, e, updatedContact, Table.CONTACTS);
         } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {

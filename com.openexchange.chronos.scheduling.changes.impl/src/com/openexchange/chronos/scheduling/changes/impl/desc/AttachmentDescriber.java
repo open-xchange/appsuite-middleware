@@ -59,7 +59,7 @@ import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 import com.openexchange.java.Strings;
 
 /**

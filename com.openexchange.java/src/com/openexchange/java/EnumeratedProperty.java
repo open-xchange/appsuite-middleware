@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.java;
 
 /**
  * {@link EnumeratedProperty}

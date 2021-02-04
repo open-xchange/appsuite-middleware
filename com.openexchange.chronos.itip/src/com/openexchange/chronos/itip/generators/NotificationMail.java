@@ -74,10 +74,10 @@ import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 import com.openexchange.mail.config.MailProperties;
 
 /**

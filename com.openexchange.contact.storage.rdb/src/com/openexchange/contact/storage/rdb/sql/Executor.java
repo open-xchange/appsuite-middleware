@@ -88,6 +88,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 
@@ -1155,6 +1156,29 @@ public class Executor {
         }
     }
 
+    public void updateMembers(Connection connection, int contextID, List<ItemUpdate<DistListMember, DistListMemberField>> list) throws SQLException, OXException {
+        if (null == list || list.isEmpty()) {
+            return;
+        }
+        for (ItemUpdate<DistListMember, DistListMemberField> member : list) {
+            DistListMemberField[] fields = member.getUpdatedFields().toArray(new DistListMemberField[member.getUpdatedFields().size()]);
+            String sql = new StringBuilder()
+                .append("UPDATE ").append(Table.DISTLIST).append(" SET ").append(Mappers.DISTLIST.getAssignments(fields)).append(" WHERE ")
+                .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+                .append(Mappers.DISTLIST.get(DistListMemberField.UUID).getColumnLabel()).append("=?").toString();
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(sql);
+                Mappers.DISTLIST.setParameters(stmt, member.getUpdate(), fields);
+                stmt.setInt(1 + fields.length, contextID);
+                Mappers.DISTLIST.get(DistListMemberField.UUID).set(stmt, 2 + fields.length, member.getOriginal());
+                logExecuteUpdate(stmt);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
+    }
+
     private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws SQLException {
         if (null != objectIDs && objectIDs.length > 0) {
             StringBuilder sb = new StringBuilder();
@@ -1191,7 +1215,6 @@ public class Executor {
         if (Integer.MIN_VALUE != objectID) {
             sb.append(" AND object=?");
         }
-        sb.append(";");
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(sb.toString());
@@ -1226,7 +1249,6 @@ public class Executor {
                 stringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
             }
         }
-        stringBuilder.append(';');
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         try {
@@ -1252,16 +1274,37 @@ public class Executor {
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs) throws SQLException, OXException {
         return delete(connection, table, contextID, folderID, objectIDs, Long.MIN_VALUE);
     }
-
+    
+    public void deleteByUuid(Connection connection, int contextID, List<DistListMember> members) throws SQLException, OXException {
+        if (null == members || members.isEmpty()) {
+            return;
+        }
+        String sql = new StringBuilder()
+            .append("DELETE FROM ").append(Table.DISTLIST).append(" WHERE ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.CONTACT_ID).getColumnLabel()).append("=? AND ")
+            .append(Mappers.DISTLIST.get(DistListMemberField.UUID).getColumnLabel()).append("=?").toString();
+        for (DistListMember member : members) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(sql);
+                stmt.setInt(1, contextID);
+                stmt.setInt(2, member.getEntryID());
+                stmt.setString(3, member.getUuid().toString());
+                logExecuteUpdate(stmt);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
+        deleteSingleFromObjectUseCountTable(connection, contextID, members.get(0).getEntryID());
+    }
     public int deleteSingle(Connection connection, Table table, int contextID, int objectID, long maxLastModified) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
             .append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=?");
-        if (Long.MIN_VALUE == maxLastModified) {
-            stringBuilder.append(';');
-        } else {
-            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?;");
+        if (Long.MIN_VALUE != maxLastModified) {
+            stringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append("<=?");
         }
         PreparedStatement stmt = null;
         try {

@@ -52,6 +52,7 @@ package com.openexchange.chronos.service;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
 
 /**
  * {@link EventUpdates}

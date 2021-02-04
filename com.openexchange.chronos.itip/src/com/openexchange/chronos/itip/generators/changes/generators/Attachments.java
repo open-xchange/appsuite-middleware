@@ -61,9 +61,9 @@ import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 import com.openexchange.java.Strings;
 
 /**

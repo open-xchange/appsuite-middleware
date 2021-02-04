@@ -64,10 +64,12 @@ import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.ItemUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.AbstractCollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
+import com.openexchange.groupware.tools.mappings.common.DefaultItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
+import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
 
 /**
  * {@link AttendeeEventUpdate}

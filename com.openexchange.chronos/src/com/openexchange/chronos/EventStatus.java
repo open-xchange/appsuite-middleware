@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos;
 
+import com.openexchange.java.EnumeratedProperty;
+
 /**
  * {@link EventStatus}
  *
