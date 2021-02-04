@@ -97,7 +97,7 @@ public class Contacts implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 if (false == user.isGuest()) {
-                    setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CONTACT)));
+                    setting.setSingleValue(String.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CONTACT)));
                 }
             }
         };

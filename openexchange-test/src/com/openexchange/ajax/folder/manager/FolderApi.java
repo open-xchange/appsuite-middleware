@@ -70,7 +70,7 @@ public class FolderApi {
     private FoldersApi foldersApi;
     private final ApiClient client;
     private final TestUser user;
-    private Integer infostoreFolder = null;
+    private String infostoreFolder = null;
 
     public FolderApi(ApiClient client, TestUser user) throws Exception {
         this.client = client;
@@ -78,10 +78,10 @@ public class FolderApi {
         foldersApi = new FoldersApi(client);
         JSlobApi jslobApi = new JSlobApi(client);
         JSONObject result = new JSONObject(jslobApi.getJSlob("io.ox/core", "folder/infostore", null));
-        infostoreFolder = (Integer) result.get("data");
+        infostoreFolder = String.valueOf(result.get("data"));
     }
 
-    public Integer getInfostoreFolder() {
+    public String getInfostoreFolder() {
         return infostoreFolder;
     }
 

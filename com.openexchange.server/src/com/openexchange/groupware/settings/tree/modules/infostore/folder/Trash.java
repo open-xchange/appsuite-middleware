@@ -121,7 +121,7 @@ public class Trash implements PreferencesItemService {
                     int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH);
                     LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", Long.valueOf(System.currentTimeMillis() - start));
                     if (-1 != folderID) {
-                        setting.setSingleValue(Integer.valueOf(folderID));
+                        setting.setSingleValue(String.valueOf(folderID));
                     }
                     return;
                 }

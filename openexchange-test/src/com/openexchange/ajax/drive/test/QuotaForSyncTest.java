@@ -96,7 +96,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     private String getPrivateInfostoreFolder() throws Exception {
         ConfigApi configApi = new ConfigApi(apiClient);
         ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
-        return ((Integer) configNode.getData()).toString();
+        return (configNode.getData()).toString();
     }
 
     @Test

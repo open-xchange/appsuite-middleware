@@ -97,7 +97,7 @@ public class Calendar implements PreferencesItemService {
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 if (false == user.isGuest()) {
-                    setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CALENDAR)));
+                    setting.setSingleValue(String.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CALENDAR)));
                 }
             }
         };

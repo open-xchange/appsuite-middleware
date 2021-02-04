@@ -49,12 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -123,20 +124,14 @@ public class UserValues {
 
     public int getPrivateInfostoreFolder() throws OXException, IOException, JSONException {
         if (null == privateInfostoreFolder) {
-            GetResponse response = client.execute(new GetRequest(Tree.PrivateInfostoreFolder));
-            Object data = response.getData();
-            if (String.class.isInstance(data)) {
-                privateInfostoreFolder = Integer.valueOf((String) data);
-            } else {
-                privateInfostoreFolder = I(response.getInteger());
-            }
+            initPrivateFolders();
         }
         return privateInfostoreFolder.intValue();
     }
 
     public int getInfostoreTrashFolder() throws OXException, IOException, JSONException {
         if (null == infostoreTrashFolder) {
-            infostoreTrashFolder = I(client.execute(new GetRequest(Tree.InfostoreTrashFolder)).getInteger());
+            infostoreTrashFolder = Integer.valueOf(client.execute(new GetRequest(Tree.InfostoreTrashFolder)).getString());
         }
         return infostoreTrashFolder.intValue();
     }
@@ -158,23 +153,33 @@ public class UserValues {
 
     public int getPrivateAppointmentFolder() throws OXException, IOException, JSONException {
         if (-1 == privateAppointmentFolder) {
-            privateAppointmentFolder = client.execute(new GetRequest(Tree.PrivateAppointmentFolder)).getInteger();
+            initPrivateFolders();
         }
         return privateAppointmentFolder;
     }
 
     public int getPrivateContactFolder() throws OXException, IOException, JSONException {
         if (-1 == privateContactFolder) {
-            privateContactFolder = client.execute(new GetRequest(Tree.PrivateContactFolder)).getInteger();
+            initPrivateFolders();
         }
         return privateContactFolder;
     }
 
     public int getPrivateTaskFolder() throws OXException, IOException, JSONException {
         if (-1 == privateTaskFolder) {
-            privateTaskFolder = client.execute(new GetRequest(Tree.PrivateTaskFolder)).getInteger();
+            initPrivateFolders();
         }
         return privateTaskFolder;
+    }
+
+    private void initPrivateFolders() throws OXException, IOException, JSONException {
+        GetResponse configGetResponse = client.execute(new GetRequest(Tree.PrivateFolders));
+        JSONObject jsonObject = configGetResponse.getJSON();
+        assertNotNull(jsonObject);
+        privateAppointmentFolder = Integer.parseInt(jsonObject.getString("calendar"));
+        privateContactFolder = Integer.parseInt(jsonObject.getString("contacts"));
+        privateTaskFolder = Integer.parseInt(jsonObject.getString("tasks"));
+        privateInfostoreFolder = Integer.valueOf(jsonObject.getString("infostore"));
     }
 
     public Date getServerTime() throws OXException, IOException, JSONException {
