@@ -242,7 +242,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
-            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), userId, contextId).toString());
+            pListDict.setPayloadUUID(OnboardingUtility.craftScenarioUUIDFrom(scenario.getId(), userId, contextId).toString());
             pListDict.setPayloadVersion(1);
             pListDict.setPayloadDisplayName(scenarioProductName);
         } else {
@@ -252,7 +252,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         // Generate payload content dictionary
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.caldav.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
+        payloadContent.setPayloadUUID(OnboardingUtility.craftProviderUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.caldav");
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
