@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -150,6 +151,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
     }
 
     @Test
+    @TryAgain
     public void testPrivate() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPrivate, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPrivate);
@@ -165,6 +167,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
     }
 
     @Test
+    @TryAgain
     public void testPublic() throws Exception {
         AppointmentInsertResponse insertResponse = clientA.execute(new InsertRequest(appointmentPublic, clientA.getValues().getTimeZone()));
         insertResponse.fillAppointment(appointmentPublic);
