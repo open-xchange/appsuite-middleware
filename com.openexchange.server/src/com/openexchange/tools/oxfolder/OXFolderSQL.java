@@ -179,7 +179,7 @@ public final class OXFolderSQL {
      * A possible optimization for this query can be:
      * SELECT ot1.fuid FROM oxfolder_tree AS ot1 LEFT JOIN oxfolder_tree ot2 ON ot1.cid=ot2.cid AND ot1.parent=ot2.fuid WHERE ot1.cid=? AND ot1.parent<>0 AND ot2.fuid IS NULL;
      */
-    private static final String SQL_SELECT_WITH_NON_EXISTING_PARENT = "SELECT ot1.fuid FROM oxfolder_tree AS ot1 where ot1.cid = ? AND ot1.parent <> "+FolderObject.SYSTEM_ROOT_FOLDER_ID+" AND NOT EXISTS (SELECT ot2.fuid FROM oxfolder_tree AS ot2 where ot2.cid = ? AND ot1.parent = ot2.fuid)";
+    private static final String SQL_SELECT_WITH_NON_EXISTING_PARENT = "SELECT ot1.fuid FROM oxfolder_tree AS ot1 where ot1.cid = ? AND ot1.parent <> " + FolderObject.SYSTEM_ROOT_FOLDER_ID + " AND NOT EXISTS (SELECT ot2.fuid FROM oxfolder_tree AS ot2 where ot2.cid = ? AND ot1.parent = ot2.fuid)";
 
     /**
      * Gets the non-existing parents in specified context.
@@ -764,7 +764,7 @@ public final class OXFolderSQL {
      * @throws SQLException
      */
     public static TIntList lookUpFolders(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws OXException, SQLException {
-    	Connection readCon = readConArg;
+        Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1475,6 +1475,7 @@ public final class OXFolderSQL {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
+
     /**
      * Gets a folder's path down to the root folder, ready to be used in events.
      *
@@ -1834,7 +1835,7 @@ public final class OXFolderSQL {
                             if (originPath.isEmpty()) {
                                 stmt.setNull(pos++, java.sql.Types.VARCHAR);
                             } else {
-                                stmt.setString(pos++,  originPath.toString());
+                                stmt.setString(pos++, originPath.toString());
                             }
                         }
                         stmt.setInt(pos++, ctx.getContextId());
@@ -1873,7 +1874,7 @@ public final class OXFolderSQL {
                             if (originPath.isEmpty()) {
                                 stmt.setNull(pos++, java.sql.Types.VARCHAR);
                             } else {
-                                stmt.setString(pos++,  originPath.toString());
+                                stmt.setString(pos++, originPath.toString());
                             }
                         }
                         stmt.setInt(pos++, ctx.getContextId());
@@ -2322,6 +2323,7 @@ public final class OXFolderSQL {
 
     /**
      * This method is used to generate identifier when creating a context.
+     * 
      * @param ctx context to create.
      * @param con writable connection to the context database in transaction mode - autocommit is false.
      * @return a unique identifier for a folder.
