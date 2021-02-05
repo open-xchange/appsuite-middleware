@@ -73,6 +73,29 @@ EOF
         fi
         ox_scr_done SCR-785
     fi
+
+    SCR=SCR-812
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/carddav.properties
+      old_prop_key=com.openexchange.carddav.reducedAggregatedCollection
+      new_prop_key=com.openexchange.carddav.aggregatedCollectionFolders
+      old_default_value="false"
+      new_equivalent="reduced_synced"
+      if ox_exists_property ${old_prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${old_prop_key} ${prop_file})
+        if [ "${old_default_value}" = "${prop_val}" ]
+        then
+          ox_remove_property ${old_prop_key} ${prop_file}
+        else
+          ox_remove_property ${old_prop_key} ${prop_file}
+          ox_set_property ${new_prop_key} ${new_equivalent} ${prop_file}
+        fi
+      fi
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 %clean
