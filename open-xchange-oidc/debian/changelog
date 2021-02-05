@@ -1,3 +1,9 @@
+open-xchange-oidc (7.10.5-5) stable; urgency=medium
+
+  * Third candidate for 7.10.5 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 05 Feb 2021 13:48:58 +0000
+
 open-xchange-oidc (7.10.5-4) stable; urgency=medium
 
   * Second candidate for 7.10.5 release
