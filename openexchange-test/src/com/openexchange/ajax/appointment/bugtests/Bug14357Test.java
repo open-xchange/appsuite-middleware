@@ -57,12 +57,10 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.fields.DataFields;
@@ -117,18 +115,6 @@ public class Bug14357Test extends AbstractAJAXSession {
         checkYear(8, 2017, 2);
         checkYear(9, 2018, 2);
         checkYear(10, 2019, 4);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-            getClient().execute(appointmentDeleteRequest);
-
-        } finally {
-            super.tearDown();
-        }
     }
 
     private void checkYear(int position, int year, int expectedDay) throws Exception {

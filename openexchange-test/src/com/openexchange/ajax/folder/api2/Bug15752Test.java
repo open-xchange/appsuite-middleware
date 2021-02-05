@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder.api2;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -59,7 +58,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
@@ -105,21 +103,6 @@ public class Bug15752Test extends AbstractAJAXSession {
         testFolder.setLastModified(new Date());
         UpdateMailResponse uResp = client.execute(new MoveMailRequest(inboxFolder, testFolder.getFullName(), mailIds[1], true));
         mailIds = new String[] { uResp.getFolder(), uResp.getID() };
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailIds) {
-                client.execute(new DeleteRequest(mailIds, true));
-            }
-            if (null != testFolder) {
-                client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

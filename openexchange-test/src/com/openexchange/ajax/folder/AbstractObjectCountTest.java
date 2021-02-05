@@ -57,7 +57,7 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
@@ -71,13 +71,9 @@ import com.openexchange.test.FolderTestManager;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
+public abstract class AbstractObjectCountTest extends Abstrac2UserAJAXSession {
 
     protected static final int[] DEFAULT_COLUMNS = new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 };
-
-    protected AJAXClient client1;
-
-    protected AJAXClient client2;
 
     protected AbstractObjectCountTest() {
         super();
@@ -87,9 +83,6 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
-        client2 = getClient2();
-
         ContentTypeRegistry ctr = ContentTypeRegistry.getInstance();
         ServiceRegistry.getInstance().addService(ContentTypeRegistry.class, ctr);
     }

@@ -66,6 +66,16 @@ import com.openexchange.testing.httpclient.models.ContactData;
  */
 public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest {
 
+    String protocol;
+    String hostname;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+    }
+
     @Test
     public void testCreateContact() throws Exception {
         FileInputStream input = null;
@@ -86,7 +96,7 @@ public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest
                 fail("Contact contains no image URL.");
             }
 
-            final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
+            final byte[] b = loadImageByURL(protocol, hostname, imageUrl);
             assertTrue("Wrong or no scaling", b.length < bigImage.length);
         } finally {
             if (input != null) {
@@ -118,7 +128,7 @@ public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest
                 fail("Contact contains no image URL.");
             }
 
-            final byte[] b = loadImageByURL(getClient().getProtocol(), getClient().getHostname(), imageUrl);
+            final byte[] b = loadImageByURL(protocol, hostname, imageUrl);
             assertTrue("Wrong or no scaling", b.length < bigImage.length);
         } finally {
             if (input != null) {

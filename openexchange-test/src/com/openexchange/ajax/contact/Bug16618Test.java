@@ -51,11 +51,9 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
@@ -116,16 +114,6 @@ public class Bug16618Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         contact = createContactWithImage();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contact));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

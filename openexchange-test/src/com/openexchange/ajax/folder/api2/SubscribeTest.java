@@ -54,11 +54,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.API;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -102,16 +100,6 @@ public class SubscribeTest extends AbstractAJAXSession {
         final InsertRequest iReq = new InsertRequest(EnumAPI.OX_NEW, testFolder);
         final InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(testFolder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(EnumAPI.EAS_FOLDERS, testFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

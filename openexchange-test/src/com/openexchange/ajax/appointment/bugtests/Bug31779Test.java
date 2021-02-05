@@ -55,7 +55,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -66,7 +65,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug31779Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug31779Test extends AbstractAJAXSession {
@@ -85,7 +84,7 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm2 = new CalendarTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         appointment = new Appointment();
@@ -97,28 +96,33 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
 
         catm.insert(appointment);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     /**
      * Tests the bug as written in the report: If the creator deletes an exception, the whole exception should disappear.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testBug31779() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         catm.delete(catm.createIdentifyingCopy(exception));
-        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
         assertNull("No object expected.", loadedException);
         assertTrue("Error expected.", ctm2.getLastResponse().hasError());
@@ -127,13 +131,13 @@ public class Bug31779Test extends AbstractAJAXSession {
 
     /**
      * Tests the case, that a participant deletes an exception: Only the participant should be removed.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testDeleteByparticipant() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
@@ -142,17 +146,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         Appointment loadedException = catm.get(exception);
         assertNotNull("Object expected.", loadedException);
         assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
-        assertEquals("Wrong changer.", getClient2().getValues().getUserId(), loadedException.getModifiedBy());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+        assertEquals("Wrong changer.", getClient(1).getValues().getUserId(), loadedException.getModifiedBy());
     }
 
 }

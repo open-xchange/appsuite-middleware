@@ -68,7 +68,7 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
     @Test
     public void testIt() throws Exception {
 
-        UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -79,11 +79,16 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient2().getValues().getPrivateAppointmentFolder();
+        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient2().execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
         Appointment actual = getResponse.getAppointment(userTimeZone);
 
         assertFalse(actual.containsAlarm());
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 }

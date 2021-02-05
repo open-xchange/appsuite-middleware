@@ -52,9 +52,7 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.util.Date;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
@@ -93,17 +91,6 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
 
         manager.insertTaskOnServer(task);
 
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            task.setLastModified(new Date(Long.MAX_VALUE));
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

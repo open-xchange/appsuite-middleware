@@ -49,21 +49,17 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.EnhancedApiClient;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -85,19 +81,20 @@ public class MWB104Test extends AbstractChronosTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-        EnhancedApiClient enhancedApiClient2 = generateEnhancedClient(testUser2);
-        rememberClient(enhancedApiClient2);
-        userApi2 = new UserApi(apiClient2, enhancedApiClient2, testUser2);
+        userApi2 = new UserApi(getApiClient(1), getEnhancedApiClient2(), getUser(1));
         defaultFolderId2 = getDefaultFolder(userApi2.getFoldersApi());
         eventManager2 = new EventManager(userApi2, defaultFolderId2);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testResetPartstat() throws Exception {
         EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "MWB-104 Test", folderId);
-        Integer secondUserId = I(getClient2().getValues().getUserId());
+        Integer secondUserId = getUser(1).getUserId();
         Attendee attendee = AttendeeFactory.createIndividual(secondUserId);
         eventData.addAttendeesItem(attendee);
         EventData createdEvent = eventManager.createEvent(eventData, true);
@@ -131,10 +128,4 @@ public class MWB104Test extends AbstractChronosTest {
         }
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        eventManager2.cleanUp();
-        super.tearDown();
-    }
 }

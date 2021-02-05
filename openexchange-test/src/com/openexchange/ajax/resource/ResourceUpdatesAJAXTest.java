@@ -53,10 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceDeleteRequest;
 import com.openexchange.ajax.resource.actions.ResourceNewRequest;
@@ -95,19 +93,6 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest {
         final ResourceNewResponse newResponse = Executor.execute(getSession(), new ResourceNewRequest(resource, true));
         resource.setIdentifier(newResponse.getID());
         resource.setLastModified(newResponse.getTimestamp());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            AJAXSession session = getSession();
-            if (null != session && null != resource && 0 < resource.getIdentifier()) {
-                Executor.execute(session, new ResourceDeleteRequest(resource, Long.MAX_VALUE, false));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     private boolean containsResource(List<Resource> resources, int resourceId) {

@@ -49,13 +49,22 @@
 
 package com.openexchange.ajax.framework;
 
+import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.junit.Assert;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentHashSet;
+import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.CommonResponse;
@@ -74,10 +83,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
 
     protected LoginApi loginApi;
     protected ApiClient apiClient;
-    protected ApiClient apiClient2;
-
-    private final Set<ApiClient> apiClients = new ConcurrentHashSet<>(1);
-    private final Set<CleanableResourceManager> resources2clean = new ConcurrentHashSet<>(1);
+    protected Map<TestUser, ApiClient> apiClients = new HashMap<>();
 
     /**
      * Default constructor.
@@ -88,23 +94,64 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         super();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().build();
+    }
+
     protected ApiClient getApiClient() {
         return apiClient;
     }
 
-    protected ApiClient getApiClient2() {
-        return apiClient2;
+    /**
+     * Gets the api client with the given number from the first context
+     *
+     * @param x
+     * @return The api client
+     */
+    protected ApiClient getApiClient(int x) {
+        return getApiClient(testContext, x);
+    }
+
+    /**
+     * Gets the api client with the given number from the first context
+     *
+     * @param ctx The test context
+     * @param x
+     * @return The api client
+     */
+    protected ApiClient getApiClient(TestContext ctx, int x) {
+        Assert.assertThat(I(x), allOf(is(greaterThanOrEqualTo(I(0))), is(lessThan(I(users.get(ctx).size())))));
+        assertFalse(apiClients.isEmpty());
+        return apiClients.get(users.get(ctx).get(x));
+    }
+
+    /**
+     * Gets the api client for the given user
+     *
+     * @param user The user
+     * @return The api client
+     */
+    protected ApiClient getApiClient(TestUser user) {
+        ApiClient result = apiClients.get(user);
+        Assert.assertNotNull("No client for the given user", result);
+        return result;
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        apiClient = generateApiClient(testUser);
-        rememberClient(apiClient);
-
-        apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
+        if (getTestConfig().createApiClients) {
+            for (Entry<TestContext, List<TestUser>> entry : users.entrySet()) {
+                for (TestUser user : entry.getValue()) {
+                    ApiClient tmpClient = generateApiClient(user);
+                    rememberClient(user, tmpClient);
+                    if (apiClient == null && user.equals(testUser)) {
+                        apiClient = tmpClient;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -112,36 +159,16 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      *
      * @param client The {@link ApiClient} to remember
      */
-    protected void rememberClient(ApiClient client) {
-        apiClients.add(client);
-    }
-
-    /**
-     * Remembers a {@link CleanableResourceManager} so that it can be cleaned up after the test run
-     *
-     * @param cleanable The {@link CleanableResourceManager} to remember
-     */
-    protected void remember(CleanableResourceManager cleanable) {
-        if (cleanable != null) {
-            resources2clean.add(cleanable);
-        }
+    protected void rememberClient(TestUser user, ApiClient client) {
+        apiClients.put(user, client);
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            try {
-                for (CleanableResourceManager cleanable : resources2clean) {
-                    cleanable.cleanUp();
-                }
-            } finally {
-                Iterator<ApiClient> iterator = apiClients.iterator();
-                while (iterator.hasNext()) {
-                    ApiClient client = iterator.next();
-                    if (client.getSession() != null) {
-                        logoutClient(client, true);
-                    }
-                    iterator.remove();
+            for (ApiClient client : apiClients.values()) {
+                if (client.getSession() != null) {
+                    logoutClient(client, true);
                 }
             }
         } finally {
@@ -243,7 +270,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         }
         ApiClient newClient;
         try {
-            newClient = new ApiClient();
+            newClient = generateApiClient();
             setBasePath(newClient);
             newClient.setUserAgent("HTTP API Testing Agent");
             newClient.login(user.getLogin(), user.getPassword());
@@ -252,6 +279,10 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
             throw new OXException(e);
         }
         return newClient;
+    }
+
+    public ApiClient generateApiClient() {
+        return new ApiClient();
     }
 
     protected void setBasePath(ApiClient newClient) {

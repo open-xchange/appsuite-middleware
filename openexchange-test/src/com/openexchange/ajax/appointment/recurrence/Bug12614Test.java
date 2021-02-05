@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -113,8 +112,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         boss = getClient();
-        secretary = getClient2();
-        thirdUser = new AJAXClient(testContext.acquireUser());
+        secretary = getClient(1);
+        thirdUser = getClient(2);
 
         assertFalse("Could not acquire enough users", boss == null);
         assertFalse("Could not acquire enough users", secretary == null );
@@ -127,17 +126,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            secretaryDeletesSeries();
-            bossUnsharesPrivateFolder();
-            if (null != thirdUser) {
-                thirdUser.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test
@@ -206,18 +196,4 @@ public final class Bug12614Test extends AbstractAJAXSession {
         exception.setObjectID(response2.getId());
     }
 
-    private void secretaryDeletesSeries() throws OXException, IOException, JSONException {
-        final GetRequest request = new GetRequest(series.getParentFolderID(), series.getObjectID());
-        final GetResponse response = secretary.execute(request);
-        final DeleteRequest request2 = new DeleteRequest(series.getObjectID(), series.getParentFolderID(), response.getTimestamp());
-        secretary.execute(request2);
-    }
-
-    private void bossUnsharesPrivateFolder() throws OXException, IOException, JSONException {
-        final OCLPermission perm1 = Create.ocl(boss.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        sharedFolder.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        final com.openexchange.ajax.folder.actions.UpdateRequest request = new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder);
-        final CommonInsertResponse response = boss.execute(request);
-        sharedFolder.setLastModified(response.getTimestamp());
-    }
 }

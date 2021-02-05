@@ -60,14 +60,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -119,20 +117,6 @@ public class Bug21026Test extends AbstractAJAXSession {
         first.setPercentComplete(100);
         first.setLastModified(client.execute(new UpdateRequest(first, timeZone)).getTimestamp());
         second = findNextOccurrence(client, task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != third) {
-                client.execute(new DeleteRequest(third));
-            }
-            client.execute(new DeleteRequest(second));
-            client.execute(new DeleteRequest(first));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

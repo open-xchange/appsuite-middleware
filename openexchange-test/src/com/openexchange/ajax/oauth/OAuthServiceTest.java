@@ -51,12 +51,9 @@ package com.openexchange.ajax.oauth;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,12 +62,10 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.oauth.actions.AllOAuthServicesRequest;
 import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
 import com.openexchange.ajax.oauth.types.OAuthService;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
@@ -90,7 +85,6 @@ public class OAuthServiceTest {
     private TestContext testContext;
     private AJAXClient client1;
     private AJAXClient client2;
-    private JSONObject oldConfig2;
 
     @BeforeClass
     public static void before() throws Exception {
@@ -105,8 +99,7 @@ public class OAuthServiceTest {
 
         Map<String, String> properties = Collections.singletonMap("com.openechange.oauth.testservice.enabled", "false");
         ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "user", null);
-        ChangePropertiesResponse changePropertiesResponse = client2.execute(changePropertiesRequest);
-        oldConfig2 = ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
+        client2.execute(changePropertiesRequest);
     }
 
     @After
@@ -116,15 +109,8 @@ public class OAuthServiceTest {
                 client1.logout();
             }
             if (null != client2) {
-                if (null != oldConfig2) {
-                    Map<String, String> oldProperties = new HashMap<String, String>();
-                    for (Entry<String, Object> entry : oldConfig2.entrySet()) {
-                        oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
-                    }
-                    client2.execute(new ChangePropertiesRequest(oldProperties, "user", null));
-                }
+                client2.logout();
             }
-            client2.logout();
         } finally {
             TestContextPool.backContext(testContext);
         }

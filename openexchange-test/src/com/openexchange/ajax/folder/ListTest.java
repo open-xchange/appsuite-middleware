@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import org.json.JSONArray;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -62,8 +61,7 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.Modules;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -74,12 +72,9 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ListTest extends AbstractAJAXSession {
+public class ListTest extends Abstrac2UserAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
-
-    private AJAXClient client;
-    private AJAXClient client2;
 
     /**
      * Initializes a new {@link ListTest}.
@@ -90,19 +85,11 @@ public class ListTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-        client2 = getClient2();
-    }
-
     @Test
     public void testListRoot() throws Throwable {
         // List root's subfolders
         ListRequest request = new ListRequest(EnumAPI.OX_NEW, Integer.toString(FolderObject.SYSTEM_ROOT_FOLDER_ID), new int[] { FolderObject.OBJECT_ID, FolderObject.SUBFOLDERS }, true);
-        ListResponse response = client.execute(request);
+        ListResponse response = client1.execute(request);
 
         boolean privateFolder = false;
         boolean publicFolder = false;
@@ -133,7 +120,7 @@ public class ListTest extends AbstractAJAXSession {
         assertTrue("Infostore folder not found", infostoreFolder);
 
         request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        response = client.execute(request);
+        response = client1.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
         String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.ROOT_FOLDER_ID);
@@ -148,7 +135,7 @@ public class ListTest extends AbstractAJAXSession {
         boolean subFolders = defaultIMAPFolder.hasSubfolders();
         assertTrue("Default email folder has no subfolders.", subFolders);
         request = new ListRequest(EnumAPI.OX_NEW, defaultIMAPFolder.getFullName());
-        response = client.execute(request);
+        response = client1.execute(request);
         iter = response.getFolder();
         FolderObject inboxFolder = null;
         while (iter.hasNext()) {
@@ -160,7 +147,7 @@ public class ListTest extends AbstractAJAXSession {
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
         GetRequest request2 = new GetRequest(EnumAPI.OX_NEW, inboxFolder.getFullName(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
-        GetResponse response2 = client.execute(request2);
+        GetResponse response2 = client1.execute(request2);
         assertFalse("Get failed.", response2.hasError());
     }
 
@@ -168,7 +155,7 @@ public class ListTest extends AbstractAJAXSession {
     public void testListPrivate() throws Throwable {
         // List root's subfolders
         final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        final ListResponse response = client.execute(request);
+        final ListResponse response = client1.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
@@ -179,7 +166,7 @@ public class ListTest extends AbstractAJAXSession {
     public void testListPrivateWithModules() throws Throwable {
         // List root's subfolders by their type
         final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), new Modules[] { Modules.MAIL });
-        final ListResponse response = client.execute(request);
+        final ListResponse response = client1.execute(request);
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
         assertTrue("Subfolders expected below private folder.", length > 0);
@@ -194,7 +181,7 @@ public class ListTest extends AbstractAJAXSession {
     public void testListPublic() throws Throwable {
         // List root's subfolders
         final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-        final ListResponse response = client.execute(request);
+        final ListResponse response = client1.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
@@ -203,14 +190,14 @@ public class ListTest extends AbstractAJAXSession {
 
     @Test
     public void testListShared() throws Throwable {
-        client.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID));
-        client.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        client1.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        client1.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
         int folderId = client2.getValues().getPrivateAppointmentFolder();
-        int userId = client.getValues().getUserId();
+        int userId = client1.getValues().getUserId();
         FolderTools.shareFolder(client2, EnumAPI.OX_NEW, folderId, userId, OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         // List root's subfolders
         ListRequest request1 = new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID);
-        ListResponse response = client.execute(request1);
+        ListResponse response = client1.execute(request1);
 
         String expectedId = FolderObject.SHARED_PREFIX + client2.getValues().getUserId();
         Iterator<FolderObject> iter = response.getFolder();
@@ -224,7 +211,7 @@ public class ListTest extends AbstractAJAXSession {
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
         ListRequest request2 = new ListRequest(EnumAPI.OX_NEW, foundUserShared.getFullName());
-        response = client.execute(request2);
+        response = client1.execute(request2);
         iter = response.getFolder();
         FolderObject foundShared = null;
         while (iter.hasNext()) {

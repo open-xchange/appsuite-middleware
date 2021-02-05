@@ -108,15 +108,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         this.summary = this.getClass().getSimpleName() + UUID.randomUUID().toString();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            createdEvent = null;
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testSingleEvent_CancleEvent() throws Exception {
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
@@ -132,7 +123,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * Receive cancel as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
-        rememberMail(apiClientC2, iMip);
         analyze(analyze(apiClientC2, iMip), CustomConsumers.CANCEL);
         cancel(apiClientC2, constructBody(iMip), null, false);
 
@@ -174,7 +164,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * Receive CANCEL as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
-        rememberMail(apiClientC2, iMip);
         analyze(analyze(apiClientC2, iMip), CustomConsumers.CANCEL);
 
         cancel(apiClientC2, constructBody(iMip), null, true);
@@ -210,7 +199,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * Receive CANCEL as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
-        rememberMail(apiClientC2, iMip);
         analyze(analyze(apiClientC2, iMip), CustomConsumers.CANCEL);
 
         cancel(apiClientC2, constructBody(iMip), null, false);
@@ -251,7 +239,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * calendar providers do it the same way.
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         analyze(analyze(apiClientC2, iMip), CustomConsumers.ALL);
 
         update(apiClientC2, constructBody(iMip));
@@ -277,7 +264,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(created.getUid(), newEvent.getUid());
@@ -288,14 +274,12 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          */
         attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), created.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
-        rememberForCleanup(apiClientC2, attendeeEvent);
 
         /*
          * Receive mail as organizer and check actions
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
-        rememberMail(reply);
 
         /*
          * Apply change as organizer via iTIP API
@@ -314,7 +298,6 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         Error error = null;
         try {
             MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
-            rememberMail(apiClient, reply);
         } catch (AssertionError ae) {
             error = ae;
         }

@@ -57,8 +57,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
 import com.openexchange.testing.httpclient.models.CommonResponse;
@@ -121,15 +121,18 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @Test
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
-        AJAXClient client = getClient();
-        String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
-        helper.testMailDownload(url, client.getProtocol()+"://"+client.getHostname());
+        int userId = testUser.getUserId().intValue();
+        int ctxId = testUser.getContextId().intValue();
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        String url = getURL(userId, ctxId, "mailsync", "apple.iphone");
+        helper.testMailDownload(url, protocol + "://" + hostname);
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "eassync", "apple.iphone");
-        helper.testEASDownload(url, client.getProtocol()+"://"+client.getHostname());
+        url = getURL(userId, ctxId, "eassync", "apple.iphone");
+        helper.testEASDownload(url, protocol + "://" + hostname);
 
-        url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "davsync", "apple.iphone");
-        helper.testDavDownload(url, client.getProtocol()+"://"+client.getHostname());
+        url = getURL(userId, ctxId, "davsync", "apple.iphone");
+        helper.testDavDownload(url, protocol + "://" + hostname);
     }
 
 

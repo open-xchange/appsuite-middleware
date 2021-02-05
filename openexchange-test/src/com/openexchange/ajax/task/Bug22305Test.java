@@ -52,11 +52,9 @@ package com.openexchange.ajax.task;
 import static com.openexchange.ajax.task.TaskTools.valuesForUpdate;
 import static org.junit.Assert.assertFalse;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -102,17 +100,6 @@ public class Bug22305Test extends AbstractTaskTest {
         UpdateResponse uResp = berta.execute(uReq);
         task.setLastModified(uResp.getTimestamp());
         bertaTask.setLastModified(uResp.getTimestamp());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest request = new DeleteRequest(bertaTask);
-            berta.execute(request);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -49,8 +49,17 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.LinkedList;
+import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -77,7 +86,13 @@ import com.openexchange.test.tryagain.TryAgainTestRule;
 @Concurrent(count = 5)
 public class AbstractClientSession {
 
-    @Rule public TestName name = new TestName();
+    /** The test name for context acquisition */
+    @Rule
+    public final TestName name = new TestName();
+
+    /** Declare 'try again' rule as public field to allow {@link TryAgain}-annotation for tests */
+    @Rule
+    public final TryAgainTestRule tryAgainRule = new TryAgainTestRule();
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
@@ -85,73 +100,113 @@ public class AbstractClientSession {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractClientSession.class);
     }
 
-    /** Declare 'try again' rule as public field to allow {@link TryAgain}-annotation for tests */
-    @org.junit.Rule
-    public final TryAgainTestRule tryAgainRule = new TryAgainTestRule();
-
-    private List<TearDownOperation> operations;
-
     private AJAXClient client;
-    private AJAXClient client2;
     protected TestContext testContext;
     protected List<TestContext> testContextList;
     protected TestUser admin;
     protected TestUser testUser;
-    protected TestUser testUser2;
+
+    protected Map<TestContext, List<TestUser>> users = new HashMap<>();
+    protected Map<TestUser, AJAXClient> users2client = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
         ProvisioningSetup.init();
-
-        operations = new LinkedList<>();
-        testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName() + "." + name.getMethodName(), getNumerOfContexts());
+        TestConfig testConfig = getTestConfig();
+        testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName() + "." + name.getMethodName(), optContextConfig(), testConfig.numberOfContexts);
         testContext = testContextList.get(0);
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
-        client = generateClient(testUser);
-        client2 = generateClient(testUser2);
+
+        for (TestContext ctx : testContextList) {
+            users.put(ctx, new ArrayList<TestUser>(testConfig.numberOfusersPerContext));
+            for (int x = testConfig.numberOfusersPerContext; x > 0; x--) {
+
+                TestUser user = ctx.acquireUser();
+                users.get(ctx).add(user);
+                if (testUser == null) {
+                    testUser = user;
+                }
+
+                if (testConfig.createAjaxClients) {
+                    users2client.put(user, generateClient(user));
+                    if (client == null) {
+                        client = users2client.get(user);
+                    }
+                }
+            }
+        }
+
         admin = testContext.getAdmin();
     }
 
     /**
-     * Allows to override the number of contexts aquired from this test
+     * Gets an optional map containing configurations for the context
      *
-     * @return The number of context to aquire. Defaults to 1
+     * @return The optional map
      */
-    protected int getNumerOfContexts() {
-        return 1;
+    public Optional<Map<String, String>> optContextConfig() {
+        return Optional.empty();
     }
 
-    @SuppressWarnings("unused")
+    protected TestUser getUser(int x) {
+        return getUser(testContext, x);
+    }
+
+    protected TestUser getUser(TestContext ctx, int x) {
+        Assert.assertThat(I(x), allOf(is(greaterThanOrEqualTo(I(0))), is(lessThan(I(users.get(ctx).size())))));
+        return users.get(ctx).get(x);
+    }
+
+    /**
+     * Gets a test config which describes the environment for the test. Test should override this method to adjust this to their own needs.
+     * Defaults to 1 context, 1 userPerContext and builds both clients
+     *
+     * @return The Testconfig
+     */
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @After
     public void tearDown() throws Exception {
         try {
-            /*
-             * Call operations from last added item to first added item (LIFO)
-             * to avoid premature closing of e.g. API clients before all relevant
-             * operations for this client has been called
-             */
-            for (int i = operations.size() - 1; i >= 0; i--) {
-                operations.get(i).safeTearDown();
+            for (AJAXClient client : users2client.values()) {
+                logoutClient(client, true);
             }
-            client = logoutClient(client, true);
-            client2 = logoutClient(client2, true);
-
         } finally {
             TestContextPool.backContext(testContextList);
         }
     }
 
     protected final AJAXClient getClient() {
+        assertNotNull("Missing ajax client. Please check test config", client);
         return client;
     }
 
-    protected final AJAXClient getClient2() {
-        return client2;
+    /**
+     * Gets the client with the given number from the first context
+     *
+     * @param x the client number whereby the default client is 0 and additional clients start with 1 and so forth
+     * @return The {@link AJAXClient}
+     */
+    protected final AJAXClient getClient(int x) {
+        return getClient(testContext, x);
+    }
+
+    /**
+     * Gets the client with the given number from the given context
+     *
+     * @param ctx The test context
+     * @param x the client number whereby the default client is 0 and additional clients start with 1 and so forth
+     * @return The {@link AJAXClient}
+     */
+    protected final AJAXClient getClient(TestContext ctx, int x) {
+        Assert.assertThat(I(x), allOf(is(greaterThanOrEqualTo(I(0))), is(lessThan(I(users.get(ctx).size())))));
+        return users2client.get(users.get(ctx).get(x));
     }
 
     public final AJAXSession getSession() {
+        assertNotNull("Missing ajax client. Please check config", client);
         return client.getSession();
     }
 
@@ -270,48 +325,90 @@ public class AbstractClientSession {
     }
 
     /**
-     * Adds a new {@link TearDownOperation} to call in this classes {@link #tearDown()} method
-     * <p>
-     * Note: Operations will be remembered in order and will be executed with the last-in first-out (LIFO)
-     * principal. Therefore e.g. first add the logout of the test client afterwards the removal of a the calendar event
-     * that uses the client from before.
+     * {@link TestConfig}
      *
-     * @param operation A {@link TearDownOperation} to execute with {@link TearDownOperation#safeTearDown()}
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.5
      */
-    protected void addTearDownOperation(TearDownOperation operation) {
-        if (null != operation) {
-            operations.add(operation);
+    public static class TestConfig {
+
+        int numberOfContexts;
+        int numberOfusersPerContext;
+        boolean createAjaxClients;
+        boolean createApiClients;
+
+        /**
+         * Initializes a new {@link TestConfig}.
+         *
+         * @param numberOfContexts
+         * @param numberOfusersPerContext
+         * @param createAjaxClients
+         * @param createApiClients
+         */
+        public TestConfig(int numberOfContexts, int numberOfusersPerContext, boolean createAjaxClients, boolean createApiClients) {
+            super();
+            this.numberOfContexts = numberOfContexts;
+            this.numberOfusersPerContext = numberOfusersPerContext;
+            this.createAjaxClients = createAjaxClients;
+            this.createApiClients = createApiClients;
         }
-    }
 
-    /**
-     *
-     * {@link TearDownOperation} - A tear down operation
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.4
-     */
-    @FunctionalInterface
-    public interface TearDownOperation {
+        public static TestConfigBuilder builder() {
+            return new TestConfigBuilder();
+        }
 
         /**
-         * A tear down operation
          *
-         * @throws Exception
+         * {@link TestConfigBuilder}
+         *
+         * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+         * @since v7.10.5
          */
-        void tearDown() throws Exception;
+        public static class TestConfigBuilder {
 
-        /**
-         * Executes the tear down operation via {@link #tearDown()}
-         * with logging the error
-         *
-         */
-        default void safeTearDown() {
-            try {
-                tearDown();
-            } catch (Throwable t) {
-                LoggerHolder.LOG.debug("Unable to execute tear down operation", t);
+            private int numberOfContexts = 1;
+            private int numberOfusersPerContext = 1;
+            private boolean createAjaxClients = false;
+            private boolean createApiClients = false;
+
+            /**
+             * Initializes a new {@link TestConfig}.
+             *
+             * @param numberOfContexts
+             * @param numberOfusersPerContext
+             * @param createAjaxClients
+             * @param createApiClients
+             */
+            public TestConfigBuilder() {
+                // empty constructor
             }
+
+            public TestConfigBuilder withContexts(int x) {
+                numberOfContexts = x;
+                return this;
+            }
+
+            public TestConfigBuilder withUserPerContext(int x) {
+                numberOfusersPerContext = x;
+                return this;
+            }
+
+            public TestConfigBuilder createAjaxClient() {
+                createAjaxClients = true;
+                return this;
+            }
+
+            public TestConfigBuilder createApiClient() {
+                createApiClients = true;
+                return this;
+            }
+
+            public TestConfig build() {
+                return new TestConfig(numberOfContexts, numberOfusersPerContext, createAjaxClients, createApiClients);
+            }
+
         }
+
     }
+
 }

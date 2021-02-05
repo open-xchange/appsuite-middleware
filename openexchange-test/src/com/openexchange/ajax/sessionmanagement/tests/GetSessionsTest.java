@@ -76,14 +76,4 @@ public class GetSessionsTest extends AbstractSessionManagementTest {
         }
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        // Logout client2
-        if (null != apiClient2) {
-            // Let the super.teardown do the logout stuff
-            rememberClient(apiClient2);
-        }
-        super.tearDown();
-    }
-
 }

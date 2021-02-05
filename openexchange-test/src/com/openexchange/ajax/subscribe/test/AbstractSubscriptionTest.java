@@ -51,7 +51,6 @@ package com.openexchange.ajax.subscribe.test;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -70,16 +69,6 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
     public void setUp() throws Exception {
         super.setUp();
         subMgr = new SubscriptionTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            subMgr.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Override

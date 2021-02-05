@@ -49,19 +49,13 @@
 
 package com.openexchange.ajax.mail;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.actions.AllRequest;
-import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -84,7 +78,6 @@ public final class Bug27708Test extends AbstractMailTest {
     private AJAXClient[] clients;
     private String recipient;
     private String[] identifier;
-    private List<String[]>[] sentMails;
 
     public Bug27708Test() {
         super();
@@ -96,50 +89,20 @@ public final class Bug27708Test extends AbstractMailTest {
         super.setUp();
         clients = new AJAXClient[NUM_THREADS];
         clients[0] = getClient();
-        clients[1] = new AJAXClient(testContext.acquireUser());
-        clients[2] = new AJAXClient(testContext.acquireUser());
-        clients[3] = new AJAXClient(testContext.acquireUser());
+        clients[1] = getClient(1);
+        clients[2] = getClient(2);
+        clients[3] = getClient(3);
         recipient = getClient().getValues().getSendAddress();
         // Unique identifier for all threads, to be able to detect own and foreign content in mail body.
         identifier = new String[NUM_THREADS];
         for (int i = 0; i < identifier.length; i++) {
             identifier[i] = UUID.randomUUID().toString();
         }
-        sentMails = new List[NUM_THREADS];
-        for (int i = 0; i < sentMails.length; i++) {
-            sentMails[i] = new LinkedList<String[]>();
-        }
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // Delete sent mails.
-            for (int i = 0; i < clients.length; i++) {
-                clients[i].execute(new DeleteRequest(sentMails[i].toArray(new String[sentMails[i].size()][]), true));
-            }
-            // Delete received mails.
-            String inboxFolder = getClient().getValues().getInboxFolder();
-            AllRequest request = new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true);
-            AllResponse response = getClient().execute(request);
-            final String[][] folderAndIDs = new String[response.size()][2];
-            for (int i = 0; i < response.size(); i++) {
-                folderAndIDs[i] = new String[] { inboxFolder, (String) response.getValue(i, 600) };
-            }
-            getClient().execute(new DeleteRequest(folderAndIDs, true));
-            // Logout clients.
-            if (null != clients) {
-                for (AJAXClient client : clients) {
-                    if (null != client) {
-                        getClient().logout();
-                    }
-                }
-                clients = null;
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().withUserPerContext(4).createAjaxClient().build();
     }
 
     @Test
@@ -147,7 +110,7 @@ public final class Bug27708Test extends AbstractMailTest {
         Thread[] threads = new Thread[clients.length];
         MailSender[] senders = new MailSender[clients.length];
         for (int i = 0; i < clients.length; i++) {
-            senders[i] = new MailSender(clients[i], recipient, identifier[i], Arrays.remove(identifier, identifier[i]), sentMails[i]);
+            senders[i] = new MailSender(clients[i], recipient, identifier[i], Arrays.remove(identifier, identifier[i]));
             threads[i] = new Thread(senders[i]);
             threads[i].start();
         }
@@ -189,18 +152,16 @@ public final class Bug27708Test extends AbstractMailTest {
         private final String recipient;
         private final String identifier;
         private final String[] others;
-        private final List<String[]> mails;
 
         private boolean running = true;
         private Throwable throwable;
 
-        MailSender(AJAXClient client, String recipient, String identifier, String[] others, List<String[]> mails) {
+        MailSender(AJAXClient client, String recipient, String identifier, String[] others) {
             super();
             this.recipient = recipient;
             this.identifier = identifier;
             this.client = client;
             this.others = others;
-            this.mails = mails;
         }
 
         public void stop() {
@@ -222,7 +183,6 @@ public final class Bug27708Test extends AbstractMailTest {
                     SendRequest sendRequest = new SendRequest(json.toString());
                     SendResponse response = client.execute(sendRequest);
                     String[] folderAndID = response.getFolderAndID();
-                    mails.add(folderAndID);
                     GetResponse getResponse = client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
                     JSONArray attachments = getResponse.getAttachments();
                     JSONObject tmp = attachments.getJSONObject(0);

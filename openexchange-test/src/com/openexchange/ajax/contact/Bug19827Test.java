@@ -50,11 +50,8 @@
 package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertNull;
-import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -104,19 +101,6 @@ public class Bug19827Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(contact);
         InsertResponse response = getClient().execute(request);
         response.fillObject(contact);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != contact) {
-                contact.setLastModified(new Date(Long.MAX_VALUE));
-                getClient().execute(new DeleteRequest(contact));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -3,10 +3,8 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -16,7 +14,6 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -50,7 +47,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         super.setUp();
 
         // Create 2. User
-        secondClient = getClient2();
+        secondClient = getClient(1);
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
@@ -86,6 +83,11 @@ public class Bug15590Test extends AbstractAJAXSession {
         insertR.fillAppointment(testAppointment);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testBug15590() throws Exception {
         Appointment moveAppointment = new Appointment();
@@ -105,33 +107,4 @@ public class Bug15590Test extends AbstractAJAXSession {
         assertEquals(movedAppointment.getParentFolderID(), moveAppointment.getParentFolderID());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // Delete testAppointment
-            if (movedAppointment != null) {
-                movedAppointment.setLastModified(new Date(Long.MAX_VALUE));
-                secondClient.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(movedAppointment));
-            } else if (testAppointment != null) {
-                testAppointment.setLastModified(new Date(Long.MAX_VALUE));
-                final com.openexchange.ajax.appointment.action.DeleteRequest delApp = new com.openexchange.ajax.appointment.action.DeleteRequest(testAppointment.getObjectID(), testFolder.getObjectID(), testAppointment.getLastModified());
-                secondClient.execute(delApp);
-            }
-
-            if (secondClient != null) {
-                secondClient.logout();
-            }
-
-            // Delete testFolder
-            if (testFolder != null) {
-                final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
-                getClient().execute(delFolder);
-            }
-
-        } finally {
-            super.tearDown();
-        }
-
-    }
 }

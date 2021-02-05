@@ -51,10 +51,8 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -90,19 +88,6 @@ public class Bug44891Test extends AbstractInfostoreTest {
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, folder);
         InsertResponse resp = getClient().execute(req);
         resp.fillObject(folder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != folder) {
-                DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
-                getClient().execute(req);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

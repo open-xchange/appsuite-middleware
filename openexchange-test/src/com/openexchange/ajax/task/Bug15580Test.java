@@ -54,13 +54,11 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -110,16 +108,6 @@ public class Bug15580Test extends AbstractTaskTest {
 
     private void setToNull(Mapper<?> mapper) {
         mapper.set(task, null);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

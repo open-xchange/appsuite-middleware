@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -296,17 +295,6 @@ public class Bug38079Test extends AbstractAJAXSession {
         Appointment loadedAppointment = catm.get(appointment.getParentFolderID(), appointment.getObjectID());
         assertEquals("Wrong start for month " + (month + 1), D("16." + (month + 1) + "." + year + " 08:00", tz), loadedAppointment.getStartDate());
         assertEquals("Wrong end for month " + (month + 1), D("16." + (month + 1) + "." + year + " 09:00", tz), loadedAppointment.getEndDate());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
-            getClient().execute(setRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

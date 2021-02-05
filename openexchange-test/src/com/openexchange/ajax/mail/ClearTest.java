@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
@@ -86,21 +85,6 @@ public class ClearTest extends AbstractMailTest {
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
         clearFolder(getTrashFolder());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            /*
-             * Clean everything
-             */
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            clearFolder(getTrashFolder());
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

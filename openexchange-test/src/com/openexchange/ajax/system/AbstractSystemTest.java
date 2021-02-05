@@ -68,8 +68,4 @@ public abstract class AbstractSystemTest extends AbstractAPIClientSession {
         api = new SystemApi(apiClient);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
 }

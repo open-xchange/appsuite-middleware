@@ -53,12 +53,10 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -102,17 +100,6 @@ public class Bug15074Test extends AbstractAJAXSession {
         InsertRequest appointmentInsertRequest = new InsertRequest(appointment, getClient().getValues().getTimeZone());
         AppointmentInsertResponse appointmentInsertResponse = getClient().execute(appointmentInsertRequest);
         appointmentInsertResponse.fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-            getClient().execute(appointmentDeleteRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -81,11 +81,16 @@ public class GetTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testGetWithParticipants() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
 
-        final int userParticipantId = getClient2().getValues().getUserId();
+        final int userParticipantId = getClient(1).getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
@@ -121,7 +126,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = getClient2().getValues().getUserId();
+        final int userParticipantId = getClient(1).getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
@@ -170,7 +175,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = getClient2().getValues().getUserId();
+        final int userParticipantId = getClient(1).getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 

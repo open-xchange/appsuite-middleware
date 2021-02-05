@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 
@@ -65,16 +64,6 @@ public class CountMailTest extends AbstractMailTest {
 
     public CountMailTest() {
         super();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(getInboxFolder());
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

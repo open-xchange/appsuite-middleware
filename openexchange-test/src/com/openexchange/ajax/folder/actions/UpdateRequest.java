@@ -68,6 +68,8 @@ public class UpdateRequest extends InsertRequest {
     private Boolean cascade;
     private Boolean ignoreWarnings;
 
+    private static final Long FAR_FUTURE = Long.valueOf(Long.MAX_VALUE);
+
     public UpdateRequest(API api, FolderObject folder, boolean failOnError) {
         super(api, folder, failOnError);
         this.folder = folder;
@@ -106,7 +108,7 @@ public class UpdateRequest extends InsertRequest {
             params.add(new Parameter(FolderFields.ID, folder.getObjectID()));
             params.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())));
         }
-        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())));
+        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getMeta() != null ? folder.getMeta().getOrDefault("timestamp", FAR_FUTURE) : FAR_FUTURE)));
         if (handDown) {
             params.add(new Parameter("permissions", "inherit"));
         }

@@ -76,20 +76,24 @@ public class TestUser implements Serializable {
 
     private final Integer userId;
 
+    private final Integer ctxId;
+
     public TestUser(String user, String context, String password) {
         this.user = user;
         this.context = context;
         this.login = user + "@" + context;
         this.password = password;
         this.userId = I(-1);
+        this.ctxId = I(-1);
     }
 
-    public TestUser(String user, String context, String password, Integer userId) {
+    public TestUser(String user, String context, String password, Integer userId, Integer ctxId) {
         this.user = user;
         this.context = context;
         this.login = user + "@" + context;
         this.password = password;
         this.userId = userId;
+        this.ctxId = ctxId;
     }
 
     public String getLogin() {
@@ -115,6 +119,15 @@ public class TestUser implements Serializable {
      */
     public Integer getUserId() {
         return userId;
+    }
+
+    /**
+     * Gets the context id
+     *
+     * @return The context id
+     */
+    public Integer getContextId() {
+        return ctxId;
     }
 
     @Override

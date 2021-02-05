@@ -57,12 +57,11 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
@@ -74,7 +73,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug25160Test extends CalDAVTest {
+public class Bug25160Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
     private FolderObject subfolder;
@@ -83,11 +82,11 @@ public class Bug25160Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
 
-        ftm.setClient(getClient2());
+        ftm.setClient(client2);
         FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
@@ -104,19 +103,6 @@ public class Bug25160Test extends CalDAVTest {
         folder.setPermissions(calendarFolder.getPermissions());
 
         subfolder = ftm.insertFolderOnServer(folder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.manager2) {
-                this.manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

@@ -53,13 +53,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.util.Date;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -93,17 +91,6 @@ public class ListAliasTest extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest delete = new DeleteRequest(appointment);
-            client.execute(delete);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

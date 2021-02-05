@@ -60,8 +60,8 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -78,7 +78,7 @@ import com.openexchange.share.recipient.GuestRecipient;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class SharedFilesFolderTest extends ShareTest {
+public class SharedFilesFolderTest extends Abstract2UserShareTest {
 
     private static final String SHARED_FOLDER = "10";
 
@@ -92,36 +92,35 @@ public class SharedFilesFolderTest extends ShareTest {
         file = insertFile(folder.getObjectID(), randomUID());
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(3).build();
+    }
+
     @Test
     public void testReShareNotPossibleForInternals() throws Exception {
-        AJAXClient client2 = getClient2();
-        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
-        try {
-            List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
-            permissions.add(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
-            file.setObjectPermissions(permissions);
-            file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
-            String sharedFileId = sharedFileId(file.getId());
+        AJAXClient client3 = getClient(2);
+        List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
+        permissions.add(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
+        file.setObjectPermissions(permissions);
+        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+        String sharedFileId = sharedFileId(file.getId());
 
-            // Check shareable flag
-            assertFalse(client2.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata().isShareable());
+        // Check shareable flag
+        assertFalse(client2.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata().isShareable());
 
-            // Try to share it anyway
-            DefaultFile toUpdate = new DefaultFile();
-            toUpdate.setFolderId(SHARED_FOLDER);
-            toUpdate.setId(sharedFileId);
-            permissions.add(new DefaultFileStorageObjectPermission(client3.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
-            toUpdate.setObjectPermissions(permissions);
+        // Try to share it anyway
+        DefaultFile toUpdate = new DefaultFile();
+        toUpdate.setFolderId(SHARED_FOLDER);
+        toUpdate.setId(sharedFileId);
+        permissions.add(new DefaultFileStorageObjectPermission(client3.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
+        toUpdate.setObjectPermissions(permissions);
 
-            UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, file.getLastModified());
-            updateInfostoreRequest.setFailOnError(false);
-            UpdateInfostoreResponse updateInfostoreResponse = client2.execute(updateInfostoreRequest);
-            assertTrue(updateInfostoreResponse.hasError());
-            assertTrue(InfostoreExceptionCodes.NO_WRITE_PERMISSION.equals(updateInfostoreResponse.getException()));
-        } finally {
-            client2.logout();
-            client3.logout();
-        }
+        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, file.getLastModified());
+        updateInfostoreRequest.setFailOnError(false);
+        UpdateInfostoreResponse updateInfostoreResponse = client2.execute(updateInfostoreRequest);
+        assertTrue(updateInfostoreResponse.hasError());
+        assertTrue(InfostoreExceptionCodes.NO_WRITE_PERMISSION.equals(updateInfostoreResponse.getException()));
     }
 
     @Test

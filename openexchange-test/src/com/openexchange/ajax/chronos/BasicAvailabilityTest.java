@@ -74,13 +74,6 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
     @SuppressWarnings("hiding")
     private ChronosApi chronosApi;
 
-    @Override
-    public void tearDown() throws Exception {
-        // Clear the availability
-        chronosApi.setAvailability(new AvailabilityData());
-        super.tearDown();
-    }
-
     /**
      * Tests setting a single available block
      */

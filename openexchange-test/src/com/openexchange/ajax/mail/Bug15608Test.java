@@ -54,12 +54,10 @@ import static com.openexchange.mail.MailListField.ID;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -100,16 +98,6 @@ public class Bug15608Test extends AbstractAJAXSession {
         final ImportMailRequest request = new ImportMailRequest(folder, ORIG_FLAGS, massMails);
         final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(ids, true));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

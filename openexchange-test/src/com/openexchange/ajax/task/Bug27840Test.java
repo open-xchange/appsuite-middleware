@@ -55,11 +55,9 @@ import java.math.BigDecimal;
 import java.util.TimeZone;
 import org.hamcrest.CoreMatchers;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -92,17 +90,6 @@ public final class Bug27840Test extends AbstractTaskTest {
         // NUMERIC(12,2) in the database. The following should be the corresponding maximal and minimal possible values.
         task.setTargetCosts(new BigDecimal("9999999999.99"));
         task.setActualCosts(new BigDecimal("-9999999999.99"));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

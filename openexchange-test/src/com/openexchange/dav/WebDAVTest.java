@@ -145,6 +145,11 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         AJAXConfig.init();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     // --- BEGIN: Optional OAuth Configuration ------------------------------------------------------------------------------
 
     protected static final String AUTH_METHOD_BASIC = "Basic Auth";
@@ -226,8 +231,8 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
 
     // --- END: Optional OAuth Configuration --------------------------------------------------------------------------------
 
-    private Set<String> folderIdsToDelete = new HashSet<String>();
-    private List<TestManager> testManagers = new ArrayList<TestManager>();
+    private final Set<String> folderIdsToDelete = new HashSet<String>();
+    private final List<TestManager> testManagers = new ArrayList<TestManager>();
 
     protected CalendarTestManager catm;
     protected ContactTestManager cotm;
@@ -258,28 +263,6 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         testManagers.add(resTm);
 
         testUserApi = new UserApi(getApiClient(), getEnhancedApiClient(), testUser);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (0 < folderIdsToDelete.size()) {
-                try {
-                    testUserApi.getFoldersApi().deleteFolders(new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null, null);
-                } catch (Exception e) {
-                    LOG.error("", e);
-                }
-            }
-            for (TestManager manager : testManagers) {
-                try {
-                    manager.cleanUp();
-                } catch (Exception e) {
-                    LOG.error("", e);
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected UserApi getUserApi() {

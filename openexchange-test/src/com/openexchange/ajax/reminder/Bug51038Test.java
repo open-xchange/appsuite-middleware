@@ -54,7 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
@@ -65,7 +65,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Bug51038Test extends AbstractAJAXSession {
+public class Bug51038Test extends Abstrac2UserAJAXSession {
 
     private int nextYear;
     private ReminderObject reminder;
@@ -96,7 +96,7 @@ public class Bug51038Test extends AbstractAJAXSession {
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(getClient().getValues().getTimeZone()), appointment.getObjectID());
         int reminderId = reminder.getObjectId();
         com.openexchange.ajax.reminder.actions.DeleteRequest delReminderReq = new com.openexchange.ajax.reminder.actions.DeleteRequest(reminder, false);
-        CommonDeleteResponse response = getClient2().execute(delReminderReq);
+        CommonDeleteResponse response = getClient(1).execute(delReminderReq);
         assertTrue("Expected error.", response.hasError());
 
         rangeReq = new RangeRequest(cal.getTime());

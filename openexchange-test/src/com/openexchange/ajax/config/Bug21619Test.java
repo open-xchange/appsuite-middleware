@@ -51,7 +51,6 @@ package com.openexchange.ajax.config;
 
 import static org.junit.Assert.fail;
 import org.apache.http.params.HttpConnectionParams;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -89,16 +88,6 @@ public final class Bug21619Test extends AbstractAJAXSession {
         }
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new SetRequest(Tree.TaskUIConfiguration, origValue));
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testForBug() throws InterruptedException {
         for (int i = 0; i < writers.length; i++) {
@@ -123,7 +112,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
 
         private boolean run = true;
         private Throwable t;
-        private TestUser testUser;
+        private final TestUser testUser;
 
         ValueWriter(TestUser testUser) {
             super();

@@ -61,6 +61,7 @@ import com.openexchange.mail.compose.impl.storage.db.CompositionSpaceDbStorage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.uploaddir.UploadDirService;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 
 /**
  * {@link FileCacheCleanUp} - Clean-up for file cache.
@@ -112,9 +113,18 @@ public class FileCacheCleanUp {
             Optional<CompositionSpaceInfo> optionalInfo = parseCompositionSpaceInfoFrom(file.getName());
             if (optionalInfo.isPresent()) {
                 CompositionSpaceInfo info = optionalInfo.get();
-                CompositionSpaceDbStorage dbStorage = storageService.newDbStorageFor(info.userId, info.contextId);
-                if (false == dbStorage.exists(info.compositionSpaceId)) {
-                    deleteFileSafe(file);
+                try {
+                    CompositionSpaceDbStorage dbStorage = storageService.newDbStorageFor(info.userId, info.contextId);
+                    if (false == dbStorage.exists(info.compositionSpaceId)) {
+                        deleteFileSafe(file);
+                    }
+                } catch (OXException e) {
+                    if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                        // Context doesn't exist anymore and the cached content can be deleted for this composition space
+                        deleteFileSafe(file);
+                        continue;
+                    }
+                    throw e;
                 }
             }
         }

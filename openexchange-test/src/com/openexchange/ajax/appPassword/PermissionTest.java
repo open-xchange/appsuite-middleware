@@ -86,20 +86,6 @@ import com.openexchange.testing.httpclient.modules.MailApi;
  */
 public class PermissionTest extends AbstractAppPasswordTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            removeAll();
-        } finally {
-            super.tearDown();
-        }
-    }
-
     /**
      * Simple test to see if we can get a list of emails
      * tryMail

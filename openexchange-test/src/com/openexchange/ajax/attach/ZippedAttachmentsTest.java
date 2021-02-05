@@ -56,13 +56,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.GetZippedDocumentsRequest;
 import com.openexchange.ajax.attach.actions.GetZippedDocumentsResponse;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -105,17 +103,6 @@ public class ZippedAttachmentsTest extends AbstractAJAXSession {
 
         contactA = getClient().execute(new GetRequest(contactA, tz)).getContact();
         contactA.getLastModifiedOfNewestAttachment().getTime();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contactA));
-            getClient().logout();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -49,19 +49,14 @@
 
 package com.openexchange.ajax.group;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.AbstractGroupResponse;
@@ -70,7 +65,6 @@ import com.openexchange.ajax.group.actions.AllResponse;
 import com.openexchange.ajax.group.actions.CreateRequest;
 import com.openexchange.ajax.group.actions.CreateResponse;
 import com.openexchange.ajax.group.actions.DeleteRequest;
-import com.openexchange.ajax.group.actions.DeleteResponse;
 import com.openexchange.ajax.group.actions.GetRequest;
 import com.openexchange.ajax.group.actions.GetResponse;
 import com.openexchange.ajax.group.actions.ListRequest;
@@ -87,36 +81,6 @@ import com.openexchange.group.Group;
 public final class FunctionTest extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FunctionTest.class);
-
-    private Set<Integer> groupsToDelete;
-
-    /**
-     * @param name
-     */
-    public FunctionTest() {
-        super();
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        groupsToDelete = new HashSet<Integer>();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (groupsToDelete != null) {
-                for (int id : groupsToDelete) {
-                    getClient().execute(new DeleteRequest(id, new Date(Long.MAX_VALUE), false));
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testSearch() throws Throwable {
@@ -222,7 +186,6 @@ public final class FunctionTest extends AbstractAJAXSession {
         CreateResponse createResponse = getClient().execute(new CreateRequest(group, true));
         int id = createResponse.getId();
         group.setIdentifier(id);
-        groupsToDelete.add(I(id));
         group.setLastModified(createResponse.getTimestamp());
         Date lm = new Date(group.getLastModified().getTime() - 1);
 
@@ -234,10 +197,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         assertEquals("Amount of deleted elements should not change after creation", 0 + staticGroupCount, numberDeletedAfterCreation);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
 
-        DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
-        if (deleteResponse.hasError()) {
-            groupsToDelete.remove(I(id));
-        }
+        getClient().execute(new DeleteRequest(group, true));
 
         UpdatesResponse updatesResponseAfterDeletion = getClient().execute(new UpdatesRequest(lm, true));
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();

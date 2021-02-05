@@ -52,12 +52,11 @@ package com.openexchange.dav.caldav.bugs;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.Config;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -71,7 +70,7 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.3
  */
-public class Bug47121Test extends CalDAVTest {
+public class Bug47121Test extends Abstract2UserCalDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
@@ -86,11 +85,11 @@ public class Bug47121Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
-        ftm.setClient(getClient2());
-        FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder()); 
+        ftm.setClient(client2);
+        FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
         folder.setFolderName(subFolderName);
@@ -106,19 +105,6 @@ public class Bug47121Test extends CalDAVTest {
         folder.setPermissions(calendarFolder.getPermissions());
         subfolder= ftm.insertFolderOnServer(folder);
         sharedFolderID = String.valueOf(subfolder.getObjectID());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != manager2) {
-                manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

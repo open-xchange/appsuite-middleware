@@ -156,27 +156,38 @@ public class ProvisioningService {
     }
 
     public TestContext createContext() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, AddressException {
+        return createContext(Optional.empty());
+    }
+
+    public TestContext createContext(Optional<Map<String, String>> optConfig) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, AddressException {
         int cid = cidCounter.getAndIncrement();
         User admin_user = createUser(CTX_ADMIN, CTX_SECRET, CTX_ADMIN, CTX_ADMIN, CTX_ADMIN, getMailAddress(CTX_ADMIN, cid), Optional.empty());
         UserModuleAccess userModuleAccess = new UserModuleAccess();
         userModuleAccess.enableAll();
         try {
             try {
-                Context result = oxContext.create(createContext(cid, DEFAULT_MAX_QUOTA), admin_user, masterCreds);
-                //Creating and setting the context-name not during context-creation but afterwards,
-                //because the server might have ignored the given cid (if "autocontextid" is active)
-                //and we still want that the auto-cid is part of the context-name
-                result.setName(getContextName(i(result.getId())));
-                oxContext.change(result, masterCreds);
-                oxContext.changeModuleAccess(result, userModuleAccess, masterCreds);
-                return toTestContext(result.getId().intValue(), userToTestUser(result.getName(), admin_user, I(2)));
+                Context result = oxContext.create(createContext(cid, DEFAULT_MAX_QUOTA, optConfig), admin_user, userModuleAccess, masterCreds);
+                if (result.getId().intValue() != cid) {
+                    //Creating and setting the context-name not during context-creation but afterwards,
+                    //because the server might have ignored the given cid (if "autocontextid" is active)
+                    //and we still want that the auto-cid is part of the context-name
+                    result.setName(getContextName(i(result.getId())));
+                    oxContext.change(result, masterCreds);
+                }
+                return toTestContext(result.getId().intValue(), userToTestUser(result.getName(), admin_user, I(2), result.getId()));
             } catch (@SuppressWarnings("unused") ContextExistsException e) {
                 // retry once
                 cid = cidCounter.getAndIncrement();
                 admin_user = createUser(CTX_ADMIN, CTX_SECRET, CTX_ADMIN, CTX_ADMIN, CTX_ADMIN, getMailAddress(CTX_ADMIN, cid), Optional.empty());
-                Context result = oxContext.create(createContext(cid, DEFAULT_MAX_QUOTA), admin_user, masterCreds);
-                oxContext.changeModuleAccess(result, userModuleAccess, masterCreds);
-                return toTestContext(result.getId().intValue(), userToTestUser(result.getName(), admin_user, I(2)));
+                Context result = oxContext.create(createContext(cid, DEFAULT_MAX_QUOTA, optConfig), admin_user, userModuleAccess, masterCreds);
+                if (result.getId().intValue() != cid) {
+                    //Creating and setting the context-name not during context-creation but afterwards,
+                    //because the server might have ignored the given cid (if "autocontextid" is active)
+                    //and we still want that the auto-cid is part of the context-name
+                    result.setName(getContextName(i(result.getId())));
+                    oxContext.change(result, masterCreds);
+                }
+                return toTestContext(result.getId().intValue(), userToTestUser(result.getName(), admin_user, I(2), result.getId()));
             }
         } catch (NoSuchContextException e) {
             // should never happen
@@ -194,7 +205,7 @@ public class ProvisioningService {
         User userToCreate = createRandomUser(cid);
         Context context = contextForId(cid);
         User created = oxUser.create(context, userToCreate, CONTEXT_CREDS);
-        return userToTestUser(context.getName(), userToCreate, created.getId());
+        return userToTestUser(context.getName(), userToCreate, created.getId(), I(cid));
     }
 
     public void changeContexConfig(int cid, Map<String, String> configs) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -208,7 +219,7 @@ public class ProvisioningService {
         User userToCreate = createRandomUser(cid);
         Context context = contextForId(cid);
         User created = oxUser.create(context, userToCreate, CONTEXT_CREDS);
-        return userToTestUser(context.getName(), userToCreate, created.getId());
+        return userToTestUser(context.getName(), userToCreate, created.getId(), I(cid));
     }
 
     public Integer createGroup(int cid, Optional<List<Integer>> optUserIds) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -232,8 +243,8 @@ public class ProvisioningService {
      * @param user The created user
      * @return
      */
-    private TestUser userToTestUser(String contextName, User user, Integer userId) {
-        return new TestUser(user.getName(), contextName, user.getPassword(), userId);
+    private TestUser userToTestUser(String contextName, User user, Integer userId, Integer ctxId) {
+        return new TestUser(user.getName(), contextName, user.getPassword(), userId, ctxId);
     }
 
     // -------------  factory methods --------------------
@@ -270,11 +281,14 @@ public class ProvisioningService {
      *
      * @param contextId The context identifier
      * @param maxQuota The maximum quota of the context
+     * @param optConfig The optional ctx config
      * @return The new {@link Context} object
      */
-    public static Context createContext(int contextId, Long maxQuota) {
+    public static Context createContext(int contextId, Long maxQuota, Optional<Map<String, String>> optConfig) {
         Context context = new Context(I(contextId));
+        context.setName(getContextName(contextId));
         context.setMaxQuota(maxQuota);
+        optConfig.ifPresent((c) -> context.setUserAttributes(Collections.singletonMap("config", c)));
         return context;
     }
 
@@ -309,7 +323,7 @@ public class ProvisioningService {
         return String.format(CONTEXT_NAME_FORMAT, String.valueOf(cid));
     }
 
-    private static String getMailAddress(String login, int cid) {
+    public static String getMailAddress(String login, int cid) {
         return String.format(MAIL_NAME_FORMAT, login, String.valueOf(cid));
     }
 

@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -89,18 +88,6 @@ public class Bug13027Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         originalTimeZone = getClient().execute(new GetRequest(Tree.TimeZone)).getString();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != originalTimeZone && null != getClient()) {
-                getClient().execute(new SetRequest(Tree.TimeZone, originalTimeZone));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

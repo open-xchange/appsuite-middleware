@@ -55,11 +55,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsRequest;
 import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -145,6 +143,11 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         getClient().execute(updateRequest);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testGetChangeExceptions() throws Exception {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE, Appointment.ALARM };
@@ -176,23 +179,10 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE };
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(appointment.getParentFolderID(), appointment.getObjectID(), columns, false);
 
-        GetChangeExceptionsResponse response = getClient2().execute(request);
+        GetChangeExceptionsResponse response = getClient(1).execute(request);
         assertTrue("Missing error.", response.hasError());
         OXException oxException = response.getException();
         assertEquals("Wrong error.", OXCachingExceptionCode.CATEGORY_PERMISSION_DENIED, oxException.getCategory());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointment != null) {
-                appointment.setLastModified(new Date(Long.MAX_VALUE));
-                getClient().execute(new DeleteRequest(appointment));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

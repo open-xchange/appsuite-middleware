@@ -57,7 +57,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
@@ -91,20 +90,6 @@ public final class SendTest extends AbstractMailTest {
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient(), false);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            clearFolder(getTrashFolder());
-
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

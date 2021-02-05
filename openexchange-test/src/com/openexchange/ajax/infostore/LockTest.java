@@ -82,8 +82,8 @@ public class LockTest extends InfostoreAJAXTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm2 = new InfostoreTestManager(getClient2());
-        ftm2 = new FolderTestManager(getClient2());
+        itm2 = new InfostoreTestManager(getClient(1));
+        ftm2 = new FolderTestManager(getClient(1));
         /*
          * create folder shared to user 2 and a file inside the folder
          */
@@ -92,7 +92,7 @@ public class LockTest extends InfostoreAJAXTest {
         OCLPermission permission1 = FolderTestManager.createPermission(
             getClient().getValues().getUserId(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true);
         OCLPermission permission2 = FolderTestManager.createPermission(
-            getClient2().getValues().getUserId(), false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS, false);
+            getClient(1).getValues().getUserId(), false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS, false);
         folder.setPermissionsAsArray(new OCLPermission[] { permission1, permission2 });
         folder = ftm.insertFolderOnServer(folder);
         /*
@@ -106,6 +106,12 @@ public class LockTest extends InfostoreAJAXTest {
             checkForError(itm);
         }
     }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
 
     @Test
     public void testLock() throws Exception {
@@ -132,7 +138,7 @@ public class LockTest extends InfostoreAJAXTest {
         assertTrue(itm2.getLastResponse().hasError());
 
         // Object may not be moved
-        file.setFolderId(Integer.toString(getClient2().getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(Integer.toString(getClient(1).getValues().getPrivateInfostoreFolder()));
         itm2.updateAction(file, new Field[] { Field.ID, Field.FOLDER_ID }, new Date(Long.MAX_VALUE));
         assertTrue(itm2.getLastResponse().hasError());
 

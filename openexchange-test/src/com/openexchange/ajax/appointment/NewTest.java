@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -59,7 +60,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
@@ -81,20 +81,13 @@ public class NewTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm2 = new CalendarTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
         ctm2.setFailOnError(true);
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (ctm2 != null) {
-                ctm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -305,7 +298,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = getClient2().getValues().getUserId();
+        final int userParticipantId = getClient(1).getValues().getUserId();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -329,7 +322,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
+        final int groupParticipantId = i(testContext.acquireGroup(Optional.empty()));
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -353,7 +346,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
+        final int resourceParticipantId = i(testContext.acquireResource());
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -379,8 +372,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
-        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
+        final int groupParticipantId = i(testContext.acquireGroup(Optional.empty()));
+        final int resourceParticipantId = i(testContext.acquireResource());
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[3];
         participants[0] = new UserParticipant(userId);
@@ -455,7 +448,7 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testSharedFolder() throws Exception {
-        final int secondUserId = getClient2().getValues().getUserId();
+        final int secondUserId = getClient(1).getValues().getUserId();
 
         final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, getClient().getValues().getPrivateAppointmentFolder());
         List<OCLPermission> permissions = folderObj.getPermissions();
@@ -469,7 +462,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(getClient2().getValues().getDefaultAddress());
+        appointmentObj.setOrganizer(getClient(1).getValues().getDefaultAddress());
         appointmentObj.setPrincipal(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);

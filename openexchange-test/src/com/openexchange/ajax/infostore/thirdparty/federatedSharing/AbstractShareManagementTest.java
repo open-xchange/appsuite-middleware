@@ -105,7 +105,6 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         sharedFolderName = this.getClass().getSimpleName() + UUID.randomUUID().toString();
         smApi = new ShareManagementApi(apiClient);
         folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
-        remember(folderManager);
         infostoreRoot = folderManager.findInfostoreRoot();
     }
 

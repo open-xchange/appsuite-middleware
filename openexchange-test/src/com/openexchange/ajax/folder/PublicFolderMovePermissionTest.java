@@ -57,15 +57,13 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -75,18 +73,14 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.4
  */
-public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
+public class PublicFolderMovePermissionTest extends Abstrac2UserAJAXSession {
 
-    private AJAXClient client;
-    private AJAXClient client2;
     private FolderObject folder;
     private FolderObject toMove;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        client2 = getClient2();
 
         OCLPermission permission = new OCLPermission();
         permission.setEntity(client2.getValues().getUserId());
@@ -100,38 +94,29 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         folder.setModule(FolderObject.INFOSTORE);
         folder.setType(FolderObject.PUBLIC);
         OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(client.getValues().getUserId());
+        perm1.setEntity(client1.getValues().getUserId());
         perm1.setFolderAdmin(true);
         perm1.setGroupPermission(false);
         perm1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folder.setPermissionsAsArray(new OCLPermission[] {perm1, permission});
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, folder);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = client1.execute(req);
         resp.fillObject(folder);
 
         toMove = new FolderObject();
         toMove.setFolderName(UUID.randomUUID().toString());
-        toMove.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
+        toMove.setParentFolderID(client1.getValues().getPrivateInfostoreFolder());
         toMove.setModule(FolderObject.INFOSTORE);
         toMove.setType(FolderObject.PUBLIC);
         OCLPermission perm2 = new OCLPermission();
-        perm2.setEntity(client.getValues().getUserId());
+        perm2.setEntity(client1.getValues().getUserId());
         perm2.setFolderAdmin(true);
         perm2.setGroupPermission(false);
         perm2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         toMove.setPermissionsAsArray(new OCLPermission[] {perm2});
         InsertRequest req2 = new InsertRequest(EnumAPI.OX_NEW, toMove);
-        InsertResponse resp2 = client.execute(req2);
+        InsertResponse resp2 = client1.execute(req2);
         resp2.fillObject(toMove);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        if (null != folder) {
-            DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, folder);
-            client.execute(req);
-        }
-        super.tearDown();
     }
 
     @Test
@@ -139,15 +124,15 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
         updateReq.setIgnorePermission(true);
-        InsertResponse response = client.execute(updateReq);
+        InsertResponse response = client1.execute(updateReq);
         assertNotNull("No folder id in update response", response.getData());
         assertNull("Update request ended with exception", response.getException());
 
         GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
-        GetResponse parentResp = client.execute(parentGet);
+        GetResponse parentResp = client1.execute(parentGet);
         FolderObject parent = parentResp.getFolder();
         GetRequest getReq = new GetRequest(EnumAPI.OX_NEW, toMove.getObjectID());
-        GetResponse getResp = client.execute(getReq);
+        GetResponse getResp = client1.execute(getReq);
         FolderObject f = getResp.getFolder();
         Assert.assertNotNull(f);
         List<OCLPermission> perms = f.getPermissions();
@@ -164,25 +149,25 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         sub.setModule(FolderObject.INFOSTORE);
         sub.setType(FolderObject.PUBLIC);
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, sub);
-        InsertResponse resp = client.execute(req);
+        InsertResponse resp = client1.execute(req);
         resp.fillObject(sub);
 
         GetRequest get = new GetRequest(EnumAPI.OX_NEW, toMove.getObjectID());
-        GetResponse get2 = client.execute(get);
+        GetResponse get2 = client1.execute(get);
         toMove = get2.getFolder();
         toMove.setLastModified(new Date());
         toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
         updateReq.setIgnorePermission(true);
-        InsertResponse response = client.execute(updateReq);
+        InsertResponse response = client1.execute(updateReq);
         assertNotNull("No folder id in update response", response.getData());
         assertNull("Update request ended with exception", response.getException());
 
         GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
-        GetResponse parentResp = client.execute(parentGet);
+        GetResponse parentResp = client1.execute(parentGet);
         FolderObject parent = parentResp.getFolder();
         GetRequest getReq = new GetRequest(EnumAPI.OX_NEW, sub.getObjectID());
-        GetResponse getResp = client.execute(getReq);
+        GetResponse getResp = client1.execute(getReq);
         FolderObject f = getResp.getFolder();
         Assert.assertNotNull(f);
         List<OCLPermission> perms = f.getPermissions();

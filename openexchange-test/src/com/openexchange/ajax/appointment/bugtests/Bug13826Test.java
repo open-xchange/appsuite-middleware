@@ -54,11 +54,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -80,13 +78,11 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class Bug13826Test extends AbstractAJAXSession {
 
-    private int userId, sourceFolderId, targetFolderId, currentFolder;
+    private int userId, sourceFolderId, targetFolderId;
 
     private FolderObject folder;
 
     private Appointment appointment, updateAppointment;
-
-    private Date lastModified;
 
     public Bug13826Test() {
         super();
@@ -118,7 +114,6 @@ public class Bug13826Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(appointment, getClient().getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = getClient().execute(request);
         insertResponse.fillObject(appointment);
-        setCurrentValues(appointment);
 
         updateAppointment = new Appointment();
         updateAppointment.setObjectID(appointment.getObjectID());
@@ -134,43 +129,15 @@ public class Bug13826Test extends AbstractAJAXSession {
         UpdateRequest update = new UpdateRequest(sourceFolderId, updateAppointment, getClient().getValues().getTimeZone(), false);
         UpdateResponse updateResponse = getClient().execute(update);
         if (!updateResponse.hasError()) {
-            lastModified = updateResponse.getTimestamp();
-            currentFolder = updateAppointment.getParentFolderID();
             fail("Expected error.");
         } else {
             assertTrue("Wrong error message", updateResponse.getException().similarTo(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create()));
         }
-        Appointment loadedAppointment = getClient().execute(new GetRequest(sourceFolderId, appointment.getObjectID(), true)).getAppointment(getClient().getValues().getTimeZone());
-        setCurrentValues(loadedAppointment);
+        getClient().execute(new GetRequest(sourceFolderId, appointment.getObjectID(), true)).getAppointment(getClient().getValues().getTimeZone());
         GetResponse getResponse = getClient().execute(new GetRequest(targetFolderId, appointment.getObjectID(), false));
         if (!getResponse.hasError()) {
-            loadedAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
+            getResponse.getAppointment(getClient().getValues().getTimeZone());
             fail("Expected error.");
-        }
-        setCurrentValues(loadedAppointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointment != null && lastModified != null) {
-                appointment.setLastModified(lastModified);
-                getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
-            }
-            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    private void setCurrentValues(Appointment appointment) {
-        if (appointment != null && appointment.getParentFolderID() != 0) {
-            currentFolder = appointment.getParentFolderID();
-        }
-
-        if (appointment != null && appointment.getLastModified() != null) {
-            lastModified = appointment.getLastModified();
         }
     }
 

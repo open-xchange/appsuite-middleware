@@ -52,17 +52,12 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -74,44 +69,19 @@ import com.openexchange.share.ShareTarget;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class QuotaTest extends ShareTest {
+public class QuotaTest extends Abstract2UserShareTest {
 
-    private AJAXClient client2;
-    private JSONObject oldConfig;
     private Map<Integer, FolderObject> foldersToDelete;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
-        client2 = getClient2();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put("com.openexchange.quota.invite_guests", "0");
         properties.put("com.openexchange.quota.share_links", "0");
         ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "user", null);
-        ChangePropertiesResponse changePropertiesResponse = client2.execute(changePropertiesRequest);
-        oldConfig = ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != client2) {
-                if (null != oldConfig) {
-                    Map<String, String> oldProperties = new HashMap<String, String>();
-                    for (Entry<String, Object> entry : oldConfig.entrySet()) {
-                        oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
-                    }
-                    client2.execute(new ChangePropertiesRequest(oldProperties, "user", null));
-                }
-                if (null != foldersToDelete && 0 < foldersToDelete.size()) {
-                    deleteFoldersSilently(client2, foldersToDelete);
-                }
-                client2.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
+        client2.execute(changePropertiesRequest);
     }
 
     @Test

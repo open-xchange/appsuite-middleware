@@ -51,10 +51,8 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -127,16 +125,6 @@ public class YomiTest extends AbstractAJAXSession {
         assertEquals("Wrong Kanji Last name", "\u4f50\u85e4", loadedUpdatedContact.getSurName());
         assertEquals("Wrong Yomi First name", "\u3055\u3068\u3046", loadedUpdatedContact.getYomiFirstName());
         assertEquals("Wrong Yomi Last name", "\u3059\u305a\u304d", loadedUpdatedContact.getYomiLastName());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contact));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

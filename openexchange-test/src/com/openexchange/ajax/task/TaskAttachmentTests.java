@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +62,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -101,16 +99,6 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         com.openexchange.ajax.attach.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.attach.actions.GetRequest(task, attachmentId));
         long timestamp = response.getAttachment().getCreationDate().getTime();
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

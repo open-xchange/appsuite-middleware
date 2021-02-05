@@ -96,7 +96,12 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
         super.setUp();
         setUpConfiguration();
     }
-    
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     protected void clear(String uri) throws OXException, IOException, JSONException {
         ClearRequest clearRequest = new ClearRequest(uri);
         getClient().execute(clearRequest);
@@ -104,7 +109,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
 
     /**
      * Mocks an external provider request with the specified URI, response content/payload, and status code
-     * 
+     *
      * @param uri The URI of the external source
      * @param responseContent The response content/payload
      * @param httpStatus The response status code
@@ -118,7 +123,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
 
     /**
      * Mocks an external provider request with the specified URI, response content/payload, status code and response headers
-     * 
+     *
      * @param uri The URI of the external source
      * @param responseContent The response content/payload
      * @param httpStatus The response status code
@@ -133,7 +138,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
 
     /**
      * Mocks an external provider request with the specified URI, response content/payload, status code and response headers
-     * 
+     *
      * @param method The HTTP method
      * @param uri The URI of the external source
      * @param responseContent The response content/payload
@@ -149,7 +154,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     /**
      * Mocks an external provider request with the specified URI, response content/payload,
      * status code, response headers and simulated response time
-     * 
+     *
      * @param method The HTTP method
      * @param uri The URI of the external source
      * @param responseContent The response content/payload
@@ -174,7 +179,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
      * Creates a folder with a subscription to schedjoules feed
      * with the specified item identifier and the specified name
      * and asserts the response.
-     * 
+     *
      * @param itemId The item identifier
      * @param folderName The folder name
      * @return The {@link FolderData} of the created folder
@@ -193,7 +198,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
 
     /**
      * Asserts the specified {@link FolderData}.
-     * 
+     *
      * @param actualFolderData The actual {@link FolderData} to assert
      * @param expectedTitle The expected title
      * @return The {@link FolderData}

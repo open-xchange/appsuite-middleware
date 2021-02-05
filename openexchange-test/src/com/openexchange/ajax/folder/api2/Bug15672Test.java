@@ -53,10 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -94,17 +92,6 @@ public class Bug15672Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, folder);
         CommonInsertResponse response = client.execute(request);
         response.fillObject(folder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest request = new DeleteRequest(EnumAPI.OUTLOOK, folder);
-            client.execute(request);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

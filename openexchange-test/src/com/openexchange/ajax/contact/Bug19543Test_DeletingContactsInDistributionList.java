@@ -4,7 +4,6 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -25,16 +24,6 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
     public void setUp() throws Exception {
         super.setUp();
         cotm.setSleep(0);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            cotm.setSleep(500);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

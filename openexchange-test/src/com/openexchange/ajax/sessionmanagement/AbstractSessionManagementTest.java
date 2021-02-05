@@ -62,7 +62,6 @@ import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
  */
 public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
-    @SuppressWarnings("hiding")
     protected ApiClient apiClient2;
 
     private SessionmanagementApi api;
@@ -81,11 +80,7 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
         // For the same user
         apiClient2 = generateApiClient(testUser);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+        rememberClient(testUser, apiClient2);
     }
 
     protected SessionmanagementApi getApi() {

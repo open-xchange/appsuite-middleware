@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
@@ -13,7 +12,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -78,19 +76,4 @@ public class Bug15777Test extends AbstractAJAXSession {
         assertTrue("Flag 'answered' is missing", MailFlag.transform(getMovedMailResp.getMail(TimeZone.getDefault()).getFlags()).contains(MailFlag.ANSWERED));
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // Delete Mail
-            final DeleteRequest del = new DeleteRequest(ids);
-            getClient().execute(del);
-
-            // Delete MailFolder
-            final com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-            getClient().execute(fDel);
-        } finally {
-            super.tearDown();
-        }
-    }
 }

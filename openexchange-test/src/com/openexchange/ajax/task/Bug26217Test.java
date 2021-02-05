@@ -54,12 +54,10 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -110,17 +108,6 @@ public final class Bug26217Test extends AbstractTaskTest {
         com.openexchange.ajax.folder.actions.InsertResponse response2 = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, moveTo));
         moveTo.setObjectID(response2.getId());
         moveTo.setLastModified(response2.getTimestamp());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, moveTo));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

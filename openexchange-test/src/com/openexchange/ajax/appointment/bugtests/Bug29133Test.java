@@ -15,7 +15,7 @@ import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug29133Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug29133Test extends AbstractAJAXSession {
@@ -36,7 +36,7 @@ public class Bug29133Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientB = getClient2();
+        clientB = getClient(1);
         ctmB = new CalendarTestManager(clientB);
 
         appointmentA = new Appointment();
@@ -54,6 +54,11 @@ public class Bug29133Test extends AbstractAJAXSession {
         catm.insert(appointmentA);
         appointmentB = catm.createIdentifyingCopy(appointmentA);
         appointmentB.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

@@ -172,8 +172,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     }
 
     @Override
-    protected int getNumerOfContexts() {
-        return 2;
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withContexts(2).withUserPerContext(1).build();
     }
 
     /**
@@ -652,6 +652,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return updateFile(file, modifiedColumns, null);
     }
 
+    private static final Date FAR_FUTURE = new Date(Long.MAX_VALUE);
+
     /**
      * Updates and remembers a file.
      *
@@ -662,7 +664,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @throws Exception
      */
     protected File updateFile(File file, Field[] modifiedColumns, RequestCustomizer<UpdateInfostoreRequest> customizer) throws Exception {
-        Date timestamp = file.getMeta() == null ? file.getLastModified() : (Date) file.getMeta().getOrDefault("timestamp", file.getLastModified());
+        Date timestamp = file.getMeta() == null ? FAR_FUTURE : (Date) file.getMeta().getOrDefault("timestamp", FAR_FUTURE);
         UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, timestamp);
         updateInfostoreRequest.setNotifyPermissionEntities(Transport.MAIL);
         updateInfostoreRequest.setFailOnError(true);
@@ -1206,6 +1208,17 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
             assertEquals("Entity ID wrong", actual.getEntity(), expectedPermission.getEntity());
             assertEquals("Recipient type wrong", actual.getType(), expectedPermission.isGroupPermission() ? RecipientType.GROUP : RecipientType.USER);
         }
+    }
+
+    /**
+     * Checks the supplied extended guest permission against the expected guest permissions.
+     *
+     * @param expectedPermission The expected permissions
+     * @param actual The actual extended permission
+     */
+    protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
+        assertNotNull("No guest permission entity for " + expectedPermission.getName(), actual);
+        checkGuestPermission((OCLPermission) expectedPermission, actual);
     }
 
     private static void checkRecipient(ShareRecipient expected, ExtendedPermissionEntity actual) {

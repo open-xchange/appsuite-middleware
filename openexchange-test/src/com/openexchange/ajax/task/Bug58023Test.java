@@ -96,6 +96,11 @@ public class Bug58023Test extends AbstractAPIClientSession {
         privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), generateFolderBody(), "1", Module.TASK.getName(), null, null).getData();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    }
+
     public String getPrivateTaskFolder() throws ApiException {
         ConfigApi configApi = new ConfigApi(apiClient);
         ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath());
@@ -133,8 +138,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllTasksInFolder() throws Exception {
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
+        ApiClient apiClient2 = getApiClient(1);
         TasksApi tasksApi2 = new TasksApi(apiClient2);
 
         TasksResponse allTasks = tasksApi2.getAllTasks(privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
@@ -150,9 +154,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetSingleTasksInFolder() throws Exception {
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-        TasksApi tasksApi2 = new TasksApi(apiClient2);
+        TasksApi tasksApi2 = new TasksApi(getApiClient(1));
 
         TaskResponse task = tasksApi2.getTask("333", privateTaskFolder);
 

@@ -57,12 +57,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -140,25 +137,6 @@ public class Bug14111Test extends AbstractAJAXSession {
                     client.execute(new DeleteRequest(reminder, false));
                 }
             }
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // Delete the exception.
-            final com.openexchange.ajax.appointment.action.DeleteRequest delReq1 = new com.openexchange.ajax.appointment.action.DeleteRequest(exception, false);
-            client.execute(delReq1);
-
-            // Delete the series.
-            final GetRequest getApp = new GetRequest(appointment, false);
-            final GetResponse getAppResp = client.execute(getApp);
-            final Appointment toDelete = getAppResp.getAppointment(tz);
-            final com.openexchange.ajax.appointment.action.DeleteRequest delReq2 = new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete, false);
-            client.execute(delReq2);
-        } finally {
-            super.tearDown();
         }
     }
 

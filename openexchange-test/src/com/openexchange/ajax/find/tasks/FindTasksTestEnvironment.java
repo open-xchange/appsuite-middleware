@@ -160,7 +160,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      */
     private final void initUsers() {
         userA = getClient().getValues();
-        userB = getClient2().getValues();
+        userB = client2.getValues();
     }
 
     /**
@@ -176,7 +176,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         //Get current structure
         Map<String, FolderObject> foldersA = getFolderStructure(getClient(), userA.getPrivateTaskFolder());
-        Map<String, FolderObject> foldersB = getFolderStructure(getClient2(), userB.getPrivateTaskFolder());
+        Map<String, FolderObject> foldersB = getFolderStructure(client2, userB.getPrivateTaskFolder());
 
         String userAPrivateTaskFolder = "UserA - findAPIPrivateTaskFolder-" + UUID.randomUUID().toString();
         try {
@@ -220,7 +220,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             userBsharedTestFolderRO = Create.createPrivateFolder(userBPrivateSharedTaskFolder, FolderObject.TASK, userB.getUserId());
             userBsharedTestFolderRO.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, false);
-            insertResponseResp = getClient2().execute(insertRequestReq);
+            insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRO);
             fttm.rememberFolderFromClientB(userBsharedTestFolderRO);
 //            ftm.rememberCreatedItems(userBsharedTestFolderRO);
@@ -236,7 +236,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         try {
             //share read only folder to userA
-            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            FolderTools.shareFolder(client2, EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -249,7 +249,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             userBsharedTestFolderRW = Create.createPrivateFolder(userBPrivateSharedTaskFolderRW, FolderObject.TASK, userB.getUserId());
             userBsharedTestFolderRW.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRW, false);
-            insertResponseResp = getClient2().execute(insertRequestReq);
+            insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRW);
             fttm.rememberFolderFromClientB(userBsharedTestFolderRW);
 //            ftm.rememberCreatedItems(userBsharedTestFolderRW);
@@ -265,7 +265,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         try {
             //share read/write folder to userA
-            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS);
+            FolderTools.shareFolder(client2, EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -278,7 +278,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             userBprivateTestFolder = Create.createPrivateFolder(userBPrivateTaskFolderNA, FolderObject.TASK, userB.getUserId());
             userBprivateTestFolder.setParentFolderID(userB.getPrivateTaskFolder());
             insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBprivateTestFolder, false);
-            insertResponseResp = getClient2().execute(insertRequestReq);
+            insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBprivateTestFolder);
             fttm.rememberFolderFromClientB(userBprivateTestFolder);
 //            ftm.rememberCreatedItems(userBprivateTestFolder);
@@ -295,7 +295,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         String userBPublicTaskFolder = "UserB - findAPIPublicTaskFolder" + UUID.randomUUID().toString();
         try {
             //create public test folder for user B
-            userBpublicTestFolder = Create.createPublicFolder(getClient2(), userBPublicTaskFolder, FolderObject.TASK, false);
+            userBpublicTestFolder = Create.createPublicFolder(client2, userBPublicTaskFolder, FolderObject.TASK, false);
             fttm.rememberFolderFromClientB(userBpublicTestFolder);
 //            ftm.rememberCreatedItems(userBpublicTestFolder);
         } catch (OXException e) {
@@ -308,7 +308,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             userBpublicTestFolder.setObjectID(foldersB.get(userBPublicTaskFolder).getObjectID());
         }
 
-//        fttm.setClient2(getClient2());
+        //        fttm.setClient2(client2);
     }
 
     /**
@@ -374,17 +374,17 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
                 switch (ft) {
                     case PUBLIC:
                         insertTask(getClient(), ft, s, userApublicTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
-                        insertTask(getClient2(), ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
+                        insertTask(client2, ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
                         break;
 
                     case PRIVATE:
                         insertTask(getClient(), ft, s, userAprivateTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
-                        insertTask(getClient2(), ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
+                        insertTask(client2, ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant> emptyList(), false, false);
                         break;
 
                     case SHARED:
-                        insertTask(getClient2(), ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant> emptyList(), false, false);
-                        insertTask(getClient2(), ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant> emptyList(), false, false);
+                        insertTask(client2, ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant> emptyList(), false, false);
+                        insertTask(client2, ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant> emptyList(), false, false);
                         break;
                 }
             }
@@ -396,18 +396,18 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         //insert a task with no attachment in private with status deferred and 1 internal participants (b) for user B
         List<Participant> list = new ArrayList<Participant>();
         list.add(usrPartB);
-        insertTask(getClient2(), FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false, false);
+        insertTask(client2, FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false, false);
 
         //insert a task with no attachment in private with status done and 2 internal participants (a+b) for user A
         list.add(usrPartA);
         rememberTask(userB, insertTask(getClient(), FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false, false));
 
         //insert a recurring task with attachment in shared folder with status not started and 2 internal participants for user b
-        rememberTask(userB, insertTask(getClient2(), FolderType.SHARED, Status.NOT_STARTED, userBsharedTestFolderRO.getObjectID(), list, true, true));
+        rememberTask(userB, insertTask(client2, FolderType.SHARED, Status.NOT_STARTED, userBsharedTestFolderRO.getObjectID(), list, true, true));
 
         //insert a task with attachment in private with status in progress and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
-        rememberTask(userA, insertTask(getClient2(), FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true, false));
+        rememberTask(userA, insertTask(client2, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true, false));
 
         //insert a task with attachment in private with status not_started and 1 internal (a) and 1 external participant for user a
         list.clear();
@@ -415,7 +415,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         list.add(extPart);
         insertTask(getClient(), FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true, false);
 
-        ttm.setClient2(getClient2());
+        ttm.setClient2(client2);
     }
 
     /**

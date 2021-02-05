@@ -75,6 +75,11 @@ public class MailTest extends AbstractAJAXSession {
 
     private static final String MAILTEXT = "This is mail text!<br>Next line<br/><br/>best regards,<br>Max Mustermann";
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().withUserPerContext(2).createAjaxClient().build();
+    }
+
     @Test
     public void testFail() {
         try {
@@ -99,10 +104,14 @@ public class MailTest extends AbstractAJAXSession {
         }
     }
 
+    private String getMailOfUser2() {
+        return getUser(1).getLogin();
+    }
+
     @Test
     public void testSendSimpleMail() throws IOException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
@@ -124,7 +133,7 @@ public class MailTest extends AbstractAJAXSession {
     @Test
     public void testSendMailWithMultipleAttachment() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
@@ -145,7 +154,7 @@ public class MailTest extends AbstractAJAXSession {
     @Test
     public void testForwardMail() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
@@ -172,7 +181,7 @@ public class MailTest extends AbstractAJAXSession {
     @Test
     public void testSendForwardMailWithAttachments() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit ForwardMe Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
@@ -202,7 +211,7 @@ public class MailTest extends AbstractAJAXSession {
     public void testGetMails() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit testGetMails Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
@@ -245,7 +254,7 @@ public class MailTest extends AbstractAJAXSession {
     public void testGetMsgSrc() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
         final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", testUser2.getLogin());
+        mailObj.put("from", getMailOfUser2());
         mailObj.put("to", testUser.getLogin());
         mailObj.put("subject", "JUnit Source Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();

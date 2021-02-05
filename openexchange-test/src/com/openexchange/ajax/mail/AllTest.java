@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import javax.mail.internet.InternetAddress;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
@@ -90,21 +89,6 @@ public final class AllTest extends AbstractMailTest {
          * Create JSON mail object
          */
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            /*
-             * Clean everything
-             */
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            clearFolder(getTrashFolder());
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

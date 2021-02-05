@@ -51,11 +51,9 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -76,15 +74,20 @@ public class CreatedByTest extends AbstractAJAXSession {
     @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();        
+        super.setUp();
 
         appointment = new Appointment();
         appointment.setTitle("Created by Test");
         appointment.setStartDate(D("07.12.2010 09:00"));
         appointment.setEndDate(D("07.12.2010 10:00"));
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        appointment.setCreatedBy(getClient2().getValues().getUserId());
+        appointment.setCreatedBy(getClient(1).getValues().getUserId());
         appointment.setIgnoreConflicts(true);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -98,16 +101,6 @@ public class CreatedByTest extends AbstractAJAXSession {
         Appointment loadAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
 
         assertEquals("Wrong created by", getClient().getValues().getUserId(), loadAppointment.getCreatedBy());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

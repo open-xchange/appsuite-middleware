@@ -66,6 +66,11 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  */
 public class MailSyncProfileTest extends AbstractSmtpAJAXSession {
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @Test
     public void testIMAPSyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();

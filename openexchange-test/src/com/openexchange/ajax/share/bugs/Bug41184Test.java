@@ -57,10 +57,9 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -77,26 +76,7 @@ import com.openexchange.test.tryagain.TryAgain;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug41184Test extends ShareTest {
-
-    private AJAXClient client2;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        client2 = getClient2();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != client2) {
-                client2.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
+public class Bug41184Test extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
@@ -111,14 +91,14 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String folderLink = discoverInvitationLink(getApiClient2(), client2.getValues().getDefaultAddress());
+        String folderLink = discoverInvitationLink(apiClient2, client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", folderLink);
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
         Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
         String folderID = String.valueOf(folder.getObjectID());
         Assert.assertEquals(folderID, folderMatcher.group(1));
-        new MailManager(getApiClient2()).clearMails();
+        new MailManager(apiClient2).clearMails();
         /*
          * create file in this folder share it to the same user, too
          */
@@ -127,7 +107,7 @@ public class Bug41184Test extends ShareTest {
         /*
          * fetch & check internal link from notification mail
          */
-        String fileLink = discoverInvitationLink(getApiClient2(), client2.getValues().getDefaultAddress());
+        String fileLink = discoverInvitationLink(apiClient2, client2.getValues().getDefaultAddress());
         Assert.assertNotNull("Invitation link not found", fileLink);
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);

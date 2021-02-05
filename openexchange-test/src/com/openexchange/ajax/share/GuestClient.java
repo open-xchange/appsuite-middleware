@@ -264,6 +264,7 @@ public class GuestClient extends AJAXClient {
              * redeem message details via token & continue
              */
             RedeemResponse redeemResponse = execute(new RedeemRequest(resolveShareResponse.getToken(), true));
+            assertFalse(redeemResponse.getErrorMessage(), redeemResponse.hasError());
             shareResponse = new ResolveShareResponse(resolveShareResponse, redeemResponse);
         } else {
             shareResponse = resolveShareResponse;

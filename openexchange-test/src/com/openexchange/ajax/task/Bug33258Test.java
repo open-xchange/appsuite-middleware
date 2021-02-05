@@ -57,12 +57,10 @@ import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -97,17 +95,6 @@ public final class Bug33258Test extends AbstractAJAXSession {
         task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         task.setTitle("Test for bug 33258");
         client1.execute(new InsertRequest(task, timeZone)).fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

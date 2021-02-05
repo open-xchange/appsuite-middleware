@@ -54,7 +54,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
@@ -132,16 +131,6 @@ public class Bug13931Test extends AbstractAJAXSession {
         assertEquals("Wrong order", aaa.getObjectID(), jsonArray.getJSONArray(1).getInt(0));
         assertEquals("Wrong order", BBB.getObjectID(), jsonArray.getJSONArray(2).getInt(0));
         assertEquals("Wrong order", bbb.getObjectID(), jsonArray.getJSONArray(3).getInt(0));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

@@ -56,14 +56,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.apiclient.FileMovePermissionWarningTest.FolderType;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -79,13 +76,7 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
  */
 public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePermissionsTest {
 
-    protected ApiClient apiClient3;
-
     protected Integer userId3;
-
-    private AJAXClient client3;
-
-    private TestUser testUser3;
 
     protected AbstractFolderMoveWarningTest(String type) {
         super(type);
@@ -94,17 +85,12 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        testUser3 = testContext.acquireUser();
-        client3 = generateClient(testUser3);
-        apiClient3 = generateApiClient(testUser3);
-        rememberClient(apiClient3);
-        userId3 = apiClient3.getUserId();
+        userId3 = getApiClient(2).getUserId();
     }
 
     @Override
-    public void tearDown() throws Exception {
-        client3 = logoutClient(client3, true);
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(3).build();
     }
 
     protected void checkFolderMove(String sourceFolder, String destinationFolder, FolderExceptionErrorMessage warning, FolderType sourceType, FolderType targetType) throws ApiException, JSONException {
@@ -165,10 +151,6 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
         return createNewFolder(sharedToUserId, BITS_REVIEWER, false, true);
     }
 
-    protected final AJAXClient getClient3() {
-        return client3;
-    }
-
     protected String getFolderName(String folderId) throws ApiException {
         FolderResponse folder = api.getFolder(folderId, TREE, null, null);
         return folder.getData().getTitle();
@@ -203,6 +185,6 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     }
 
     private String getPath(String folderToMove, String sourceFolder, FolderType sourceType) throws ApiException {
-        return sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") + getFolderName(sourceFolder) + (folderToMove != null ? "/" + getFolderName(folderToMove) : "");
+        return sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? getFolderName(getPrivateInfostoreFolder(getApiClient(1))) + "/" : "") + getFolderName(sourceFolder) + (folderToMove != null ? "/" + getFolderName(folderToMove) : "");
     }
 }

@@ -55,12 +55,10 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -89,17 +87,6 @@ public class Bug30903Test extends AbstractMailTest {
      */
     public Bug30903Test() {
         super();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest delReq = new DeleteRequest(fmids, true);
-            getClient().execute(delReq);
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

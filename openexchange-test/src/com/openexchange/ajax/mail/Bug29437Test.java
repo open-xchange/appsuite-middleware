@@ -51,11 +51,9 @@ package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertNull;
 import java.nio.charset.Charset;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
 import com.openexchange.ajax.mail.actions.AttachmentResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
@@ -100,19 +98,6 @@ public class Bug29437Test extends AbstractMailTest {
 		ImportMailRequest importReq = new ImportMailRequest(getInboxFolder(), 0, Charset.forName("UTF-8"), TEST_MAIL);
 		ImportMailResponse importResp = getClient().execute(importReq);
 		folderAndId = importResp.getIds();
-	}
-
-	@Override
-	@After
-	public void tearDown() throws Exception {
-		try {
-			if (folderAndId != null) {
-				DeleteRequest deleteReq = new DeleteRequest(folderAndId, true);
-				getClient().execute(deleteReq);
-			}
-		} finally {
-			super.tearDown();
-		}
 	}
 
 	@Test

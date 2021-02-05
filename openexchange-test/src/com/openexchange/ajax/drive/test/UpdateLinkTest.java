@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
@@ -220,16 +219,6 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         assertNull("Share was not deleted", guestEntity);
         List<FileStorageObjectPermission> objectPermissions = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertTrue("Permission was not deleted", objectPermissions.isEmpty());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            itm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

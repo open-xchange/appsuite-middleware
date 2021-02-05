@@ -92,6 +92,7 @@ import com.openexchange.testing.httpclient.models.AnalysisChangeCurrentEvent;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.Conference;
@@ -113,6 +114,11 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
     private EventData attendeeEvent = null;
 
     private Attendee replyingAttendee;
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    }
 
     /**
      * Creates an event as user A in context 1 with external attendee user B from context 2.
@@ -136,7 +142,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -146,7 +151,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * reply with "accepted"
          */
         attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
-        rememberForCleanup(apiClientC2, attendeeEvent);
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
 
         /*
@@ -154,7 +158,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
-        rememberMail(reply);
 
         /*
          * Take over accept and check in calendar
@@ -357,7 +360,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         AnalysisChangeCurrentEvent current = analyzeResponse.getData().get(0).getChanges().get(0).getCurrentEvent();
 
         EventData eventData = eventManagerC2.getEvent(current.getFolder(), current.getId());
-        rememberForCleanup(eventData);
         assertEquals(createdEvent.getUid(), eventData.getUid());
         assertAttendeePartStat(eventData.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         /*
@@ -368,7 +370,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals(asset.getFilename(), attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        byte[] attachmentData = eventManagerC2.getAttachment(eventData.getId(), i(attachment.getManagedId()),  eventData.getFolder());
+        byte[] attachmentData = eventManagerC2.getAttachment(eventData.getId(), i(attachment.getManagedId()), eventData.getFolder());
         assertNotNull(attachmentData);
 
         /*
@@ -388,11 +390,10 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Receive update as attendee and accept changes
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.ALL);
         change = assertSingleChange(analyzeResponse);
-        assertSingleDescription(change, "The attachment <i>"+ asset.getFilename() + "</i> was removed");
+        assertSingleDescription(change, "The attachment <i>" + asset.getFilename() + "</i> was removed");
         ActionResponse actionResponse = update(apiClientC2, constructBody(iMip));
         updated = actionResponse.getData().get(0);
         updated = eventManagerC2.getEvent(updated.getFolder(), updated.getId());
@@ -454,12 +455,13 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Add an third attendee
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
-        TestUser testUser3 = context2.acquireUser();
+        TestUser testUser3 = users.get(context2).get(1);
 
         Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
         addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
         deltaEvent.getAttendees().add(addedAttendee);
         updateEventAsOrganizer(deltaEvent);
+        assertTrue("Attendee was not added", deltaEvent.getAttendees().size() == createdEvent.getAttendees().size());
 
         /*
          * Check that the event has a new attendee
@@ -471,10 +473,8 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * Check invite mail for new attendee
          */
-        ApiClient apiClient3 = generateApiClient(testUser3);
-        rememberClient(apiClient3);
+        ApiClient apiClient3 = getApiClient(context2, 1);
         MailData iMip = receiveIMip(apiClient3, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClient3, iMip);
         analyzeResponse = analyze(apiClient3, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
         assertNotNull(newEvent);
@@ -494,7 +494,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         updateEventAsOrganizer(deltaEvent);
 
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
-        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
 
@@ -644,9 +643,9 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         String untilStr = DateTimeUtil.getZuluDateTime(new Date(now + TimeUnit.DAYS.toMillis(30)).getTime()).getValue();
 
         ChronosCalendarResultResponse calendarResultResponse = chronosApi.updateEvent(deltaEvent.getFolder(), deltaEvent.getId(), now(), getUpdateBody(deltaEvent), deltaEvent.getRecurrenceId(), null, null, null, null, null, null, fromStr, untilStr, Boolean.TRUE, null);
-        assertNull(calendarResultResponse.getError());
-        assertTrue(calendarResultResponse.getData().getUpdated().size() == 1);
-        createdEvent = calendarResultResponse.getData().getUpdated().get(0);
+        CalendarResult result = checkResponse(calendarResultResponse.getError(), calendarResultResponse.getErrorDesc(), calendarResultResponse.getData());
+        assertTrue(result.getUpdated().size() == 1);
+        createdEvent = result.getUpdated().get(0);
     }
 
     private AnalyzeResponse receiveUpdateAsAttendee(PartStat partStat, CustomConsumers consumer) throws Exception {
@@ -659,7 +658,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
 
     private AnalyzeResponse receiveUpdateAsAttendee(PartStat partStat, CustomConsumers consumer, String summary, int sequnce) throws Exception {
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, sequnce, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
         assertNotNull(newEvent);

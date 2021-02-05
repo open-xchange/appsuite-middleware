@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -100,17 +99,6 @@ public class Bug12409Test extends AbstractMailTest {
 
         folderAndID = getClient().execute(new SendRequest(mailObject_string)).getFolderAndID();
 
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // clean the drafts folder
-            clearFolder(getDraftsFolder());
-        } finally {
-            super.tearDown();
-        }
     }
 
     public Bug12409Test() {

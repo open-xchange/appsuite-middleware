@@ -57,7 +57,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -98,16 +97,21 @@ public class PrivateTests extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient2();
-        client3 = new AJAXClient(testContext.acquireUser());
-        client4 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient(1);
+        client3 = getClient(2);
+        client4 = getClient(3);
 
-        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Private Test Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, 
-            ocl(client1.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), 
-            ocl(client2.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), 
+        folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Private Test Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE,
+            ocl(client1.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+            ocl(client2.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
             ocl(client3.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         CommonInsertResponse response = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder));
         response.fillObject(folder);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(4).build();
     }
 
     @Test
@@ -187,13 +191,13 @@ public class PrivateTests extends AbstractAJAXSession {
         app.setLocation("Hier und da");
         app.setPrivateFlag(true);
         app.setParentFolderID(folder.getObjectID());
-        app.setUsers(new UserParticipant[] { 
-            new UserParticipant(client1.getValues().getUserId()), 
-            new UserParticipant(client2.getValues().getUserId()), 
+        app.setUsers(new UserParticipant[] {
+            new UserParticipant(client1.getValues().getUserId()),
+            new UserParticipant(client2.getValues().getUserId()),
             new UserParticipant(client4.getValues().getUserId()) });
-        app.setParticipants(new Participant[] { 
-            new UserParticipant(client1.getValues().getUserId()), 
-            new UserParticipant(client2.getValues().getUserId()), 
+        app.setParticipants(new Participant[] {
+            new UserParticipant(client1.getValues().getUserId()),
+            new UserParticipant(client2.getValues().getUserId()),
             new UserParticipant(client4.getValues().getUserId()) });
 
         InsertRequest insertRequest = new InsertRequest(app, client1.getValues().getTimeZone());
@@ -227,25 +231,6 @@ public class PrivateTests extends AbstractAJAXSession {
         getResponse = client4.execute(get);
         loaded = getResponse.getAppointment(client4.getValues().getTimeZone());
         assertEquals("Missing data.", app.getLocation(), loaded.getLocation());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(app));
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
-           
-            if (null != client3){
-                client3.logout();
-                client3 = null;
-            }
-            if (null != client4){
-                client4.logout();
-                client4 = null;
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

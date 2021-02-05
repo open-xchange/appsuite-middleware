@@ -55,7 +55,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
@@ -212,24 +211,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonWriterRegistry.addWriter(MatchType.user, new UserComparisonWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.under, new UnderJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.over, new OverJSONWriterImpl());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            for (Integer id : rulesToDelete) {
-                try {
-                    if (id != null) {
-                        mailFilterAPI.deleteRule(id.intValue());
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected void rememberRule(int ruleId) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
@@ -64,17 +65,17 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.ContactData;
-import com.openexchange.testing.httpclient.models.ContactListElement;
 import com.openexchange.testing.httpclient.models.ContactResponse;
 import com.openexchange.testing.httpclient.models.ContactUpdateResponse;
 import com.openexchange.testing.httpclient.models.DistributionListMember;
@@ -92,7 +93,7 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSession {
+public class AbstractApiClientContactTest extends AbstractAPIClientSession {
 
     public static final String CONTENT_TYPE = "image/png";
 
@@ -117,7 +118,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         super.setUp();
         contactsApi = new ContactsApi(apiClient);
         contactFolderId = getDefaultFolder(apiClient.getSession(), new FoldersApi(apiClient));
-        userId = getUserId();
+        userId = i(testUser.getUserId());
 
         UserResponse resp = new UserApi(apiClient).getUser(String.valueOf(userId));
         assertNull(resp.getErrorDesc(), resp.getError());
@@ -462,25 +463,6 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         return id;
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        List<ContactListElement> body = new ArrayList<>();
-        for(String id: createdContacts) {
-            ContactListElement element = new ContactListElement();
-            element.setFolder(contactFolderId);
-            element.setId(id);
-            body.add(element);
-        }
-        if (!body.isEmpty()) {
-            try {
-                contactsApi.deleteContacts(Long.valueOf(Long.MAX_VALUE), body);
-            } catch(@SuppressWarnings("unused") Exception e) {
-                // ignore
-            }
-        }
-        super.tearDown();
-    }
-
     public void updateContact(final ContactData contactObj, String folder) throws Exception {
         ContactUpdateResponse updateContact = contactsApi.updateContact(folder, contactObj.getId(), lastTimestamp, contactObj);
         assertNull(updateContact.getErrorDesc(), updateContact.getError());
@@ -522,10 +504,9 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
     public byte[] loadImageByURL(final String protocol, final String hostname, final String imageUrl) throws Exception {
         InputStream inputStream = null;
         try {
-            final AJAXSession ajaxSession = getSession();
-
+            CloseableHttpClient httpClient = HttpClients.createDefault();
             final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
-            final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            final HttpResponse httpResponse = httpClient.execute(httpRequest);
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
             final byte[] buf = new byte[len];

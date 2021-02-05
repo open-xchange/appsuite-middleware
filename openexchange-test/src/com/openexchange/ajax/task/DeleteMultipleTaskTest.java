@@ -52,14 +52,11 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertFalse;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
@@ -106,28 +103,6 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
         final InsertRequest insReq2 = new InsertRequest(task2, timeZone);
         final InsertResponse insRes2 = getClient().execute(insReq2);
         insRes2.fillTask(task2);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final GetRequest getReq1 = new GetRequest(task1.getParentFolderID(), task1.getObjectID(), false);
-            final GetResponse getRes1 = getClient().execute(getReq1);
-            if (!getRes1.hasError()) {
-                final DeleteRequest delReq = new DeleteRequest(task1, false);
-                getClient().execute(delReq);
-            }
-
-            final GetRequest getReq2 = new GetRequest(task2.getParentFolderID(), task2.getObjectID(), false);
-            final GetResponse getRes2 = getClient().execute(getReq2);
-            if (!getRes2.hasError()) {
-                final DeleteRequest delReq = new DeleteRequest(task2, false);
-                getClient().execute(delReq);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

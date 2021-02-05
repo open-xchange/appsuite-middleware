@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -65,10 +64,8 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -91,31 +88,20 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
     protected Attendee actingAttendee1;
     protected Attendee actingAttendee2;
     protected Attendee actingAttendee3;
-
     protected EventData event;
-
-    protected TestUser testUser3;
-    protected TestUser testUser4;
-    private AJAXClient client3;
-    private AJAXClient client4;
-
     private String summary;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        testUser3 = testContext.acquireUser();
-        testUser4 = testContext.acquireUser();
-        client3 = generateClient(testUser3);
-        client4 = generateClient(testUser4);
 
         summary = this.getClass().getSimpleName() + UUID.randomUUID();
         event = EventFactory.createSeriesEvent(apiClient.getUserId().intValue(), summary, 10, folderId);
         // The internal attendees
-        organizerAttendee = createAttendee(I(getClient().getValues().getUserId()));
-        actingAttendee1 = createAttendee(I(getClient2().getValues().getUserId()));
-        actingAttendee2 = createAttendee(I(client3.getValues().getUserId()));
-        actingAttendee3 = createAttendee(I(client4.getValues().getUserId()));
+        organizerAttendee = createAttendee(testUser.getUserId());
+        actingAttendee1 = createAttendee(getUser(1).getUserId());
+        actingAttendee2 = createAttendee(getUser(2).getUserId());
+        actingAttendee3 = createAttendee(getUser(3).getUserId());
 
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizerAttendee);
@@ -135,23 +121,16 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            client3 = logoutClient(client3, true);
-            client4 = logoutClient(client4, true);
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(4).build();
     }
 
     @Test
     public void testCreateSeriesWithoutExceptions_returnOneNeedsAction() throws Exception {
         Calendar start = getStart();
-        ApiClient client3 = generateApiClient(testUser3);
-        rememberClient(client3);
-        EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
+        ApiClient client3 = getApiClient(2);
+        EnhancedApiClient enhancedClient3 = (EnhancedApiClient) client3;
+        UserApi userApi3 = new UserApi(client3, enhancedClient3, getUser(2));
 
         Calendar end = getEnd();
 
@@ -165,11 +144,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         Calendar start = getStart();
         createSingleEvent();
 
-        ApiClient client3 = generateApiClient(testUser3);
-        rememberClient(client3);
-        EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
+        EnhancedApiClient enhancedClient3 = (EnhancedApiClient) getApiClient(2);
+        UserApi userApi3 = new UserApi(getApiClient(2), enhancedClient3, getUser(2));
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.HOURS.toMillis(2));
@@ -185,11 +161,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         secondOccurrence.setSummary(event.getSummary() + "The summary changed and that should result in a dedicated action");
         eventManager.updateOccurenceEvent(secondOccurrence, secondOccurrence.getRecurrenceId(), true);
 
-        ApiClient client3 = generateApiClient(testUser3);
-        rememberClient(client3);
-        EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
+        EnhancedApiClient enhancedClient3 = (EnhancedApiClient) getApiClient(2);
+        UserApi userApi3 = new UserApi(getApiClient(2), enhancedClient3, getUser(2));
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
@@ -210,11 +183,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
         EventData secondOccurrence = getSecondOccurrence(eventManager, event);
         eventManager.updateAttendee(secondOccurrence.getId(), secondOccurrence.getRecurrenceId(), folderId, data, false);
 
-        ApiClient client3 = generateApiClient(testUser3);
-        rememberClient(client3);
-        EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
+        EnhancedApiClient enhancedClient3 = (EnhancedApiClient) getApiClient(2);
+        UserApi userApi3 = new UserApi(getApiClient(2), enhancedClient3, getUser(2));
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));
@@ -233,11 +203,8 @@ public class NeedsActionActionTest extends AbstractExtendedChronosTest {
 
         createSingleEvent();
 
-        ApiClient client3 = generateApiClient(testUser3);
-        rememberClient(client3);
-        EnhancedApiClient enhancedClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedClient3);
-        UserApi userApi3 = new UserApi(client3, enhancedClient3, testUser3);
+        EnhancedApiClient enhancedClient3 = (EnhancedApiClient) getApiClient(2);
+        UserApi userApi3 = new UserApi(getApiClient(2), enhancedClient3, getUser(2));
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(end.getTimeInMillis() + TimeUnit.DAYS.toMillis(14));

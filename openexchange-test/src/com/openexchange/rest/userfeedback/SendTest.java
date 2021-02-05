@@ -62,11 +62,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
-import com.openexchange.ajax.mail.actions.DeleteResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.testing.restclient.invoker.ApiException;
@@ -103,23 +100,6 @@ public class SendTest extends AbstractUserFeedbackTest {
         requestBody.put("subject", "subject");
         requestBody.put("body", "body");
         requestBody.put("compress", true);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            deleteMail();
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    private void deleteMail() throws OXException, IOException, JSONException {
-        if (Strings.isNotEmpty(mailId)) {
-            DeleteRequest delete = new DeleteRequest(getAjaxClient().getValues().getInboxFolder(), mailId, true);
-            DeleteResponse deleteResponse = getAjaxClient().execute(delete);
-            assertFalse(deleteResponse.hasError());
-        }
     }
 
     private void assertMailRetrieved(String subject, MailMessage[] mailMessages) {

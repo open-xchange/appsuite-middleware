@@ -55,11 +55,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
@@ -76,7 +75,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug43297Test extends CalDAVTest {
+public class Bug43297Test extends Abstract2UserCalDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
@@ -91,10 +90,10 @@ public class Bug43297Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
-        ftm.setClient(getClient2());        
+        ftm.setClient(client2);
         FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
@@ -111,19 +110,6 @@ public class Bug43297Test extends CalDAVTest {
         folder.setPermissions(calendarFolder.getPermissions());
         subfolder = ftm.insertFolderOnServer(folder);
         sharedFolderID = String.valueOf(subfolder.getObjectID());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.manager2) {
-                this.manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

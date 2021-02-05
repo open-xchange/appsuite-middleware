@@ -60,7 +60,6 @@ import com.openexchange.testing.httpclient.models.AppPasswordRegistrationRespons
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
 import com.openexchange.testing.httpclient.models.MultifactorDeviceParameters;
-import com.openexchange.testing.httpclient.models.MultifactorFinishAuthenticationData;
 import com.openexchange.testing.httpclient.models.MultifactorFinishRegistrationData;
 import com.openexchange.testing.httpclient.models.MultifactorFinishRegistrationResponse;
 import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationResponse;
@@ -82,7 +81,6 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
     private static final String SMS_CODE = "0815";
 
     private MultifactorApi multifactorApi;
-    private String deviceId;
     @SuppressWarnings("hiding")
     private LoginApi loginApi;
 
@@ -99,16 +97,6 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
         super.setUp();
         multifactorApi = new MultifactorApi(getApiClient());
         loginApi = new LoginApi(getApiClient());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            deleteDevice();
-            removeAll();
-        } finally {
-            super.tearDown();
-        }
     }
 
     private void setupSMS() throws ApiException {
@@ -131,27 +119,6 @@ public class MultifactorBypassTest extends AbstractAppPasswordTest {
         MultifactorFinishRegistrationResponse finalresp =
             multifactorApi.multifactorDeviceActionfinishRegistration(SMS_PROVIDER_NAME, respData.getDeviceId(), data);
         checkResponse(finalresp.getError(), finalresp.getErrorDesc(), finalresp.getData());
-        deviceId = respData.getDeviceId();
-    }
-
-    private void deleteDevice() throws ApiException {
-        if (deviceId != null) {
-            try {
-                getApiClient().logout();
-            } catch (@SuppressWarnings("unused") ApiException ex) {
-                // May need to log out if hadn't completed test
-            }
-            // We need to log in the main testuser for cleanup
-            getApiClient().login(testUser.getLogin(), testUser.getPassword());
-            //multifactorApi = new MultifactorApi(getApiClient());  // update client with latest login
-            // Authenticated against sms so we can cleanup
-            MultifactorFinishAuthenticationData data = new MultifactorFinishAuthenticationData();
-            data.setSecretCode(SMS_CODE);
-            multifactorApi.multifactorDeviceActionStartAuthentication(SMS_PROVIDER_NAME, deviceId);
-            multifactorApi.multifactorDeviceActionfinishAuthentication(SMS_PROVIDER_NAME, deviceId, data);
-            // Delete the device
-            multifactorApi.multifactorDeviceActionDelete(SMS_PROVIDER_NAME, deviceId);
-        }
     }
 
     @Test

@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -232,13 +231,6 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
     private String rememberFolder(String id) {
         toDelete.add(id);
         return id;
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        ArrayList<String> list = toDelete.stream().collect(Collectors.toCollection(ArrayList::new));
-        foldersApi.deleteFolders(list, TREE, getLastTimeStamp(), module, TRUE, FALSE, FALSE, null, Boolean.FALSE);
-        super.tearDown();
     }
 
     private Long getLastTimeStamp() {

@@ -117,6 +117,11 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         defaultFolder = getDefaultFolder(getSessionId());
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(4).build();
+    }
+
     /**
      * Creates a folder with the given title
      *
@@ -229,15 +234,6 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
             permissions.add(perm);
         }
         return permissions;
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            folderApi.deleteFolders(createdFolders, "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

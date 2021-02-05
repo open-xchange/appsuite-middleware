@@ -93,12 +93,12 @@ public class Bug16476Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = getClient2();
+        clientB = getClient(1);
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 16476" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
-        
+
         folder = ftm.insertFolderOnServer(folder);
-        
+
         appointment = new Appointment();
         appointment.setStartDate(D("01.06.2010 08:00"));
         appointment.setEndDate(D("01.06.2010 09:00"));
@@ -106,6 +106,11 @@ public class Bug16476Test extends AbstractAJAXSession {
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setPrivateFlag(true);
         appointment.setIgnoreConflicts(true);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

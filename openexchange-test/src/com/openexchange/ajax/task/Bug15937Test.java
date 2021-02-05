@@ -52,12 +52,10 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -92,16 +90,6 @@ public class Bug15937Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(task, timeZone);
         InsertResponse response = client.execute(request);
         response.fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.framework;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -95,32 +94,6 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractRestTest {
             ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
             ChangePropertiesResponse response = getAjaxClient().execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
-        }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (oldData != null) {
-                // change back to old value if present
-                Map<String, Object> map = oldData.asMap();
-                Map<String, String> newMap = new HashMap<>();
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    try {
-                        newMap.put(entry.getKey(), (String) entry.getValue());
-                    } catch (ClassCastException cce) {
-                        //should never be the case
-                        return;
-                    }
-                }
-                if (!map.isEmpty()) {
-                    ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
-                    ChangePropertiesResponse response = getAjaxClient().execute(req);
-                    oldData = ResponseWriter.getJSON(response.getResponse());
-                }
-            }
-        } finally {
-            super.tearDown();
         }
     }
 

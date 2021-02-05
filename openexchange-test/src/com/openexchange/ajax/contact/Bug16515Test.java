@@ -51,10 +51,8 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -91,17 +89,6 @@ public class Bug16515Test extends AbstractAJAXSession {
         final Contact toCompare = getContactResp.getContact();
 
         assertEquals("File as has changed after creating contact.", contact.getFileAs(), toCompare.getFileAs());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest deleteContactReq = new DeleteRequest(contact, false);
-            getClient().execute(deleteContactReq);
-        } finally {
-            super.tearDown();
-        }
     }
 
     public Contact createContact() throws Exception {

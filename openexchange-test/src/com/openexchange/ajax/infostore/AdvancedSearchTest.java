@@ -73,19 +73,14 @@ import com.openexchange.testing.httpclient.models.InfoItemsResponse;
  */
 public class AdvancedSearchTest extends InfostoreApiClientTest {
 
-    private List<InfoItemData> createdEntities = new ArrayList<>();
+    private final List<InfoItemData> createdEntities = new ArrayList<>();
 
-    private String columns = "" + File.Field.ID.getNumber() + "," + File.Field.TITLE.getNumber() + "," + File.Field.FILENAME.getNumber();
+    private final String columns = "" + File.Field.ID.getNumber() + "," + File.Field.TITLE.getNumber() + "," + File.Field.FILENAME.getNumber();
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         createFiles(10, folderId);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     /**

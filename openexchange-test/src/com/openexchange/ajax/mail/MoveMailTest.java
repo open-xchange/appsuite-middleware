@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -80,18 +79,6 @@ public class MoveMailTest extends AbstractMailTest {
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(values.getSentFolder());
-            clearFolder(values.getInboxFolder());
-            clearFolder(values.getDraftsFolder());
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

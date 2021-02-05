@@ -53,10 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -134,18 +132,6 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final List<TestMail> mails = mtm.findAndLoadSimilarMails(testMail, client, folder.getFullName());
 
         assertFalse("No mail was found", null == mails);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (folder != null) {
-                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

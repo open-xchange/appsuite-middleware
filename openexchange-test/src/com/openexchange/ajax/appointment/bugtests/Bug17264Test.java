@@ -54,7 +54,6 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -103,7 +102,7 @@ public class Bug17264Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         clientA = getClient();
-        clientB = getClient2();
+        clientB = getClient(1);
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 17264", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 
@@ -121,6 +120,11 @@ public class Bug17264Test extends AbstractAJAXSession {
         appointment.setParentFolderID(folder.getObjectID());
         appointment.setIgnoreConflicts(true);
         appointment.setAlarm(30);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -175,17 +179,6 @@ public class Bug17264Test extends AbstractAJAXSession {
         GetResponse getResponse = clientA.execute(getRequest);
         Appointment app = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            //clientA.execute(new DeleteRequest(appointment));
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

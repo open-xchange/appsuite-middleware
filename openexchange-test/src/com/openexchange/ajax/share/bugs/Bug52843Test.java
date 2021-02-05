@@ -74,6 +74,11 @@ import com.openexchange.testing.httpclient.models.MailData;
  */
 public class Bug52843Test extends ShareTest {
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(1).build();
+    }
+
     @Test
     @TryAgain
     public void testNotifyFolder() throws Exception {
@@ -89,7 +94,7 @@ public class Bug52843Test extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : folder.getPermissions()) {
-            if (oclPermission.getEntity() != getClient().getValues().getUserId()) {
+            if (oclPermission.getEntity() != testUser.getUserId().intValue()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -111,9 +116,9 @@ public class Bug52843Test extends ShareTest {
          * try to re-send notification as guest
          */
         mailManager.clearMails();
-        AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), getClient().getValues().getUserId()));
+        AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), testUser.getUserId().intValue()));
         assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
-        MailData notificationMessage = discoverInvitationMessage(getApiClient(), getClient().getValues().getDefaultAddress());
+        MailData notificationMessage = discoverInvitationMessage(getApiClient(), testUser.getLogin());
         assertNull("Notification was received", notificationMessage);
     }
 }

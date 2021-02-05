@@ -58,14 +58,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareAPITest;
 import com.openexchange.ajax.share.actions.DeleteLinkRequest;
@@ -100,7 +98,6 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  */
 public class GetALinkTest extends ShareAPITest {
 
-    private InfostoreTestManager itm;
     private FolderObject infostore;
     private InfostoreApi infostoreApi;
     private DefaultFile file;
@@ -112,7 +109,6 @@ public class GetALinkTest extends ShareAPITest {
         super.setUp();
         infostoreApi = new InfostoreApi(getApiClient());
         shareApi = new ShareManagementApi(getApiClient());
-        itm = new InfostoreTestManager(getClient());
 
         UserValues values = getClient().getValues();
         infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
@@ -131,15 +127,8 @@ public class GetALinkTest extends ShareAPITest {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (itm != null) {
-                itm.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @Test

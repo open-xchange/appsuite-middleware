@@ -96,9 +96,9 @@ public class Bug56359Test extends AppointmentTest {
         /*
          * as user B, try and add an external user via 'confirm' action (in user b's personal calendar folder)
          */
-        int folderId = getClient2().getValues().getPrivateAppointmentFolder();
+        int folderId = getClient(1).getValues().getPrivateAppointmentFolder();
         int objectId = appointment.getObjectID();
-        ConfirmResponse confirmResponse = getClient2().execute(new ConfirmRequest(
+        ConfirmResponse confirmResponse = getClient(1).execute(new ConfirmRequest(
             folderId, objectId, Appointment.ACCEPT, "", "test@example.com", appointment.getLastModified(), false));
         assertTrue("No errors in confirm response", confirmResponse.hasError());
         assertEquals("Unexpected error in confirm response", "APP-0059", confirmResponse.getException().getErrorCode());
@@ -109,6 +109,11 @@ public class Bug56359Test extends AppointmentTest {
         for (Participant participant : appointment.getParticipants()) {
             assertNotEquals("External participant was added", "test@example.com", participant.getEmailAddress());
         }
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

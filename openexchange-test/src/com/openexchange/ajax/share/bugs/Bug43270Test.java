@@ -57,7 +57,6 @@ import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -65,11 +64,10 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -90,9 +88,8 @@ import com.openexchange.test.tryagain.TryAgain;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class Bug43270Test extends ShareTest {
+public class Bug43270Test extends Abstract2UserShareTest {
 
-    private AJAXClient client2;
     private Map<Integer, FolderObject> foldersToDelete;
 
     /**
@@ -109,23 +106,6 @@ public class Bug43270Test extends ShareTest {
     public void setUp() throws Exception {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
-        client2 = new AJAXClient(testContext.acquireUser());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != client2) {
-                if (null != foldersToDelete && 0 < foldersToDelete.size()) {
-                    deleteFoldersSilently(client2, foldersToDelete);
-                }
-                client2.logout();
-                prepareUser(true, null, null);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -89,7 +89,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     private int nextYear;
 
-    private int occurrence = 5;
+    private final int occurrence = 5;
 
     private static final int[] COLS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE,
@@ -108,8 +108,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient2();
-        ctm2 = new CalendarTestManager(getClient2());
+        client2 = getClient(1);
+        ctm2 = new CalendarTestManager(client2);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         folderId1 = client1.getValues().getPrivateAppointmentFolder();
         folderId2 = client2.getValues().getPrivateAppointmentFolder();
@@ -132,14 +132,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            if (ctm2 != null) {
-                ctm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

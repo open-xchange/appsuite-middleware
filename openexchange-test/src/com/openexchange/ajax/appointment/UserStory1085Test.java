@@ -55,11 +55,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -92,8 +90,8 @@ public class UserStory1085Test extends AppointmentTest {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient2();
-        clientC = new AJAXClient(testContext.acquireUser());
+        clientB = getClient(1);
+        clientC = getClient(2);
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
@@ -138,16 +136,8 @@ public class UserStory1085Test extends AppointmentTest {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clientB.execute(new DeleteRequest(appointmenShare));
-            clientC.execute(new DeleteRequest(appointmentPrivate));
-            clientC.execute(new DeleteRequest(appointmentNormal));
-            clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

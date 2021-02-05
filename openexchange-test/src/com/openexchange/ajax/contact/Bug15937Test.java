@@ -51,10 +51,8 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -86,16 +84,6 @@ public class Bug15937Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(contact);
         InsertResponse response = getClient().execute(request);
         response.fillObject(contact);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contact));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -104,17 +103,6 @@ public class MSISDNAddressTest extends AbstractMailTest {
         GetResponse response = getClient().execute(new GetRequest(userValues.getUserId(), userValues.getTimeZone()));
         contactData = response.getContact();
         setCellularNumberOfContact();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // reset to original Number if tests expect this
-            setCellularNumberOfContact();
-        } finally {
-            super.tearDown();
-        }
     }
 
     private void setCellularNumberOfContact() throws OXException, IOException, JSONException {

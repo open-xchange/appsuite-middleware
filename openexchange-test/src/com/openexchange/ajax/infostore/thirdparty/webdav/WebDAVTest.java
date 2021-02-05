@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -166,11 +167,11 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
     }
 
     @Override
-    protected Map<String, String> getNeededConfigurations() {
+    public Optional<Map<String, String>> optContextConfig() {
         HashMap<String, String> configuration = new HashMap<>();
         configuration.put("com.openexchange.capability.filestorage_webdav", Boolean.TRUE.toString());
         configuration.put("com.openexchange.file.storage.webdav.blacklistedHosts", "");
-        return configuration;
+        return Optional.of(configuration);
     }
 
     /**
@@ -187,11 +188,6 @@ public class WebDAVTest extends AbstractFileStorageAccountTest {
         final boolean extendedResponse = false;
         FoldersCleanUpResponse response = foldersApi.deleteFolders(Collections.singletonList(folderId), null, null, null, B(hardDelete), B(failOnError), B(extendedResponse), null, Boolean.FALSE);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-    }
-
-    @Override
-    protected String getReloadables() {
-        return "CapabilityReloadable";
     }
 
     /**

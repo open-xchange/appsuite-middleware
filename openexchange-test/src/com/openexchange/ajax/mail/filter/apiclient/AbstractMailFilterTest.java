@@ -49,17 +49,11 @@
 
 package com.openexchange.ajax.mail.filter.apiclient;
 
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.I;
-import static java.lang.Boolean.TRUE;
-import static java.lang.Boolean.FALSE;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.MailFilterDeletionBody;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.MailfilterApi;
@@ -104,23 +98,4 @@ public abstract class AbstractMailFilterTest extends AbstractConfigAwareAPIClien
         return ruleId;
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        ApiException ex = null;
-        try {
-
-            folderApi.deleteFolders(foldersToDelete, "0", L(Long.MAX_VALUE), null, TRUE, FALSE, FALSE, null, FALSE);
-            for (int ruleId : sieveRuleToDelete) {
-                MailFilterDeletionBody body = new MailFilterDeletionBody();
-                body.setId(I(ruleId));
-                mailfilterapi.deleteRuleV2(body, null);
-            }
-        } catch (ApiException e) {
-            ex = e;
-        }
-        super.tearDown();
-        if (ex != null) {
-            throw ex;
-        }
-    }
 }

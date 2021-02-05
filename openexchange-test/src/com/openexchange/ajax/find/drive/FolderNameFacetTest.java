@@ -51,7 +51,6 @@ package com.openexchange.ajax.find.drive;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
@@ -106,9 +105,8 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        foldersApi.deleteFolders(createdFolders, "0", L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -216,7 +214,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         assertEquals(2, i(data.getSize()));
 
         // Search as another user, result in "Public Files" expected
-        FindApi findApi2 = new FindApi(apiClient2);
+        FindApi findApi2 = new FindApi(getApiClient(1));
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
         checkResponseForErrors(response);
         data = response.getData();

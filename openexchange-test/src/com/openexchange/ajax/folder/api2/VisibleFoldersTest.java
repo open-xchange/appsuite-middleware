@@ -52,17 +52,14 @@ package com.openexchange.ajax.folder.api2;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.PermissionTools;
 
@@ -71,31 +68,23 @@ import com.openexchange.test.PermissionTools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class VisibleFoldersTest extends AbstractAJAXSession {
-
-    private AJAXClient clientA;
-
-    private AJAXClient clientB;
+public class VisibleFoldersTest extends Abstrac2UserAJAXSession {
 
     private FolderObject createdPrivateFolder;
-
     private FolderObject createdPublicFolder;
-
     private FolderObject createdSharedFolder;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientA = getClient();
-        clientB = getClient2();
 
         {
             createdPrivateFolder = new FolderObject();
             createdPrivateFolder.setModule(FolderObject.CALENDAR);
             createdPrivateFolder.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
             createdPrivateFolder.setType(FolderObject.PRIVATE);
-            createdPrivateFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
+            createdPrivateFolder.setPermissions(PermissionTools.P(I(client1.getValues().getUserId()), PermissionTools.ADMIN));
             createdPrivateFolder.setFolderName("testPrivateCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdPrivateFolder);
             final InsertResponse iResp = getClient().execute(iReq);
@@ -107,7 +96,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
             createdPublicFolder.setModule(FolderObject.CALENDAR);
             createdPublicFolder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             createdPublicFolder.setType(FolderObject.PUBLIC);
-            createdPublicFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN));
+            createdPublicFolder.setPermissions(PermissionTools.P(I(client1.getValues().getUserId()), PermissionTools.ADMIN));
             createdPublicFolder.setFolderName("testPublicCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdPublicFolder);
             final InsertResponse iResp = getClient().execute(iReq);
@@ -117,27 +106,15 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
         {
             createdSharedFolder = new FolderObject();
             createdSharedFolder.setModule(FolderObject.CALENDAR);
-            createdSharedFolder.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
+            createdSharedFolder.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
             createdSharedFolder.setType(FolderObject.PRIVATE);
-            createdSharedFolder.setPermissions(PermissionTools.P(I(clientB.getValues().getUserId()), PermissionTools.ADMIN, I(clientA.getValues().getUserId()), "arawada"));
+            createdSharedFolder.setPermissions(PermissionTools.P(I(client2.getValues().getUserId()), PermissionTools.ADMIN, I(client1.getValues().getUserId()), "arawada"));
             createdSharedFolder.setFolderName("testSharedCalendarFolder" + System.currentTimeMillis());
             final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdSharedFolder);
-            final InsertResponse iResp = clientB.execute(iReq);
+            final InsertResponse iResp = client2.execute(iReq);
             iResp.fillObject(createdSharedFolder);
         }
 
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPrivateFolder));
-            clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdPublicFolder));
-            clientB.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdSharedFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

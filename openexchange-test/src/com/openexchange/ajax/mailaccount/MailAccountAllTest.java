@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
@@ -75,18 +74,6 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
     public void setUp() throws Exception {
         super.setUp();
         createMailAccount();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-                deleteMailAccount();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

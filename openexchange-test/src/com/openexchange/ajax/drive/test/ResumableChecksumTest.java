@@ -60,7 +60,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,18 +120,6 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         String folderTitle = "ResumableChecksumFolder_" + UUID.randomUUID().toString();
         folderId = createFolderForTest(folderTitle);
         rememberFolder(folderId);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (!folders.isEmpty()) {
-                FoldersApi folderApi = new FoldersApi(getApiClient());
-                folderApi.deleteFolders(folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

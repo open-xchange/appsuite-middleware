@@ -50,8 +50,7 @@
 package com.openexchange.ajax.chronos;
 
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 /**
  * {@link AbstractEnhancedApiClientSession}
@@ -61,15 +60,9 @@ import com.openexchange.test.pool.TestUser;
  */
 public abstract class AbstractEnhancedApiClientSession extends AbstractConfigAwareAPIClientSession {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractEnhancedApiClientSession.class);
-
-    private EnhancedApiClient enhancedApiClient;
-
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        enhancedApiClient = generateEnhancedClient(testUser);
-        rememberClient(enhancedApiClient);
+    public ApiClient generateApiClient() {
+        return new EnhancedApiClient();
     }
 
     /**
@@ -78,43 +71,16 @@ public abstract class AbstractEnhancedApiClientSession extends AbstractConfigAwa
      * @return The enhancedApiClient
      */
     public EnhancedApiClient getEnhancedApiClient() {
-        return enhancedApiClient;
+        return (EnhancedApiClient) getApiClient();
     }
 
     /**
-     * Sets the enhancedApiClient
+     * Gets the enhancedApiClient
      *
-     * @param enhancedApiClient The enhancedApiClient to set
+     * @return The enhancedApiClient
      */
-    public void setEnhancedApiClient(EnhancedApiClient enhancedApiClient) {
-        this.enhancedApiClient = enhancedApiClient;
-    }
-
-    /**
-     * Generates a new {@link EnhancedApiClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @param client The client identifier to use when performing a login
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link EnhancedApiClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final EnhancedApiClient generateEnhancedClient(TestUser user) throws OXException {
-        if (null == user) {
-            LOG.error("Can only create a client for an valid user");
-            throw new OXException();
-        }
-        EnhancedApiClient newClient;
-        try {
-            newClient = new EnhancedApiClient();
-            setBasePath(newClient);
-            newClient.setUserAgent("HTTP API Testing Agent");
-            newClient.login(user.getLogin(), user.getPassword());
-        } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
-            throw new OXException();
-        }
-        return newClient;
+    public EnhancedApiClient getEnhancedApiClient2() {
+        return (EnhancedApiClient) getApiClient(1);
     }
 
 }

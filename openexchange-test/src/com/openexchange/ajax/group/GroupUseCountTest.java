@@ -62,7 +62,6 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.GroupData;
-import com.openexchange.testing.httpclient.models.GroupListElement;
 import com.openexchange.testing.httpclient.models.GroupSearchBody;
 import com.openexchange.testing.httpclient.models.GroupUpdateResponse;
 import com.openexchange.testing.httpclient.models.GroupsResponse;
@@ -84,9 +83,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
 
     private GroupsApi groupsApi;
     private Integer[] groupIds;
-    private Long timestamp;
     private TasksApi taskApi;
-    private Long taskTimestamp;
     private List<TaskListElement> tasksToDelete;
     private String randPrefix;
 
@@ -122,33 +119,16 @@ public class GroupUseCountTest extends AbstractChronosTest {
         response = groupsApi.createGroup(groupData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         groupIds[1] = response.getData().getId();
-        timestamp = response.getTimestamp();
 
         tasksToDelete = new ArrayList<TaskListElement>();
         taskApi = new TasksApi(getApiClient());
     }
 
-    private synchronized void rememberTask(String folderId, String id, Long timestamp) {
+    private synchronized void rememberTask(String folderId, String id) {
         TaskListElement element = new TaskListElement();
         element.setId(id);
         element.setFolder(folderId);
         this.tasksToDelete.add(element);
-        this.taskTimestamp = timestamp;
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        GroupListElement body = new GroupListElement();
-        if (groupIds != null) {
-            for (Integer id : groupIds) {
-                body.setId(id);
-                groupsApi.deleteGroup(timestamp, body);
-            }
-        }
-        if (tasksToDelete != null && !tasksToDelete.isEmpty()) {
-            taskApi.deleteTasks(taskTimestamp, tasksToDelete);
-        }
-        super.tearDown();
     }
 
     @Test
@@ -211,7 +191,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         task.addParticipantsItem(participant);
         TaskUpdateResponse createTask = taskApi.createTask(task);
         Assert.assertNull(createTask.getError(), createTask.getErrorDesc());
-        rememberTask(task.getFolderId(), createTask.getData().getId(), createTask.getTimestamp());
+        rememberTask(task.getFolderId(), createTask.getData().getId());
 
         // Check order again
         body = new GroupSearchBody();

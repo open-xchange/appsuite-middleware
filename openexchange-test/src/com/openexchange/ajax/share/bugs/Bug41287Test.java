@@ -50,14 +50,12 @@
 package com.openexchange.ajax.share.bugs;
 
 import static org.junit.Assert.assertFalse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.DeleteLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.groupware.container.FolderObject;
@@ -74,7 +72,6 @@ public class Bug41287Test extends ShareTest {
     private FolderObject parent;
     private FolderObject subfolder;
     private ShareTarget target;
-    private long lastModified;
 
     @Override
     @Before
@@ -86,18 +83,7 @@ public class Bug41287Test extends ShareTest {
         remember(parent);
         target = new ShareTarget(FolderObject.INFOSTORE, String.valueOf(subfolder.getObjectID()));
         GetLinkRequest req = new GetLinkRequest(target);
-        lastModified = getClient().execute(req).getResponse().getTimestamp().getTime();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteLinkRequest req = new DeleteLinkRequest(target, lastModified);
-            getClient().execute(req);
-        } finally {
-            super.tearDown();
-        }
+        getClient().execute(req);
     }
 
     @Test
@@ -107,7 +93,6 @@ public class Bug41287Test extends ShareTest {
         GetLinkResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
         String url = resp.getShareLink().getShareURL();
-        lastModified = resp.getTimestamp().getTime();
         GuestClient guestClient = resolveShare(url);
         OCLGuestPermission perm = createAnonymousGuestPermission();
         perm.setEntity(guestClient.getValues().getUserId());

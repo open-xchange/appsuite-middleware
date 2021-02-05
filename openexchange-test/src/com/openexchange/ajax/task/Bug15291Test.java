@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -61,7 +60,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.group.actions.CreateRequest;
 import com.openexchange.ajax.group.actions.CreateResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -107,17 +105,6 @@ public class Bug15291Test extends AbstractAJAXSession {
         task = Create.createWithDefaults(client1.getValues().getPrivateTaskFolder(), "Test for bug 15291");
         task.addParticipant(participant);
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(task));
-            client1.execute(new com.openexchange.ajax.group.actions.DeleteRequest(group));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

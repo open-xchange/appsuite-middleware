@@ -56,7 +56,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,17 +90,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
         setAttendeePrivileges(event);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        if (null != eventManager2) {
-            eventManager2.cleanUp();
-        }
-        super.tearDown();
     }
 
     @Override

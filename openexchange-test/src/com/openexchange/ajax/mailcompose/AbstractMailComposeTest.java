@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mailcompose;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -75,7 +74,6 @@ import com.openexchange.testing.httpclient.models.MailComposeResponseMessageMode
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
-import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.modules.ContactsApi;
@@ -133,30 +131,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        if (null != compositionSpaceIds && compositionSpaceIds.size() > 0) {
-            for (String id : compositionSpaceIds) {
-                try {
-                    api.deleteMailComposeById(id, null);
-                } catch (ApiException e) {
-                    // Space was already deleted, ignore...
-                }
-            }
-        }
-
-        List<MailListElement> body = new ArrayList<>();
-        for (MailDestinationData dest : IMPORTED_EMAILS) {
-            MailListElement mailListElement = new MailListElement();
-            mailListElement.setFolder(dest.getFolderId());
-            mailListElement.setId(dest.getId());
-            body.add(mailListElement);
-        }
-        mailApi.deleteMails(body, null, null, null);
-
-        if (testFolderId != null) {
-            foldersApi.deleteFolders(Collections.singletonList(testFolderId), "0", null, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        }
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     protected MailDestinationData importTestMailWithAttachment() throws ApiException {
@@ -210,7 +186,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     protected String getOtherMailAddress() throws Exception {
         ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(I(getClient2().getValues().getUserId())).getData();
+        ContactData data = contactsApi.getContactByUser(getUser(1).getUserId()).getData();
         assertNotNull("No contact data for other user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for other user.", Strings.isEmpty(mailAddress));
@@ -222,7 +198,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     protected List<List<String>> getRecipient() throws Exception {
-        return Collections.singletonList(Arrays.asList(new String[] { testUser2.getUser(), getOtherMailAddress() }));
+        return Collections.singletonList(Arrays.asList(new String[] { getUser(1).getUser(), getOtherMailAddress() }));
     }
 
     protected void check(MailComposeSendResponse response) {

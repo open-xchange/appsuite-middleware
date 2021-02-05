@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.ajax.framework.ListIDs.l;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,7 +60,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
@@ -85,6 +85,11 @@ public class ListTest extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
         catm.setFailOnError(true);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -154,9 +159,9 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
-        final int userParticipantId = getClient2().getValues().getUserId();
-        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
-        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
+        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int groupParticipantId = i(testContext.acquireGroup(Optional.empty()));
+        final int resourceParticipantId = i(testContext.acquireResource());
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);
         participants[1] = new UserParticipant(userParticipantId);
@@ -274,15 +279,4 @@ public class ListTest extends AppointmentTest {
         }
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (ftm != null) {
-                ftm.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 }

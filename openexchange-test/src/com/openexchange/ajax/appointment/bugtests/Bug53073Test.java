@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -71,7 +70,7 @@ import com.openexchange.test.FolderTestManager;
  * @since v7.8.4
  */
 public class Bug53073Test extends AbstractAJAXSession {
-    
+
 
     private AJAXClient client;
     private AJAXClient client2;
@@ -82,11 +81,16 @@ public class Bug53073Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        
+
         client = getClient();
-        client2 = getClient2();
+        client2 = getClient(1);
         catm2 = new CalendarTestManager(client2);
         ftm2 = new FolderTestManager(client2);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -99,10 +103,10 @@ public class Bug53073Test extends AbstractAJAXSession {
         permissions.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         sharedFolder.getPermissions().add(permissions);
         ftm.insertFolderOnServer(sharedFolder);
-        
+
         FolderObject privateFolder = ftm2.generatePrivateFolder("Bug 53073 Private Folder " + System.currentTimeMillis(), FolderObject.CALENDAR, client2.getValues().getPrivateAppointmentFolder(), client2.getValues().getUserId());
         ftm2.insertFolderOnServer(privateFolder);
-        
+
         Appointment app = new Appointment();
         app.setTitle("Bug53073");
         app.setStartDate(D("01.05.2017 08:00"));
@@ -111,7 +115,7 @@ public class Bug53073Test extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
         app.setParentFolderID(sharedFolder.getObjectID());
         catm.insert(app);
-        
+
         Appointment update = catm2.createIdentifyingCopy(app);
         update.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
         System.out.println("Shared: " + sharedFolder.getObjectID() + ", " + privateFolder.getObjectID() + " -> " + client2.getValues().getPrivateAppointmentFolder());
@@ -122,14 +126,4 @@ public class Bug53073Test extends AbstractAJAXSession {
         System.out.println(catm2.getLastException().getMessage());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            catm2.cleanUp();
-            ftm2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
 }

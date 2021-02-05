@@ -56,7 +56,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +68,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventId;
 
 /**
  * {@link ChangeOrganizerTest}
@@ -89,30 +87,6 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
 
         // The new organizer
         newOrganizer = AttendeeFactory.createOrganizerFrom(actingAttendee);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        if (null != event) {
-            EventId id = new EventId();
-            id.setId(event.getId());
-            
-            // Make sure event is deleted, whoever the organizer is
-            try {
-                id.setFolder(null != event.getFolder() ? event.getFolder() : defaultFolderId);
-                eventManager.deleteEvent(id, System.currentTimeMillis(), false);
-            } catch (Exception e) {
-                // Ignore
-            }
-            try {
-                id.setFolder(null != event.getFolder() ? event.getFolder() : folderId2);
-                eventManager2.deleteEvent(id, System.currentTimeMillis(), false);
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-        super.tearDown();
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
@@ -74,7 +75,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Charsets;
@@ -101,7 +101,7 @@ import com.openexchange.testing.restclient.modules.InternetFreeBusyApi;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class FreeBusyTest extends AbstractChronosTest {
 
-    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+    private final Map<String, String> CONFIG = new HashMap<String, String>();
 
     private static final int DEFAULT_WEEKS_FUTURE = 4;
 
@@ -135,7 +135,6 @@ public class FreeBusyTest extends AbstractChronosTest {
         /*
          * Initialize internet free busy API with generated REST API client
          */
-        ProvisioningSetup.init();
         ApiClient restClient = new ApiClient();
         restClient.setBasePath(getBasePath());
         restUser = TestContextPool.getRestUser();
@@ -153,7 +152,7 @@ public class FreeBusyTest extends AbstractChronosTest {
          */
         userName = testUser.getUser();
         server = testUser.getContext();
-        contextid = getClient().getValues().getContextId();
+        contextid = i(testUser.getContextId());
 
         Integer resId = testContext.acquireResource();
         ResourceResponse resource = new ResourcesApi(getApiClient()).getResource(resId);
@@ -181,7 +180,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     // -------------------------------Positive tests--------------------------------------------------------------
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned,
      * if only contentId, user name and server name are given.
      *
@@ -196,7 +195,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned,
      * if contentId, resource name and server name are given.
      *
@@ -211,7 +210,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned for a resource, if the value simple is set to true.
      *
      * @throws Exception if changing the configuration fails
@@ -225,7 +224,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned, if all parameters are given.
      *
      * @throws Exception if changing the configuration fails
@@ -241,7 +240,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned, if the value simple is set to true.
      *
      * @throws Exception if changing the configuration fails
@@ -255,7 +254,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned, if the requested time range into future is greater than the configured maximum.
      * In this case the time range up to the configured time range is expected.
      *
@@ -273,7 +272,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether valid iCalendar data is returned, if the requested time range into past is greater than the configured maximum.
      * In this case the time range down to the configured time range is expected.
      *
@@ -291,7 +290,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests the edge case where the maximum time range into the past property is set to 0.
      * In this case no past free busy times should be returned.
      *
@@ -309,7 +308,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests the edge case where the time range into the past parameter is set to 0.
      * In this case no past free busy times should be returned.
      *
@@ -325,7 +324,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests the edge case where the maximum time range into the future property is set to 0.
      * In this case no future free busy times should be returned.
      *
@@ -343,7 +342,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests the edge case where the time range into the future parameter is set to 0.
      * In this case no future free busy times should be returned.
      *
@@ -361,7 +360,7 @@ public class FreeBusyTest extends AbstractChronosTest {
     // -------------------------------Depend on property tests--------------------------------------------------------------
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 404,
      * if free busy data is not published for the requested user.
      *
@@ -382,10 +381,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     // -------------------------------Invalid input tests--------------------------------------------------------------
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 400,
      * if context id is null.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -400,10 +399,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 404,
      * if context id is negative.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -418,10 +417,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 400,
      * if user name is null.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -436,10 +435,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 400,
      * if server name is null.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -454,10 +453,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 404,
      * if context id does not fit to user and server name.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -472,10 +471,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 404,
      * if the user name is not existing in the context.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -490,10 +489,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 404,
      * if the server name does not fit to context id and user name.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -508,10 +507,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 400,
      * if the time range into past value is negative.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test
@@ -526,10 +525,10 @@ public class FreeBusyTest extends AbstractChronosTest {
     }
 
     /**
-     * 
+     *
      * Tests whether getting free busy data failed with code 400,
      * if the time range into future value is negative.
-     * 
+     *
      * @throws Exception if changing the configuration fails
      */
     @Test

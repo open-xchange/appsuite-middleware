@@ -53,8 +53,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -70,7 +69,7 @@ import com.openexchange.testing.httpclient.models.MailData;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class NotifyFolderSharesTest extends ShareTest {
+public class NotifyFolderSharesTest extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
@@ -106,20 +105,18 @@ public class NotifyFolderSharesTest extends ShareTest {
         OCLPermission permission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setGroupPermission(true);
-        AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
-        testNotify(module, parent, permission, emailAddress, getApiClient2());
+        testNotify(module, parent, permission, emailAddress, apiClient2);
     }
 
     private void testNotifyUser(int module, int parent) throws Exception {
-        AJAXClient client2 = getClient2();
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        testNotify(module, parent, permission, emailAddress, getApiClient2());
+        testNotify(module, parent, permission, emailAddress, apiClient2);
     }
 
     private void testNotify(int module, int parent, OCLPermission permission, String emailAddress, ApiClient apiClient) throws Exception {

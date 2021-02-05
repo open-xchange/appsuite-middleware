@@ -56,7 +56,6 @@ import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -90,7 +89,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         client3 = new AJAXClient(user3);
         groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(user3.getUserId())))); //TODO null check
         catm = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
         ctm3 = new CalendarTestManager(client3);
 
         appointment = new Appointment();
@@ -105,14 +104,19 @@ public class Bug41794Test extends AbstractAJAXSession {
         appointment.setParticipants(new Participant[] { up, gp });
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testBug41794() throws Exception {
         catm.insert(appointment);
 
-        appointment.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         ctm2.delete(appointment);
 
-        assertNull("Did not expect appointment for user 2", ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
+        assertNull("Did not expect appointment for user 2", ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
 
         Appointment loadedAppointment = ctm3.get(client3.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertNotNull(loadedAppointment);
@@ -122,18 +126,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         ctm3.confirm(loadedAppointment, Appointment.ACCEPT, "message");
         ctm3.update(loadedAppointment);
 
-        assertNull("Did not expect appointment for user 2", ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm2.cleanUp();
-            ctm3.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+        assertNull("Did not expect appointment for user 2", ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
     }
 
     private GroupParticipant getGroupParticipant(int groupParticipantId) {

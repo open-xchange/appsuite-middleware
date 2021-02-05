@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
@@ -88,18 +87,6 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         super();
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-                deleteMailAccount();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testLifeCycle() throws OXException, IOException, JSONException {
 
@@ -117,7 +104,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
-        mailAccountDescription.setLogin(testUser2.getLogin());
+        mailAccountDescription.setLogin(user2.getLogin());
         getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL)));
         // *shrugs* don't need the response
     }

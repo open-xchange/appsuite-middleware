@@ -135,7 +135,6 @@ public class MWB905Test extends AbstractClientSession {
         setBasePath(newClient);
         newClient.setUserAgent("HTTP API Testing Agent");
         newClient.login(user.getLogin(), user.getPassword());
-        addTearDownOperation(() -> newClient.logout());
         return newClient;
     }
 

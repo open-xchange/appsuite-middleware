@@ -231,14 +231,8 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            //finally remove all multifactor devices registered during the test run
-            clearAllMultifactorDevices();
-        }
-        finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -295,7 +289,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //login with a new session but do not provide 2nd factor
         ApiClient client2 = generateApiClient(testUser);
-        rememberClient(client2);
+        rememberClient(testUser, client2);
         MultifactorApi multifactorApi = new MultifactorApi(client2);
 
         //Try to delete the 2nd factor. THIS MUST FAIL.
@@ -314,7 +308,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //login with a new session but do not provide 2nd factor
         ApiClient client2 = generateApiClient(testUser);
-        rememberClient(client2);
+        rememberClient(testUser, client2);
 
         //Perform some API call which is 2fa protected
         //This MUST FAIL, because the 2nd factor was not provided

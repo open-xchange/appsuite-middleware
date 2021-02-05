@@ -72,7 +72,7 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
     public void testIt() throws Exception {
         int uid1 = getClient().getValues().getUserId();
 
-        UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -82,12 +82,12 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient2().getValues().getPrivateAppointmentFolder();
+        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient2().execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
         Date lastMod = getResponse.getTimestamp();
 
-        getClient2().execute(new DeleteRequest(appId, fid2, lastMod));
+        getClient(1).execute(new DeleteRequest(appId, fid2, lastMod));
 
         Appointment actual = catm.get(app);
 
@@ -95,6 +95,11 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
 
         assertEquals(1, participants.length);
         assertEquals(uid1, participants[0].getIdentifier());
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

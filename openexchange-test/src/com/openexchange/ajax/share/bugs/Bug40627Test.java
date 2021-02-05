@@ -62,8 +62,8 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FolderShare;
@@ -87,7 +87,7 @@ import com.openexchange.tools.arrays.Arrays;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug40627Test extends ShareTest {
+public class Bug40627Test extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
@@ -124,7 +124,6 @@ public class Bug40627Test extends ShareTest {
         groupPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         groupPermission.setGroupPermission(true);
         permissions.add(groupPermission);
-        AJAXClient client2 = getClient2();
         int userId2 = client2.getValues().getUserId();
         client2.logout();
         OCLPermission userPermission = new OCLPermission(userId2, 0);

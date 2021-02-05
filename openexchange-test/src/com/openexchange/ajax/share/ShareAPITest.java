@@ -51,17 +51,10 @@ package com.openexchange.ajax.share;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -70,16 +63,13 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FileSharesRequest;
 import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.FolderSharesRequest;
-import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -97,30 +87,6 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public abstract class ShareAPITest extends AbstractAPIClientSession {
 
-    private Map<Integer, FolderObject> foldersToDelete;
-    private Map<String, File> filesToDelete;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        foldersToDelete = new HashMap<>();
-        filesToDelete = new HashMap<>();
-
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != getClient()) {
-                deleteFoldersSilently(getClient(), foldersToDelete);
-                deleteFilesSilently(getClient(), filesToDelete.values());
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
     /**
      * Inserts and remembers a new private folder.
      *
@@ -134,7 +100,6 @@ public abstract class ShareAPITest extends AbstractAPIClientSession {
     private FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
         FolderObject createdFolder = insertPrivateFolder(getClient(), api, module, parent, name);
         assertNotNull(createdFolder);
-        remember(createdFolder);
         assertEquals("Folder name wrong", name, createdFolder.getFolderName());
         return createdFolder;
     }
@@ -191,17 +156,6 @@ public abstract class ShareAPITest extends AbstractAPIClientSession {
         InsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(folder);
         return getFolder(api, folder.getObjectID(), client);
-    }
-
-    /**
-     * Remembers a folder for cleanup.
-     *
-     * @param folder The folder to remember
-     */
-    private void remember(FolderObject folder) {
-        if (null != folder) {
-            foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
-        }
     }
 
     /**
@@ -305,38 +259,6 @@ public abstract class ShareAPITest extends AbstractAPIClientSession {
             }
         }
         return null;
-    }
-
-    private static Date futureTimestamp() {
-        return new Date(System.currentTimeMillis() + 1000000);
-    }
-
-    private static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
-        deleteFoldersSilently(client, foldersToDelete.keySet());
-    }
-
-    private static void deleteFoldersSilently(AJAXClient client, Collection<Integer> foldersIDs) throws Exception {
-        if (null != client && null != foldersIDs && 0 < foldersIDs.size()) {
-            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp());
-            deleteRequest.setHardDelete(Boolean.TRUE);
-            client.execute(deleteRequest);
-        }
-    }
-
-    private static void deleteFilesSilently(AJAXClient client, Collection<File> files) throws Exception {
-        if (null != client && null != files && 0 < files.size()) {
-            List<String> folderIDs = new ArrayList<>();
-            List<String> fileIDs = new ArrayList<>();
-            for (File file : files) {
-                if (file != null) {
-                    folderIDs.add(file.getFolderId());
-                    fileIDs.add(file.getId());
-                }
-            }
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp());
-            deleteInfostoreRequest.setHardDelete(Boolean.TRUE);
-            client.execute(deleteInfostoreRequest);
-        }
     }
 
     /**

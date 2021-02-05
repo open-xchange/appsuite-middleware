@@ -55,13 +55,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.GetDocumentRequest;
 import com.openexchange.ajax.attach.actions.GetDocumentResponse;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -101,17 +99,6 @@ public class Bug30701Test extends AbstractAJAXSession {
         attachmentID = getClient().execute(new AttachRequest(contactA, "doc.txt", data, "text/plain")).getId();
         contactA = getClient().execute(new GetRequest(contactA, tz)).getContact();
         contactA.getLastModifiedOfNewestAttachment().getTime();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contactA));
-            getClient().logout();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -65,6 +65,7 @@ import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.models.BrowseResponse;
 import com.openexchange.testing.httpclient.models.CountriesResponse;
 import com.openexchange.testing.httpclient.models.CountryData;
@@ -96,6 +97,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests the available languages
      */
     @Test
+    @TryAgain
     public void testGetLanguages() throws Exception {
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesLanguagesResponse.json");
         mock("http://example.com/languages?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
@@ -112,6 +114,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests the available countries with default locale
      */
     @Test
+    @TryAgain
     public void testGetCountriesWithDefaultLocale() throws Exception {
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
         mock("http://example.com/countries?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
@@ -128,6 +131,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests the available countries with random locale
      */
     @Test
+    @TryAgain
     public void testGetCountriesWithRandomLocale() throws Exception {
         String randomLanguage = getRandomLanguage();
 
@@ -146,6 +150,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests getting a page that does not exist
      */
     @Test
+    @TryAgain
     public void testGetNonExistentPage() throws Exception {
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesPageNotFoundResponse.json");
         mock("http://example.com/pages/1138", assetManager.readAssetString(asset), HttpStatus.SC_NOT_FOUND, RESPONSE_HEADERS);
@@ -159,6 +164,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests browsing the root page of a random chosen country in a random chosen language
      */
     @Test
+    @TryAgain
     public void testBrowseRootOfRandomCountry() throws Exception {
         String randomLanguage = getRandomLanguage();
         String randomCountry = getRandomCountry();
@@ -174,6 +180,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests browsing a page
      */
     @Test
+    @TryAgain
     public void testBrowsePage() throws Exception {
         String randomLanguage = getRandomLanguage();
         String randomCountry = getRandomCountry();
@@ -210,6 +217,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Tests the search
      */
     @Test
+    @TryAgain
     public void testSearch() throws Exception {
         String language = getRandomLanguage();
         String query = "Star Wars";

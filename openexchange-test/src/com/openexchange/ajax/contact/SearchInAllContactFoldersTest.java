@@ -51,16 +51,13 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -109,23 +106,6 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         InsertRequest insertContact2 = new InsertRequest(contact2);
         insertResponse = getClient().execute(insertContact2);
         insertResponse.fillObject(contact2);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            //delete the two contacts
-            DeleteRequest contactDeleteRequest = new DeleteRequest(contact1);
-            getClient().execute(contactDeleteRequest);
-            contactDeleteRequest = new DeleteRequest(contact2);
-            getClient().execute(contactDeleteRequest);
-            //delete the new folder
-            com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
-            getClient().execute(folderDeleteRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

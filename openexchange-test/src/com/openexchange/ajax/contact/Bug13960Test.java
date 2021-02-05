@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,11 +56,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -97,16 +94,6 @@ public class Bug13960Test extends AbstractAJAXSession {
         contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         InsertResponse response = getClient().execute(new InsertRequest(contact));
         response.fillObject(contact);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contact));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

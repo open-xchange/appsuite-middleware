@@ -88,7 +88,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
 
     @SuppressWarnings("hiding")
     private String folderId;
-    private UserApi user2;
 
     private EventData createSingleEvent(String summary, long startDate, long endDate, List<Attendee> attendees) {
         EventData singleEvent = new EventData();
@@ -109,11 +108,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         folderId = createAndRememberNewFolder(defaultUserApi, getDefaultFolder(), getCalendaruser());
-
-        // prepare second user
-        user2 = new UserApi(generateApiClient(testUser2), generateEnhancedClient(testUser2), testUser2);
-        rememberClient(user2.getClient());
-        rememberClient(user2.getEnhancedApiClient());
     }
 
     @Test

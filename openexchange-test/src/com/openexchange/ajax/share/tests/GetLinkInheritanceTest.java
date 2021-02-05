@@ -85,9 +85,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     public void setUp() throws Exception {
         super.setUp();
         ApiClient client = getApiClient();
-        rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
-        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
         infostoreRoot = folderManager.findInfostoreRoot();
 

@@ -91,8 +91,6 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
         for (SessionManagementData session : sessions) {
             assertTrue(apiClient.getSession().equals(session.getSessionId()) || apiClient2.getSession().equals(session.getSessionId()));
         }
-        // Let super.tearDown clean up
-        rememberClient(apiClient2);
     }
 
 }

@@ -54,12 +54,10 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -71,24 +69,20 @@ import com.openexchange.test.pool.TestUser;
  */
 public class MWB713Test extends CalDAVTest {
 
-    private TestContext context2;
-    private TestUser organizerUser;
-    private AJAXClient organizerClient;
+    private TestUser organizer;
     private String uid;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        context2 = testContextList.get(1);
-        organizerUser = context2.acquireUser();
-        organizerClient = generateClient(organizerUser);
+        organizer = getUser(testContextList.get(1), 0);
         uid = randomUID();
     }
 
     @Override
-    protected int getNumerOfContexts() {
-        return 2;
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(1).withContexts(2).build();
     }
 
     @Test
@@ -99,7 +93,7 @@ public class MWB713Test extends CalDAVTest {
         Date end2 = TimeTools.D("next monday at 15:00");
 
         String attendeeMail = getClient().getValues().getDefaultAddress();
-        String organizerMail = organizerClient.getValues().getDefaultAddress();
+        String organizerMail = organizer.getLogin();
 
         // @formatter:off
         String create =
@@ -165,9 +159,4 @@ public class MWB713Test extends CalDAVTest {
         assertEquals(end2.getTime(), iCalResource.getVEvent().getDTEnd().getTime());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        delete(getAppointment(uid));
-        super.tearDown();
-    }
 }

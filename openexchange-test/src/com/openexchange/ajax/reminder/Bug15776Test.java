@@ -55,12 +55,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -137,19 +134,6 @@ public class Bug15776Test extends AbstractAJAXSession {
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
 
         assertNotNull("No reminder was found.", reminder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
-            client.execute(new DeleteRequest(toDelete, false));
-            toDelete = client.execute(new GetRequest(pastAppointment, false)).getAppointment(timezone);
-            client.execute(new DeleteRequest(toDelete, false));
-        } finally {
-            super.tearDown();
-        }
     }
 
     private Appointment createSeriesInThePast() throws Exception {

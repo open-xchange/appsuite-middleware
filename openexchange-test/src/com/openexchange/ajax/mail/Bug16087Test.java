@@ -52,12 +52,10 @@ package com.openexchange.ajax.mail;
 import static com.openexchange.mail.MailListField.FLAGS;
 import static com.openexchange.mail.MailListField.ID;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
@@ -90,16 +88,6 @@ public class Bug16087Test extends AbstractAJAXSession {
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
         final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(ids, true));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

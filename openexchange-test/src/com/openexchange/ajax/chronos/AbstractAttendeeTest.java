@@ -80,20 +80,15 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client = generateApiClient(testUser2);
-        rememberClient(client);
-        EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
-        rememberClient(enhancedClient);
-
-        user2 = new UserApi(client, enhancedClient, testUser2);
-        folderId2 = getDefaultFolder(client);
-        eventManager2 = new EventManager(user2, getDefaultFolder(client));
+        ApiClient client2 = getApiClient(1);
+        user2 = new UserApi(client2, getEnhancedApiClient2(), getUser(1));
+        folderId2 = getDefaultFolder(client2);
+        eventManager2 = new EventManager(user2, getDefaultFolder(client2));
     }
 
     @Override
-    public void tearDown() throws Exception {
-        eventManager2.cleanUp();
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {

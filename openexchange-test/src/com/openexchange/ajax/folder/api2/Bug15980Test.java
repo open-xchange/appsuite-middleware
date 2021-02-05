@@ -53,10 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -97,16 +95,6 @@ public class Bug15980Test extends AbstractAJAXSession {
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         testFolder.setLastModified(new Date());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

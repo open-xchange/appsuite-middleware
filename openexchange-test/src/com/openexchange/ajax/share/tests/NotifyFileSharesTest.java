@@ -52,8 +52,7 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -72,7 +71,7 @@ import com.openexchange.testing.httpclient.models.MailData;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class NotifyFileSharesTest extends ShareTest {
+public class NotifyFileSharesTest extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
@@ -104,19 +103,17 @@ public class NotifyFileSharesTest extends ShareTest {
 
     private void testNotifyGroup(int parent) throws Exception {
         DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ);
-        AJAXClient client2 = getClient2();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
-        testNotify(parent, permission, emailAddress, getApiClient2());
+        testNotify(parent, permission, emailAddress, apiClient2);
     }
 
     private void testNotifyUser(int parent) throws Exception {
-        AJAXClient client2 = getClient2();
         int userId = client2.getValues().getUserId();
         String emailAddress = client2.getValues().getDefaultAddress();
         client2.logout();
         DefaultFileStorageObjectPermission permission = new DefaultFileStorageObjectPermission(userId, false, FileStorageObjectPermission.WRITE);
-        testNotify(parent, permission, emailAddress, getApiClient2());
+        testNotify(parent, permission, emailAddress, apiClient2);
     }
 
     private void testNotify(int parentFolder, FileStorageObjectPermission permission, String emailAddress, ApiClient apiClient) throws Exception {

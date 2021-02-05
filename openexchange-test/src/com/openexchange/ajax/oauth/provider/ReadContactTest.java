@@ -53,8 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
@@ -75,12 +73,6 @@ public class ReadContactTest extends AbstractOAuthTest {
 
     public ReadContactTest() {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE));
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
     }
 
     @Test
@@ -191,12 +183,6 @@ public class ReadContactTest extends AbstractOAuthTest {
             com.openexchange.ajax.contact.action.DeleteRequest deleteContactReq = new com.openexchange.ajax.contact.action.DeleteRequest(contact, false);
             oAuthClient.execute(deleteContactReq);
         }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
 }

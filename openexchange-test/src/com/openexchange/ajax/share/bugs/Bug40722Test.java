@@ -114,6 +114,7 @@ public class Bug40722Test extends ShareTest {
          * check access to share link, now without password
          */
         guestClient = resolveShare(shareURL, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPassword);
+        assertNotNull(guestClient.getSession().getId());
         guestClient.checkShareModuleAvailable();
     }
 

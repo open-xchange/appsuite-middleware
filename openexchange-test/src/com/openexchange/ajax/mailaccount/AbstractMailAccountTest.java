@@ -51,7 +51,7 @@ package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
 import org.json.JSONException;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
@@ -66,7 +66,7 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AbstractMailAccountTest extends AbstractAJAXSession {
+public class AbstractMailAccountTest extends Abstrac2UserAJAXSession {
 
     protected AbstractMailAccountTest() {
         super();
@@ -98,7 +98,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
     protected void createMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription = createMailAccountObject();
 
-        updateMailAccountDescription(mailAccountDescription, testUser2);
+        updateMailAccountDescription(mailAccountDescription, user2);
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
 

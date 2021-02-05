@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
@@ -68,18 +67,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountValidateTest extends AbstractMailAccountTest {
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
-                deleteMailAccount();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testValidate() throws OXException, IOException, JSONException {

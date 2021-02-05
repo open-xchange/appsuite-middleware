@@ -3,22 +3,19 @@ package com.openexchange.ajax.folder.api2;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
-public class Bug17261Test extends AbstractAJAXSession {
+public class Bug17261Test extends Abstrac2UserAJAXSession {
 
-    private AJAXClient client2;
     private FolderObject folder;
     private FolderObject secondFolder;
     private FolderTestManager ftm1;
@@ -30,7 +27,6 @@ public class Bug17261Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         folderName = "Bug17621 Folder" + System.currentTimeMillis();
-        client2 = new AJAXClient(testContext.acquireUser());
         ftm1 = new FolderTestManager(getClient());
         folder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] { getClient().getValues().getUserId() });
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
@@ -79,17 +75,6 @@ public class Bug17261Test extends AbstractAJAXSession {
 
         if (secondFolder.getObjectID() > 0) {
             ftm1.deleteFolderOnServer(secondFolder);
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ftm1.deleteFolderOnServer(folder);
-            client2.logout();
-        } finally {
-            super.tearDown();
         }
     }
 

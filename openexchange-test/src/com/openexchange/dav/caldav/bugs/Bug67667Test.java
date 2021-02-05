@@ -55,7 +55,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
@@ -72,26 +72,15 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.4
  */
-public class Bug67667Test extends CalDAVTest {
+public class Bug67667Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager catm2;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        catm2 = new CalendarTestManager(getClient2());
+        catm2 = new CalendarTestManager(client2);
         catm2.setFailOnError(true);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != catm2) {
-                catm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

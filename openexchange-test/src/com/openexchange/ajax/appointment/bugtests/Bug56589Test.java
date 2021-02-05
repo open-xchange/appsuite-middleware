@@ -55,11 +55,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -89,24 +87,24 @@ public class Bug56589Test extends AbstractAJAXSession {
          * as user 2, share default calendar to user 1
          */
         FolderObject folder = new FolderObject();
-        folder.setObjectID(getClient2().getValues().getPrivateAppointmentFolder());
+        folder.setObjectID(getClient(1).getValues().getPrivateAppointmentFolder());
         folder.setLastModified(new Date(Long.MAX_VALUE));
         folder.setPermissionsAsArray(new OCLPermission[] {
-            ocl(getClient2().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+            ocl(getClient(1).getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
             ocl(getClient().getValues().getUserId(), false, false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_OWN_OBJECTS)
         });
-        getClient2().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folder));
+        getClient(1).execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, folder));
         /*
          * as user 3, prepare & insert appointment with user 2
          */
-        catm3 = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
+        catm3 = new CalendarTestManager(getClient(2));
         Appointment appointment = new Appointment();
         appointment.setIgnoreConflicts(true);
         appointment.setTitle("Bug56589Test");
         appointment.setStartDate(D("next friday at 11:30"));
         appointment.setEndDate(D("next friday at 12:30"));
         UserParticipant user1 = new UserParticipant(catm3.getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
         appointment.setParentFolderID(catm3.getClient().getValues().getPrivateAppointmentFolder());
@@ -118,27 +116,8 @@ public class Bug56589Test extends AbstractAJAXSession {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        if (null != catm3) {
-            try {
-                catm3.cleanUp();
-            } catch (Exception e) {
-                org.slf4j.LoggerFactory.getLogger(Bug56589Test.class).error("", e);
-            }
-            try {
-                logoutClient(catm3.getClient(), true);
-                catm3.cleanUp();
-            } catch (Exception e) {
-                org.slf4j.LoggerFactory.getLogger(Bug56589Test.class).error("", e);
-            }
-        }
-        try {
-            new CalendarTestManager(getClient2()).resetDefaultFolderPermissions();
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(Bug56589Test.class).error("", e);
-        }
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test
@@ -153,7 +132,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         appointmentUpdate.setIgnoreConflicts(true);
         appointmentUpdate.setModifiedBy(getClient().getValues().getUserId());
         UserParticipant user1 = new UserParticipant(catm3.getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirmMessage("");
         user2.setDisplayName("");
         user2.setConfirm(Appointment.DECLINE);
@@ -163,7 +142,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         /*
          * as user 1, also "decline" for user 2 via confirm, like USM does
          */
-        catm.confirm(appointmentUpdate, getClient2().getValues().getUserId(), Appointment.DECLINE, "");
+        catm.confirm(appointmentUpdate, getClient(1).getValues().getUserId(), Appointment.DECLINE, "");
         /*
          * as user 1, verify the appointment
          */
@@ -182,7 +161,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         appointmentUpdate.setIgnoreConflicts(true);
         appointmentUpdate.setModifiedBy(getClient().getValues().getUserId());
         UserParticipant user1 = new UserParticipant(catm3.getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirmMessage("");
         user2.setDisplayName("");
         user2.setConfirm(Appointment.DECLINE);
@@ -193,7 +172,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         /*
          * as user 1, also "decline" for user 2 via confirm, like USM does
          */
-        catm.confirm(appointmentUpdate, getClient2().getValues().getUserId(), Appointment.DECLINE, "");
+        catm.confirm(appointmentUpdate, getClient(1).getValues().getUserId(), Appointment.DECLINE, "");
         /*
          * as user 1, verify the appointment
          */
@@ -205,7 +184,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         /*
          * as user 1, "decline" for user 2 via confirm
          */
-        catm.confirm(appointment, getClient2().getValues().getUserId(), Appointment.DECLINE, "");
+        catm.confirm(appointment, getClient(1).getValues().getUserId(), Appointment.DECLINE, "");
         /*
          * as user 1, verify the appointment
          */
@@ -224,7 +203,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         appointmentUpdate.setIgnoreConflicts(true);
         appointmentUpdate.setModifiedBy(getClient().getValues().getUserId());
         UserParticipant user1 = new UserParticipant(catm3.getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirmMessage("");
         user2.setDisplayName("");
         user2.setConfirm(Appointment.DECLINE);
@@ -249,7 +228,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         appointmentUpdate.setIgnoreConflicts(true);
         appointmentUpdate.setModifiedBy(getClient().getValues().getUserId());
         UserParticipant user1 = new UserParticipant(catm3.getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirmMessage("");
         user2.setDisplayName("");
         user2.setConfirm(Appointment.DECLINE);
@@ -272,7 +251,7 @@ public class Bug56589Test extends AbstractAJAXSession {
         for (UserParticipant user : updatedAppointment.getUsers()) {
             if (catm3.getClient().getValues().getUserId() == user.getIdentifier()) {
                 assertEquals("unexpected confirmation status", Appointment.ACCEPT, user.getConfirm());
-            } else if (getClient2().getValues().getUserId() == user.getIdentifier()) {
+            } else if (getClient(1).getValues().getUserId() == user.getIdentifier()) {
                 assertEquals("unexpected confirmation status", Appointment.DECLINE, user.getConfirm());
             } else {
                 fail("unexpected user in appointment: " + user.getIdentifier());

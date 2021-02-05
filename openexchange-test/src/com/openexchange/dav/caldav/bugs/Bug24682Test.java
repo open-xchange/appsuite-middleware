@@ -57,14 +57,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -80,7 +79,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug24682Test extends CalDAVTest {
+public class Bug24682Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager[] managers;
 
@@ -94,7 +93,7 @@ public class Bug24682Test extends CalDAVTest {
          * setup managers for other users
          */
         managers = new CalendarTestManager[3];
-        managers[0] = new CalendarTestManager(getClient2());
+        managers[0] = new CalendarTestManager(client2);
         managers[1] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         managers[2] = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
         for (CalendarTestManager manager : managers) {
@@ -109,47 +108,6 @@ public class Bug24682Test extends CalDAVTest {
          */
         FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            /*
-             * cleanup
-             */
-            if (null != managers) {
-                for (CalendarTestManager manager : managers) {
-                    if (null != manager) {
-                        manager.cleanUp();
-                    }
-                }
-            }
-            /*
-             * unshare user C's calendar
-             */
-            if (null != userC && null != userC.getClient()) {
-                if (null != userA && null != userA.getClient()) {
-                    FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userA.getClient().getValues().getUserId());
-                }
-                if (null != userB && null != userB.getClient()) {
-                    FolderTools.unshareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId());
-                }
-            }
-            /*
-             * close managers
-             */
-            if (null != managers) {
-                for (CalendarTestManager manager : managers) {
-                    if (null != manager && null != manager.getClient()) {
-                        manager.getClient().logout();
-                    }
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

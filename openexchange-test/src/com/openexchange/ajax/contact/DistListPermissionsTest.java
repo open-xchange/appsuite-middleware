@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -72,7 +71,7 @@ import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link DistListPermissionsTest} - Checks the distribution list handling.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DistListPermissionsTest extends AbstractManagedContactTest {
@@ -89,7 +88,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = getClient2();
+        client2 = getClient(1);
         cotm2 = new ContactTestManager(client2);
         folderManager2 = new FolderTestManager(client2);
         /*
@@ -115,14 +114,8 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            cotm2.cleanUp();
-            folderManager2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

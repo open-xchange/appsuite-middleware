@@ -52,7 +52,6 @@ package com.openexchange.ajax.find.calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -90,17 +89,6 @@ public class CalendarFindTest extends AbstractFindTest {
         random = new Random();
         manager = new CalendarTestManager(getClient());
         manager2 = new CalendarTestManager(client2);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-            manager2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

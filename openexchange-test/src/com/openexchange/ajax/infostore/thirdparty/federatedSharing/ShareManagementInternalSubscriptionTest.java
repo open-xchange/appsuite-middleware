@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
-import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.cleanInbox;
 import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.prepareUser;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -76,8 +75,12 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        smApi2 = new ShareManagementApi(apiClient2);
-        cleanInbox(apiClient2);
+        smApi2 = new ShareManagementApi(getApiClient(1));
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -85,7 +88,7 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         String shareLink = "http://localhost/appsuite/ui!&app=io.ox/files&folder=9001&id=9001";
         analyze(smApi2, shareLink, StateEnum.UNSUPPORTED);
     }
-    
+
     @Test
     public void testInternalLink_UnkownResource() throws Exception {
         String shareLink = "https://localhost/appsuite/ui#!&app=io.ox/files&folder=999999";
@@ -102,14 +105,14 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         FolderData folder = folderManager.getFolder(folderId);
         ArrayList<FolderPermission> originalPermissions = new ArrayList<>(folder.getPermissions());
         ArrayList<FolderPermission> updatedPermissions = new ArrayList<>(folder.getPermissions());
-        updatedPermissions.add(prepareUser(testUser2, apiClient2.getUserId()));
+        updatedPermissions.add(prepareUser(getUser(1), getApiClient(1).getUserId()));
 
         folderId = setFolderPermission(folderId, updatedPermissions);
 
         /*
          * Receive mail as user and extract share link
          */
-        String shareLink = receiveShareLink(apiClient2, testUser.getLogin());
+        String shareLink = receiveShareLink(getApiClient(1), testUser.getLogin());
         analyze(smApi2, shareLink, StateEnum.SUBSCRIBED);
 
         /*

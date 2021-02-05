@@ -50,13 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -106,20 +103,6 @@ public class Bug16151Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(appointment, timeZone2);
         AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // client deletes appointment
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(appointment));
-            // client2 unshares folder
-            FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

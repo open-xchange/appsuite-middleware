@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -123,7 +122,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
         perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        final int userId2 = getClient2().getValues().getUserId();
+        final int userId2 = getClient(1).getValues().getUserId();
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(userId2);
         perm2.setGroupPermission(false);
@@ -138,22 +137,8 @@ public class Bug12393Test extends AbstractAJAXSession {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final AJAXClient myClient = getClient();
-            // reload the parent folder (it has been changed since its creation by the modification of permissions)
-            final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
-            final GetResponse getResponse = myClient.execute(getRequest);
-            parentFolderObject = getResponse.getFolder();
-            // lastModified has to be set separately
-            parentFolderObject.setLastModified(getResponse.getTimestamp());
-            //delete the parent folder and with it the subfolder
-            final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
-            myClient.execute(folderDeleteRequest);
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

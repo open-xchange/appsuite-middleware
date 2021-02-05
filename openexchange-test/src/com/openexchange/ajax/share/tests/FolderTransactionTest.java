@@ -52,10 +52,13 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Test;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -126,7 +129,14 @@ public class FolderTransactionTest extends ShareTest {
         /*
          * Update should fail because of possible concurrent modification
          */
-        sharedFolder.setLastModified(new Date(sharedFolder.getLastModified().getTime() - 1000));
+        Map<String, Object> meta;
+        if (sharedFolder.getMeta() == null) {
+            meta = new HashMap<>();
+        } else {
+            meta = new HashMap<>(sharedFolder.getMeta());
+        }
+        meta.put(AJAXServlet.PARAMETER_TIMESTAMP, L(sharedFolder.getLastModified().getTime() - 1000));
+        sharedFolder.setMeta(meta);
         boolean updateFailed = false;
         try {
             updateFolder(api, sharedFolder);

@@ -163,7 +163,6 @@ public class ITipRequestTests extends AbstractITipTest {
         eventManagerC2.createEvent(event, true);
 
         mailData = receiveIMip(apiClient, organizer.getEmail(), uniqueSummary, 0, SchedulingMethod.REQUEST);
-        rememberMail(mailData);
     }
 
     @Test
@@ -186,7 +185,6 @@ public class ITipRequestTests extends AbstractITipTest {
          * Validate event from attendee perspective
          */
         EventData updatedEvent = assertSingleEvent(response);
-        rememberForCleanup(updatedEvent);
         assertThat("Should be the same start date", updatedEvent.getStartDate(), is(event.getStartDate()));
         assertThat("Should be the same end date", updatedEvent.getEndDate(), is(event.getEndDate()));
 
@@ -201,7 +199,6 @@ public class ITipRequestTests extends AbstractITipTest {
          */
         MailData replyMail = receiveIMip(apiClientC2, attendee.getEmail(), uniqueSummary, 0, SchedulingMethod.REPLY);
         assertNotNull(replyMail);
-        rememberMail(apiClientC2, replyMail);
 
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, replyMail);
         assertEquals(SchedulingMethod.REPLY.name(), iTipReply.getMethod());

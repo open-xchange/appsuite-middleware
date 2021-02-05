@@ -125,7 +125,6 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         assertNotNull(result.getData().getCreated());
         assertTrue(result.getData().getCreated().size() == 1);
         EventData changeException = result.getData().getCreated().get(0);
-        rememberForCleanup(changeException);
         assertFalse(createdEvent.getId().equals(changeException.getId()));
         assertTrue(createdEvent.getId().equals(changeException.getSeriesId()));
         assertTrue(changeException.getAttendees().size() == 2);
@@ -134,7 +133,6 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
         assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());

@@ -53,7 +53,6 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
@@ -103,7 +102,7 @@ public class Bug35355Test extends AbstractResourceAwareAjaxSession {
         client3 = new AJAXClient(testContext.acquireUser());
 
         up1 = new UserParticipant(getClient().getValues().getUserId());
-        up2 = new UserParticipant(getClient2().getValues().getUserId());
+        up2 = new UserParticipant(getClient(1).getValues().getUserId());
         up3 = new UserParticipant(client3.getValues().getUserId());
         resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
@@ -148,6 +147,11 @@ public class Bug35355Test extends AbstractResourceAwareAjaxSession {
         blockingApp.setParentFolderID(client3.getValues().getPrivateAppointmentFolder());
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testBug35355() throws Exception {
         ctm3.insert(blockingApp);
@@ -166,16 +170,6 @@ public class Bug35355Test extends AbstractResourceAwareAjaxSession {
         updateSeries.setParticipants(new Participant[] { up1, resourceParticipant });
         catm.update(updateSeries);
         assertFalse("No conflict expected.", catm.getLastResponse().hasConflicts());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm3.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

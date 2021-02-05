@@ -57,13 +57,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -108,16 +106,6 @@ public class Bug13960Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(appointment, timeZone);
         AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

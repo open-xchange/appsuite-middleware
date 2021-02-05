@@ -51,11 +51,9 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -100,20 +98,6 @@ public final class Bug12280Test extends AbstractAJAXSession {
         final InsertRequest request = new InsertRequest(appointment, tz);
         final AppointmentInsertResponse response = client.execute(request);
         response.fillAppointment(appointment);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest request = new DeleteRequest(appointment);
-            getClient().execute(request);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

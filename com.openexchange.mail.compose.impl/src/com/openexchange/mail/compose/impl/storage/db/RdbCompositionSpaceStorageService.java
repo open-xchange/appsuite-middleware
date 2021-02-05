@@ -119,7 +119,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
         fileCache = new FileCacheImpl(this, services);
     }
 
-    private CompositionSpaceDbStorage newDbStorageFor(Session session) {
+    private CompositionSpaceDbStorage newDbStorageFor(Session session) throws OXException {
         return new CompositionSpaceDbStorage(dbProvider, /*txPolicy, */session, services);
     }
 
@@ -146,8 +146,9 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The database storage
+     * @throws OXException in case the context can't be resolved
      */
-    public CompositionSpaceDbStorage newDbStorageFor(int userId, int contextId) {
+    public CompositionSpaceDbStorage newDbStorageFor(int userId, int contextId) throws OXException {
         return new CompositionSpaceDbStorage(dbProvider, /*txPolicy, */userId, contextId, services);
     }
 

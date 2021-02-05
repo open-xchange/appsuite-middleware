@@ -51,14 +51,11 @@ package com.openexchange.ajax.appointment;
 
 import static org.junit.Assert.assertFalse;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -98,29 +95,6 @@ public class DeleteMultipleAppointmentTest extends AppointmentTest {
         InsertRequest insReq2 = new InsertRequest(appointment2, timeZone);
         AppointmentInsertResponse insRes2 = getClient().execute(insReq2);
         insRes2.fillAppointment(appointment2);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            GetRequest getReq1 = new GetRequest(appointment1, false);
-            GetResponse getRes1 = getClient().execute(getReq1);
-            if (!getRes1.hasError()) {
-                DeleteRequest delReq = new DeleteRequest(appointment1);
-                getClient().execute(delReq);
-            }
-
-            GetRequest getReq2 = new GetRequest(appointment2, false);
-            GetResponse getRes2 = getClient().execute(getReq2);
-            if (!getRes2.hasError()) {
-                DeleteRequest delReq = new DeleteRequest(appointment2);
-                getClient().execute(delReq);
-            }
-
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

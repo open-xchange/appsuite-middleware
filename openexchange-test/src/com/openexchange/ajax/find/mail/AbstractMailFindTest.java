@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -47,16 +46,6 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         super.setUp();
         defaultAddress = getClient().getValues().getSendAddress();
         contactManager = new ContactTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            contactManager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {

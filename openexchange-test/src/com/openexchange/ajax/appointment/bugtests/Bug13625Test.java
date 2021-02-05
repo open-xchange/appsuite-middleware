@@ -52,11 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
@@ -116,19 +114,6 @@ public class Bug13625Test extends AbstractAJAXSession {
             }
         }
         assertTrue("Appointment not found", found);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointment != null && appointment.getObjectID() != 0) {
-                getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-            }
-
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

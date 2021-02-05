@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appPassword;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
@@ -102,24 +102,15 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
     public void setUp() throws Exception {
         super.setUp();
         // Add required capability
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getClient().getValues().getUserId());
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(i(testUser.getUserId()));
         Set<String> cap = new HashSet<String>(1);
         cap.add("app_spec_passwords");
         Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(I(getClient().getValues().getContextId())), user, cap, emptySet, emptySet, userCreds);
+        usrInterface.changeCapabilities(new Context(testUser.getContextId()), user, cap, emptySet, emptySet, userCreds);
         appSpecApi = new AppPasswordApi(getApiClient());
         super.setUpConfiguration();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            removeAll();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

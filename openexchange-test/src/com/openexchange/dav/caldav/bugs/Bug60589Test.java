@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
@@ -77,7 +78,7 @@ public class Bug60589Test extends CalDAVTest {
         /*
          * lookup internal resource for test
          */
-        int resId = testContext.acquireResource(); // TODO add null check
+        int resId = i(testContext.acquireResource());
         String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resId);
         /*
          * create appointment
@@ -148,7 +149,7 @@ public class Bug60589Test extends CalDAVTest {
         /*
          * lookup internal resource for test
          */
-        int resId = testContext.acquireResource(); // TODO add null check
+        int resId = i(testContext.acquireResource());
         String resourceUri = ResourceId.forResource(getClient().getValues().getContextId(), resId);
         /*
          * create appointment

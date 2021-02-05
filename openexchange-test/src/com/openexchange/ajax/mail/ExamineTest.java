@@ -58,7 +58,6 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
@@ -76,8 +75,6 @@ import com.openexchange.java.Streams;
 
 public class ExamineTest extends AbstractMailTest {
 
-    FolderObject subFolder;
-
     @Override
     @Before
     public void setUp() throws Exception {
@@ -87,23 +84,6 @@ public class ExamineTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (subFolder != null) {
-                subFolder.setLastModified(new Date(0));
-                com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subFolder);
-                getClient().execute(fDel);
-            }
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            clearFolder(getTrashFolder());
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testExamineTest() throws OXException, IOException, JSONException {
         UserValues values = getClient().getValues();
@@ -111,7 +91,7 @@ public class ExamineTest extends AbstractMailTest {
 
         String name = "examineTest" + System.currentTimeMillis();
         String fullName = folder + "/" + name;
-        subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
+        FolderObject subFolder = Create.createPrivateFolder(name, FolderObject.MAIL, values.getUserId());
         subFolder.setFullName(fullName);
         InsertRequest subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, true);
         getClient().execute(subFolderReq);

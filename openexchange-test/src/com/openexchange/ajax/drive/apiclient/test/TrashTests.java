@@ -93,7 +93,6 @@ public class TrashTests extends AbstractAPIClientSession {
         folderApi = new FolderApi(client, testUser);
         infostoreFolder = folderApi.getInfostoreFolder();
         folderManager = new FolderManager(folderApi, "0");
-        remember(folderManager);
 
         FoldersResponse rootFolders = folderApi.getFoldersApi().getRootFolders("1,319", null, "infostore");
         rootId = getFolderId("Infostore", rootFolders);
@@ -106,12 +105,6 @@ public class TrashTests extends AbstractAPIClientSession {
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        driveApi.emptyTrash(client.getSession(), rootId);
-        super.tearDown();
     }
 
     private String getFolderId(String name, FoldersResponse folders) {

@@ -62,10 +62,9 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.actions.SendLinkRequest;
 import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.file.storage.DefaultFile;
@@ -95,7 +94,7 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class MailNotificationTest extends ShareTest {
+public class MailNotificationTest extends Abstract2UserShareTest {
 
     private FolderObject testFolder1;
     private FolderObject publicDriveFolder;
@@ -392,14 +391,13 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private void testUserGotNoNotification(FolderObject testFolder, File file) throws Exception {
-        AJAXClient secondClient = getClient2();
-        int internalUserId = secondClient.getValues().getUserId();
-        secondClient.logout();
+        int internalUserId = client2.getValues().getUserId();
+        client2.logout();
         OCLPermission permission = new OCLPermission();
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         share(testFolder, file, permission, null, false);
-        assertEquals(0, new MailManager(getApiClient2()).getMailCount());
+        assertEquals(0, new MailManager(apiClient2).getMailCount());
     }
 
     private File createFile(FolderObject folder, String fileName, String mimeType) throws Exception {

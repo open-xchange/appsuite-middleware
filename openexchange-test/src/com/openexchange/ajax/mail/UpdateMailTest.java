@@ -82,17 +82,6 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class UpdateMailTest extends AbstractMailTest {
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(getSentFolder());
-            clearFolder(getInboxFolder());
-            clearFolder(getTrashFolder());
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testShouldBeAbleToAddFlags() throws OXException, IOException, JSONException {
         final String eml = "Message-Id: <4A102517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";

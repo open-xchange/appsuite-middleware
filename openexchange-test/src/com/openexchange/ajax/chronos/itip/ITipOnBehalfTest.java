@@ -66,7 +66,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
@@ -100,8 +99,6 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
 
     private String sharedFolder;
 
-    /** The user C from context 1 */
-    private TestUser testUserC1_2;
     /** The user C's client */
     private ApiClient apiClientC1_2;
 
@@ -113,9 +110,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         /*
          * Get another user of context 1
          */
-        testUserC1_2 = testContext.acquireUser();
-        apiClientC1_2 = generateApiClient(testUserC1_2);
-        rememberClient(apiClientC1_2);
+        apiClientC1_2 = getApiClient(2);
 
         UserApi anotherUserApi = new UserApi(apiClientC1_2);
         UserResponse userResponseC1_2 = anotherUserApi.getUser(String.valueOf(apiClientC1_2.getUserId()));
@@ -155,6 +150,11 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         folderManager.updateFolder(folderData);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    }
+
     @Test
     public void testOnBehalfOfInvitation() throws Exception {
         String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation";
@@ -164,7 +164,6 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         assertNotNull(response);
         assertNull(response.getError());
         EventData secretaryEvent = response.getData().getCreated().get(0);
-        rememberForCleanup(apiClientC1_2, secretaryEvent);
 
         /*
          * Check event within folder of organizer
@@ -178,7 +177,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Check notification mail within organizers inbox
          *
          */
-        rememberMail(receiveNotification(apiClient, testUser.getLogin(), summary));
+        receiveNotification(apiClient, testUser.getLogin(), summary);
 
         /*
          * Receive iMIP as attendee
@@ -192,14 +191,12 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         analyze(analyzeResponse, CustomConsumers.ACTIONS);
 
         EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
-        rememberForCleanup(apiClientC2, attendeeEvent);
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
 
         /*
          * Receive accept as organizer
          */
         iMip = receiveIMip(apiClient, testUserC2.getLogin(), summary, 0, SchedulingMethod.REPLY);
-        rememberMail(iMip);
         analyzeResponse = analyze(apiClient, iMip);
         newEvent = assertSingleChange(analyzeResponse).getNewEvent();
         assertNotNull(newEvent);

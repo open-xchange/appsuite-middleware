@@ -53,13 +53,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -74,9 +71,8 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug37002Test extends AbstractAJAXSession {
+public class Bug37002Test extends Abstrac2UserAJAXSession {
 
-    private AJAXClient client1, client2;
     private Task task;
     private TimeZone timeZone;
 
@@ -88,8 +84,6 @@ public class Bug37002Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
-        client2 = getClient2();
         Participant participant = new UserParticipant(client2.getValues().getUserId());
 
         timeZone = getClient().getValues().getTimeZone();
@@ -105,16 +99,6 @@ public class Bug37002Test extends AbstractAJAXSession {
         done.addParticipant(participant); // OX6 frontend sends all participants again
         done.setStatus(Task.DONE);
         client2.execute(new UpdateRequest(done, timeZone)).fillTask(task, client2Task, done);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

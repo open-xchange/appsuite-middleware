@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -14,7 +13,6 @@ import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -104,17 +102,6 @@ public class Bug16089Test extends AbstractAJAXSession {
         String text = response.getText();
         String sub = text.substring(8, text.length() - 1); //TODO: exchange ugly hack for JSON parser
         return Integer.parseInt(sub);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment, false));
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     private Appointment createAppointment() throws Exception {

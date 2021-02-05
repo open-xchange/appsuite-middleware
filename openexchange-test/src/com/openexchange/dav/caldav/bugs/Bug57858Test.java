@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Bug57858Test extends CalDAVTest {
+public class Bug57858Test extends Abstract2UserCalDAVTest {
 
     @Test
     public void testSnoozeReminderOfOccurrence() throws Exception {
@@ -119,7 +119,7 @@ public class Bug57858Test extends CalDAVTest {
             "RRULE:FREQ=DAILY;INTERVAL=1\r\n" +
             "ORGANIZER:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
-            "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:7B669A77-E205-4B03-A1AF-40FB146C4A3F\r\n" +
             "UID:7B669A77-E205-4B03-A1AF-40FB146C4A3F\r\n" +

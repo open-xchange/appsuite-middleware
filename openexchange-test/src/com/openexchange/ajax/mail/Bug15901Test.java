@@ -54,14 +54,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -99,17 +97,6 @@ public class Bug15901Test extends AbstractAJAXSession {
         final ImportMailRequest request = new ImportMailRequest(folder, 32, mail);
         final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest del = new DeleteRequest(ids);
-            getClient().execute(del);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

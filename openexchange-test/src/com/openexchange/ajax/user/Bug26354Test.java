@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.user;
 
-import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -60,8 +59,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.AttributeWriter;
 import com.openexchange.ajax.config.BetaWriter;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -94,8 +91,6 @@ public final class Bug26354Test extends AbstractAJAXSession {
 
     private AJAXClient client;
     private int userId;
-    private boolean origBetaValue;
-    private String origTimeZoneValue;
 
     public Bug26354Test() {
         super();
@@ -107,8 +102,6 @@ public final class Bug26354Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId = client.getValues().getUserId();
-        origBetaValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
-        origTimeZoneValue = client.execute(new GetRequest(Tree.TimeZone)).getString();
 
         writer[0] = new BetaWriter(testUser);
         thread[0] = new Thread(writer[0]);
@@ -142,9 +135,6 @@ public final class Bug26354Test extends AbstractAJAXSession {
                 final Throwable throwable = writer[i].getThrowable();
                 assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
             }
-            client.execute(new SetRequest(Tree.Beta, B(origBetaValue)));
-            client.execute(new SetRequest(Tree.TimeZone, origTimeZoneValue));
-            assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
         } finally {
             super.tearDown();
         }

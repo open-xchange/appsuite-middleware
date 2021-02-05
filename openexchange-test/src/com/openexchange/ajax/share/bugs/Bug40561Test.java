@@ -59,8 +59,8 @@ import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -82,7 +82,7 @@ import com.openexchange.share.recipient.GuestRecipient;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class Bug40561Test extends ShareTest {
+public class Bug40561Test extends Abstract2UserShareTest {
 
     @Test
     public void testShareFileAndSearchForItAsGuest() throws Exception {
@@ -113,7 +113,7 @@ public class Bug40561Test extends ShareTest {
 
     @Test
     public void testShareFileInternallyAndSearchForIt() throws Exception {
-        AJAXClient shareClient = getClient2();
+        AJAXClient shareClient = client2;
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);

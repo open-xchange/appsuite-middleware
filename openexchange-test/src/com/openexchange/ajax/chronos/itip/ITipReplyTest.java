@@ -112,6 +112,11 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         this.summary = this.getClass().getSimpleName() + UUID.randomUUID().toString();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    }
+
     @Test
     public void testSingleEvent_AcceptAsAttendee() throws Exception {
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
@@ -142,7 +147,6 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), "declined the invitation: " + summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
-        rememberMail(reply);
 
         /*
          * Apply change as organizer via iTIP API, expect the master with the new change exception and exception itself to be returned
@@ -166,7 +170,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         /*
          * Forward to other user of same context
          */
-        TestUser partyCrasher = context2.acquireUser();
+        TestUser partyCrasher = users.get(context2).get(1);
         String crashersMail = partyCrasher.getLogin();
 
         /*
@@ -197,10 +201,8 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         /*
          * Receive forwarded mail as party crasher
          */
-        ApiClient apiClient3 = generateApiClient(partyCrasher);
-        rememberClient(apiClient3);
+        ApiClient apiClient3 = getApiClient(context2, 1);
         MailData iMip = receiveIMip(apiClient3, userResponseC2.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClient3, iMip);
 
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClient3, iMip)).getNewEvent();
         assertNotNull(newEvent);
@@ -212,14 +214,12 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          */
         EventData eventData = assertSingleEvent(accept(apiClient3, constructBody(iMip), null), createdEvent.getUid());
         assertAttendeePartStat(eventData.getAttendees(), crashersMail, PartStat.ACCEPTED.status);
-        rememberForCleanup(apiClient3, eventData);
 
         /*
          * Receive mail as organizer and check actions for party crasher
          */
         MailData reply = receiveIMip(apiClient, crashersMail, summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId(), CustomConsumers.PARTY_CRASHER);
-        rememberMail(reply);
 
         /*
          * Apply change as organizer via iTIP API
@@ -234,7 +234,6 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          * Check as original attendee if an update mail from the organizer was sent to inform about a new participant
          */
         MailData updateMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, updateMail);
         analyze(analyze(apiClientC2, updateMail), CustomConsumers.ALL);
     }
 
@@ -255,14 +254,12 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          */
         EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), comment), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
-        rememberForCleanup(apiClientC2, attendeeEvent);
 
         /*
          * Receive mail as organizer and check actions
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
-        rememberMail(reply);
 
         /*
          * Apply change as organizer via iTIP API

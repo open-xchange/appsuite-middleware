@@ -55,14 +55,12 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -82,7 +80,6 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
     private static final int[] LAST_MODIFIED_UTC = new int[] { Task.LAST_MODIFIED_UTC, Task.OBJECT_ID, Task.FOLDER_ID };
 
     private int id;
-    private Date lastModified;
 
     /**
      * Default constructor.
@@ -103,18 +100,6 @@ public class LastModifiedUTCTest extends AbstractTaskTest {
         final InsertRequest request = new InsertRequest(task, getTimeZone());
         final InsertResponse response = Executor.execute(getClient(), request);
         id = response.getId();
-        lastModified = response.getTimestamp();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest deleteRequest = new DeleteRequest(getPrivateFolder(), getId(), lastModified);
-            Executor.execute(getClient(), deleteRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
     public int getId() {

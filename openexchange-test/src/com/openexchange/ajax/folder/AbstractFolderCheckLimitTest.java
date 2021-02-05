@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.rmi.Naming;
 import java.util.HashMap;
@@ -103,10 +102,10 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
         this.user = createUserObj();
-        this.quotaTestuser = new TestUser(user.getName(), Integer.toString(getClient().getValues().getContextId()), "secret");
-        this.testUserId = createNewUserWithQuota(user);
+        this.quotaTestuser = new TestUser(user.getName(), Integer.toString(testUser.getContextId().intValue()), "secret");
+        this.testUserId = createNewUserWithQuota(user); // TODO create default user with this quota instead
         quotaApiClient = generateApiClient(quotaTestuser);
-        rememberClient(quotaApiClient);
+        rememberClient(quotaTestuser, quotaApiClient);
         foldersApi = new FoldersApi(quotaApiClient);
         quotaTestFolderId = getPrivateInfostoreFolder();
     }
@@ -117,28 +116,12 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
         return (configNode.getData()).toString();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            deleteUser();
-        } finally {
-            super.tearDown();
-        }
-    }
-
     protected int createNewUserWithQuota(User user) throws Exception {
         UserModuleAccess userModuleAccess = new UserModuleAccess();
-        context = new Context(I(getClient().getValues().getContextId()));
+        context = new Context(testUser.getContextId());
         Integer userId = iface.create(context, user, userModuleAccess, credentials).getId();
         user.setId(userId);
         return userId.intValue();
-    }
-
-    protected void deleteUser() throws Exception {
-        if (testUserId > 0) {
-            User user = new User(testUserId);
-            iface.delete(new Context(I(getClient().getValues().getContextId())), user, null, credentials);
-        }
     }
 
     protected FolderCheckLimitsResponse checkLimits(FolderCheckLimitsData body, String folderId, String type) throws ApiException {

@@ -61,7 +61,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -69,7 +68,7 @@ import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -96,11 +95,9 @@ import com.openexchange.test.FolderTestManager;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractFindTest extends AbstractAJAXSession {
+public abstract class AbstractFindTest extends Abstrac2UserAJAXSession {
 
     protected Random random;
-
-    protected AJAXClient client2;
 
     protected FolderTestManager folderManager2;
 
@@ -120,19 +117,8 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         random = new Random();
-        client2 = getClient2();
         folderManager2 = new FolderTestManager(client2);
         i18nServiceRegistry = mock(I18nServiceRegistry.class);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            folderManager2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

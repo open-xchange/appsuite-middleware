@@ -53,13 +53,11 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -115,19 +113,6 @@ public class Bug13942Test extends AbstractAJAXSession {
         updateAppointment.setParentFolderID(getClientB().getValues().getPrivateAppointmentFolder());
         updateAppointment.setLastModified(appointment.getLastModified());
         updateAppointment.setAlarm(30);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointment != null && appointment.getObjectID() != 0) {
-                DeleteRequest delete = new DeleteRequest(appointment);
-                getClient().execute(delete);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

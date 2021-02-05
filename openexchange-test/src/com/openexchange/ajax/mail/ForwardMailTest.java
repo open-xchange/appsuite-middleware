@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -74,16 +73,6 @@ public class ForwardMailTest extends AbstractReplyTest {
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

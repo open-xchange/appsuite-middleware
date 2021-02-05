@@ -20,29 +20,20 @@ public class ConfirmTest extends AppointmentTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm2 = new CalendarTestManager(getClient2());
-        ftm2 = new FolderTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
+        ftm2 = new FolderTestManager(getClient(1));
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            if (ctm2 != null) {
-                ctm2.cleanUp();
-            }
-            if (ftm2 != null) {
-                ftm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testConfirm() throws Exception {
 
-        FolderObject user2CalendarFolder = ftm2.getFolderFromServer(getClient2().getValues().getPrivateAppointmentFolder());
-        final int secondUserId = getClient2().getValues().getUserId();
+        FolderObject user2CalendarFolder = ftm2.getFolderFromServer(getClient(1).getValues().getPrivateAppointmentFolder());
+        final int secondUserId = getClient(1).getValues().getUserId();
 
         Appointment appointmentObj = createAppointmentObject("testConfirm");
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];

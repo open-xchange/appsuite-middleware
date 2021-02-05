@@ -55,20 +55,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,34 +78,7 @@ import com.openexchange.test.tryagain.TryAgain;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class Bug44962Test extends ShareTest {
-
-    private AJAXClient client2;
-    private Map<Integer, FolderObject> foldersToDelete;
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        foldersToDelete = new HashMap<Integer, FolderObject>();
-        client2 = new AJAXClient(testContext.acquireUser());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != client2) {
-                if (null != foldersToDelete && 0 < foldersToDelete.size()) {
-                    deleteFoldersSilently(client2, foldersToDelete);
-                }
-                client2.logout();
-                prepareUser(true, true, null);
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
+public class Bug44962Test extends Abstract2UserShareTest {
 
     protected static int randomPimModule() {
         int[] pimModules = new int[] { FolderObject.CONTACT, FolderObject.TASK, FolderObject.CALENDAR
@@ -281,7 +249,6 @@ public class Bug44962Test extends ShareTest {
     private void inviteGuestToFolder(int module, boolean readCreateSharedFolders, Boolean inviteGuests, String expectedError) throws Exception {
         prepareUser(readCreateSharedFolders, false, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, module, getDefaultFolder(client2, module));
-        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         folder.getPermissions().add(createNamedGuestPermission());
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
         updateRequest.setFailOnError(false);
@@ -291,7 +258,6 @@ public class Bug44962Test extends ShareTest {
     private void inviteGuestToPublicFolder(int module, boolean editPublicFolders, Boolean inviteGuests, String expectedError) throws Exception {
         setReadCreateSharedFoldersAndEditPublicFolders(false, true);
         FolderObject folder = insertPublicFolder(client2, EnumAPI.OX_NEW, module);
-        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         prepareUser(false, editPublicFolders, inviteGuests);
         folder.getPermissions().add(createNamedGuestPermission());
         UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
@@ -302,7 +268,6 @@ public class Bug44962Test extends ShareTest {
     private void inviteUserToFolder(int module, boolean readCreateSharedFolders, Boolean inviteGuests, String expectedError) throws Exception {
         prepareUser(readCreateSharedFolders, false, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, module, getDefaultFolder(client2, module));
-        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         OCLPermission permission = new OCLPermission(getClient().getValues().getUserId(), folder.getObjectID());
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         folder.getPermissions().add(permission);
@@ -314,7 +279,6 @@ public class Bug44962Test extends ShareTest {
     private void inviteUserToPublicFolder(int module, boolean editPublicFolders, Boolean inviteGuests, String expectedError) throws Exception {
         setReadCreateSharedFoldersAndEditPublicFolders(false, true);
         FolderObject folder = insertPublicFolder(client2, EnumAPI.OX_NEW, module);
-        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         prepareUser(false, editPublicFolders, inviteGuests);
         OCLPermission permission = new OCLPermission(getClient().getValues().getUserId(), folder.getObjectID());
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);

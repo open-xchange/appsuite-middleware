@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertFalse;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
 public class DeleteMultipleContactsTest extends AbstractContactTest {
 
     private Contact c1, c2, c3;
-    private boolean needCleanup = true;
 
     /**
      * Initializes a new {@link DeleteMultipleContactsTest}.
@@ -127,28 +125,6 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         DeleteRequest delReq = new DeleteRequest(getClient().getValues().getPrivateContactFolder(), cids, new Date());
         CommonDeleteResponse delRes = getClient().execute(delReq);
         assertFalse("Delete of multiple contacts failed: " + delRes.getErrorMessage(), delRes.hasError());
-        needCleanup = false;
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (needCleanup) {
-                try {
-                    DeleteRequest delReq = new DeleteRequest(c1);
-                    getClient().execute(delReq);
-                    delReq = new DeleteRequest(c2);
-                    getClient().execute(delReq);
-                    delReq = new DeleteRequest(c3);
-                    getClient().execute(delReq);
-                } catch (Exception e) {
-
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

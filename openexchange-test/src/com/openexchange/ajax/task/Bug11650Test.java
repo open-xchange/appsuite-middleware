@@ -51,8 +51,6 @@ package com.openexchange.ajax.task;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotEquals;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -68,7 +66,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.pool.TestUser;
 
 /**
  * Checks if bug 11650 appears again.
@@ -76,9 +73,6 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug11650Test extends AbstractTaskTest {
-
-    private TestUser owner;
-    private TestUser sharee;
 
     /**
      * Default constructor.
@@ -90,19 +84,8 @@ public class Bug11650Test extends AbstractTaskTest {
     }
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        // Get users
-        owner = testContext.acquireUser();
-        sharee = testContext.acquireUser();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        // Context cleared, so need to back user
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     /**
@@ -112,16 +95,8 @@ public class Bug11650Test extends AbstractTaskTest {
      */
     @Test
     public void testSearchInSharedFolder() throws Throwable {
-        final AJAXClient client;
-        final AJAXClient client2;
-        if (null == owner || null == sharee) {
-            // Use fallback in case of missing user(s)
-            client = getClient();
-            client2 = getClient2();
-        } else {
-            client = new AJAXClient(owner);
-            client2 = new AJAXClient(sharee);
-        }
+        final AJAXClient client = getClient();
+        final AJAXClient client2 = getClient(1);
         final int privateTaskFID = client.getValues().getPrivateTaskFolder();
         final FolderObject folder = createFolder(client.getValues().getUserId(), client2.getValues().getUserId());
         folder.setParentFolderID(privateTaskFID);

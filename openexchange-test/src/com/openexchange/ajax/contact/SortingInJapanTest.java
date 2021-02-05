@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -82,18 +81,6 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
             fail("no locale found");
         }
         getClient().execute(new SetRequest(Tree.Language, "ja-JP"));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != originalLocale) {
-                getClient().execute(new SetRequest(Tree.Language, originalLocale));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

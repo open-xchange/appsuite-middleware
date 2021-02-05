@@ -61,7 +61,7 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.tryagain.TryAgain;
@@ -74,7 +74,7 @@ import com.openexchange.test.tryagain.TryAgain;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public class Bug65805Test extends ShareTest {
+public class Bug65805Test extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
@@ -106,7 +106,7 @@ public class Bug65805Test extends ShareTest {
          */
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
         permissions.add(createAnonymousGuestPermission());
-        OCLPermission userPermission = new OCLPermission(getClient2().getValues().getUserId(), 0);
+        OCLPermission userPermission = new OCLPermission(client2.getValues().getUserId(), 0);
         userPermission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         permissions.add(userPermission);
         FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), randomUID(), permissions.toArray(new OCLPermission[permissions.size()]));
@@ -114,7 +114,7 @@ public class Bug65805Test extends ShareTest {
          * check that the share url is only visible to user a
          */
         assertNotNull("Share URL not visible", getShareURL(getClient(), api, folder.getObjectID()));
-        assertNull("Share URL is visible", getShareURL(getClient2(), api, folder.getObjectID()));
+        assertNull("Share URL is visible", getShareURL(client2, api, folder.getObjectID()));
     }
 
     private static String getShareURL(AJAXClient client, EnumAPI api, int folderId) throws Exception {

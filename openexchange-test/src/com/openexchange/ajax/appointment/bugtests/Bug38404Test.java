@@ -54,7 +54,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -84,18 +83,23 @@ public class Bug38404Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        ctm2 = new CalendarTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
 
         appointment = new Appointment();
         appointment.setTitle("Bug 38404");
         appointment.setStartDate(D("10.08.2015 08:00"));
         appointment.setEndDate(D("10.08.2015 09:00"));
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -105,7 +109,7 @@ public class Bug38404Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.TUESDAY + Appointment.WEDNESDAY + Appointment.THURSDAY);
         appointment.setInterval(2);
         catm.update(appointment);
-        appointment.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         ctm2.confirm(appointment, Appointment.ACCEPT, "yes", 1);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment loaded = catm.get(appointment);
@@ -115,12 +119,12 @@ public class Bug38404Test extends AbstractAJAXSession {
         for (UserParticipant up : loaded.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient(1).getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.NONE, up.getConfirm());
             }
         }
 
-        Appointment[] all = ctm2.all(getClient2().getValues().getPrivateAppointmentFolder(), D("11.08.2015 00:00", TimeZones.UTC), D("12.08.2015 00:00", TimeZones.UTC));
+        Appointment[] all = ctm2.all(getClient(1).getValues().getPrivateAppointmentFolder(), D("11.08.2015 00:00", TimeZones.UTC), D("12.08.2015 00:00", TimeZones.UTC));
         int exceptionId = 0;
         for (Appointment app : all) {
             if (app.getRecurrenceID() == appointment.getObjectID() && app.getRecurrenceID() != app.getObjectID()) {
@@ -129,19 +133,19 @@ public class Bug38404Test extends AbstractAJAXSession {
             }
         }
         assertFalse("Unable to find exception.", exceptionId == 0);
-        Appointment loadedException = ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), exceptionId);
+        Appointment loadedException = ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), exceptionId);
         assertEquals("Wrong amount of participants.", 2, loadedException.getUsers().length);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient(1).getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
             }
         }
 
         Appointment updateAlarm = new Appointment();
         updateAlarm.setObjectID(appointment.getObjectID());
-        updateAlarm.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        updateAlarm.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         updateAlarm.setAlarm(15);
         updateAlarm.setLastModified(new Date(Long.MAX_VALUE));
         ctm2.update(updateAlarm);
@@ -153,17 +157,17 @@ public class Bug38404Test extends AbstractAJAXSession {
         for (UserParticipant up : loaded.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient(1).getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.NONE, up.getConfirm());
             }
         }
 
-        loadedException = ctm2.get(getClient2().getValues().getPrivateAppointmentFolder(), exceptionId);
+        loadedException = ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), exceptionId);
         assertEquals("Wrong amount of participants.", 2, loadedException.getUsers().length);
         for (UserParticipant up : loadedException.getUsers()) {
             if (up.getIdentifier() == getClient().getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
-            } else if (up.getIdentifier() == getClient2().getValues().getUserId()) {
+            } else if (up.getIdentifier() == getClient(1).getValues().getUserId()) {
                 assertEquals("Wrong confirmation status for user: " + up.getIdentifier(), Appointment.ACCEPT, up.getConfirm());
             }
         }
@@ -179,16 +183,4 @@ public class Bug38404Test extends AbstractAJAXSession {
         assertEquals("Wrong start.", D("11.08.2015 08:00"), loaded.getStartDate());
         assertEquals("Wrong end.", D("11.08.2015 09:00"), loaded.getEndDate());
     }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            catm.cleanUp();
-            ctm2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
-
 }

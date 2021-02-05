@@ -54,11 +54,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -93,16 +91,6 @@ public class Bug7590Test extends AbstractAJAXSession {
         calendar = TimeTools.createCalendar(tz);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         appointment = createAppointment();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

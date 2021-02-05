@@ -66,7 +66,7 @@ public class Bug4497Test_SharedAppDeletedByParticipant extends ManagedAppointmen
 
     @Test
     public void testIt() throws Exception {
-        UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -76,14 +76,19 @@ public class Bug4497Test_SharedAppDeletedByParticipant extends ManagedAppointmen
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient2().getValues().getPrivateAppointmentFolder();
+        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient2().execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
         Date lastMod = getResponse.getTimestamp();
 
-        CommonDeleteResponse deleteResponse = getClient2().execute(new DeleteRequest(appId, fid2, lastMod));
+        CommonDeleteResponse deleteResponse = getClient(1).execute(new DeleteRequest(appId, fid2, lastMod));
 
         assertFalse(deleteResponse.hasError() || deleteResponse.hasConflicts());
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

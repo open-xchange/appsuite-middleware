@@ -57,14 +57,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -81,7 +79,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class MoveTest extends CalDAVTest {
+public class MoveTest extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
 
@@ -89,23 +87,8 @@ public class MoveTest extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(new AJAXClient(testContext.acquireUser()));
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.manager2) {
-                this.manager2.cleanUp();
-                if (null != manager2.getClient()) {
-                    manager2.getClient().logout();
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

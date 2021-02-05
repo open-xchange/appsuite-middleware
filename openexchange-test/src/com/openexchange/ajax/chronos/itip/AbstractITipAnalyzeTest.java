@@ -91,13 +91,6 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         super.setUp();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        rememberForCleanup(createdEvent);
-        rememberMail(apiClient, mailData);
-        super.tearDown();
-    }
-
     protected Attendee prepareCommonAttendees(EventData event) {
         Attendee replyingAttendee = convertToAttendee(testUserC2, Integer.valueOf(0));
         replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
@@ -154,7 +147,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
             delta.setRecurrenceId(eventData.getRecurrenceId());
         }
         if (null != eventData.getAttendees()) {
-            delta.setAttendees(eventData.getAttendees());
+            delta.setAttendees(new ArrayList<>(eventData.getAttendees()));
         }
         if (null != eventData.getConferences()) {
             delta.setConferences(eventData.getConferences());
@@ -290,7 +283,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         }),
         ;
 
-        private Consumer<Analysis> consumer;
+        private final Consumer<Analysis> consumer;
 
         CustomConsumers(Consumer<Analysis> consumer) {
             this.consumer = consumer;

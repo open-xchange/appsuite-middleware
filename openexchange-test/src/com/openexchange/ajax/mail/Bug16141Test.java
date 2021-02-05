@@ -60,12 +60,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -148,18 +146,6 @@ public class Bug16141Test extends AbstractAJAXSession {
                 sb.append(buf, 0, length);
             }
             return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes(com.openexchange.java.Charsets.UTF_8));
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-        if (ids != null) {
-            getClient().execute(new DeleteRequest(ids));
-        }
-        } finally {
-            super.tearDown();
         }
     }
 

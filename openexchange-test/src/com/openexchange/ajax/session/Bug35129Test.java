@@ -51,17 +51,14 @@ package com.openexchange.ajax.session;
 
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.java.Strings;
 
 /**
  * Test proper server response if Authentication header is not sent.
@@ -77,21 +74,10 @@ public class Bug35129Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         AJAXConfig.init();
         super.setUp();
-        myClient = new AJAXClient(new AJAXSession(), true);
+        myClient = getClient();
         myClient.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != myClient && Strings.isNotEmpty(myClient.getSession().getId())) {
-                myClient.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void test4UnauthorizedResponse() throws Exception {

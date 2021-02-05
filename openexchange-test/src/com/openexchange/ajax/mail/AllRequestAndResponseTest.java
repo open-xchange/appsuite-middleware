@@ -4,7 +4,6 @@ package com.openexchange.ajax.mail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import javax.mail.internet.InternetAddress;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
@@ -36,16 +35,6 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
          */
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
         clearFolder(folder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-        clearFolder(folder);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

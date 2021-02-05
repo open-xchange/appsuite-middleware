@@ -49,16 +49,25 @@
 
 package com.openexchange.ajax.framework;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.pool.TestUser;
 
 /**
  * {@link AbstractConfigAwareAPIClientSession} extends the AbstractAPIClientSession with methods to preconfigure reloadable configurations before executing the tests.
@@ -68,7 +77,10 @@ import com.openexchange.ajax.writer.ResponseWriter;
  */
 public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPIClientSession {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractConfigAwareAPIClientSession.class);
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().build();
+    }
 
     /**
      * Initializes a new {@link AbstractConfigAwareAPIClientSession}.
@@ -85,67 +97,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      * @throws Exception if changing the configuration fails
      */
     protected void setUpConfiguration() throws Exception {
-        setUpConfiguration(getClient());
-    }
-
-    /**
-     * Changes the configurations given by {@link #getNeededConfigurations()}.
-     *
-     * @throws Exception if changing the configuration fails
-     */
-    protected void setUpConfiguration(AJAXClient client) throws Exception {
-        Map<String, String> map = getNeededConfigurations();
-        if (!map.isEmpty()) {
-            // change configuration to new values
-            ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
-            ChangePropertiesResponse response = client.execute(req);
-            oldData.put(client, ResponseWriter.getJSON(response.getResponse()).getJSONObject("data"));
-        }
-    }
-
-    /**
-     * Roll back the configuration based in the old data
-     *
-     * @param client The client to use
-     * @param oldData The data to restore
-     * @throws Exception In case of error
-     */
-    protected void rollbackConfiguration(AJAXClient client, JSONObject oldData) throws Exception {
-        Map<String, Object> map = oldData.asMap();
-        if (map.isEmpty()) {
-            return;
-        }
-        Map<String, String> newMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            try {
-                Object value = entry.getValue();
-                if (value == JSONObject.NULL) {
-                    value = null;
-                }
-                newMap.put(entry.getKey(), (String) value);
-            } catch (ClassCastException cce) {
-                //should never be the case
-                LOG.error("Cannot revert the old values", cce);
-                continue;
-            }
-        }
-        ChangePropertiesRequest req = new ChangePropertiesRequest(newMap, getScope(), getReloadables());
-        ChangePropertiesResponse response = client.execute(req);
-        LOG.info("Restored capabilities, etc. back to:\n{}", ResponseWriter.getJSON(response.getResponse()));
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (oldData.isEmpty()) {
-                return;
-            }
-            for (Entry<AJAXClient, JSONObject> entry : oldData.entrySet()) {
-                rollbackConfiguration(entry.getKey(), entry.getValue());
-            }
-        } finally {
-            super.tearDown();
-        }
+        setUpConfigWithOwnClient();
     }
 
     /**
@@ -189,5 +141,43 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      */
     protected int getUserId() {
         return apiClient.getUserId().intValue();
+    }
+
+    private void setUpConfigWithOwnClient() throws ClientProtocolException, IOException, URISyntaxException {
+        if (getNeededConfigurations() != null && getNeededConfigurations().isEmpty() == false) {
+            changeConfigWithOwnClient(testUser, new JSONObject(getNeededConfigurations()).toString());
+        }
+    }
+
+    /**
+     * Changes the configuration of the given user
+     *
+     * @param user The user
+     * @param config The new config
+     * @throws ClientProtocolException
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    private void changeConfigWithOwnClient(TestUser user, String config) throws ClientProtocolException, IOException, URISyntaxException {
+        assertTrue(user.getContextId() != null && user.getContextId().intValue() > 0);
+        assertTrue(user.getUserId() != null && user.getUserId().intValue() > 0);
+        HttpClient httpclient = HttpClients.createDefault();
+        URI uri = new URIBuilder()
+            .setScheme(AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL))
+            .setHost(AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME))
+            .setPath("ajax/changeConfigForTest")
+            .setPort(8009)
+            .addParameter("userId", String.valueOf(user.getUserId()))
+            .addParameter("contextId", String.valueOf(user.getContextId()))
+            .addParameter("scope", getScope())
+            .addParameter("reload", getReloadables())
+            .build();
+
+        HttpPut httppost = new HttpPut(uri);
+        StringEntity entity = new StringEntity(config, ContentType.APPLICATION_JSON);
+        httppost.setEntity(entity);
+
+        HttpResponse response = httpclient.execute(httppost);
+        assertEquals(response.getStatusLine().getReasonPhrase(), 200, response.getStatusLine().getStatusCode());
     }
 }

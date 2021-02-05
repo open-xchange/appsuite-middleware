@@ -77,6 +77,11 @@ public class Bug67685Test extends AbstractAPIClientSession {
         api = new DriveApi(apiClient);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @Test
     public void testDriveSubscribeActionGet_ModeInvalid_ErrorResponseWithoutException() throws OXException, IOException, JSONException, ApiException {
         String sessionId = apiClient.getSession();

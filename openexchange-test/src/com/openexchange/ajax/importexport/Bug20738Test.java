@@ -57,7 +57,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -76,18 +75,6 @@ import com.openexchange.groupware.importexport.ImportResult;
 public final class Bug20738Test extends AbstractAJAXSession {
 
     private final List<DeleteRequest> toDelete = new ArrayList<DeleteRequest>();
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            for (final DeleteRequest deleteRequest : this.toDelete) {
-                super.getClient().execute(deleteRequest);
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testNoRecurrenceMasterFound() throws Throwable {

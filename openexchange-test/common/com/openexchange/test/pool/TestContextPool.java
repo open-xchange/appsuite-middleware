@@ -59,8 +59,16 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.internet.AddressException;
 import org.junit.Assert;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -99,9 +107,23 @@ public class TestContextPool {
      * @throws OXException
      */
     public static TestContext acquireContext(String acquiredBy) throws OXException {
+        return acquireContext(acquiredBy, Optional.empty());
+    }
+
+    /**
+     * Returns an exclusive {@link TestContext} which means this context is currently not used by any other test.<br>
+     * <br>
+     * <b>Caution: After using the {@link TestContext} make sure it will be returned to pool by using {@link #backContext(TestContext)}!</b>
+     *
+     * @param acquiredBy The name of the class that acquires the context (for logging purposes)
+     * @param optConfig The optional config for the contexts
+     * @return {@link TestContext} to be used for tests.
+     * @throws OXException
+     */
+    public static TestContext acquireContext(String acquiredBy, Optional<Map<String, String>> optConfig) throws OXException {
         List<TestContext> contextList;
         try {
-            contextList = aquireContexts(1);
+            contextList = aquireContexts(1, optConfig);
             Assert.assertFalse("Unable to acquire test context due to an empty pool.", contextList == null || contextList.isEmpty());
             TestContext context = contextList.get(0);
             LOG.debug("Context '{}' has been acquired by {}.", context.getName(), acquiredBy);
@@ -120,12 +142,13 @@ public class TestContextPool {
      *
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @param amount The amount of contexts to aquire
+     * @param optConfig The optional ctx config
      * @return a list of {@link TestContext} to be used for tests.
      * @throws OXException
      */
-    public static List<TestContext> acquireContext(String acquiredBy, int amount) throws OXException {
+    public static List<TestContext> acquireContext(String acquiredBy, Optional<Map<String, String>> optConfig, int amount) throws OXException {
         try {
-            List<TestContext> result = aquireContexts(amount);
+            List<TestContext> result = aquireContexts(amount, optConfig);
             Assert.assertFalse("Unable to acquire test context due to an empty pool.", result == null || result.isEmpty());
             result.forEach((c) -> {
                 LOG.info("Context '{}' has been acquired by {}.", c.getName(), acquiredBy);
@@ -140,7 +163,52 @@ public class TestContextPool {
         }
     }
 
-    private static List<TestContext> aquireContexts(int amount) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException, AddressException {
+    private static Queue<TestContext> pool = new LinkedBlockingDeque<TestContext>(180);
+
+    private static Optional<TestContext> tryPool() {
+        return Optional.ofNullable(pool.poll());
+    }
+
+    /**
+     * Initializes the {@link TestContextPool}
+     *
+     * Pre-provisions 2000 context if configured
+     */
+    private static void init() {
+        if (Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.PRE_PROVISION_CONTEXTS, Boolean.TRUE.toString())).booleanValue()) {
+
+            ExecutorService executor = Executors.newFixedThreadPool(20);
+            List<Callable<Void>> tasks = new ArrayList<>(20);
+            for (int i = 0; i < 20; i++) {
+                tasks.add(() -> {
+                    for (int x = 0; x < 100; x++) {
+                        TestContext ctx = ProvisioningService.getInstance().createContext();
+                        pool.add(ctx);
+                    }
+                    return null;
+                });
+            }
+
+            try {
+                executor.invokeAll(tasks);
+                executor.shutdown();
+            } catch (@SuppressWarnings("unused") InterruptedException e) {
+                // failed
+            }
+        }
+    }
+
+    private static AtomicBoolean initialized = new AtomicBoolean(false);
+
+    private static List<TestContext> aquireContexts(int amount, Optional<Map<String, String>> optConfig) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException, AddressException {
+        if (initialized.get() == false) {
+            synchronized (initialized) {
+                if (initialized.get() == false) {
+                    init();
+                    initialized.set(true);
+                }
+            }
+        }
         List<TestContext> result = new ArrayList<TestContext>(amount);
         try {
             Assert.assertTrue("Aquisation of semaphore took too long", semaphore.tryAcquire(amount, 10, TimeUnit.MINUTES));
@@ -151,7 +219,16 @@ public class TestContextPool {
         boolean success = false;
         try {
             for (int i = amount; i > 0; i--) {
-                result.add(ProvisioningService.getInstance().createContext());
+                if (optConfig.isPresent()) {
+                    result.add(ProvisioningService.getInstance().createContext(optConfig));
+                } else {
+                    Optional<TestContext> optContext = tryPool();
+                    if (optContext.isPresent()) {
+                        result.add(optContext.get());
+                    } else {
+                        result.add(ProvisioningService.getInstance().createContext());
+                    }
+                }
             }
             success = true;
         } finally {

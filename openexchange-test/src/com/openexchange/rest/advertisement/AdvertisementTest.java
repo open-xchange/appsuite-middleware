@@ -96,7 +96,6 @@ import com.openexchange.tools.arrays.Arrays;
 public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
     private final String taxonomyTypes = "groupware_premium";
-    private Context old;
     private static final String reloadables = "AdvertisementPackageServiceImpl, TaxonomyTypesAdvertisementConfigService";
     private static final String DEFAULT = "default";
 
@@ -156,36 +155,10 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
                 Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
                 OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
-                old = ctxInterface.getData(ctx, credentials);
                 ctxInterface.change(ctx, credentials);
                 break;
             default:
                 fail("Unknown package scheme.");
-        }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            switch (packageScheme) {
-                case "Global":
-                    //nothing to do
-                    break;
-                case "AccessCombinations":
-                    //nothing to do
-                    break;
-                case "TaxonomyTypes":
-                    // Change to old taxonomy types
-                    if (old != null) {
-                        TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
-                        Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
-                        OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
-                        ctxInterface.change(old, credentials);
-                    }
-                    break;
-            }
-        } finally {
-            super.tearDown();
         }
     }
 

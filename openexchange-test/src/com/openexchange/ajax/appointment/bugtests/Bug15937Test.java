@@ -53,11 +53,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -96,16 +94,6 @@ public class Bug15937Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(appointment, timeZone);
         AppointmentInsertResponse response = getClient().execute(request);
         response.fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

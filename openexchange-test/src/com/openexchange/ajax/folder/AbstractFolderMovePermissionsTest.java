@@ -50,10 +50,8 @@
 package com.openexchange.ajax.folder;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +59,6 @@ import java.util.UUID;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -108,7 +105,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-        ApiClient apiClient2 = generateApiClient(testUser2);
+        ApiClient apiClient2 = getApiClient(1);
         userId1 = getApiClient().getUserId();
         userId2 = apiClient2.getUserId();
         api = new FoldersApi(getApiClient());
@@ -131,12 +128,8 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     }
 
     @Override
-    public void tearDown() throws Exception {
-        api.deleteFolders(createdFolders, TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        if (Strings.isNotEmpty(sharedFolderId)) {
-            api2.deleteFolders(Collections.singletonList(sharedFolderId), TREE, L(System.currentTimeMillis()), null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        }
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Override

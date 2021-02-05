@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -96,14 +95,6 @@ public class AbstractImportExportTest extends AbstractChronosTest {
         contactsApi = new ContactsApi(getApiClient());
 
         importExportManager = new ICalImportExportManager(exportApi, importApi);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        if (contactsToDelete != null) {
-            contactsApi.deleteContacts(L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
-        }
-        super.tearDown();
     }
 
     protected String getImportResponse(String fileName) throws Exception {

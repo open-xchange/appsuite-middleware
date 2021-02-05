@@ -80,7 +80,7 @@ public class Bug29566Test extends AbstractAJAXSession {
         super.setUp();
 
         catm.resetDefaultFolderPermissions();
-        catm2 = new CalendarTestManager(getClient2());
+        catm2 = new CalendarTestManager(getClient(1));
         catm2.resetDefaultFolderPermissions();
 
         appointment = new Appointment();
@@ -93,6 +93,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         user.setConfirm(Appointment.NONE);
         appointment.setParticipants(new Participant[] { user });
         appointment.setUsers(new UserParticipant[] { user });
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -115,11 +120,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         Appointment clone = appointment.clone();
 
         if (!shared) {
-            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -156,11 +161,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -197,11 +202,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -238,11 +243,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeOrganizer();
 
         if (!shared) {
-            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });

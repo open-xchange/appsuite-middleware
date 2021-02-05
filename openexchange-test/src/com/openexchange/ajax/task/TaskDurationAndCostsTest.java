@@ -55,11 +55,9 @@ import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -101,17 +99,6 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(task, tz);
         InsertResponse response = getClient().execute(request);
         response.fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest req = new DeleteRequest(task);
-            getClient().execute(req);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

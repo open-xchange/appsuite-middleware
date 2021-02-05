@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder.api2;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Locale;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.i18n.FolderStrings;
 public class Bug15995Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private Locale locale;
 
     public Bug15995Test() {
         super();
@@ -83,18 +81,7 @@ public class Bug15995Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        locale = client.getValues().getLocale();
         client.execute(new SetRequest(Tree.Language, Locale.US));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new SetRequest(Tree.Language, locale));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

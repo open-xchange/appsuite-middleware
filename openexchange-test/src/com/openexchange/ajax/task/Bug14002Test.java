@@ -55,13 +55,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -101,16 +99,6 @@ public class Bug14002Test extends AbstractTaskTest {
         task.setPercentComplete(0);
         final InsertResponse insertR = client.execute(new InsertRequest(task, tz));
         insertR.fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

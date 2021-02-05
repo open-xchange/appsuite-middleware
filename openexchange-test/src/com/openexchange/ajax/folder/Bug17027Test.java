@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -79,7 +78,6 @@ public class Bug17027Test extends AbstractAJAXSession {
     private AJAXClient client;
     private FolderObject createdFolder;
     private Date before;
-    private boolean folderDeleted = false;
 
     public Bug17027Test() {
         super();
@@ -97,18 +95,6 @@ public class Bug17027Test extends AbstractAJAXSession {
         before = new Date(createdFolder.getLastModified().getTime() - 1);
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (!folderDeleted) {
-                client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testUpdates() throws Throwable {
         FolderUpdatesResponse response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));
@@ -121,7 +107,6 @@ public class Bug17027Test extends AbstractAJAXSession {
         assertTrue("Newly created folder not found.", found);
         assertFalse("Newly created folder should not be contained in deleted list.", response.getDeletedIds().contains(I(createdFolder.getObjectID())));
         client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
-        folderDeleted = true;
         response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));
         for (FolderObject folder : response.getFolders()) {
             assertFalse("By other user newly created private folder is returned in updates response.", createdFolder.getObjectID() == folder.getObjectID());

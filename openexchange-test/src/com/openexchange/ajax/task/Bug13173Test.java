@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -97,17 +96,6 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ttm.cleanUp();
-            deleteDuplicates(duplicates);
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testBug13173() {
         testTask = ttm.insertTaskOnServer(testTask);
@@ -132,13 +120,6 @@ public class Bug13173Test extends AbstractAJAXSession {
         task.setPercentComplete(75);
         task.setStatus(Task.IN_PROGRESS);
         testTask = ttm.updateTaskOnServer(task);
-    }
-
-    private void deleteDuplicates(ArrayList<Task> duplicates) {
-        for (Task t : duplicates) {
-            t.setParentFolderID(folderId);
-            ttm.deleteTaskOnServer(t);
-        }
     }
 
     private ArrayList<Task> getDuplicates() {

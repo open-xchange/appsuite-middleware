@@ -50,7 +50,6 @@
 package com.openexchange.ajax.find.calendar;
 
 import static org.junit.Assert.assertNotNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -77,16 +76,6 @@ public class AutocompleteTest extends CalendarFindTest {
     public void setUp() throws Exception {
         super.setUp();
         contactManager = new ContactTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            contactManager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

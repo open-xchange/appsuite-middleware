@@ -165,7 +165,6 @@ public class Bug65533Test extends AbstractITipTest {
          * receive & analyze iMIP request as user a
          */
         MailData iMipRequestData = receiveIMip(apiClient, organizerMail, summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMipRequestData);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClient, iMipRequestData)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(uid, newEvent.getUid());
@@ -182,7 +181,6 @@ public class Bug65533Test extends AbstractITipTest {
         EventResponse eventResponse = chronosApi.getEvent(eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         eventData = eventResponse.getData();
-        rememberForCleanup(eventData);
         assertEquals(uid, eventData.getUid());
         assertAttendeePartStat(eventData.getAttendees(), recipientMail, "ACCEPTED");
         /*
@@ -202,7 +200,6 @@ public class Bug65533Test extends AbstractITipTest {
          */
         MailData iMipReplyData = receiveIMip(apiClientC2, recipientMail, summary, 0, SchedulingMethod.REPLY);
         assertNotNull(iMipReplyData);
-        rememberMail(apiClientC2, iMipReplyData);
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, iMipReplyData);
         assertEquals("REPLY", iTipReply.getMethod());
         assertTrue(null != iTipReply.getEvents() && 1 == iTipReply.getEvents().size());

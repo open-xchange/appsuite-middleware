@@ -53,12 +53,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -154,19 +152,6 @@ public class Bug17327Test extends AbstractAJAXSession {
         }
 
         assertEquals("Alarm is not equal in All- and GetRequest after update.", getResponseAfterUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment));
-            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-            client2.logout();
-
-        } finally {
-            super.tearDown();
-        }
     }
 
     public Appointment createAppointment() {

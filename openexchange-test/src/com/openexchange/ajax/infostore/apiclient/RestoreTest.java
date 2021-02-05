@@ -73,6 +73,11 @@ import com.openexchange.testing.httpclient.models.InfoItemsRestoreResponseData;
  */
 public class RestoreTest extends InfostoreApiClientTest {
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @Test
     public void testRestore() throws Exception {
         // Create and upload a file

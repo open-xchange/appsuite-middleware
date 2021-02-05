@@ -64,7 +64,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
@@ -101,18 +100,6 @@ public class Bug36333Test extends AbstractMailTest {
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != fmid) {
-                getClient().execute(new DeleteRequest(fmid, true).ignoreError());
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

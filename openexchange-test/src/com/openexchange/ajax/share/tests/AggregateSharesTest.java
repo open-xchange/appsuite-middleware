@@ -52,10 +52,6 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
@@ -66,8 +62,8 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,34 +77,17 @@ import com.openexchange.test.tryagain.TryAgain;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AggregateSharesTest extends ShareTest {
+public class AggregateSharesTest extends Abstract2UserShareTest {
 
-    private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
-        clientsAndFolders.put(getClient(), new ArrayList<Integer>());
-        clientsAndFolders.put(getClient2(), new ArrayList<Integer>());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != clientsAndFolders) {
-                for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
-                    deleteFoldersSilently(entry.getKey(), entry.getValue());
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     private AJAXClient randomClient() {
-        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
-        return ajaxClients[random.nextInt(ajaxClients.length)];
+        return getClient(random.nextInt(users.get(testContext).size()));
     }
 
     @Test
@@ -118,13 +97,11 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     public void noTestAggregateSharesExtensively() throws Exception {
-        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
         for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (AJAXClient client1 : ajaxClients) {
+            for (AJAXClient client1 : users2client.values()) {
                 for (int module1 : TESTED_MODULES) {
-                    for (AJAXClient client2 : ajaxClients) {
+                    for (AJAXClient client2 : users2client.values()) {
                         for (int module2 : TESTED_MODULES) {
-//                            System.out.println("AggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -140,11 +117,10 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     public void noTestRemoveAggregateSharesExtensively() throws Exception {
-        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
         for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (AJAXClient client1 : ajaxClients) {
+            for (AJAXClient client1 : users2client.values()) {
                 for (int module1 : TESTED_MODULES) {
-                    for (AJAXClient client2 : ajaxClients) {
+                    for (AJAXClient client2 : users2client.values()) {
                         for (int module2 : TESTED_MODULES) {
 //                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testRemoveAggregateShares(api, client1, module1, client2, module2);
@@ -169,7 +145,6 @@ public class AggregateSharesTest extends ShareTest {
         insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse1 = client1.execute(insertRequest1);
         insertResponse1.fillObject(folderA);
-        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
         GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
         folderA = getResponse1.getFolder();
         folderA.setLastModified(getResponse1.getTimestamp());
@@ -201,7 +176,6 @@ public class AggregateSharesTest extends ShareTest {
         insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse2 = client2.execute(insertRequest2);
         insertResponse2.fillObject(folderB);
-        clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
         GetResponse getResponse = client2.execute(new GetRequest(api, folderB.getObjectID()));
         folderB = getResponse.getFolder();
         folderB.setLastModified(getResponse.getTimestamp());
@@ -254,7 +228,6 @@ public class AggregateSharesTest extends ShareTest {
          * as user 1 with client 1, create folder A shared to guest user
          */
         FolderObject folderA = insertSharedFolder(client1, api, module1, getDefaultFolder(client1, module1), guestPermission);
-        clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
         /*
          * check permissions
          */
@@ -277,7 +250,6 @@ public class AggregateSharesTest extends ShareTest {
          * as user 2 with client 2, create folder B shared to guest user
          */
         FolderObject folderB = insertSharedFolder(client2, api, module2, getDefaultFolder(client2, module2), guestPermission);
-        clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
         /*
          * check permissions
          */

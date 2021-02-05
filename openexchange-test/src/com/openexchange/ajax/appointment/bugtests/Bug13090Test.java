@@ -55,11 +55,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -145,18 +143,6 @@ public class Bug13090Test extends AbstractAJAXSession {
             assertTrue("Wrong exception code.", updateResponse.getException().similarTo(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create()));
         } else {
             fail("Error expected.");
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
         }
     }
 

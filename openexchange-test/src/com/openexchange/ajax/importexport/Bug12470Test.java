@@ -56,14 +56,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.exception.OXException;
@@ -87,8 +85,6 @@ public final class Bug12470Test extends AbstractAJAXSession {
 
     private int objectId = -1;
 
-    private Date lastModified = null;
-
     /**
      * {@inheritDoc}
      */
@@ -101,19 +97,6 @@ public final class Bug12470Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         utc = TimeZone.getTimeZone("UTC");
         importvTodo();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            deleteTask();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -139,14 +122,6 @@ public final class Bug12470Test extends AbstractAJAXSession {
         }
         final ImportResult result = response.getImports()[0];
         objectId = Integer.parseInt(result.getObjectId());
-    }
-
-    private void deleteTask() throws OXException, IOException, JSONException {
-        if (null == lastModified) {
-            lastModified = new Date(Long.MAX_VALUE);
-        }
-        final DeleteRequest request = new DeleteRequest(folderId, objectId, lastModified);
-        client.execute(request);
     }
 
     private static final String vTodo = "BEGIN:VCALENDAR\n" + "PRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\n" + "VERSION:2.0\n" + "BEGIN:VTODO\n" + "DTSTAMP:20070531T093649Z\n" + "ORGANIZER;CN=Horst Schmidt:MAILTO:horst.schmidt@example.invalid\n" + "CREATED:20070531T093612Z\n" + "UID:libkcal-1172232934.1028\n" + "SEQUENCE:0\n" + "LAST-MODIFIED:20070531T093612Z\n" + "DESCRIPTION:das ist ein ical test\n" + "SUMMARY:test ical\n" + "LOCATION:daheim\n" + "CLASS:PUBLIC\n" + "PRIORITY:5\n" + "DUE;VALUE=DATE:20070731\n" + "PERCENT-COMPLETE:30\n" + "END:VTODO\n" + "END:VCALENDAR\n";

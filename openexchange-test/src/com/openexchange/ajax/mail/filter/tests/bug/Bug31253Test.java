@@ -52,10 +52,8 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -82,18 +80,6 @@ public class Bug31253Test extends AbstractMailFilterTest {
      */
     public Bug31253Test() {
         super();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (folder != null) {
-                getClient().execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

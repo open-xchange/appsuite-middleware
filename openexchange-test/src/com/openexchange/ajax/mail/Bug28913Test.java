@@ -51,10 +51,8 @@ package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -89,16 +87,6 @@ public final class Bug28913Test extends AbstractMailTest {
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
         final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().executeSafe(new DeleteRequest(ids, true));
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

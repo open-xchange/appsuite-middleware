@@ -72,7 +72,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.jcodec.common.io.IOUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
@@ -84,7 +83,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.FileAccountCreationResponse;
 import com.openexchange.testing.httpclient.models.FileAccountData;
-import com.openexchange.testing.httpclient.models.FileAccountUpdateResponse;
 import com.openexchange.testing.httpclient.models.FileAccountsResponse;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -160,33 +158,11 @@ public abstract class AbstractFileStorageAccountTest extends AbstractConfigAware
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        super.setUpConfiguration();
-
         filestorageApi = new FilestorageApi(getApiClient());
         infostoreApi = new InfostoreApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
         configApi = new ConfigApi(getApiClient());
         folderManager = new FolderManager(foldersApi, "0");
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            try {
-                folderManager.cleanUp();
-            } finally {
-                //Cleanup: Delete the created FileAccount
-                FileAccountData accountToClean = getAccountData();
-                if (accountToClean != null && accountToClean.getId() != null) {
-                    FileAccountUpdateResponse response = filestorageApi.deleteFileAccount(accountToClean.getFilestorageService(), accountToClean.getId());
-                    Integer responseData = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-                    Assert.assertThat(responseData, is(I(1)));
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

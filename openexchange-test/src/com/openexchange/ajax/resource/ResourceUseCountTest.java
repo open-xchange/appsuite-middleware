@@ -49,19 +49,19 @@
 
 package com.openexchange.ajax.resource;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.test.pool.ProvisioningService;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.ResourceData;
-import com.openexchange.testing.httpclient.models.ResourceListElement;
 import com.openexchange.testing.httpclient.models.ResourceSearchBody;
 import com.openexchange.testing.httpclient.models.ResourceUpdateResponse;
 import com.openexchange.testing.httpclient.models.ResourcesResponse;
@@ -77,14 +77,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
 
     private ResourcesApi resourceApi;
     private Integer[] resourceIds;
-    private Long timestamp;
     private String uuid;
-    /**
-     * Initializes a new {@link ResourceUseCountTest}.
-     */
-    public ResourceUseCountTest() {
-        super();
-    }
 
     @Override
     public void setUp() throws Exception {
@@ -94,7 +87,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         ResourceData resourceData = new ResourceData();
         resourceData.setDisplayName(uuid + "-1");
         resourceData.setName("Test1");
-        resourceData.setMailaddress("test1@oxdb.local");
+        resourceData.setMailaddress(ProvisioningService.getMailAddress("test1", testContext.getId()));
         ResourceUpdateResponse response = resourceApi.createResource(resourceData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resourceIds = new Integer[2];
@@ -102,26 +95,10 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         resourceData = new ResourceData();
         resourceData.setDisplayName(uuid + "-2");
         resourceData.setName("Test2");
-        resourceData.setMailaddress("test2@oxdb.local");
+        resourceData.setMailaddress(ProvisioningService.getMailAddress("test2", testContext.getId()));
         response = resourceApi.createResource(resourceData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resourceIds[1] = response.getData().getId();
-        timestamp = response.getTimestamp();
-    }
-
-
-    @Override
-    public void tearDown() throws Exception {
-        if (resourceIds != null) {
-            List<ResourceListElement> resourcesToDelete = new ArrayList<>(resourceIds.length);
-            for (Integer id : resourceIds) {
-                ResourceListElement element = new ResourceListElement();
-                element.setId(id);
-                resourcesToDelete.add(element);
-            }
-            resourceApi.deleteResources(timestamp, resourcesToDelete);
-        }
-        super.tearDown();
     }
 
     @Test
@@ -146,6 +123,13 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         eventData.addAttendeesItem(att);
         eventManager.createEvent(eventData, true);
 
+        try {
+            // Wait until use count has been adjusted
+            Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
+        }
+
         // Check order again
         body = new ResourceSearchBody();
         body.setPattern(uuid);
@@ -158,7 +142,6 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         for (ResourceData resource : resources) {
             Assert.assertEquals(resourceIds[x--], resource.getId());
         }
-
     }
 
 }

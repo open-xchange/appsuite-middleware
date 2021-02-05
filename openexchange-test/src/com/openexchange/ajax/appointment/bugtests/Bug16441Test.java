@@ -50,8 +50,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -95,17 +93,6 @@ public class Bug16441Test extends AbstractAJAXSession {
         AppointmentInsertResponse response = getClient().execute(new InsertRequest(appointment, getClient().getValues().getTimeZone()));
         response.fillAppointment(appointment);
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 5, appointment.getLastModified()));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

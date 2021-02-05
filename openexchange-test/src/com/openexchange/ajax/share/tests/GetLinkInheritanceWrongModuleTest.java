@@ -84,9 +84,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
     public void setUp() throws Exception {
         super.setUp();
         ApiClient client = getApiClient();
-        rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
-        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
         infostoreRoot = "1";
 
@@ -104,16 +102,6 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), MODULE);
         D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), MODULE);
         E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), MODULE);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        A = null;
-        B = null;
-        C = null;
-        D = null;
-        E = null;
-        super.tearDown();
     }
 
     @Test

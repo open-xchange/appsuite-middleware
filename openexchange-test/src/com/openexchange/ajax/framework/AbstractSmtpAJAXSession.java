@@ -49,14 +49,11 @@
 
 package com.openexchange.ajax.framework;
 
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.smtptest.MailManager;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 public abstract class AbstractSmtpAJAXSession extends AbstractAPIClientSession {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSmtpAJAXSession.class);
 
     protected TestUser noReplyUser;
     private ApiClient noReplyApiClient;
@@ -71,25 +68,11 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAPIClientSession {
         mailManager = new MailManager(getApiClient());
         noReplyUser = testContext.acquireNoReplyUser();
         noReplyAJAXClient = new AJAXClient(noReplyUser);
+        rememberClient(noReplyUser, noReplyApiClient);
         noReplyApiClient = generateApiClient(noReplyUser);
-        rememberClient(noReplyApiClient);
+        rememberClient(noReplyUser, noReplyApiClient);
         noReplyMailManager = new MailManager(noReplyApiClient);
         noReplyMailManager.clearMails();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (noReplyAJAXClient != null) {
-                // Client can be null if setUp() fails
-                noReplyAJAXClient.logout();
-                noReplyAJAXClient = null;
-            }
-        } catch (Exception e) {
-            LoggerFactory.getLogger(AbstractSmtpAJAXSession.class).error("Unable to correctly tear down test setup.", e);
-        } finally {
-            super.tearDown();
-        }
     }
 
     public AJAXClient getNoReplyAJAXClient() {

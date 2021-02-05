@@ -52,11 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -129,16 +127,6 @@ public class Bug18336Test extends AbstractAJAXSession {
 
         assertEquals("Wrong start date", updateAppointment.getStartDate(), loadedAppointment.getStartDate());
         assertEquals("Wrong end date", updateAppointment.getEndDate(), loadedAppointment.getEndDate());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

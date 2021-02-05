@@ -57,10 +57,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -101,18 +99,6 @@ public final class FunambolTest extends AbstractAJAXSession {
         appointment.setEndDate(new Date(TimeTools.getHour(1, timeZone)));
         appointment.setIgnoreConflicts(true);
         return appointment;
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            for (Appointment app : toDelete) {
-                getClient().execute(new DeleteRequest(app));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

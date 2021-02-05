@@ -61,7 +61,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -91,18 +90,6 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        // Restore unlimited quota
-        Map<String, String> map = Collections.singletonMap("com.openexchange.quota.calendar", "-1");
-        if (!map.isEmpty()) {
-            // change configuration to new values
-            ChangePropertiesRequest req = new ChangePropertiesRequest(map, getScope(), getReloadables());
-            getClient().execute(req);
-        }
-        super.tearDown();
     }
 
     /**

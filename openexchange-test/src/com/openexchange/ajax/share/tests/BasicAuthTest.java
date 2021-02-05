@@ -65,11 +65,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -108,25 +106,6 @@ public class BasicAuthTest extends ShareTest {
         super.setUp();
 
         calendarManager = new CalendarTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            CalendarTestManager calendarManager = this.calendarManager;
-            if (null != calendarManager) {
-                calendarManager.cleanUp();
-                this.calendarManager = null;
-            }
-
-            if (null != folder) {
-                getClient().execute(new DeleteRequest(EnumAPI.OX_OLD, false, folder).setFailOnErrorParam(Boolean.FALSE));
-                folder = null;
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

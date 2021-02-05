@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -76,7 +75,7 @@ public class Bug48149Test extends AbstractAJAXSession {
     private CalendarTestManager ctm2;
     private CalendarTestManager ctm3;
     private FolderTestManager ftm2;
-    private FolderObject sharedFolder1;    
+    private FolderObject sharedFolder1;
     private Appointment app1;
     private Appointment app2;
 
@@ -87,11 +86,11 @@ public class Bug48149Test extends AbstractAJAXSession {
     @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();        
-        client3 = new AJAXClient(testContext.acquireUser());
-        ctm2 = new CalendarTestManager(getClient2());
+        super.setUp();
+        client3 = getClient(2);
+        ctm2 = new CalendarTestManager(getClient(1));
         ctm3 = new CalendarTestManager(client3);
-        ftm2 = new FolderTestManager(getClient2());
+        ftm2 = new FolderTestManager(getClient(1));
 
         // Remove all permissions
         FolderObject folderUpdate = new FolderObject(getClient().getValues().getPrivateAppointmentFolder());
@@ -100,9 +99,9 @@ public class Bug48149Test extends AbstractAJAXSession {
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         ftm.updateFolderOnServer(folderUpdate);
 
-        folderUpdate = new FolderObject(getClient2().getValues().getPrivateAppointmentFolder());
+        folderUpdate = new FolderObject(getClient(1).getValues().getPrivateAppointmentFolder());
         folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
-            getClient2().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            getClient(1).getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         ftm2.updateFolderOnServer(folderUpdate);
 
@@ -124,8 +123,13 @@ public class Bug48149Test extends AbstractAJAXSession {
         app2.setStartDate(TimeTools.D("07.08.2016 08:00"));
         app2.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app2.setIgnoreConflicts(true);
-        app2.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        app2.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
         ctm2.insert(app2);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test
@@ -148,22 +152,6 @@ public class Bug48149Test extends AbstractAJAXSession {
         }
         assertTrue("Expected error.", ctm3.getLastResponse().hasError());
         assertTrue("Excpected something with permissions. (" + ctm3.getLastResponse().getErrorMessage() + ")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm2.cleanUp();
-            ctm3.cleanUp();
-            ftm2.cleanUp();
-            if (null != client3) {
-                client3.logout();
-                client3 = null;
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

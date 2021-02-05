@@ -101,6 +101,11 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().createAjaxClient().withUserPerContext(2).build();
+    }
+
     private MultifactorDevice registerTestDevice(MultifactorApi api) throws ApiException {
         final String randomDeviceName = "My test device " + UUID.randomUUID().toString();
         final String randomPhoneNumber = "+49" + new Random().nextInt(9999999);
@@ -154,12 +159,6 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         // Get context and user ID
         contextId = super.getClient().getValues().getContextId();
         userId = super.getClient().getValues().getUserId();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        getAdminApi().multifactorDeleteDevices(I(contextId), I(userId));
-        super.tearDown();
     }
 
     /**
@@ -237,15 +236,14 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         Collection<MultifactorDevice> devices = registerTestDevices(MultifactorApi(), numberOfDevices);
         assertThat(I(devices.size()), is(I(numberOfDevices)));
 
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
+        ApiClient apiClient2 = getApiClient(1);
         MultifactorApi api2 = new MultifactorApi(apiClient2);
         boolean createdForUser2 = false;
 
         JSONObject oldClient2Config = null;
         try {
             //The 2nd user needs the same configuration applied (SMS provider and DEMO mode)
-            oldClient2Config = setUpConfigForClient(getClient2());
+            oldClient2Config = setUpConfigForClient(getClient(1));
 
             //Create a test device for another user
             registerTestDevice(api2);
@@ -258,18 +256,18 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
             assertThat(devicesForUser, is(empty()));
 
             //The device for the second user must still be present
-            List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient2().getValues().getContextId()), I(getClient2().getValues().getUserId()));
+            List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
             assertThat(I(devicesForUser2.size()), is(I(1)));
         } finally {
             if (createdForUser2) {
                 //Cleanup the devices of the 2nd user
-                getAdminApi().multifactorDeleteDevices(I(getClient2().getValues().getContextId()), I(getClient2().getValues().getUserId()));
-                List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient2().getValues().getContextId()), I(getClient2().getValues().getUserId()));
+                getAdminApi().multifactorDeleteDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
+                List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
                 assertThat(devicesForUser2, is(empty()));
             }
             //Restoring the configuration for the 2nd user
             if (oldClient2Config != null) {
-                restoreConfigForClient(getClient2(), oldClient2Config);
+                restoreConfigForClient(getClient(1), oldClient2Config);
             }
         }
     }

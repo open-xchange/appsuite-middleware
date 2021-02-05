@@ -54,11 +54,10 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
@@ -74,7 +73,7 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class Bug62008Test extends CalDAVTest {
+public class Bug62008Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager catm2;
 
@@ -87,20 +86,8 @@ public class Bug62008Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        catm2 = new CalendarTestManager(getClient2());
+        catm2 = new CalendarTestManager(client2);
         catm2.setFailOnError(true);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != catm2) {
-                catm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -121,7 +108,7 @@ public class Bug62008Test extends CalDAVTest {
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
-        appointment.addParticipant(new UserParticipant(getClient2().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client2.getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         appointment.setParentFolderID(catm.getPrivateFolder());
         catm.insert(appointment);
@@ -227,7 +214,7 @@ public class Bug62008Test extends CalDAVTest {
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
-        appointment.addParticipant(new UserParticipant(getClient2().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client2.getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
         appointment.setParentFolderID(catm2.getPrivateFolder());
         catm2.insert(appointment);

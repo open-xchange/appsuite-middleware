@@ -18,7 +18,7 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
-        AJAXClient client2 = getClient2();
+        AJAXClient client2 = getClient(1);
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
@@ -47,6 +47,11 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
         }
         assertFalse("Should not find user listed as external participant", foundAsExternal);
         assertTrue("Should find user listed as internal participant", foundAsInternal);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -84,7 +89,7 @@ public class TaskExternalUsersBecomeInternalUsers extends ManagedTaskTest {
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
-        AJAXClient client2 = getClient2();
+        AJAXClient client2 = getClient(1);
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();

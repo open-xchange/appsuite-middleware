@@ -89,12 +89,12 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
     private static final int DEFAULT_REFRESH_INTERVAL = 1440;
     private static final String DEFAULT_LOCALE = "en";
-    
+
     static final long TIMESTAMP = 1516370400000L;
 
     /**
      * Initialises a new {@link AbstractSchedJoulesProviderTest}.
-     * 
+     *
      * @param providerId
      */
     public AbstractSchedJoulesProviderTest() {
@@ -111,6 +111,11 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
     }
 
     @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
+    @Override
     protected Map<String, String> getNeededConfigurations() {
         return CONFIG;
     }
@@ -122,7 +127,7 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
     /**
      * Creates a folder with a subscription to schedjoules feed with the specified item identifier and the specified name
-     * 
+     *
      * @param itemId The item identifier
      * @param folderName The folder name
      * @return The {@link FolderData} of the created folder
@@ -147,10 +152,10 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
         return createFolder(folderName, MODULE, config, defaultExtendedProperties());
     }
-    
+
     /**
      * Prepare a {@link JSONObject} with the default extended properties
-     * 
+     *
      * @return a {@link JSONObject} with the default extended properties
      * @throws JSONException if a JSON parsing error is occurred
      */

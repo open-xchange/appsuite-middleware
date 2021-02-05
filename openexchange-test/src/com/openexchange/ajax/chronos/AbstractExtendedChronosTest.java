@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos;
 
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
@@ -90,23 +89,17 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-        EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
-        rememberClient(enhancedClient);
-        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2);
+        apiClient2 = getApiClient(1);
+        EnhancedApiClient enhancedClient = getEnhancedApiClient2();
+        userApi2 = new UserApi(apiClient2, enhancedClient, getUser(1));
 
         folderId2 = getDefaultFolder(apiClient2);
         eventManager2 = new EventManager(userApi2, folderId2);
     }
 
-    @After
     @Override
-    public void tearDown() throws Exception {
-        if (null != eventManager2) {
-            eventManager2.cleanUp();
-        }
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     // ----------------------------- HELPER -----------------------------

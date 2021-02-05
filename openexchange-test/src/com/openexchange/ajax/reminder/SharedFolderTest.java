@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -68,8 +67,7 @@ import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -86,11 +84,7 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SharedFolderTest extends AbstractAJAXSession {
-
-    AJAXClient client;
-
-    AJAXClient client2;
+public class SharedFolderTest extends Abstrac2UserAJAXSession {
 
     FolderObject sharedFolder;
 
@@ -109,17 +103,15 @@ public class SharedFolderTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        client = getClient();
-        tz = client.getValues().getTimeZone();
-        client2 = getClient2();
+        tz = client1.getValues().getTimeZone();
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
-        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
-        sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
+        sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client1.getValues().getUserId());
+        sharedFolder.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        final InsertResponse folderInsertResponse = client1.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        FolderTools.shareFolder(client1, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
     @Test
@@ -127,17 +119,17 @@ public class SharedFolderTest extends AbstractAJAXSession {
         // Create appointment
         firstAppointment = createAppointment();
         firstAppointment.setAlarm(15);
-        final AppointmentInsertResponse appointmentInsertResponse = client.execute(new InsertRequest(firstAppointment, tz, true));
+        final AppointmentInsertResponse appointmentInsertResponse = client1.execute(new InsertRequest(firstAppointment, tz, true));
         appointmentInsertResponse.fillAppointment(firstAppointment);
 
         // Get Appointment and Reminder to check reminder and alarm field
         {
-            final GetResponse getResponse = client.execute(new GetRequest(firstAppointment));
+            final GetResponse getResponse = client1.execute(new GetRequest(firstAppointment));
             final Appointment toCompare = getResponse.getAppointment(tz);
             assertEquals("Appointment did not contain correct alarm time.", firstAppointment.getAlarm(), toCompare.getAlarm());
 
             final RangeRequest rangeReq = new RangeRequest(firstAppointment.getEndDate());
-            final RangeResponse rangeResp = client.execute(rangeReq);
+            final RangeResponse rangeResp = client1.execute(rangeReq);
             final ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(tz), firstAppointment.getObjectID());
 
             assertNotNull("No reminder was found.", reminder);
@@ -150,15 +142,15 @@ public class SharedFolderTest extends AbstractAJAXSession {
         // Update appointment and check again
         {
             firstAppointment.setAlarm(30);
-            final UpdateResponse updateResponse = client.execute(new UpdateRequest(firstAppointment, tz));
+            final UpdateResponse updateResponse = client1.execute(new UpdateRequest(firstAppointment, tz));
             firstAppointment.setLastModified(updateResponse.getTimestamp());
 
-            final GetResponse getResponse = client.execute(new GetRequest(firstAppointment));
+            final GetResponse getResponse = client1.execute(new GetRequest(firstAppointment));
             final Appointment toCompare = getResponse.getAppointment(tz);
             assertEquals("Appointment did not contain correct alarm time.", firstAppointment.getAlarm(), toCompare.getAlarm());
 
             final RangeRequest rangeReq = new RangeRequest(firstAppointment.getEndDate());
-            final RangeResponse rangeResp = client.execute(rangeReq);
+            final RangeResponse rangeResp = client1.execute(rangeReq);
             final ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(tz), firstAppointment.getObjectID());
 
             assertNotNull("No reminder was found.", reminder);
@@ -168,7 +160,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
             assertEquals("Reminder date was not set correctly.", remCal.getTime(), reminder.getDate());
         }
 
-        client.execute(new DeleteRequest(firstAppointment));
+        client1.execute(new DeleteRequest(firstAppointment));
     }
 
     @Test
@@ -181,12 +173,12 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
         // Get Appointment and Reminder to check reminder and alarm field
         {
-            final GetResponse getResponse = client.execute(new GetRequest(secondAppointment));
+            final GetResponse getResponse = client1.execute(new GetRequest(secondAppointment));
             final Appointment toCompare = getResponse.getAppointment(tz);
             assertEquals("Appointment did not contain correct alarm time.", secondAppointment.getAlarm(), toCompare.getAlarm());
 
             final RangeRequest rangeReq = new RangeRequest(secondAppointment.getEndDate());
-            final RangeResponse rangeResp = client.execute(rangeReq);
+            final RangeResponse rangeResp = client1.execute(rangeReq);
             final ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(tz), secondAppointment.getObjectID());
 
             assertNotNull("No reminder was found.", reminder);
@@ -202,12 +194,12 @@ public class SharedFolderTest extends AbstractAJAXSession {
             final UpdateResponse updateResponse = client2.execute(new UpdateRequest(secondAppointment, tz2));
             secondAppointment.setLastModified(updateResponse.getTimestamp());
 
-            final GetResponse getResponse = client.execute(new GetRequest(secondAppointment));
+            final GetResponse getResponse = client1.execute(new GetRequest(secondAppointment));
             final Appointment toCompare = getResponse.getAppointment(tz);
             assertEquals("Appointment did not contain correct alarm time.", secondAppointment.getAlarm(), toCompare.getAlarm());
 
             final RangeRequest rangeReq = new RangeRequest(secondAppointment.getEndDate());
-            final RangeResponse rangeResp = client.execute(rangeReq);
+            final RangeResponse rangeResp = client1.execute(rangeReq);
             final ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(tz), secondAppointment.getObjectID());
 
             assertNotNull("No reminder was found.", reminder);
@@ -218,16 +210,6 @@ public class SharedFolderTest extends AbstractAJAXSession {
         }
 
         client2.execute(new DeleteRequest(secondAppointment));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     public Appointment createAppointment() {

@@ -82,16 +82,6 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testAttendeeAlarmsChanges() throws Exception {
         // attendee should be able to adjust his alarms

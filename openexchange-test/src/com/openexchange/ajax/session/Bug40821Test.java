@@ -51,12 +51,10 @@ package com.openexchange.ajax.session;
 
 import static org.junit.Assert.assertEquals;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
-import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -88,17 +86,6 @@ public class Bug40821Test extends AbstractAJAXSession {
         GetRequest getRequest = new GetRequest(Tree.Language);
         GetResponse getResponse = getClient().execute(getRequest);
         language = getResponse.getString();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            SetRequest setRequest = new SetRequest(Tree.Language, language);
-            getClient().execute(setRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

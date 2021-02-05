@@ -141,7 +141,7 @@ public class Bug20758Test extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient2();
+        client2 = getClient(1);
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 
@@ -154,6 +154,11 @@ public class Bug20758Test extends AbstractConversionTest {
 
         mailFolderAndMailID2 = createMail(ical2);
         sequenceId2 = getSequenceIdForMail(client1, mailFolderAndMailID2);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

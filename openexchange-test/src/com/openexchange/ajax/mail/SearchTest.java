@@ -80,32 +80,6 @@ public final class SearchTest extends AbstractMailTest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            /*
-             * Clean everything
-             */
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            clearFolder(getTrashFolder());
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        /*
-         * Clean everything before starting the test
-         */
-        clearFolder(getInboxFolder());
-        clearFolder(getSentFolder());
-        clearFolder(getTrashFolder());
-    }
-
     /**
      * Tests the <code>action=search</code> request on INBOX folder
      *

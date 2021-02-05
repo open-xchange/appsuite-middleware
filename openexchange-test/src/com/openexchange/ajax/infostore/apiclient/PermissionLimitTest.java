@@ -84,8 +84,6 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
     public void setUp() throws Exception {
         super.setUp();
         super.setUpConfiguration();
-        testContext.acquireUser();
-        testContext.acquireUser();
 
         UserApi userApi = new UserApi(apiClient);
         UsersResponse resp = userApi.getAllUsers("1", null, null);
@@ -97,6 +95,10 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
         invalidPerms = allEntities.stream().toArray(Integer[]::new);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(4).build();
+    }
 
     /**
      * Creates a permissions list with default permissions from the given list of entities

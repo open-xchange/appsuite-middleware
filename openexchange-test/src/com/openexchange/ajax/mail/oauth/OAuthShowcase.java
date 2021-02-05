@@ -97,6 +97,11 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
         sApi = new SnippetApi(oauthclient);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().withUserPerContext(2).build();
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void showcaseMailViaOAuth() throws ApiException, JSONException {
@@ -204,8 +209,8 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
 
         JSONArray to = new JSONArray();
         JSONArray innerTo = new JSONArray();
-        innerTo.put(testUser2.getUser());
-        innerTo.put(testUser2.getLogin());
+        innerTo.put(getUser(1).getUser());
+        innerTo.put(getUser(1).getLogin());
         to.put(innerTo);
         mail.put("to", to);
         mail.put("subject", "test");

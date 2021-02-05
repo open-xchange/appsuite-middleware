@@ -67,7 +67,7 @@ import com.openexchange.test.pool.TestUser;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class DuplicateAuthIdTest {
@@ -115,8 +115,11 @@ public class DuplicateAuthIdTest {
 
     @After
     public void tearDown() throws Exception {
-        client1.logout();
-        TestContextPool.backContext(testContext);
+        try {
+            client1.logout();
+        } finally {
+            TestContextPool.backContext(testContext);
+        }
     }
 
     @Test

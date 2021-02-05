@@ -75,6 +75,11 @@ public class JSONApiTest extends AbstractOAuthTest {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE)); // scope for first grant
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @SuppressWarnings("unused")
     @Test
     public void testAllAndRevoke() throws Exception {

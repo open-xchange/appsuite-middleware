@@ -53,12 +53,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.exception.OXException;
@@ -94,18 +92,6 @@ public final class Bug35992Test extends AbstractAJAXSession {
         ExternalUserParticipant participant = new ExternalUserParticipant("");
         participant.setDisplayName("");
         task.addParticipant(participant);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (task.containsObjectID()) {
-                client1.execute(new DeleteRequest(task));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

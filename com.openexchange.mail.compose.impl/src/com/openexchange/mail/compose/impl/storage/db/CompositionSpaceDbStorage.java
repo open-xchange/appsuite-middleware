@@ -81,6 +81,7 @@ import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.storage.db.mapping.MessageMapper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -111,9 +112,14 @@ public class CompositionSpaceDbStorage {
      * @param dbProvider The database provider
      * @param session The session providing user information
      * @param services The service look-up
+     * @throws OXException in case the context can't be resolved
      */
-    public CompositionSpaceDbStorage(DBProvider dbProvider, /*DBTransactionPolicy txPolicy,*/ Session session, ServiceLookup services) {
-        this(dbProvider, session.getUserId(), session.getContextId(), services);
+    public CompositionSpaceDbStorage(DBProvider dbProvider, /* DBTransactionPolicy txPolicy, */ Session session, ServiceLookup services) throws OXException {
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
+        this.dbProvider = dbProvider;
+        this.services = services;
+        this.context = ServerSessionAdapter.valueOf(session).getContext();
     }
 
     /**
@@ -123,8 +129,9 @@ public class CompositionSpaceDbStorage {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param services The service look-up
+     * @throws OXException in case the context can't be resolved
      */
-    public CompositionSpaceDbStorage(DBProvider dbProvider, /*DBTransactionPolicy txPolicy,*/ int userId, int contextId, ServiceLookup services) {
+    public CompositionSpaceDbStorage(DBProvider dbProvider, /* DBTransactionPolicy txPolicy, */ int userId, int contextId, ServiceLookup services) throws OXException {
         super();
         // this.txPolicy = txPolicy;
         this.userId = userId;
@@ -700,13 +707,13 @@ public class CompositionSpaceDbStorage {
         }
     }
 
-    private Context getContext(int contextId) {
+    private Context getContext(int contextId) throws OXException {
         try {
             return services.getService(ContextService.class).getContext(contextId);
         } catch (OXException e) {
-            LoggerHolder.LOG.error("Unable to resolve context.", e);
+            LoggerHolder.LOG.debug("Unable to resolve context.", e);
+            throw e;
         }
-        return null;
     }
 
     private OXException handleException(SQLException e) {

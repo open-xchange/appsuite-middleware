@@ -55,7 +55,7 @@ import java.io.ByteArrayInputStream;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.AttachResponse;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Create;
@@ -70,15 +70,15 @@ import com.openexchange.java.util.UUIDs;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public class Bug65799Test extends AbstractAJAXSession {
+public class Bug65799Test extends Abstrac2UserAJAXSession {
 
     @Test
     public void testAddAttachment() throws Exception {
         /*
          * as user a, create a task folder, shared to user b
          */
-        FolderObject folder = ftm.insertFolderOnServer(ftm.generateSharedFolder(UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, 
-            getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId()));
+        FolderObject folder = ftm.insertFolderOnServer(ftm.generateSharedFolder(UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK,
+            getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId(), client2.getValues().getUserId()));
         /*
          * create a 'private' task in private folder as user a
          */
@@ -88,7 +88,7 @@ public class Bug65799Test extends AbstractAJAXSession {
         /*
          * try and attach a file to the tasks as user 2
          */
-        AttachResponse attachResponse = getClient2().execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("wurst".getBytes()), "text/plain"));
+        AttachResponse attachResponse = client2.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("wurst".getBytes()), "text/plain"));
         assertTrue(attachResponse.hasError());
         assertEquals("TSK-0046", attachResponse.getException().getErrorCode());
     }

@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -221,22 +220,27 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         ftm.insertFoldersOnServer(new FolderObject[] { privateSubfolder, publicSubfolder });
 
         // prepare shared folders
-        ftm2 = new FolderTestManager(getClient2());
+        ftm2 = new FolderTestManager(getClient(1));
         // remove any non-private permissions from client2s private folder
         OCLPermission adminPermission = new OCLPermission();
-        adminPermission.setEntity(getClient2().getValues().getUserId());
+        adminPermission.setEntity(getClient(1).getValues().getUserId());
         adminPermission.setGroupPermission(false);
         adminPermission.setFolderAdmin(true);
         adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        FolderObject client2PrivateFolder = ftm2.getFolderFromServer(privateFolderId(getClient2()));
+        FolderObject client2PrivateFolder = ftm2.getFolderFromServer(privateFolderId(getClient(1)));
         client2PrivateFolder.setPermissionsAsArray(new OCLPermission[] { adminPermission });
         client2PrivateFolder.setLastModified(new Date());
         ftm2.updateFolderOnServer(client2PrivateFolder);
-        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), privateFolderId(getClient2()), getClient2().getValues().getUserId(), userId);
+        sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " " + UUID.randomUUID().toString(), moduleId(), privateFolderId(getClient(1)), getClient(1).getValues().getUserId(), userId);
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
         oAuthClient.logout();
         oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -293,7 +297,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<FolderObject> sharedFolders = listFolders(listSharedFolders);
         assertContentTypeAndPermissions(sharedFolders);
         FolderObject client2Folder = null;
-        String sharedFolderId = "u:" + getClient2().getValues().getUserId();
+        String sharedFolderId = "u:" + getClient(1).getValues().getUserId();
         for (FolderObject folder : sharedFolders) {
             if (sharedFolderId.equals(folder.getFullName())) {
                 client2Folder = folder;
@@ -514,21 +518,6 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     private Set<Integer> collectFolderIds(AJAXRequest<ListResponse> request) throws OXException, IOException, JSONException {
         List<FolderObject> folders = listFolders(request);
         return collectFolderIds(folders);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (ftm != null) {
-                ftm.cleanUp();
-            }
-            if (ftm2 != null) {
-                ftm2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

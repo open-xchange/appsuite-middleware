@@ -60,11 +60,9 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -124,16 +122,6 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -71,16 +71,6 @@ import com.openexchange.testing.httpclient.modules.ClientonboardingApi;
  */
 public class DownloadLinkTest extends AbstractOnboardingTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testDownloadLinkCalDAV() throws Exception {
         ClientonboardingApi api = getApi();

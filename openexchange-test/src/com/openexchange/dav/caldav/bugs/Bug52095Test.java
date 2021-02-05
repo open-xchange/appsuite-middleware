@@ -71,7 +71,6 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -81,7 +80,7 @@ import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.ICalUtils;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
@@ -101,7 +100,7 @@ import com.openexchange.test.PermissionTools;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class Bug52095Test extends CalDAVTest {
+public class Bug52095Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
     private FolderObject sharedFolder;
@@ -115,30 +114,18 @@ public class Bug52095Test extends CalDAVTest {
         /*
          * as user b, create subfolder shared to user a
          */
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         sharedFolder = new FolderObject();
         sharedFolder.setModule(FolderObject.CALENDAR);
         sharedFolder.setParentFolderID(manager2.getPrivateFolder());
         sharedFolder.setPermissions(
-            PermissionTools.P(Integer.valueOf(getClient2().getValues().getUserId()),
+            PermissionTools.P(Integer.valueOf(client2.getValues().getUserId()),
             PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr")
         );
         sharedFolder.setFolderName(randomUID());
-        ftm.setClient(getClient2());
+        ftm.setClient(client2);
         sharedFolder = ftm.insertFolderOnServer(sharedFolder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != manager2) {
-                manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -169,7 +156,7 @@ public class Bug52095Test extends CalDAVTest {
          * query free/busy as user a
          */
         List<String> attendees = new ArrayList<String>();
-        attendees.add(getClient2().getValues().getDefaultAddress());
+        attendees.add(client2.getValues().getDefaultAddress());
         String freeBusyICal = generateFreeBusyICal(from, until, attendees);
         Document document = this.postFreeBusy(freeBusyICal, attendees);
         assertNotNull("got no free/busy result", document);

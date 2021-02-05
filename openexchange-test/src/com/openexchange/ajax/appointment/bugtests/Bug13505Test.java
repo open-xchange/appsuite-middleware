@@ -55,11 +55,9 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
@@ -130,16 +128,6 @@ public class Bug13505Test extends AbstractAJAXSession {
         GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID());
         Appointment loadA = getClient().execute(get).getAppointment(tz);
         assertFalse("No days values expected", loadA.containsDays());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected class SpecialUpdateRequest extends UpdateRequest {

@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
@@ -86,14 +85,14 @@ public class Bug48165Test extends AbstractAJAXSession {
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
-        ctm2 = new CalendarTestManager(getClient2());
+        ctm2 = new CalendarTestManager(getClient(1));
 
         conflict = new Appointment();
         conflict.setTitle("Bug 48165 Test - conflict");
         conflict.setStartDate(TimeTools.D("03.08." + nextYear + " 11:00"));
         conflict.setEndDate(TimeTools.D("03.08." + nextYear + " 12:00"));
         conflict.setIgnoreConflicts(true);
-        conflict.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
 
         series = new Appointment();
         series.setTitle("Bug 48165 Test - series");
@@ -103,7 +102,12 @@ public class Bug48165Test extends AbstractAJAXSession {
         series.setInterval(1);
         series.setIgnoreConflicts(true);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient2().getValues().getUserId()) });
+        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient(1).getValues().getUserId()) });
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -132,16 +136,6 @@ public class Bug48165Test extends AbstractAJAXSession {
             }
         }
         assertTrue("Expect conflict.", found);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

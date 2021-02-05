@@ -60,11 +60,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
@@ -132,19 +130,6 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         folderId = createFolderForTest(folderTitle);
         rememberFolder(folderId);
         infostoreApi = new InfostoreApi(getApiClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        if (!fileIds.isEmpty()) {
-            infostoreApi.deleteInfoItems(L(new Date().getTime()), fileIds, Boolean.TRUE, null);
-        }
-        if (!folders.isEmpty()) {
-            FoldersApi folderApi = new FoldersApi(getApiClient());
-            folderApi.deleteFolders(folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
-        }
-        super.tearDown();
     }
 
     protected String uploadInfoItem(File file, String mimeType) throws ApiException, FileNotFoundException, IOException {

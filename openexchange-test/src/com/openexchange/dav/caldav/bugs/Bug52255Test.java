@@ -55,10 +55,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -74,7 +73,7 @@ import com.openexchange.test.PermissionTools;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class Bug52255Test extends CalDAVTest {
+public class Bug52255Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
     private FolderObject sharedFolder;
@@ -86,30 +85,18 @@ public class Bug52255Test extends CalDAVTest {
         /*
          * as user b, create subfolder shared to user a
          */
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         sharedFolder = new FolderObject();
         sharedFolder.setModule(FolderObject.CALENDAR);
         sharedFolder.setParentFolderID(manager2.getPrivateFolder());
         sharedFolder.setPermissions(
-            PermissionTools.P(Integer.valueOf(getClient2().getValues().getUserId()),
+            PermissionTools.P(Integer.valueOf(client2.getValues().getUserId()),
             PermissionTools.ADMIN, Integer.valueOf(getClient().getValues().getUserId()), "vr")
         );
         sharedFolder.setFolderName(randomUID());
-        ftm.setClient(getClient2());
+        ftm.setClient(client2);
         sharedFolder = ftm.insertFolderOnServer(sharedFolder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != manager2) {
-                manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

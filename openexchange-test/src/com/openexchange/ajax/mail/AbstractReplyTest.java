@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.ForwardResponse;
@@ -86,18 +85,6 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
         this.contactManager = new ContactTestManager(getClient());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(getInboxFolder());
-            clearFolder(getSentFolder());
-            contactManager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     protected boolean contains(List<String> from, String string) {

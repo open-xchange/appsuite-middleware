@@ -53,13 +53,11 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -101,16 +99,6 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
         com.openexchange.ajax.attach.actions.GetResponse response = getClient().execute(new com.openexchange.ajax.attach.actions.GetRequest(contact, attachmentId));
         long timestamp = response.getAttachment().getCreationDate().getTime();
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(contact));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

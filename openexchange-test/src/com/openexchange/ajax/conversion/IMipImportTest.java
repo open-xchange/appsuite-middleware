@@ -51,14 +51,11 @@ package com.openexchange.ajax.conversion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
@@ -106,7 +103,7 @@ public class IMipImportTest extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient2();
+        client2 = getClient(1);
 
         uuid = UUID.randomUUID().toString();
 
@@ -118,13 +115,8 @@ public class IMipImportTest extends AbstractConversionTest {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(objectId, folder, new Date(Long.MAX_VALUE)));
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

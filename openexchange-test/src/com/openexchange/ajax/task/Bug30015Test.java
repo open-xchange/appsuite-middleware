@@ -54,13 +54,11 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
@@ -104,17 +102,6 @@ public final class Bug30015Test extends AbstractAJAXSession {
         task.setInterval(1);
         task.setOccurrence(2);
         client1.execute(new InsertRequest(task, timeZone)).fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(first));
-            client1.execute(new DeleteRequest(second));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

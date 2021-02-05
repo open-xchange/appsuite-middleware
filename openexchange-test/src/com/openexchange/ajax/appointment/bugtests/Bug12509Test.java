@@ -52,11 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
@@ -91,7 +89,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient2();
+        clientB = getClient(1);
 
         folder = new FolderObject();
         folder.setFolderName("Bug 12509 Test Folder" + UUID.randomUUID().toString());
@@ -140,6 +138,11 @@ public class Bug12509Test extends AbstractAJAXSession {
         exception.setAlarm(15);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testBug12509() throws Exception {
         UpdateRequest appointmentUpdateRequest = new UpdateRequest(exception, clientB.getValues().getTimeZone());
@@ -150,20 +153,6 @@ public class Bug12509Test extends AbstractAJAXSession {
 
         GetRequest appointmentGetRequest = new GetRequest(folder.getObjectID(), exception.getObjectID(), true);
         clientA.execute(appointmentGetRequest);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-            clientA.execute(appointmentDeleteRequest);
-            com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder);
-            clientA.execute(folderDeleteRequest);
-
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

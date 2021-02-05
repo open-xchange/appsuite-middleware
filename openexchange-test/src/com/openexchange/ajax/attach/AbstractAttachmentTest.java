@@ -96,6 +96,11 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         moduleId = getModule();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     public abstract int createExclusiveWritableAttachable(int folderId) throws Exception;
 
     public abstract int getExclusiveWritableFolder() throws Exception;
@@ -312,7 +317,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        atm.setClient(getClient2());
+        atm.setClient(getClient(1));
         atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
         assertTrue(atm.getLastResponse().hasError());
 

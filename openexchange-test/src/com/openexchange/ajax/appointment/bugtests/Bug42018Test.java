@@ -52,7 +52,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -107,16 +106,6 @@ public class Bug42018Test extends AbstractAJAXSession {
         Appointment loadedAppointment = ctm.get(appointment);
         assertNotNull("Expect delete exception.", loadedAppointment.getDeleteException());
         assertEquals("Expect exactly one delete exception", 1, loadedAppointment.getDeleteException().length);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            ctm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

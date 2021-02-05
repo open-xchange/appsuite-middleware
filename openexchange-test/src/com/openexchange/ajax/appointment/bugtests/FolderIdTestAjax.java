@@ -75,9 +75,9 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
+        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient(1).getValues().getUserId() });
         ftm.insertFolderOnServer(folderA);
-        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
+        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient(1).getValues().getUserId() });
         ftm.insertFolderOnServer(folderB);
 
         appointment = new Appointment();
@@ -89,9 +89,14 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
         catm.insert(appointment);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testSomething() throws Exception {
-        catm.setClient(getClient2());
+        catm.setClient(getClient(1));
         appointment.setParentFolderID(folderB.getObjectID());
         catm.update(folderA.getObjectID(), appointment);
         Appointment loaded = catm.get(folderB.getObjectID(), appointment.getObjectID());

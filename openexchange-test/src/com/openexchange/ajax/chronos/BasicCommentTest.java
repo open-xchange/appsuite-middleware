@@ -52,11 +52,9 @@ package com.openexchange.ajax.chronos;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
@@ -105,16 +103,8 @@ public class BasicCommentTest extends AbstractChronosTest {
     private EventData eventData;
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        if (null != eventData) {
-            eventManager.deleteEvent(getEventId(), System.currentTimeMillis(), false);
-        }
-        super.tearDown();
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -171,8 +161,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void validateMailInSecondUsersInbox(String mailSubject, String comment) throws OXException, ApiException, Exception {
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
+        ApiClient apiClient2 = getApiClient(1);
         MailApi mailApi = new MailApi(apiClient2);
 
         MailResponse response = mailApi.getMail(INBOX, getMailId(mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);
@@ -216,9 +205,9 @@ public class BasicCommentTest extends AbstractChronosTest {
         return null != eventData.getFolder() ? eventData.getFolder() : defaultFolderId;
     }
 
-    private void setAttendees() throws ApiException, OXException, IOException, JSONException {
-        Attendee organizer = createAttendee(I(getClient().getValues().getUserId()));
-        Attendee attendee = createAttendee(I(getClient2().getValues().getUserId()));
+    private void setAttendees() throws ApiException {
+        Attendee organizer = createAttendee(testUser.getUserId());
+        Attendee attendee = createAttendee(getUser(1).getUserId());
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizer);
         attendees.add(attendee);

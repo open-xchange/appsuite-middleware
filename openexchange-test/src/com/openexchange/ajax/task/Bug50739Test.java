@@ -57,8 +57,7 @@ import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AllRequest;
 import com.openexchange.ajax.attach.actions.AllResponse;
 import com.openexchange.ajax.attach.actions.AttachRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Create;
@@ -73,10 +72,8 @@ import com.openexchange.java.util.UUIDs;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.4
  */
-public class Bug50739Test extends AbstractAJAXSession {
+public class Bug50739Test extends Abstrac2UserAJAXSession {
 
-    private AJAXClient client1;
-    private AJAXClient client2;
     FolderObject privateFolder;
     FolderObject sharedFolder;
 
@@ -84,8 +81,6 @@ public class Bug50739Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
-        client2 = getClient2();
         privateFolder = ftm.insertFolderOnServer(ftm.generatePrivateFolder(
             UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, client1.getValues().getPrivateTaskFolder(), client1.getValues().getUserId()));
         sharedFolder = ftm.insertFolderOnServer(ftm.generateSharedFolder(

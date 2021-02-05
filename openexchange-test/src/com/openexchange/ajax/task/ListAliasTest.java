@@ -52,7 +52,6 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,7 +59,6 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
@@ -92,17 +90,6 @@ public class ListAliasTest extends AbstractTaskTest {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest delete = new DeleteRequest(task);
-            client.execute(delete);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

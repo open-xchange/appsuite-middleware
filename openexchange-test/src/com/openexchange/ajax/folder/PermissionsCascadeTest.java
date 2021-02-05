@@ -57,10 +57,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.ClearRequest;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -85,8 +82,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
     private FolderObject rootFolder;
 
-    private static final boolean CLEANUP = true;
-
     /**
      * Initializes a new {@link PermissionsCascadeTest}.
      *
@@ -94,20 +89,6 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      */
     public PermissionsCascadeTest() {
         super();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (CLEANUP) {
-                getClient().execute(new DeleteRequest(EnumAPI.OUTLOOK, rootFolder.getObjectID(), rootFolder.getLastModified()));
-                getClient().execute(new ClearRequest(EnumAPI.OUTLOOK, getClient().getValues().getInfostoreTrashFolder()));
-            }
-
-        } finally {
-            super.tearDown();
-        }
     }
 
     /**

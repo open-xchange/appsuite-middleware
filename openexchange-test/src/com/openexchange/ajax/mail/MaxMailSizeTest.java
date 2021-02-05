@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.UserValues;
@@ -86,16 +85,6 @@ public class MaxMailSizeTest extends AbstractMailTest {
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient(), true);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

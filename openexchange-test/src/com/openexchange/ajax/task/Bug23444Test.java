@@ -54,11 +54,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -102,17 +100,6 @@ public final class Bug23444Test extends AbstractTaskTest {
         InsertRequest request = new InsertRequest(task, tz);
         InsertResponse response = client.execute(request);
         response.fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

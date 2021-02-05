@@ -277,7 +277,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes = new Changes();
 
         UserResolver resolver = new UserResolver(getClient());
-        User[] resolveUser = resolver.resolveUser(testUser2.getUser() + "*");
+        User[] resolveUser = resolver.resolveUser(getUser(1).getUser() + "*");
         assertTrue("Precondition: Cannot start without having another user ready", resolveUser.length > 0);
         UserParticipant userParticipant = new UserParticipant(resolveUser[0].getId());
         Participant[] participants = new UserParticipant[] { userParticipant };
@@ -289,6 +289,11 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         series = catm.get(series); //update series from server
         assertTrue("Should contain the participant in the change exception", java.util.Arrays.asList(exception.getParticipants()).contains(userParticipant));
         assertFalse("Should not contain the participant in the whole series", java.util.Arrays.asList(series.getParticipants()).contains(userParticipant));
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

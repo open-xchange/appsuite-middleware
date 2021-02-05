@@ -53,11 +53,9 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -100,17 +98,6 @@ public final class Bug12496Test extends AbstractAJAXSession {
         final InsertRequest request = new InsertRequest(appointment, tz);
         final AppointmentInsertResponse response = client.execute(request);
         response.fillAppointment(appointment);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            final DeleteRequest request = new DeleteRequest(appointment);
-            getClient().execute(request);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

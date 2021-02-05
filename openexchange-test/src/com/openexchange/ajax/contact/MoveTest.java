@@ -50,7 +50,6 @@
 package com.openexchange.ajax.contact;
 
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -107,18 +106,4 @@ public class MoveTest extends AbstractContactTest {
         compareObject(contactObj, loadContact);
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (objectId > 0 && targetFolder > 0) {
-                deleteContact(objectId, targetFolder, true);
-            }
-            if (folder != null) {
-                getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 }

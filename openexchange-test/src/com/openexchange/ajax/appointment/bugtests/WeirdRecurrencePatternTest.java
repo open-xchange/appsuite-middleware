@@ -52,11 +52,8 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -73,7 +70,6 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
 
-    private String origTimeZone;
     private Appointment appointment;
     private TimeZone tz;
 
@@ -91,9 +87,6 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        GetRequest getRequest = new GetRequest(Tree.TimeZone);
-        GetResponse getResponse = getClient().execute(getRequest);
-        origTimeZone = getResponse.getString();
         tz = TimeZone.getTimeZone("Europe/Berlin");
         SetRequest setRequest = new SetRequest(Tree.TimeZone, tz.getID());
         getClient().execute(setRequest);
@@ -120,14 +113,4 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         assertEquals("Wrong end date.", D("06.01.2015 16:30", tz), loaded.getEndDate());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            SetRequest setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
-            getClient().execute(setRequest);
-        } finally {
-            super.tearDown();
-        }
-    }
 }

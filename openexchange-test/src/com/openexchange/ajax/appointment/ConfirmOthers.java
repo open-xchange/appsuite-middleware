@@ -54,11 +54,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -74,7 +72,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -98,9 +95,9 @@ public class ConfirmOthers extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = new AJAXClient(testContext.acquireUser());
-        clientB = new AJAXClient(testContext.acquireUser());
-        clientC = new AJAXClient(testContext.acquireUser());
+        clientA = getClient();
+        clientB = getClient(1);
+        clientC = getClient(2);
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
@@ -133,30 +130,8 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            new CalendarTestManager(clientA).resetDefaultFolderPermissions();
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(getClass()).error("", e);
-        }
-        try {
-            clientC.execute(new DeleteRequest(appointment.getObjectID(), clientC.getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
-            if (null != clientA) {
-                clientA.logout();
-                clientA = null;
-            }
-            if (null != clientB) {
-                clientB.logout();
-                clientB = null;
-            }
-            if (null != clientC) {
-                clientC.logout();
-                clientC = null;
-            }
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

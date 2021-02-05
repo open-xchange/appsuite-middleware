@@ -5,18 +5,18 @@ import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * 
+ *
  * {@link MWB682Test}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.5
  */
-public class MWB682Test extends AbstractAJAXSession {
+public class MWB682Test extends Abstrac2UserAJAXSession {
 
     @Before
     @Override
@@ -29,7 +29,7 @@ public class MWB682Test extends AbstractAJAXSession {
         permission1.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
 
         OCLPermission permission2 = new OCLPermission();
-        permission2.setEntity(getClient2().getValues().getUserId());
+        permission2.setEntity(client2.getValues().getUserId());
         permission2.setGroupPermission(false);
         permission2.setFolderAdmin(false);
         permission2.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);

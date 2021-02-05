@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertFalse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -80,8 +79,13 @@ public class Bug55690Test extends AbstractAJAXSession {
         super.setUp();
 
         client = getClient();
-        client2 = getClient2();
+        client2 = getClient(1);
         catm2 = new CalendarTestManager(client2);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -105,14 +109,4 @@ public class Bug55690Test extends AbstractAJAXSession {
         assertFalse("No exception expected", ftm.getLastResponse().hasWarnings() || ftm.getLastResponse().hasError());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            catm2.cleanUp();
-            ftm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
-    }
 }

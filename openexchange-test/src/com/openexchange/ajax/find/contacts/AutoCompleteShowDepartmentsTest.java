@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,9 +102,9 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     private static final String SHOW_DEPARTMENT_JSLOB = "showDepartment";
     private static final String CONTACTS_MODULE = "contacts";
 
-    private Map<String, TestUser> testUsers;
-    private Map<String, ApiClient> clients;
-    private Set<String> randomUsers;
+    Random rand = new Random(System.currentTimeMillis());
+
+    private Set<TestUser> randomUsers;
 
     /**
      * Initialises a new {@link AutoCompleteShowDepartmentsTest}.
@@ -118,24 +119,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        testUsers = new HashMap<>();
-        clients = new HashMap<>();
         randomUsers = new HashSet<>();
-
-        for (int i = 0; i < AMOUNT_OF_TEST_USERS; i++) {
-            TestUser testUser = testContext.acquireUser();
-            if (testUser == null) {
-                LOG.debug("Could not acquire user");
-                continue;
-            }
-            LOG.info("Acquired user '{}'", testUser);
-
-            ApiClient client = generateApiClient(testUser);
-            rememberClient(client);
-            testUsers.put(testUser.getUser(), testUser);
-            clients.put(testUser.getUser(), client);
-        }
 
         // Prepare users
         prepareUser(pickRandomUser(), "Department A");
@@ -144,21 +128,21 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         super.setUpConfiguration();
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(AMOUNT_OF_TEST_USERS).build();
+    }
+
     /**
      * Picks a random user from the registry
      *
      * @return The random {@link TestUser}
      */
     private TestUser pickRandomUser() {
-        String[] keys = testUsers.keySet().toArray(new String[AMOUNT_OF_TEST_USERS]);
-        String key;
-        do {
-            key = keys[(int) (Math.random() * AMOUNT_OF_TEST_USERS)];
-        } while (randomUsers.contains(key));
-
-        randomUsers.add(key);
-        LOG.info("Picked random user '{}'", key);
-        return testUsers.get(key);
+        TestUser user = getUser(rand.nextInt(AMOUNT_OF_TEST_USERS));
+        randomUsers.add(user);
+        LOG.info("Picked random user '{}'", user);
+        return user;
     }
 
     /**
@@ -168,24 +152,10 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      * @param department The department to set
      */
     private void prepareUser(TestUser testUser, String department) throws ApiException {
-        ApiClient client = clients.get(testUser.getUser());
+        ApiClient client = getApiClient(testUser);
         UserApi userApi = new UserApi(client);
         CommonResponse response = userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
         assertNull(response.getErrorDesc(), response.getError());
-    }
-
-    /**
-     * Resets the users
-     */
-    @Override
-    public void tearDown() throws Exception {
-        // Reset users
-        for (String key : randomUsers) {
-            ApiClient client = clients.get(key);
-            UserApi userApi = new UserApi(client);
-            userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
-        }
-        super.tearDown();
     }
 
     /**
@@ -257,8 +227,8 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      * @return <code>true</code> if it is contained, <code>false</code> otherwise
      */
     private boolean isRandomUser(String itemName) {
-        for (String user : randomUsers) {
-            if (itemName.toLowerCase().contains(user)) {
+        for (TestUser user : randomUsers) {
+            if (itemName.toLowerCase().contains(user.getUser())) {
                 return true;
             }
         }

@@ -67,8 +67,6 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -88,6 +86,11 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
      */
     public Bug12099Test() {
         super();
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(3).build();
     }
 
     /**
@@ -140,12 +143,8 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         permissions.add(perm);
         String sharedFolder = createAndRememberNewFolder(defaultUserApi, folderId, getCalendaruser(), permissions);
 
-        TestUser testUser3 = testContext.acquireUser();
-        ApiClient apiClient3 = generateApiClient(testUser3);
-        rememberClient(apiClient3);
-        EnhancedApiClient enhancedApiClient3 = generateEnhancedClient(testUser3);
-        rememberClient(enhancedApiClient3);
-        UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3);
+        EnhancedApiClient enhancedApiClient3 = (EnhancedApiClient) getApiClient(2);
+        UserApi userApi3 = new UserApi(getApiClient(2), enhancedApiClient3, getUser(2));
         EventManager eventManager3 = new EventManager(userApi3, sharedFolder);
 
         String summary = "Bug12099Test";
@@ -159,7 +158,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         Date from = DateTimeUtil.parseDateTime(eventData.getStartDate());
         Date until = new Date(DateTimeUtil.parseDateTime(eventData.getEndDate()).getTime() + TimeUnit.DAYS.toMillis(1));
 
-        String defaultFolder3 = getDefaultFolder(apiClient3);
+        String defaultFolder3 = getDefaultFolder(getApiClient(2));
         List<EventData> allEvents = eventManager3.getAllEvents(from, until, true, defaultFolder3);
         assertEquals(2, allEvents.stream().filter(e -> e.getSummary().equals(summary)).collect(Collectors.toList()).size());
 

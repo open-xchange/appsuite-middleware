@@ -54,7 +54,6 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.Mail;
@@ -83,16 +82,6 @@ public class MailSearchTest extends AbstractMailTest {
         super.setUp();
         folder = getInboxFolder();
         clearFolder(folder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            clearFolder(folder);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

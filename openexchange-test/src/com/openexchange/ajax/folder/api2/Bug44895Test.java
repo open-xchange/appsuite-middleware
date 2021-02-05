@@ -50,10 +50,8 @@
 package com.openexchange.ajax.folder.api2;
 
 import static org.junit.Assert.assertFalse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -90,19 +88,6 @@ public class Bug44895Test extends AbstractFolderTest {
         InsertRequest req = new InsertRequest(EnumAPI.OX_NEW, calendarFolder);
         InsertResponse resp = client.execute(req);
         resp.fillObject(calendarFolder);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != calendarFolder) {
-                DeleteRequest req = new DeleteRequest(EnumAPI.OX_NEW, calendarFolder);
-                client.execute(req);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

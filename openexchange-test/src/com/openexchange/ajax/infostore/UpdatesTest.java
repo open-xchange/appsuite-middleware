@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -118,17 +117,6 @@ public class UpdatesTest extends AbstractAJAXSession {
         urlDoc.setDescription("test url description");
         urlDoc.setURL("http://www.open-xchange.com");
         itm.newAction(urlDoc);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            itm.cleanUp();
-            ftm.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.thirdparty.federatedSharing;
 
-import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.cleanInbox;
 import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.clearAccountError;
 import static com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.prepareGuest;
 import static org.hamcrest.Matchers.notNullValue;
@@ -69,7 +68,6 @@ import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -106,44 +104,26 @@ import com.openexchange.tools.id.IDMangler;
 public class ShareManagementSubscriptionTest extends AbstractShareManagementTest {
 
     /* Context 2 */
-    private TestContext context2;
-    private TestUser testUserC2;
-    private ApiClient apiClientC2;
     private ShareManagementApi smApiC2;
     private SubscribeShareResponseData accountData;
+    private ApiClient apiClientC2;
+    private TestUser testUserC2;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        context2 = this.testContextList.get(1);
-        testUserC2 = context2.acquireUser();
-        apiClientC2 = generateApiClient(testUserC2);
-        addTearDownOperation(() -> logoutClient(apiClientC2, true));
+        apiClientC2 = getApiClient(testContextList.get(1), 0);
         smApiC2 = new ShareManagementApi(apiClientC2);
-        cleanInbox(apiClientC2);
-
+        testUserC2 = getUser(testContextList.get(1), 0);
         sharedFolderName = this.getClass().getSimpleName() + UUID.randomUUID().toString();
         smApi = new ShareManagementApi(apiClient);
         folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
-        remember(folderManager);
         infostoreRoot = folderManager.findInfostoreRoot();
     }
 
     @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != accountData) {
-                deleteOXShareAccount();
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    @Override
-    protected int getNumerOfContexts() {
-        return 2;
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).build();
     }
 
     @Test

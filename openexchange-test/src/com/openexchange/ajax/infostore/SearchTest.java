@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import com.google.common.collect.Iterables;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -27,7 +27,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.FolderTestManager;
 
-public class SearchTest extends AbstractAJAXSession {
+public class SearchTest extends Abstrac2UserAJAXSession {
 
     protected String[] all = null;
 
@@ -136,7 +136,7 @@ public class SearchTest extends AbstractAJAXSession {
 
     @Test
     public void testPermissions() throws Exception {
-        itm.setClient(getClient2());
+        itm.setClient(client2);
         List<com.openexchange.file.storage.File> found = itm.search("*", folderId);
         assertEquals(0, found.size());
         assertEquals("IFO-0400", itm.getLastResponse().getException().getErrorCode());

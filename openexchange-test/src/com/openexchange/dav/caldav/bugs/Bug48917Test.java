@@ -58,12 +58,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -79,7 +78,7 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.3
  */
-public class Bug48917Test extends CalDAVTest {
+public class Bug48917Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
 
@@ -87,21 +86,8 @@ public class Bug48917Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.manager2) {
-                this.manager2.cleanUp();
-            }
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

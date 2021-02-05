@@ -57,12 +57,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -76,7 +75,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug43521Test extends CalDAVTest {
+public class Bug43521Test extends Abstract2UserCalDAVTest {
 
     private CalendarTestManager manager2;
     private AJAXClient client3;
@@ -85,26 +84,14 @@ public class Bug43521Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        manager2 = new CalendarTestManager(getClient2());
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
-
-        client3 = new AJAXClient(testContext.acquireUser());
+        client3 = getClient(2);
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != this.manager2) {
-                this.manager2.cleanUp();
-            }
-            if (null != client3) {
-                client3.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
-
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
     }
 
     @Test

@@ -63,7 +63,7 @@ import org.junit.Test;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.reports.CalendarQueryReportInfo;
 import com.openexchange.dav.caldav.reports.CompFilter;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -76,7 +76,7 @@ import com.openexchange.groupware.container.UserParticipant;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class Bug64086Test extends CalDAVTest {
+public class Bug64086Test extends Abstract2UserCalDAVTest {
 
     @Test
     public void testReportWithChangeExceptions() throws Exception {
@@ -97,7 +97,7 @@ public class Bug64086Test extends CalDAVTest {
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
-        appointment.addParticipant(new UserParticipant(getClient2().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(client2.getValues().getUserId()));
         appointment.setParentFolderID(catm.getPrivateFolder());
         catm.insert(appointment);
         Date clientLastModified = catm.getLastModification();

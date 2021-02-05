@@ -50,11 +50,9 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -125,13 +123,4 @@ public class Bug13447Test extends AbstractAJAXSession {
         appointment.setLastModified(response.getTimestamp());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
-        } finally {
-            super.tearDown();
-        }
-    }
 }

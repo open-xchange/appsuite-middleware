@@ -104,10 +104,4 @@ public class Bug64836Test extends AbstractChronosTest {
         eventManager.getEvent(defaultFolderId, createdSeries.getId());
     }
     
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-    
-
 }

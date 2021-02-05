@@ -79,7 +79,6 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -130,7 +129,6 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     private File file;
     private FolderManager folderManager;
     private FolderManager folderManager2;
-    private TestUser testUser3;
     private Integer userId1;
     private Integer userId2;
     private Integer userId3;
@@ -141,18 +139,19 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         super.setUp();
 
         userId1 = apiClient.getUserId();
-        userId2 = apiClient2.getUserId();
-        testUser3 = testContext.acquireUser();
-        apiClient3 = generateApiClient(testUser3);
-        rememberClient(apiClient3);
+        userId2 = getApiClient(1).getUserId();
+        apiClient3 = getApiClient(2);
         userId3 = apiClient3.getUserId();
 
         folderManager = new FolderManager(new FoldersApi(getApiClient()), "1");
-        remember(folderManager);
-        folderManager2 = new FolderManager(new FoldersApi(getApiClient2()), "1");
-        remember(folderManager2);
+        folderManager2 = new FolderManager(new FoldersApi(getApiClient(1)), "1");
 
         file = File.createTempFile("FileMovePermissionWarningTest", ".txt");
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(3).build();
     }
 
     /**
@@ -596,7 +595,7 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
         perm.add(p1);
         FolderPermission p2 = createPermissionFor(userId1, BITS_ADMIN, Boolean.FALSE);
         perm.add(p2);
-        String id = folderManager2.createFolder(getPrivateInfostoreFolder(getApiClient2()), "FolderPermissionTest_" + UUID.randomUUID().toString(), perm);
+        String id = folderManager2.createFolder(getPrivateInfostoreFolder(getApiClient(1)), "FolderPermissionTest_" + UUID.randomUUID().toString(), perm);
         return id;
     }
 
@@ -607,11 +606,11 @@ public class FileMovePermissionWarningTest extends InfostoreApiClientTest {
     private Object[] getFileWarningArguments(String fileId, String sourceFolderId, String destinationFolderId, FolderType sourceType, FolderType destinationType) throws ApiException {
         // @formatter:off
         String sourceFolderPath = sourceType.getRootPath() +
-                                 (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                 (sourceType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient(1))) + "/" : "") +
                                  (sourceType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
                                  folderManager.getFolderName(sourceFolderId);
         String destinationFolderPath = destinationType.getRootPath() +
-                                      (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient2())) + "/" : "") +
+                                      (destinationType.equals(FolderType.SHARED) ? folderManager2.getFolderName(getPrivateInfostoreFolder(getApiClient(1))) + "/" : "") +
                                       (destinationType.equals(FolderType.PRIVATE) ? folderTitle + "/" : "") +
                                       folderManager.getFolderName(destinationFolderId);
         // @formatter:on

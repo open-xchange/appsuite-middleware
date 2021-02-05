@@ -52,12 +52,10 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
@@ -101,17 +99,6 @@ public class Bug38782Test extends AbstractAJAXSession {
         start.add(Calendar.HOUR_OF_DAY, 2);
         task.setEndDate(start.getTime());
         client1.execute(new InsertRequest(task, timeZone, true)).fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.execute(new DeleteRequest(task));
-        } finally {
-            super.tearDown();
-        }
-
     }
 
     @Test

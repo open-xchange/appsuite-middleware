@@ -58,15 +58,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.PermissionLevel;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FileAccountData;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -92,9 +91,7 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
 
     private FileAccountData account;
     private String sharedFolderId;
-    private ApiClient sharingClient;
     private FoldersApi sharingFoldersApi;
-    private TestContext context2;
     private final String fileStorageServiceId;
 
     /**
@@ -177,28 +174,23 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     public void setUp() throws Exception {
         super.setUp();
         this.shareApi = new ShareManagementApi(getApiClient());
-        
+
         // Clear inbox for the user who will receive the share
         cleanInbox(getApiClient());
 
         //Acquire a user who shares a folder
-        context2 = this.testContextList.get(1);
-        TestUser sharingUser = context2.acquireUser();
-        sharingClient = generateApiClient(sharingUser);
-        rememberClient(sharingClient);
-        sharingFoldersApi = new FoldersApi(sharingClient);
+        sharingFoldersApi = new FoldersApi(getApiClient(testContextList.get(1), 0));
         FolderManager folderManager = new FolderManager(sharingFoldersApi, "0");
-        remember(folderManager);
 
         //The sharing user create a folder which is shared to the actual user
-        FolderData sharedFolder = createFolder(folderManager, getPrivateInfostoreFolderID(sharingClient), getRandomFolderName());
+        FolderData sharedFolder = createFolder(folderManager, getPrivateInfostoreFolderID(getApiClient(testContextList.get(1), 0)), getRandomFolderName());
         sharedFolderId = sharedFolder.getId();
 
         //Share it
         shareFolder(sharedFolder, testUser, folderManager);
 
         //Get the share link
-        String shareLink = receiveShareLink(getApiClient(), sharingUser.getLogin(), sharedFolder.getTitle());
+        String shareLink = receiveShareLink(getApiClient(), getUser(testContextList.get(1), 0).getLogin(), sharedFolder.getTitle());
 
         //Register an XOX account which integrates the share
         FederatedSharingFileAccountConfiguration configuration = new FederatedSharingFileAccountConfiguration(shareLink, null);
@@ -206,17 +198,17 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     }
 
     @Override
-    protected Map<String, String> getNeededConfigurations() {
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).build();
+    }
+
+    @Override
+    public Optional<Map<String, String>> optContextConfig() {
         HashMap<String, String> configuration = new HashMap<>();
         configuration.put("com.openexchange.capability.filestorage_xox", Boolean.TRUE.toString());
         configuration.put("com.openexchange.capability.filestorage_xctx", Boolean.TRUE.toString());
         configuration.put("com.openexchange.api.client.blacklistedHosts", "");
-        return configuration;
-    }
-
-    @Override
-    protected String getReloadables() {
-        return "CapabilityReloadable";
+        return Optional.of(configuration);
     }
 
     /**
@@ -267,8 +259,4 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         return null;
     }
 
-    @Override
-    protected int getNumerOfContexts() {
-        return 2;
-    }
 }

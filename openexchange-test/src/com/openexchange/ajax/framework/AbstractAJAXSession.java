@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.test.AttachmentTestManager;
@@ -61,11 +59,8 @@ import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.ReminderTestManager;
 import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
-import com.openexchange.test.TestManager;
 
 public abstract class AbstractAJAXSession extends AbstractClientSession {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAJAXSession.class);
 
     protected CalendarTestManager catm;
     protected ContactTestManager cotm;
@@ -77,8 +72,6 @@ public abstract class AbstractAJAXSession extends AbstractClientSession {
     protected AttachmentTestManager atm;
     protected MailTestManager mtm;
     protected FolderTaskTestManager fttm;
-
-    private List<TestManager> testManager = new ArrayList<>();
 
     /**
      * Default constructor.
@@ -95,41 +88,19 @@ public abstract class AbstractAJAXSession extends AbstractClientSession {
 
         AJAXClient client = getClient();
         catm = new CalendarTestManager(client);
-        testManager.add(catm);
         cotm = new ContactTestManager(client);
-        testManager.add(cotm);
         ftm = new FolderTestManager(client);
-        testManager.add(ftm);
         itm = new InfostoreTestManager(client);
-        testManager.add(itm);
         ttm = new TaskTestManager(client);
-        testManager.add(ttm);
         atm = new AttachmentTestManager(client);
-        testManager.add(atm);
         mtm = new MailTestManager(client);
-        testManager.add(mtm);
         resTm = new ResourceTestManager(client);
-        testManager.add(resTm);
         remTm = new ReminderTestManager(client);
-        testManager.add(remTm);
-        fttm = new FolderTaskTestManager(client, getClient2());
-        testManager.add(fttm);
-    }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            for (TestManager manager : testManager) {
-                if (manager != null) {
-                    try {
-                        manager.cleanUp();
-                    } catch (Exception e) {
-                        LOG.error("", e);
-                    }
-                }
-            }
-        } finally {
-            super.tearDown();
+        if (getTestConfig().numberOfusersPerContext > 1) {
+            AJAXClient client2 = getClient(1);
+            fttm = new FolderTaskTestManager(client, client2);
         }
     }
+
 }

@@ -10,13 +10,11 @@ import java.util.Iterator;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -201,23 +199,6 @@ public class Bug16292Test extends AbstractAJAXSession {
                 }
             }
             i++;
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            // Delete Appointment
-            getClient().execute(new DeleteRequest(appointment, false));
-
-            // Delete Task
-            getClient().execute(new com.openexchange.ajax.task.actions.DeleteRequest(task, false));
-
-            // Delete Contact
-            getClient().execute(new com.openexchange.ajax.contact.action.DeleteRequest(contact, false));
-        } finally {
-            super.tearDown();
         }
     }
 

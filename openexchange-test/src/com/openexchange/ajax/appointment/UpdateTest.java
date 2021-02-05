@@ -76,6 +76,11 @@ public class UpdateTest extends AppointmentTest {
 
     private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.INTERVAL, CalendarObject.RECURRENCE_COUNT, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.RECURRENCE_START };
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testSimple() throws Exception {
         Appointment appointmentObj = createAppointmentObject("testSimple");
@@ -104,7 +109,7 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setLocation(null);
         appointmentObj.setObjectID(objectId);
 
-        final int userParticipantId = getClient2().getValues().getUserId();
+        final int userParticipantId = getClient(1).getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 

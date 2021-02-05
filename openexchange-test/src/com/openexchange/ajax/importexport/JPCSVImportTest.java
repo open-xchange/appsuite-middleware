@@ -98,14 +98,6 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         contactsApi = new ContactsApi(getApiClient());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        if (folderToDelete != null) {
-            foldersApi.deleteFolders(new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        }
-        super.tearDown();
-    }
-
     /**
      * Creates a new folder and remembers it.
      *

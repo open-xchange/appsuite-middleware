@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.config;
 
-import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -58,7 +57,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -116,7 +114,6 @@ public class Bug15354Test extends AbstractAJAXSession {
                 final Throwable throwable = writer[i].getThrowable();
                 assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
             }
-            client.execute(new SetRequest(Tree.Beta, B(origValue)));
         } finally {
             super.tearDown();
         }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -110,8 +109,8 @@ public abstract class AbstractOrganizerTest extends AbstractExtendedChronosTest 
         event = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), getEventName());
 
         // The internal attendees
-        organizerAttendee = createAttendee(I(getClient().getValues().getUserId()));
-        actingAttendee = createAttendee(I(getClient2().getValues().getUserId()));
+        organizerAttendee = createAttendee(testUser.getUserId());
+        actingAttendee = createAttendee(getUser(1).getUserId());
 
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizerAttendee);
@@ -124,9 +123,14 @@ public abstract class AbstractOrganizerTest extends AbstractExtendedChronosTest 
         event.setCalendarUser(organizerCU);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    }
+
     /**
      * The name for the events summary
-     * 
+     *
      * @return The name
      */
     abstract String getEventName();

@@ -6,13 +6,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -70,18 +68,6 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         "END:VEVENT\n" +
         "END:VCALENDAR";
     // @formatter:on
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointmentId > 0) {
-                getClient().execute(new DeleteRequest(appointmentId, folder.getObjectID(), new Date(System.currentTimeMillis()), true));
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
 
     @Test
     public void testReminderTwoWeeksBefore() throws Exception {

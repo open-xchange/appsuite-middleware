@@ -57,7 +57,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -73,17 +73,17 @@ import com.openexchange.test.tryagain.TryAgain;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class Bug40527Test extends ShareTest {
+public class Bug40527Test extends Abstract2UserShareTest {
 
     @Test
     @TryAgain
     public void testInternalFileShareLinkOnSharedCreation() throws Exception {
-        AJAXClient shareClient = getClient2();
+        AJAXClient shareClient = client2;
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
             File file = insertSharedFile(folder.getObjectID(), randomUID(), sharePermission);
-            String invitationLink = discoverInvitationLink(getApiClient2(), shareClient.getValues().getDefaultAddress());
+            String invitationLink = discoverInvitationLink(apiClient2, shareClient.getValues().getDefaultAddress());
             Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
@@ -102,14 +102,14 @@ public class Bug40527Test extends ShareTest {
     @Test
     @TryAgain
     public void testInternalFileShareLinkOnSubsequentShare() throws Exception {
-        AJAXClient shareClient = getClient2();
+        AJAXClient shareClient = client2;
         try {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder());
             File file = insertFile(folder.getObjectID());
             file.setObjectPermissions(Collections.singletonList(new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ)));
             updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
-            String invitationLink = discoverInvitationLink(getApiClient2(), shareClient.getValues().getDefaultAddress());
+            String invitationLink = discoverInvitationLink(apiClient2, shareClient.getValues().getDefaultAddress());
             Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);

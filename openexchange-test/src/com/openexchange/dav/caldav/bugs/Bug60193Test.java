@@ -58,7 +58,7 @@ import java.util.Date;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.WebDAVClient;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -73,7 +73,7 @@ import com.openexchange.groupware.container.Participant;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.1
  */
-public class Bug60193Test extends CalDAVTest {
+public class Bug60193Test extends Abstract2UserCalDAVTest {
 
     @Test
     public void testRSVPAfterAcceptOnServer() throws Exception {
@@ -115,14 +115,14 @@ public class Bug60193Test extends CalDAVTest {
             "SUMMARY:Test\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "ORGANIZER:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
-            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ORGANIZER:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(client2.getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -196,14 +196,14 @@ public class Bug60193Test extends CalDAVTest {
             "SUMMARY:Test\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "ORGANIZER:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
-            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ORGANIZER:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(client2.getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -269,14 +269,14 @@ public class Bug60193Test extends CalDAVTest {
             "SUMMARY:Test\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "ORGANIZER:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
-            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ORGANIZER:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(client2.getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */
@@ -341,14 +341,14 @@ public class Bug60193Test extends CalDAVTest {
             "SUMMARY:Test\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
-            "ORGANIZER:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
-            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ORGANIZER:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + client2.getValues().getDefaultAddress() + "\r\n" +
             "ATTENDEE;PARTSTAT=ACCEPTED;RSVP=TRUE:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ; // @formatter:on
         WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(getClient2().getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, encodeFolderID(String.valueOf(client2.getValues().getPrivateAppointmentFolder())), uid, iCal, Collections.emptyMap()));
         /*
          * as user a, check appointment on client
          */

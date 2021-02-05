@@ -52,11 +52,9 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -109,17 +107,6 @@ public class Bug13788Test extends AbstractAJAXSession {
 
         Appointment loadedAppointment = getResponse.getAppointment(getClient().getValues().getTimeZone());
         assertTrue("Lost fulltime flag.", loadedAppointment.getFullTime());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
-            getClient().execute(appointmentDeleteRequest);
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

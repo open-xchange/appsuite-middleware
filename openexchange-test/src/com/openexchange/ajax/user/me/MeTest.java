@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
-import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.testing.httpclient.models.CurrentUserData;
 import com.openexchange.testing.httpclient.models.CurrentUserResponse;
 import com.openexchange.testing.httpclient.modules.UserMeApi;
@@ -94,18 +93,17 @@ public class MeTest extends AbstractAPIClientSession {
         UserMeApi api = new UserMeApi(getApiClient());
         CurrentUserResponse response = api.getCurrentUser();
         CurrentUserData me = response.getData();
-        UserValues values = getClient().getValues();
-        assertEquals("Missing or wrong user_id", values.getUserId(), me.getUserId().intValue());
-        assertEquals("Missing or wrong context_id", values.getContextId(), me.getContextId().intValue());
+        assertEquals("Missing or wrong user_id", testUser.getUserId().intValue(), me.getUserId().intValue());
+        assertEquals("Missing or wrong context_id", testContext.getId(), me.getContextId().intValue());
         assertNotNull("Missing context_admin", me.getContextAdmin());
         assertNotNull("Missing login_name", me.getLoginName());
         assertNotNull("Missing display_name", me.getDisplayName());
         assertNotNull("Missing mail_login", me.getMailLogin());
-        assertEquals("Missing or wrong email_address", values.getDefaultAddress(), me.getEmailAddress());
+        assertEquals("Missing or wrong email_address", testUser.getLogin(), me.getEmailAddress());
         assertNotNull("Missing email_aliases", me.getEmailAliases());
         assertTrue("Missing primary address in email_aliases", me.getEmailAliases().stream().anyMatch(a -> {
             try {
-                return a.equals(values.getDefaultAddress());
+                return a.equals(testUser.getLogin());
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }

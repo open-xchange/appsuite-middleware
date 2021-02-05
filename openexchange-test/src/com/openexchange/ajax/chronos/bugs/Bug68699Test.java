@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.Assert;
@@ -76,10 +75,13 @@ public class Bug68699Test extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-
+        apiClient2 = getApiClient(1);
         summary = "Bug68699Test" + UUID.randomUUID();
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test(expected = AssertionError.class)
@@ -88,7 +90,7 @@ public class Bug68699Test extends AbstractChronosTest {
             /*
              * Create event with no location set
              */
-            Attendee attendee = AttendeeFactory.createIndividual(I(getClient2().getValues().getUserId()));
+            Attendee attendee = AttendeeFactory.createIndividual(getUser(1).getUserId());
             EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), summary, folderId);
             event.setFolder(folderId);
             event.setAttendees(Collections.singletonList(attendee));
@@ -96,7 +98,7 @@ public class Bug68699Test extends AbstractChronosTest {
             event = eventManager.createEvent(event, true);
 
             /*
-             * Update event with empty location 
+             * Update event with empty location
              */
             EventData deltaEvent = new EventData();
             deltaEvent.setId(event.getId());

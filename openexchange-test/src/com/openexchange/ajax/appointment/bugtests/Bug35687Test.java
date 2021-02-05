@@ -77,10 +77,10 @@ public class Bug35687Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient(1).getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
-        catm.setClient(getClient2());
+        catm.setClient(getClient(1));
 
         int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
@@ -93,6 +93,11 @@ public class Bug35687Test extends AbstractAJAXSession {
         app.setIgnoreConflicts(true);
 
         app = catm.insert(app);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

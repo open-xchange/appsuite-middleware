@@ -66,7 +66,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -83,7 +83,7 @@ import com.openexchange.test.TaskTestManager;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksTest extends AbstractAJAXSession {
+public class TasksTest extends Abstrac2UserAJAXSession {
 
     /**
      * Logger.
@@ -269,14 +269,14 @@ public class TasksTest extends AbstractAJAXSession {
 
     @Test
     public void testConfirmation() throws Throwable {
-        TaskTestManager ttm2 = new TaskTestManager(getClient2());
+        TaskTestManager ttm2 = new TaskTestManager(client2);
         final int folderId = getClient().getValues().getPrivateTaskFolder();
 
         final Task task = new Task();
         task.setTitle("Task to test confirmation");
 
-        final int folderId2 = getClient2().getValues().getPrivateTaskFolder();
-        final int userId2 = getClient2().getValues().getUserId();
+        final int folderId2 = client2.getValues().getPrivateTaskFolder();
+        final int userId2 = client2.getValues().getUserId();
 
         final List<UserParticipant> participants = new ArrayList<UserParticipant>();
         final UserParticipant participant = new UserParticipant(userId2);

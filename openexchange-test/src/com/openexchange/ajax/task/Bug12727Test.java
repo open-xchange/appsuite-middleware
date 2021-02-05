@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -86,9 +85,6 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Before
     public void setUp() throws Exception {
@@ -96,19 +92,6 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         client = getClient();
         manager = new TaskTestManager(client);
         createTask();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            manager.cleanUp();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -51,11 +51,9 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -87,7 +85,7 @@ public class Bug21620Test extends AbstractAJAXSession {
          * prepare clients
          */
         clientA = getClient();
-        clientB = getClient2();
+        clientB = getClient(1);
         clientC = new AJAXClient(testContext.acquireUser());
         /*
          * as user A, share a calendar folder to user B
@@ -119,6 +117,11 @@ public class Bug21620Test extends AbstractAJAXSession {
         appointment.setPrincipalId(clientA.getValues().getUserId());
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    }
+
     @Test
     public void testBug21620() throws Exception {
         /*
@@ -139,18 +142,6 @@ public class Bug21620Test extends AbstractAJAXSession {
         loadedAppointment = catm.get(appointment);
         assertEquals("Wrong organizer ID", clientB.getValues().getUserId(), loadedAppointment.getOrganizerId());
         assertEquals("Wrong principal ID", clientA.getValues().getUserId(), loadedAppointment.getPrincipalId());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != appointment && 0 < appointment.getObjectID()) {
-                clientB.execute(new DeleteRequest(appointment));
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

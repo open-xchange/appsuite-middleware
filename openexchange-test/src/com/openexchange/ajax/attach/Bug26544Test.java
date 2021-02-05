@@ -61,7 +61,6 @@ import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AllRequest;
 import com.openexchange.ajax.attach.actions.AllResponse;
 import com.openexchange.ajax.attach.actions.AttachRequest;
-import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -110,7 +109,6 @@ public class Bug26544Test {
     @After
     public void tearDown() throws Exception {
         try {
-            client.execute(new DeleteRequest(contactA));
             client.logout();
         } finally {
             TestContextPool.backContext(testContext);

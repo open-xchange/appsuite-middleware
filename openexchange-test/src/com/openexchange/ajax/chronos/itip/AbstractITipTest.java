@@ -55,7 +55,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.jdom2.IllegalDataException;
@@ -63,22 +62,15 @@ import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.EnhancedApiClient;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
-import com.openexchange.testing.httpclient.models.DeleteEventBody;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.MailData;
-import com.openexchange.testing.httpclient.models.MailDestinationData;
-import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
-import com.openexchange.testing.httpclient.modules.MailApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
@@ -169,15 +161,11 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         super.setUp();
 
         UserApi api = new UserApi(getApiClient());
-        userResponseC1 = api.getUser(String.valueOf(getClient().getValues().getUserId()));
+        userResponseC1 = api.getUser(String.valueOf(testUser.getUserId()));
 
         context2 = testContextList.get(1);
-        addTearDownOperation(() -> TestContextPool.backContext(context2));
-
-        testUserC2 = context2.acquireUser();
-
-        apiClientC2 = generateApiClient(testUserC2);
-        rememberClient(apiClientC2);
+        testUserC2 = users.get(context2).get(0);
+        apiClientC2 = getApiClient(context2, 0);
         UserApi anotherUserApi = new UserApi(apiClientC2);
         userResponseC2 = anotherUserApi.getUser(String.valueOf(apiClientC2.getUserId()));
         // Validate
@@ -187,8 +175,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
         folderIdC2 = getDefaultFolder(apiClientC2);
 
-        enhancedApiClientC2 = generateEnhancedClient(testUser);
-        rememberClient(enhancedApiClientC2);
+        enhancedApiClientC2 = getEnhancedApiClient2();
         eventManagerC2 = new EventManager(new com.openexchange.ajax.chronos.UserApi(apiClientC2, enhancedApiClientC2, testUserC2), folderIdC2);
 
         eventManager.setIgnoreConflicts(true);
@@ -196,17 +183,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     @Override
-    protected int getNumerOfContexts() {
-        return 2;
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            eventManagerC2.cleanUp();
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(2).build();
     }
 
     /*
@@ -327,60 +305,4 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         return Long.valueOf(System.currentTimeMillis());
     }
 
-    /*
-     * =========================
-     * =========CLEANUP=========
-     * =========================
-     */
-
-    protected void rememberMail(MailData data) {
-        rememberMail(getApiClient(), data);
-    }
-
-    protected void rememberMail(ApiClient apiClient, MailData data) {
-        if (null == apiClient || null == data) {
-            return;
-        }
-        MailApi mailApi = new MailApi(apiClient);
-        MailListElement elm = new MailListElement();
-        elm.setId(data.getId());
-        elm.setFolder(data.getFolderId());
-        addTearDownOperation(() -> {
-            mailApi.deleteMails(Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
-
-        });
-    }
-
-    protected void rememberMail(ApiClient apiClient, MailDestinationData data) {
-        if (null == apiClient || null == data) {
-            return;
-        }
-        MailApi mailApi = new MailApi(apiClient);
-        MailListElement elm = new MailListElement();
-        elm.setId(data.getId());
-        elm.setFolder(data.getFolderId());
-        addTearDownOperation(() -> {
-            mailApi.deleteMails(Collections.singletonList(elm), now(), Boolean.TRUE, Boolean.FALSE);
-
-        });
-    }
-
-    protected void rememberForCleanup(EventData eventData) {
-        rememberForCleanup(apiClient, eventData);
-    }
-
-    protected void rememberForCleanup(ApiClient apiClient, EventData eventData) {
-        if (null == apiClient || null == eventData) {
-            return;
-        }
-        EventId eventId = new EventId();
-        eventId.setId(eventData.getId());
-        eventId.setFolder(eventData.getFolder());
-
-        addTearDownOperation(() -> {
-            DeleteEventBody body = new DeleteEventBody();
-            body.addEventsItem(eventId);
-            new ChronosApi(apiClient).deleteEvent(now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, "none");
-        });
-    }
 }

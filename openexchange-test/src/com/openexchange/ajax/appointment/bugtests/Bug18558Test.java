@@ -56,11 +56,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.json.JSONArray;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -101,9 +99,9 @@ public class Bug18558Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient2();
-        clientC = new AJAXClient(testContext.acquireUser());
-        clientD = new AJAXClient(testContext.acquireUser());
+        clientB = getClient(1);
+        clientC = getClient(2);
+        clientD = getClient(3);
 
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
@@ -140,6 +138,11 @@ public class Bug18558Test extends AbstractAJAXSession {
         insertResponse.fillObject(appointment);
     }
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(4).build();
+    }
+
     @Test
     public void testBug18558Test() throws Exception {
         SearchRequest search = new SearchRequest(appointment.getTitle(), -1, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.USERS, Appointment.PARTICIPANTS });
@@ -172,26 +175,4 @@ public class Bug18558Test extends AbstractAJAXSession {
         assertFalse("No error expected.", getResponse.hasError());
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            new CalendarTestManager(clientA).resetDefaultFolderPermissions();
-            new CalendarTestManager(clientB).resetDefaultFolderPermissions();
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(getClass()).error("", e);
-        }
-        try {
-            if (null != appointment) {
-                appointment.setLastModified(new Date(Long.MAX_VALUE));
-                if (appointment.getObjectID() > 0) {
-                    clientC.execute(new DeleteRequest(appointment));
-                }
-            }
-            clientC = logoutClient(clientC);
-            clientD = logoutClient(clientD);
-        } finally {
-            super.tearDown();
-        }
-    }
 }

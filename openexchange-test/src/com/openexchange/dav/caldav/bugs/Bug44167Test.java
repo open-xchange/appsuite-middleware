@@ -57,13 +57,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal;
@@ -83,7 +82,7 @@ import com.openexchange.test.CalendarTestManager;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class Bug44167Test extends CalDAVTest {
+public class Bug44167Test extends Abstract2UserCalDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
@@ -99,11 +98,11 @@ public class Bug44167Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client3 = new AJAXClient(testContext.acquireUser());
-        manager2 = new CalendarTestManager(getClient2());
+        client3 = getClient(2);
+        manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
-        ftm.setClient(getClient2());
+        ftm.setClient(client2);
         FolderObject calendarFolder = ftm.getFolderFromServer(manager2.getPrivateFolder());
         String subFolderName = "testfolder_" + randomUID();
         FolderObject folder = new FolderObject();
@@ -123,19 +122,8 @@ public class Bug44167Test extends CalDAVTest {
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != manager2) {                
-                manager2.cleanUp();                
-            }
-            if (null != client3) {
-                client3.logout();
-            }
-        } finally {
-            super.tearDown();
-        }
-
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
     }
 
     @Test

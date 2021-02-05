@@ -57,7 +57,6 @@ import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.convertToAttendee;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.getJSLoabForCalendar;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
-import static com.openexchange.ajax.chronos.itip.ITipUtil.restoreCalendarSettings;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.is;
@@ -72,7 +71,6 @@ import static org.junit.Assert.fail;
 import java.util.Map;
 import java.util.UUID;
 import org.jdom2.IllegalDataException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
@@ -126,14 +124,13 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         /*
          * Prepare other internal attendee
          */
-        apiClient2C1 = generateApiClient(testUser2);
-        rememberClient(apiClient2C1);
+        apiClient2C1 = getApiClient(1);
         UserApi userApi = new UserApi(apiClient2C1);
         userResponse2C1 = userApi.getUser(String.valueOf(apiClient2C1.getUserId()));
         if (null == userResponse2C1) {
             throw new IllegalDataException("Need user info for test!");
         }
-        internalAttendee = convertToAttendee(testUser2, apiClient2C1.getUserId());
+        internalAttendee = convertToAttendee(getUser(1), apiClient2C1.getUserId());
         internalAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
 
         jslobApi = new JSlobApi(apiClient2C1);
@@ -152,7 +149,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -162,7 +158,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
          * reply with "accepted"
          */
         attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
-        rememberForCleanup(apiClientC2, attendeeEvent);
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
 
         /*
@@ -170,7 +165,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
-        rememberMail(reply);
 
         /*
          * Take over accept and check in calendar
@@ -186,14 +180,9 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         }
     }
 
-    @After
     @Override
-    public void tearDown() throws Exception {
-        try {
-            restoreCalendarSettings(jslobApi, jslob);
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -209,7 +198,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         }
         fail("Mail should not be received!!");
 
-        rememberMail(apiClient2C1, notification);
         assertTrue(null != notification.getAttachment() && notification.getAttachment().booleanValue());
         assertThat(I(notification.getAttachments().size()), is(I(1)));
 

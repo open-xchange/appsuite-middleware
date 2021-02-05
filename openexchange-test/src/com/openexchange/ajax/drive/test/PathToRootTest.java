@@ -134,12 +134,6 @@ public class PathToRootTest extends AbstractAPIClientSession {
         this.realRootPath = getRealRootPath();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        folderTestManager.cleanUp();
-        super.tearDown();
-    }
-
     private String getRealRootPath() throws Exception {
         DriveSettingsResponse resp = driveApi.getSettings(apiClient.getSession(), String.valueOf(realRootFolderId), I(8), null);
         assertNotNull(resp);

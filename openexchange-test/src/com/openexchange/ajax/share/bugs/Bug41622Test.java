@@ -51,12 +51,6 @@ package com.openexchange.ajax.share.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -65,9 +59,8 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.share.Abstract2UserShareTest;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
@@ -82,10 +75,7 @@ import com.openexchange.test.tryagain.TryAgain;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug41622Test extends ShareTest {
-
-    private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
-    private AJAXClient client2;
+public class Bug41622Test extends Abstract2UserShareTest {
 
     /**
      * Initializes a new {@link Bug41622Test}.
@@ -94,33 +84,6 @@ public class Bug41622Test extends ShareTest {
      */
     public Bug41622Test() {
         super();
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        client2 = getClient2();
-        clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
-        clientsAndFolders.put(getClient(), new ArrayList<Integer>());
-        clientsAndFolders.put(client2, new ArrayList<Integer>());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != clientsAndFolders) {
-                for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
-                    deleteFoldersSilently(entry.getKey(), entry.getValue());
-                    if (false == entry.getKey().equals(getClient())) {
-                        entry.getKey().logout();
-                    }
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -141,7 +104,6 @@ public class Bug41622Test extends ShareTest {
         insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse1 = getClient().execute(insertRequest1);
         insertResponse1.fillObject(folderA);
-        clientsAndFolders.get(getClient()).add(Integer.valueOf(folderA.getObjectID()));
         GetResponse getResponse1 = getClient().execute(new GetRequest(api, folderA.getObjectID()));
         folderA = getResponse1.getFolder();
         folderA.setLastModified(getResponse1.getTimestamp());
@@ -173,7 +135,6 @@ public class Bug41622Test extends ShareTest {
         insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse2 = client2.execute(insertRequest2);
         insertResponse2.fillObject(folderB);
-        clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
         GetResponse getResponse = client2.execute(new GetRequest(api, folderB.getObjectID()));
         folderB = getResponse.getFolder();
         folderB.setLastModified(getResponse.getTimestamp());

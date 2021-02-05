@@ -176,7 +176,12 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Whether to use a random cid range or not
          */
-        USE_RANDOM_CID_RANGE("useRandomCidRange")
+        USE_RANDOM_CID_RANGE("useRandomCidRange"),
+
+        /**
+         * Whether to initially provision contexts before starting the first test
+         */
+        PRE_PROVISION_CONTEXTS("preProvisionContexts")
 
         ;
 

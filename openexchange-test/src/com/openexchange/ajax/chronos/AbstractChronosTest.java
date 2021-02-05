@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -123,9 +122,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         super.setUp();
         LOG.info("Setup for test ...");
         ApiClient client = getApiClient();
-        rememberClient(client);
         EnhancedApiClient enhancedClient = getEnhancedApiClient();
-        rememberClient(enhancedClient);
         defaultUserApi = new UserApi(client, enhancedClient, testUser);
         chronosApi = defaultUserApi.getChronosApi();
         foldersApi = defaultUserApi.getFoldersApi();
@@ -134,36 +131,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         eventManager = new EventManager(defaultUserApi, defaultFolderId);
         folderManager = new CalendarFolderManager(defaultUserApi, foldersApi);
         folderId = createAndRememberNewFolder(defaultUserApi, getDefaultFolder(), defaultUserApi.getCalUser().intValue());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        LOG.info("Teardown...");
-        Exception exception = null;
-        try {
-            if (eventIds != null) {
-                DeleteEventBody body = new DeleteEventBody();
-                body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
-            }
-            // Clean-up event manager
-            eventManager.cleanUp();
-            folderManager.cleanUp();
-
-            try {
-                if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-                }
-            } catch (Exception e) {
-                exception = e;
-            }
-        } finally {
-            super.tearDown();
-        }
-
-        if (exception != null) {
-            throw exception;
-        }
     }
 
     /**

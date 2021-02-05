@@ -66,6 +66,11 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  */
 public class DAVSyncProfileTest extends AbstractSmtpAJAXSession {
 
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    }
+
     @Test
     public void testDAVsyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();

@@ -56,18 +56,13 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
@@ -87,9 +82,8 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug32044Test extends AbstractAJAXSession {
+public final class Bug32044Test extends Abstrac2UserAJAXSession {
 
-    private AJAXClient client1, client2;
     private TimeZone timeZone1, timeZone2;
     private Calendar cal;
     private Task task;
@@ -103,9 +97,7 @@ public final class Bug32044Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
         timeZone1 = client1.getValues().getTimeZone();
-        client2 = getClient2();
         timeZone2 = client2.getValues().getTimeZone();
         cal = TimeTools.createCalendar(TimeZones.UTC);
         // Create a shared folder
@@ -142,26 +134,6 @@ public final class Bug32044Test extends AbstractAJAXSession {
         task.setLastModified(updateResponse.getTimestamp());
         // end of reminder range request
         cal.add(Calendar.HOUR_OF_DAY, 1);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            task = client1.execute(new GetRequest(task)).getTask(timeZone1);
-            client1.execute(new DeleteRequest(task));
-            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder2.getObjectID(), false));
-            if (!response.hasError()) {
-                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder2));
-            }
-            response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder1.getObjectID(), false));
-            if (!response.hasError()) {
-                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder1));
-            }
-            client2.logout();
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

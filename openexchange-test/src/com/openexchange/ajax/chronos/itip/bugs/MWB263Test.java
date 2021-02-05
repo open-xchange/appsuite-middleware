@@ -118,7 +118,6 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
          * Receive series mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -135,7 +134,6 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
          * Receive exception mail as attendee, status for series still NEEDS_ACTION
          */
         MailData iMipException = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, iMipException);
         AnalysisChangeNewEvent newException = assertSingleChange(analyze(apiClientC2, iMipException)).getNewEvent();
         assertNotNull(newException);
         assertEquals(secondOccurrence.getRecurrenceId(), newException.getRecurrenceId());

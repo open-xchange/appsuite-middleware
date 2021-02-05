@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.rmi.server.UID;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +65,6 @@ import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
-import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailUpdateBody;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
@@ -85,7 +82,6 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
     private static final String FOLDER = "default0%2FINBOX";
     private MailApi api;
     private final Map<Integer, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
-    private Long timestamp = L(0);
     private FoldersApi folderApi;
     private String folderId;
 
@@ -119,7 +115,6 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
             // data size should always be 1
             Assert.assertEquals(1, data.size());
             IMPORTED_EMAILS.put(I(x), data.get(0));
-            timestamp = response.getTimestamp();
         }
 
         // Mark first mail as unread
@@ -132,23 +127,6 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         mailUpdateBody.setClearFlags(I(32));
         api.updateMail(folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(1)).getId(), null);
 
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            List<MailListElement> body = new ArrayList<>();
-            for (MailDestinationData dest : IMPORTED_EMAILS.values()) {
-                MailListElement mailListElement = new MailListElement();
-                mailListElement.setFolder(dest.getFolderId());
-                mailListElement.setId(dest.getId());
-                body.add(mailListElement);
-            }
-            api.deleteMails(body, timestamp, null, null);
-            folderApi.deleteFolders(Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

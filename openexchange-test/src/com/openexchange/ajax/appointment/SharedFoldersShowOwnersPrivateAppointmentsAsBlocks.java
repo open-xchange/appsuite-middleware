@@ -109,7 +109,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = getClient2();
+        client2 = getClient(1);
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();
         sharedFolder = ftm.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
@@ -139,6 +139,11 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         publicAppointment.setPrivateFlag(false);
         catm.insert(publicAppointment);
         publicAppointmentID = publicAppointment.getObjectID();
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

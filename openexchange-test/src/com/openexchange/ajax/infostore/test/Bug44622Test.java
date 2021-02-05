@@ -53,14 +53,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.util.Date;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetDocumentRequest;
 import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
@@ -98,17 +95,6 @@ public class Bug44622Test extends AbstractInfostoreTest {
         NewInfostoreRequest req = new NewInfostoreRequest(file, upload);
         NewInfostoreResponse resp = getClient().execute(req);
         fileID = resp.getID();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            DeleteInfostoreRequest req = new DeleteInfostoreRequest(fileID, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
-            getClient().execute(req);
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

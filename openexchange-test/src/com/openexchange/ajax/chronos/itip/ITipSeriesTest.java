@@ -111,7 +111,6 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        rememberMail(apiClientC2, inviteMail);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, inviteMail)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -122,7 +121,6 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
          */
         EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail), null), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
-        rememberForCleanup(apiClientC2, attendeeEvent);
 
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
@@ -171,7 +169,6 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
          * Receive deletion as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
-        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
     }

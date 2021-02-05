@@ -56,10 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.ajax.infostore.fileaccount.actions.DeleteFileaccountRequest;
 import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountRequest;
-import com.openexchange.ajax.infostore.fileaccount.actions.NewFileaccountResponse;
-import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
 import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountRequest;
 import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountResponse;
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
@@ -80,8 +77,6 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
     private final List<OAuthService> authProviders;
 
     private List<Integer> accountIds;
-
-    private String filestoreId;
 
     private TestContext testContext;
 
@@ -136,18 +131,6 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      */
     public void cleanup() throws Exception {
         try {
-            if (authProviders != null && false == authProviders.isEmpty()) {
-                for (OAuthService auth : authProviders) {
-                    deleteFilestorageFor(auth);
-                }
-            }
-
-            if (accountIds != null && false == accountIds.isEmpty()) {
-                for (int accountId : accountIds) {
-                    deleteOAuthAccount(accountId);
-                }
-            }
-
             logout();
         } finally {
             TestContextPool.backContext(testContext);
@@ -193,9 +176,7 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("account", String.valueOf(account));
         NewFileaccountRequest nfReq = new NewFileaccountRequest(authProvider.name(), authProvider.getFilestorageService(), jsonObject);
-        NewFileaccountResponse nfResp = ajaxClient.execute(nfReq);
-        String filestoreId = (String) nfResp.getData();
-        this.filestoreId = filestoreId;
+        ajaxClient.execute(nfReq);
     }
 
     /**
@@ -211,20 +192,4 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
         }
     }
 
-    /**
-     * Delete the oauth account
-     *
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     */
-    private void deleteOAuthAccount(int accountId) throws OXException, IOException, JSONException {
-        DeleteOAuthAccountRequest req = new DeleteOAuthAccountRequest(accountId);
-        ajaxClient.execute(req);
-    }
-
-    private void deleteFilestorageFor(OAuthService authProvider) throws Exception {
-        DeleteFileaccountRequest delReq = new DeleteFileaccountRequest(authProvider.getFilestorageService(), filestoreId);
-        ajaxClient.execute(delReq);
-    }
 }

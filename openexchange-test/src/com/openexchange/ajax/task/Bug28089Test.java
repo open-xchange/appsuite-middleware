@@ -54,16 +54,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -105,21 +102,6 @@ public final class Bug28089Test extends AbstractTaskTest {
         client1.execute(new InsertRequest(task, tz)).fillTask(task);
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            GetResponse response = client1.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, folder.getObjectID(), false));
-            if (!response.hasError()) {
-                client1.execute(new DeleteRequest(task));
-                folder.setLastModified(response.getTimestamp());
-                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
-            }
-        } finally {
-            super.tearDown();
-        }
-    }
-
     @Test
     public void testForBug() throws OXException, IOException, JSONException {
         CommonDeleteResponse response = client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
@@ -127,7 +109,7 @@ public final class Bug28089Test extends AbstractTaskTest {
         String message;
         try {
             message = warnings.get(0).getMessage();
-        } catch (IndexOutOfBoundsException e) {
+        } catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
             message = "Response contains warnings.";
         }
         Assert.assertTrue(message, warnings.isEmpty());

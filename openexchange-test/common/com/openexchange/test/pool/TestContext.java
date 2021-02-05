@@ -56,6 +56,8 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import org.junit.Assert;
@@ -84,10 +86,12 @@ public class TestContext implements Serializable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContext.class);
 
     private final String name;
-    private final int id;
+    private final int contextId;
 
     private final AtomicReference<TestUser> contextAdmin = new AtomicReference<>();
     private final AtomicReference<TestUser> noReplyUser = new AtomicReference<>();
+
+    private final Queue<TestUser> userPool = new LinkedBlockingDeque<TestUser>(2);
 
     /**
      * Initializes a new {@link TestContext}.
@@ -98,8 +102,14 @@ public class TestContext implements Serializable {
      */
     public TestContext(int id, String name, TestUser admin) {
         this.name = name;
-        this.id = id;
+        this.contextId = id;
         this.contextAdmin.set(admin);
+        try {
+            userPool.add(ProvisioningService.getInstance().createUser(id));
+            userPool.add(ProvisioningService.getInstance().createUser(id));
+        } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException | AddressException e) {
+            LOG.error("", e);
+        }
     }
 
     public TestUser getAdmin() {
@@ -108,7 +118,11 @@ public class TestContext implements Serializable {
 
     public TestUser acquireUser() {
         try {
-            return ProvisioningService.getInstance().createUser(id);
+            Optional<TestUser> optUser = Optional.ofNullable(userPool.poll());
+            if(optUser.isPresent()) {
+                return optUser.get();
+            }
+            return ProvisioningService.getInstance().createUser(contextId);
         } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException | AddressException e) {
             LOG.error("", e);
         }
@@ -121,20 +135,20 @@ public class TestContext implements Serializable {
 
     public Integer acquireResource() {
         try {
-            return ProvisioningService.getInstance().createResource(id);
+            return ProvisioningService.getInstance().createResource(contextId);
         } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Unable to acquire resource", e);
+            Assert.fail();
         }
         return null;
     }
 
     public Integer acquireGroup(Optional<List<Integer>> optUsers) {
         try {
-            return ProvisioningService.getInstance().createGroup(id, optUsers);
+            return ProvisioningService.getInstance().createGroup(contextId, optUsers);
         } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException | NoSuchUserException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Unable to acquire group", e);
+            Assert.fail();
         }
         return null;
     }
@@ -176,7 +190,7 @@ public class TestContext implements Serializable {
      * @return The context id.
      */
     public int getId() {
-        return id;
+        return contextId;
     }
 
     public TestUser acquireNoReplyUser() {
@@ -185,7 +199,7 @@ public class TestContext implements Serializable {
                 if (noReplyUser.get() == null) {
                     noReplyUser.set(acquireUser());
                     try {
-                        ProvisioningService.getInstance().changeContexConfig(this.id, Collections.singletonMap("com.openexchange.noreply.address", noReplyUser.get().getLogin()));
+                        ProvisioningService.getInstance().changeContexConfig(this.contextId, Collections.singletonMap("com.openexchange.noreply.address", noReplyUser.get().getLogin()));
                     } catch (RemoteException | InvalidCredentialsException | NoSuchContextException | StorageException | InvalidDataException | MalformedURLException | NotBoundException e) {
                         LOG.error("Unable to change config for no reply address", e);
                         Assert.fail();

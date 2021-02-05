@@ -51,7 +51,6 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -91,20 +90,12 @@ public class Bug7276Test extends AbstractTaskTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = getClient(1);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client2.logout();
-        } finally {
-            super.tearDown();
-        }
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().withUserPerContext(2).createAjaxClient().build();
     }
 
     /**

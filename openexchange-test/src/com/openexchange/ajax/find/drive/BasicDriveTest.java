@@ -353,7 +353,6 @@ public class BasicDriveTest extends AbstractFindTest {
 
     @Test
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = getClient2();
         try {
             FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
             AJAXClient[] clients = new AJAXClient[] { getClient(), getClient(), client2 };

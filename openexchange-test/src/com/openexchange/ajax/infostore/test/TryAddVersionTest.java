@@ -54,12 +54,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
@@ -96,23 +93,6 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         NewInfostoreRequest req = new NewInfostoreRequest(file, f);
         NewInfostoreResponse resp = getClient().execute(req);
         ids.add(resp.getID());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (ids != null) {
-                for (String id : ids) {
-                    DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
-                    req.setHardDelete(Boolean.TRUE);
-                    getClient().execute(req);
-                }
-            }
-            ids = null;
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

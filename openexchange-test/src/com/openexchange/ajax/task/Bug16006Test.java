@@ -52,8 +52,6 @@ package com.openexchange.ajax.task;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -61,7 +59,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -79,7 +76,6 @@ public class Bug16006Test extends AbstractAJAXSession {
 
     private AJAXClient client;
     private Task task;
-    private TimeZone origTimeZone;
     private Date alarm;
 
     public Bug16006Test() {
@@ -91,7 +87,6 @@ public class Bug16006Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        origTimeZone = client.getValues().getTimeZone();
         client.execute(new SetRequest(Tree.TimeZone, "Pacific/Honolulu"));
         task = new Task();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
@@ -102,17 +97,6 @@ public class Bug16006Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(task, TimeZones.UTC, true, true);
         InsertResponse response = client.execute(request);
         response.fillTask(task);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(task));
-            client.execute(new SetRequest(Tree.TimeZone, origTimeZone.getID()));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

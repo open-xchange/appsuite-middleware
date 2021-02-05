@@ -61,7 +61,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.dav.Config;
 import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -74,7 +74,7 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class Bug61998Test extends CalDAVTest {
+public class Bug61998Test extends Abstract2UserCalDAVTest {
 
     @Override
     protected String getDefaultUserAgent() {
@@ -92,13 +92,13 @@ public class Bug61998Test extends CalDAVTest {
          * prepare ace grant for user 1 and user 2
          */
         Principal principal1 = Principal.getHrefPrincipal(Config.getPathPrefix() + "/principals/users/" + getClient().getValues().getUserId());
-        Privilege[] privileges1 = { 
-            Privilege.PRIVILEGE_BIND, Privilege.PRIVILEGE_READ, Privilege.PRIVILEGE_READ_ACL, 
-            Privilege.PRIVILEGE_READ_CURRENT_USER_PRIVILEGE_SET,  Privilege.PRIVILEGE_UNBIND, Privilege.PRIVILEGE_WRITE, 
+        Privilege[] privileges1 = {
+            Privilege.PRIVILEGE_BIND, Privilege.PRIVILEGE_READ, Privilege.PRIVILEGE_READ_ACL,
+            Privilege.PRIVILEGE_READ_CURRENT_USER_PRIVILEGE_SET,  Privilege.PRIVILEGE_UNBIND, Privilege.PRIVILEGE_WRITE,
             Privilege.PRIVILEGE_WRITE_ACL, Privilege.PRIVILEGE_WRITE_CONTENT, Privilege.PRIVILEGE_WRITE_PROPERTIES
         };
         Ace grantAce1 = AclProperty.createGrantAce(principal1, privileges1, false, false, null);
-        Principal principal2 = Principal.getHrefPrincipal(Config.getPathPrefix() + "/principals/users/" + getClient2().getValues().getUserId());
+        Principal principal2 = Principal.getHrefPrincipal(Config.getPathPrefix() + "/principals/users/" + client2.getValues().getUserId());
         Privilege[] privileges2 = { Privilege.PRIVILEGE_READ };
         Ace grantAce2 = AclProperty.createGrantAce(principal2, privileges2, false, false, null);
         /*
@@ -118,7 +118,7 @@ public class Bug61998Test extends CalDAVTest {
         assertEquals(2, folder.getPermissions().size());
         OCLPermission permission2 = null;
         for (OCLPermission permission : folder.getPermissions()) {
-            if (getClient2().getValues().getUserId() == permission.getEntity()) {
+            if (client2.getValues().getUserId() == permission.getEntity()) {
                 permission2 = permission;
             }
         }

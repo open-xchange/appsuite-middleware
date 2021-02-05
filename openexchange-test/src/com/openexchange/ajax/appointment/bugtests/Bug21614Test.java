@@ -57,7 +57,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * {@link Bug21614Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug21614Test extends AbstractAJAXSession {
@@ -96,7 +95,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient2();
+        clientB = getClient(1);
 
         List<Participant> participants = new ArrayList<Participant>();
         Participant p = new UserParticipant(clientB.getValues().getUserId());
@@ -112,6 +111,11 @@ public class Bug21614Test extends AbstractAJAXSession {
         appointment.setOccurrence(5);
         appointment.setInterval(1);
         appointment.setParticipants(participants);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -151,16 +155,6 @@ public class Bug21614Test extends AbstractAJAXSession {
             }
         }
         assertFalse("Should not find the appointment.", found);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            getClient().execute(new DeleteRequest(appointment));
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

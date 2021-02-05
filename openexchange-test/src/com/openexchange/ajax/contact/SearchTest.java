@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
@@ -127,13 +128,26 @@ public class SearchTest extends AbstractContactTest {
         int[] contactIds = new int[] {};
         try {
             int collectFolderId = -1;
-            final GetResponse getResponse = getClient().execute(new GetRequest(Tree.ContactCollectFolder));
+            long start = System.currentTimeMillis();
+            boolean created = false;
+            GetResponse getResponse = null;
+            // Wait until the ContactCollectorFolderCreator finished
+            while (created == false && (start + TimeUnit.SECONDS.toMillis(30)) > System.currentTimeMillis()) {
+                getResponse = getClient().execute(new GetRequest(Tree.ContactCollectFolder));
+                if (getResponse.getData() != null && getResponse.getData().equals("null") == false) {
+                    created = true;
+                    break;
+                }
+                Thread.sleep(1000);
+            }
+            assertNotNull(getResponse);
             if (getResponse.hasValue()) {
                 if (getResponse.hasInteger()) {
                     collectFolderId = getResponse.getInteger();
 
                     if (-1 == collectFolderId) {
                         // Obviously contact collector folder is not present for test user
+                        fail("Missing collect folder");
                         return;
                     }
                 } else {

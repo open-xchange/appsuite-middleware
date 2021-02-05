@@ -52,10 +52,8 @@ package com.openexchange.ajax.mailaccount;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
@@ -81,19 +79,6 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
     public void setUp() throws Exception {
         super.setUp();
         mailAccount = null;
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailAccount) {
-                MailAccountDeleteRequest req = new MailAccountDeleteRequest(mailAccount.getId());
-                getClient().execute(req);
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -143,6 +128,7 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
     //        assertTrue(mailAccount.isMailStartTls());
     //        assertTrue(mailAccount.isTransportStartTls());
     //    }
+
     @Test
     public void testCreateMailAccountWithDefaults() throws Exception {
         MailAccountDescription acc = createMailAccountObject();

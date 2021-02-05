@@ -51,7 +51,6 @@ package com.openexchange.ajax.reminder;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -124,18 +123,6 @@ public class DeleteMultipleReminderTest extends ReminderTest {
     public void testDeleteMultipleReminders() throws Exception {
         DeleteRequest delReq = new DeleteRequest(reminders, true);
         client.execute(delReq);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            appointment.setLastModified(new Date(Long.MAX_VALUE));
-            com.openexchange.ajax.appointment.action.DeleteRequest aDelReq = new com.openexchange.ajax.appointment.action.DeleteRequest(appointment);
-            client.execute(aDelReq);
-        } finally {
-            super.tearDown();
-        }
     }
 
 }

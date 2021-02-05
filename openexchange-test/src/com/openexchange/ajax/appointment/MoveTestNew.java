@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -90,7 +89,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
 
     private FolderObject folderA, folderA1, folderB, folderB1, folderB2, folderC, folderC1;
 
-    private Set<TestManager> tm = new HashSet<TestManager>();
+    private final Set<TestManager> tm = new HashSet<TestManager>();
 
     private int idA, idB, idC;
 
@@ -98,21 +97,20 @@ public class MoveTestNew extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientC = new AJAXClient(testContext.acquireUser());
-
+        clientC = getClient(2);
         valuesC = clientC.getValues();
 
         idA = getClient().getValues().getUserId();
-        idB = getClient2().getValues().getUserId();
+        idB = getClient(1).getValues().getUserId();
         idC = valuesC.getUserId();
 
-        ctmB = new CalendarTestManager(getClient2());
+        ctmB = new CalendarTestManager(getClient(1));
         ctmC = new CalendarTestManager(clientC);
 
         tm.add(ctmB);
         tm.add(ctmC);
 
-        ftmB = new FolderTestManager(getClient2());
+        ftmB = new FolderTestManager(getClient(1));
         ftmC = new FolderTestManager(clientC);
 
         tm.add(ftmB);
@@ -127,17 +125,22 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderA1 = ftm.insertFolderOnServer(folderA1);
 
         //
-        folderB = ftmB.getFolderFromServer(getClient2().getValues().getPrivateAppointmentFolder());
+        folderB = ftmB.getFolderFromServer(getClient(1).getValues().getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
-        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
+        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, getClient(1), getClient());
         folderB1 = ftmB.insertFolderOnServer(folderB1);
-        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, getClient2(), getClient());
+        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, getClient(1), getClient());
         folderB2 = ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
         addAuthorPermissions(folderC, getClient().getValues().getUserId(), ftmC);
         folderC1 = createPrivateFolder("SubfolderC1" + UUID.randomUUID().toString(), ftmC, clientC, getClient());
         folderC1 = ftmC.insertFolderOnServer(folderC1);
+    }
+
+    @Override
+    public TestConfig getTestConfig() {
+        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     private void addAuthorPermissions(FolderObject folder, int userId, FolderTestManager actor) {
@@ -153,23 +156,6 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderUpdate.setPermissions(newPermissions);
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         actor.updateFolderOnServer(folderUpdate);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            for (TestManager manager : tm) {
-                manager.cleanUp();
-            }
-
-            if (null != clientC) {
-                clientC.logout();
-                clientC = null;
-            }
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test

@@ -69,11 +69,6 @@ public class AbstractOnboardingTest extends AbstractAPIClientSession {
         api = new ClientonboardingApi(apiClient);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     protected ClientonboardingApi getApi() {
         return api;
     }

@@ -54,10 +54,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -65,8 +63,7 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.PermissionTools;
@@ -76,41 +73,27 @@ import com.openexchange.test.PermissionTools;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug16163Test extends AbstractAJAXSession {
+public class Bug16163Test extends Abstrac2UserAJAXSession {
 
     private static final int[] ATTRIBUTES = { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME };
-    private AJAXClient client;
     private FolderObject testFolder;
-    private AJAXClient client2;
     private int appointmentFolder;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        client2 = getClient2();
         testFolder = new FolderObject();
         testFolder.setModule(FolderObject.CALENDAR);
-        appointmentFolder = client.getValues().getPrivateAppointmentFolder();
+        appointmentFolder = client1.getValues().getPrivateAppointmentFolder();
         testFolder.setParentFolderID(appointmentFolder);
-        testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), "a/a", I(client2.getValues().getUserId()), "v"));
+        testFolder.setPermissions(PermissionTools.P(I(client1.getValues().getUserId()), "a/a", I(client2.getValues().getUserId()), "v"));
         testFolder.setFolderName("testFolder4Bug16163-" + System.currentTimeMillis());
         final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, testFolder);
-        final InsertResponse iResp = client.execute(iReq);
+        final InsertResponse iResp = client1.execute(iReq);
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         testFolder.setLastModified(new Date());
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
-        } finally {
-            super.tearDown();
-        }
     }
 
     @Test
@@ -118,12 +101,12 @@ public class Bug16163Test extends AbstractAJAXSession {
         {
             // Fill cache with database folder.
             final GetRequest request = new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID());
-            client.execute(request);
+            client1.execute(request);
         }
         {
             // Fill cache with outlook folder.
             final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, testFolder.getObjectID());
-            client.execute(request);
+            client1.execute(request);
         }
         {
             // Test with user seeing a shared folder.
@@ -138,12 +121,12 @@ public class Bug16163Test extends AbstractAJAXSession {
             assertTrue("Path on Outlook like tree should have at least 4 parts, but has " + data.length, data.length >= 4);
             assertEquals("Path should start with test folder but is folder " + data[0][namePos], Integer.toString(testFolder.getObjectID()), data[0][idPos]);
             if (4 == data.length) {
-                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[1][idPos]);
+                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[1][namePos], FolderObject.SHARED_PREFIX + client1.getValues().getUserId(), data[1][idPos]);
                 assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[2][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[2][idPos]);
                 assertEquals("Root folder should be IPM_ROOT but is " + data[3][namePos], FolderStorage.PRIVATE_ID, data[3][idPos]);
             } else {
                 assertEquals("Parent of created folder should be user1's Calendar folder but is " + data[1][namePos], Integer.toString(appointmentFolder), data[1][idPos]);
-                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[2][namePos], FolderObject.SHARED_PREFIX + client.getValues().getUserId(), data[2][idPos]);
+                assertEquals("Parent of created folder should be virtual shared user folder but is " + data[2][namePos], FolderObject.SHARED_PREFIX + client1.getValues().getUserId(), data[2][idPos]);
                 assertEquals("Parent of virtual shared user folder should be system shared root folder but is " + data[3][namePos], Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID), data[3][idPos]);
                 assertEquals("Root folder should be IPM_ROOT but is " + data[4][namePos], FolderStorage.PRIVATE_ID, data[4][idPos]);
             }
@@ -151,13 +134,13 @@ public class Bug16163Test extends AbstractAJAXSession {
         {
             // Check cached folder.
             final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, testFolder.getObjectID());
-            final GetResponse response = client.execute(request);
+            final GetResponse response = client1.execute(request);
             assertEquals("Identifier of cached folder is broken.", testFolder.getObjectID(), response.getFolder().getObjectID());
         }
         {
             // Test with sharing user if caching breaks his path.
             final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
-            final PathResponse response = client.execute(request);
+            final PathResponse response = client1.execute(request);
             final Object[][] data = response.getArray();
             assertFalse("Path request should work for that folder.", response.hasError());
             final int idPos = response.getColumnPos(FolderObject.OBJECT_ID);

@@ -72,7 +72,6 @@ import com.openexchange.java.util.UUIDs;
  */
 public class MWB805Test extends ManagedAppointmentTest {
 
-    private TimeZone originalTimezone;
     private TimeZone userTimezone;
 
     @Override
@@ -81,18 +80,9 @@ public class MWB805Test extends ManagedAppointmentTest {
         userTimezone = getClient().getValues().getTimeZone();
         assertNotNull(userTimezone);
         if (false == "America/Denver".equals(userTimezone.getID())) {
-            originalTimezone = userTimezone;
             userTimezone = TimeZone.getTimeZone("America/Denver");
             getClient().getValues().setTimeZone(userTimezone);
         }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        if (null != originalTimezone) {
-            getClient().getValues().setTimeZone(originalTimezone);
-        }
-        super.tearDown();
     }
 
     @Test

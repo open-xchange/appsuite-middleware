@@ -53,11 +53,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -167,16 +165,4 @@ public class Bug13501Test extends AbstractAJAXSession {
         endSearch = new Date(1249257600000L); // 03.08.2009 00:00:00
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            if (appointment.getObjectID() > 0) {
-                getClient().execute(new DeleteRequest(appointment.getObjectID(), getClient().getValues().getPrivateAppointmentFolder(), appointment.getLastModified()));
-            }
-        } finally {
-            super.tearDown();
-        }
-
-    }
 }
