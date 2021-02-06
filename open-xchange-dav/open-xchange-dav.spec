@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core >= @OXVERSION@
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,6 +71,29 @@ EOF
         fi
         ox_scr_done SCR-785
     fi
+
+    SCR=SCR-812
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/carddav.properties
+      old_prop_key=com.openexchange.carddav.reducedAggregatedCollection
+      new_prop_key=com.openexchange.carddav.aggregatedCollectionFolders
+      old_default_value="false"
+      new_equivalent="reduced_synced"
+      if ox_exists_property ${old_prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${old_prop_key} ${prop_file})
+        if [ "${old_default_value}" = "${prop_val}" ]
+        then
+          ox_remove_property ${old_prop_key} ${prop_file}
+        else
+          ox_remove_property ${old_prop_key} ${prop_file}
+          ox_set_property ${new_prop_key} ${new_equivalent} ${prop_file}
+        fi
+      fi
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 %clean
@@ -88,6 +111,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Fri Feb 05 2021 Steffen Templin <marcus.klein@open-xchange.com>
+Third candidate for 7.10.5 release
 * Mon Feb 01 2021 Steffen Templin <marcus.klein@open-xchange.com>
 Second candidate for 7.10.5 release
 * Fri Jan 15 2021 Steffen Templin <marcus.klein@open-xchange.com>
