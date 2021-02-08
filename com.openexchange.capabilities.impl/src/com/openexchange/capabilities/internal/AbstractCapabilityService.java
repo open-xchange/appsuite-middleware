@@ -132,7 +132,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final String REGION_NAME_USER = "CapabilitiesUser";
     private static final String REGION_NAME = "Capabilities";
 
-    private static final String PERMISSION_PROPERTY = "permissions".intern();
+    private static final String PERMISSION_PROPERTY = "permissions";
 
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
 
