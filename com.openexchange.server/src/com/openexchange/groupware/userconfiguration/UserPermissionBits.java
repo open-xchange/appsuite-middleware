@@ -198,7 +198,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
 
     /**
      * The permission bit for publication access.
-     * 
+     *
      * @deprecated Publications were removed with MW-1089 in version 7.10.2
      */
     @Deprecated
@@ -776,7 +776,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public boolean isPublication() {
         return hasPermission(PUBLICATION);
     }
-    
+
     /**
      * Sets if this user configuration indicates to enable publication.
      *
@@ -977,7 +977,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
         int[] thisGroups = groups;
         if (null == thisGroups) {
             try {
-                thisGroups = groups = UserStorage.getInstance().getUser(userId, context.getContextId()).getGroups();
+                thisGroups = groups = UserStorage.getInstance().getUser(userId, context).getGroups();
             } catch (OXException e) {
                 thisGroups = groups = new int[0];
             }
