@@ -1791,30 +1791,105 @@ public class Strings {
     }
 
     /**
-     * Converts specified wildcard string to a regular expression
+     * Converts specified wild-card string to a regular expression with line boundaries.
+     * <p>
+     * That is resulting regular expression matches a complete line, not a single word by prepending/appending:
+     * <table border="0" cellpadding="1" cellspacing="0">
+     * <tr><th>&nbsp;</th></tr>
+     * <tr><td valign="top" headers="construct bounds"><tt>^&nbsp;&nbsp;&nbsp;&nbsp;</tt></td>
+     * <td headers="matches">The beginning of a line</td></tr>
+     * <tr><td valign="top" headers="construct bounds"><tt>$&nbsp;&nbsp;&nbsp;&nbsp;</tt></td>
+     * <td headers="matches">The end of a line</td></tr>
+     * </table>
      *
-     * @param wildcard The wildcard string to convert
+     * @param wildcard The wild-card string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
     public static String wildcardToRegex(String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
-        s.append('^');
-        final int len = wildcard.length();
+        return wildcardToRegex(wildcard, true);
+    }
+
+    /**
+     * Converts specified wild-card string to a regular expression.
+     * <p>
+     * If argument <code>withLineBoundaries</code> is set to <code>true</code>, the resulting regular expression matches a complete line,
+     * not a single word by prepending/appending:
+     * <table border="0" cellpadding="1" cellspacing="0">
+     * <tr><th>&nbsp;</th></tr>
+     * <tr><td valign="top" headers="construct bounds"><tt>^&nbsp;&nbsp;&nbsp;&nbsp;</tt></td>
+     * <td headers="matches">The beginning of a line</td></tr>
+     * <tr><td valign="top" headers="construct bounds"><tt>$&nbsp;&nbsp;&nbsp;&nbsp;</tt></td>
+     * <td headers="matches">The end of a line</td></tr>
+     * </table>
+     *
+     * @param wildcard The wild-card string to convert
+     * @param withLineBoundaries <code>true</code> to add line boundaries (beginning and end of a line) to resulting regular expression; otherwise <code>false</code> to not add them
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    public static String wildcardToRegex(String wildcard, boolean withLineBoundaries) {
+        if (wildcard == null) {
+            return null;
+        }
+
+        StringBuilder s = withLineBoundaries ? initForWildcard2Regex(0, wildcard, true) : null;
+        int len = wildcard.length();
         for (int i = 0; i < len; i++) {
-            final char c = wildcard.charAt(i);
-            if (c == '*') {
-                s.append(".*");
-            } else if (c == '?') {
-                s.append('.');
-            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\');
-                s.append(c);
-            } else {
-                s.append(c);
+            char c = wildcard.charAt(i);
+            switch (c) {
+                case '*':
+                    if (s == null) {
+                        s = initForWildcard2Regex(i, wildcard, withLineBoundaries);
+                    }
+                    s.append(".*");
+                    break;
+                case '?':
+                    if (s == null) {
+                        s = initForWildcard2Regex(i, wildcard, withLineBoundaries);
+                    }
+                    s.append('.');
+                    break;
+                case '(':
+                case ')':
+                case '[':
+                case ']':
+                case '$':
+                case '^':
+                case '.':
+                case '{':
+                case '}':
+                case '|':
+                case '\\':
+                    if (s == null) {
+                        s = initForWildcard2Regex(i, wildcard, withLineBoundaries);
+                    }
+                    s.append('\\');
+                    s.append(c);
+                    break;
+                default:
+                    if (s != null) {
+                        s.append(c);
+                    }
+                    break;
             }
         }
-        s.append('$');
-        return (s.toString());
+        if (s != null) {
+            if (withLineBoundaries) {
+                s.append('$');
+            }
+            return s.toString();
+        }
+        return wildcard; // Return as-is
+    }
+
+    private static StringBuilder initForWildcard2Regex(int index, String wildcard, boolean withLineBoundaries) {
+        StringBuilder s = new StringBuilder(wildcard.length() << 1);
+        if (withLineBoundaries) {
+            s.append('^');
+        }
+        if (index > 0) {
+            s.append(wildcard, 0, index);
+        }
+        return s;
     }
 
     /**
@@ -1837,7 +1912,6 @@ public class Strings {
             }
         }
         return false;
-
     }
 
     /**
@@ -2024,9 +2098,15 @@ public class Strings {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static char[] asHexChars(final byte[] hash) {
-        final int length = hash.length;
-        final char[] buf = new char[length << 1];
+    public static char[] asHexChars(byte[] hash) {
+        if (hash == null) {
+            return null;
+        }
+        int length = hash.length;
+        if (length <= 0) {
+            return new char[0];
+        }
+        char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
@@ -2040,8 +2120,9 @@ public class Strings {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static String asHex(final byte[] hash) {
-        return new String(asHexChars(hash));
+    public static String asHex(byte[] hash) {
+        char[] chars = asHexChars(hash);
+        return chars == null ? null : new String(chars);
     }
 
     /**
