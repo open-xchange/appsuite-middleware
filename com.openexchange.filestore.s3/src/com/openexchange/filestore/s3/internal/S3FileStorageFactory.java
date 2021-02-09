@@ -54,7 +54,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.openexchange.config.Interests;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.InterestsAware;
@@ -113,7 +112,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
             String filestoreID = extractFilestoreID(uri);
             LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
 
-            S3ClientConfig clientConfig = S3ClientConfig.init(filestoreID, services.getServiceSafe(LeanConfigurationService.class));
+            S3ClientConfig clientConfig = S3ClientConfig.init(filestoreID, services);
             S3FileStorageClient client = clientRegistry.getOrCreate(clientConfig);
             LOG.debug("Using \"{}\" as bucket name for filestore \"{}\". Client is \"{}\" with scope \"{}\".",
                 clientConfig.getBucketName(), filestoreID, client.getKey(), clientConfig.getClientScope());

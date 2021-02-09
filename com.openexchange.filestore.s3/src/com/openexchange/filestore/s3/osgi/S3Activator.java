@@ -57,6 +57,8 @@ import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
 import com.openexchange.filestore.s3.internal.client.S3ClientFactory;
 import com.openexchange.filestore.s3.internal.client.S3ClientRegistry;
 import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -75,7 +77,7 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override

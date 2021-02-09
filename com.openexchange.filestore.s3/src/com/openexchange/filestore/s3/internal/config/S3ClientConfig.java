@@ -67,6 +67,7 @@ import com.openexchange.config.lean.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link S3ClientConfig}
@@ -76,34 +77,49 @@ import com.openexchange.java.Strings;
  */
 public class S3ClientConfig {
 
+    /**
+     * Initializes a new {@link S3ClientConfig}
+     *
+     * @param filestoreID The file storage identifier
+     * @param services The service look-up
+     * @return The {@link S3ClientConfig}
+     * @throws OXException
+     */
+    public static S3ClientConfig init(String filestoreID, ServiceLookup services) throws OXException {
+        LeanConfigurationService configService = services.getServiceSafe(LeanConfigurationService.class);
+        return new S3ClientConfig(filestoreID, getBucketAndClientInfo(filestoreID, configService), services);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final String filestoreID;
     private final BucketAndClientInfo bucketAndClientInfo;
     private final LeanConfigurationService configService;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link S3ClientConfig}.
      *
-     * @param filestoreID The filestore id
-     * @param bucketAndClientInfo The {@link BucketAndClientInfo}
-     * @param configService The {@link LeanConfigurationService}
+     * @param filestoreID The file storage identifier
+     * @param bucketAndClientInfo The service look-up
+     * @param services The service look-up
+     * @throws OXException If initialization fails
      */
-    private S3ClientConfig(String filestoreID, BucketAndClientInfo bucketAndClientInfo, LeanConfigurationService configService) {
+    private S3ClientConfig(String filestoreID, BucketAndClientInfo bucketAndClientInfo, ServiceLookup services) throws OXException {
         super();
         this.filestoreID = filestoreID;
         this.bucketAndClientInfo = bucketAndClientInfo;
-        this.configService = configService;
+        this.services = services;
+        configService = services.getServiceSafe(LeanConfigurationService.class);
     }
 
     /**
-     * Initializes a new {@link S3ClientConfig}
+     * Gets the service look-up providing tracked services.
      *
-     * @param filestoreID The filestore id
-     * @param configService The {@link LeanConfigurationService}
-     * @return The {@link S3ClientConfig}
-     * @throws OXException
+     * @return The service look-up
      */
-    public static S3ClientConfig init(String filestoreID, LeanConfigurationService configService) throws OXException {
-        return new S3ClientConfig(filestoreID, getBucketAndClientInfo(filestoreID, configService), configService);
+    public ServiceLookup getServices() {
+        return services;
     }
 
     /**
@@ -269,6 +285,8 @@ public class S3ClientConfig {
 
     /**
      * Gets the number of currently configured clients.
+     *
+     * @return The number of currently configured clients
      */
     public int getNumberOfConfiguredClients() {
         Map<String, String> s3ClientProperties = configService.getProperties((k, v) -> k.startsWith(S3ClientProperty.PREFIX));
@@ -280,6 +298,8 @@ public class S3ClientConfig {
 
     /**
      * Gets the max. number of clients that might be configured to have per-client monitoring enabled.
+     *
+     * @return The max. number of clients
      */
     public int getMaxNumberOfMonitoredClients() {
         return configService.getIntProperty(S3Property.MAX_NUMBER_OF_MONITORED_CLIENTS);
@@ -287,6 +307,8 @@ public class S3ClientConfig {
 
     /**
      * Gets whether metric collection is enabled.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean enableMetricCollection() {
         return configService.getBooleanProperty(S3Property.METRIC_COLLECTION);

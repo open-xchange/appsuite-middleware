@@ -65,6 +65,7 @@ import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.SimpleServiceLookup;
 
 /**
  * Tests different file store configs to ensure functioning with shared client configs
@@ -187,15 +188,17 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO10;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH2_USER1_NO1;
-        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -208,6 +211,8 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         for (int storage = 1; storage <= 2; storage++) {
             for (int user = 1; user <= 2; user++) {
@@ -215,13 +220,13 @@ public class S3ClientConfigTest {
                     String filestoreID = "ox-filestore-ceph-" + storage + "-" + user + "-" + no;
                     if (storage == 1) {
                         if (user == 1) {
-                            assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+                            assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
                         } else {
-                            assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+                            assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
                         }
                     } else {
                         if (user == 1) {
-                            assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+                            assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
                         }
                     }
                 }
@@ -229,13 +234,13 @@ public class S3ClientConfigTest {
         }
 
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO10;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH2_USER1_NO1;
-        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -248,19 +253,21 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER1_NO2;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO1;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER2_NO10;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH2_USER1_NO1;
-        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -278,19 +285,21 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         String filestoreID = "ox-filestore-01";
-        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = "ox-filestore-02";
-        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO2, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO2, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = "ox-filestore-03";
-        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = "ox-filestore-04";
-        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO10, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO10, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = "ox-filestore-05";
-        assertClientSettings_CEPH2_USER1(BUCKET_CEPH2_USER1_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(BUCKET_CEPH2_USER1_NO1, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -339,19 +348,21 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER1_NO2;
-        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO2, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(BUCKET_CEPH1_USER1_NO2, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO1;
-        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER2_NO10;
-        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO10, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(BUCKET_CEPH1_USER2_NO10, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH2_USER1_NO1;
-        assertClientSettings_CEPH2_USER1(BUCKET_CEPH2_USER1_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(BUCKET_CEPH2_USER1_NO1, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -383,22 +394,24 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         // Clients
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER1_NO2;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO1;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         // Filestores
         filestoreID = BUCKET_CEPH1_USER2_NO10;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH2_USER1_NO1;
-        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH2_USER1(filestoreID, S3ClientScope.DEDICATED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -429,15 +442,17 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
         // Clients
         String filestoreID = BUCKET_CEPH1_USER1_NO1;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
         filestoreID = BUCKET_CEPH1_USER1_NO2;
-        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER1(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
 
         filestoreID = BUCKET_CEPH1_USER2_NO1;
-        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, configService));
+        assertClientSettings_CEPH1_USER2(filestoreID, S3ClientScope.SHARED, S3ClientConfig.init(filestoreID, services));
     }
 
     @Test
@@ -462,8 +477,10 @@ public class S3ClientConfigTest {
            .build();
 
         LeanConfigurationService configService = configServiceFor(oldConfig);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         int oldFingerprint = clientConfig.getFingerprint();
 
         // override credentials and verify that fingerprint changed
@@ -471,8 +488,10 @@ public class S3ClientConfigTest {
         newConfig.put("com.openexchange.filestore.s3client.ceph-1-1.accessKey", "new-access-key-to-verify-fingerprint-change");
         newConfig.put("com.openexchange.filestore.s3client.ceph-1-1.secretKey", "new-secret-key-to-verify-fingerprint-change");
         configService = configServiceFor(newConfig);
+        services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         assertNotEquals(oldFingerprint, clientConfig.getFingerprint());
     }
 
@@ -498,8 +517,10 @@ public class S3ClientConfigTest {
            .build();
 
         LeanConfigurationService configService = configServiceFor(oldConfig);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         int oldFingerprint = clientConfig.getFingerprint();
 
         // override credentials and verify that fingerprint changed
@@ -507,8 +528,10 @@ public class S3ClientConfigTest {
         newConfig.put("com.openexchange.filestore.s3.ox-filestore-ceph-1-1-1.accessKey", "new-access-key-to-verify-fingerprint-change");
         newConfig.put("com.openexchange.filestore.s3.ox-filestore-ceph-1-1-1.secretKey", "new-secret-key-to-verify-fingerprint-change");
         configService = configServiceFor(newConfig);
+        services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         assertNotEquals(oldFingerprint, clientConfig.getFingerprint());
     }
 
@@ -524,8 +547,10 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(config);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         assertTrue(clientConfig.enableMetricCollection());
         assertEquals(3, clientConfig.getNumberOfConfiguredClients());
         assertEquals(21, clientConfig.getMaxNumberOfMonitoredClients());
@@ -542,16 +567,20 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(oldConfig);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         int oldFingerprint = clientConfig.getFingerprint();
 
         // override credentials and verify that fingerprint changed
         Map<String, String> newConfig = new HashMap<>(oldConfig);
         newConfig.put("com.openexchange.filestore.s3.metricCollection", Boolean.TRUE.toString());
         configService = configServiceFor(newConfig);
+        services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         assertNotEquals(oldFingerprint, clientConfig.getFingerprint());
     }
 
@@ -566,16 +595,20 @@ public class S3ClientConfigTest {
             .build();
 
         LeanConfigurationService configService = configServiceFor(oldConfig);
+        SimpleServiceLookup services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        S3ClientConfig clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         int oldFingerprint = clientConfig.getFingerprint();
 
         // override credentials and verify that fingerprint changed
         Map<String, String> newConfig = new HashMap<>(oldConfig);
         newConfig.put("com.openexchange.filestore.s3.maxNumberOfMonitoredClients", "21");
         configService = configServiceFor(newConfig);
+        services = new SimpleServiceLookup();
+        services.add(LeanConfigurationService.class, configService);
 
-        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, configService);
+        clientConfig = S3ClientConfig.init(BUCKET_CEPH1_USER1_NO1, services);
         assertNotEquals(oldFingerprint, clientConfig.getFingerprint());
     }
 

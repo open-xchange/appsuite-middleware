@@ -64,8 +64,11 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.amazonaws.ApacheHttpClientConfig;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -93,6 +96,8 @@ import com.openexchange.filestore.s3.internal.config.S3EncryptionConfig;
 import com.openexchange.filestore.s3.metrics.PerClientMetricCollector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
@@ -280,9 +285,18 @@ public class S3ClientFactory {
      *
      * @param clientConfig The client config
      * @return An according {@link ClientConfiguration} instance
+     * @throws OXException If required services are absent
      */
-    private ClientConfiguration getClientConfiguration(S3ClientConfig clientConfig) {
+    private ClientConfiguration getClientConfiguration(S3ClientConfig clientConfig) throws OXException {
+        SSLSocketFactoryProvider factoryProvider = clientConfig.getServices().getServiceSafe(SSLSocketFactoryProvider.class);
+        SSLConfigurationService sslConfig = clientConfig.getServices().getServiceSafe(SSLConfigurationService.class);
+
         ClientConfiguration clientConfiguration = new ClientConfiguration();
+
+        {
+            ApacheHttpClientConfig apacheHttpClientConfig = clientConfiguration.getApacheHttpClientConfig();
+            apacheHttpClientConfig.setSslSocketFactory(new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), NoopHostnameVerifier.INSTANCE));
+        }
 
         {
             String signerOverride = clientConfig.getValue(S3ClientProperty.SIGNER_OVERRIDE);
