@@ -65,8 +65,7 @@ public class UnsynchronizedStringWriter extends StringWriter {
      * Create a new string writer, using the default initial string-buffer size.
      */
     public UnsynchronizedStringWriter() {
-        buf = new StringBuilder();
-        lock = buf;
+        this(16);
     }
 
     /**
@@ -75,11 +74,27 @@ public class UnsynchronizedStringWriter extends StringWriter {
      * @param initialSize A non-negative <code>int</code> specifying the initial size of the buffer.
      * @throws IllegalArgumentException If initial size is negative
      */
-    public UnsynchronizedStringWriter(final int initialSize) {
+    public UnsynchronizedStringWriter(int initialSize) {
+        super();
         if (initialSize < 0) {
             throw new IllegalArgumentException("Negative buffer size");
         }
         buf = new StringBuilder(initialSize);
+        lock = buf;
+    }
+
+    /**
+     * Create a new string writer, using the specified {@code StringBuilder} instance.
+     *
+     * @param buf A non-null {@code StringBuilder} instance
+     * @throws IllegalArgumentException If {@code StringBuilder} instance is <code>null</code>
+     */
+    public UnsynchronizedStringWriter(StringBuilder buf) {
+        super();
+        if (buf == null) {
+            throw new IllegalArgumentException("Buffer is null");
+        }
+        this.buf = buf;
         lock = buf;
     }
 

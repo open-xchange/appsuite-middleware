@@ -2636,6 +2636,10 @@ msgstr ""
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61

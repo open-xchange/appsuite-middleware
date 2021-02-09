@@ -50,6 +50,7 @@
 package com.openexchange.oidc.http.outbound;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -81,6 +82,14 @@ public class SSLInjectingTokenRequest extends TokenRequest {
         return tokenRequest == null ? null : new SSLInjectingTokenRequest(tokenRequest);
     }
 
+    private static final AuthorizationGrant DUMMY_GRANT = new AuthorizationGrant(com.nimbusds.oauth2.sdk.GrantType.REFRESH_TOKEN) {
+
+        @Override
+        public Map<String, String> toParameters() {
+            return Collections.emptyMap();
+        }
+    };
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final TokenRequest tokenRequest;
@@ -89,7 +98,7 @@ public class SSLInjectingTokenRequest extends TokenRequest {
      * Initializes a new {@link SSLInjectingTokenRequest}.
      */
     private SSLInjectingTokenRequest(TokenRequest tokenRequest) {
-        super(null, (ClientID) null, null, null, null);
+        super(null, (ClientID) null, DUMMY_GRANT, null, null);
         this.tokenRequest = tokenRequest;
     }
 

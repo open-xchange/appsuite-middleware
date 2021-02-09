@@ -1162,7 +1162,7 @@ public class DriveStorage {
      * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
      * @throws OXException
      */
-    private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
+    public boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
         if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(folder.getName())) {
             return true;
         }
