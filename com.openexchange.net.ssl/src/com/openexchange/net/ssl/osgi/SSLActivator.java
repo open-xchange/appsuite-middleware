@@ -59,12 +59,19 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  *
- * {@link SSLActivator}
+ * {@link SSLActivator} - The activator for <code>"com.openexchange.net.ssl"</code> bundle.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
 public class SSLActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link SSLActivator}.
+     */
+    public SSLActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
