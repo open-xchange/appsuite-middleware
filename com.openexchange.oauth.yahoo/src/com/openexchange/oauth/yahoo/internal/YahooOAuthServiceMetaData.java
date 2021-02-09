@@ -53,13 +53,10 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.model.Verb;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link YahooOAuthServiceMetaData}
@@ -75,15 +72,6 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
 
     public YahooOAuthServiceMetaData(ServiceLookup services) {
         super(services, KnownApi.YAHOO, YahooOAuthScope.values());
-    }
-
-    @Override
-    public String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session) {
-        DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (deferrer == null || false == deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            return callbackUrl;
-        }
-        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
     }
 
     @Override

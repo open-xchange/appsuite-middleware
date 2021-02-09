@@ -53,8 +53,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +63,8 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -86,10 +86,12 @@ import com.openexchange.session.Session;
  */
 public class YahooClient {
 
-    private static final Pattern PATTERN_GUID = Pattern.compile("<value>([^<]*)<");
+    private static final String EMPTY_STRING = "";
 
-    private static final String ALL_CONTACT_IDS_URL = "https://social.yahooapis.com/v1/user/GUID/contacts?format=json";
-    private static final String SINGLE_CONTACT_URL = "https://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
+    private static final Logger LOGGER = LoggerFactory.getLogger(YahooClient.class);
+
+    private static final String ALL_CONTACT_IDS_URL = "https://social.yahooapis.com/v1/user/me/contacts?format=json";
+    private static final String SINGLE_CONTACT_URL = "https://social.yahooapis.com/v1/user/me/contact/CONTACT_ID?format=json";
 
     private final OAuthService scribeService;
     private final OAuthAccount oauthAccount;
@@ -151,16 +153,28 @@ public class YahooClient {
      * @throws OXException if a connection error is occurred
      */
     public String getGUID() throws OXException {
-        OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
+        OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=json");
         scribeService.signRequest(new Token(oauthAccount.getToken(), oauthAccount.getSecret()), guidRequest);
         Response guidResponse = execute(guidRequest);
         String contentType = guidResponse.getHeader("Content-Type");
-        if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
+        if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
             throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
         }
 
-        final Matcher matcher = PATTERN_GUID.matcher(guidResponse.getBody());
-        return matcher.find() ? matcher.group(1) : "";
+        try {
+            JSONObject body = new JSONObject(guidResponse.getBody());
+            if (false == body.hasAndNotNull("guid")) {
+                return EMPTY_STRING;
+            }
+            JSONObject guidBody = body.optJSONObject("guid");
+            if (guidBody == null) {
+                return EMPTY_STRING;
+            }
+            return guidBody.optString("value");
+        } catch (JSONException e) {
+            LOGGER.debug("Unable to extract GUID from response {}", guidResponse.getBody());
+        }
+        return EMPTY_STRING;
     }
 
     /**
@@ -170,12 +184,10 @@ public class YahooClient {
      * @throws OXException
      */
     public JSONObject getContacts() throws OXException {
-        String guid = getGUID();
-
         Token accessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
 
         // Now get the ids of all the users contacts
-        OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
+        OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL);
         scribeService.signRequest(accessToken, request);
         final Response response = execute(request);
         if (response.getCode() == 403) {
@@ -197,7 +209,7 @@ public class YahooClient {
      */
     public JSONObject getContact(String contactId) throws OXException {
         Token accessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
-        final String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", getGUID()).replace("CONTACT_ID", contactId);
+        final String singleContactUrl = SINGLE_CONTACT_URL.replace("CONTACT_ID", contactId);
         // Request
         final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
         scribeService.signRequest(accessToken, singleContactRequest);
