@@ -971,11 +971,11 @@ public final class Databases {
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(DatabaseService databaseService, Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+    public static void executeAndConsumeQuery(DatabaseService databaseService, Connection connection, ResultConsumer rc, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         if (null == connection) {
-            executeAndConsumeQuery(-1, databaseService, statement, rc, valueSetters);
+            executeAndConsumeQuery(-1, databaseService, rc, statement, valueSetters);
         } else {
-            executeAndConsumeQuery(connection, statement, rc, valueSetters);
+            executeAndConsumeQuery(connection, rc, statement, valueSetters);
         }
     }
 
@@ -1009,8 +1009,8 @@ public final class Databases {
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
-        executeAndConsumeQuery(-1, databaseService, statement, rc, valueSetters);
+    public static void executeAndConsumeQuery(DatabaseService databaseService, ResultConsumer rc, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+        executeAndConsumeQuery(-1, databaseService, rc, statement, valueSetters);
     }
 
     /**
@@ -1055,13 +1055,13 @@ public final class Databases {
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+    public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, ResultConsumer rc, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         Connection connection = null;
         try {
             connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
             if (null != connection) {
                 connection.setAutoCommit(false);
-                executeAndConsumeQuery(connection, statement, rc, valueSetters);
+                executeAndConsumeQuery(connection, rc, statement, valueSetters);
             }
         } finally {
             if (contextId <= 0) {
@@ -1128,13 +1128,13 @@ public final class Databases {
      * Executes an SQL query
      *
      * @param connection The connection to use
-     * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
+     * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
-    public static void executeAndConsumeQuery(Connection connection, String statement, ResultConsumer rc, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
+    public static void executeAndConsumeQuery(Connection connection, ResultConsumer rc, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         ResultSet rs = null;
         PreparedStatement stmt = null;
         try {

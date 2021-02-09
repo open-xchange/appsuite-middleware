@@ -145,8 +145,8 @@ public class RemoveOrphanedGuestEntriesTask implements UpdateTaskV2 {
         // @formatter:off
         Databases.executeAndConsumeQuery(
             globalConnection,
-            "SELECT guest_id, uid FROM guest2context where cid = ?",
             (rs) -> guestIds.add(L(rs.getLong(1))),
+            "SELECT guest_id, uid FROM guest2context where cid = ?",
             (stmt) -> stmt.setInt(1, contextId));
         // @formatter:on
         if (guestIds.isEmpty()) {
@@ -160,8 +160,8 @@ public class RemoveOrphanedGuestEntriesTask implements UpdateTaskV2 {
         // @formatter:off
         Databases.executeAndConsumeQuery(
             globalConnection,
-            Databases.getIN("SELECT id, mail_address FROM guest WHERE id IN(", guestIds.size()),
             (rs) -> guestToMailAddress.put(I(rs.getInt(1)), rs.getString(2)),
+            Databases.getIN("SELECT id, mail_address FROM guest WHERE id IN(", guestIds.size()),
             (stmt) -> setGuestIds(1, stmt, guestIds));
         // @formatter:on
 
@@ -176,8 +176,8 @@ public class RemoveOrphanedGuestEntriesTask implements UpdateTaskV2 {
         for (Entry<Integer, String> entry : guestToMailAddress.entrySet()) {
             Databases.executeAndConsumeQuery(
                 userConnection,
-                sql, 
                 (rs)-> guestIds.remove(L(Integer.toUnsignedLong(i(entry.getKey())))), // Found an user, so remove from list
+                sql, 
                 (stmt) -> stmt.setInt(1, contextId),
                 (stmt) -> stmt.setString(2, entry.getValue()));
             // @formatter:on
