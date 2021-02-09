@@ -54,9 +54,11 @@ import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.rmi.Remote;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.activation.MailcapCommandMap;
 import javax.servlet.ServletException;
 import org.json.FileBackedJSONStringProvider;
@@ -168,6 +170,7 @@ import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.JsonMaxSize;
 import com.openexchange.groupware.settings.tree.ShardingSubdomains;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
@@ -280,6 +283,7 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
+import com.openexchange.tools.oxfolder.OXFolderUniqueness;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -791,6 +795,11 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());
         registerService(CreateTableService.class, new CreateIDSequenceTable());
+        // Register oxfolder_reservedpath related services
+        registerService(CreateTableService.class, new OXFolderUniqueness.CreateFolderReservedPathTable());
+        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new OXFolderUniqueness.CreateFolderReservedPathUpdateTask()));
+        getServiceSafe(TimerService.class).scheduleAtFixedRate(new OXFolderUniqueness.CleanUpReservedPathsTask(this), 30, 60, TimeUnit.MINUTES);
+        
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         MailAccountStorageService mailAccountStorageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
         registerService(MailAccountStorageService.class, mailAccountStorageService);

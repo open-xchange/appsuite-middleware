@@ -697,6 +697,7 @@ public final class OXFolderSQL {
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
      *
      * @param folderId The folder ID
+     * @param parentFolderId The parent folder ID
      * @param newName The new name to set
      * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
@@ -704,11 +705,11 @@ public final class OXFolderSQL {
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
+    public static void updateName(int folderId, int parentFolderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
         Connection writeCon = null;
         try {
             writeCon = DBPool.pickupWriteable(ctx);
-            updateName(folderId, newName, lastModified, modifiedBy, writeCon, ctx);
+            updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, writeCon, ctx);
         } finally {
             Database.back(ctx, true, writeCon);
         }
@@ -718,6 +719,7 @@ public final class OXFolderSQL {
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
      *
      * @param folderId The folder ID
+     * @param parentFolderId The parent folder ID
      * @param newName The new name to set
      * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
@@ -726,13 +728,18 @@ public final class OXFolderSQL {
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Connection writeCon, Context ctx) throws OXException, SQLException {
+    public static void updateName(int folderId, int parentFolderId, String newName, long lastModified, int modifiedBy, Connection writeCon, Context ctx) throws OXException, SQLException {
         if (null == writeCon) {
-            updateName(folderId, newName, lastModified, modifiedBy, ctx);
+            updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, ctx);
             return;
         }
+        if (false == OXFolderUniqueness.isUniqueFolderName(writeCon, ctx.getContextId(), parentFolderId, newName)) {
+            throw OXFolderExceptionCode.DUPLICATE_NAME.create(newName, I(parentFolderId));
+        }
+        String folderName = OXFolderUniqueness.getFolderName(writeCon, ctx.getContextId(), folderId);
 
         // Update name
+        OXFolderUniqueness.reserveFolderName(writeCon, ctx, parentFolderId, newName);
         PreparedStatement stmt = null;
         try {
             // Do the update
@@ -746,6 +753,8 @@ public final class OXFolderSQL {
         } finally {
             Databases.closeSQLStuff(stmt);
         }
+        // Remove old entry if there was no error during update
+        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), parentFolderId, folderName);
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid, fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
@@ -1609,6 +1618,10 @@ public final class OXFolderSQL {
         }
 
         final int permissionFlag = determinePermissionFlag(folder);
+        if (false == OXFolderUniqueness.isUniqueFolderName(writeCon, ctx.getContextId(), folder.getParentFolderID(), folder.getFolderName())) {
+            throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
+        }
+        OXFolderUniqueness.reserveFolderName(writeCon, ctx, folder.getParentFolderID(), folder.getFolderName());
         SQLClosure<Void> insertFolderClosure = new SQLClosure<Void>() {
 
             @Override
@@ -1793,6 +1806,18 @@ public final class OXFolderSQL {
             updateFolderSQL(userId, folder, lastModified, ctx);
             return;
         }
+        /*
+         * Check if folder name as changed, reserve folder name before update if necessary
+         */
+        boolean changedName = false;
+        String folderName = null;
+        if (Strings.isNotEmpty(folder.getFolderName())) {
+            folderName = OXFolderUniqueness.getFolderName(writeCon, ctx.getContextId(), folder.getObjectID());
+            if (false == folder.getFolderName().equalsIgnoreCase(folderName)) {
+                changedName = true;
+                OXFolderUniqueness.reserveFolderName(writeCon, ctx, folder.getParentFolderID(), folder.getFolderName());
+            }
+        }
 
         /*
          * Update Folder
@@ -1931,6 +1956,9 @@ public final class OXFolderSQL {
             }
         };
         RetryingTransactionClosure.execute(updateFolderClosure, 3, writeCon);
+        if (changedName) {
+            OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), folder.getParentFolderID(), folderName);
+        }
     }
 
     private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
@@ -1957,6 +1985,8 @@ public final class OXFolderSQL {
             return;
         }
 
+        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), src.getObjectID());
+        OXFolderUniqueness.reserveFolderName(writeCon, ctx, dest.getObjectID(), src.getFolderName());
         SQLClosure<Void> moveFolderClosure = new SQLClosure<Void>() {
 
             @Override
@@ -2105,6 +2135,7 @@ public final class OXFolderSQL {
             return;
         }
 
+        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), folderId);
         SQLClosure<Void> delClosure = new SQLClosure<Void>() {
 
             @Override
