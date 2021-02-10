@@ -383,7 +383,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
      * @param updateProcess the {@link UpdateProcess}
      * @return the failures
      */
-    private List<Map<String, Object>> getFailures(UpdateProcess updateProcess) {
+    List<Map<String, Object>> getFailures(UpdateProcess updateProcess) {
         // Return possible failures
         Queue<TaskInfo> failures = updateProcess.getFailures();
         if (failures == null || failures.isEmpty()) {
@@ -399,18 +399,18 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /////////////////////////////////// METADATA BUILDER ////////////////////////////////////////
 
-    private enum TaskMetadata {
+    enum TaskMetadata {
         taskName, state, reason, successful, lastModified, uuid, schema, className;
     }
 
-    private enum TaskState {
+    enum TaskState {
         running, pending, succeeded, failed
     }
 
     /**
      * {@link TaskMetadataBuilder}
      */
-    private static final class TaskMetadataBuilder {
+    static final class TaskMetadataBuilder {
 
         private String taskName;
         private String taskState;
