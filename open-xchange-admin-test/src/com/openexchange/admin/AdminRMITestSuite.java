@@ -52,6 +52,7 @@ package com.openexchange.admin;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.admin.reseller.rmi.AdminResellerRmiTestSuite;
 import com.openexchange.admin.rmi.AdditionalRMITests;
 import com.openexchange.admin.rmi.Bug16865Test;
 import com.openexchange.admin.rmi.Bug19379Test;

@@ -56,23 +56,23 @@ import org.junit.Test;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link MessagingRequestDataTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagingRequestDataTest {
-         @Test
-     public void testParsesLongFolderForm() throws OXException {
+
+    @Test
+    public void testParsesLongFolderForm() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
-        final String folder="some/folder";
+        final String folder = "some/folder";
 
-        final String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService + "://" + account + "/" + folder;
 
         final AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("folder" , folderLong);
+        req.putParameter("folder", folderLong);
 
         final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
 
@@ -85,21 +85,21 @@ public class MessagingRequestDataTest {
         assertEquals(folder, addr.getFolder());
     }
 
-         @Test
-     public void testNumberFormatExceptionInAccount() {
+    @Test
+    public void testNumberFormatExceptionInAccount() {
         final String messagingService = "com.openexchange.test1";
         final String account = "735abc";
-        final String folder="some/folder";
+        final String folder = "some/folder";
 
-        final String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService + "://" + account + "/" + folder;
 
         final AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("folder" , folderLong);
+        req.putParameter("folder", folderLong);
 
         final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
 
         try {
-            final MessagingFolderAddress addr = messagingRequest.getLongFolder();
+            messagingRequest.getLongFolder();
             fail("Should have failed parsing account number");
         } catch (OXException e) {
             // SUCCESS
@@ -107,16 +107,16 @@ public class MessagingRequestDataTest {
 
     }
 
-         @Test
-     public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws OXException {
+    @Test
+    public void testFallsBackToFolderForMissingMessagingServiceAndAccountIDAndFolderAndID() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
-        final String folder="some/folder";
+        final String folder = "some/folder";
 
-        final String folderLong = messagingService+"://"+account+"/"+folder;
+        final String folderLong = messagingService + "://" + account + "/" + folder;
 
         final AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("folder" , folderLong);
+        req.putParameter("folder", folderLong);
 
         final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
 
@@ -126,16 +126,16 @@ public class MessagingRequestDataTest {
 
     }
 
-         @Test
-     public void testAssemblesLongFolder() throws OXException {
+    @Test
+    public void testAssemblesLongFolder() throws OXException {
         final String messagingService = "com.openexchange.test1";
         final String account = "735";
-        final String folder="some/folder";
+        final String folder = "some/folder";
 
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", messagingService);
         req.putParameter("account", account);
-        req.putParameter("folder" , folder);
+        req.putParameter("folder", folder);
 
         final MessagingRequestData messagingRequest = new MessagingRequestData(req, null, TestRegistryBuilder.buildTestRegistry(), null);
 

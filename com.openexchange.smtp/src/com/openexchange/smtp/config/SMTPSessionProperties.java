@@ -59,6 +59,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.smtp.SmtpReloadable;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link SMTPSessionProperties} - Default properties for an SMTP session established via <code>JavaMail</code> API
@@ -111,6 +112,7 @@ public final class SMTPSessionProperties {
     static {
         SmtpReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 sessionProperties = null;
@@ -126,7 +128,6 @@ public final class SMTPSessionProperties {
     /**
      * This method can only be exclusively accessed
      */
-    @SuppressWarnings("unchecked")
     private static void initializeSMTPProperties() {
         /*
          * Define SMTP properties
@@ -136,7 +137,7 @@ public final class SMTPSessionProperties {
          * Set some global JavaMail properties
          */
         final Properties properties = sessionProperties;
-        properties.putAll((Map<? extends Object, ? extends Object>) System.getProperties().clone());
+        properties.putAll(SystemPropertiesUtils.cloneSystemProperties());
         if (!properties.containsKey(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
             properties.put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
@@ -163,8 +164,7 @@ public final class SMTPSessionProperties {
          * Deny NTLM authentication
          */
         properties.put("mail.smtp.auth.ntlm.disable", "true");
-        final Properties systemProperties = System.getProperties();
-        for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+        for (Map.Entry<Object, Object> systemProperty : SystemPropertiesUtils.getSystemProperties().entrySet()) {
             String propName = systemProperty.getKey().toString();
             if (propName.startsWith("mail.")) {
                 properties.put(propName, systemProperty.getValue());

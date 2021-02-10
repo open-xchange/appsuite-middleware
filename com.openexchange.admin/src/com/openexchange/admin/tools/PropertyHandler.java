@@ -46,9 +46,9 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.tools;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -60,19 +60,31 @@ import java.util.Properties;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Streams;
+import com.openexchange.config.ConfigurationServices;
 
+/**
+ * {@link PropertyHandler}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
+ */
 public class PropertyHandler {
 
-    protected Hashtable<String, Object>       allPropValues       = null;
-    private Hashtable<String, String>       userPropValues      = null;
-    protected Hashtable<String, String>       groupPropValues     = null;
-    private Hashtable<String, String>       resPropValues       = null;
-    private Hashtable<String, String>       rmiPropValues       = null;
-    protected Hashtable<String, String> sqlPropValues = null;
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PropertyHandler.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PropertyHandler.class);
 
-    private String configdirname;
+    private static final String RMI_PROPERTIES = "RMI.properties";
+    private static final String ADMIN_USER_PROPERTIES = "AdminUser.properties";
+    private static final String GROUP_PROPERTIES = "Group.properties";
+    private static final String RESOURCE_PROPERTIES = "Resource.properties";
+
+    protected Hashtable<String, Object> allPropValues = null;
+    private final Hashtable<String, String> userPropValues = null;
+    protected Hashtable<String, String> groupPropValues = null;
+    private final Hashtable<String, String> resPropValues = null;
+    private final Hashtable<String, String> rmiPropValues = null;
+    protected Hashtable<String, String> sqlPropValues = null;
+
+    private String configDirName;
     private final Properties sysprops;
 
     protected final static String PROPERTIES_SQL = "SQL_PROP_CONFIG";
@@ -82,358 +94,239 @@ public class PropertyHandler {
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
     public static final String USER_STORAGE = "USER_STORAGE";
 
-    public PropertyHandler(final Properties sysprops) {
-        this.allPropValues = new Hashtable<String, Object>();
+    /**
+     * Initializes a new {@link PropertyHandler}.
+     *
+     * @param sysprops the system properties
+     */
+    public PropertyHandler(Properties sysprops) {
+        this.allPropValues = new Hashtable<>();
         this.sysprops = sysprops;
         try {
             loadProps(sysprops);
         } catch (FileNotFoundException e) {
-            log.error("", e);
+            LOGGER.error("", e);
         } catch (IOException e) {
-            log.error("", e);
+            LOGGER.error("", e);
         }
     }
 
     /**
-     * Get String value from Properties-File. If not set or not found, use given fallback!
+     * Get String value from Properties-File. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public String getProp( final String key, final String fallBack ) {
+    public String getProp(String key, String fallBack) {
         String retString = fallBack;
-
-        if ( this.allPropValues.containsKey( key ) ) {
-            retString = this.allPropValues.get( key ).toString();
-        } else {
-            log.error("Property '{}' not found in file {}! Using fallback :{}", key, this.configdirname, fallBack );
+        if (allPropValues.containsKey(key)) {
+            return allPropValues.get(key).toString();
         }
-
+        LOGGER.error("Property '{}' not found in file {}! Using fallback :{}", key, this.configDirName, fallBack);
         return retString;
     }
 
-
-
     /**
+     * Get String value from System properties. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public String getSysProp( final String key, final String fallBack ) {
+    public String getSysProp(String key, String fallBack) {
         String retString = fallBack;
-        final Properties syprops = new Properties( this.sysprops );
-        retString = syprops.getProperty( key );
-
-        if ( retString == null ) {
-            log.debug("Property ''{}'' not found in the run script! Using fallback :{}", key, fallBack);
-            retString = fallBack;
+        retString = this.sysprops.getProperty(key);
+        if (retString == null) {
+            LOGGER.debug("Property '{}' not found in the run script! Using fallback :{}", key, fallBack);
+            return fallBack;
         }
-
         return retString;
     }
 
-    public String getGroupProp( final String key, final String fallBack ) {
-        String retBool = fallBack;
-
-        synchronized (this) {
-            if ( this.groupPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("Group.properties");
-                    final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
-            retBool =  this.groupPropValues.get( key ).toString();
-        } else {
-            log.debug("Property ''{}'' not found in file ''Group.properties''! Using fallback :{}", key, fallBack);
-        }
-
-        return retBool;
+    /**
+     * Get String value from the {@value #GROUP_PROPERTIES} file. If not set or not found, use given fallback.
+     *
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
+     */
+    public String getGroupProp(String key, String fallBack) {
+        return getProperty(groupPropValues, GROUP_PROPERTIES, key, fallBack);
     }
 
     /**
+     * Get boolean value from the {@value #GROUP_PROPERTIES} file. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public boolean getGroupProp( final String key, final boolean fallBack ) {
-        boolean retBool = fallBack;
-
-        synchronized (this) {
-            if ( this.groupPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("Group.properties");
-                    final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() );
-        } else {
-            log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, Boolean.valueOf(fallBack));
-        }
-
-        return retBool;
+    public boolean getGroupProp(String key, boolean fallBack) {
+        return getBooleanProperty(groupPropValues, GROUP_PROPERTIES, key, fallBack);
     }
 
     /**
+     * Get boolean value from the {@value #ADMIN_USER_PROPERTIES} file. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public boolean getUserProp( final String key, final boolean fallBack ) {
-        boolean retBool = fallBack;
-
-        synchronized (this) {
-            if ( this.userPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("AdminUser.properties");
-                    final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
-            final String val = this.userPropValues.get( key ).toString();
-            retBool = Boolean.parseBoolean( val );
-        } else {
-            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, Boolean.valueOf(fallBack));
-        }
-
-        return retBool;
+    public boolean getUserProp(final String key, final boolean fallBack) {
+        return getBooleanProperty(userPropValues, ADMIN_USER_PROPERTIES, key, fallBack);
     }
 
     /**
+     * Get String value from the {@value #ADMIN_USER_PROPERTIES} file. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public String getUserProp( final String key, final String fallBack ) {
-        String retBool = fallBack;
-
-        synchronized (this) {
-            if ( this.userPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("AdminUser.properties");
-                    final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
-            retBool =  this.userPropValues.get( key ).toString();
-        } else {
-            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, fallBack);
-        }
-        return retBool;
+    public String getUserProp(String key, String fallBack) {
+        return getProperty(userPropValues, ADMIN_USER_PROPERTIES, key, fallBack);
     }
 
     /**
+     * Get boolean value from the {@value #RESOURCE_PROPERTIES} file. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public boolean getResourceProp( final String key, final boolean fallBack ) {
-        boolean retBool = fallBack;
-
-        synchronized (this) {
-            if ( this.resPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("Resource.properties");
-                    final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
-            retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() );
-        } else {
-            log.debug("Property ''{}'' not found in file ''Resource.properties''! Using fallback :{}", key, Boolean.valueOf(fallBack));
-        }
-
-        return retBool;
+    public boolean getResourceProp(String key, boolean fallBack) {
+        return getBooleanProperty(resPropValues, RESOURCE_PROPERTIES, key, fallBack);
     }
-
 
     /**
+     * Get String value from the {@value #ADMIN_USER_PROPERTIES} file. If not set or not found, use given fallback.
      *
-     * @param key
-     * @param fallBack
-     * @return
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
      */
-    public int getRmiProp( final String key, final int fallBack ) {
-        int retInt = fallBack;
-
-        synchronized (this) {
-            if ( this.rmiPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("RMI.properties");
-                    final Hashtable<String, String> ht = this.rmiPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if ( this.rmiPropValues != null && this.rmiPropValues.containsKey( key ) ) {
-            retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() );
-        } else {
-            log.debug("Property ''{}'' not found in file ''RMI.properties''! Using fallback :{1", key, I(fallBack));
-        }
-
-        return retInt;
+    public String getResourceProp(final String key, final String fallback) {
+        return getProperty(resPropValues, RESOURCE_PROPERTIES, key, fallback);
     }
 
-    private void loadProps(final Properties sysprops) throws FileNotFoundException, IOException {
-        this.allPropValues.put( AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL" );
-
-        if ( sysprops.getProperty( "openexchange.propdir" ) != null ) {
-            this.configdirname = sysprops.getProperty("openexchange.propdir");
-            addpropsfromfile(this.configdirname + File.separatorChar + "AdminDaemon.properties");
-        } else {
-            log.error("Parameter '-Dopenexchange.propdir' not given in system properties!");
-            log.error("Now, using default parameter!");
-        }
+    /**
+     * Get integer value from the {@value #RMI_PROPERTIES} file. If not set or not found, use given fallback.
+     *
+     * @param key The property key
+     * @param fallBack The fall-back value
+     * @return The property value
+     */
+    public int getRmiProp(final String key, final int fallBack) {
+        return getIntProperty(rmiPropValues, RMI_PROPERTIES, key, fallBack);
     }
 
-    protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
-        final Properties configprops  = new Properties();
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            configprops.load(in);
-        } finally {
-            Streams.close(in);
+    /**
+     * Adds all properties from the specified file to the local cache
+     *
+     * @param file The file name
+     * @throws FileNotFoundException if the file does not exist
+     * @throws IOException if an I/O error is occurred
+     */
+    protected void addpropsfromfile(String file) throws FileNotFoundException, IOException {
+        Properties configProps = new Properties();
+        try (FileInputStream in = new FileInputStream(file)) {
+            configProps.load(in);
         }
 
-        final Enumeration<?> enumi = configprops.propertyNames();
-        while ( enumi.hasMoreElements() ) {
-            final String param = (String)enumi.nextElement();
-            String value = configprops.getProperty( param );
+        final Enumeration<?> enumeration = configProps.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            final String param = String.class.cast(enumeration.nextElement());
+            String value = configProps.getProperty(param);
 
-            if ( value.startsWith( "$PWD" ) ) {
+            if (value.startsWith("$PWD")) {
                 // FIXME: Set a parsed value here instead of working dir
                 // A new File without any content point to the current working dir
-                value = stringReplacer( value, "$PWD", new File( "" ).getAbsolutePath() );
+                value = stringReplacer(value, "$PWD", new File("").getAbsolutePath());
             }
 
-            this.allPropValues.put( param, value );
+            allPropValues.put(param, value);
 
-            if ( param.toLowerCase().endsWith( "_prop" ) ) {
-                final Properties customprops = new Properties();
-                try {
-                    in = new FileInputStream(value);
+            if (param.toLowerCase().endsWith("_prop")) {
+                Properties customprops = new Properties();
+                try (FileInputStream in = new FileInputStream(value)) {
                     customprops.load(in);
-                } finally {
-                    Streams.close(in);
                 }
-                final Enumeration<?> enuma = customprops.propertyNames();
-                Hashtable<String, String> custconfig = new Hashtable<String, String>();
-                if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {
-                    @SuppressWarnings("unchecked") Hashtable<String, String> ht = (Hashtable<String, String>) this.allPropValues.get( param + "_CONFIG" );
+                Enumeration<?> enuma = customprops.propertyNames();
+                Hashtable<String, String> custconfig = new Hashtable<>();
+                if (allPropValues.containsKey(param + "_CONFIG")) {
+                    @SuppressWarnings("unchecked") Hashtable<String, String> ht = (Hashtable<String, String>) allPropValues.get(param + "_CONFIG");
                     custconfig = ht;
                 }
-                while ( enuma.hasMoreElements() ){
-                    final String param_ = (String)enuma.nextElement();
-                    String value_ = customprops.getProperty( param_ );
-                    if ( value_.startsWith( "$PWD" ) ) {
-                        value_ = stringReplacer( value_, "$PWD", new File( "" ).getAbsolutePath() );
+                while (enuma.hasMoreElements()) {
+                    String param_ = (String) enuma.nextElement();
+                    String value_ = customprops.getProperty(param_);
+                    if (value_.startsWith("$PWD")) {
+                        value_ = stringReplacer(value_, "$PWD", new File("").getAbsolutePath());
                     }
-                    if ( value_.startsWith( "\"" ) ) {
-                        value_ = value_.substring( 1 );
+                    if (value_.startsWith("\"")) {
+                        value_ = value_.substring(1);
                     }
-                    if ( value_.endsWith( "\"" ) ) {
-                        value_ = value_.substring( 0 , value_.length() - 1 );
+                    if (value_.endsWith("\"")) {
+                        value_ = value_.substring(0, value_.length() - 1);
 
                     }
-                    custconfig.put( param_, value_ );
+                    custconfig.put(param_, value_);
                 }
-                this.allPropValues.put( param + "_CONFIG", custconfig );
+                allPropValues.put(param + "_CONFIG", custconfig);
             }
         }
     }
 
-    private String stringReplacer(final String source, final String find, final String replacement ) {
+    ///////////////////////////////// HELPERS ////////////////////////////
+
+    /**
+     * Loads all properties from the configured properties directory
+     *
+     * @param sysprops The system properties
+     * @throws FileNotFoundException if no properties files are found
+     * @throws IOException if an I/O error is occurred
+     */
+    private void loadProps(final Properties sysprops) throws FileNotFoundException, IOException {
+        allPropValues.put(AdminProperties.Prop.ADMINDAEMON_LOGLEVEL, "ALL");
+
+        if (sysprops.getProperty("openexchange.propdir") != null) {
+            configDirName = sysprops.getProperty("openexchange.propdir");
+            addpropsfromfile(this.configDirName + File.separatorChar + "AdminDaemon.properties");
+        } else {
+            LOGGER.error("Parameter '-Dopenexchange.propdir' not given in system properties!");
+            LOGGER.error("Now, using default parameter!");
+        }
+    }
+
+    /**
+     * Replaces the specified source string with the specified replacement if a match is found
+     *
+     * @param source The source string
+     * @param find The search string
+     * @param replacement The replacement
+     * @return The new string with the replacement
+     */
+    private String stringReplacer(String source, String find, String replacement) {
         int i = 0;
         int j;
         final int k = find.length();
         final int m = replacement.length();
 
         String src = source;
-        while ( i < src.length() ) {
-            j = src.indexOf( find, i );
+        while (i < src.length()) {
+            j = src.indexOf(find, i);
 
-            if ( j == -1 ) {
+            if (j == -1) {
                 break;
             }
 
-            if ( j == 0 ) {
-                src = replacement + src.substring( j + k );
-            } else if ( j + k == src.length() ) {
-                src = src.substring( 0, j ) + replacement;
+            if (j == 0) {
+                src = replacement + src.substring(j + k);
+            } else if (j + k == src.length()) {
+                src = src.substring(0, j) + replacement;
             } else {
-                src = src.substring( 0, j ) + replacement + src.substring( j + k );
+                src = src.substring(0, j) + replacement + src.substring(j + k);
             }
             i = j + m;
         }
@@ -441,33 +334,89 @@ public class PropertyHandler {
         return src;
     }
 
-    public String getResourceProp(final String key, final String fallback) {
+    /**
+     * Retrieves the specified boolean property from the specified properties' file
+     * If the property is absent or cannot be retrieved,
+     * the supplied fallback is returned
+     *
+     * @param propertiesFile The properties file
+     * @param key The property key
+     * @param fallback The fallback value
+     * @return The property's value or the fallback
+     */
+    private boolean getBooleanProperty(Hashtable<String, String> cachedValues, String propertiesFile, String key, boolean fallback) {
+        return Boolean.parseBoolean(getProperty(cachedValues, propertiesFile, key, Boolean.toString(fallback)));
+    }
+
+    /**
+     * Retrieves the specified integer property from the specified properties' file
+     * If the property is absent or cannot be retrieved,
+     * the supplied fallback is returned
+     *
+     * @param cachedValues The cached values
+     * @param propertiesFile The properties file
+     * @param key The property key
+     * @param fallback The fallback value
+     *
+     * @return The property's value or the fallback
+     */
+    private int getIntProperty(Hashtable<String, String> cachedValues, String propertiesFile, String key, int fallback) {
+        return Integer.parseInt(getProperty(cachedValues, propertiesFile, key, Integer.toString(fallback)));
+    }
+
+    /**
+     * Retrieves the specified property from the specified properties' file
+     * If the property is absent or cannot be retrieved,
+     * the supplied fallback is returned
+     *
+     * @param cachedValues The cached values, if <code>null</code> will be initialised and all properties will be cached in that {@link Hashtable}
+     * @param propertiesFile The properties file
+     * @param key The property key
+     * @param fallback The fallback value
+     *
+     * @return The property's value or the fallback
+     */
+    private String getProperty(Hashtable<String, String> cachedValues, String propertiesFile, String key, String fallback) {
         String retval = fallback;
         synchronized (this) {
-            if (this.resPropValues == null) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                } else {
-                    final Properties properties = service.getFile("Resource.properties");
-                    final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
+            if (cachedValues == null) {
+                Properties properties = getPropertiesFile(propertiesFile);
+                if (null != properties) {
+                    Hashtable<String, String> ht = cachedValues = new Hashtable<>(properties.size());
+                    for (Entry<Object, Object> entry : properties.entrySet()) {
                         ht.put(entry.getKey().toString(), entry.getValue().toString());
                     }
                 }
             }
         }
 
-        if (this.resPropValues != null && this.resPropValues.containsKey(key)) {
-            retval = this.resPropValues.get(key).toString();
-        } else {
-            log.debug("Property '{}' not found in file 'Resource.properties'! Using fallback :{}", key, fallback);
+        if (cachedValues != null && cachedValues.containsKey(key)) {
+            return cachedValues.get(key).toString();
         }
+        LOGGER.debug("Property '{}' not found in file '{}'! Using fallback :{}", key, propertiesFile, fallback);
         return retval;
     }
 
-
+    /**
+     * Retrieves the properties from the specified file
+     *
+     * @param propertiesFile The properties file
+     * @return The properties or <code>null</code> if the config service is absent or no file is found.
+     */
+    private Properties getPropertiesFile(String propertiesFile) {
+        ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            service = AdminCache.getConfigurationService();
+        }
+        if (null == service) {
+            LOGGER.debug("Service '{}' is missing.", ConfigurationService.class.getName());
+            return null;
+        }
+        try {
+            return ConfigurationServices.loadPropertiesFrom(service.getFileByName(propertiesFile));
+        } catch (IOException e) {
+            LOGGER.error("Properties file '{}' file cannot be opened for reading!", propertiesFile, e);
+            return null;
+        }
+    }
 }

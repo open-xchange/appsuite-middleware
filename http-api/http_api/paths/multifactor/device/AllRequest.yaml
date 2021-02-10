@@ -4,8 +4,8 @@
     tags:
       - Multifactor
     summary: Gets all multifactor devices
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

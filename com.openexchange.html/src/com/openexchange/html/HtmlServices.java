@@ -517,6 +517,10 @@ public final class HtmlServices {
                 }
             }
         }
+        
+        if (c == null) {
+            return s;
+        }
 
         while (i-- > 0) {
             if (c[i] <= 127) {
@@ -524,7 +528,7 @@ public final class HtmlServices {
             }
         }
 
-        return c == null ? s : new String(c);
+        return new String(c);
     }
 
     // ------------------------------------------------------------------------------------------------------------------------ //

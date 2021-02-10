@@ -61,8 +61,8 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
  * To implement this in our class simply extend from this class.
  *
  * @author d7
- *
  */
+@SuppressWarnings("deprecation")
 public abstract class ExtendableDataObject extends EnforceableDataObject implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 5125311385480887183L;
@@ -129,11 +129,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * @return
      */
     public boolean removeExtension(final OXCommonExtension extension) {
-        if (null == extensions.remove(extension.getClass().getName())) {
-            return false;
-        } else {
-            return true;
-        }
+        return null == extensions.remove(extension.getClass().getName()) ? false : true;
     }
 
     public final void setExtensionsok(boolean extensionsok) {

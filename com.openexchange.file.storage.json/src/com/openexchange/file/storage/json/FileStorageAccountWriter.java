@@ -49,25 +49,18 @@
 
 package com.openexchange.file.storage.json;
 
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * Renders a FileStorageAccount in its JSON representation also using the dynamic form description of the parent file storage service.
@@ -128,51 +121,20 @@ public class FileStorageAccountWriter {
      * Writes given account into its JSON representation.
      *
      * @param account The account
-     * @param rootFolder The accounts root folder
+     * @param rootFolder The accounts root folder, or <code>null</code> if there is none
+     * @param capabilities The capabilities to include, or <code>null</code> if not applicable
+     * @param metadata A json object providing additional arbitrary metadata of the account for clients, or <code>null</code> if not applicable
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
      */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities) throws JSONException {
-        JSONObject accountJSON = new JSONObject(7);
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities, JSONObject metadata) throws JSONException {
+        JSONObject accountJSON = new JSONObject();
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
-        final FileStorageService fsService = account.getFileStorageService();
+        FileStorageService fsService = account.getFileStorageService();
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
         accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
-        accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
-        accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
-
-        DynamicFormDescription formDescription = fsService.getFormDescription();
-        if (null != formDescription && null != account.getConfiguration()) {
-            JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
-            accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
-        }
-
-        // Add capabilities
-        if (capabilities == null) {
-            capabilities = new HashSet<String>(0);
-        }
-        accountJSON.put("capabilities", capabilities);
-        return accountJSON;
-    }
-
-    /**
-     * Writes given erroneous account into its JSON representation.
-     *
-     * @param account The account
-     * @param rootFolder The accounts root folder
-     * @return The resulting JSON
-     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
-     * @throws JSONException If writing JSON fails
-     */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities, OXException exception, Session session, boolean includeStackTraceOnError) throws JSONException {
-        JSONObject accountJSON = new JSONObject(12 + (exception.getLogArgs() != null ? exception.getLogArgs().length : 0));
-        accountJSON.put(FileStorageAccountConstants.ID, account.getId());
-        final FileStorageService fsService = account.getFileStorageService();
-        accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
-        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
-        accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
-        if (rootFolder != null) {
+        if (null != rootFolder) {
             accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
         }
         accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
@@ -183,32 +145,11 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
-        // Add capabilities
-        if (capabilities == null) {
-            capabilities = new HashSet<String>(0);
-        }
-        accountJSON.put("capabilities", capabilities);
-        accountJSON.put("hasError", true);
-
-        ResponseWriter.addException(accountJSON, exception, localeFrom(session), includeStackTraceOnError);
+        accountJSON.putOpt("capabilities", null != capabilities ? new JSONArray(capabilities) : null);
+        accountJSON.putOpt("metadata", metadata);
 
         return accountJSON;
     }
-
-    private static Locale localeFrom(final Session session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        try {
-            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
-        } catch (OXException e) {
-            return Locale.US;
-        }
-    }
-
 
     /**
      * Writes the given file storage service into its JSON representation.

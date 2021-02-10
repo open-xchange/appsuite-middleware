@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Mechanism Bundle 
 Bundle-SymbolicName: com.openexchange.password.mechanism
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Description: The Open-Xchange password-mechanism bundle
@@ -25,3 +25,4 @@ Export-Package: com.openexchange.password.mechanism,
  com.openexchange.password.mechanism.exceptions,
  com.openexchange.password.mechanism.stock
 Bundle-Activator: com.openexchange.password.mechanism.osgi.PasswordMechImplActivator
+Automatic-Module-Name: com.openexchange.password.mechanism

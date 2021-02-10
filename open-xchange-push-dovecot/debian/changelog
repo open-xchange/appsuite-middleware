@@ -1,68 +1,38 @@
-open-xchange-push-dovecot (7.10.4-18) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-5) stable; urgency=medium
 
-  * Build for patch 2021-02-08 (5945)
+  * Third candidate for 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 02 Feb 2021 10:10:41 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 05 Feb 2021 13:49:10 +0000
 
-open-xchange-push-dovecot (7.10.4-17) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-4) stable; urgency=medium
 
-  * Build for patch 2021-01-25 (5937)
+  * Second candidate for 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 19 Jan 2021 09:55:06 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 01 Feb 2021 11:14:29 +0000
 
-open-xchange-push-dovecot (7.10.4-16) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-3) stable; urgency=medium
 
-  * Build for patch 2021-01-11 (5930)
+  * First candidate for 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 05 Jan 2021 11:33:51 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 15 Jan 2021 12:45:52 +0000
 
-open-xchange-push-dovecot (7.10.4-15) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-2) stable; urgency=medium
 
-  * Build for patch 2020-12-14 (5924)
+  * Second preview of 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 09 Dec 2020 11:56:34 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 17 Dec 2020 13:31:26 +0000
 
-open-xchange-push-dovecot (7.10.4-14) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-1) stable; urgency=medium
 
-  * Build for patch 2020-11-23 (5905)
+  * First preview of 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 16 Nov 2020 14:12:23 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 27 Nov 2020 15:56:58 +0000
 
-open-xchange-push-dovecot (7.10.4-13) stable; urgency=medium
+open-xchange-push-dovecot (7.10.5-0) unstable; urgency=medium
 
-  * Build for patch 2020-11-09 (5891)
+  * prepare for 7.10.5 release
 
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 04 Nov 2020 12:08:39 +0000
-
-open-xchange-push-dovecot (7.10.4-12) stable; urgency=medium
-
-  * Build for patch 2020-10-26 (5888)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 20 Oct 2020 10:51:02 +0000
-
-open-xchange-push-dovecot (7.10.4-11) stable; urgency=medium
-
-  * Build for patch 2020-10-12 (5879)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 06 Oct 2020 12:03:31 +0000
-
-open-xchange-push-dovecot (7.10.4-10) stable; urgency=medium
-
-  * Build for patch 2020-09-29 (5869)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 23 Sep 2020 10:29:30 +0000
-
-open-xchange-push-dovecot (7.10.4-9) stable; urgency=medium
-
-  * Build for patch 2020-09-14 (5857)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 11 Sep 2020 11:10:09 +0000
-
-open-xchange-push-dovecot (7.10.4-8) stable; urgency=medium
-
-  * Build for patch 2020-08-24 (5842)
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 24 Aug 2020 15:08:48 +0000
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 06 Oct 2020 09:28:38 +0200
 
 open-xchange-push-dovecot (7.10.4-7) stable; urgency=medium
 

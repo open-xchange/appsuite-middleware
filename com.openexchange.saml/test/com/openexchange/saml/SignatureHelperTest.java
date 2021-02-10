@@ -55,8 +55,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -69,7 +67,6 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import com.openexchange.saml.tools.SignatureHelper;
 import com.openexchange.saml.validation.ValidationError;
 
@@ -99,7 +96,7 @@ public class SignatureHelperTest {
     Signature signature;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(SigningUtil.class);
         PowerMockito.mockStatic(SignatureValidator.class);
@@ -110,7 +107,7 @@ public class SignatureHelperTest {
     }
 
     @Test
-    public void testValidateSignature_TwoSigPass() throws Exception {
+    public void testValidateSignature_TwoSigPass() {
         ValidationError error = SignatureHelper.validateSignature(object, credentials);
         assertTrue("Expected no validation failure, but did fail", error == null);
     }

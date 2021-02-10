@@ -72,7 +72,7 @@ public class UnsynchronizedStringReader extends Reader {
      *
      * @param s String providing the character stream.
      */
-    public UnsynchronizedStringReader(final String s) {
+    public UnsynchronizedStringReader(String s) {
         this.str = s;
         this.length = s.length();
     }
@@ -101,7 +101,7 @@ public class UnsynchronizedStringReader extends Reader {
      * @exception IOException If an I/O error occurs
      */
     @Override
-    public int read(final char cbuf[], final int off, final int len) throws IOException {
+    public int read(char cbuf[], int off, int len) throws IOException {
         if ((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length) || ((off + len) < 0)) {
             throw new IndexOutOfBoundsException();
         } else if (len == 0) {
@@ -128,7 +128,7 @@ public class UnsynchronizedStringReader extends Reader {
      * @exception IOException If an I/O error occurs
      */
     @Override
-    public long skip(final long ns) throws IOException {
+    public long skip(long ns) throws IOException {
         if (next >= length) {
             return 0;
         }
@@ -167,7 +167,7 @@ public class UnsynchronizedStringReader extends Reader {
      * @exception IOException If an I/O error occurs
      */
     @Override
-    public void mark(final int readAheadLimit) throws IOException {
+    public void mark(int readAheadLimit) throws IOException {
         if (readAheadLimit < 0) {
             throw new IllegalArgumentException("Read-ahead limit < 0");
         }

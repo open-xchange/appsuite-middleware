@@ -72,7 +72,9 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link AggregateSharesTest}
@@ -110,6 +112,7 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAggregateSharesRandomly() throws Exception {
         testAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -131,6 +134,7 @@ public class AggregateSharesTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testRemoveAggregateSharesRandomly() throws Exception {
         testRemoveAggregateShares(randomFolderAPI(), randomClient(), randomModule(), randomClient(), randomModule());
     }
@@ -349,7 +353,8 @@ public class AggregateSharesTest extends ShareTest {
         ResolveShareResponse shareResolveResponse = new GuestClient(shareURLA, guestPermission.getRecipient(), false).getShareResolveResponse();
         assertEquals("Login type wrong", "guest_password", shareResolveResponse.getLoginType());
         assertEquals("Status wrong", "not_found_continue", shareResolveResponse.getStatus());
-        assertEquals("Target wrong", folderBTarget,  shareResolveResponse.getTarget());
+        assertNotNull("No target", shareResolveResponse.getTarget());
+        assertTrue("Target wrong", ShareTargetPath.parse(folderBTarget).matches(ShareTargetPath.parse(shareResolveResponse.getTarget())));
         /*
          * check if share link to folder A still accessible
          */

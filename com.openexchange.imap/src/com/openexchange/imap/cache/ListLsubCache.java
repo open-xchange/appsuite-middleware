@@ -520,10 +520,8 @@ public final class ListLsubCache {
      * @param accountId The account ID
      * @param session The session
      * @return The cached LIST entry or <code>null</code>
-     * @throws OXException If loading the entry fails
-     * @throws MessagingException If a messaging error occurs
      */
-    public static ListLsubEntry tryCachedLISTEntry(String fullName, int accountId, Session session) throws OXException, MessagingException {
+    public static ListLsubEntry tryCachedLISTEntry(String fullName, int accountId, Session session) {
         // Get the associated map
         Cache<Integer, ListLsubCollection> cache = CACHE.getIfPresent(UserAndContext.newInstance(session));
         if (null == cache) {
@@ -885,7 +883,7 @@ public final class ListLsubCache {
         }
     }
 
-    private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session, final boolean ignoreSubscriptions) throws OXException, MessagingException {
+    private static ListLsubCollection getCollection(int accountId, IMAPFolder imapFolder, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
         // Get the associated map
         Cache<Integer, ListLsubCollection> cache = CACHE.getUnchecked(UserAndContext.newInstance(session));
 

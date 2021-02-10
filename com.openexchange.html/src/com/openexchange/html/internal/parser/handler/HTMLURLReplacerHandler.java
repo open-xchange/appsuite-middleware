@@ -50,9 +50,7 @@
 package com.openexchange.html.internal.parser.handler;
 
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -61,7 +59,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.parser.HtmlHandler;
@@ -240,27 +237,6 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
-        }
-    }
-
-    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
-
-    private static String replaceURLCodePoints(final String s) {
-        final Matcher m = PATTERN_CODE_POINT.matcher(s);
-        final StringBuffer buffer = new StringBuffer(s.length());
-        while (m.find()) {
-            final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
-        }
-        m.appendTail(buffer);
-        return buffer.toString();
-    }
-
-    private static String urlDecode(final String s) {
-        try {
-            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            return s;
         }
     }
 

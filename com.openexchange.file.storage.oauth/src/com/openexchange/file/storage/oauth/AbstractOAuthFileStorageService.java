@@ -69,11 +69,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -93,7 +95,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener, FileStorageAccountDeleteListener {
+public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener, FileStorageAccountDeleteListener, LoginAwareFileStorageServiceExtension {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthFileStorageService.class);
 
@@ -141,6 +143,15 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         tmpDescription.add(oauthAccount);
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
+    
+    @Override
+    public void testConnection(FileStorageAccount account, Session session) throws OXException {
+        FileStorageAccountAccess accountAccess = getAccountAccess(account.getId(), session);
+        if (false == accountAccess.isConnected()) {
+            accountAccess.connect();
+        }
+        accountAccess.ping();
+    }
 
     @Override
     public DynamicFormDescription getFormDescription() {
@@ -186,7 +197,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         Integer iUserId = Integer.valueOf(user);
         Integer iContextId = Integer.valueOf(cid);
         try {
-            List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
+            List<FileStorageAccount> toDelete = new LinkedList<>();
             FakeSession session = new FakeSession(null, user, cid);
             for (FileStorageAccount account : getAccounts0(session, false)) {
                 Object obj = account.getConfiguration().get("account");
@@ -203,7 +214,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Pass the connection and the hint about the scopes to the FileStorageAccountManager
             // as a session parameter.
             session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, eventProps.get(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES));
-            session.setParameter("__file.storage.delete.connection", con);
+            session.setParameter("__connection", con);
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
                     accountManager.deleteAccount(deleteMe, session);
@@ -214,7 +225,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                     }
                 }
             } finally {
-                session.setParameter("__file.storage.delete.connection", null);
+                session.setParameter("__connection", null);
                 session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
             }
         } catch (Exception e) {
@@ -266,7 +277,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return;
         }
 
-        session.setParameter("__file.storage.delete.connection", con);
+        session.setParameter("__connection", con);
         try {
             OAuthService storage = services.getService(OAuthService.class);
             if (storage == null) {
@@ -302,7 +313,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Update the account
             storage.updateAccount(session, accountId, eventProps);
         } finally {
-            session.setParameter("__file.storage.delete.connection", null);
+            session.setParameter("__connection", null);
         }
     }
 
@@ -374,7 +385,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return getAccountManager0(secretAware).getAccounts(session);
         }
 
-        Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<String, FileStorageAccountInfo>(8);
+        Map<String, FileStorageAccountInfo> accountsMap = new LinkedHashMap<>(8);
         for (FileStorageAccountManagerProvider provider : compositeAccountManager.providers()) {
             for (FileStorageAccount account : newInstanceFor(provider.getAccountManagerFor(getId())).getAccounts(session)) {
                 FileStorageAccountInfo info = new FileStorageAccountInfo(account, provider.getRanking());
@@ -386,7 +397,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             }
         }
 
-        List<FileStorageAccount> ret = new ArrayList<FileStorageAccount>(accountsMap.size());
+        List<FileStorageAccount> ret = new ArrayList<>(accountsMap.size());
         for (FileStorageAccountInfo info : accountsMap.values()) {
             ret.add(info.getAccount());
         }

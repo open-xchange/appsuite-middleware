@@ -64,6 +64,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * Share links are broken - a link like https://ox.example.com/appsuite/ui#!&app=io.ox/files&folder=10&id=1234/9876
@@ -75,6 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class Bug40527Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testInternalFileShareLinkOnSharedCreation() throws Exception {
         AJAXClient shareClient = getClient2();
         try {
@@ -98,6 +100,7 @@ public class Bug40527Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testInternalFileShareLinkOnSubsequentShare() throws Exception {
         AJAXClient shareClient = getClient2();
         try {

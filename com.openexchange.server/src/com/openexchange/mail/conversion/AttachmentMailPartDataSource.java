@@ -129,7 +129,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
         throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
     }
 
-    private MailPart getMail(final int accountId, final String fullname, final String mailId, Session session, DataProperties properties) throws OXException {
+    private MailPart getMail(int accountId, String fullname, String mailId, Session session, DataProperties properties) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);

@@ -113,11 +113,13 @@ public class MockOAuthService implements OAuthService {
                 return null;
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public String getSecret() {
                 return tokenSecret;
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public String getToken() {
                 return token;
@@ -139,6 +141,11 @@ public class MockOAuthService implements OAuthService {
             public String getUserIdentity() {
                 // TODO Auto-generated method stub
                 return null;
+            }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
             }
 
         };

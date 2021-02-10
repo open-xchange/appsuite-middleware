@@ -335,7 +335,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *                       DISTANT_FUTURE to circumvent the check
      * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
-     * @param The fields to use from the update. May be null if the update is null.
+     * @param modifiedFields The fields to use from the update. May be null if the update is null.
      * @return The new folderId and id
      * @throws OXException If operation fails
      */

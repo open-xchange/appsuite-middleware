@@ -88,7 +88,7 @@ import com.openexchange.testing.httpclient.models.MailData;
  * - Test User 1 from context C1
  * - Test User 2 from context C2
  * and their API clients as well as user information
- * 
+ *
  * <p>
  * Note: Also tests should only check one specific aspect, iTIP test require to do some steps. Therefore we can test
  * everything at once, to avoid duplicating code.
@@ -301,7 +301,7 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
          * Apply change as organizer via iTIP API
          */
         assertSingleEvent(update(constructBody(reply)), created.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), created.getId(), created.getFolder(), created.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(created.getId(), created.getFolder(), created.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
         for (Attendee attendee : createdEvent.getAttendees()) {

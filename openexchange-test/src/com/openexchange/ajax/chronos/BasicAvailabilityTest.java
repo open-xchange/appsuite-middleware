@@ -77,7 +77,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         // Clear the availability
-        chronosApi.setAvailability(defaultUserApi.getSession(), new AvailabilityData());
+        chronosApi.setAvailability(new AvailabilityData());
         super.tearDown();
     }
 
@@ -93,10 +93,10 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
         chronosApi = new ChronosApi(defaultUserApi.getClient());
 
         // Set the availability
-        chronosApi.setAvailability(defaultUserApi.getSession(), availabilityData);
+        chronosApi.setAvailability(availabilityData);
 
         // Get the availability
-        GetAvailabilityResponse availability = chronosApi.getAvailability(defaultUserApi.getSession());
+        GetAvailabilityResponse availability = chronosApi.getAvailability();
         List<Available> availableBlocks = availability.getData();
 
         // Assert
@@ -118,10 +118,10 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
         chronosApi = new ChronosApi(defaultUserApi.getClient());
 
         // Set the availability
-        chronosApi.setAvailability(defaultUserApi.getSession(), availabilityData);
+        chronosApi.setAvailability(availabilityData);
 
         // Get the availability
-        GetAvailabilityResponse availability = chronosApi.getAvailability(defaultUserApi.getSession());
+        GetAvailabilityResponse availability = chronosApi.getAvailability();
         List<Available> availableBlocks = availability.getData();
 
         // Assert
@@ -143,10 +143,10 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
         chronosApi = new ChronosApi(defaultUserApi.getClient());
 
         // Set the availability
-        chronosApi.setAvailability(defaultUserApi.getSession(), availabilityData);
+        chronosApi.setAvailability(availabilityData);
 
         // Get the availability
-        GetAvailabilityResponse availability = chronosApi.getAvailability(defaultUserApi.getSession());
+        GetAvailabilityResponse availability = chronosApi.getAvailability();
         List<Available> availableBlocks = availability.getData();
 
         // Assert
@@ -157,7 +157,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
 
     /**
      * Creates an {@link Available} block within the specified range
-     * 
+     *
      * @param from The starting point in time
      * @param until The ending point in time
      * @return The {@link Available} block
@@ -173,7 +173,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
     /**
      * Creates an {@link Available} block within the specified range and the specified
      * recurrence rule
-     * 
+     *
      * @param from The starting point in time
      * @param until The ending point in time
      * @param rrule The recurrence rule
@@ -189,7 +189,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
     /**
      * Asserts that the specified expected {@link List} of {@link Available} blocks
      * is equal to the specified actual {@link List} of {@link Available} blocks
-     * 
+     *
      * @param expected The expected {@link List}
      * @param actual The actual {@link List}
      */
@@ -203,7 +203,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
 
     /**
      * Asserts that the expected {@link Available} is equal the actual {@link Available}
-     * 
+     *
      * @param expected The expected {@link Available}
      * @param actual The actual {@link Available}
      */

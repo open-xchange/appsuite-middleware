@@ -58,10 +58,10 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 
 /**
- * {@link OAuthDropboxDropTokensTask}
+ * {@link OAuthDropboxDropTokensTask} - Update task to drop all OAuth tokens in
+ * preparation for OAuth 2.0.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -79,7 +79,7 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
         Connection writeConnection = params.getConnection();
         PreparedStatement statement = null;
         try {
-            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?");
+            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE serviceId = ?");
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
@@ -94,6 +94,6 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
+        return new String[] { "com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2" };
     }
 }

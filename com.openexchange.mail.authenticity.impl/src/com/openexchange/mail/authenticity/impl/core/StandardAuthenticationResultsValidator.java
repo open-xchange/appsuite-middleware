@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -352,7 +353,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             }
             overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, domain);
             overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MECH, result.getMechanism().getTechnicalName());
-            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, !domain.equalsIgnoreCase(fromDomain));
+            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, B(!domain.equalsIgnoreCase(fromDomain)));
             break;
         }
     }
@@ -659,17 +660,17 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         DKIMResult result = (DKIMResult) dkimResult.getResult();
         switch (result) {
             case PASS:
-                return true;
+                return B(true);
             case FAIL:
             case PERMFAIL:
-                return false;
+                return B(false);
             case NONE:
             case NEUTRAL:
             case TEMPERROR:
                 return null;
             case POLICY:
             default:
-                return true;
+                return B(true);
         }
     }
 
@@ -696,6 +697,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                     // Retain NEUTRAL
                     return;
                 }
+                //$FALL-THROUGH$
             case FAIL:
             case PERMERROR:
                 if (dkimStatus == null || false == dkimStatus.booleanValue()) {

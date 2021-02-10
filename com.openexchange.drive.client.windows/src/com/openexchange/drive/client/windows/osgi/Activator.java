@@ -52,7 +52,6 @@ package com.openexchange.drive.client.windows.osgi;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -72,6 +71,7 @@ import com.openexchange.drive.client.windows.servlet.DownloadServlet;
 import com.openexchange.drive.client.windows.servlet.InstallServlet;
 import com.openexchange.drive.client.windows.servlet.UpdatesXMLServlet;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -88,7 +88,6 @@ public class Activator extends HousekeepingActivator {
     private String downloadServletAlias;
     private String updateServletAlias;
     private String installServletAlias;
-    private ServiceRegistration<Remote> serviceRegistration;
 
     /**
      * Initializes a new {@link Activator}.
@@ -135,32 +134,27 @@ public class Activator extends HousekeepingActivator {
         //register rmi interface
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
         props.put("RMIName", BrandingConfigurationRemote.RMI_NAME);
-        serviceRegistration = context.registerService(Remote.class, new BrandingConfigurationRemoteImpl(), props);
-
+        registerService(Remote.class, new BrandingConfigurationRemoteImpl(), props);
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
         HttpService httpService = getService(HttpService.class);
         if (httpService != null) {
             if (downloadServletAlias != null) {
-                httpService.unregister(downloadServletAlias);
+                HttpServices.unregister(downloadServletAlias, httpService);
                 downloadServletAlias = null;
             }
             if (updateServletAlias != null) {
-                httpService.unregister(updateServletAlias);
+                HttpServices.unregister(updateServletAlias, httpService);
                 updateServletAlias = null;
             }
             if (installServletAlias != null) {
-                httpService.unregister(installServletAlias);
+                HttpServices.unregister(installServletAlias, httpService);
                 installServletAlias = null;
             }
         }
-        Services.setServiceLookup(null);
         super.stopBundle();
+        Services.setServiceLookup(null);
     }
 }

@@ -3,9 +3,10 @@
     operationId: getQuotaInformation
     tags:
       - Quota
-    summary: Gets quota information.
+    summary: Gets quota information
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: module
         description: >-

@@ -74,7 +74,7 @@ public class Bug51480VulTest extends AbstractSanitizing {
             "Stop";
 
         try {
-            String sanitized = getHtmlService().sanitize(content, null, false, null, null);
+            getHtmlService().sanitize(content, null, false, null, null);
             fail("HTML should be recognized as corrupt");
         } catch (OXException e) {
             assertTrue("Unexpected error", e.equalsCode(4, "HTM"));

@@ -68,7 +68,6 @@ import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
-import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.User;
 
@@ -105,7 +104,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
      *
      * @param status The twitter status
      */
-    public TwitterMessagingMessage(final Status status, final Session session) throws OXException {
+    public TwitterMessagingMessage(final Status status) throws OXException {
         super();
         this.status = status;
 
@@ -130,7 +129,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         }
         headers = Collections.unmodifiableMap(m);
 
-        final TwitterMultipartContent multipartContent = TwitterMultipartContent.newInstance(status, session);
+        final TwitterMultipartContent multipartContent = TwitterMultipartContent.newInstance(status);
         content = multipartContent;
 
         long sz = -1;

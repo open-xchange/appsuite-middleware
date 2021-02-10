@@ -103,6 +103,10 @@ public class SAMLTestUtils {
         return map;
     }
 
+    public static AddSessionParameter buildAddSessionParameter() {
+        return buildAddSessionParameter(null);
+    }
+
     public static AddSessionParameter buildAddSessionParameter(final SessionEnhancement enhancement) {
         return new AddSessionParameter() {
 
@@ -143,7 +147,7 @@ public class SAMLTestUtils {
 
             @Override
             public List<SessionEnhancement> getEnhancements() {
-                return Arrays.asList(enhancement);
+                return null != enhancement ? Arrays.asList(enhancement) : Collections.emptyList();
             }
 
             @Override

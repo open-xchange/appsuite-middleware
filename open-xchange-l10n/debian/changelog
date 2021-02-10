@@ -1,68 +1,38 @@
-open-xchange-l10n (7.10.4-18) stable; urgency=medium
+open-xchange-l10n (7.10.5-5) stable; urgency=medium
 
-  * Build for patch 2021-02-08 (5945)
+  * Third candidate for 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Feb 2021 10:10:19 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 05 Feb 2021 13:48:46 +0000
 
-open-xchange-l10n (7.10.4-17) stable; urgency=medium
+open-xchange-l10n (7.10.5-4) stable; urgency=medium
 
-  * Build for patch 2021-01-25 (5937)
+  * Second candidate for 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Jan 2021 09:54:42 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 01 Feb 2021 11:14:07 +0000
 
-open-xchange-l10n (7.10.4-16) stable; urgency=medium
+open-xchange-l10n (7.10.5-3) stable; urgency=medium
 
-  * Build for patch 2021-01-11 (5930)
+  * First candidate for 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 05 Jan 2021 11:33:27 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Jan 2021 12:45:29 +0000
 
-open-xchange-l10n (7.10.4-15) stable; urgency=medium
+open-xchange-l10n (7.10.5-2) stable; urgency=medium
 
-  * Build for patch 2020-12-14 (5924)
+  * Second preview of 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 09 Dec 2020 11:56:18 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 17 Dec 2020 13:31:01 +0000
 
-open-xchange-l10n (7.10.4-14) stable; urgency=medium
+open-xchange-l10n (7.10.5-1) stable; urgency=medium
 
-  * Build for patch 2020-11-23 (5905)
+  * First preview of 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 16 Nov 2020 14:12:03 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 27 Nov 2020 15:56:42 +0000
 
-open-xchange-l10n (7.10.4-13) stable; urgency=medium
+open-xchange-l10n (7.10.5-0) unstable; urgency=medium
 
-  * Build for patch 2020-11-09 (5891)
+  * prepare for 7.10.5 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 04 Nov 2020 12:08:23 +0000
-
-open-xchange-l10n (7.10.4-12) stable; urgency=medium
-
-  * Build for patch 2020-10-26 (5888)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 20 Oct 2020 10:50:39 +0000
-
-open-xchange-l10n (7.10.4-11) stable; urgency=medium
-
-  * Build for patch 2020-10-12 (5879)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Oct 2020 12:03:11 +0000
-
-open-xchange-l10n (7.10.4-10) stable; urgency=medium
-
-  * Build for patch 2020-09-29 (5869)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Sep 2020 10:29:11 +0000
-
-open-xchange-l10n (7.10.4-9) stable; urgency=medium
-
-  * Build for patch 2020-09-14 (5857)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 11 Sep 2020 11:09:50 +0000
-
-open-xchange-l10n (7.10.4-8) stable; urgency=medium
-
-  * Build for patch 2020-08-24 (5842)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Aug 2020 15:08:30 +0000
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Oct 2020 09:28:29 +0200
 
 open-xchange-l10n (7.10.4-7) stable; urgency=medium
 

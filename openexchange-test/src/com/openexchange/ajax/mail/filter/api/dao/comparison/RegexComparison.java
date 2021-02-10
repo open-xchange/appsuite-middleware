@@ -72,13 +72,11 @@ public class RegexComparison extends AbstractComparison implements Comparison<Re
         return MatchType.regex;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setArgument(RegexComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.regex + "' comparison type can not have any arguments");
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Object getArgument(RegexComparisonArgument argument) {
         throw new UnsupportedOperationException("The '" + MatchType.regex + "' comparison type does not have any arguments");

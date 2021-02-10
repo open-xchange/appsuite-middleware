@@ -50,7 +50,10 @@
 package com.openexchange.subscribe.osgi;
 
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.database.PurgeCredentialsUpdateTask;
 
 /**
  * {@link UpdateTaskActivator}
@@ -66,6 +69,7 @@ public final class UpdateTaskActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         track(DatabaseService.class, new UpdateTaskRegisterer(context));
+        registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(new PurgeCredentialsUpdateTask()));
         openTrackers();
     }
 

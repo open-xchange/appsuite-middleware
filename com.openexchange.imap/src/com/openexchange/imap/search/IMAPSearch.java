@@ -183,7 +183,7 @@ public final class IMAPSearch {
         return IMAPProperties.getInstance().getUmlautFilterThreshold(userId, contextId);
     }
 
-    public static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm, int userId, int contextId) throws OXException, MessagingException {
+    public static int[] issueIMAPSearch(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, int userId, int contextId) throws OXException, MessagingException {
         try {
             if (searchTerm.containsWildcard()) {
                 /*
@@ -250,7 +250,7 @@ public final class IMAPSearch {
      * @return The matching messages as an array
      * @throws MessagingException If a messaging error occurs
      */
-    public static int[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+    public static int[] issueNonWildcardSearch(SearchTerm term, IMAPFolder imapFolder) throws MessagingException {
         /*-
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
@@ -261,7 +261,7 @@ public final class IMAPSearch {
     /**
      * Searches with respect to umlauts
      */
-    public static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
+    public static int[] searchWithUmlautSupport(com.openexchange.mail.search.SearchTerm<?> searchTerm, int[] seqNums, IMAPFolder imapFolder) throws OXException {
         try {
             IMAPFolderWorker.clearCache(imapFolder);
 
@@ -295,7 +295,7 @@ public final class IMAPSearch {
      * @return The sequence number of matching messages
      * @throws MessagingException If a messaging error occurs
      */
-    private static int[] search(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+    private static int[] search(SearchTerm term, IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (0 >= messageCount) {
             return new int[0];
@@ -303,7 +303,7 @@ public final class IMAPSearch {
 
         final Object oSeqNums = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 try {
                     return protocol.search(term);
                 } catch (SearchException e) {

@@ -66,7 +66,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
     /**
      * Initializes a new {@link ThreadableImpl}.
      */
-    public ThreadableImpl(final com.openexchange.imap.threader.Threadable delegatee) {
+    public ThreadableImpl(com.openexchange.imap.threader.Threadable delegatee) {
         super();
         this.delegatee = delegatee;
     }
@@ -125,12 +125,12 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
     }
 
     @Override
-    public void setChild(final Threadable child) {
+    public void setChild(Threadable child) {
         delegatee.setChild(null == child ? null : ((ThreadableImpl) child).delegatee);
     }
 
     @Override
-    public void setNext(final Threadable next) {
+    public void setNext(Threadable next) {
         delegatee.setNext(null == next ? null : ((ThreadableImpl) next).delegatee);
     }
 
@@ -148,7 +148,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
 
         private final Enumeration<com.openexchange.imap.threader.Threadable> enumeration;
 
-        protected IteratorImpl(final Enumeration<com.openexchange.imap.threader.Threadable> enumeration) {
+        protected IteratorImpl(Enumeration<com.openexchange.imap.threader.Threadable> enumeration) {
             super();
             this.enumeration = enumeration;
         }

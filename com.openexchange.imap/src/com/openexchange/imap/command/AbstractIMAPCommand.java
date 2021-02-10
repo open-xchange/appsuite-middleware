@@ -96,7 +96,7 @@ public abstract class AbstractIMAPCommand<T> {
      *
      * @param imapFolder The IMAP folder
      */
-    protected AbstractIMAPCommand(final IMAPFolder imapFolder) {
+    protected AbstractIMAPCommand(IMAPFolder imapFolder) {
         super();
         this.imapFolder = imapFolder;
         this.protocolCommand = new CallbackIMAPProtocolCommand(this, imapFolder);
@@ -136,14 +136,14 @@ public abstract class AbstractIMAPCommand<T> {
         private final AbstractIMAPCommand<?> abstractIMAPCommand;
         private final IMAPFolder imapFolder;
 
-        protected CallbackIMAPProtocolCommand(final AbstractIMAPCommand<?> abstractIMAPCommand, final IMAPFolder imapFolder) {
+        protected CallbackIMAPProtocolCommand(AbstractIMAPCommand<?> abstractIMAPCommand, IMAPFolder imapFolder) {
             super();
             this.abstractIMAPCommand = abstractIMAPCommand;
             this.imapFolder = imapFolder;
         }
 
         @Override
-        public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+        public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
             if (abstractIMAPCommand.returnDefaultValue) {
                 /*
                  * Abort processing
@@ -256,7 +256,7 @@ public abstract class AbstractIMAPCommand<T> {
      * @return The debug info
      */
     @SuppressWarnings("unused")
-    protected String getDebugInfo(final int argsIndex) {
+    protected String getDebugInfo(int argsIndex) {
         return null;
     }
 
@@ -266,7 +266,7 @@ public abstract class AbstractIMAPCommand<T> {
      * @param argsIndex - the argument index
      * @return the IMAP command to be executed
      */
-    protected abstract String getCommand(final int argsIndex);
+    protected abstract String getCommand(int argsIndex);
 
     /**
      * Gets the IMAP command's arguments whereas each argument <b>must not</b> exceed 16384 bytes.

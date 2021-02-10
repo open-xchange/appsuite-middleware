@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Advertisment JSON Api
 Bundle-SymbolicName: com.openexchange.advertisement.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.advertisement.json.osgi.Activator
@@ -26,3 +26,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.advertisement.json

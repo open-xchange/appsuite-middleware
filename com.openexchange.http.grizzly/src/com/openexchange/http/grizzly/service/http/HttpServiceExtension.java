@@ -131,7 +131,7 @@ public interface HttpServiceExtension extends HttpService {
      */
     void registerFilter(final Filter filter,
                         final String urlPattern,
-                        final Dictionary initParams,
+                        final Dictionary<?,?> initParams,
                         final HttpContext context) throws ServletException;
 
     /**

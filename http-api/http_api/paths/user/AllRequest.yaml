@@ -3,9 +3,10 @@
     operationId: getAllUsers
     tags:
       - User
-    summary: Gets all users.
+    summary: Gets all users
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamUserColumns'
       - in: query
         name: sort

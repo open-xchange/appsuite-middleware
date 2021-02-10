@@ -56,13 +56,20 @@ import com.openexchange.java.util.UUIDs;
  */
 public class OAuthParams {
 
+    private String scheme = "https";
     private String hostname = "localhost";
+    private int port = 443;
     private String clientId;
     private String redirectURI;
     private String scope;
     private String state = UUIDs.getUnformattedStringFromRandom();
     private String responseType = "code";
     private String clientSecret;
+
+    public OAuthParams setScheme(String scheme) {
+        this.scheme = scheme;
+        return this;
+    }
 
     public OAuthParams setHostname(String hostname) {
         this.hostname = hostname;
@@ -99,6 +106,16 @@ public class OAuthParams {
         return this;
     }
 
+
+    public OAuthParams setPort(int port) {
+        this.port = port;
+        return this;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
     public String getHostname() {
         return hostname;
     }
@@ -125,6 +142,10 @@ public class OAuthParams {
 
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    public int getPort() {
+        return port;
     }
 
 }

@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -741,6 +742,48 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     @Override
     public MediaStatus getMediaStatusForClient(com.openexchange.session.Session session) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        if (!jsonObject.has(Metadata.CREATED_FROM_LITERAL.getName())) {
+            return null;
+        }
+        return EntityInfo.parseJSON(jsonObject.optJSONObject(Metadata.CREATED_FROM_LITERAL.getName()));
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        try {
+            if (null != createdFrom) {
+                jsonObject.put(Metadata.CREATED_FROM_LITERAL.getName(), createdFrom.toJSON());
+            } else {
+                jsonObject.remove(Metadata.CREATED_FROM_LITERAL.getName());
+            }
+        } catch (JSONException e) {
+            LOG.error("",e);
+        }
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        if (!jsonObject.has(Metadata.MODIFIED_FROM_LITERAL.getName())) {
+            return null;
+        }
+        return EntityInfo.parseJSON(jsonObject.optJSONObject(Metadata.MODIFIED_FROM_LITERAL.getName()));
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        try {
+            if (null != modifiedFrom) {
+                jsonObject.put(Metadata.MODIFIED_FROM_LITERAL.getName(), modifiedFrom.toJSON());
+            } else {
+                jsonObject.remove(Metadata.MODIFIED_FROM_LITERAL.getName());
+            }
+        } catch (JSONException e) {
+            LOG.error("",e);
+        }
     }
 
 }

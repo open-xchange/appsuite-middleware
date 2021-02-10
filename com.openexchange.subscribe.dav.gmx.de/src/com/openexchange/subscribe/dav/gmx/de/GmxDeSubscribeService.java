@@ -51,6 +51,7 @@ package com.openexchange.subscribe.dav.gmx.de;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.dav.AbstractCardDAVSubscribeService;
 import com.openexchange.tools.session.ServerSession;
@@ -65,10 +66,11 @@ public class GmxDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
      * Initializes a new {@link GmxDeSubscribeService}.
-     * 
-     * @param services The {@link ServiceLookup}  
+     *
+     * @param services The {@link ServiceLookup}
+     * @throws OXException
      */
-    public GmxDeSubscribeService(ServiceLookup services) {
+    public GmxDeSubscribeService(ServiceLookup services) throws OXException {
         super(services);
     }
 

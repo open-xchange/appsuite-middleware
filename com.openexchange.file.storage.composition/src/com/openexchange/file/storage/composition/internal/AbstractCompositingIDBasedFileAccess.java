@@ -59,6 +59,7 @@ import static com.openexchange.file.storage.composition.internal.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +82,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -90,6 +92,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
+import com.openexchange.file.storage.FileStorageBackwardLinkAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageConstants;
 import com.openexchange.file.storage.FileStorageETagProvider;
@@ -106,6 +109,7 @@ import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageMultiMove;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageRestoringFileAccess;
@@ -114,6 +118,7 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.UserizedIDTuple;
 import com.openexchange.file.storage.composition.FileID;
@@ -140,8 +145,8 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
+import com.openexchange.tools.iterator.RangeAwareSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -534,7 +539,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     @Override
     public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
         List<SearchIterator<File>> searchIterators = new ArrayList<>();
-        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses();
+        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses( (fs) -> !(fs instanceof SharingFileStorageService));
         for (FileStorageFileAccess fileAccess : fileStorageAccesses) {
             if (ObjectPermissionAware.class.isInstance(fileAccess)) {
                 SearchIterator<File> searchIterator = ((ObjectPermissionAware) fileAccess).getUserSharedDocuments(fields, sort, order);
@@ -889,7 +894,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              */
             if (null != listenerRegistry) {
                 for (IDBasedFileAccessListener listener : listenerRegistry) {
-                    listener.onBeforeNewFile(document, data, sequenceNumber, modifiedColumns, fileAccess, session);
+                    fileAccess = listener.onBeforeNewFile(document, data, sequenceNumber, modifiedColumns, fileAccess, session);
                 }
             }
 
@@ -949,7 +954,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          */
         if (null != listenerRegistry) {
             for (IDBasedFileAccessListener listener : listenerRegistry) {
-                listener.onBeforeUpdateFile(document, data, sequenceNumber, modifiedColumns, isMove, fileAccess, session);
+                fileAccess = listener.onBeforeUpdateFile(document, data, sequenceNumber, modifiedColumns, isMove, fileAccess, session);
             }
         }
 
@@ -958,6 +963,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              * Special handling for move to different folder
              */
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceIDTuple.getFolder());
+
+            warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, fileAccess, getFileMetaData(fileAccess, sourceIDTuple)));
+            if (0 < warnings.size()) {
+                addWarnings(warnings);
+                if (false == ignoreWarnings) {
+                    return null;
+                }
+            }
+
             document.setFolderId(sourceIDTuple.getFolder());
             document.setId(sourceIDTuple.getId());
             IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
@@ -1013,6 +1027,52 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     /**
+     * Gets the file meta data for a given file id tuple.
+     *
+     * @param fileAccess The file access.
+     * @param sourceIDTuple The id tuple of the wanted file.
+     * @return The file meta data.
+     * @throws OXException
+     */
+    private File getFileMetaData(FileStorageFileAccess fileAccess, final IDTuple sourceIDTuple) throws OXException {
+        SearchIterator<File> fileMetaDataResult = null;
+        try {
+            fileMetaDataResult = fileAccess.getDocuments(Arrays.asList(sourceIDTuple), Arrays.asList(Field.ID, Field.FOLDER_ID, Field.FILENAME, Field.OBJECT_PERMISSIONS)).results();
+            return fileMetaDataResult.hasNext() ? fileMetaDataResult.next() : null;
+        } finally {
+            if (fileMetaDataResult != null) {
+                fileMetaDataResult.close();
+            }
+        }
+    }
+
+    /**
+     * 
+     * Collects any possible warnings that might occur when moving a file.
+     *
+     * @param sourceFileID The file id of the file to move.
+     * @param targetFolderID The id of the target folder.
+     * @param fileAccess The FileStorageFileAccess of the source file.
+     * @param file The file to move.
+     * @return The warnings, or an empty list if there are none.
+     * @throws OXException
+     */
+    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, final FolderID targetFolderID, FileStorageFileAccess fileAccess, File file) throws OXException {
+        FileStorageFolder sourceFolder = fileAccess.getAccountAccess().getFolderAccess().getFolder(sourceFileID.getFolderId());
+        List<FileStoragePermission> sourceFolderPermissions = sourceFolder.getPermissions();
+
+        FileStorageFileAccess destFolderFileAccess = getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId());
+        FileStorageFolder destFolder = destFolderFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
+        List<FileStoragePermission> destFolderPermissions = destFolder.getPermissions();
+
+        return checkFileMoveForPermissionChangeWarnings(sourceFileID.toUniqueID(), file, sourceFileID.getFolderId(), sourceFolderPermissions, targetFolderID.getFolderId(), destFolderPermissions, fileAccess, destFolderFileAccess);
+    }
+
+    private String getFolderPath(FileStorageFileAccess fileAccess, final String folderId) throws OXException {
+        return getPathString(fileAccess.getAccountAccess().getFolderAccess().getPath2DefaultFolder(folderId));
+    }
+
+    /**
      * Moves a file to a folder located in a different file storage.
      *
      * @param document The document to move
@@ -1039,7 +1099,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * full move, check for potential data loss
              */
-            List<OXException> warnings = collectWarningsBeforeMove(id, sourceFile, folderId, modifiedColumns);
+            List<OXException> warnings = collectWarningsBeforeMoveToAnotherAccount(id, sourceFile, folderId, modifiedColumns, sourceAccess);
             if (0 < warnings.size()) {
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
@@ -1287,9 +1347,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
         });
     }
-
+    
     @Override
-    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded) throws OXException {
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded, boolean ignoreWarnings) throws OXException {
         final FolderID destinationID;
         if (null == destFolderId) {
             throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
@@ -1302,6 +1362,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FileStorageFileAccess fileAccess = getFileAccess(destService, destAccountId);
         if (FileStorageTools.supports(fileAccess, FileStorageCapability.MULTI_MOVE)) {
             useMultiMove = true;
+
             for (int i = sourceIds.size(); useMultiMove && i-- > 0;) {
                 FileID sourceID = new FileID(sourceIds.get(i));
                 useMultiMove = (sourceID.getService().equals(destService) && sourceID.getAccountId().equals(destAccountId));
@@ -1309,12 +1370,23 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             if (useMultiMove) {
                 /*
+                 * check for file move warnings
+                 */
+                List<OXException> warnings = collectWarningsBeforeMultiMove(sourceIds, destFolderId, destinationID);
+                if (0 < warnings.size()) {
+                    addWarnings(warnings);
+                    if (ignoreWarnings == false) {
+                        return sourceIds;
+                    }
+                }
+
+                /*
                  * check for available listeners
                  */
                 IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
                 if (null != listenerRegistry) {
                     for (IDBasedFileAccessListener listener : listenerRegistry) {
-                        listener.onBeforeMoveFiles(sourceIds, sequenceNumber, destFolderId, fileAccess, session);
+                        fileAccess = listener.onBeforeMoveFiles(sourceIds, sequenceNumber, destFolderId, fileAccess, session);
                     }
                 }
 
@@ -1353,6 +1425,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
                     FileID newFileID = new FileID(destService, destAccountId, destFolderId, new FileID(sourceId).getFileId());
                     FolderID newFolderID = new FolderID(destService, destAccountId, destFolderId);
+                    // @formatter:off
                     postEvent(FileStorageEventHelper.buildDeleteEvent(
                         session,
                         sourceFileID.getService(),
@@ -1367,8 +1440,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         newFileID.getAccountId(),
                         newFolderID.toUniqueID(),
                         newFileID.toUniqueID(),
-                        null));
-                }
+                        null)); 
+                    // @formatter:on
+                    }
                 return conflicted;
             }
         }
@@ -1380,9 +1454,56 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             file.setFolderId(destFolderId);
 
             // Save file metadata without binary payload
-            saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE);
+            saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE, Arrays.asList(Field.ID, Field.FOLDER_ID), ignoreWarnings, false);
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * 
+     * Collects any possible warnings that might occur when moving multiple files to another folder via multimove.
+     *
+     * @param sourceIds An array with the ids of the files to move.
+     * @param destFolderId The id of the new parent folder.
+     * @param destinationID The FolderID of the new parent folder.
+     * @return The warnings, or an empty list if there are none.
+     * @throws OXException
+     */
+    private List<OXException> collectWarningsBeforeMultiMove(final List<String> sourceIds, String destFolderId, final FolderID destinationID) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        FileStorageFileAccess destFileAccess = getFileAccess(destinationID);
+        FolderID targetFolderID = new FolderID(destFolderId);
+        FileStorageFolder targetFolder = destFileAccess.getAccountAccess().getFolderAccess().getFolder(targetFolderID.getFolderId());
+        List<FileStoragePermission> destPermissions = targetFolder.getPermissions();
+
+        String lastSourceFolderId = "-1";
+        FileStorageFolder sourceFolder = null;
+        for (String sourceId : sourceIds) {
+            FileID sourceID = new FileID(sourceId);
+            final String sourceService = sourceID.getService();
+            final String sourceAccountId = sourceID.getAccountId();
+            FileStorageFileAccess sourceFileAccess = getFileAccess(sourceService, sourceAccountId);
+
+            if (lastSourceFolderId.equals(sourceID.getFolderId()) == false || sourceFolder == null) {
+                FolderID sourceFolderID = new FolderID(sourceService, sourceAccountId, sourceID.getFolderId());
+                sourceFolder = getFolderAccess(sourceFolderID).getFolder(sourceFolderID.getFolderId());
+            }
+            lastSourceFolderId = sourceID.getFolderId();
+            List<FileStoragePermission> sourcePermissions = sourceFolder.getPermissions();
+
+            IDTuple fileIdTuple = new IDTuple();
+            fileIdTuple.setId(sourceID.getFileId());
+            fileIdTuple.setFolder(sourceID.getFolderId());
+            File fileMetaData = getFileMetaData(sourceFileAccess, fileIdTuple);
+
+            warnings.addAll(checkFileMoveForPermissionChangeWarnings(sourceId, fileMetaData, sourceID.getFolderId(), sourcePermissions, destFolderId, destPermissions, sourceFileAccess, destFileAccess));
+        }
+        return warnings;
+    }
+
+    @Override
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded) throws OXException {
+        return move(sourceIds, sequenceNumber, destFolderId, adjustFilenamesAsNeeded, false);
     }
 
     @Override
@@ -1423,7 +1544,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.getInstance();
             if (null != listenerRegistry) {
                 for (IDBasedFileAccessListener listener : listenerRegistry) {
-                    listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
+                    fileAccess = listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
                 }
             }
             IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields != null ? fields : Collections.emptyList());
@@ -1449,6 +1570,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
         fileMetadata.setVersion(null);
+        fileMetadata.setCreatedBy(0);
+        fileMetadata.setCreatedFrom(null);
+        fileMetadata.setModifiedBy(0);
+        fileMetadata.setModifiedFrom(null);
 
         if (newData == null) {
             saveFileMetadata(fileMetadata, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
@@ -1512,42 +1637,49 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * collect & filter results
              */
-            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
-
-                int index = 0;
-
-                @Override
-                public boolean accept(File thing) throws OXException {
-                    try {
-                        if (0 < start && index < start || 0 < end && index >= end) {
-                            return false;
-                        }
-                        return true;
-                    } finally {
-                        index++;
-                    }
-                }
-            };
+            return collectSearchResults(completionService, count, sort, order, start, end);
         }
     }
 
     @Override
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        /*
-         * perform search in single storage
-         */
-        FolderID folderID = new FolderID(folderId);
-        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
-        if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
-        }
-        SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(
-            folderID.getFolderId(), includeSubfolders, searchTerm, fields, sort, order, start, end);
-        if (null == searchIterator) {
+        Map<FileStorageFileAccess, List<String>> foldersByFileAccess = getFoldersByFileAccess(Collections.singletonList(folderId));
+        if (foldersByFileAccess.isEmpty()) {
             return SearchIteratorAdapter.emptyIterator();
         }
-        FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
-        return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+        if (1 == foldersByFileAccess.size()) {
+            /*
+             * perform search in single storage
+             */
+            FolderID folderID = new FolderID(folderId);
+            FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+            if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
+                throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
+            }
+            SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(folderID.getFolderId(), includeSubfolders, searchTerm, fields, sort, order, start, end);
+            if (null == searchIterator) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+            return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+        }
+        /*
+         * schedule tasks to perform search in multiple storages concurrently
+         */
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        CompletionService<SearchIterator<File>> completionService = null != threadPool ? new ThreadPoolCompletionService<>(threadPool) : new CallerRunsCompletionService<>();
+        int count = 0;
+        for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+            if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
+                FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                completionService.submit(getSearchCallable(fileAccess, folderId, includeSubfolders, searchTerm, fields, sort, order));
+                count++;
+            }
+        }
+        /*
+         * collect & filter results
+         */
+        return collectSearchResults(completionService, count, sort, order, start, end);
     }
 
     @Override
@@ -1806,6 +1938,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         return result;
     }
 
+    @Override
+    public String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        FileID fileID = null != id ? new FileID(id) : null;
+        FileStorageBackwardLinkAccess fileAccess = getFileAccess(folderID, FileStorageBackwardLinkAccess.class);
+        return fileAccess.getBackwardLink(folderID.getFolderId(), null != fileID ? fileID.getFileId() : null, additionals);
+    }
+
     /**
      * Posts specified event
      *
@@ -1919,28 +2059,44 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return Collections.emptyMap();
         } else if (1 == folderIds.size()) {
             FolderID folderID = new FolderID(folderIds.get(0));
-            return Collections.singletonMap(getFileAccess(folderID.getService(), folderID.getAccountId()),
-                Collections.singletonList(folderID.getFolderId()));
+            FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+            List<String> folders = Collections.singletonList(folderID.getFolderId());
+            if (false == isSeparateFederatedShares() && (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId()))) {
+                List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService);
+                if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
+                    Map<FileStorageFileAccess, List<String>> foldersByFileAccess = new HashMap<FileStorageFileAccess, List<String>>(additionalFileAccesses.size() + 1);
+                    foldersByFileAccess.put(fileAccess, folders);
+                    for (FileStorageFileAccess additionalFileAccess : additionalFileAccesses) {
+                        foldersByFileAccess.put(additionalFileAccess, folders);
+                    }
+                    return foldersByFileAccess;
+                }
+            }
+            return Collections.singletonMap(fileAccess, folders);
         } else {
             Map<String, FileStorageFileAccess> fileAccessesByAccount = new HashMap<>();
             Map<String, List<String>> foldersByAccount = new HashMap<>();
             for (String uniqueID : folderIds) {
                 FolderID folderID = new FolderID(uniqueID);
                 String key = folderID.getService() + '/' + folderID.getAccountId();
-                List<String> folders = foldersByAccount.get(key);
-                if (null == folders) {
-                    folders = new ArrayList<>();
-                    foldersByAccount.put(key, folders);
-                }
-                folders.add(folderID.getFolderId());
+                com.openexchange.tools.arrays.Collections.put(foldersByAccount, key, folderID.getFolderId());
                 FileStorageFileAccess fileAccess = fileAccessesByAccount.get(key);
                 if (null == fileAccess) {
                     fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
                     fileAccessesByAccount.put(key, fileAccess);
                 }
+                if (false == isSeparateFederatedShares() && (PUBLIC_INFOSTORE_ID.equals(folderID.getFolderId()) || SHARED_INFOSTORE_ID.equals(folderID.getFolderId()))) {
+                    List<FileStorageFileAccess> additionalFileAccesses = getAllFileStorageAccesses((fs) -> fs instanceof SharingFileStorageService);
+                    if (null != additionalFileAccesses && 0 < additionalFileAccesses.size()) {
+                        for (FileStorageFileAccess additionalFileAccess : additionalFileAccesses) {
+                            String additionalKey = additionalFileAccess.getAccountAccess().getService().getId() + '/' + additionalFileAccess.getAccountAccess().getAccountId();
+                            com.openexchange.tools.arrays.Collections.put(foldersByAccount, additionalKey, folderID.getFolderId());
+                            fileAccessesByAccount.putIfAbsent(additionalKey, fileAccess);
+                        }
+                    }
+                }
             }
-            Map<FileStorageFileAccess, List<String>> foldersByFileAccess =
-                new HashMap<>(foldersByAccount.size());
+            Map<FileStorageFileAccess, List<String>> foldersByFileAccess = new HashMap<>(foldersByAccount.size());
             for (Entry<String, FileStorageFileAccess> entry : fileAccessesByAccount.entrySet()) {
                 foldersByFileAccess.put(entry.getValue(), foldersByAccount.get(entry.getKey()));
             }
@@ -1955,9 +2111,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @param sourceFile The source file
      * @param targetFolderID The identifier of the target folder
      * @param modifiedColumns A list of fields that are going to be modified during the copy operation, or <code>null</code> if all fields are copied
+     * @param sourceFileAccess The FileStorageFileAccess of the source file.
      * @return The warnings, or an empty list if there are none
      */
-    private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns) throws OXException {
+    private List<OXException> collectWarningsBeforeMoveToAnotherAccount(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns, FileStorageFileAccess sourceFileAccess) throws OXException {
         List<OXException> warnings = new ArrayList<>(6);
         if (Strings.isNotEmpty(sourceFile.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION))) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
@@ -1983,6 +2140,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             warnings.add(FileStorageExceptionCodes.LOSS_OF_FILE_SHARES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
+
+        warnings.addAll(collectWarningsBeforeMove(sourceFileID, targetFolderID, sourceFileAccess, sourceFile));
         return warnings;
     }
 
@@ -2013,6 +2172,115 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         return warnings;
     }
 
+    /**
+     * 
+     * Checks if permissions change when moving a file and adds warnings in this case.
+     *
+     * @param fileId The id of the file to move.
+     * @param file The file meta data of the file to move.
+     * @param sourceFolderId The id of the original parent folder.
+     * @param sourceFolderPermissions The permissions of the original parent folder.
+     * @param destFolderId The id of the new parent folder.
+     * @param destFolderPermissions The permissions of the new parent folder.
+     * @param sourceFolderFileAccess The FileStorageFileAccess of the original parent folder.
+     * @param destFolderFileAccess The FileStorageFileAccess of the new parent folder.
+     * @return A list with warnings.
+     * @throws OXException
+     */
+    private List<OXException> checkFileMoveForPermissionChangeWarnings(String fileId, File file, String sourceFolderId, List<FileStoragePermission> sourceFolderPermissions, String destFolderId, List<FileStoragePermission> destFolderPermissions, FileStorageFileAccess sourceFolderFileAccess, FileStorageFileAccess destFolderFileAccess) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+
+        // Checks if the permissions of the parent folder are changed
+        boolean sourceFolderContainsFP = containsForeignPermissions(session.getUserId(), sourceFolderPermissions);
+        boolean targetFolderContainsFP = containsForeignPermissions(session.getUserId(), destFolderPermissions);
+        Object[] args = null;
+        if (sourceFolderContainsFP != targetFolderContainsFP || haveEqualPermissionEntities(sourceFolderPermissions, destFolderPermissions) == false) {
+            if (sourceFolderContainsFP && targetFolderContainsFP) {
+                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                warnings.add(FileStorageExceptionCodes.MOVE_TO_ANOTHER_SHARED_WARNING.create(args));
+            } else if (sourceFolderContainsFP && targetFolderContainsFP == false) {
+                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                warnings.add(FileStorageExceptionCodes.MOVE_TO_NOT_SHARED_WARNING.create(args));
+                /*
+                 * Disabled warnings for getting new permissions with file move
+                 */
+                //            } else if (sourceFolderContainsFP == false && targetFolderContainsFP) {
+                //                args = createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess);
+                //                warnings.add(FileStorageExceptionCodes.MOVE_TO_SHARED_WARNING.create(args));
+            }
+        }
+        // Checks if the file itself has object permissions, that will be removed when moving the file
+        List<FileStorageObjectPermission> objectPermissions = file != null ? file.getObjectPermissions() : null;
+        if (objectPermissions != null && objectPermissions.isEmpty() == false) {
+            warnings.add(FileStorageExceptionCodes.MOVE_SHARED_FILE_WARNING.create(args != null ? args : createWarningArguments(fileId, file, sourceFolderId, destFolderId, sourceFolderFileAccess, destFolderFileAccess)));
+        }
+        return warnings;
+    }
+
+    /**
+     *
+     * Gets a value indicating whether two list with permission entities contain the same entities.
+     *
+     * @param permissions1 One permission list.
+     * @param permissions2 Another permission list.
+     * @return <code>true</code> if the lists have the same entities, <code>false</code>, otherwise
+     */
+    private boolean haveEqualPermissionEntities(List<FileStoragePermission> permissions1, List<FileStoragePermission> permissions2) {
+        Set<Integer> entities1 = getPermissionEntities(permissions1);
+        Set<Integer> entities2 = getPermissionEntities(permissions2);
+        return entities1.equals(entities2);
+    }
+
+    /**
+     *
+     * Gets the permission entities from a given list of permissions.
+     *
+     * @param permissions The permission set.
+     * @return A set of the entities of the permissions.
+     */
+    private Set<Integer> getPermissionEntities(List<FileStoragePermission> permissions) {
+        return permissions.stream().map(p -> I(p.getEntity())).collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder contains permissions for entities other than the supplied current user.
+     *
+     * @param userID The entity identifier of the user that should be considered as "not" foreign
+     * @param oldPermissions The permissions to check
+     * @return <code>true</code> if foreign permissions were found, <code>false</code>, otherwise
+     */
+    private boolean containsForeignPermissions(int userID, List<FileStoragePermission> permissions) {
+        if (null != permissions && 0 < permissions.size()) {
+            for (FileStoragePermission permission : permissions) {
+                if (permission.getEntity() != userID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 
+     * Creates an object array with arguments for the warning that occurs when a file is moved between folders.
+     *
+     * @param fileId The if of the file to move.
+     * @param file The file, that should be moved.
+     * @param sourceFolderId The id of the original parent folder.
+     * @param destFolderId The id of the new parent folder.
+     * @param sourceFolderFileAccess The file access of the original parent folder.
+     * @param destFolderFileAccess The file access of the new parent folder.
+     * @return An object array with arguments for the warning.
+     * @throws OXException
+     */
+    private Object[] createWarningArguments(String fileId, File file, String sourceFolderId, String destFolderId, FileStorageFileAccess sourceFolderFileAccess, FileStorageFileAccess destFolderFileAccess) throws OXException {
+        String sourceFolderPath = getFolderPath(sourceFolderFileAccess, sourceFolderId);
+        String destFolderPath = getFolderPath(destFolderFileAccess, destFolderId);
+        String fileName = file != null ? file.getFileName() : null;
+        Object[] args = { fileName, sourceFolderPath, destFolderPath, fileId, destFolderId };
+        return args;
+    }
+
     private static String getFileNameFrom(File file, FileStorageFileAccess fileAccess) throws OXException {
         String fileName = file.getFileName();
         if (Strings.isEmpty(fileName)) {
@@ -2029,10 +2297,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @param count The number of results to take
      * @param sort The field to sort
      * @param order The sort order
+     * @param start The inclusive start index for the search results, or <code>-1</code> if not defined
+     * @param end The exclusive end index for the search results, or <code>-1</code> if not defined
      * @return A merged search iterator
-     * @throws OXException
      */
-    private static SearchIterator<File> collectSearchResults(CompletionService<SearchIterator<File>> completionService, int count, Field sort, SortDirection order) throws OXException {
+    private static SearchIterator<File> collectSearchResults(CompletionService<SearchIterator<File>> completionService, int count, Field sort, SortDirection order, int start, int end) throws OXException {
         List<SearchIterator<File>> searchIterators = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             SearchIterator<File> searchIterator = null;
@@ -2052,7 +2321,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(searchIterator);
             }
         }
-        return new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
+        return new RangeAwareSearchIterator<File>(new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators), start, end);
     }
 
     /**
@@ -2075,6 +2344,39 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 try {
                     searchIterator = fileAccess.search(
                         folderIds, searchTerm, fields, sort, order, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                } catch (Exception e) {
+                    // Ignore failed one in composite search results
+                    LOG.warn("Error searching in file storage {}", fileAccess, e);
+                }
+                if (null == searchIterator) {
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+                FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+                return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+            }
+        };
+    }
+
+    /**
+     * Constructs a callable task to search in a specific file storage access.
+     *
+     * @param fileAccess The file access to query
+     * @param folderId The (relative) folder ID to pass to the storage
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param searchTerm The search term to pass to the storage
+     * @param fields The fields to pass to the storage
+     * @param sort The sort field to pass to the storage
+     * @param order The sort order to pass to the storage
+     * @return The callable
+     */
+    private static Callable<SearchIterator<File>> getSearchCallable(final FileStorageAdvancedSearchFileAccess fileAccess, String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order) {
+        return new Callable<SearchIterator<File>>() {
+
+            @Override
+            public SearchIterator<File> call() throws Exception {
+                SearchIterator<File> searchIterator = null;
+                try {
+                    searchIterator = fileAccess.search(folderId, includeSubfolders, searchTerm, fields, sort, order, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                 } catch (Exception e) {
                     // Ignore failed one in composite search results
                     LOG.warn("Error searching in file storage {}", fileAccess, e);

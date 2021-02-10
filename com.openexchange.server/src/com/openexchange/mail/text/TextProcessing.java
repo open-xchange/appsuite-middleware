@@ -78,7 +78,7 @@ public final class TextProcessing {
 
     private static final char CHAR_BREAK = '\n';
 
-    private static String foldLine(final String line, final int linewrap, final String prefix) {
+    private static String foldLine(String line, int linewrap, String prefix) {
         int end;
         char c;
         /*
@@ -193,7 +193,7 @@ public final class TextProcessing {
      * @param linewrap The number of characters which may fit into a line
      * @return The line-folded content
      */
-    public static String performLineFolding(final String content, final int linewrap) {
+    public static String performLineFolding(String content, int linewrap) {
         if (linewrap <= 0) {
             return content;
         }
@@ -213,7 +213,7 @@ public final class TextProcessing {
         return content;
     }
 
-    private static String getQuotePrefix(final String line) {
+    private static String getQuotePrefix(String line) {
         if (line.length() == 0) {
             return null;
         }
@@ -256,7 +256,7 @@ public final class TextProcessing {
      * @return The extracted plain-text content
      * @throws OXException If text extraction fails
      */
-    public static String extractTextFrom(final MailMessage mail) throws OXException {
+    public static String extractTextFrom(MailMessage mail) throws OXException {
         final MailPart mailPart = extractTextFrom(mail, 0);
         if (null == mailPart) {
             return "";
@@ -280,7 +280,7 @@ public final class TextProcessing {
         }
     }
 
-    private static MailPart extractTextFrom(final MailPart mailPart, final int altLevel) throws OXException {
+    private static MailPart extractTextFrom(MailPart mailPart, int altLevel) throws OXException {
         if (!mailPart.containsContentType()) {
             return null;
         }
@@ -316,7 +316,7 @@ public final class TextProcessing {
         return null;
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(MailPart mailPart, ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -328,7 +328,7 @@ public final class TextProcessing {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    private static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();

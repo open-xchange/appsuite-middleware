@@ -51,6 +51,7 @@ package com.openexchange.admin.plugin.hosting.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,6 +67,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
@@ -110,14 +113,18 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.pipesnfilters.Filter;
 
@@ -522,15 +529,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     for (final OXContextPluginInterface oxContextPlugin : plugins) {
                         if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
                             OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
-                            Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
-                            if (undoInfo != null) {
-                                if (undeleteInfos == null) {
-                                    undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String, Object>>(plugins.size());
+                            try {
+                                Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
+                                if (undoInfo != null) {
+                                    if (undeleteInfos == null) {
+                                        undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String, Object>>(plugins.size());
+                                    }
+                                    undeleteInfos.put(extended, undoInfo);
                                 }
-                                undeleteInfos.put(extended, undoInfo);
+                            } catch (PluginException e) {
+                                undoDelete(ctx, undeleteInfos);
+                                throw e;
                             }
                         } else {
-                            oxContextPlugin.delete(ctx, auth);
+                            try {
+                                oxContextPlugin.delete(ctx, auth);
+                            } catch (PluginException e) {
+                                undoDelete(ctx, undeleteInfos);
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -545,14 +562,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     deleted = true;
                 } finally {
                     if (!deleted) {
-                        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInfos.entrySet()) {
-                            try {
-                                Map<String, Object> undoInfo = undeleteInfo.getValue();
-                                undeleteInfo.getKey().undelete(ctx, undoInfo);
-                            } catch (PluginException x) {
-                                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), x, "Undeletion failed");
-                            }
-                        }
+                        undoDelete(ctx, undeleteInfos);
                     }
                 }
             }
@@ -563,6 +573,26 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (Throwable e) {
             logAndEnhanceException(e, credentials, ctx);
             throw e;
+        }
+    }
+
+    /**
+     * Performs an undo
+     *
+     * @param ctx The context
+     * @param undeleteInformation The undelete information
+     */
+    private void undoDelete(final Context ctx, Map<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInformation) {
+        if (undeleteInformation == null) {
+            return;
+        }
+        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInformation.entrySet()) {
+            try {
+                Map<String, Object> undoInfo = undeleteInfo.getValue();
+                undeleteInfo.getKey().undelete(ctx, undoInfo);
+            } catch (PluginException x) {
+                LOGGER.warn("Undeletion failed", x);
+            }
         }
     }
 
@@ -1217,7 +1247,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 view = viewFactory.getView(admin_user.getId().intValue(), ret.getId().intValue());
                 Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                 if (check != null && check.booleanValue()) {
-                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
                 }
             } catch (OXException e) {
@@ -1340,6 +1370,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e3;
         }
 
+        OXUserStorageInterface oxu;
+        Integer[] userIds;
+        int adminId;
         try {
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
@@ -1375,11 +1408,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            oxu = OXUserStorageInterface.getInstance();
 
             // change rights for all users in context to specified one in access combination name
-            Integer[] userIds = i2I(oxu.getAll(ctx));
-            final int adminId = tool.getAdminForContext(ctx);
+            userIds = i2I(oxu.getAll(ctx));
+            adminId = tool.getAdminForContext(ctx);
             userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
             oxu.changeModuleAccess(ctx, adminId, accessAdmin);
             oxu.changeModuleAccess(ctx, I2i(userIds), accessUser);
@@ -1389,6 +1422,51 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             logAndEnhanceException(e, credentials, ctx);
             throw e;
         }
+
+        // JCS
+        Set<Integer> distinctUserIds = Stream.concat(Stream.of(Integer.valueOf(adminId)), Arrays.stream(userIds)).collect(Collectors.toSet());
+        for (Integer userId : distinctUserIds) {
+            try {
+                UserConfigurationStorage.getInstance().invalidateCache(userId.intValue(), new ContextImpl(ctx.getId().intValue()));
+            } catch (OXException e) {
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), e, "Error removing user {} in context {} from configuration storage", userId, ctx.getId());
+            } catch (RuntimeException e) {
+                log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), e, "");
+            }
+
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache usercCache = cacheService.getCache("User");
+                    final Cache upCache = cacheService.getCache("UserPermissionBits");
+                    final Cache ucCache = cacheService.getCache("UserConfiguration");
+                    final Cache usmCache = cacheService.getCache("UserSettingMail");
+                    final Cache capabilitiesCache = cacheService.getCache("Capabilities");
+                    {
+                        final CacheKey key = cacheService.newCacheKey(i(ctx.getId()), userId.intValue());
+                        usercCache.remove(key);
+                        try {
+                            User[] usrdata = oxu.getData(ctx, new User[] { new User(userId.intValue()) });
+                            usercCache.remove(cacheService.newCacheKey(i(ctx.getId()), usrdata[0].getName()));
+                        } catch (Exception x) {
+                            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), x, "Error loading user {} in context {}", userId, ctx.getId());
+                        }
+                        upCache.remove(key);
+                        ucCache.remove(key);
+                        usmCache.remove(key);
+                        capabilitiesCache.removeFromGroup(userId, ctx.getId().toString());
+                        try {
+                            UserConfigurationStorage.getInstance().invalidateCache(userId.intValue(), new ContextImpl(ctx.getId().intValue()));
+                        } catch (OXException e) {
+                            log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), e, "Error removing user {} in context {} from configuration storage", userId, ctx.getId());
+                        }
+                    }
+                } catch (Exception e) {
+                    log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userId), e, "");
+                }
+            }
+        }
+        // END OF JCS
     }
 
     /**

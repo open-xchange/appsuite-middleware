@@ -91,7 +91,7 @@ public final class TransportProviderRegistry {
      * @return The appropriate transport provider
      * @throws OXException If no supporting transport provider can be found
      */
-    public static TransportProvider getTransportProviderBySession(final Session session, final int accountId) throws OXException {
+    public static TransportProvider getTransportProviderBySession(Session session, int accountId) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamTransportProvider();
         TransportProvider provider;
@@ -136,7 +136,7 @@ public final class TransportProviderRegistry {
      * @param serverUrl The transport server URL
      * @return The appropriate transport provider
      */
-    public static TransportProvider getTransportProviderByURL(final String serverUrl) {
+    public static TransportProvider getTransportProviderByURL(String serverUrl) {
         /*
          * Get appropriate provider
          */
@@ -149,11 +149,11 @@ public final class TransportProviderRegistry {
      * @param protocol The transport protocol
      * @return The appropriate transport provider
      */
-    public static TransportProvider getTransportProvider(final String protocol) {
+    public static TransportProvider getTransportProvider(String protocol) {
         if (null == protocol) {
             return null;
         }
-        for (final Iterator<Map.Entry<Protocol, TransportProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+        for (Iterator<Map.Entry<Protocol, TransportProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, TransportProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 return entry.getValue();
@@ -180,7 +180,7 @@ public final class TransportProviderRegistry {
      *         protocol; otherwise <code>false</code>
      * @throws OXException If provider's start-up fails
      */
-    public static boolean registerTransportProvider(final String protocol, final TransportProvider provider) throws OXException {
+    public static boolean registerTransportProvider(String protocol, TransportProvider provider) throws OXException {
         final Protocol p = Protocol.parseProtocol(protocol);
         if (providers.containsKey(p)) {
             return false;
@@ -208,7 +208,7 @@ public final class TransportProviderRegistry {
      * Unregisters all transport providers
      */
     public static void unregisterAll() {
-        for (final Iterator<TransportProvider> iter = providers.values().iterator(); iter.hasNext();) {
+        for (Iterator<TransportProvider> iter = providers.values().iterator(); iter.hasNext();) {
             final TransportProvider provider = iter.next();
             /*
              * Perform shutdown
@@ -235,7 +235,7 @@ public final class TransportProviderRegistry {
      * @return The unregistered transport provider, or <code>null</code>
      * @throws OXException If provider's shut-down fails
      */
-    public static TransportProvider unregisterTransportProvider(final TransportProvider provider) throws OXException {
+    public static TransportProvider unregisterTransportProvider(TransportProvider provider) throws OXException {
         if (!providers.containsKey(provider.getProtocol())) {
             return null;
         }
@@ -269,8 +269,8 @@ public final class TransportProviderRegistry {
      *         protocol
      * @throws OXException If provider's shut-down fails
      */
-    public static TransportProvider unregisterTransportProviderByProtocol(final String protocol) throws OXException {
-        for (final Iterator<Map.Entry<Protocol, TransportProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
+    public static TransportProvider unregisterTransportProviderByProtocol(String protocol) throws OXException {
+        for (Iterator<Map.Entry<Protocol, TransportProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, TransportProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 iter.remove();

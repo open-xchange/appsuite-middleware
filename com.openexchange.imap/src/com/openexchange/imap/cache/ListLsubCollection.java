@@ -80,6 +80,7 @@ import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -269,7 +270,7 @@ final class ListLsubCollection implements Serializable {
      */
     public String toString(boolean lsub) {
         StringBuilder builder = new StringBuilder(1024);
-        String lf = System.getProperty("line.separator");
+        String lf = SystemPropertiesUtils.getProperty("line.separator");
         builder.append("ListLsubCollection:");
 
         SortedMap<String, ListLsubEntry> sm = new TreeMap<String, ListLsubEntry>(lsub ? lsubMap : listMap);
@@ -322,13 +323,13 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name to check
      * @return <code>true</code> if full name starts with either shared or user namespace prefix; otherwise <code>false</code>
      */
-    protected boolean isNamespace(final String fullName) {
-        for (final String sharedNamespace : shared) {
+    protected boolean isNamespace(String fullName) {
+        for (String sharedNamespace : shared) {
             if (fullName.startsWith(sharedNamespace)) {
                 return true;
             }
         }
-        for (final String userNamespace : user) {
+        for (String userNamespace : user) {
             if (fullName.startsWith(userNamespace)) {
                 return true;
             }
@@ -336,13 +337,13 @@ final class ListLsubCollection implements Serializable {
         return false;
     }
 
-    protected boolean equalsNamespace(final String fullName) {
-        for (final String sharedNamespace : shared) {
+    protected boolean equalsNamespace(String fullName) {
+        for (String sharedNamespace : shared) {
             if (fullName.equals(sharedNamespace)) {
                 return true;
             }
         }
-        for (final String userNamespace : user) {
+        for (String userNamespace : user) {
             if (fullName.equals(userNamespace)) {
                 return true;
             }
@@ -389,7 +390,7 @@ final class ListLsubCollection implements Serializable {
      *
      * @param fullName The full name
      */
-    public void remove(final String fullName) {
+    public void remove(String fullName) {
         /*
          * Cleanse from LIST map
          */
@@ -400,25 +401,25 @@ final class ListLsubCollection implements Serializable {
         removeFrom(fullName, lsubMap);
     }
 
-    private static void removeFrom(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+    private static void removeFrom(String fullName, ConcurrentMap<String, ListLsubEntryImpl> map) {
         final ListLsubEntryImpl entry = map.remove(fullName);
         if (null != entry) {
             final ListLsubEntryImpl parent = entry.getParentImpl();
             if (null != parent) {
                 parent.removeChild(entry);
             }
-            for (final ListLsubEntry child : entry.getChildrenSet()) {
+            for (ListLsubEntry child : entry.getChildrenSet()) {
                 removeFromMap(child.getFullName(), map);
             }
         }
     }
 
-    private static void removeFromMap(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+    private static void removeFromMap(String fullName, ConcurrentMap<String, ListLsubEntryImpl> map) {
         final ListLsubEntryImpl entry = map.remove(fullName);
         if (null == entry) {
             return;
         }
-        for (final ListLsubEntry child : entry.getChildrenSet()) {
+        for (ListLsubEntry child : entry.getChildrenSet()) {
             removeFromMap(child.getFullName(), map);
         }
     }
@@ -429,7 +430,7 @@ final class ListLsubCollection implements Serializable {
      * @param imapStore The IMAP store
      * @throws OXException If re-initialization fails
      */
-    public void reinitSpecialUseFolders(final IMAPStore imapStore) throws OXException {
+    public void reinitSpecialUseFolders(IMAPStore imapStore) throws OXException {
         try {
             reinitSpecialUseFolders((IMAPFolder) imapStore.getFolder("INBOX"), imapStore);
         } catch (MessagingException e) {
@@ -443,11 +444,11 @@ final class ListLsubCollection implements Serializable {
      * @param imapFolder The IMAP store
      * @throws OXException If re-initialization fails
      */
-    public void reinitSpecialUseFolders(final IMAPFolder imapFolder) throws OXException {
+    public void reinitSpecialUseFolders(IMAPFolder imapFolder) throws OXException {
         reinitSpecialUseFolders(imapFolder, (IMAPStore) imapFolder.getStore());
     }
 
-    private void reinitSpecialUseFolders(final IMAPFolder imapFolder, final IMAPStore imapStore) throws OXException {
+    private void reinitSpecialUseFolders(IMAPFolder imapFolder, IMAPStore imapStore) throws OXException {
         try {
             draftsEntries.clear();
             junkEntries.clear();
@@ -461,7 +462,7 @@ final class ListLsubCollection implements Serializable {
                 imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                     @Override
-                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                         doListSpecialUse(protocol, true);
                         return null;
                     }
@@ -474,7 +475,7 @@ final class ListLsubCollection implements Serializable {
                 imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                     @Override
-                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                         doListSpecialUse(protocol, false);
                         return null;
                     }
@@ -493,7 +494,7 @@ final class ListLsubCollection implements Serializable {
      * @param ignoreSubscriptions Whether subscription are supposed to be ignored
      * @throws OXException If re-initialization fails
      */
-    public void reinit(final IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
+    public void reinit(IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
         clear(false);
         init(true, imapStore, ignoreSubscriptions);
     }
@@ -518,7 +519,7 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private void init(boolean clearMaps, IMAPFolder imapFolder, final boolean ignoreSubscriptions, IMAPStore imapStore) throws MessagingException {
+    private void init(boolean clearMaps, IMAPFolder imapFolder, boolean ignoreSubscriptions, IMAPStore imapStore) throws MessagingException {
         if (clearMaps) {
             listMap.clear();
             lsubMap.clear();
@@ -546,7 +547,7 @@ final class ListLsubCollection implements Serializable {
         imapFolderToUse.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 // Perform LIST "" ""
                 doRootListCommand(protocol, null);
 
@@ -652,7 +653,7 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private void checkConsistency(final IMAPStore imapStore) {
+    private void checkConsistency(IMAPStore imapStore) {
         final ListLsubEntryImpl rootEntry = listMap.get(ROOT_FULL_NAME);
         /*
          * Ensure every LSUB'ed entry occurs in LIST'ed entries
@@ -737,9 +738,9 @@ final class ListLsubCollection implements Serializable {
         return lle;
     }
 
-    private static void dropEntryFrom(final ListLsubEntryImpl lle, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+    private static void dropEntryFrom(ListLsubEntryImpl lle, ConcurrentMap<String, ListLsubEntryImpl> map) {
         final Set<ListLsubEntryImpl> tmp = new HashSet<ListLsubEntryImpl>(lle.getChildrenSet());
-        for (final ListLsubEntryImpl child : tmp) {
+        for (ListLsubEntryImpl child : tmp) {
             dropEntryFrom(child, map);
         }
         map.remove(lle.getFullName());
@@ -756,7 +757,7 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private static boolean existsSafe(final String fullName, final IMAPStore imapStore) {
+    private static boolean existsSafe(String fullName, IMAPStore imapStore) {
         if (null == imapStore) {
             return false;
         }
@@ -776,7 +777,7 @@ final class ListLsubCollection implements Serializable {
      * @param imapFolder The connected IMAP folder
      * @throws MailException If update fails
      */
-    public ListLsubEntry getActualEntry(final String fullName, final IMAPFolder imapFolder) throws OXException {
+    public ListLsubEntry getActualEntry(String fullName, IMAPFolder imapFolder) throws OXException {
         try {
             /*
              * Perform LIST "" <full-name>
@@ -784,7 +785,7 @@ final class ListLsubCollection implements Serializable {
             return (ListLsubEntry) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     return doSingleListCommandWithLsub(protocol, fullName);
                 }
 
@@ -836,7 +837,7 @@ final class ListLsubCollection implements Serializable {
      *
      * @param protocol The IMAP protocol
      */
-    protected void doDummyLsub(final IMAPProtocol protocol) {
+    protected void doDummyLsub(IMAPProtocol protocol) {
         String command = "LSUB \"\" \"\"";
         Response[] r = performCommand(protocol, command);
         Response response = r[r.length - 1];
@@ -884,7 +885,7 @@ final class ListLsubCollection implements Serializable {
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecialUse) throws ProtocolException {
+    protected void doListSpecialUse(IMAPProtocol protocol, boolean usingSpecialUse) throws ProtocolException {
         String command = "LIST";
         String sCmd = new StringBuilder(command).append(usingSpecialUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
         Response[] r = performCommand(protocol, sCmd);
@@ -943,7 +944,7 @@ final class ListLsubCollection implements Serializable {
      * @param responses Test responses
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub, Response[] responses) throws ProtocolException {
+    protected void doListLsubCommand(IMAPProtocol protocol, boolean lsub, Response[] responses) throws ProtocolException {
         // Perform command
         String command = lsub ? "LSUB" : "LIST";
         String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
@@ -963,7 +964,7 @@ final class ListLsubCollection implements Serializable {
             // Get sorted responses
             final List<ListLsubEntryImpl> listResponses = sortedListResponses(r, command, lsub);
             char separator = '\0';
-            for (final ListLsubEntryImpl next : listResponses) {
+            for (ListLsubEntryImpl next : listResponses) {
                 ListLsubEntryImpl listLsubEntry = next;
 
                 // Check for MBox format while iterating LIST/LSUB responses.
@@ -1094,8 +1095,8 @@ final class ListLsubCollection implements Serializable {
         LOG2.debug(messageBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
-    private void handleNamespaces(final ConcurrentMap<String, ListLsubEntryImpl> map, final ListLsubEntryImpl rootEntry, final char separator) {
-        for (final String sharedNamespace : shared) {
+    private void handleNamespaces(ConcurrentMap<String, ListLsubEntryImpl> map, ListLsubEntryImpl rootEntry, char separator) {
+        for (String sharedNamespace : shared) {
             final ListLsubEntryImpl entry = map.get(sharedNamespace);
             if (null == entry) {
                 final ListLsubEntryImpl namespaceFolder =
@@ -1115,7 +1116,7 @@ final class ListLsubCollection implements Serializable {
                 entry.setCanOpen(false);
             }
         }
-        for (final String userNamespace : user) {
+        for (String userNamespace : user) {
             final ListLsubEntryImpl entry = map.get(userNamespace);
             if (null == entry) {
                 final ListLsubEntryImpl namespaceFolder =
@@ -1137,7 +1138,7 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private List<ListLsubEntryImpl> sortedListResponses(final Response[] r, final String command, final boolean lsub) {
+    private List<ListLsubEntryImpl> sortedListResponses(Response[] r, String command, boolean lsub) {
         List<ListLsubEntryImpl> list = new ArrayList<ListLsubEntryImpl>(r.length);
         for (int i = 0, len = r.length - 1; len-- > 0; i++) {
             if (r[i] instanceof IMAPResponse) {
@@ -1166,7 +1167,7 @@ final class ListLsubCollection implements Serializable {
      * @param set The set of full names
      * @param add <code>true</code> to add to <code>set</code> parameter; otherwise <code>false</code> to remove from it
      */
-    private void handleParentMap(final Map<String, List<ListLsubEntryImpl>> parentMap, final char separator, final ListLsubEntryImpl rootEntry, final boolean lsub, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+    private void handleParentMap(Map<String, List<ListLsubEntryImpl>> parentMap, char separator, ListLsubEntryImpl rootEntry, boolean lsub, ConcurrentMap<String, ListLsubEntryImpl> map) {
         /*
          * Handle children
          */
@@ -1175,7 +1176,7 @@ final class ListLsubCollection implements Serializable {
             handleChildren = false;
             String grandFullName = null;
             ListLsubEntryImpl newEntry = null;
-            Next: for (final Entry<String, List<ListLsubEntryImpl>> entry : parentMap.entrySet()) {
+            Next: for (Entry<String, List<ListLsubEntryImpl>> entry : parentMap.entrySet()) {
                 final String parentFullName = entry.getKey();
                 ListLsubEntryImpl parent = map.get(parentFullName);
                 if (null == parent) {
@@ -1211,7 +1212,7 @@ final class ListLsubCollection implements Serializable {
                     parent.setParent(rootEntry);
                     rootEntry.addChildIfAbsent(parent);
                 }
-                for (final ListLsubEntryImpl child : entry.getValue()) {
+                for (ListLsubEntryImpl child : entry.getValue()) {
                     child.setParent(parent);
                     parent.addChildIfAbsent(child);
                 }
@@ -1240,7 +1241,7 @@ final class ListLsubCollection implements Serializable {
      * @param responses Test responses
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doRootListCommand(final IMAPProtocol protocol, Response[] responses) throws ProtocolException {
+    protected void doRootListCommand(IMAPProtocol protocol, Response[] responses) throws ProtocolException {
         /*
          * Perform command: LIST "" ""
          */
@@ -1307,7 +1308,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @throws ProtocolException If a protocol error occurs
      */
-    protected ListLsubEntryImpl doSingleListCommandWithLsub(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
+    protected ListLsubEntryImpl doSingleListCommandWithLsub(IMAPProtocol protocol, String fullName) throws ProtocolException {
         doDummyLsub(protocol);
         /*
          * Perform command: LIST "" <full-name>
@@ -1356,7 +1357,7 @@ final class ListLsubCollection implements Serializable {
      * @return <code>true</code> if subscribed; otherwise <code>false</code>
      * @throws ProtocolException If a protocol error occurs
      */
-    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
+    private boolean doSubscriptionCheck(IMAPProtocol protocol, String fullName) throws ProtocolException {
         /*
          * Perform command: LIST "" <full-name>
          */
@@ -1511,7 +1512,7 @@ final class ListLsubCollection implements Serializable {
      * @param imapStore The IMAP store
      * @throws OXException If operation fails
      */
-    public void addSingle(final String fullName, final IMAPStore imapStore) throws OXException {
+    public void addSingle(String fullName, IMAPStore imapStore) throws OXException {
         try {
             addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"));
         } catch (MessagingException e) {
@@ -1639,12 +1640,12 @@ final class ListLsubCollection implements Serializable {
      * @param imapFolder The IMAP folder
      * @throws OXException If operation fails
      */
-    public void addSingle(final String fullName, final IMAPFolder imapFolder) throws OXException {
+    public void addSingle(String fullName, IMAPFolder imapFolder) throws OXException {
         try {
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     doSingleListCommand(fullName, protocol, false);
                     return null;
                 }
@@ -1654,7 +1655,7 @@ final class ListLsubCollection implements Serializable {
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
                 @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                     doSingleListCommand(fullName, protocol, true);
                     return null;
                 }
@@ -1672,7 +1673,7 @@ final class ListLsubCollection implements Serializable {
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
-    protected ListLsubEntryImpl doSingleListCommand(final String fullName, final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
+    protected ListLsubEntryImpl doSingleListCommand(String fullName, IMAPProtocol protocol, boolean lsub) throws ProtocolException {
         if (!lsub) {
             doDummyLsub(protocol);
         }
@@ -1700,7 +1701,7 @@ final class ListLsubCollection implements Serializable {
                         final ListLsubEntryImpl oldEntry = map.get(fullName);
                         final ListLsubEntryImpl parent;
                         if (null != oldEntry) {
-                            for (final ListLsubEntryImpl child : oldEntry.getChildrenSet()) {
+                            for (ListLsubEntryImpl child : oldEntry.getChildrenSet()) {
                                 child.setParent(listLsubEntry);
                                 listLsubEntry.addChild(child);
                             }
@@ -1737,7 +1738,7 @@ final class ListLsubCollection implements Serializable {
                     final StringBuilder sb = new StringBuilder(1024);
                     sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
                     sb.append(fullName).append("\":\n");
-                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    for (Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
                         sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
                     }
                     return sb.toString();
@@ -1772,7 +1773,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return <code>true</code> if a subscribed subfolder exists; otherwise <code>false</code>
      */
-    public boolean hasAnySubscribedSubfolder(final String fullName) {
+    public boolean hasAnySubscribedSubfolder(String fullName) {
         checkDeprecated();
         final ListLsubEntryImpl parent = lsubMap.get(fullName);
         if (null != parent && !parent.getChildrenSet().isEmpty()) {
@@ -1860,7 +1861,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return The LIST entry for specified full name or <code>null</code>
      */
-    public ListLsubEntry getList(final String fullName) {
+    public ListLsubEntry getList(String fullName) {
         if (null == fullName) {
             return null;
         }
@@ -1874,7 +1875,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return The LIST entry for specified full name or <code>null</code>
      */
-    public ListLsubEntry getListIgnoreDeprecated(final String fullName) {
+    public ListLsubEntry getListIgnoreDeprecated(String fullName) {
         if (null == fullName) {
             return null;
         }
@@ -1887,7 +1888,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return The LSUB entry for specified full name or <code>null</code>
      */
-    public ListLsubEntry getLsub(final String fullName) {
+    public ListLsubEntry getLsub(String fullName) {
         if (null == fullName) {
             return null;
         }
@@ -1901,7 +1902,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return The LSUB entry for specified full name or <code>null</code>
      */
-    public ListLsubEntry getLsubIgnoreDeprecated(final String fullName) {
+    public ListLsubEntry getLsubIgnoreDeprecated(String fullName) {
         if (null == fullName) {
             return null;
         }
@@ -2071,7 +2072,7 @@ final class ListLsubCollection implements Serializable {
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
     }
 
-    private String parseEncodedFullName(final IMAPResponse listResponse) {
+    private String parseEncodedFullName(IMAPResponse listResponse) {
         /*-
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          *
@@ -2106,7 +2107,7 @@ final class ListLsubCollection implements Serializable {
      * @param fullName The full name
      * @return An empty {@link ListLsubEntry}
      */
-    protected static ListLsubEntry emptyEntryFor(final String fullName) {
+    protected static ListLsubEntry emptyEntryFor(String fullName) {
         return new EmptyListLsubEntry(fullName);
     }
 
@@ -2116,7 +2117,7 @@ final class ListLsubCollection implements Serializable {
 
         private final String fullName;
 
-        public EmptyListLsubEntry(final String fullName) {
+        public EmptyListLsubEntry(String fullName) {
             super();
             this.fullName = fullName;
         }
@@ -2207,12 +2208,12 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
-        public void rememberACLs(final List<ACL> aclList) {
+        public void rememberACLs(List<ACL> aclList) {
             // Nothing to do
         }
 
         @Override
-        public void rememberCounts(final int total, final int recent, final int unseen) {
+        public void rememberCounts(int total, int recent, int unseen) {
             // Nothing to do
         }
 
@@ -2271,7 +2272,7 @@ final class ListLsubCollection implements Serializable {
 
         private boolean dummy;
 
-        protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+        protected ListLsubEntryImpl(String fullName, Set<String> attributes, char separator, ChangeState changeState, boolean hasInferiors, boolean canOpen, Boolean hasChildren, ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
             String checkedFullName = checkFullName(fullName, separator);
             this.fullName = checkedFullName;
@@ -2295,7 +2296,7 @@ final class ListLsubCollection implements Serializable {
             dummy = false;
         }
 
-        protected ListLsubEntryImpl(final ListLsubEntryImpl newEntry, final boolean subscribed) {
+        protected ListLsubEntryImpl(ListLsubEntryImpl newEntry, boolean subscribed) {
             super();
             fullName = newEntry.fullName;
             originalFullName = newEntry.originalFullName;
@@ -2313,7 +2314,7 @@ final class ListLsubCollection implements Serializable {
             dummy = false;
         }
 
-        protected void copyFrom(final ListLsubEntryImpl newEntry) {
+        protected void copyFrom(ListLsubEntryImpl newEntry) {
             if (newEntry == null) {
                 return;
             }
@@ -2365,7 +2366,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param parent The parent
          */
-        protected void setParent(final ListLsubEntryImpl parent) {
+        protected void setParent(ListLsubEntryImpl parent) {
             this.parent = parent;
         }
 
@@ -2388,7 +2389,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param child The child LIST/LSUB entry
          */
-        protected void addChild(final ListLsubEntryImpl child) {
+        protected void addChild(ListLsubEntryImpl child) {
             if (null == child) {
                 return;
             }
@@ -2411,7 +2412,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param child The child LIST/LSUB entry
          */
-        protected void removeChild(final ListLsubEntryImpl child) {
+        protected void removeChild(ListLsubEntryImpl child) {
             if (null == child || null == children) {
                 return;
             }
@@ -2423,7 +2424,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param childFullName The child full-name
          */
-        protected void removeChildByFullName(final String childFullName) {
+        protected void removeChildByFullName(String childFullName) {
             if (null == childFullName || null == children) {
                 return;
             }
@@ -2441,7 +2442,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param child The child LIST/LSUB entry
          */
-        protected void addChildIfAbsent(final ListLsubEntryImpl child) {
+        protected void addChildIfAbsent(ListLsubEntryImpl child) {
             if (null == child) {
                 return;
             }
@@ -2499,7 +2500,7 @@ final class ListLsubCollection implements Serializable {
             return hasInferiors;
         }
 
-        protected ListLsubEntryImpl setCanOpen(final boolean canOpen) {
+        protected ListLsubEntryImpl setCanOpen(boolean canOpen) {
             this.canOpen = canOpen;
             return this;
         }
@@ -2525,7 +2526,7 @@ final class ListLsubCollection implements Serializable {
             return !nonExistent;
         }
 
-        protected void setSubscribed(final boolean subscribed) {
+        protected void setSubscribed(boolean subscribed) {
             this.subscribed = Boolean.valueOf(subscribed);
         }
 
@@ -2555,12 +2556,12 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
-        public void rememberACLs(final List<ACL> aclList) {
+        public void rememberACLs(List<ACL> aclList) {
             this.acls = new ArrayList<ACL>(aclList);
         }
 
         @Override
-        public void rememberCounts(final int total, final int recent, final int unseen) {
+        public void rememberCounts(int total, int recent, int unseen) {
             if (null == status) {
                 status = new int[3];
             }
@@ -2575,7 +2576,7 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -2627,7 +2628,7 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
-        public int compareTo(final ListLsubEntryImpl anotherEntry) {
+        public int compareTo(ListLsubEntryImpl anotherEntry) {
             final String anotherFullName = anotherEntry.fullName;
             return fullName == null ? (anotherFullName == null ? 0 : -1) : fullName.compareToIgnoreCase(anotherFullName);
         }
@@ -2637,7 +2638,7 @@ final class ListLsubCollection implements Serializable {
          *
          * @param namespace The namespace flag
          */
-        protected ListLsubEntryImpl setNamespace(final boolean namespace) {
+        protected ListLsubEntryImpl setNamespace(boolean namespace) {
             this.namespace = namespace;
             return this;
         }
@@ -2655,7 +2656,7 @@ final class ListLsubCollection implements Serializable {
     } // End of class ListLsubEntryImpl
 
     /** Checks the full name */
-    protected static String checkFullName(final String fullName, final char separator) {
+    protected static String checkFullName(String fullName, char separator) {
         if (null == fullName) {
             return fullName;
         }

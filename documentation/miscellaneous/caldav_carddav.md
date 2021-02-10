@@ -69,7 +69,7 @@ com.openexchange.dav.prefixPath=/dav
 com.openexchange.dav.proxyPrefixPath=/
 ```
 
-> Note: For further information about the properties, have a look at [com.openexchange.dav.prefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.prefixPath) and [com.openexchange.dav.proxyPrefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPrefixPath)
+> Note: For further information about the properties, have a look at [com.openexchange.dav.prefixPath](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/#com.openexchange.dav.prefixPath) and [com.openexchange.dav.proxyPrefixPath](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/#com.openexchange.dav.proxyPrefixPath)
 
 With this configuration, the server will register all *DAV servlets* with the prefix <code>/dav/*</code>, thus e.g. the CalDAV servlet will be reachable under <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, a corresponding ProxyPass directive needs to be configured, too. E.g. for Apache:
 
@@ -114,7 +114,9 @@ For environments where it is inconvenient to setup a virtual host there is also 
   RewriteCond %{HTTP_USER_AGENT}      CalDAV%20Sync%20Adapter [OR]
   RewriteCond %{HTTP_USER_AGENT}      CalDavSynchronizer [OR]
   RewriteCond %{HTTP_USER_AGENT}      accountsd          [OR]
+  RewriteCond %{HTTP_USER_AGENT}      remindd            [OR]
   RewriteCond %{HTTP_USER_AGENT}      "eM Client"        [OR]
+  RewriteCond %{HTTP_USER_AGENT}      "eMClient"        [OR]
   RewriteCond %{HTTP_USER_AGENT}      "OX Sync"          [OR]
   RewriteCond %{HTTP_USER_AGENT}      CalDav             [OR]
   RewriteCond %{HTTP_USER_AGENT}      CoreDAV

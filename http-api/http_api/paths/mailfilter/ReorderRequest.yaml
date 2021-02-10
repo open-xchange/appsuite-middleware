@@ -4,8 +4,9 @@
     tags:
       - Mailfilter
     summary: Reorders mail filter rules.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: username
         description: >-

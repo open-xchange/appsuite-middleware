@@ -101,7 +101,7 @@ public class SessionHandlerTest {
     private SessiondConfigInterface config;
 
     @BeforeClass
-    public static void initHazelcast() throws Exception {
+    public static void initHazelcast() {
         Config config = new Config();
         config.getSerializationConfig().addPortableFactory(CustomPortable.FACTORY_ID, new PortableFactory() {
 
@@ -212,7 +212,7 @@ public class SessionHandlerTest {
     }
 
     @Before
-    public void initServices() throws Exception {
+    public void initServices() {
         SessionHandler.addTimerService(SimFactory.newTimerService());
         SessionHandler.addThreadPoolService(SimFactory.newThreadPoolService());
     }
@@ -306,6 +306,7 @@ public class SessionHandlerTest {
         return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, false, null, Arrays.asList(new SessionEnhancement() {
 
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void enhanceSession(Session session) {
                 for (int i = 0; i < props.length; i++) {

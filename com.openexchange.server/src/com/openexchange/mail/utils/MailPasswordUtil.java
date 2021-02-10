@@ -106,7 +106,7 @@ public final class MailPasswordUtil {
     public static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
 
         @Override
-        public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
+        public void update(String recrypted, GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
             final Connection con = Database.get(contextId, true);
             int rollback = 0;
@@ -133,7 +133,7 @@ public final class MailPasswordUtil {
             }
         }
 
-        private void update0(final String recrypted, final GenericProperty customizationNote, final Connection con) throws SQLException {
+        private void update0(String recrypted, GenericProperty customizationNote, Connection con) throws SQLException {
             PreparedStatement stmt = null;
             final Session session = customizationNote.session;
             final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
@@ -188,7 +188,7 @@ public final class MailPasswordUtil {
      * @return The encrypted password as Base64 encoded string
      * @throws GeneralSecurityException If password encryption fails
      */
-    public static String encrypt(final String password, final String key) throws GeneralSecurityException {
+    public static String encrypt(String password, String key) throws GeneralSecurityException {
         return encrypt(password, generateSecretKey(key));
     }
 
@@ -201,7 +201,7 @@ public final class MailPasswordUtil {
      * @throws GeneralSecurityException If password decryption fails
      * @throws OXException
      */
-    public static String decrypt(final String encryptedPassword, final Session session, final int accountId, final String login, final String server) throws OXException {
+    public static String decrypt(String encryptedPassword, Session session, int accountId, String login, String server) throws OXException {
         try {
             SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
             return encryptionService.decrypt(session, encryptedPassword, new GenericProperty(accountId, session, login, server));
@@ -224,7 +224,7 @@ public final class MailPasswordUtil {
      * @return The decrypted password
      * @throws GeneralSecurityException If password decryption fails
      */
-    public static String decrypt(final String encryptedPassword, final String key) throws GeneralSecurityException {
+    public static String decrypt(String encryptedPassword, String key) throws GeneralSecurityException {
         try {
             return decrypt(encryptedPassword, generateSecretKey(key));
         } catch (GeneralSecurityException e) {
@@ -254,7 +254,7 @@ public final class MailPasswordUtil {
      * @return The encrypted password as Base64 encoded string
      * @throws GeneralSecurityException If password encryption fails
      */
-    public static String encrypt(final String password, final Key key) throws GeneralSecurityException {
+    public static String encrypt(String password, Key key) throws GeneralSecurityException {
         if (null == password || null == key) {
             return null;
         }
@@ -291,7 +291,7 @@ public final class MailPasswordUtil {
      * @return The decrypted password
      * @throws GeneralSecurityException If password decryption fails
      */
-    public static String decrypt(final String encryptedPassword, final Key key) throws GeneralSecurityException {
+    public static String decrypt(String encryptedPassword, Key key) throws GeneralSecurityException {
         if (null == encryptedPassword || null == key) {
             return null;
         }
@@ -342,7 +342,7 @@ public final class MailPasswordUtil {
      * @param key The key string
      * @return A secret key generated from specified key string
      */
-    public static Key generateSecretKey(final String key) {
+    public static Key generateSecretKey(String key) {
         if (null == key) {
             return null;
         }
@@ -355,14 +355,14 @@ public final class MailPasswordUtil {
      * @param bytes The bytes
      * @return A secret key generated from specified bytes
      */
-    public static Key generateSecretKey(final byte[] bytes) {
+    public static Key generateSecretKey(byte[] bytes) {
         if (null == bytes) {
             return null;
         }
         return new SecretKeySpec(ensureLength(bytes), ALGORITHM_DES);
     }
 
-    private static byte[] ensureLength(final byte[] bytes) {
+    private static byte[] ensureLength(byte[] bytes) {
         final byte[] keyBytes;
         final int len = bytes.length;
         if (len < KEY_LENGTH) {
@@ -385,7 +385,7 @@ public final class MailPasswordUtil {
      *
      * @param key
      * @return
-    public static String encodeKey(final Key key) {
+    public static String encodeKey(Key key) {
         final BASE64Encoder encoder = new BASE64Encoder();
         return encoder.encode(key.getEncoded());
     }
@@ -397,7 +397,7 @@ public final class MailPasswordUtil {
      * @param encodedKey
      * @return
      * @throws IOException
-    public static Key decodeKey(final String encodedKey) throws IOException {
+    public static Key decodeKey(String encodedKey) throws IOException {
         final BASE64Decoder decoder = new BASE64Decoder();
         final byte raw[] = decoder.decodeBuffer(encodedKey);
         final SecretKey key = new SecretKeySpec(raw, "DES");

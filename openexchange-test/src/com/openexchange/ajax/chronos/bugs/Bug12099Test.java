@@ -98,7 +98,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
     public void testSeriesChangedFromIsZero() throws Throwable {
         String summary = "Bug12099Test";
         EventData event = EventFactory.createSeriesEvent(getCalendaruser(), summary, 2, folderId);
-        EventData createEvent = eventManager.createEvent(event);
+        EventData createEvent = eventManager.createEvent(event, true);
 
         Date start = DateTimeUtil.parseDateTime(event.getStartDate());
         Date end = DateTimeUtil.parseDateTime(event.getEndDate());
@@ -138,14 +138,14 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         perm.setGroup(Boolean.FALSE);
         perm.setBits(I(4227332));
         permissions.add(perm);
-        String sharedFolder = createAndRememberNewFolder(defaultUserApi, getSessionId(), folderId, getCalendaruser(), permissions);
+        String sharedFolder = createAndRememberNewFolder(defaultUserApi, folderId, getCalendaruser(), permissions);
 
         TestUser testUser3 = testContext.acquireUser();
         ApiClient apiClient3 = generateApiClient(testUser3);
         rememberClient(apiClient3);
         EnhancedApiClient enhancedApiClient3 = generateEnhancedClient(testUser3);
         rememberClient(enhancedApiClient3);
-        UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3, true);
+        UserApi userApi3 = new UserApi(apiClient3, enhancedApiClient3, testUser3);
         EventManager eventManager3 = new EventManager(userApi3, sharedFolder);
 
         String summary = "Bug12099Test";
@@ -159,7 +159,7 @@ public final class Bug12099Test extends AbstractSecondUserChronosTest {
         Date from = DateTimeUtil.parseDateTime(eventData.getStartDate());
         Date until = new Date(DateTimeUtil.parseDateTime(eventData.getEndDate()).getTime() + TimeUnit.DAYS.toMillis(1));
 
-        String defaultFolder3 = getDefaultFolder(userApi3.getSession(), apiClient3);
+        String defaultFolder3 = getDefaultFolder(apiClient3);
         List<EventData> allEvents = eventManager3.getAllEvents(from, until, true, defaultFolder3);
         assertEquals(2, allEvents.stream().filter(e -> e.getSummary().equals(summary)).collect(Collectors.toList()).size());
 

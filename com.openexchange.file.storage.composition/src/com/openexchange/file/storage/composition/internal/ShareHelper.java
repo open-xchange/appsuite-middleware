@@ -188,7 +188,7 @@ public class ShareHelper {
         return new ComparedObjectPermissions(session, (File)null, (File)null);
     }
 
-    public static List<FileStorageObjectPermission> collectAddedObjectPermissions(ComparedObjectPermissions comparedPermissions, Session session) throws OXException {
+    public static List<FileStorageObjectPermission> collectAddedObjectPermissions(ComparedObjectPermissions comparedPermissions, Session session) {
         Collection<FileStorageObjectPermission> newPermissions = comparedPermissions.getNewPermissions();
         if (newPermissions == null || newPermissions.isEmpty()) {
             return Collections.emptyList();
@@ -277,12 +277,12 @@ public class ShareHelper {
         try {
             if (comparedPermissions.hasNewGuests()) {
                 List<FileStorageGuestObjectPermission> newGuestPermissions = comparedPermissions.getNewGuestPermissions();
-                List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(newGuestPermissions.size());
+                List<ShareRecipient> shareRecipients = new ArrayList<>(newGuestPermissions.size());
                 for (FileStorageGuestObjectPermission guestPermission : newGuestPermissions) {
                     shareRecipients.add(guestPermission.getRecipient());
                 }
 
-                List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
+                List<FileStorageObjectPermission> allPermissions = new ArrayList<>(shareRecipients.size());
                 ShareService shareService = Services.getService(ShareService.class);
                 if (null == shareService) {
                     throw ServiceExceptionCode.absentService(ShareService.class);
@@ -319,7 +319,7 @@ public class ShareHelper {
         if (null == permissions || 0 == permissions.size()) {
             return Collections.emptyList();
         }
-        List<Integer> affectedUserIDs = new ArrayList<Integer>(permissions.size());
+        List<Integer> affectedUserIDs = new ArrayList<>(permissions.size());
         for (FileStorageObjectPermission removedPermission : permissions) {
             if (false == removedPermission.isGroup()) {
                 affectedUserIDs.add(Integer.valueOf(removedPermission.getEntity()));

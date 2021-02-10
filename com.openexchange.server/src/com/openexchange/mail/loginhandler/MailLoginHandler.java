@@ -50,6 +50,8 @@
 package com.openexchange.mail.loginhandler;
 
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
@@ -57,9 +59,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -71,6 +75,8 @@ import com.openexchange.session.Session;
  */
 public final class MailLoginHandler implements LoginHandlerService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MailLoginHandler.class);
+
 	/**
 	 * Initializes a new {@link MailLoginHandler}.
 	 */
@@ -79,7 +85,7 @@ public final class MailLoginHandler implements LoginHandlerService {
 	}
 
 	@Override
-    public void handleLogin(final LoginResult login) throws OXException {
+    public void handleLogin(LoginResult login) throws OXException {
         /*
          * Track mail login in data retention service
          */
@@ -99,6 +105,13 @@ public final class MailLoginHandler implements LoginHandlerService {
                  * Finally store it
                  */
                 retentionService.storeOnAccess(retentionData);
+            } catch (OXException e) {
+                // Skipp mail login in case the mail is not accessible from oauth. E.g. because master auth is not enabled
+                if (MailExceptionCode.MISSING_CONNECT_PARAM.equals(e) && session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN) != null && e.getArgument(MailConfig.MISSING_SESSION_PASSWORD) != null) {
+                    LOG.debug("Mail access with oauth impossible. Skipping mail login.");
+                    return;
+                }
+                throw e;
             } finally {
                 MailAccess.closeInstance(mailAccess);
             }
@@ -106,7 +119,7 @@ public final class MailLoginHandler implements LoginHandlerService {
     }
 
 	@Override
-    public void handleLogout(final LoginResult logout) throws OXException {
+    public void handleLogout(LoginResult logout) throws OXException {
 	    // Nothing
 	}
 }

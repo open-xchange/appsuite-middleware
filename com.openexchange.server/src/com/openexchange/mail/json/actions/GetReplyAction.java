@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -70,7 +71,6 @@ import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.WRITE_MAIL)
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetReplyAction extends AbstractMailAction {
 
     /**
@@ -87,12 +87,12 @@ public final class GetReplyAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetReplyAction(final ServiceLookup services) {
+    public GetReplyAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return performGet(req);
@@ -100,7 +100,7 @@ public final class GetReplyAction extends AbstractMailAction {
         return performPut(req, paths);
     }
 
-    private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
+    private AJAXRequestResult performPut(MailRequest req, JSONArray paths) throws OXException {
         try {
             int length = paths.length();
             if (length != 1) {
@@ -131,7 +131,7 @@ public final class GetReplyAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performGet(final MailRequest req) throws OXException {
+    private AJAXRequestResult performGet(MailRequest req) throws OXException {
         try {
             ServerSession session = req.getSession();
             /*

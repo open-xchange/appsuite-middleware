@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Recovery Plug-in
 Bundle-SymbolicName: com.openexchange.secret.recovery
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.secret.recovery.osgi.SecretRecoveryActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -32,3 +32,4 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.secret.recovery
+Automatic-Module-Name: com.openexchange.secret.recovery

@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Retrieves not acknowledged alarm triggers.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: rangeStart
         description: >

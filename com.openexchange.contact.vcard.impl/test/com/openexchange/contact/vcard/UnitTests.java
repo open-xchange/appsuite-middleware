@@ -85,7 +85,7 @@ import org.junit.runners.Suite;
     Bug7249Test.class,
     Bug7250Test.class,
     Bug7719Test.class,
-
+    MWB768Test.class,
 })
 public class UnitTests {
 

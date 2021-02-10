@@ -73,7 +73,7 @@ public final class SubjectTerm extends SearchTerm<String> {
     /**
      * Initializes a new {@link SubjectTerm}
      */
-    public SubjectTerm(final String unicodeSubject) {
+    public SubjectTerm(String unicodeSubject) {
         super();
         this.unicodeSubject = unicodeSubject;
     }
@@ -101,12 +101,12 @@ public final class SubjectTerm extends SearchTerm<String> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.SUBJECT);
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final String subject;
         try {
             subject = msg.getSubject();
@@ -124,7 +124,7 @@ public final class SubjectTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         final String subject = mailMessage.getSubject();
         if (subject == null) {
             if (null == unicodeSubject) {

@@ -58,6 +58,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -78,7 +79,8 @@ public class MailOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountStorageService.class, SessiondService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountStorageService.class, SessiondService.class,
+            ServerConfigService.class };
     }
 
     @Override

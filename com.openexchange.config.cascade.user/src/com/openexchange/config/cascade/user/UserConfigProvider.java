@@ -59,6 +59,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.user.cache.PropertyMap;
 import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
 import com.openexchange.context.ContextService;
@@ -99,7 +100,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
     @Override
     public String getScope() {
-    	return "user";
+    	return ConfigViewScope.USER.getScopeName();
     }
 
     /**
@@ -131,27 +132,30 @@ public class UserConfigProvider implements ConfigProviderService {
     }
 
     @Override
-    public BasicProperty get(String property, int contextId, int userId) throws OXException {
+    public BasicProperty get(String propertyName, int contextId, int userId) throws OXException {
         if (userId == NO_USER) {
             return NO_PROPERTY;
         }
 
         PropertyMap propertyMap = PropertyMapManagement.getInstance().getFor(userId, contextId);
-        BasicProperty basicProperty = propertyMap.get(property);
+        BasicProperty basicProperty = propertyMap.get(propertyName);
         if (null == basicProperty) {
             BasicProperty loaded;
             try {
-                loaded = new BasicPropertyImpl(property, userId, contextId, services);
+                loaded = new BasicPropertyImpl(propertyName, userId, contextId, services);
             } catch (OXException e) {
-                if (false == USER_NOT_FOUND.equals(e)) {
+                if (e.equalsCode(2, "CTX")) {
+                    // "CTX-0002" --> No such context
+                    return NO_PROPERTY;
+                } else if (USER_NOT_FOUND.equals(e)) {
+                    // "USR-0010" --> No such user
+                    return NO_PROPERTY;
+                } else {
                     throw e;
                 }
-
-                // "USR-0010" --> No such user
-                loaded = NO_PROPERTY;
             }
 
-            basicProperty = propertyMap.putIfAbsent(property, loaded);
+            basicProperty = propertyMap.putIfAbsent(propertyName, loaded);
             if (null == basicProperty) {
                 basicProperty = loaded;
             }

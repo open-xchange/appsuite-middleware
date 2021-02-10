@@ -92,10 +92,10 @@ public class UseCountTest extends ContactTest {
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c1.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
+        c1.setEmail1(testContext.acquireUser().getLogin());
         c1 = cotm.newAction(c1);
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c2.setEmail1(modifyMailAddress(client.getValues().getDefaultAddress()));
+        c2.setEmail1(testContext.acquireUser().getLogin());
         c2 = cotm.newAction(c2);
 
         SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
@@ -129,27 +129,5 @@ public class UseCountTest extends ContactTest {
         } while (System.currentTimeMillis() < until);
         assertNotNull("Missing contact", firstResult);
         assertEquals(address, firstResult.getEmail1());
-    }
-
-    /**
-     * Modify given mail address to create new unique address
-     *
-     * @param mailAdress The original mail address
-     * @return unique mail address
-     */
-    private String modifyMailAddress(String mailAddress) {
-        StringBuilder sb = new StringBuilder();
-        int at;
-
-        // Check if given mail address is 'valid'
-        if ((at = mailAddress.indexOf('@')) < 0) {
-            return mailAddress;
-        }
-
-        // Generate random address
-        sb.append(UUID.randomUUID().toString().replaceAll("-", ""));
-        sb.append(mailAddress.substring(at));
-
-        return sb.toString();
     }
 }

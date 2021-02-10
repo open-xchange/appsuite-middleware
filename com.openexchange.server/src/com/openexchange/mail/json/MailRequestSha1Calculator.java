@@ -66,6 +66,6 @@ public interface MailRequestSha1Calculator {
      * @return The SHA1 sum
      * @throws OXException If SHA1 sum cannot be calculated.
      */
-    String getSha1For(final MailRequest req) throws OXException;
+    String getSha1For(MailRequest req) throws OXException;
 
 }

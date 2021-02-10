@@ -64,53 +64,53 @@ public interface ConfigView {
      * Sets denoted property
      *
      * @param scope The property's scope
-     * @param property The property's name
+     * @param propertyName The property's name
      * @param value The property's value
      * @throws OXException If setting property fails for any reason
      */
-    <T> void set(String scope, String property, T value) throws OXException;
+    <T> void set(String scope, String propertyName, T value) throws OXException;
 
     /**
      * Gets coerced property value.
      *
-     * @param property The property name
+     * @param propertyName The property name
      * @param coerceTo The type to coerce to
      * @return The coerced value or <code>null</code>
      * @throws OXException If such a property does not exist
      */
-    <T> T get(String property, Class<T> coerceTo) throws OXException;
+    <T> T get(String propertyName, Class<T> coerceTo) throws OXException;
 
     /**
      * (Optionally) Gets coerced property value.
      *
-     * @param property The property name
+     * @param propertyName The property name
      * @param coerceTo The type to coerce to
      * @param defaultValue The default value
      * @return The coerced value or <code>defaultValue</code> if absent
      * @throws OXException If returning property fails
      */
-    <T> T opt(String property, Class<T> coerceTo, T defaultValue) throws OXException;
+    <T> T opt(String propertyName, Class<T> coerceTo, T defaultValue) throws OXException;
 
     /**
      * Gets coerced property.
      *
      * @param scope The property's scope
-     * @param property The property's name
+     * @param propertyName The property's name
      * @param coerceTo The type to coerce to
      * @return The coerced property
      * @throws OXException If returning property fails
      */
-    <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException;
+    <T> ConfigProperty<T> property(String scope, String propertyName, Class<T> coerceTo) throws OXException;
 
     /**
      * Gets coerced composed property (all scopes combined).
      *
-     * @param property The property's name
+     * @param propertyName The property's name
      * @param coerceTo The type to coerce to
      * @return The coerced composed property
      * @throws OXException If returning composed property fails
      */
-    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
+    <T> ComposedConfigProperty<T> property(String propertyName, Class<T> coerceTo) throws OXException;
 
     /**
      * Gets all available properties.

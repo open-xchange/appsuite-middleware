@@ -73,7 +73,7 @@ public abstract class CatenatingTerm extends SearchTerm<SearchTerm<?>[]> {
     /**
      * Initializes a new {@link CatenatingTerm}
      */
-    public CatenatingTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
+    public CatenatingTerm(SearchTerm<?> firstTerm, SearchTerm<?> secondTerm) {
         super();
         terms = new SearchTerm<?>[] { firstTerm, secondTerm };
     }
@@ -93,7 +93,7 @@ public abstract class CatenatingTerm extends SearchTerm<SearchTerm<?>[]> {
      *
      * @param firstTerm The first search term
      */
-    public void setFirstTerm(final SearchTerm<?> firstTerm) {
+    public void setFirstTerm(SearchTerm<?> firstTerm) {
         terms[0] = firstTerm;
     }
 
@@ -102,7 +102,7 @@ public abstract class CatenatingTerm extends SearchTerm<SearchTerm<?>[]> {
      *
      * @param secondTerm The second search term
      */
-    public void setSecondTerm(final SearchTerm<?> secondTerm) {
+    public void setSecondTerm(SearchTerm<?> secondTerm) {
         terms[1] = secondTerm;
     }
 

@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * Anonymous guests are created for creating links to folders/items. At most one link must exist
@@ -95,6 +96,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddAnonymousGuestToFolder() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject updated = addPermissions(folder, guestPermission);
@@ -113,6 +115,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddAnonymousGuestWithInvalidPermissionToFolder() throws Exception {
         /*
          * Permission bits are ignored for anonymous guests, therefore the update should succeed
@@ -136,6 +139,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddTwoAnonymousGuestsToFolder() throws Exception {
         /*
          * Only one anonymous permission is allowed, so the update must fail.
@@ -154,6 +158,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddTwoAnonymousGuestsSubsequentlyToFolder() throws Exception {
         /*
          * Only one anonymous permission is allowed, so the second update must fail.
@@ -172,6 +177,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddExistingAnonymousGuestToNewFolder() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject updated = addPermissions(folder, guestPermission);
@@ -191,6 +197,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testUpdateAnonymousGuestPermissionToWritableOnFolder() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject updated = addPermissions(folder, guestPermission);
@@ -210,6 +217,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddAnonymousGuestToFile() throws Exception {
         FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
 
@@ -229,6 +237,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddAnonymousGuestWithInvalidPermissionToFile() throws Exception {
         /*
          * Permission bits are ignored for anonymous guests, therefore the update should succeed
@@ -252,6 +261,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddTwoAnonymousGuestsToFile() throws Exception {
         /*
          * Only one anonymous permission is allowed, so the update must fail.
@@ -270,6 +280,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddTwoAnonymousGuestsSubsequentlyToFile() throws Exception {
         /*
          * Only one anonymous permission is allowed, so the second update must fail.
@@ -288,6 +299,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAddExistingAnonymousGuestToNewFile() throws Exception {
         FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
         File updated = addPermissions(file, guestPermission);
@@ -307,6 +319,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testUpdateAnonymousGuestPermissionToWritableOnFile() throws Exception {
         FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
         File updated = addPermissions(file, guestPermission);

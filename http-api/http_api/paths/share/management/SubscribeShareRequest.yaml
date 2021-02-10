@@ -1,0 +1,26 @@
+/share/management?action=subscribe:
+  put:
+    operationId: subscribeShare
+    tags:
+      - Share/Management
+      - FederatedSharing
+    summary: Subscribes to a share that is associated with a specific share link from a remote server.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          An json object holding the account information in case of success. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeShareResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExtendedSubscribeShareBody'
+      description: >-
+        A JSON object containing the data for the update
+      required: true

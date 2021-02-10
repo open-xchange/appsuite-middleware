@@ -49,17 +49,17 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
@@ -98,44 +98,17 @@ public class GetAction extends AbstractFileStorageAccountAction {
         FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
 
         FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
-        FileStorageFolder rootFolder = access.getRootFolder();
+        FileStorageFolder rootFolder = optRootFolder(access);
 
-        // Check file storage capabilities
-        Set<String> caps = new HashSet<String>(8, 0.9f);
-        if (access instanceof CapabilityAware) {
-            CapabilityAware capabilityAware = (CapabilityAware) access;
-
-            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.FILE_VERSIONS.name());
-            }
-
-            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-            }
-
-            supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-            }
-
-            supported = capabilityAware.supports(FileStorageCapability.LOCKS);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.LOCKS.name());
-            }
-
-            supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.READ_ONLY.name());
-            }
-
-            supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
-            }
+        try {
+            return new AJAXRequestResult(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
+        } catch (OXException e) {
+            //Add account with error
+            boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
+            JSONObject accountJSON = writer.write(account, null, determineCapabilities(access), null);
+            accountJSON.put("hasError", true);
+            ResponseWriter.addException(accountJSON, e, localeFrom(session), includeStackTraceOnError);
+            return new AJAXRequestResult(accountJSON);
         }
-        return new AJAXRequestResult(writer.write(account, rootFolder, caps));
     }
-
 }

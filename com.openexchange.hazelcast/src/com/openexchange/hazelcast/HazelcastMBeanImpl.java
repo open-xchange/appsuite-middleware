@@ -57,17 +57,17 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import com.hazelcast.cluster.Cluster;
+import com.hazelcast.cluster.Member;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MemberGroupConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.PartitionGroupConfig;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Member;
-import com.hazelcast.core.Partition;
-import com.hazelcast.core.PartitionService;
-import com.hazelcast.util.AddressUtil;
+import com.hazelcast.internal.util.AddressUtil;
+import com.hazelcast.partition.Partition;
+import com.hazelcast.partition.PartitionService;
 
 /**
  * {@link HazelcastMBeanImpl}

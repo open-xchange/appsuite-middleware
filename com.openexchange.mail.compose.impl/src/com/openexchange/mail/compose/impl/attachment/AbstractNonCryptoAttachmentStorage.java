@@ -76,7 +76,9 @@ import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.AttachmentStorageReference;
+import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.ContentId;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.DefaultAttachment;
 import com.openexchange.mail.compose.SizeProvider;
@@ -427,10 +429,10 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         if (null != optStorageIdentifier) {
             try {
                 if (false == deleteData(optStorageIdentifier, session)) {
-                    LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier);
+                    LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier.getIdentifier());
                 }
             } catch (Exception e) {
-                LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier, e);
+                LoggerHolder.LOG.error("Failed to delete storage resource with identifier {}", optStorageIdentifier.getIdentifier(), e);
             }
         }
     }
@@ -444,13 +446,13 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         Connection con = null;
         int rollback = 0;
+        Attachment savedAttachment = null;
         try {
             con = databaseService.getWritable(session.getContextId());
 
             con.setAutoCommit(false); // BEGIN
             rollback = 1;
 
-            Attachment savedAttachment;
             try {
                 savedAttachment = saveAttachmentMetaData(identifierAndSize, attachment, session, con);
             } catch (OXException e) {
@@ -474,7 +476,11 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                     }
                     Databases.autocommit(con);
                 }
-                databaseService.backWritable(session.getContextId(), con);
+                if (savedAttachment == null) {
+                    databaseService.backWritableAfterReading(session.getContextId(), con);
+                } else {
+                    databaseService.backWritable(session.getContextId(), con);
+                }
             }
             deleteSafely(storageIdentifierToDelete, session);
         }
@@ -500,24 +506,43 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         return saveAttachmentMetaData(identifierAndSize, attachment, session, con);
     }
 
-    private Attachment saveAttachmentMetaData(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachment, Session session, Connection con) throws OXException {
+    private Attachment saveAttachmentMetaData(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachmentDesc, Session session, Connection con) throws OXException {
         AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentMeta (uuid, cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid, dedicatedFileStorageId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            // Build appropriate attachment instance.
             UUID uuid = UUID.randomUUID();
-            stmt.setBytes(1, UUIDs.toByteArray(uuid));
+            ContentId contentId = attachmentDesc.getContentId();
+            if (contentId == null && ContentDisposition.INLINE == attachmentDesc.getContentDisposition()) {
+                contentId = AttachmentStorages.generateContentIdForAttachmentId(uuid);
+            }
+
+            DefaultAttachment.Builder builder = DefaultAttachment.builder(uuid);
+            builder.withStorageReference(new AttachmentStorageReference(storageIdentifierToDelete, getStorageType()));
+            builder.withName(attachmentDesc.getName());
+            builder.withSize(identifierAndSize.size);
+            builder.withMimeType(attachmentDesc.getMimeType());
+            builder.withContentId(contentId);
+            builder.withDisposition(attachmentDesc.getContentDisposition());
+            builder.withOrigin(attachmentDesc.getOrigin());
+            builder.withCompositionSpaceId(attachmentDesc.getCompositionSpaceId());
+            builder.withDataProvider(getDataProviderFor(storageIdentifierToDelete, session));
+            DefaultAttachment defaultAttachment = builder.build();
+
+            // Insert into database
+            stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentMeta (uuid, cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid, dedicatedFileStorageId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.setBytes(1, UUIDs.toByteArray(defaultAttachment.getId()));
             stmt.setInt(2, session.getContextId());
             stmt.setInt(3, session.getUserId());
             stmt.setInt(4, getStorageType().getType());
             stmt.setString(5, storageIdentifierToDelete.getIdentifier());
-            setOptVarChar(6, attachment.getName(), stmt);
+            setOptVarChar(6, attachmentDesc.getName(), stmt);
             stmt.setLong(7, identifierAndSize.size);
-            setOptVarChar(8, attachment.getMimeType(), stmt);
-            setOptVarChar(9, attachment.getContentId(), stmt);
-            setOptVarChar(10, null == attachment.getContentDisposition() ? null : attachment.getContentDisposition().getId(), stmt);
-            setOptVarChar(11, null == attachment.getOrigin() ? null : attachment.getOrigin().getIdentifier(), stmt);
-            stmt.setBytes(12, UUIDs.toByteArray(attachment.getCompositionSpaceId()));
+            setOptVarChar(8, attachmentDesc.getMimeType(), stmt);
+            setOptVarChar(9, contentId == null ? null : contentId.getContentId(), stmt);
+            setOptVarChar(10, null == attachmentDesc.getContentDisposition() ? null : attachmentDesc.getContentDisposition().getId(), stmt);
+            setOptVarChar(11, null == attachmentDesc.getOrigin() ? null : attachmentDesc.getOrigin().getIdentifier(), stmt);
+            stmt.setBytes(12, UUIDs.toByteArray(attachmentDesc.getCompositionSpaceId()));
             {
                 Optional<Integer> dedicatedFileStorageId = storageIdentifierToDelete.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
                 stmt.setInt(13, dedicatedFileStorageId.isPresent() ? dedicatedFileStorageId.get().intValue() : 0);
@@ -525,19 +550,6 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
             stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
-
-            // Successfully inserted into database. Build appropriate attachment instance.
-            DefaultAttachment.Builder builder = DefaultAttachment.builder(uuid);
-            builder.withStorageReference(new AttachmentStorageReference(storageIdentifierToDelete, getStorageType()));
-            builder.withName(attachment.getName());
-            builder.withSize(identifierAndSize.size);
-            builder.withMimeType(attachment.getMimeType());
-            builder.withContentId(attachment.getContentId());
-            builder.withDisposition(attachment.getContentDisposition());
-            builder.withOrigin(attachment.getOrigin());
-            builder.withCompositionSpaceId(attachment.getCompositionSpaceId());
-            builder.withDataProvider(getDataProviderFor(storageIdentifierToDelete, session));
-            DefaultAttachment defaultAttachment = builder.build();
 
             storageIdentifierToDelete = null;
             return defaultAttachment;
@@ -561,13 +573,14 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
     public void deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getWritable(session.getContextId());
+        boolean deleted = false;
         int rollback = 0;
         try {
             Databases.startTransaction(con);
             rollback = 1;
 
             List<AttachmentStorageIdentifier> storageIdentifiers = new ArrayList<>();
-            deleteAttachmentsByCompositionSpace(compositionSpaceId, session, storageIdentifiers, con);
+            deleted = deleteAttachmentsByCompositionSpace(compositionSpaceId, session, storageIdentifiers, con);
 
             con.commit();
             rollback = 2;
@@ -584,7 +597,11 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                 }
                 Databases.autocommit(con);
             }
-            databaseService.backWritable(session.getContextId(), con);
+            if (deleted) {
+                databaseService.backWritable(session.getContextId(), con);
+            } else {
+                databaseService.backWritableAfterReading(session.getContextId(), con);
+            }
         }
     }
 
@@ -595,12 +612,12 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
      * @param session The session providing user information
      * @param storageIdentifiers A container for storage identifiers, which are supposed to be deleted
      * @param con The connection to use
+     * @return <code>true</code> if at least one attachment has been deleted; otherwise <code>false</code>
      * @throws OXException If attachments cannot be deleted
      */
-    public void deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
+    private boolean deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
-            deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
-            return;
+            throw OXException.general("Connection must not be null");
         }
 
         boolean error = true; // pessimistic
@@ -613,9 +630,15 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                 stmt.setBytes(2, UUIDs.toByteArray(compositionSpaceId));
                 rs = stmt.executeQuery();
 
+                if (false == rs.next()) {
+                    // No such attachment meta data for given composition space
+                    error = false; // All went fine
+                    return false;
+                }
+
                 List<byte[]> ids2Delete = new LinkedList<byte[]>();
                 int storageType = getStorageType().getType();
-                while (rs.next()) {
+                do {
                     if ((session.getUserId() == rs.getInt(3)) && (storageType == rs.getInt(4))) {
                         byte[] id = rs.getBytes(1);
                         AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
@@ -623,22 +646,30 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
 
                         ids2Delete.add(id);
                     }
-                }
+                } while (rs.next());
                 Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+                rs = null;
 
                 stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
                 for (byte[] id : ids2Delete) {
                     stmt.setBytes(1, id);
                     stmt.addBatch();
                 }
-                stmt.executeBatch();
+                int[] updateCounts = stmt.executeBatch();
+
+                error = false; // All went fine
+                for (int updateCount : updateCounts) {
+                    if (updateCount > 0) {
+                        return true;
+                    }
+                }
+                return false;
             } catch (SQLException e) {
                 throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
             }
-
-            error = false; // All went fine
         } finally {
             if (error) {
                 // Prevent from prematurely deleting storage resources
@@ -656,12 +687,13 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getWritable(session.getContextId());
         int rollback = 0;
+        boolean deleted = false;
         try {
             Databases.startTransaction(con);
             rollback = 1;
 
             List<AttachmentStorageIdentifier> storageIdentifiers = new ArrayList<>(ids.size());
-            deleteAttachments(ids, session, storageIdentifiers, con);
+            deleted = deleteAttachments(ids, session, storageIdentifiers, con);
 
             con.commit();
             rollback = 2;
@@ -678,7 +710,11 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                 }
                 Databases.autocommit(con);
             }
-            databaseService.backWritable(session.getContextId(), con);
+            if (deleted) {
+                databaseService.backWritable(session.getContextId(), con);
+            } else {
+                databaseService.backWritableAfterReading(session.getContextId(), con);
+            }
         }
     }
 
@@ -689,14 +725,15 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
      * @param session The session providing user information
      * @param storageIdentifiers A container for storage identifiers, which are supposed to be deleted
      * @param con The connection to use
+     * @return <code>true</code> if at least one attachment has been deleted; otherwise <code>false</code>
      * @throws OXException If attachments cannot be deleted
      */
-    public void deleteAttachments(List<UUID> ids, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
+    private boolean deleteAttachments(List<UUID> ids, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
-            deleteAttachments(ids, session);
-            return;
+            throw OXException.general("Connection must not be null");
         }
 
+        boolean deleted = false;
         boolean error = true; // pessimistic
         try {
             if (ids.size() == 1) {
@@ -714,7 +751,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                         Databases.closeSQLStuff(rs, stmt);
                         stmt = con.prepareStatement("DELETE FROM compositionSpaceAttachmentMeta WHERE uuid=?");
                         stmt.setBytes(1, UUIDs.toByteArray(id));
-                        stmt.executeUpdate();
+                        deleted = stmt.executeUpdate() > 0;
                     }
                 } catch (SQLException e) {
                     throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
@@ -751,7 +788,10 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
                         stmt.setBytes(1, UUIDs.toByteArray(id));
                         stmt.addBatch();
                     }
-                    stmt.executeBatch();
+                    int[] updateCounts = stmt.executeBatch();
+                    for (int i = updateCounts.length; !deleted && i-- > 0;) {
+                        deleted = updateCounts[i] > 0;
+                    }
                 } catch (SQLException e) {
                     throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
                 } finally {
@@ -760,6 +800,7 @@ public abstract class AbstractNonCryptoAttachmentStorage implements AttachmentSt
             }
 
             error = false; // All went fine
+            return deleted;
         } finally {
             if (error) {
                 // Prevent from prematurely deleting storage resources

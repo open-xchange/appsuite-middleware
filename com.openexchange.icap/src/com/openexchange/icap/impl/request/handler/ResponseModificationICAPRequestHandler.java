@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.icap.ICAPCommunicationStrings;
@@ -88,16 +89,30 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
         int previewSize = getPreviewSize(request);
         long contentLength = getContentLength(request);
 
-        String bodyHeaders = prepareBodyHeaders(contentLength, previewSize);
+        String originalRequestHeaders = prepareOriginalRequestHeaders(request, contentLength, previewSize);
+        String originalResponseHeaders = prepareOriginalResponseHeaders(request);
         if (false == request.getHeaders().containsKey(ICAPRequestHeader.ENCAPSULATED)) {
             requestBuilder.append(ICAPRequestHeader.ENCAPSULATED).append(": ");
-            requestBuilder.append(Strings.isNotEmpty(bodyHeaders) ? "res-hdr=0, " : "").append("res-body=").append(bodyHeaders.length()).append(ICAPCommunicationStrings.CRLF);
+            if (Strings.isNotEmpty(originalRequestHeaders)) {
+                requestBuilder.append("req-hdr=0, ");
+                if (Strings.isNotEmpty(originalResponseHeaders)) {
+                    requestBuilder.append("res-hdr=").append(originalRequestHeaders.length()).append(", ");
+                }
+                requestBuilder.append("res-body=").append(originalRequestHeaders.length() + originalResponseHeaders.length()).append(ICAPCommunicationStrings.CRLF);
+            } else {
+                requestBuilder.append("res-body=0");
+            }
         }
         markEndOfHeaders(requestBuilder);
         // Send the ICAP headers
         sendData(outputStream, requestBuilder.toString());
         // Send the HTTP headers
-        sendData(outputStream, bodyHeaders);
+        if (Strings.isNotEmpty(originalRequestHeaders)) {
+            sendData(outputStream, originalRequestHeaders);
+        }
+        if (Strings.isNotEmpty(originalResponseHeaders)) {
+            sendData(outputStream, originalResponseHeaders);
+        }
 
         if (contentLength < 0) {
             // Stream the whole data
@@ -138,21 +153,44 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
     }
 
     /**
-     * Prepares the body headers.
+     * Prepares the original request's headers.
      * 
      * @param contentLength The optional length of the data
      * @param previewSize The optional supported preview size from the ICAP Server
-     * @return The prepared body headers or an empty string if content length is unavailable (i.e. is <code>-1</code>).
+     * @return The prepared original request's headers or an empty string if content length is unavailable (i.e. is <code>-1</code>).
      */
-    private String prepareBodyHeaders(long contentLength, long previewSize) {
-        if (contentLength < 0) {
+    private String prepareOriginalRequestHeaders(ICAPRequest request, long contentLength, long previewSize) {
+        StringBuilder builder = new StringBuilder(128);
+        if (Strings.isNotEmpty(request.getOriginalRequest())) {
+            builder.append(request.getOriginalRequest()).append(ICAPCommunicationStrings.CRLF);
+        }
+        for (Entry<String, String> entry : request.getOriginalRequestHeaders().entrySet()) {
+            if (entry.getKey().equals(ICAPRequestHeader.CONTENT_LENGTH)) {
+                // Skip, we will handle them later
+                continue;
+            }
+            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(ICAPCommunicationStrings.CRLF);
+        }
+        if (contentLength > 0) {
+            builder.append(ICAPRequestHeader.CONTENT_LENGTH).append(": ").append(previewSize > 0 && previewSize <= contentLength ? previewSize : contentLength).append(ICAPCommunicationStrings.CRLF);
+        }
+        if (builder.length() == 0) {
             return "";
         }
-        StringBuilder bodyHeaders = new StringBuilder(128);
-        bodyHeaders.append(ICAPRequestHeader.CONTENT_LENGTH).append(": ").append(previewSize > 0 && previewSize <= contentLength ? previewSize : contentLength).append(ICAPCommunicationStrings.CRLF);
-        // More body headers?
-        markEndOfHeaders(bodyHeaders);
+        // More original request headers?
+        markEndOfHeaders(builder);
 
+        return builder.toString();
+    }
+
+    private String prepareOriginalResponseHeaders(ICAPRequest request) {
+        StringBuilder bodyHeaders = new StringBuilder(128);
+        if (Strings.isNotEmpty(request.getOriginalStatus())) {
+            bodyHeaders.append(request.getOriginalStatus()).append(ICAPCommunicationStrings.CRLF);
+        }
+        for (Entry<String, String> entry : request.getOriginalResponseHeaders().entrySet()) {
+            bodyHeaders.append(entry.getKey()).append(": ").append(entry.getValue()).append(ICAPCommunicationStrings.CRLF);
+        }
         return bodyHeaders.toString();
     }
 
@@ -172,6 +210,9 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
             return Integer.parseInt(previewSizeStr);
         } catch (NumberFormatException e) {
             LOG.warn("Invalid value '{}' for the '{}' header was detected in the ICAPRequest.", previewSizeStr, ICAPRequestHeader.PREVIEW);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("", e);
+            }
             return -1;
         }
     }
@@ -181,9 +222,8 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
      * 
      * @param request The {@link ICAPRequest} from which to fetch the 'Content-Length' header
      * @return The value of the 'Content-Length' header or <code>-1</code> if none available
-     * @throws IOException if an I/O error occurs
      */
-    private long getContentLength(ICAPRequest request) throws IOException {
+    private long getContentLength(ICAPRequest request) {
         String contentLengthStr = request.getHeaders().get(ICAPRequestHeader.CONTENT_LENGTH);
         return Strings.isEmpty(contentLengthStr) ? -1 : Long.parseLong(contentLengthStr);
     }

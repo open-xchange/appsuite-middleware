@@ -117,7 +117,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     protected Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException {
         Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>(folderTargets.size() + objectsByModule.size(), 1.0F);
         Map<String, FolderObject> foldersById = loadFolderTargets(folderTargets, proxies);
-        loadObjectTargets(objectsByModule, foldersById, true, proxies);
+        loadObjectTargets(objectsByModule, foldersById, proxies);
         return proxies;
     }
 
@@ -223,7 +223,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
         updateFolders(proxies);
     }
 
-    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderObject> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
+    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderObject> foldersById, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         for (Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
             int module = moduleEntry.getKey().intValue();
             ModuleHandler handler = handlers.get(module);

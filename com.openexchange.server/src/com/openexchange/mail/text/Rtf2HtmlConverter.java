@@ -122,7 +122,7 @@ public final class Rtf2HtmlConverter {
             firstLine = false;
         }
 
-        public void updateState(final AttributeSet attributeset, final StringBuilder sb, final Element element) {
+        public void updateState(AttributeSet attributeset, StringBuilder sb, Element element) {
             final String s = element.getName();
             if (s.equalsIgnoreCase("paragraph")) {
                 firstLine = true;
@@ -149,7 +149,7 @@ public final class Rtf2HtmlConverter {
             }
         }
 
-        private void openIndentTable(final StringBuilder sb, final double d, final double d1) {
+        private void openIndentTable(StringBuilder sb, double d, double d1) {
             if (d != 0.0D || d1 != 0.0D) {
                 closeSubsetTags(sb);
                 sb.append("<table><tr>");
@@ -161,7 +161,7 @@ public final class Rtf2HtmlConverter {
             }
         }
 
-        private void closeIndentTable(final StringBuilder sb, final double d, final double d1) {
+        private void closeIndentTable(StringBuilder sb, double d, double d1) {
             if (d != 0.0D || d1 != 0.0D) {
                 closeSubsetTags(sb);
                 sb.append("</td>");
@@ -173,14 +173,14 @@ public final class Rtf2HtmlConverter {
             }
         }
 
-        void closeTags(final StringBuilder sb) {
+        void closeTags(StringBuilder sb) {
             closeSubsetTags(sb);
             closeTag(alignment, -1, "div", sb);
             alignment = -1;
             closeIndentTable(sb, oldLeftIndent, oldRightIndent);
         }
 
-        private void closeSubsetTags(final StringBuilder sb) {
+        private void closeSubsetTags(StringBuilder sb) {
             closeTag(bold, "b", sb);
             closeTag(italic, "i", sb);
             closeTag(underline, "u", sb);
@@ -195,31 +195,31 @@ public final class Rtf2HtmlConverter {
             size = -1;
         }
 
-        private void closeTag(final boolean flag, final String s, final StringBuilder sb) {
+        private void closeTag(boolean flag, String s, StringBuilder sb) {
             if (flag) {
                 sb.append("</").append(s).append('>');
             }
         }
 
-        private void closeTag(final Color color1, final String s, final StringBuilder sb) {
+        private void closeTag(Color color1, String s, StringBuilder sb) {
             if (color1 != null) {
                 sb.append("</").append(s).append('>');
             }
         }
 
-        private void closeTag(final String s, final String s1, final StringBuilder sb) {
+        private void closeTag(String s, String s1, StringBuilder sb) {
             if (s.length() > 0) {
                 sb.append("</").append(s1).append('>');
             }
         }
 
-        private void closeTag(final int i, final int j, final String s, final StringBuilder sb) {
+        private void closeTag(int i, int j, String s, StringBuilder sb) {
             if (i > j) {
                 sb.append("</").append(s).append('>');
             }
         }
 
-        private int updateAlignment(final AttributeSet attributeset, final int k, final StringBuilder sb) {
+        private int updateAlignment(AttributeSet attributeset, int k, StringBuilder sb) {
             int i = k;
             final Object obj = attributeset.getAttribute(StyleConstants.Alignment);
             if (obj == null) {
@@ -239,7 +239,7 @@ public final class Rtf2HtmlConverter {
             return i;
         }
 
-        private Color updateFontColor(final AttributeSet attributeset, final Color color3, final StringBuilder sb) {
+        private Color updateFontColor(AttributeSet attributeset, Color color3, StringBuilder sb) {
             Color color1 = color3;
             final Object obj = attributeset.getAttribute(StyleConstants.Foreground);
             if (obj == null) {
@@ -256,7 +256,7 @@ public final class Rtf2HtmlConverter {
             return color1;
         }
 
-        private String updateFontName(final AttributeSet attributeset, final String s2, final StringBuilder sb) {
+        private String updateFontName(AttributeSet attributeset, String s2, StringBuilder sb) {
             String s = s2;
             final Object obj = attributeset.getAttribute(StyleConstants.FontFamily);
             if (obj == null) {
@@ -273,7 +273,7 @@ public final class Rtf2HtmlConverter {
             return s;
         }
 
-        private double updateDouble(final AttributeSet attributeset, final double d2, final Object obj) {
+        private double updateDouble(AttributeSet attributeset, double d2, Object obj) {
             double d = d2;
             final Object obj1 = attributeset.getAttribute(obj);
             if (obj1 != null) {
@@ -282,7 +282,7 @@ public final class Rtf2HtmlConverter {
             return d;
         }
 
-        private int updateFontSize(final AttributeSet attributeset, final int k, final StringBuilder sb) {
+        private int updateFontSize(AttributeSet attributeset, int k, StringBuilder sb) {
             int i = k;
             final Object obj = attributeset.getAttribute(StyleConstants.FontSize);
             if (obj == null) {
@@ -299,7 +299,7 @@ public final class Rtf2HtmlConverter {
             return i;
         }
 
-        private boolean updateBoolean(final AttributeSet attributeset, final Object obj, final String s, final boolean flag2, final StringBuilder sb) {
+        private boolean updateBoolean(AttributeSet attributeset, Object obj, String s, boolean flag2, StringBuilder sb) {
             boolean flag = flag2;
             final Object obj1 = attributeset.getAttribute(obj);
             if (obj1 != null) {
@@ -316,7 +316,7 @@ public final class Rtf2HtmlConverter {
             return flag;
         }
 
-        private String makeColorString(final Color color1) {
+        private String makeColorString(Color color1) {
             String s = Long.toString(color1.getRGB() & 0xffffff, 16);
             if (s.length() < 6) {
                 final StringBuilder sb = new StringBuilder();
@@ -329,7 +329,7 @@ public final class Rtf2HtmlConverter {
             return s;
         }
 
-        public String performFirstLineIndent(final String s2) {
+        public String performFirstLineIndent(String s2) {
             String s = s2;
             if (firstLine) {
                 if (firstLineIndent != 0.0D) {
@@ -341,7 +341,7 @@ public final class Rtf2HtmlConverter {
             return s;
         }
 
-        public String getSpaceTab(final int i) {
+        public String getSpaceTab(int i) {
             final StringBuilder sb = new StringBuilder();
             for (int j = 0; j < i; j++) {
                 sb.append("&nbsp;");
@@ -364,7 +364,7 @@ public final class Rtf2HtmlConverter {
      * @param rtfContent The RTF content
      * @return The converted HTML content
      */
-    public static String convertRTFToHTML(final String rtfContent) {
+    public static String convertRTFToHTML(String rtfContent) {
         final HTMLStateMachine hsm = new HTMLStateMachine();
         final String htmlBody = convertRTFStringToHTML(rtfContent, hsm);
         final StringBuilder docBuilder = new StringBuilder(htmlBody.length() + 26).append("<html><body>");
@@ -378,7 +378,7 @@ public final class Rtf2HtmlConverter {
      * @param rtfString The RTF string
      * @return The converted HTML body
      */
-    public static String convertRTFStringToHTML(final String rtfString) {
+    public static String convertRTFStringToHTML(String rtfString) {
         final HTMLStateMachine hsm = new HTMLStateMachine();
         final RTFEditorKit rtfeditorkit = new RTFEditorKit();
         final DefaultStyledDocument defaultstyleddocument = new DefaultStyledDocument();
@@ -386,7 +386,7 @@ public final class Rtf2HtmlConverter {
         return scanDocument(defaultstyleddocument, hsm);
     }
 
-    private static String convertRTFStringToHTML(final String s2, final HTMLStateMachine hsm) {
+    private static String convertRTFStringToHTML(String s2, HTMLStateMachine hsm) {
         String s = s2;
         final RTFEditorKit rtfeditorkit = new RTFEditorKit();
         final DefaultStyledDocument defaultstyleddocument = new DefaultStyledDocument();
@@ -395,7 +395,7 @@ public final class Rtf2HtmlConverter {
         return s;
     }
 
-    private static void readString(final String s, final Document document, final RTFEditorKit rtfeditorkit) {
+    private static void readString(String s, Document document, RTFEditorKit rtfeditorkit) {
         try {
             rtfeditorkit.read(new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes(s)), document, 0);
         } catch (IOException e) {
@@ -407,7 +407,7 @@ public final class Rtf2HtmlConverter {
         }
     }
 
-    private static String scanDocument(final Document document, final HTMLStateMachine hsm) {
+    private static String scanDocument(Document document, HTMLStateMachine hsm) {
         try {
             final StringBuilder sb = new StringBuilder(document.getLength());
             final Element element = document.getDefaultRootElement();
@@ -420,7 +420,7 @@ public final class Rtf2HtmlConverter {
         return "";
     }
 
-    private static void recurseElements(final Element element, final Document document, final StringBuilder sb, final HTMLStateMachine hsm) {
+    private static void recurseElements(Element element, Document document, StringBuilder sb, HTMLStateMachine hsm) {
         for (int i = 0; i < element.getElementCount(); i++) {
             final Element element1 = element.getElement(i);
             scanAttributes(element1, document, sb, hsm);
@@ -428,7 +428,7 @@ public final class Rtf2HtmlConverter {
         }
     }
 
-    private static void scanAttributes(final Element element, final Document document, final StringBuilder sb, final HTMLStateMachine hsm) {
+    private static void scanAttributes(Element element, Document document, StringBuilder sb, HTMLStateMachine hsm) {
         try {
             final int i = element.getStartOffset();
             final int j = element.getEndOffset();

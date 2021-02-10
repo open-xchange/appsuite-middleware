@@ -70,7 +70,6 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -169,8 +168,6 @@ public class InfostoreCopyTask implements CopyUserTaskService {
     @Override
     public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
-        final Context srcCtx = copyTools.getSourceContext();
-        final Context dstCtx = copyTools.getDestinationContext();
         final int srcCtxId = copyTools.getSourceContextId().intValue();
         final int dstCtxId = copyTools.getDestinationContextId().intValue();
         final int dstUsrId = copyTools.getDestinationUserId().intValue();
@@ -186,7 +183,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.administrative()); // Avoid considering unified quota
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
-        exchangeFolderIds(originDocuments, folderMapping, dstCon, dstCtxId);
+        exchangeFolderIds(originDocuments, folderMapping);
         writeInfostoreDocumentsToDB(originDocuments, dstCon, dstCtxId, dstUsrId);
 
         return null;
@@ -250,7 +247,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
 
     }
 
-    private void exchangeFolderIds(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid) throws OXException {
+    private void exchangeFolderIds(final Map<DocumentMetadata, List<DocumentMetadata>> documents, final ObjectMapping<FolderObject> folderMapping) {
         for (final DocumentMetadata master : documents.keySet()) {
             final FolderObject source = folderMapping.getSource((int) master.getFolderId());
             final FolderObject target = folderMapping.getDestination(source);

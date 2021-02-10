@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import org.slf4j.Logger;
+
 /**
  * {@link FileStorageCapabilityTools} - Utility class for file storage capabilities.
  *
@@ -56,6 +58,11 @@ package com.openexchange.file.storage;
  * @since v7.8.0
  */
 public class FileStorageCapabilityTools {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class);
+    }
 
     /**
      * Initializes a new {@link FileStorageCapabilityTools}.
@@ -73,6 +80,10 @@ public class FileStorageCapabilityTools {
      * @see #supports(FileStorageFileAccess, FileStorageCapability)
      */
     public static Boolean supportsByClass(Class<? extends FileStorageFileAccess> fileAccessClass, FileStorageCapability capability) {
+        if (capability.isFileAccessCapability() == false) {
+            LoggerHolder.LOG.warn("Folder access capability given: {}", capability);
+            return Boolean.FALSE;
+        }
         switch (capability) {
             case FILE_VERSIONS:
                 return Boolean.valueOf(FileStorageVersionedFileAccess.class.isAssignableFrom(fileAccessClass));
@@ -121,8 +132,32 @@ public class FileStorageCapabilityTools {
                 return Boolean.valueOf(FileStorageAutoRenameFoldersAccess.class.isAssignableFrom(fileAccessClass));
             case RESTORE:
                 return Boolean.valueOf(FileStorageRestoringFileAccess.class.isAssignableFrom(fileAccessClass));
+            case BACKWARD_LINK:
+                return Boolean.valueOf(FileStorageBackwardLinkAccess.class.isAssignableFrom(fileAccessClass));
             default:
-                org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
+                LoggerHolder.LOG.warn("Unknown file access capability: {}", capability);
+                return Boolean.FALSE;
+        }
+    }
+
+    /**
+     * Gets a value indicating whether a specific account supports a specific capability.
+     *
+     * @param folderAccessClass The folder access class to check the capability for
+     * @param capability The capability to check
+     * @return A {@code Boolean} instance indicating support for specified capability or <code>null</code> if support cannot be checked by class (but by instance; see {@link #supports(FileStorageFolderAccess, FileStorageCapability)})
+     * @see #supports(FileStorageFolderAccess, FileStorageCapability)
+     */
+    public static Boolean supportsFolderCapabilityByClass(Class<? extends FileStorageFolderAccess> folderAccessClass, FileStorageCapability capability) {
+        if (capability.isFileAccessCapability()) {
+            LoggerHolder.LOG.warn("File access capability given: {}", capability);
+            return Boolean.FALSE;
+        }
+        switch (capability) {
+            case SEARCH_IN_FOLDER_NAME:
+                return Boolean.valueOf(SearchableFolderNameFolderAccess.class.isAssignableFrom(folderAccessClass));
+            default:
+                LoggerHolder.LOG.warn("Unknown folder access capability: {}", capability);
                 return Boolean.FALSE;
         }
     }
@@ -135,6 +170,10 @@ public class FileStorageCapabilityTools {
      * @return <code>true</code> if the capability is supported, <code>false</code>, otherwise
      */
     public static boolean supports(FileStorageFileAccess fileAccess, FileStorageCapability capability) {
+        if (capability.isFileAccessCapability() == false) {
+            LoggerHolder.LOG.warn("Folder access capability given: {}", capability);
+            return false;
+        }
         switch (capability) {
             case FILE_VERSIONS:
                 return FileStorageVersionedFileAccess.class.isInstance(fileAccess);
@@ -182,8 +221,31 @@ public class FileStorageCapabilityTools {
                 return FileStorageAutoRenameFoldersAccess.class.isInstance(fileAccess);
             case RESTORE:
                 return FileStorageRestoringFileAccess.class.isInstance(fileAccess);
+            case BACKWARD_LINK:
+                return FileStorageBackwardLinkAccess.class.isInstance(fileAccess);
             default:
-                org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
+                LoggerHolder.LOG.warn("Unknown file access capability: {}", capability);
+                return false;
+        }
+    }
+
+    /**
+     * Gets a value indicating whether a specific account supports a specific capability.
+     *
+     * @param folderAccess The folder access reference to check the capability for
+     * @param capability The capability to check
+     * @return <code>true</code> if the capability is supported, <code>false</code>, otherwise
+     */
+    public static boolean supports(FileStorageFolderAccess folderAccess, FileStorageCapability capability) {
+        if (capability.isFileAccessCapability()) {
+            LoggerHolder.LOG.warn("File access capability given: {}", capability);
+            return false;
+        }
+        switch (capability) {
+            case SEARCH_IN_FOLDER_NAME:
+                return SearchableFolderNameFolderAccess.class.isInstance(folderAccess);
+            default:
+                LoggerHolder.LOG.warn("Unknown folder access capability: {}", capability);
                 return false;
         }
     }

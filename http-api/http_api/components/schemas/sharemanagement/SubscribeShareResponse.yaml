@@ -1,0 +1,15 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+      type: object
+      properties:
+        account:
+          type: string
+          description: The account ID of the newly created account
+        module:
+          type: string
+          description: The module of the subscription
+        folder:
+          type: string
+          description: The folder ID of the subscrition

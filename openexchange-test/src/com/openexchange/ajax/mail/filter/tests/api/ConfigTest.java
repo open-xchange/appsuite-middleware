@@ -67,7 +67,7 @@ public class ConfigTest extends AbstractAPIClientSession {
 
     /**
      * Initializes a new {@link ConfigTest}.
-     * 
+     *
      * @param name The test case's name
      */
     public ConfigTest() {
@@ -80,7 +80,7 @@ public class ConfigTest extends AbstractAPIClientSession {
     @Test
     public void testConfig() throws Exception {
         MailfilterApi api = new MailfilterApi(getApiClient());
-        MailFilterConfigResponsev2 response = api.getConfigV2(getSessionId(), null);
+        MailFilterConfigResponsev2 response = api.getConfigV2(null);
 
         assertNotNull("The mail filter configuration response is null", response);
         assertNotNull("The mail filter configuration data is null", response.getData());

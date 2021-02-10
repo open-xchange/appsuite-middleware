@@ -94,20 +94,27 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
     private String accessCombinationName;
 
     public static void main(final String[] args) {
-        new ChangeModuleAccessGlobal(args);
+        new ChangeModuleAccessGlobal().execute(args);
     }
 
     /**
      * Initializes a new {@link ChangeModuleAccessGlobal}.
-     *
-     * @param args
      */
-    public ChangeModuleAccessGlobal(String[] args) {
-        AdminParser parser = new AdminParser("changeaccessglobal");
+    public ChangeModuleAccessGlobal() {
+        super();
         addAccess = new UserModuleAccess();
+        removeAccess = new UserModuleAccess();
+    }
+
+    /**
+     * executes the command
+     *
+     * @param args The arguments list
+     */
+    public void execute(String[] args) {
+        AdminParser parser = new AdminParser("changeaccessglobal");
         addAccess.disableAll();
         addAccess.setGlobalAddressBookDisabled(false);
-        removeAccess = new UserModuleAccess();
         removeAccess.disableAll();
         removeAccess.setGlobalAddressBookDisabled(false);
 
@@ -143,6 +150,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         setAdminPassOption(admp, "adminmasterpass", "The password of the admin master");
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     /**
      * Removed "access-global-address-book-disabled" since this is not supported in this CLT.
@@ -218,9 +226,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
      * @throws CLIIllegalOptionValueException
      * @throws CLIUnknownOptionException
      * @throws MissingOptionException
-     * @throws InvalidCredentialsException
      */
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidCredentialsException {
+    @SuppressWarnings("deprecation")
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
         parser.ownparse(args);
         auth = credentialsparsing(parser);
 

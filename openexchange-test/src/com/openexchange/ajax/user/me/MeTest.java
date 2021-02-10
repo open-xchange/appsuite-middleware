@@ -92,7 +92,7 @@ public class MeTest extends AbstractAPIClientSession {
     @Test
     public void testGet() throws Exception {
         UserMeApi api = new UserMeApi(getApiClient());
-        CurrentUserResponse response = api.getCurrentUser(getSessionId());
+        CurrentUserResponse response = api.getCurrentUser();
         CurrentUserData me = response.getData();
         UserValues values = getClient().getValues();
         assertEquals("Missing or wrong user_id", values.getUserId(), me.getUserId().intValue());

@@ -8,7 +8,7 @@
       "email" : "info@open-xchange.com",
       "url" : "https://www.open-xchange.com/"
     },
-    "version" : "7.10.4"
+    "version" : "7.10.5"
   },
   "tags" : [ {
     "name" : "Drive",
@@ -410,6 +410,14 @@
           "schema" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "binary",
+          "description" : "Additional flag to prevent non-binary API responses during errors.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
           }
         } ],
         "responses" : {
@@ -888,7 +896,7 @@
         "x-ox-examples" : [ {
           "Example1" : null,
           "description" : "Basic example",
-          "example" : "==> GET http://192.168.32.191/ajax/drive?action=subscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n\n<== HTTP 200 OK (13.6268 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\" : {\n      }\n    }\n"
+          "example" : "==> GET http://192.168.32.191/ajax/drive?action=subscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677&mode=separate\n\n<== HTTP 200 OK (13.6268 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\" : {\n      }\n    }\n"
         } ]
       },
       "put" : {
@@ -914,6 +922,15 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "in" : "query",
+          "name" : "mode",
+          "description" : "The subscription mode supported by the client. If set to \"separate\", SYNC actions for directory versions where changes occurred will be returned if possible.  ",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "default", "separate" ]
+          }
         } ],
         "responses" : {
           "200" : {
@@ -930,7 +947,7 @@
         "x-ox-examples" : [ {
           "Example1" : null,
           "description" : "Basic example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=subscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n> Content:\n  {\n    \"root\": [ \"129136\", \"129137\" ]\n  },\n\n<== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=subscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677&mode=separate\n> Content:\n  {\n    \"root\": [ \"129136\", \"129137\" ]\n  },\n\n<== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
         } ],
         "requestBody" : {
           "content" : {
@@ -2374,9 +2391,13 @@
             "type" : "string",
             "description" : "For mail folders, the rights string as defined in [RFC 2086](http://tools.ietf.org/html/rfc2086)."
           },
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "User ID of the user or group to which this permission applies (ignored for type \"anonymous\" or \"guest\")."
+            "description" : "Internal identifier of the user or group to which this permission applies (ignored for type \"anonymous\" or \"guest\")."
           },
           "group" : {
             "type" : "boolean",
@@ -2416,9 +2437,13 @@
       "FolderExtendedPermission" : {
         "type" : "object",
         "properties" : {
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission. Should be used to associate the entry  with its 'extended' permission version equivalent."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "Identifier of the permission entity (i.e. user-, group- or guest-ID)."
+            "description" : "Internal identifier of the permission entity (i.e. user-, group- or guest-ID)."
           },
           "bits" : {
             "type" : "integer",
@@ -2467,9 +2492,13 @@
             "description" : "A number specifying the permission flags.<br>\n* 0 (the numerical value indicating no object permissions),<br>\n* 1 (the numerical value indicating read object permissions),<br>\n* 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask))\n",
             "enum" : [ 0, 1, 2 ]
           },
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "User ID of the user or group to which this permission applies."
+            "description" : "Internal identifier of the user or group to which this permission applies."
           },
           "group" : {
             "type" : "boolean",
@@ -3044,9 +3073,13 @@
       "ObjectExtendedPermission" : {
         "type" : "object",
         "properties" : {
+          "identifier" : {
+            "type" : "string",
+            "description" : "The qualified identifier of the entity associated with this permission. Should be used to associate the entry  with its 'extended' permission version equivalent."
+          },
           "entity" : {
             "type" : "integer",
-            "description" : "Identifier of the permission entity (i.e. user-, group- or guest-ID)."
+            "description" : "Internal identifier of the permission entity (i.e. user-, group- or guest-ID)."
           },
           "bits" : {
             "type" : "integer",

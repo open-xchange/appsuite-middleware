@@ -81,11 +81,11 @@ public abstract class AbstractMessagingActionTest {
         return getAction().perform(req, session);
     }
 
-    protected void assertFails(final AJAXRequestData requestData) throws OXException {
+    protected void assertFails(final AJAXRequestData requestData) {
         final AbstractMessagingAction action = getAction();
         final SimServerSession session = new SimServerSession(new SimContext(1), new SimUser(), null);
         try {
-            final AJAXRequestResult result = action.perform(requestData, session);
+            action.perform(requestData, session);
             fail("Should have thrown exception");
         } catch (OXException x) {
             // SUCCESS

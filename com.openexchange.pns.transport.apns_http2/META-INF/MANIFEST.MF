@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The implementation for APNS HTTP/2 backed transport of push notifcations
 Bundle-SymbolicName: com.openexchange.pns.transport.apns_http2
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -54,3 +54,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.transport.apns_http2.osgi.ApnsHttp2PushNotificationTransportActivator
 Export-Package: com.openexchange.pns.transport.apns_http2
+Automatic-Module-Name: com.openexchange.pns.transport.apns.http2

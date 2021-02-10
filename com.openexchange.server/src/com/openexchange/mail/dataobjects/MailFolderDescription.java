@@ -115,7 +115,7 @@ public class MailFolderDescription {
      *
      * @param permission The permission to add
      */
-    public void addPermission(final MailPermission permission) {
+    public void addPermission(MailPermission permission) {
         if (null == permission) {
             return;
         } else if (null == permissions) {
@@ -130,7 +130,7 @@ public class MailFolderDescription {
      *
      * @param permissions The array of permissions to add
      */
-    public void addPermissions(final MailPermission[] permissions) {
+    public void addPermissions(MailPermission[] permissions) {
         if ((null == permissions) || (permissions.length == 0)) {
             return;
         } else if (null == this.permissions) {
@@ -145,7 +145,7 @@ public class MailFolderDescription {
      *
      * @param permissions The collection of permissions to add
      */
-    public void addPermissions(final Collection<? extends MailPermission> permissions) {
+    public void addPermissions(Collection<? extends MailPermission> permissions) {
         if ((null == permissions) || (permissions.isEmpty())) {
             return;
         } else if (null == this.permissions) {
@@ -370,7 +370,7 @@ public class MailFolderDescription {
      * @see #setFullname(String)
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
-    public void setExists(final boolean exists) {
+    public void setExists(boolean exists) {
         this.exists = exists;
         b_exists = true;
     }
@@ -384,7 +384,7 @@ public class MailFolderDescription {
      * @see #setExists(boolean)
      * @param fullname the fullname to set
      */
-    public void setFullname(final String fullname) {
+    public void setFullname(String fullname) {
         this.fullname = fullname;
         b_fullname = true;
     }
@@ -394,7 +394,7 @@ public class MailFolderDescription {
      *
      * @param accountId The account ID
      */
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
 
@@ -403,7 +403,7 @@ public class MailFolderDescription {
      *
      * @param name the name to set
      */
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
         b_name = true;
     }
@@ -413,7 +413,7 @@ public class MailFolderDescription {
      *
      * @param parentFullname the parent fullname to set
      */
-    public void setParentFullname(final String parentFullname) {
+    public void setParentFullname(String parentFullname) {
         this.parentFullname = parentFullname;
         b_parentFullname = true;
     }
@@ -423,7 +423,7 @@ public class MailFolderDescription {
      *
      * @param parentAccountId The account ID belonging to parent.
      */
-    public void setParentAccountId(final int parentAccountId) {
+    public void setParentAccountId(int parentAccountId) {
         this.parentAccountId = parentAccountId;
     }
 
@@ -432,7 +432,7 @@ public class MailFolderDescription {
      *
      * @param separator the separator to set
      */
-    public void setSeparator(final char separator) {
+    public void setSeparator(char separator) {
         this.separator = separator;
         b_separator = true;
     }
@@ -442,7 +442,7 @@ public class MailFolderDescription {
      *
      * @param subscribed the subscription status to set
      */
-    public void setSubscribed(final boolean subscribed) {
+    public void setSubscribed(boolean subscribed) {
         this.subscribed = subscribed;
         b_subscribed = true;
     }

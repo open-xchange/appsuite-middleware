@@ -133,7 +133,7 @@ public abstract class AbstractFile implements File {
 
     @Override
     public boolean equals(final File other, final Field criterium, final Field... criteria) {
-        final List<Field> fields = new ArrayList<Field>(1 + criteria.length);
+        final List<Field> fields = new ArrayList<>(1 + criteria.length);
 
         for (final Field field : fields) {
             if (0 != new FileComparator(field).compare(this, other)) {
@@ -164,6 +164,11 @@ public abstract class AbstractFile implements File {
             }
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     /**

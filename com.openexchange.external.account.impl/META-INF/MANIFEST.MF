@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Implementation For Open-Xchange Bundle For External Accounts
 Bundle-SymbolicName: com.openexchange.external.account.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.external.account.impl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Gets a ZIP archive for multiple attachments of an event.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
     responses:

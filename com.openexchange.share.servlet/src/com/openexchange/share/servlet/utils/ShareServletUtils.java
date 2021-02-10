@@ -154,7 +154,7 @@ public final class ShareServletUtils {
             /*
              * construct & send redirect
              */
-            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), target, loginConfig, request.getServerName());
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), target, loginConfig);
             LOG.debug("Redirecting share {} to {}...", guest.getBaseToken(), url);
             response.sendRedirect(url);
             return true;
@@ -176,7 +176,7 @@ public final class ShareServletUtils {
      * @param loginMethod The login method to use
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(GuestInfo guest, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException, IOException {
+    public static LoginResult login(GuestInfo guest, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException {
         /*
          * try guest auto-login at this stage if enabled
          */

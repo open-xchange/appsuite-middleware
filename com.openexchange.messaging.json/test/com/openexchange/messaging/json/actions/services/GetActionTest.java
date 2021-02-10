@@ -69,9 +69,10 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetActionTest {
+
     // Success Case
-         @Test
-     public void testGet() throws OXException {
+    @Test
+    public void testGet() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService messagingService = new SimMessagingService();
@@ -94,8 +95,8 @@ public class GetActionTest {
 
     // Error cases
 
-         @Test
-     public void testUnknownId() throws OXException {
+    @Test
+    public void testUnknownId() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final GetAction action = new GetAction(registry);
@@ -113,8 +114,8 @@ public class GetActionTest {
 
     }
 
-         @Test
-     public void testMissingParameter() throws OXException {
+    @Test
+    public void testMissingParameter() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         final GetAction action = new GetAction(registry);
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -128,8 +129,8 @@ public class GetActionTest {
         }
     }
 
-         @Test
-     public void testOXException() throws OXException {
+    @Test
+    public void testOXException() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService messagingService = new SimMessagingService();

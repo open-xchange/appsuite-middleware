@@ -16,6 +16,8 @@ All calls towards the authorization or token endpoint enforce HTTPS. Plain HTTP 
 
 # Authorization Flow
 
+**Note**: The following information about authorization flow only refers to the use of the built-in authorization server.
+
 ## Step 1: Request an authorization code
 
 `GET https://ox.example.com/appsuite/api/oauth/provider/authorization`
@@ -156,13 +158,15 @@ If the token has expired, has been tampered with, or the permissions revoked, th
 
 ## HTTP JSON API
 
-With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org/wiki/index.php?title=HTTP_API). There are a few differences to the existing API documentation you have to keep in mind:
+With OAuth you can access a subset of the existing [HTTP API](https://documentation.open-xchange.com/components/middleware/http/latest/index.html). There are a few differences to the existing API documentation you have to keep in mind:
 
--   The available modules and actions must be accessed via a special servlet path `/appsuite/api/oauth/modules`.
+-   The available modules and actions can be accessed via a special servlet path `/appsuite/api/oauth/modules` in addition to the normal path. But this subpath is deprecated an will be removed in the future.
 
-        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123
+		GET /appsuite/api/contacts?action=all&folder=123
+		or
+        GET /appsuite/api/oauth/modules/contacts?action=all&folder=123 (deprecated)
 
--   The session parameter can be omitted for every request. Instead the access token must be provided as authorization header:
+-   The session parameter must be omitted for every request. Instead the access token must be provided as authorization header:
 
         Authorization: Bearer 0062a74e65a74cefb364dcd17648eb04
 
@@ -196,106 +200,23 @@ With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org
 
 Find the OAuth-enabled modules and actions below. Every action is bound to a specific scope. However some actions are available implicitly if access for any scope is granted. E.g. you may always request a users details or configuration if any kind of OAuth access is granted, but you may only change a users configuration, if the `write_userconfig` scope is granted. The view on the folder tree is always limited by the granted scope. E.g. if you were granted `read_contacts` you can also perform all read-only requests that target contact folders. In turn you may only create/modify/delete contact folders if obtained the `write_contacts` scope.
 
+More detailed information about the required scopes for each action can be found in the [HTTP API](https://documentation.open-xchange.com/components/middleware/http/7.10.5/index.html) documentation.
 
-### reminder
-
-| Action | Scope |
-|--------|-------|
-| delete | write_reminders |
-| remindAgain | write_reminders |
-| range | read_reminders |
-| updates | read_reminders |
-
-
-### config
-
-| Name       | Scope            |
-|------------|------------------|
-| path (GET) | <any>            |
-| path (PUT) | write_userconfig |
+| Module                                       | Scopes                         |
+-----------------------------------------------|--------------------------------|
+|config                                        | write_userconfig               |
+|folders                                       | \<depends\>                    |
+|mail / mailcompose                            | read_mail, write_mail          |
+|calendar / chronos                            | read_calendar, write_calendar  |
+|contacts                                      | read_contacts, write_contacts  |
+|infostore / files / fileaccount / fileservice | read_files, write_files        |
+|drive                                         | read_drive, write_drive        |
+|tasks                                         | read_tasks, write_tasks        |
+|reminder                                      | read_reminder, write_reminder  |
+|snippets                                      | write_userconfig               |
+|user/me                                       | \<any\>                        |
 
 
-### user/me
-
-| Name | Scope |
-|------|-------|
-| GET  | <any> |
-
-
-### folders
-
-| Name       | Scope     |
-|------------|-----------|
-| clear      | <depends> |
-| update     | <depends> |
-| new        | <depends> |
-| updates    | <depends> |
-| get        | <depends> |
-| root       | <depends> |
-| allVisible | <depends> |
-| path       | <depends> |
-| delete     | <depends> |
-| list       | <depends> |
-
-
-### tasks
-
-| Name    | Scope       |
-|---------|-------------|
-| delete  | write_tasks |
-| copy    | write_tasks |
-| get     | read_tasks  |
-| search  | read_tasks  |
-| updates | read_tasks  |
-| new     | write_tasks |
-| list    | read_tasks  |
-| update  | write_tasks |
-| confirm | write_tasks |
-| all     | read_tasks  |
-
-
-### contact
-
-| Name            | Scope          |
-|-----------------|----------------|
-| delete          | write_contacts |
-| listuser        | read_contacts  |
-| birthdays       | read_contacts  |
-| autocomplete    | read_contacts  |
-| advanchedSearch | read_contacts  |
-| copy            | write_contacts |
-| anniversaries   | read_contacts  |
-| get             | read_contacts  |
-| search          | read_contacts  |
-| updates         | read_contacts  |
-| new             | write_contacts |
-| getuser         | read_contacts  |
-| list            | read_contacts  |
-| update          | write_contacts |
-| all             | read_contacts  |
-
-
-### calendar
-
-| Name                | Scope          |
-|---------------------|----------------|
-| delete              | write_calendar |
-| resolveuid          | read_calendar  |
-| copy                | write_calendar |
-| get                 | read_calendar  |
-| getChangeExceptions | read_calendar  |
-| search              | read_calendar  |
-| updates             | read_calendar  |
-| freebusy            | read_calendar  |
-| newappointments     | read_calendar  |
-| has                 | read_calendar  |
-| new                 | write_calendar |
-| list                | read_calendar  |
-| update              | write_calendar |
-| all                 | read_calendar  |
-| confirm             | write_calendar |
-
-
-## Card- and CalDAV
+**Card- and CalDAV**
 
 If installed, the interfaces for Card- and CalDAV are also available via OAuth. Clients can notice it based on the `WWW-Authenticate` headers of responses to unauthorized requests. If OAuth is supported, a header declaring `Bearer` as supported auth scheme will be present. The according scope values are `carddav` and `caldav`. The interfaces support OAuth natively so there is no extra servlet path or the like.

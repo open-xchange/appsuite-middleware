@@ -65,6 +65,7 @@ public abstract class AbstractRequest<T extends AbstractRequest<T>> {
 
     protected String scheme = "https";
     protected String hostname;
+    protected int port;
     protected String clientId;
     protected String redirectURI;
     protected String scope;
@@ -80,7 +81,18 @@ public abstract class AbstractRequest<T extends AbstractRequest<T>> {
     }
 
     public T setHostname(String hostname) {
-        this.hostname = hostname;
+        int portIndex = hostname.indexOf(':');
+        if (portIndex > 0) {
+            this.hostname = hostname.substring(0, portIndex);
+            this.port = Integer.parseInt(hostname.substring(portIndex + 1));
+        } else {
+            this.hostname = hostname;
+        }
+        return (T) this;
+    }
+
+    public T setPort(int port) {
+        this.port = port;
         return (T) this;
     }
 

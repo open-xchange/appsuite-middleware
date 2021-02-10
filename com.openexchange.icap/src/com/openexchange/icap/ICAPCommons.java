@@ -67,7 +67,7 @@ public final class ICAPCommons {
     /**
      * The user agent
      */
-    public static final String USER_AGENT = "Open-Xchange ICAP Client/1.0";
+    public static final String USER_AGENT = "Open-Xchange ICAP Client/" + ICAPClientVersion.CLIENT_VERSION;
 
     /**
      * The default ICAP server port.

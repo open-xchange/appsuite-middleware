@@ -61,8 +61,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -75,7 +75,6 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -86,9 +85,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
 @DispatcherNotes(enqueueable = true)
-@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.WRITE, hasCustomOAuthScopeCheck = true)
 public final class UpdateAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -192,14 +190,13 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
          */
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .put("permissions", request.getParameter("permissions"))
-            .put("altNames", request.getParameter("altNames"))
-            .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
-            .put("suppressUnifiedMail", isSuppressUnifiedMail(session))
-            .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
-            .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
-            .put(id, folderService);
+        // @formatter:off
+        FolderServiceDecorator decorator = getDecorator(request).put("cascadePermissions", Boolean.valueOf(cascadePermissions))
+                                                                .put("permissions", request.getParameter("permissions"))
+                                                                .put(PARAM_AUTORENAME, request.getParameter(PARAM_AUTORENAME))
+                                                                .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
+                                                                .put(id, folderService);
+        // @formatter:on
 
         boolean notify = updateData.notifyPermissionEntities() && folder.getPermissions() != null && folder.getPermissions().length > 0;
         UserizedFolder original = null;
@@ -219,8 +216,10 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
 
         Date lastModified = null != newId ? folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC() : null;
         AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
+
         result.addWarnings(warnings);
-        if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
+
+        if (null == newId && 0 < warnings.size() && false == ignoreWarnings) {
             result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(
                 getFolderNameSafe(session, folder, id, treeId, folderService), id));
         }

@@ -128,14 +128,14 @@ public class UserExceptionMessage implements LocalizableStrings {
     public final static String UPDATE_ATTRIBUTES_FAILED_DISPLAY = "Updating attributes failed in context %1$d for user %2$d.";
 
     /**
-     * Invalid password length. The password must be of minimum length %1$d.
+     * Invalid password length. The password must have a minimum length of %1$d characters.
      */
-    public final static String INVALID_MIN_LENGTH_DISPLAY = "Invalid password length. The password must have a minimum length of %1$d.";
+    public final static String INVALID_MIN_LENGTH_DISPLAY = "Invalid password length. The password must have a minimum length of %1$d characters.";
 
     /**
-     * Invalid password length. The password must be of maximum length %1$d.
+     * Invalid password length. The password must have a maximum length of %1$d characters.
      */
-    public final static String INVALID_MAX_LENGTH_DISPLAY = "Invalid password length. The password must have a maximum length of %1$d.";
+    public final static String INVALID_MAX_LENGTH_DISPLAY = "Invalid password length. The password must have a maximum length of %1$d characters.";
 
     /**
      * The parameter %s for this user is missing.

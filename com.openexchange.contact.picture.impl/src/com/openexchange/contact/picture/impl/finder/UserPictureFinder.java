@@ -60,6 +60,7 @@ import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -103,7 +104,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     private PictureResult provideUserData(Session session, PictureSearchData data) {
-        if (data.hasUser()) {
+        if (data.hasUser() && Strings.isEmpty(data.getAccountId())) {
             try {
                 User user = userService.getUser(i(data.getUserId()), session.getContextId());
                 if (null != user) {
@@ -115,7 +116,7 @@ public class UserPictureFinder implements ContactPictureFinder {
                             set.add(string);
                         }
                     }
-                    return new PictureResult(new PictureSearchData(null, user.isGuest() ? I(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID) : I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(user.getContactId()), set));
+                    return new PictureResult(new PictureSearchData(null, null, user.isGuest() ? I(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID) : I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(user.getContactId()), set));
                 }
             } catch (OXException e) {
                 LOGGER.debug("Unable to find user with identifier {} in context {}", data.getUserId(), I(session.getContextId()), e);

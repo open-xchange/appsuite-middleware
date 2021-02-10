@@ -4,6 +4,16 @@
     tags:
       - Folders
     summary: Creates a new folder.
+    security:
+        - session: []
+        - oauth: 
+          - write_mails
+        - oauth: 
+          - write_tasks
+        - oauth: 
+          - write_calendar
+        - oauth: 
+          - write_contacts             
     parameters:
       - in: query
         name: folder_id
@@ -11,7 +21,6 @@
         required: true
         schema:
           type: string
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamFolderTree'
       - $ref: '#/components/parameters/gblQueryParamAllowedModules'
       - in: query
@@ -21,16 +30,6 @@
         schema:
           type: string
       - $ref: '#/components/parameters/QueryParamFolderAutoRename'
-    responses:
-      '200':
-        description: >-
-          A JSON object with the object ID of the folder. In case of errors the
-          responsible fields in the response are filled (see [Error
-          handling](#error-handling)).
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FolderUpdateResponse'
     requestBody:
       content:
         application/json:
@@ -49,4 +48,18 @@
 
         {"folder":{"module":"infostore","subscribed":true,"title":"Test123","permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The
         message"}})
-      required: true
+      required: true      
+    responses:
+      '200':
+        description: >-
+          A JSON object with the object ID of the folder. In case of errors the
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderUpdateResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

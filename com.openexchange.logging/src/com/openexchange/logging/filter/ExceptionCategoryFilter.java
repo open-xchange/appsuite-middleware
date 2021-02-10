@@ -179,6 +179,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     private final IncludeStackTraceService traceService;
     private final CategoriesAndName categoriesAndName;
     private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final boolean hasAny;
 
     /**
      * Initializes a new {@link ExceptionCategoryFilter}.
@@ -192,6 +193,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         this.traceService = traceService;
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
         this.categoriesAndName = parseCategories(categories);
+        this.hasAny = false == this.categoriesAndName.categories.isEmpty();
     }
 
     @Override
@@ -207,7 +209,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
-        if (OXException.class.isInstance(t)) {
+        if (hasAny && OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
             if (null != category && categoriesAndName.categories.contains(category.getType())) {
                 if (traceService.isEnabled()) {
@@ -260,6 +262,10 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
      * @return The resulting categories and filter name
      */
     private static CategoriesAndName parseCategories(String categories) {
+        if (Strings.isEmpty(categories)) {
+            return new CategoriesAndName(EnumSet.noneOf(Category.EnumType.class));
+        }
+
         Set<String> c;
         {
             String[] catz = Strings.splitByComma(categories);

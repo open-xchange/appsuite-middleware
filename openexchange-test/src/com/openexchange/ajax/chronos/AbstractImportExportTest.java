@@ -101,7 +101,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         if (contactsToDelete != null) {
-            contactsApi.deleteContacts(defaultUserApi.getSession(), L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
+            contactsApi.deleteContacts(L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
         }
         super.tearDown();
     }
@@ -118,14 +118,14 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected String importICalFile(String fileName) throws Exception {
         Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
+        return importExportManager.importICalFile(defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
     }
 
-    protected void createContactWithBirthdayEvent(String session) throws Exception {
+    protected void createContactWithBirthdayEvent() throws Exception {
         if (Strings.isEmpty(contactsFolder)) {
             contactsFolder = getDefaultContactFolder();
         }
-        rememberContact(contactsApi.createContact(session, createContactData()).getData().getId());
+        rememberContact(contactsApi.createContact(createContactData()).getData().getId());
     }
 
     private ContactData createContactData() {

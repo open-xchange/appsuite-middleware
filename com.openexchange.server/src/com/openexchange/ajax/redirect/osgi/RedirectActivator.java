@@ -53,6 +53,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.redirect.RedirectServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 
 public class RedirectActivator extends HousekeepingActivator{
 
@@ -77,8 +78,8 @@ public class RedirectActivator extends HousekeepingActivator{
 		if (null != service) {
             final String alias = this.alias;
             if (null != alias) {
-                service.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, service);
             }
         }
         super.stopBundle();

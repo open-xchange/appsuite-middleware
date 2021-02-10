@@ -49,14 +49,19 @@
 
 package com.openexchange.carddav.resources;
 
+import static com.openexchange.carddav.Tools.getFoldersHash;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.carddav.AggregatedCollectionMode;
+import com.openexchange.carddav.CardDAVProperty;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.dav.DAVUserAgent;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
@@ -65,8 +70,10 @@ import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import com.openexchange.login.Interface;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -78,16 +85,11 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class RootCollection extends DAVRootCollection {
 
-    private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
-    private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
-    private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
-    private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
-    private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
-
     private final GroupwareCarddavFactory factory;
-    private String exposedCollections = null;
-    private Pattern userAgentForAggregatedCollection = null;
-    private Boolean reducedAggregatedCollection = null;
+
+    private String exposedCollections;
+    private Pattern userAgentForAggregatedCollection;
+    private AggregatedCollectionMode aggregatedCollectionMode;
 
     /**
      * Initializes a new {@link RootCollection}.
@@ -122,19 +124,19 @@ public class RootCollection extends DAVRootCollection {
 			/*
 			 * add the aggregated collection as child resource
 			 */
-		    if (isReducedAggregatedCollection().booleanValue()) {
-		        children.add(createReducedAggregatedCollection());
-            } else {
-                children.add(createAggregatedCollection());
+            try {
+                children.add(createAggregatedCollection(getAggregatedFolders()));
+            } catch (OXException e) {
+                throw protocolException(getUrl(), e);
             }
 			LOG.debug("{}: adding aggregated collection as child resource.", getUrl());
 		}
 		if (isUseFolderCollections()) {
 			/*
-			 * add one child resource per contact folder
-			 */
+             * add one child resource per synchronized contact folder
+             */
 			try {
-				for (UserizedFolder folder : factory.getState().getFolders()) {
+                for (UserizedFolder folder : factory.getState().getVisibleFolders(true)) {
 					children.add(createFolderCollection(folder));
 					LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
 				}
@@ -156,63 +158,57 @@ public class RootCollection extends DAVRootCollection {
      */
 	@Override
     public DAVCollection getChild(String name) throws WebdavProtocolException {
-		if (isUseAggregatedCollection() && (AGGREGATED_FOLDER_ID.equals(name) || AGGREGATED_DISPLAY_NAME.equals(name))) {
-			/*
-			 * this is the aggregated collection
-			 */
-		    return isReducedAggregatedCollection().booleanValue() ? createReducedAggregatedCollection() : createAggregatedCollection();
-		}
-		if (isUseFolderCollections()) {
-	        try {
-	            for (UserizedFolder folder : factory.getState().getFolders()) {
-	                if (name.equals(folder.getID())) {
-	                    LOG.debug("{}: found child collection by name '{}'", getUrl(), name);
-	                    return createFolderCollection(folder);
-	                }
-	                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
-	                    LOG.debug("{}: found child collection by resource name '{}'", getUrl(), name);
-	                    return createFolderCollection(folder);
-	                }
-	            }
-	            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
-	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactContentType.getInstance(), FolderStorage.REAL_TREE_ID);
-	        } catch (OXException e) {
-	            throw protocolException(getUrl(), e);
-	        }
-		}
+        try {
+            if (isUseAggregatedCollection()) {
+                List<UserizedFolder> aggregatedFolders = getAggregatedFolders();
+                String currentName = getAggregatedCollectionId(aggregatedFolders);
+                if (currentName.equals(name)) {
+                    /*
+                     * this is the aggregated collection
+                     */
+                    return createAggregatedCollection(aggregatedFolders);
+                }
+                LOG.debug("{}: aggregated collection in use, current name is {}, but requested child collection '{}' not found.", getUrl(), currentName, name);
+            }
+            if (isUseFolderCollections()) {
+                for (UserizedFolder folder : factory.getState().getVisibleFolders(true)) {
+                    if (name.equals(folder.getID())) {
+                        LOG.debug("{}: found child collection by name '{}'", getUrl(), name);
+                        return createFolderCollection(folder);
+                    }
+                    if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
+                        LOG.debug("{}: found child collection by resource name '{}'", getUrl(), name);
+                        return createFolderCollection(folder);
+                    }
+                }
+                LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
+                return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactsContentType.getInstance(), FolderStorage.REAL_TREE_ID);
+            }
+        } catch (OXException e) {
+            throw protocolException(getUrl(), e);
+        }
 		throw protocolException(getUrl(), new Exception("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}
 
     private String getExposedCollections() {
-        if (null == this.exposedCollections) {
-            exposedCollections = "0";
+        if (null == exposedCollections) {
             try {
-                exposedCollections = factory.getConfigValue(EXPOSED_COLLECTIONS_PROPERTY, "0");
+                exposedCollections = factory.getServiceSafe(LeanConfigurationService.class).getProperty(CardDAVProperty.EXPOSED_COLLECTIONS);
             } catch (OXException e) {
-                LOG.error("error getting exposed collections from config, falling back to '0'", e);
+                exposedCollections = CardDAVProperty.EXPOSED_COLLECTIONS.getDefaultValue(String.class);
+                LOG.error("error getting exposed collections from config, falling back to '{}'", exposedCollections, e);
             }
         }
-        return this.exposedCollections;
-    }
-
-    private Boolean isReducedAggregatedCollection() {
-        if (null == this.reducedAggregatedCollection) {
-            reducedAggregatedCollection = Boolean.TRUE;
-            try {
-                reducedAggregatedCollection = Boolean.valueOf(factory.getConfigValue(REDUCED_AGGREGATED_COLLECTION_PROPERTY, "true"));
-            } catch (OXException e) {
-                LOG.error("error getting reduced aggregated collection property from config, falling back to 'true'", e);
-            }
-        }
-        return this.reducedAggregatedCollection;
+        return exposedCollections;
     }
 
     private Pattern getUserAgentForAggregatedCollection() {
-        if (null == this.userAgentForAggregatedCollection) {
-            String regex = ".*CFNetwork.*Darwin.*|.*AddressBook.*CardDAVPlugin.*Mac_OS_X.*|.*Mac OS X.*AddressBook.*|.*macOS.*AddressBook.*";
+        if (null == userAgentForAggregatedCollection) {
+            String regex;
             try {
-                regex = factory.getConfigValue(USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY, regex);
+                regex = factory.getServiceSafe(LeanConfigurationService.class).getProperty(CardDAVProperty.USERAGENT_FOR_AGGREGATED_COLLECTION);
             } catch (OXException e) {
+                regex = CardDAVProperty.USERAGENT_FOR_AGGREGATED_COLLECTION.getDefaultValue(String.class);
                 LOG.error("error getting exposed collections from config, falling back to '{}'", regex, e);
             }
             userAgentForAggregatedCollection = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -244,20 +240,60 @@ public class RootCollection extends DAVRootCollection {
         }
     }
 
-    private CardDAVCollection createAggregatedCollection() throws WebdavProtocolException {
+    private CardDAVCollection createAggregatedCollection(List<UserizedFolder> aggregatedFolders) throws WebdavProtocolException {
         try {
-            return factory.mixin(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
+            return factory.mixin(new AggregatedCollection(factory, constructPathForChildResource(getAggregatedCollectionId(aggregatedFolders)), aggregatedFolders));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
     }
 
-    private CardDAVCollection createReducedAggregatedCollection() throws WebdavProtocolException {
-        try {
-            return factory.mixin(new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
-        } catch (OXException e) {
-            throw protocolException(getUrl(), e);
+    private List<UserizedFolder> getAggregatedFolders() throws OXException {
+        switch (getAggregatedCollectionMode()) {
+            case ALL:
+                return factory.getState().getVisibleFolders(false);
+            case DEFAULT_ONLY:
+                return Collections.singletonList(factory.getState().getDefaultFolder());
+            case REDUCED:
+                return factory.getState().getReducedVisibleFolders(false);
+            case REDUCED_SYNCED:
+                return factory.getState().getReducedVisibleFolders(true);
+            case ALL_SYNCED:
+            default:
+                return factory.getState().getVisibleFolders(true);
         }
+    }
+
+    private AggregatedCollectionMode getAggregatedCollectionMode() {
+        if (null == aggregatedCollectionMode) {
+            try {
+                /*
+                 * check if defined, first
+                 */
+                LeanConfigurationService configService = factory.getServiceSafe(LeanConfigurationService.class);
+                String value = configService.getProperty(DefaultProperty.valueOf(CardDAVProperty.AGGREGATED_COLLECTION_FOLDERS.getFQPropertyName(), null));
+                if (Strings.isEmpty(value)) {
+                    /*
+                     * not configured, probe legacy property as fallback
+                     */
+                    String legacyPropertyName = CardDAVProperty.REDUCED_AGGREGATED_COLLECTION.getFQPropertyName();
+                    String legacyValue = configService.getProperty(DefaultProperty.valueOf(legacyPropertyName, null));
+                    if (Strings.isNotEmpty(legacyValue) && Boolean.parseBoolean(legacyValue)) {
+                        value = AggregatedCollectionMode.REDUCED_SYNCED.name();
+                        LOG.debug("{}: using mode {} for aggregated collection based on defined legacy property {}.", getUrl(), value, legacyPropertyName);
+                    }
+                }
+                aggregatedCollectionMode = Enums.parse(AggregatedCollectionMode.class, value, AggregatedCollectionMode.ALL_SYNCED);
+            } catch (OXException e) {
+                LOG.error("Error getting aggregated collection folders mode from config, falling back to '{}'", AggregatedCollectionMode.ALL_SYNCED, e);
+                aggregatedCollectionMode = AggregatedCollectionMode.ALL_SYNCED;
+            }
+        }
+        return aggregatedCollectionMode;
+    }
+
+    private static String getAggregatedCollectionId(List<UserizedFolder> aggregatedFolders) throws OXException {
+        return "Contacts." + getFoldersHash(aggregatedFolders);
     }
 
 }

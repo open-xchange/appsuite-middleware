@@ -119,6 +119,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.ComparedOCLFolderPermissions;
@@ -576,14 +577,13 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
             }
         }
 
-        boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         checkFolderPermissions(fo, Optional.ofNullable(originalFolder));
         int oldParentId = originalFolder.getParentFolderID();
         FolderObject storageObject = originalFolder.clone();
 
         int optionz = options;
-        if (((optionz & OPTION_TRASHING) > 0) && performMove) {
+        if (((optionz & OPTION_TRASHING) > 0) && fo.containsParentFolderID()) {
             int newParentFolderID = fo.getParentFolderID();
             if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
@@ -627,7 +627,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
         try {
             if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta() || fo.containsOriginPath()) {
                 int newParentFolderID = fo.getParentFolderID();
-                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if (fo.containsParentFolderID() && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                     // Reload storage's folder for following update
@@ -641,17 +641,20 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
                 update(fo, optionz, storageObject, lastModified, handDown);
             } else if (fo.containsFolderName()) {
                 int newParentFolderID = fo.getParentFolderID();
-                if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if (fo.containsParentFolderID() && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     // Perform move
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                 } else {
                     rename(fo, storageObject, lastModified);
                 }
-            } else if (performMove) {
-                // Perform move
-                folderId2OldOwner = determineCurrentOwnerships(originalFolder);
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
+            } else if (fo.containsParentFolderID()) {
+                int newParentFolderID = fo.getParentFolderID();
+                if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    // Perform move
+                    folderId2OldOwner = determineCurrentOwnerships(originalFolder);
+                    move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
+                }
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1303,16 +1306,17 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
             /*
              * Check if target is a descendant folder
              */
-            final TIntList parentIDList = new TIntArrayList(1);
+            TIntList parentIDList = new TIntArrayList(1);
             parentIDList.add(storageSrc.getObjectID());
             if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
                 throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE.create(I(storageSrc.getObjectID()), I(ctx.getContextId()));
             }
+            parentIDList = null;
             /*
              * Count all moveable subfolders: TODO: Recursive check???
              */
-            final int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(storageSrc.getObjectID(), user.getId(), user.getGroups(), readCon, ctx);
-            if (numOfMoveableSubfolders != storageSrc.getSubfolderIds(true, ctx).size()) {
+            int numOfMoveableSubfolders = OXFolderSQL.getNumOfMoveableSubfolders(storageSrc.getObjectID(), user.getId(), user.getGroups(), readCon, ctx);
+            if (numOfMoveableSubfolders < storageSrc.getSubfolderIds(true, ctx).size()) {
                 throw OXFolderExceptionCode.NO_SUBFOLDER_MOVE_ACCESS.create(I(session.getUserId()), I(storageSrc.getObjectID()), I(ctx.getContextId()));
             }
         }
@@ -2073,11 +2077,11 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         try {
             ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
         } finally {
-            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+            LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
         }
     }
 

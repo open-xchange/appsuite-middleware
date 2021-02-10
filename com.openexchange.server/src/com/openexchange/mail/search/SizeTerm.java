@@ -72,7 +72,7 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     /**
      * Initializes a new {@link SizeTerm}
      */
-    public SizeTerm(final ComparisonType comparisonType, final int size) {
+    public SizeTerm(ComparisonType comparisonType, int size) {
         super();
         pattern = new ComparablePattern<Integer>() {
 
@@ -103,12 +103,12 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.SIZE);
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final int size;
         try {
             size = msg.getSize();
@@ -130,7 +130,7 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         final long size = mailMessage.getSize();
         final ComparablePattern<Integer> pattern = getPattern();
         final ComparisonType comparisonType = pattern.getComparisonType();

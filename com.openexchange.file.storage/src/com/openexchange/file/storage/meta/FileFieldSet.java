@@ -56,6 +56,7 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 /**
@@ -172,8 +173,14 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object lockedUntil(final Object... args) {
-        long value = longValue(1, args);
-        md(args).setLockedUntil(0 < value ? new Date(value) : null);
+        if (1 > args.length || null == args[1]) {
+            md(args).setLockedUntil(null);
+        } else if (args[1] instanceof Number) {
+            long value = ((Number) args[1]).longValue();
+            md(args).setLockedUntil(0 < value ? new Date(value) : null);
+        } else {
+            md(args).setLockedUntil(date(1, args));
+        }
         return ret(args);
     }
 
@@ -345,6 +352,22 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     public Object mediaDate(Object[] args) {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public Object created_from(Object... args) {
+        if (EntityInfo.class.isInstance(args[1])) {
+            md(args).setCreatedFrom((EntityInfo) args[1]);
+        }
+        return ret(args);
+    }
+
+    @Override
+    public Object modified_from(Object... args) {
+        if (EntityInfo.class.isInstance(args[1])) {
+            md(args).setModifiedFrom((EntityInfo) args[1]);
+        }
+        return ret(args);
     }
 
     private Object ret(final Object[] args) {

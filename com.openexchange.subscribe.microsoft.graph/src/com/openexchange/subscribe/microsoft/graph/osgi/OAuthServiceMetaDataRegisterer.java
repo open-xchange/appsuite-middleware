@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -104,7 +105,13 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
         Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         logger.info("Registering Microsoft Graph subscription services.");
-        MicrosoftContactsSubscribeService msContactsSubService = new MicrosoftContactsSubscribeService(oAuthServiceMetaData, services);
+        MicrosoftContactsSubscribeService msContactsSubService;
+        try {
+            msContactsSubService = new MicrosoftContactsSubscribeService(oAuthServiceMetaData, services);
+        } catch (OXException e) {
+            logger.error("Unable to create Microsoft Graph subscription service: " + e.getMessage(), e);
+            return null;
+        }
         contactsRegistration = context.registerService(SubscribeService.class, msContactsSubService, null);
 
         try {

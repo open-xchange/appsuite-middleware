@@ -52,8 +52,10 @@ package com.openexchange.recaptcha.osgi;
 import java.util.Properties;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.recaptcha.ReCaptchaService;
 import com.openexchange.recaptcha.ReCaptchaServlet;
 import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
@@ -76,8 +78,8 @@ public class Activator extends HousekeepingActivator {
     protected synchronized void startBundle() throws Exception {
         ConfigurationService config = getService(ConfigurationService.class);
 
-        Properties props = config.getFile("recaptcha.properties");
-        Properties options = config.getFile("recaptcha_options.properties");
+        Properties props = ConfigurationServices.loadPropertiesFrom(config.getFileByName("recaptcha.properties"));
+        Properties options = ConfigurationServices.loadPropertiesFrom(config.getFileByName("recaptcha_options.properties"));
         registerService(ReCaptchaService.class, new ReCaptchaServiceImpl(props, options), null);
 
         registerServlet();
@@ -111,9 +113,9 @@ public class Activator extends HousekeepingActivator {
             String alias = this.alias;
             ReCaptchaServlet servlet = this.servlet;
             if (servlet != null && null != alias) {
-                httpService.unregister(alias);
                 this.servlet = null;
                 this.alias = null;
+                HttpServices.unregister(alias, httpService);
                 LOG.info("reCAPTCHA Servlet unregistered.");
             }
         }

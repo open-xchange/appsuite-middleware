@@ -80,15 +80,15 @@ public final class ParallelsHostnameService implements HostnameService {
 
     @Override
     public String getHostname(int userId, int contextId) {
-        return getHostname(userId, contextId, false);
+        return getHostname(contextId, false);
     }
 
     @Override
     public String getGuestHostname(int userId, int contextId) {
-        return getHostname(userId, contextId, true);
+        return getHostname(contextId, true);
     }
 
-    private String getHostname(final int userId, final int contextId, boolean isGuest) {
+    private String getHostname(final int contextId, boolean isGuest) {
         if (contextId <= 0) {
             LOG.error("getHostname: Got context with id {}, dont generating any hostname", I(contextId));
             return null;

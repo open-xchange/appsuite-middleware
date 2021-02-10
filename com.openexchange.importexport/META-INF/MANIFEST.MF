@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Importexport
 Bundle-SymbolicName: com.openexchange.importexport
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.importexport.osgi.ImportExportActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -102,3 +102,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.importexport
+Automatic-Module-Name: com.openexchange.importexport

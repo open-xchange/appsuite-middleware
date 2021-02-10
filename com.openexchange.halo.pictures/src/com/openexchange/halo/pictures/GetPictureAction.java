@@ -141,8 +141,10 @@ public class GetPictureAction extends AbstractGetPictureAction {
         if (!hadCriterium && eTagOnly) {
             return null;
         }
+        String accountId = req.getParameter("account_id");
+        
 
-        PictureSearchData data = new PictureSearchData(I(contact.getInternalUserId()), I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
+        PictureSearchData data = new PictureSearchData(I(contact.getInternalUserId()), accountId, I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
         try {
             if (eTagOnly) {
                 return (V) services.getServiceSafe(ContactPictureService.class).getETag(session, data);

@@ -149,6 +149,12 @@ import com.openexchange.test.concurrent.ParallelSuite;
     InheritPermissionOnMoveTest.class,
     MergePermissionOnMoveTest.class,
 
+    // Warnings tests for move folders 
+    InheritWarningPermissionOnMoveTest.class,
+    MergeWarningPermissionOnMoveTest.class,
+
+    MWB682Test.class,
+
 })
 public final class FolderTestSuite {
 

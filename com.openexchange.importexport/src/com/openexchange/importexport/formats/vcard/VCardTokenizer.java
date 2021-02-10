@@ -93,9 +93,8 @@ public class VCardTokenizer {
      * Creates a new instance that reads the content to be parsed from a reader.
      *
      * @param reader: Reader of the content of a VCard file. Reader will be closed.
-     * @throws IOException
      */
-    public VCardTokenizer(final InputStream is) throws IOException {
+    public VCardTokenizer(final InputStream is) {
         streamAsBytes = new UnsynchronizedByteArrayOutputStream();
         vcard = new BufferedInputStream(is, 65536);
     }
@@ -160,27 +159,28 @@ public class VCardTokenizer {
         if (streamEnded) {
             return null;
         }
-        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-        final byte buf[] = new byte[1];
-        int length = -1;
-        while ((length = vcard.read(buf)) > 0) {
-            baos.write(buf, 0, length);
-            if ('\n' == buf[0]) {
+        try (ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream()) {
+            final byte buf[] = new byte[1];
+            int length = -1;
+            while ((length = vcard.read(buf)) > 0) {
+                baos.write(buf, 0, length);
+                if ('\n' == buf[0]) {
+                    final byte[] ret = baos.toByteArray();
+                    streamAsBytes.write(ret);
+                    return Charsets.toAsciiString(ret);
+                }
+            }
+            streamEnded = true;
+
+            // cleaning up
+            if (baos.size() != 0) {
+                baos.write((byte) 10); // add final newline
                 final byte[] ret = baos.toByteArray();
                 streamAsBytes.write(ret);
                 return Charsets.toAsciiString(ret);
             }
+            return null;
         }
-        streamEnded = true;
-
-        // cleaning up
-        if (baos.size() != 0) {
-            baos.write((byte) 10); // add final newline
-            final byte[] ret = baos.toByteArray();
-            streamAsBytes.write(ret);
-            return Charsets.toAsciiString(ret);
-        }
-        return null;
     }
 
     protected byte[] toByteArray(final List<Byte> list) {

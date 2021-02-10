@@ -49,10 +49,9 @@
 
 package com.openexchange.mail.autoconfig.internal;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.AutoconfigException;
@@ -63,7 +62,7 @@ import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
-import com.openexchange.mail.autoconfig.sources.OutlookComConfigSource;
+import com.openexchange.mail.autoconfig.sources.staticsource.KnownStaticConfigSource;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -76,13 +75,25 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     private final List<ConfigSource> sources;
 
+    /**
+     * Initializes a new {@link AutoconfigServiceImpl}.
+     *
+     * @param services THe service look-up
+     */
     public AutoconfigServiceImpl(final ServiceLookup services) {
-        sources = new LinkedList<ConfigSource>();
+        super();
+        KnownStaticConfigSource[] staticConfigSources = KnownStaticConfigSource.values();
+
+        ImmutableList.Builder<ConfigSource> sources = ImmutableList.builderWithExpectedSize(staticConfigSources.length + 4);
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer(services));
         sources.add(new ISPDB(services));
-        sources.add(new OutlookComConfigSource());
+        for (KnownStaticConfigSource staticConfigSource : staticConfigSources) {
+            sources.add(staticConfigSource);
+        }
         sources.add(new Guess(services));
+
+        this.sources = sources.build();
     }
 
     @Override
@@ -119,14 +130,16 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         return null;
     }
 
-    private static final Pattern PATTERN_SPLIT = Pattern.compile("@");
-
     protected String getDomain(final QuotedInternetAddress internetAddress) {
-        return PATTERN_SPLIT.split(internetAddress.getAddress())[1];
+        String address = internetAddress.getAddress();
+        int pos = address.indexOf('@');
+        return pos > 0 ? address.substring(pos + 1) : address;
     }
 
     private String getLocalPart(final QuotedInternetAddress internetAddress) {
-        return PATTERN_SPLIT.split(internetAddress.getAddress())[0];
+        String address = internetAddress.getAddress();
+        int pos = address.indexOf('@');
+        return pos > 0 ? address.substring(0, pos) : address;
     }
 
 }

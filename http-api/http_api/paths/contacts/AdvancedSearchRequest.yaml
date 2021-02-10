@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Search for contacts by filter.
+    security:
+        - session: []
+        - oauth:
+          - read_contacts             
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: sort
@@ -38,14 +41,6 @@
           enum:
             - gbk
             - gb2312
-      - in: query
-        name: admin
-        description: >-
-          (DEPRECATED) Specifies whether to include the contact representing the
-          admin in the result or not. Defaults to `true`.
-        required: false
-        schema:
-          type: boolean
     responses:
       '200':
         description: >

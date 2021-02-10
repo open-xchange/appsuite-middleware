@@ -61,15 +61,29 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String GUEST = "guest";
 
-    public static final String FILE = "file";
-
-    public static final String FOLDER = "folder";
-
     // John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
-    public static final String SHARE_WITH_TARGET = "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password to view it.";
+    public static final String SHARE_FOLDER_WITH_TARGET = "%1$s has shared the folder \"%2$s\" with you. Please enter the share password to view it.";
+
+    // John Doe has shared the file "document.pdf" with you. Please enter the share password to view it.
+    public static final String SHARE_FILE_WITH_TARGET = "%1$s has shared the file \"%2$s\" with you. Please enter the share password to view it.";
 
     // John Doe has shared the folder "Photos" with you. Please enter your password to view it.
-    public static final String SHARE_WITH_TARGET_AND_GUEST_PASSWORD = "%1$s has shared the %2$s \"%3$s\" with you. Please enter your password to view it.";
+    public static final String SHARE_FOLDER_WITH_TARGET_AND_GUEST_PASSWORD = "%1$s has shared the folder \"%2$s\" with you. Please enter your password to view it.";
+
+    // John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
+    public static final String SHARE_FILE_WITH_TARGET_AND_GUEST_PASSWORD = "%1$s has shared the file \"%2$s\" with you. Please enter your password to view it.";
+
+    // The folder "Photos" is shared with you. Please enter the share password to view it.
+    public static final String SHARE_FOLDER_WITH_TARGET_UNKNOWN_SHARING_USER = "The folder \"%1$s\" is shared with you. Please enter the share password to view it.";
+
+    // The file "document.pdf" is shared with you. Please enter the share password to view it.
+    public static final String SHARE_FILE_WITH_TARGET_UNKNOWN_SHARING_USER = "The file \"%1$s\" is shared with you. Please enter the share password to view it.";
+
+    // The folder "Photos" is shared with you. Please enter your password to view it.
+    public static final String SHARE_FOLDER_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER = "The folder \"%1$s\" is shared with you. Please enter your password to view it.";
+
+    // The file "document.pdf" is shared with you. Please enter your password to view it.
+    public static final String SHARE_FILE_WITH_TARGET_AND_GUEST_PASSWORD_UNKNOWN_SHARING_USER = "The file \"%1$s\" is shared with you. Please enter your password to view it.";
 
     // Login when opening a share protected with a password
     public static final String SHARE_PASSWORD = "Please enter your password to log into this account.";

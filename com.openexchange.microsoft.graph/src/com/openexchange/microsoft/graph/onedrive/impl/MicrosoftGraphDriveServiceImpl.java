@@ -365,6 +365,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return list;
     }
 
+    @SuppressWarnings("resource")
     @Override
     public String upload(String accessToken, File file, InputStream inputStream) throws OXException {
         JSONObject responseBody;
@@ -377,16 +378,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 sink.write(inputStream);
                 contentLength = sink.getLength();
                 is = sink.getClosingStream();
-                sink = null; // Avoid premature closing
+                sink = null; // Intentional: Avoid premature closing
             } finally {
                 Streams.close(sink);
             }
         }
 
         if (contentLength > ONESHOT_LIMIT) {
-            responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), contentLength, is);
+            responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getId(), file.getFileName(), contentLength, is);
         } else {
-            responseBody = api.oneshotUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), is);
+            responseBody = api.oneshotUpload(accessToken, file.getFolderId(), file.getId(), file.getFileName(), file.getFileMIMEType(), is);
         }
         return responseBody.optString("id");
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.impl.tests;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Collections;
@@ -146,7 +147,7 @@ public class OIDCSessionInspectorServiceTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void onSessionHit_NoBackendTrackedTest() throws Exception {
+    public void onSessionHit_NoBackendTrackedTest() {
         Mockito.when(this.mockedOidcBackends.getAllRegisteredBackends()).thenReturn(Collections.<OIDCBackend>emptyList());
         SessionInspectorService emptyInspector = new OIDCSessionInspectorService(this.mockedOidcBackends, this.tokenService);
         Mockito.when(this.mockedSession.getParameter(OIDCTools.BACKEND_PATH)).thenReturn("backendPath");
@@ -160,11 +161,12 @@ public class OIDCSessionInspectorServiceTest {
         fail("No error was thrown, but expected");
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void onSessionHit_IgnoreUnmanagedSession() throws Exception {
         PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
         Mockito.when(mockedSession.getParameter(OIDCTools.IDTOKEN)).thenReturn(null);
-        Mockito.when(mockedSession.containsParameter(OIDCTools.IDTOKEN)).thenReturn(false);
+        Mockito.when(B(mockedSession.containsParameter(OIDCTools.IDTOKEN))).thenReturn(B(false));
 
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
 

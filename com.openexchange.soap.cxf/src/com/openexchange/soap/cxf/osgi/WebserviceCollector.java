@@ -135,7 +135,7 @@ public class WebserviceCollector implements ServiceListener {
     public void close() {
         open = false;
         for (final Entry<String, Endpoint> entry : new ArrayList<Entry<String, Endpoint>>(endpoints.entrySet())) {
-            remove(entry.getKey(), entry.getValue());
+            remove(entry.getKey());
         }
     }
 
@@ -143,7 +143,7 @@ public class WebserviceCollector implements ServiceListener {
         final Object service = context.getService(ref);
         if (isWebservice(service)) {
             final String name = getName(ref, service);
-            remove(name, service);
+            remove(name);
         } else {
             context.ungetService(ref);
         }
@@ -191,7 +191,7 @@ public class WebserviceCollector implements ServiceListener {
         return service.getClass().getSimpleName();
     }
 
-    private void remove(final String name, final Object service) {
+    private void remove(final String name) {
         final Endpoint endpoint = endpoints.remove(name);
         if (endpoint != null) {
             endpoint.stop();

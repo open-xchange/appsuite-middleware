@@ -154,7 +154,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

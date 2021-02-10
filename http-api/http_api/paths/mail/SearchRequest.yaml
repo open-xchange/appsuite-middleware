@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Searches for mails.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - $ref: '#/components/parameters/gblQueryParamMailColumns'
       - $ref: '#/components/parameters/gblQueryParamMailHeaders'
@@ -32,21 +35,6 @@
         required: false
         schema:
           type: string
-    responses:
-      '200':
-        description: >
-          'A JSON object containing an array with matching mails. Mails are
-          represented by arrays. The elements of each array contain the
-
-          information specified by the corresponding identifiers in the
-          `columns` parameter. Not IMAP: with timestamp. In case of errors the
-          responsible fields in the
-
-          response are filled (see [Error handling](#error-handling)).'
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MailsResponse'
     requestBody:
       content:
         application/json:
@@ -64,4 +52,23 @@
 
         `from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`,
         `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.
-      required: true
+      required: true          
+    responses:
+      '200':
+        description: >
+          'A JSON object containing an array with matching mails. Mails are
+          represented by arrays. The elements of each array contain the
+
+          information specified by the corresponding identifiers in the
+          `columns` parameter. Not IMAP: with timestamp. In case of errors the
+          responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

@@ -59,6 +59,7 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.10.1
  */
+@SuppressWarnings("deprecation")
 public class MetricDescriptorCache {
 
     private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;

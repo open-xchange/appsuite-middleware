@@ -3,11 +3,12 @@
     operationId: setAvailability
     tags:
       - Chronos
-    summary: >-
+    summary: Sets/Overwrites the availability of the user.
+    security: 
+        - session: []    
+    description: >-
       Sets/Overwrites the availability of the user. If an empty payload is sent,
       then the availability of the user is deleted/unset.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

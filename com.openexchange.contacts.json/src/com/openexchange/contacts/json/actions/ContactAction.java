@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,19 +51,19 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.EnumSet;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -74,31 +74,21 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link ContactAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.READ)
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
 public abstract class ContactAction implements AJAXActionService {
 
-    protected static final String MODULE = "contacts";
+    protected static final String MODULE = ContactActionFactory.MODULE;
 
     /** Named logger instance */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactAction.class);
 
     private final ServiceLookup serviceLookup;
 
-    public static final int[] COLUMNS_ALIAS_ALL = new int[] { 20, 1, 5, 2, 602 };
-
-    public static final int[] COLUMNS_ALIAS_LIST = new int[] { 20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
-
     /**
-     * Contact fields that are not persistent.
-     */
-    public static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC, ContactField.SORT_NAME);
-
-    /**
-     * Initializes a new {@link ContactAction}.
+     * Initializes a new {@link IDBasedContactAction}.
      *
      * @param serviceLookup The service lookup to use
      */
@@ -122,43 +112,32 @@ public abstract class ContactAction implements AJAXActionService {
     protected abstract AJAXRequestResult perform(ContactRequest request) throws OXException;
 
     /**
-     * Gets the contact service.
+     * Adds all contacts available from a search iterator into a collection.
      *
-     * @return the contact service
+     * @param contacts The collection to add the contacts to
+     * @param searchIterator The search iterator to get the contacts from
+     * @param excludedUserID A user ID to exclude from the results, or a value <code>&lt; 0</code> to ignore
+     * @return The latest last-modified timestamp of all added contacts
      * @throws OXException
      */
-    protected ContactService getContactService() throws OXException {
+    protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator, int excludedUserID) throws OXException {
+        Date lastModified = new Date(0);
+        if (null == searchIterator) {
+            return lastModified;
+        }
         try {
-            return serviceLookup.getService(ContactService.class);
-        } catch (IllegalStateException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactService.class.getName());
+            while (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                if (0 < excludedUserID && excludedUserID == contact.getInternalUserId()) {
+                    continue; // skip
+                }
+                lastModified = getLatestModified(lastModified, contact);
+                contacts.add(contact);
+            }
+        } finally {
+            close(searchIterator);
         }
-    }
-
-    /**
-     * Gets the vCard service.
-     *
-     * @return The vCard service
-     */
-    protected VCardService getVCardService() throws OXException {
-        try {
-            return serviceLookup.getService(VCardService.class);
-        } catch (IllegalStateException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(VCardService.class.getName());
-        }
-    }
-
-    /**
-     * Optionally gets the vCard storage service.
-     *
-     * @return The vCard storage service, or <code>null</code> if not available
-     */
-    protected VCardStorageService optVCardStorageService(int contextId) {
-        VCardStorageFactory vCardStorageFactory = serviceLookup.getOptionalService(VCardStorageFactory.class);
-        if (vCardStorageFactory != null) {
-            return vCardStorageFactory.getVCardStorageService(serviceLookup.getService(ConfigViewFactory.class), contextId);
-        }
-        return null;
+        return lastModified;
     }
 
     /**
@@ -166,11 +145,28 @@ public abstract class ContactAction implements AJAXActionService {
      *
      * @param lastModified the date to compare
      * @param contact the contact
-     * @return
+     * @return The contact's last modified if it's newer than the specified lastModified
      */
     protected static Date getLatestModified(final Date lastModified, final Contact contact) {
         final Date contactLastModified = contact.getLastModified();
         return null == contactLastModified || lastModified.after(contactLastModified) ? lastModified : contactLastModified;
+    }
+
+    /**
+     * Returns the latest (newer) last modified timestamp from the specified contacts
+     *
+     * @param results The contacts
+     * @return The newest last modified
+     */
+    protected static Date getLatestTimestamp(List<Contact> results) {
+        if (null == results || results.isEmpty()) {
+            return null;
+        }
+        long maximumTimestamp = 0L;
+        for (Contact contact : results) {
+            maximumTimestamp = Math.max(maximumTimestamp, contact.getLastModified().getTime());
+        }
+        return new Date(maximumTimestamp);
     }
 
     /**
@@ -184,31 +180,47 @@ public abstract class ContactAction implements AJAXActionService {
     }
 
     /**
-     * Adds all contacts available from a search iterator into a collection.
+     * Gets the contact service.
      *
-     * @param contacts The collection to add the contacts to
-     * @param searchIterator The search iterator to get the contacts from
-     * @param excludedUserID A user ID to exclude from the results, or a value <code>&lt; 0</code> to ignore
-     * @return The latest last-modified timestamp of all added contacts
+     * @return the contact service
      * @throws OXException
      */
-    protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator, int excludedUserID) throws OXException {
-        Date lastModified = new Date(0);
-        if (null != searchIterator) {
-            try {
-                while (searchIterator.hasNext()) {
-                    Contact contact = searchIterator.next();
-                    if (0 < excludedUserID && excludedUserID == contact.getInternalUserId()) {
-                        continue; // skip
-                    }
-                    lastModified = getLatestModified(lastModified, contact);
-                    contacts.add(contact);
-                }
-            } finally {
-                close(searchIterator);
-            }
-        }
-        return lastModified;
+    ContactService getContactService() throws OXException {
+        return requireService(ContactService.class);
     }
 
+    /**
+     * Gets the vCard service.
+     *
+     * @return The vCard service
+     */
+    VCardService getVCardService() throws OXException {
+        return requireService(VCardService.class);
+    }
+
+    /**
+     * Optionally gets the vCard storage service.
+     *
+     * @return The vCard storage service, or <code>null</code> if not available
+     */
+    VCardStorageService optVCardStorageService(int contextId) {
+        VCardStorageFactory vCardStorageFactory = serviceLookup.getOptionalService(VCardStorageFactory.class);
+        if (vCardStorageFactory != null) {
+            return vCardStorageFactory.getVCardStorageService(serviceLookup.getService(ConfigViewFactory.class), contextId);
+        }
+        return null;
+    }
+
+    /**
+     * Obtains a service from the local {@link ServiceLookup} instance and returns it. If the
+     * service is not available, {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} is thrown.
+     *
+     * @param <S> The service type
+     * @param serviceClass The service class to obtain
+     * @return The service
+     * @throws OXException if the service is not available
+     */
+    <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
+        return com.openexchange.osgi.Tools.requireService(clazz, serviceLookup);
+    }
 }

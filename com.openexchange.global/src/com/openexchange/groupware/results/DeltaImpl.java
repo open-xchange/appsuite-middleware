@@ -92,7 +92,7 @@ public class DeltaImpl<T> implements Delta<T> {
         return sequenceNumber;
     }
 
-    public void close() throws OXException {
+    public void close() {
         newOnes.close();
         modifiedOnes.close();
         deletedOnes.close();

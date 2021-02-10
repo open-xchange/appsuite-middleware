@@ -110,6 +110,66 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.xctx2.enabled
+      description: |
+        Configures if the <i>cross-context</i> calendar provider for integrating federated shares is available for a user or not. 
+      defaultValue: false
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
+    - key: com.openexchange.calendar.xctx2.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts for a user within the <i>cross-context</i> calendar provider for integrating 
+        federated shares. Each account may provide multiple shared calendars. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share","Limit"]
+    - key: com.openexchange.calendar.xctx2.autoRemoveUnknownShares
+      description: |
+        Enables or disables the automatic removal of accounts in the <i>cross-context</i> calendar provider that refer to a no longer 
+        existing guest user in the remote context. 
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
+    - key: com.openexchange.calendar.xctx2.retryAfterErrorInterval
+      description: |
+        Configures the interval in milliseconds when a retry attempt should be performed after an error occurred when initializing the 
+        cross-context calendar access. Must be at least one minute.
+      defaultValue: 3600000
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
+    - key: com.openexchange.calendar.xctx2.enableFreeBusy
+      description: |
+        Enables or disables free/busy lookups within integrated federated shares. Once activated, free/busy data will also be collected
+        from contexts the user has a subscribed cross-context account in. The value can be specified through the config-cascade, and is 
+        evaluated for the context/user where the lookup is initiated from.    
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Share"]
     - key: com.openexchange.calendar.maxEventResults
       description: |
         Defines a maximum number of event in event results. The intention of this limit is to prevent out of memory situations.

@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,12 +54,6 @@ if [ ${1:-0} -eq 2 ]; then
     GLOBIGNORE='*'
 
     PFILE=/opt/open-xchange/etc/saml.properties
-
-    # SoftwareChange_Request-2673
-    ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
-
-    # SoftwareChange_Request-3548
-    ox_add_property com.openexchange.saml.allowUnsolicitedResponses true /opt/open-xchange/etc/saml.properties
 
     # SCR-678
     VALUE=$(ox_read_property com.openexchange.saml.enabled /opt/open-xchange/etc/saml.properties)
@@ -112,28 +106,18 @@ fi
 %defattr(-,root,root)
 
 %changelog
-* Tue Feb 02 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-02-08 (5945)
-* Tue Jan 19 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-25 (5937)
-* Tue Jan 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-11 (5930)
-* Wed Dec 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-12-14 (5924)
-* Mon Nov 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-23 (5905)
-* Wed Nov 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-09 (5891)
-* Tue Oct 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-26 (5888)
+* Fri Feb 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.5 release
+* Mon Feb 01 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.5 release
+* Fri Jan 15 2021 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.5 release
+* Thu Dec 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.10.5 release
+* Fri Nov 27 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-12 (5879)
-* Wed Sep 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-29 (5869)
-* Fri Sep 11 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-14 (5857)
-* Mon Aug 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-08-24 (5842)
+prepare for 7.10.5 release
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>

@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
@@ -83,6 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class EditAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG =
@@ -92,12 +94,12 @@ public final class EditAction extends AbstractMailAction {
      * Initializes a new {@link EditAction}.
      * @param services
      */
-    public EditAction(final ServiceLookup services) {
+    public EditAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         AJAXRequestData request = req.getRequest();
         List<OXException> warnings = new ArrayList<OXException>();
 

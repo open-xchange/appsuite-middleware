@@ -2,7 +2,7 @@ feature_name: ICal Calendar Provider
 properties:
     - key: com.openexchange.calendar.ical.refreshInterval
       description: |
-        Defines the default refresh interval of the calendar feeds.
+        Defines the default refresh interval of the calendar feeds (in minutes).
       defaultValue: 10080
       version: 7.10.0
       reloadable: true

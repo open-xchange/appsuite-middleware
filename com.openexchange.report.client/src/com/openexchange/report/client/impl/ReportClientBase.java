@@ -324,10 +324,12 @@ public class ReportClientBase extends AbstractJMXTools {
 
                 case NONE:
                     System.out.println(NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND);
+                    //$FALL-THROUGH$
                 case MULTIPLE:
                     if (ReportMode.NONE != mode) {
                         System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                     }
+                    //$FALL-THROUGH$
                 case DISPLAYANDSEND:
                 default:
                     savereport = false;

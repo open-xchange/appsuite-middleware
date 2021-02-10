@@ -128,7 +128,9 @@ public interface MailMessageHandler {
     /**
      * Handle message's disposition notification
      *
-     * @param acknowledged TODO
+     * @param dispositionNotificationTo The E-Mail address to which disposition notification is to be sent
+     * @param acknowledged Whether disposition notification has already been sent (acknowledged)
+     * @throws If handling disposition notification fails
      */
     public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean acknowledged) throws OXException;
 

@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +81,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     @Override
     public String getScope() {
-    	return "context";
+    	return ConfigViewScope.CONTEXT.getScopeName();
     }
 
     @Override

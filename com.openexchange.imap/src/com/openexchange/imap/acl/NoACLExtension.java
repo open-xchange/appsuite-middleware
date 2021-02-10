@@ -89,64 +89,64 @@ public final class NoACLExtension implements ACLExtension {
     }
 
     @Override
-    public boolean canRead(final Rights rights) {
+    public boolean canRead(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canLookUp(final Rights rights) {
+    public boolean canLookUp(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canKeepSeen(final Rights rights) {
+    public boolean canKeepSeen(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canWrite(final Rights rights) {
+    public boolean canWrite(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canInsert(final Rights rights) {
+    public boolean canInsert(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canPost(final Rights rights) {
+    public boolean canPost(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canGetACL(final Rights rights) {
+    public boolean canGetACL(Rights rights) {
         // GETACL/LISTRIGHTS must not be performed on missing ACL support
         return false;
     }
 
     @Override
-    public boolean canSetACL(final Rights rights) {
+    public boolean canSetACL(Rights rights) {
         // SETACL/DELETEACL must not be performed on missing ACL support
         return false;
     }
 
     @Override
-    public boolean canCreate(final Rights rights) {
+    public boolean canCreate(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canDeleteMailbox(final Rights rights) {
+    public boolean canDeleteMailbox(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canDeleteMessages(final Rights rights) {
+    public boolean canDeleteMessages(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean canExpunge(final Rights rights) {
+    public boolean canExpunge(Rights rights) {
         return true;
     }
 
@@ -161,92 +161,92 @@ public final class NoACLExtension implements ACLExtension {
     }
 
     @Override
-    public void addFolderAdminRights(final Rights rights) {
+    public void addFolderAdminRights(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public boolean containsFolderAdminRights(final Rights rights) {
+    public boolean containsFolderAdminRights(Rights rights) {
         return true;
     }
 
     @Override
-    public void addFolderVisibility(final Rights rights) {
+    public void addFolderVisibility(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public boolean containsFolderVisibility(final Rights rights) {
+    public boolean containsFolderVisibility(Rights rights) {
         return true;
     }
 
     @Override
-    public void addCreateObjects(final Rights rights) {
+    public void addCreateObjects(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addCreateSubfolders(final Rights rights) {
+    public void addCreateSubfolders(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addDeleteAll(final Rights rights) {
+    public void addDeleteAll(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addNonMappable(final Rights rights) {
+    public void addNonMappable(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addReadAll(final Rights rights) {
+    public void addReadAll(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addReadAllKeepSeen(final Rights rights) {
+    public void addReadAllKeepSeen(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public void addWriteAll(final Rights rights) {
+    public void addWriteAll(Rights rights) {
         // Nothing to do
     }
 
     @Override
-    public boolean containsCreateObjects(final Rights rights) {
+    public boolean containsCreateObjects(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsCreateSubfolders(final Rights rights) {
+    public boolean containsCreateSubfolders(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsDeleteAll(final Rights rights) {
+    public boolean containsDeleteAll(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsNonMappable(final Rights rights) {
+    public boolean containsNonMappable(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsReadAll(final Rights rights) {
+    public boolean containsReadAll(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsReadAllKeepSeen(final Rights rights) {
+    public boolean containsReadAllKeepSeen(Rights rights) {
         return true;
     }
 
     @Override
-    public boolean containsWriteAll(final Rights rights) {
+    public boolean containsWriteAll(Rights rights) {
         return true;
     }
 

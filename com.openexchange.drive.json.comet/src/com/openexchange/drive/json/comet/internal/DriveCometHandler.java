@@ -74,6 +74,7 @@ import com.openexchange.java.Streams;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@SuppressWarnings("rawtypes")
 public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveCometHandler.class);
@@ -122,10 +123,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
                 if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId()) {
                     Set<String> folderIDs = driveEvent.getFolderIDs();
                     if (null != folderIDs && null != rootFolderIDs) {
-                        List<DriveAction<? extends DriveVersion>> actions = driveEvent.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode));
-                        if (null != actions && 0 < actions.size()) {
-                            write(actions);
-                        }
+                        write(driveEvent.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode)));
                     }
                 }
             }

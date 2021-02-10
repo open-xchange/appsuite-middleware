@@ -33,19 +33,19 @@ public class DetachTest extends InfostoreAJAXTest {
         origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(origId);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
     }
 
     @Test

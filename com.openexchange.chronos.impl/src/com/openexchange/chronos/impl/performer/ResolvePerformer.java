@@ -458,7 +458,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
                     Attendee matchingAttendeeCopy = resolveFromAttendeeCopy(event, resolvedAttendee.getEntity());
                     if (null != matchingAttendeeCopy) {
                         LOG.debug("Injecting known attendee data {} from calendar {} for {} in {}", matchingAttendeeCopy, matchingAttendeeCopy.getFolderId(), attendee, event);
-                        iterator.set(matchingAttendeeCopy);
+                        iterator.set(AttendeeMapper.getInstance().copy(matchingAttendeeCopy, resolvedAttendee, AttendeeField.PARTSTAT, AttendeeField.COMMENT));
                     }
                 }
             } catch (OXException e) {

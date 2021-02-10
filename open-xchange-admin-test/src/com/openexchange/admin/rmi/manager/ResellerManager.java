@@ -104,6 +104,21 @@ public class ResellerManager extends AbstractManager {
     }
 
     /**
+     * Creates the specified {@link ResellerAdmin} under the specified parent {@link ResellerAdmin}
+     * 
+     * @param parent The parent {@link ResellerAdmin}
+     * @param resellerAdmin The {@link ResellerAdmin} to create
+     * @return The created {@link ResellerAdmin}
+     * @throws Exception if an error is occurred
+     */
+    public ResellerAdmin create(ResellerAdmin parent, ResellerAdmin resellerAdmin) throws Exception {
+        OXResellerInterface resellerInterface = getResellerInterface();
+        ResellerAdmin admin = resellerInterface.create(resellerAdmin, new Credentials(parent.getName(), parent.getPassword()));
+        managedObjects.put(admin.getId(), admin);
+        return admin;
+    }
+
+    /**
      * Changes/Updates the specified {@link ResellerAdmin}
      * 
      * @param resellerAdmin The {@link ResellerAdmin} to change
@@ -178,6 +193,7 @@ public class ResellerManager extends AbstractManager {
     void clean(Object object) throws Exception {
         delete((ResellerAdmin) object);
     }
+
     //////////////////////////// RMI LOOK-UPS //////////////////////////////
 
     /**
@@ -187,6 +203,6 @@ public class ResellerManager extends AbstractManager {
      * @throws Exception if an error is occurred during RMI look-up
      */
     private OXResellerInterface getResellerInterface() throws Exception {
-        return (OXResellerInterface) getRemoteInterface(OXResellerInterface.RMI_NAME, OXResellerInterface.class);
+        return getRemoteInterface(OXResellerInterface.RMI_NAME, OXResellerInterface.class);
     }
 }

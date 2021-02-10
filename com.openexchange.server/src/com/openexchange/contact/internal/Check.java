@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -395,8 +396,8 @@ public final class Check {
 	}
 
     private static void checkForSubscription(Session session, String fid, int cid) throws OXException {
-        Object parameter = session.getParameter(Session.PARAM_SUBSCRIPTION_ADMIN);
-        if (parameter != null && Boolean.parseBoolean(parameter.toString())) {
+        if ("true".equals(LogProperties.get(LogProperties.Name.SUBSCRIPTION_ADMIN))) {
+            // Caller is allowed to delete/update/create objects in subscribed folders
             return;
         }
         if (new OXFolderAccess(ServerSessionAdapter.valueOf(session).getContext()).isSubscriptionFolder(fid, cid)) {

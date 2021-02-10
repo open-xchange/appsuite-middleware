@@ -79,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class SnippetAction implements AJAXActionService {
 
+    protected static final String MODULE = "userconfig";
+
     /**
      * Splits a char sequence by comma-separated (<code>','</code>) values.
      */
@@ -187,6 +189,7 @@ public abstract class SnippetAction implements AJAXActionService {
      * @throws OXException If performing request fails for any reason
      * @throws JSONException If a JSON error occurs
      */
+    @SuppressWarnings("unused")
     protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException, IOException {
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }

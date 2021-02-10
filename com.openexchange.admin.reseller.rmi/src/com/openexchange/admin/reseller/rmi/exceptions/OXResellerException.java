@@ -157,7 +157,15 @@ public class OXResellerException extends AbstractAdminRmiException {
         /**
          * Cannot change parentId to id of subsubadmin
          */
-        CANNOT_SET_PARENTID_TO_SUBSUBADMIN("Cannot change parentId to id of subsubadmin");
+        CANNOT_SET_PARENTID_TO_SUBSUBADMIN("Cannot change parentId to id of subsubadmin"),
+        /**
+         * The subadmin is not authorized to list data of another subadmin
+         */
+        SUBADMIN_IS_NOT_AUTHORIZED_TO_LIST_DATA("The subadmin is not authorized to list data of another subadmin"),
+        /**
+         * Unable to delete %1$s, still owns Subadmin(s)
+         */
+        UNABLE_TO_DELETE_OWNS_SUBADMINS("Unable to delete %1$s, still owns Subadmin(s)");
 
         private final String text;
 

@@ -49,56 +49,21 @@
 
 package com.openexchange.policy.retry;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * {@link LinearRetryPolicy}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class LinearRetryPolicy implements RetryPolicy {
-
-    private final int maxTries;
-    private final long sleepTime;
-    private int retryCount = 1;
+public class LinearRetryPolicy extends AbstractRetryPolicy {
 
     /**
      * Initialises a new {@link LinearRetryPolicy}.
+     * The {@link #maxTries} is initialised with
+     * {@link Integer#MAX_VALUE} and {@link #sleepTime}
+     * with 5000 milliseconds.
      */
     public LinearRetryPolicy() {
-        this(Integer.MAX_VALUE, 5000);
-    }
-
-    /**
-     * Initialises a new {@link LinearRetryPolicy}.
-     * 
-     * @param maxTries The amount of maximum tries
-     * @param sleepTime The delay between each try in milliseconds
-     */
-    public LinearRetryPolicy(int maxTries, long sleepTime) {
-        this.maxTries = maxTries;
-        this.sleepTime = sleepTime;
-    }
-
-    @Override
-    public int getMaxTries() {
-        return maxTries;
-    }
-
-    @Override
-    public int retryCount() {
-        return retryCount;
-    }
-
-    @Override
-    public boolean isRetryAllowed() {
-        retryCount++;
-        try {
-            TimeUnit.MILLISECONDS.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            return false;
-        }
-        return true;
+        super(Integer.MAX_VALUE, 5000L);
     }
 }

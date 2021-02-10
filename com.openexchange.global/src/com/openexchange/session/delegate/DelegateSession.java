@@ -59,6 +59,7 @@ import com.openexchange.session.SetableSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public class DelegateSession implements SetableSession {
 
     protected final Session session;

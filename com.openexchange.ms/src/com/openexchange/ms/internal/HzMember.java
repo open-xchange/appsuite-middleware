@@ -51,6 +51,7 @@ package com.openexchange.ms.internal;
 
 import java.net.InetSocketAddress;
 import com.hazelcast.instance.EndpointQualifier;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Member;
 
 /**
@@ -60,21 +61,21 @@ import com.openexchange.ms.Member;
  */
 public final class HzMember implements Member {
 
-    private final com.hazelcast.core.Member hzMember;
+    private final com.hazelcast.cluster.Member hzMember;
 
     /**
      * Initializes a new {@link HzMember}.
      *
      * @param hzMember A reference to the underlying hazelcast member
      */
-    public HzMember(final com.hazelcast.core.Member hzMember) {
+    public HzMember(final com.hazelcast.cluster.Member hzMember) {
         super();
         this.hzMember = hzMember;
     }
 
     @Override
     public String getUuid() {
-        return hzMember.getUuid();
+        return UUIDs.getUnformattedString(hzMember.getUuid());
     }
 
     @Override

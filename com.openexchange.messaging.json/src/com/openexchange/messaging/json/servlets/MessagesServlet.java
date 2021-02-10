@@ -50,13 +50,13 @@
 package com.openexchange.messaging.json.servlets;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -68,7 +68,6 @@ import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
 import com.openexchange.messaging.json.actions.messages.MessagingRequestData;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link MessagesServlet}
  *
@@ -76,16 +75,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagesServlet extends MultipleAdapterServletNew {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 2342329232570692011L;
 
     private static final Object RESOLVE = "resolve";
-    private final List<MessagingContentDumper> dumpers = new ArrayList<MessagingContentDumper>(1) {{
-        add(new BinaryContentDumper());
-        // Add more as needed
-    }};
+
+    private final List<MessagingContentDumper> dumpers = ImmutableList.of(new BinaryContentDumper()); // Add more as needed
 
     public MessagesServlet() {
         super(MessagingActionFactory.INSTANCE);
@@ -109,12 +103,11 @@ public class MessagesServlet extends MultipleAdapterServletNew {
                 final MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
 
                 //TODO: Set Content-Type Header
-                for(final MessagingContentDumper dumper : dumpers) {
+                for (final MessagingContentDumper dumper : dumpers) {
                     if (dumper.handles(content)) {
                         dumper.dump(content, resp.getOutputStream());
                     }
                 }
-
 
             } catch (OXException e) {
                 throw new ServletException(e);

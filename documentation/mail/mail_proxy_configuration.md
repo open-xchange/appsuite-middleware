@@ -21,15 +21,30 @@ To configure the proxy a few java system properties must be set. For example:
 -Dmail.smtp.proxy.port=3128
 -Dmail.smtps.proxy.host=proxy.local
 -Dmail.smtps.proxy.port=3128
+# pop
+-Dmail.pop3.proxy.host=proxy.local
+-Dmail.pop3.proxy.port=8080
+-Dmail.pop3s.proxy.host=proxy.local
+-Dmail.pop3s.proxy.port=8080"
 ```
 
-This will apply the proxy setting to all imap and smtp connections. It many scenarios it is advisable to exclude the primary mail account by also 
-configuring the 'nonProxyHosts' java system properties. Please note that those properties are in opposition to the other properties ox specific properties. 
+This will apply the proxy setting to all imap and smtp connections. In many scenarios it is advisable to exclude the primary mail account by also configuring the 'nonProxyHosts' java system properties. Please note that those properties are in opposition to the other properties ox specific properties. 
+While "proxy.host" and "proxy.port" should be specified for both protocol variants (with and without SSL), "proxy.nonProxyHosts" must only be specified for the basic protocol.
+ 
 For example:
 
 ```
 -Dmail.imap.proxy.nonProxyHosts=my.local.imap.server
 -Dmail.smtp.proxy.nonProxyHosts=my.local.smtp.server
+-Dmail.pop3.proxy.nonProxyHosts=my.local.pop3.server
+```
+
+More complex:
+
+```
+-Dmail.imap.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
+-Dmail.smtp.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
+-Dmail.pop3.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
 ```
 
 This properties are applied to both secure and non-secure connections.

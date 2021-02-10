@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.java.GeoLocation;
 import com.openexchange.session.Session;
@@ -245,6 +246,33 @@ public interface DocumentMetadata extends Serializable {
      */
     void setOriginFolderPath(InfostoreFolderPath originFolderPath);
 
+    /**
+     * Gets the 'created_from' entity info
+     * 
+     * @return The 'created_from' entity info
+     */
+    EntityInfo getCreatedFrom();
+
+    /**
+     * Sets the 'created_from' entity info
+     * 
+     * @param createdFrom The 'created_from' entity info
+     */
+    void setCreatedFrom(EntityInfo createdFrom);
+
+    /**
+     * Gets the 'modified_from' entity info
+     * 
+     * @return The 'modified_from' entity info
+     */
+    EntityInfo getModifiedFrom();
+
+    /**
+     * Sets the 'modified_from' entity info
+     * 
+     * @param modifiedFrom The 'modified_from' entity info
+     */
+    void setModifiedFrom(EntityInfo modifiedFrom);
 
     // ------------------------------------------------------------ MEDIA STUFF ------------------------------------------------------------
 

@@ -119,6 +119,7 @@ import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.io.IOTools;
@@ -570,12 +571,17 @@ public class LoginServlet extends AJAXServlet {
                         SessionUtility.checkIP(session, req.getRemoteAddr());
                         LoginConfiguration conf = confReference.get();
                         String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient());
-                        if (secret == null || !session.getSecret().equals(secret)) {
-                            if (null != secret) {
-                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                            }
+                        if (secret == null) {
                             requestContext.getMetricProvider().recordErrorCode(SessionExceptionCodes.SESSION_EXPIRED);
-                            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_EXPECTED_SECRET_COOKIE.getIdentifier());
+                            throw oxe;
+                        } else if (!session.getSecret().equals(secret)) {
+                            LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
+                            requestContext.getMetricProvider().recordErrorCode(SessionExceptionCodes.SESSION_EXPIRED);
+                            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+                            throw oxe;
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
@@ -587,7 +593,9 @@ public class LoginServlet extends AJAXServlet {
                     } else {
                         LOG.info("There is no session associated with session identifier: {}", sessionId);
                         requestContext.getMetricProvider().recordErrorCode(SessionExceptionCodes.SESSION_EXPIRED);
-                        throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                        OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                        oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                        throw oxe;
                     }
                 } catch (OXException e) {
                     LOG.debug("", e);
@@ -916,7 +924,9 @@ public class LoginServlet extends AJAXServlet {
         Session session = result.getSession();
         if (null == session) {
             // Should not occur
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+            throw oxe;
         }
         final LoginConfiguration conf = getLoginConfiguration(session);
         try {

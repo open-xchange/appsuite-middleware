@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,6 +81,7 @@ public class MessageDescription {
     private Meta meta;
     private Security security;
     private Priority priority;
+    private ClientToken clientToken;
     private boolean contentEncrypted;
     private Map<String, String> customHeaders;
 
@@ -98,6 +100,7 @@ public class MessageDescription {
     private boolean bMeta;
     private boolean bSecurity;
     private boolean bPriority;
+    private boolean bClientToken;
     private boolean bContentEncrypted;
     private boolean bCustomHeaders;
 
@@ -111,6 +114,150 @@ public class MessageDescription {
         security = Security.DISABLED;
         meta = Meta.META_NEW;
     }
+
+    public boolean seemsEqual(MessageDescription other) {
+        // Check flags
+        if (other.bContentEncrypted && contentEncrypted != other.contentEncrypted) {
+            return false;
+        }
+        if (other.bContentType && contentType != other.contentType) {
+            return false;
+        }
+        if (other.bPriority && priority != other.priority) {
+            return false;
+        }
+        if (other.bRequestReadReceipt && requestReadReceipt != other.requestReadReceipt) {
+            return false;
+        }
+
+        // Check addresses
+        if (other.bFrom) {
+            if (from == null) {
+                if (other.from != null) {
+                    return false;
+                }
+            } else if (!from.equals(other.from)) {
+                return false;
+            }
+        }
+        if (other.bTo) {
+            if (to == null) {
+                if (other.to != null) {
+                    return false;
+                }
+            } else if (!to.equals(other.to)) {
+                return false;
+            }
+        }
+        if (other.bCc) {
+            if (cc == null) {
+                if (other.cc != null) {
+                    return false;
+                }
+            } else if (!cc.equals(other.cc)) {
+                return false;
+            }
+        }
+        if (other.bBcc) {
+            if (bcc == null) {
+                if (other.bcc != null) {
+                    return false;
+                }
+            } else if (!bcc.equals(other.bcc)) {
+                return false;
+            }
+        }
+        if (other.bReplyTo) {
+            if (replyTo == null) {
+                if (other.replyTo != null) {
+                    return false;
+                }
+            } else if (!replyTo.equals(other.replyTo)) {
+                return false;
+            }
+        }
+        if (other.bSender) {
+            if (sender == null) {
+                if (other.sender != null) {
+                    return false;
+                }
+            } else if (!sender.equals(other.sender)) {
+                return false;
+            }
+        }
+
+        // Check subject
+        if (other.bSubject) {
+            if (subject == null) {
+                if (other.subject != null) {
+                    return false;
+                }
+            } else if (!subject.equals(other.subject)) {
+                return false;
+            }
+        }
+
+        // Check content
+        if (other.bContent) {
+            if (content == null) {
+                if (other.content != null) {
+                    return false;
+                }
+            } else if (!content.equals(other.content)) {
+                return false;
+            }
+        }
+
+        // Check rest
+        if (other.bCustomHeaders) {
+            if (customHeaders == null) {
+                if (other.customHeaders != null) {
+                    return false;
+                }
+            } else if (!customHeaders.equals(other.customHeaders)) {
+                return false;
+            }
+        }
+        if (other.bMeta) {
+            if (meta == null) {
+                if (other.meta != null) {
+                    return false;
+                }
+            } else if (!meta.equals(other.meta)) {
+                return false;
+            }
+        }
+        if (other.bSecurity) {
+            if (security == null) {
+                if (other.security != null) {
+                    return false;
+                }
+            } else if (!security.equals(other.security)) {
+                return false;
+            }
+        }
+        if (other.bSharedAttachmentsInfo) {
+            if (sharedAttachmentsInfo == null) {
+                if (other.sharedAttachmentsInfo != null) {
+                    return false;
+                }
+            } else if (!sharedAttachmentsInfo.equals(other.sharedAttachmentsInfo)) {
+                return false;
+            }
+        }
+        if (other.containsValidClientToken()) {
+            if (clientToken == null) {
+                if (other.clientToken != null) {
+                    return false;
+                }
+            } else if (!clientToken.equals(other.clientToken)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     public Address getFrom() {
         return from;
@@ -343,9 +490,9 @@ public class MessageDescription {
         this.customHeaders = customHeaders;
         bCustomHeaders = true;
     }
-    
+
     public void addCustomHeader(String name, String value) {
-        if (Strings.isNotEmpty(name) && Strings.isNotEmpty(value)) {            
+        if (Strings.isNotEmpty(name) && Strings.isNotEmpty(value)) {
             Map<String, String> customHeaders = this.customHeaders;
             if (customHeaders == null) {
                 customHeaders = new LinkedHashMap<>();
@@ -407,8 +554,15 @@ public class MessageDescription {
         return attachments;
     }
 
-    public MessageDescription setAttachments(List<Attachment> attachments) {
-        this.attachments = attachments;
+    public MessageDescription setAttachments(List<? extends Attachment> attachments) {
+        if (attachments == null) {
+            this.attachments = null;
+        } else {
+            this.attachments = new ArrayList<>(attachments.size());
+            for (Attachment attachment : attachments) {
+                this.attachments.add(attachment);
+            }
+        }
         bAttachments = true;
         return this;
     }
@@ -455,6 +609,15 @@ public class MessageDescription {
         return bSecurity;
     }
 
+    /**
+     * Checks if security object has been set before and its value is not <code>null</code>.
+     *
+     * @return <code>true</code> if previously set and not <code>null</code>; otherwise <code>false</code>
+     */
+    public boolean containsNotNullSecurity() {
+        return bSecurity && security != null;
+    }
+
     public void removeSecurity() {
         security = null;
         bSecurity = false;
@@ -477,6 +640,34 @@ public class MessageDescription {
     public void removePriority() {
         priority = null;
         bPriority = false;
+    }
+
+    /**
+     * Gets the client token
+     *
+     * @return The client token
+     */
+    public ClientToken getClientToken() {
+        return clientToken;
+    }
+
+    public MessageDescription setClientToken(ClientToken clientToken) {
+        this.clientToken = clientToken;
+        bClientToken = true;
+        return this;
+    }
+
+    public boolean containsClientToken() {
+        return bClientToken;
+    }
+
+    public boolean containsValidClientToken() {
+        return clientToken != null && clientToken.isPresent();
+    }
+
+    public void removeClientToken() {
+        clientToken = null;
+        bClientToken = false;
     }
 
     @Override
@@ -521,7 +712,10 @@ public class MessageDescription {
             builder.append("security=").append(security).append(", ");
         }
         if (priority != null) {
-            builder.append("priority=").append(priority);
+            builder.append("priority=").append(priority).append(", ");
+        }
+        if (clientToken != null) {
+            builder.append("clientToken=").append(clientToken);
         }
         builder.append("]");
         return builder.toString();

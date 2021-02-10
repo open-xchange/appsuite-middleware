@@ -3,14 +3,14 @@
     operationId: updatePassword
     tags:
       - Passwordchange
-    summary: Updates or changes the password of the current use.
+    summary: Updates or changes the password of the current use
+    security: 
+        - session: []    
     description: >
       #### Note
 
       The new password will be set without any checks. The client must ensure
       that it is the password the user wants to set.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

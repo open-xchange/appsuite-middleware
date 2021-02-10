@@ -2,12 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share API bundle
 Bundle-SymbolicName: com.openexchange.share
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
+Automatic-Module-Name: com.openexchange.share
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
- com.google.common.io;version="18.0.0",
+ com.google.common.io,
+ com.openexchange.annotation,
  com.openexchange.config.lean,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.i18n,
@@ -25,4 +28,5 @@ Export-Package: com.openexchange.share,
  com.openexchange.share.groupware,
  com.openexchange.share.groupware.spi,
  com.openexchange.share.notification,
- com.openexchange.share.recipient
+ com.openexchange.share.recipient,
+ com.openexchange.share.subscription

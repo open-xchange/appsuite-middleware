@@ -60,8 +60,9 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings("deprecation")
 public class PictureHaloActionFactory implements AJAXActionServiceFactory {
-
+    
     private final GetPictureAction getPictureAction;
 
     /**

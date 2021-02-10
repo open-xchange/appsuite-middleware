@@ -4,6 +4,8 @@
     tags:
       - Attachments
     summary: Gets an attachment's document/filedata.
+    security: 
+        - session: []    
     description: >
       It is possible to add a filename to the request's URI like
       `/attachment/{filename}?action=document`.
@@ -11,7 +13,6 @@
       The filename may be added to the customary attachment path to suggest a
       filename to a Save-As dialog.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamAttached'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsModule'

@@ -198,6 +198,7 @@ public final class Props {
     /**
      * Throws an UnsupportedOperationException!!!
      */
+    @SuppressWarnings("unused")
     public <V> void putAll(final Props props) {
         throw new UnsupportedOperationException("Props.putAll()");
     }

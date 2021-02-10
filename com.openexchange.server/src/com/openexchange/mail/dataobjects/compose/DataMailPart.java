@@ -102,7 +102,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
      * @param session The session
      * @throws OXException If data's content is not supported
      */
-    protected DataMailPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
+    protected DataMailPart(Object data, Map<String, String> dataProperties, Session session) throws OXException {
         super();
         setHeaders(dataProperties);
 
@@ -215,7 +215,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 
@@ -255,7 +255,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
     }
 
-    private void setHeaders(final Map<String, String> dataProperties) throws OXException {
+    private void setHeaders(Map<String, String> dataProperties) throws OXException {
         final String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         if (null != cts) {
             setContentType(cts);

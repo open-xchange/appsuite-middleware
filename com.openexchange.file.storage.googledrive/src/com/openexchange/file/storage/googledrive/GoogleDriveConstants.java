@@ -154,6 +154,8 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
     public enum GoogleFileFields {
+
+        @SuppressWarnings("hiding")
         ID("id"),
         NAME("name"),
         PARENTS("parents"),

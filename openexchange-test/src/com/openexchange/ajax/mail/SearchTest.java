@@ -94,6 +94,18 @@ public final class SearchTest extends AbstractMailTest {
         }
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        /*
+         * Clean everything before starting the test
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+    }
+
     /**
      * Tests the <code>action=search</code> request on INBOX folder
      *

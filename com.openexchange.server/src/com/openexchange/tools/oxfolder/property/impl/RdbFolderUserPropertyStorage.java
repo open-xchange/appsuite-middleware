@@ -80,8 +80,6 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     private final static String DELETE_USER_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND userid=?";
     private final static String DELETE_CONTEXT_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=?";
     private final static String DELETE_FOLDER_PROPS      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=?";
-    private final static String DELETE      = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
-    private final static String DELETE_PROP = "DELETE FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=?";
     private final static String EXIST       = "SELECT EXISTS(SELECT 1 FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? LIMIT 1)";
     private final static String GET         = "SELECT name, value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?";
     private final static String GET_PROP    = "SELECT value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=? LIMIT 1";
@@ -100,7 +98,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     }
 
     @Override
-    public void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException {
+    public void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys) throws OXException {
         Connection connection = null;
         DatabaseService dbService = null;
         int rollback = 0;
@@ -114,7 +112,7 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
             Databases.startTransaction(connection);
             rollback = 1;
 
-            deleteFolderProperties(contextId, folderId, userId, propertyKeys, connection);
+            deleteFolderProperties(contextId, folderId, userIds, propertyKeys, connection);
             modified = true;
 
             connection.commit();
@@ -137,53 +135,46 @@ public class RdbFolderUserPropertyStorage implements FolderUserPropertyStorage {
     }
 
     @Override
-    public void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys, Connection connection) throws OXException {
+    public void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys, Connection connection) throws OXException {
         if (null == connection) {
             // Get connection an re-call this function
-            deleteFolderProperties(contextId, folderId, userId, propertyKeys);
+            deleteFolderProperties(contextId, folderId, userIds, propertyKeys);
             return;
+        }
+
+        String sql;
+        {
+            StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM ").append(TABLE_NAME).append(" WHERE cid=? AND fuid=?");
+            if (null != userIds && 0 < userIds.length) {
+                stringBuilder.append(" AND userid").append(Databases.getPlaceholders(userIds.length));
+            }
+            if (null != propertyKeys && 0 < propertyKeys.size()) {
+                stringBuilder.append(" AND name").append(Databases.getPlaceholders(propertyKeys.size()));
+            }
+            sql = stringBuilder.toString();
         }
 
         PreparedStatement stmt = null;
         try {
-            if (null == propertyKeys || propertyKeys.isEmpty()) {
-                // Prepare statement
-                stmt = connection.prepareStatement(DELETE);
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, folderId);
-                stmt.setInt(3, userId);
-
-                // Execute
-                stmt.executeUpdate();
-            } else {
-                // Prepare statement for every property
-                stmt = connection.prepareStatement(DELETE_PROP);
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, folderId);
-                stmt.setInt(3, userId);
-                for (String key : propertyKeys) {
-                    stmt.setString(4, key);
-                    stmt.addBatch();
+            int parameterIndex = 1;
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(parameterIndex++, contextId);
+            stmt.setInt(parameterIndex++, folderId);
+            if (null != userIds && 0 < userIds.length) {
+                for (int userId : userIds) {
+                    stmt.setInt(parameterIndex++, userId);
                 }
-                // Execute batch
-                stmt.executeBatch();
             }
+            if (null != propertyKeys && 0 < propertyKeys.size()) {
+                for (String key : propertyKeys) {
+                    stmt.setString(parameterIndex++, key);
+                }
+            }
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public void deleteFolderProperty(int contextId, int folderId, int userId, String key) throws OXException {
-        deleteFolderProperty(contextId, folderId, userId, key, null);
-    }
-
-    @Override
-    public void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
-        if (null != key) {
-            deleteFolderProperties(contextId, folderId, userId, Collections.singleton(key), connection);
         }
     }
 

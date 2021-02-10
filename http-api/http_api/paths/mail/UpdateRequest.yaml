@@ -6,6 +6,10 @@
     summary: >-
       Updates a mail or a folder's messages and/or moves a mail to another
       folder.
+    security: 
+        - session: []
+        - oauth:
+          - write_mail   
     description: >
       The update request can perform an update of the color label and flags of
       one mail object. Beside it
@@ -21,7 +25,6 @@
 
       accordingly.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -39,6 +42,16 @@
         required: false
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailUpdateBody'
+      description: >-
+        A JSON object containing the new values that ought to be applied to mail
+        and/or the id of the destination folder (if the mail shall be moved,
+        otherwise it must not be specified).
+      required: true          
     responses:
       '200':
         description: >
@@ -53,13 +66,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailDestinationResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/MailUpdateBody'
-      description: >-
-        A JSON object containing the new values that ought to be applied to mail
-        and/or the id of the destination folder (if the mail shall be moved,
-        otherwise it must not be specified).
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

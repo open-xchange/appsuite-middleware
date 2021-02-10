@@ -61,9 +61,10 @@ public class LinkUpdate {
 
     private Date expiryDate;
     private String password;
+    private boolean includeSubfolders;
     private boolean containsExpiryDate;
     private boolean containsPassword;
-    private boolean includeSubfolders;
+    private boolean containsIncludeSubfolders;
 
     /**
      * Initializes a new {@link LinkUpdate}.
@@ -111,6 +112,25 @@ public class LinkUpdate {
     }
 
     /**
+     * Gets the includeSubfolders
+     *
+     * @return The includeSubfolders
+     */
+    public boolean isIncludeSubfolders() {
+        return includeSubfolders;
+    }
+
+    /**
+     * Sets the includeSubfolders
+     *
+     * @param includeSubfolders Whether sub-folders should be included or not
+     */
+    public void setIncludeSubfolders(boolean includeSubfolders) {
+        this.includeSubfolders = includeSubfolders;
+        containsIncludeSubfolders = true;
+    }
+
+    /**
      * Gets the containsExpiryDate
      *
      * @return The containsExpiryDate
@@ -129,21 +149,12 @@ public class LinkUpdate {
     }
 
     /**
-     * Gets the includeSubfolders
-     * 
-     * @return The includeSubfolders
-     */
-    public boolean isIncludeSubfolders() {
-        return includeSubfolders;
-    }
-
-    /**
-     * Sets the includeSubfolders
+     * Gets a value whether the include subfolders flag has been set or not.
      *
-     * @param includeSubfolders Whether sub-folders should be included or not
+     * @return <code>true</code> if the include subfolders flag is set, <code>false</code>, otherwise
      */
-    public void setIncludeSubfolders(boolean includeSubfolders) {
-        this.includeSubfolders = includeSubfolders;
+    public boolean containsIncludeSubfolders() {
+        return containsIncludeSubfolders;
     }
 
 }

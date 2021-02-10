@@ -50,7 +50,6 @@
 package com.openexchange.security.manager.configurationReader;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -288,7 +287,7 @@ public class ConfigurationReader {
         }
 
         List<FolderPermission> permissions = new ArrayList<>();
-        for(String prop : props) {
+        for (String prop : props) {
             if (missing.containsKey(prop) == false) {
                 continue;
             }
@@ -317,31 +316,22 @@ public class ConfigurationReader {
      * @throws OXException
      */
     public List<FolderPermission> readConfigFolders() throws OXException {
-        List<String> configurations = null;
-        try {
-            configurations = new ConfigurationFileParser(configService).getConfigList();
-        } catch (IOException e) {
-            LOG.error("Problem loading list of configuration settings from config file for security settings", e);
-        }
-        if (configurations != null) {
-            missing.clear();
-            reloadableConfigurationPaths = new ArrayList<String>(configurations.size());
-            ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
-            for (String config : configurations) {
-                if (config.startsWith("$")) {
-                    addVariable(folderPermissions, config);
-                } else {
-                    if (config.startsWith(File.separator) || config.startsWith(FILE_PREFIX + File.separator)) {
-                        addFolder(folderPermissions, config);
-                    } else {
-                        addConfiguration(folderPermissions, config);
-                    }
-
-                }
+        List<String> configurations = new ConfigurationFileParser(configService).getConfigList();
+        missing.clear();
+        reloadableConfigurationPaths = new ArrayList<String>(configurations.size());
+        ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
+        for (String config : configurations) {
+            if (config.startsWith("$")) {
+                addVariable(folderPermissions, config);
+                continue;
             }
-            return folderPermissions;
+            if (config.startsWith(File.separator) || config.startsWith(FILE_PREFIX + File.separator)) {
+                addFolder(folderPermissions, config);
+            } else {
+                addConfiguration(folderPermissions, config);
+            }
         }
-        return null;
+        return folderPermissions;
     }
 
     /**

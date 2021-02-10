@@ -57,6 +57,7 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -179,7 +180,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             final String resmail = res.getEmail();
-            if (resmail != null && resmail.trim().length() > 0 && !GenericChecks.isValidMailAddress(resmail)) {
+            if (resmail != null && resmail.trim().length() > 0 && (!GenericChecks.isValidMailAddress(resmail) || !GenericChecks.isValidMailAddress(resmail, PropertyScope.propertyScopeForContext(ctx.getId().intValue())))) {
                 throw new InvalidDataException("Invalid email address");
             }
             oxRes.change(ctx, res);
@@ -253,13 +254,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
 
             final String resmail = res.getEmail();
-            if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
+            if (resmail != null && (!GenericChecks.isValidMailAddress(resmail)) || !GenericChecks.isValidMailAddress(resmail, PropertyScope.propertyScopeForContext(ctx.getId().intValue()))) {
                 throw new InvalidDataException("Invalid email address");
             }
             final int retval = oxRes.create(ctx, res);
             res.setId(I(retval));
 
-            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -330,7 +331,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             if (!tool.existsResource(ctx, res.getId().intValue())) {
                 throw new NoSuchResourceException("Resource with this id does not exist");
             }
-            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -452,7 +453,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                     resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
                 }
             }
-            final ArrayList<Resource> retval = new ArrayList<Resource>();
+            final ArrayList<Resource> retval = new ArrayList<>();
             for (final Resource resource : resources) {
                 // not nice, but works ;)
                 final Resource tmp = oxRes.getData(ctx, resource);

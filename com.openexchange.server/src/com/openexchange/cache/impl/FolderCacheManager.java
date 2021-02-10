@@ -74,9 +74,12 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.util.Tools;
 import com.openexchange.lock.LockService;
+import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -407,6 +410,7 @@ public final class FolderCacheManager {
                             LOG.warn("", e);
                         }
                     }
+                    cleanseFromLocalCache(folderId, ctx.getContextId());
                 }
             } finally {
                 lock.unlock();
@@ -564,6 +568,7 @@ public final class FolderCacheManager {
                             LOG.warn("", e);
                         }
                     }
+                    cleanseFromLocalCache(folderProvider.getObjectID(), ctx.getContextId());
                 } else if (currentFromCache instanceof Condition) {
                     cond = (Condition) currentFromCache;
                 }
@@ -646,6 +651,7 @@ public final class FolderCacheManager {
                     LOG.warn("", e);
                 }
             }
+            cleanseFromLocalCache(folderId, contextId);
         }
 
         // Invalidate again after transaction is committed
@@ -714,6 +720,7 @@ public final class FolderCacheManager {
                 LOG.warn("", e);
             }
         }
+        cleanseFromLocalCache(folderIds, contextId);
 
         // Invalidate again after transaction is committed
         if (null != optConnection) {
@@ -724,6 +731,24 @@ public final class FolderCacheManager {
                     LOG.warn("", e);
                 }
             });
+        }
+    }
+
+    private void cleanseFromLocalCache(int folderId, int contextId) {
+        int userId = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        if (userId > 0) {
+            FolderMapManagement.getInstance().dropFor(Integer.toString(folderId), FolderStorage.REAL_TREE_ID, userId, contextId);
+        }
+    }
+
+    private void cleanseFromLocalCache(int[] folderIds, int contextId) {
+        int userId = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        if (userId > 0) {
+            List<String> fids = new ArrayList<>(folderIds.length);
+            for (int folderId : folderIds) {
+                fids.add(Integer.toString(folderId));
+            }
+            FolderMapManagement.getInstance().dropFor(fids, FolderStorage.REAL_TREE_ID, userId, contextId, null);
         }
     }
 

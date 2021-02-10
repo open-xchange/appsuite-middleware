@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 /**
@@ -530,6 +531,26 @@ public class IDManglingFile implements DelegatingFile {
     @Override
     public void setSequenceNumber(long sequenceNumber) {
         file.setSequenceNumber(sequenceNumber);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return file.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        file.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return file.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        file.setModifiedFrom(modifiedFrom);
     }
 
 }

@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 18
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -17,6 +17,13 @@ Summary:        Open-Xchange Meta packages
 %define all_lang_ui_appsuite open-xchange-appsuite-help-de-de, open-xchange-appsuite-help-en-gb, open-xchange-appsuite-help-en-us, open-xchange-appsuite-help-es-es, open-xchange-appsuite-help-es-mx, open-xchange-appsuite-help-fr-fr, open-xchange-appsuite-help-it-it, open-xchange-appsuite-help-ja-jp, open-xchange-appsuite-help-nl-nl, open-xchange-appsuite-help-pl-pl, open-xchange-appsuite-help-zh-cn, open-xchange-appsuite-help-zh-tw, open-xchange-appsuite-l10n-ca-es, open-xchange-appsuite-l10n-cs-cz, open-xchange-appsuite-l10n-da-dk, open-xchange-appsuite-l10n-de-de, open-xchange-appsuite-l10n-en-gb, open-xchange-appsuite-l10n-en-us, open-xchange-appsuite-l10n-es-es, open-xchange-appsuite-l10n-es-mx, open-xchange-appsuite-l10n-et-ee, open-xchange-appsuite-l10n-fi-fi, open-xchange-appsuite-l10n-fr-ca, open-xchange-appsuite-l10n-fr-fr, open-xchange-appsuite-l10n-hu-hu, open-xchange-appsuite-l10n-it-it, open-xchange-appsuite-l10n-ja-jp, open-xchange-appsuite-l10n-lv-lv, open-xchange-appsuite-l10n-nl-nl, open-xchange-appsuite-l10n-pl-pl, open-xchange-appsuite-l10n-pt-br, open-xchange-appsuite-l10n-ro-ro, open-xchange-appsuite-l10n-ru-ru, open-xchange-appsuite-l10n-sk-sk, open-xchange-appsuite-l10n-sv-se, open-xchange-appsuite-l10n-tr-tr, open-xchange-appsuite-l10n-zh-cn, open-xchange-appsuite-l10n-zh-tw
 
 %define all_lang_backend open-xchange-l10n-de-de, open-xchange-l10n-cs-cz, open-xchange-l10n-es-es, open-xchange-l10n-hu-hu, open-xchange-l10n-it-it, open-xchange-l10n-ja-jp, open-xchange-l10n-lv-lv, open-xchange-l10n-nl-nl, open-xchange-l10n-pl-pl, open-xchange-l10n-sk-sk, open-xchange-l10n-zh-cn, open-xchange-l10n-zh-tw
+
+%description
+Open-Xchange Meta packages
+
+Authors:
+--------
+    Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-appsuite-push
@@ -257,6 +264,7 @@ Authors:
     Open-Xchange
 
 # --- transitional packages --------------------------------------------------------------------------
+
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-linkedin
 Group:          Applications/Productivity
@@ -271,6 +279,7 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-calendar-printing
 Group:          Applications/Productivity
@@ -347,6 +356,20 @@ Authors:
 # ----------------------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-upsell-multiple
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-upsell-multiple
+Empty transitional package. This package was discontinued and can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-dataretrieval
 Group:          Applications/Productivity
 Summary:        Empty transitional package.
@@ -360,14 +383,21 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
-%description
-Open-Xchange Meta packages
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-mobile-config
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-mobile-config
+Empty transitional package. This package was discontinued and can be removed.
 
 Authors:
 --------
     Open-Xchange
 
-%prep
+# ----------------------------------------------------------------------------------------------------
+
+prep
 %setup -q
 
 %build
@@ -379,126 +409,95 @@ Authors:
 
 %files
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-server
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-databaseonly
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-backend-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-ox6-compat
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-pubsub
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-messaging
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-singleserver
 %defattr(-,root,root)
-%doc README.TXT
-
-#%files -n open-xchange-meta-plesk
-#%defattr(-,root,root)
-#%doc README.TXT
 
 %files -n open-xchange-meta-parallels
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-parallels-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-parallels-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility-ui-ox6
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-mobility-ui-appsuite
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-meta-cpanel
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-linkedin
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-calendar-printing
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-core
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-json
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-events
 %defattr(-,root,root)
-%doc README.TXT
 
 %files -n open-xchange-realtime-events-json
 %defattr(-,root,root)
-%doc README.TXT
+
+%files -n open-xchange-upsell-multiple
+%defattr(-,root,root)
 
 %files -n open-xchange-dataretrieval
 %defattr(-,root,root)
 
+%files -n open-xchange-mobile-config
+%defattr(-,root,root)
+
 %changelog
-* Tue Feb 02 2021 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2021-02-08 (5945)
-* Tue Jan 19 2021 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2021-01-25 (5937)
-* Tue Jan 05 2021 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2021-01-11 (5930)
-* Wed Dec 09 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-12-14 (5924)
-* Mon Nov 16 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-11-23 (5905)
-* Wed Nov 04 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-11-09 (5891)
-* Tue Oct 20 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-10-26 (5888)
+* Fri Feb 05 2021 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.10.5 release
+* Mon Feb 01 2021 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.10.5 release
+* Fri Jan 15 2021 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.10.5 release
+* Thu Dec 17 2020 Carsten Hoeger <choeger@open-xchange.com>
+Second preview of 7.10.5 release
+* Fri Nov 27 2020 Carsten Hoeger <choeger@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-10-12 (5879)
-* Wed Sep 23 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-09-29 (5869)
-* Fri Sep 11 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-09-14 (5857)
-* Mon Aug 24 2020 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2020-08-24 (5842)
+prepare for 7.10.5 release
 * Wed Aug 05 2020 Carsten Hoeger <choeger@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Carsten Hoeger <choeger@open-xchange.com>

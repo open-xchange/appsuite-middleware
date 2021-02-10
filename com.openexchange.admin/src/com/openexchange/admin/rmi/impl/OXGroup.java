@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -380,7 +381,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             final int retval = oxGroup.create(ctx, grp);
             grp.setId(I(retval));
-            final List<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
+            final List<OXGroupPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -424,7 +425,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         int contextId = ctx.getId().intValue();
                         for (final Integer member_id : mems) {
                             cache.remove(cacheService.newCacheKey(contextId, member_id.intValue()));
-                            UserConfigurationStorage.getInstance().invalidateCache(member_id, new ContextImpl(ctx.getId().intValue()));
+                            UserConfigurationStorage.getInstance().invalidateCache(i(member_id), new ContextImpl(ctx.getId().intValue()));
                         }
 
                         Cache groupCache = cacheService.getCache(GroupService.CACHE_REGION_NAME);
@@ -514,7 +515,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new NoSuchGroupException("No such group");
             }
 
-            final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
+            final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -535,7 +536,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             // remember the old members for later cache invalidation
-            List<User[]> del_groups_members = new ArrayList<User[]>();
+            List<User[]> del_groups_members = new ArrayList<>();
             for (Group del_group : grp) {
                 del_groups_members.add(oxGroup.getMembers(ctx, del_group.getId().intValue()));
             }
@@ -671,7 +672,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw e;
             }
 
-            List<Group> retval = new ArrayList<Group>(groups.length);
+            List<Group> retval = new ArrayList<>(groups.length);
             for (final Group group : groups) {
                 retval.add(oxGroup.get(ctx, group));
             }

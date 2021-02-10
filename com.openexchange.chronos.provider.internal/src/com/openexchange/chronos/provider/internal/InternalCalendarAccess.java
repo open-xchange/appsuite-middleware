@@ -62,7 +62,9 @@ import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.chronos.provider.internal.Constants.USER_PROPERTY_PREFIX;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.sql.Connection;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -99,9 +101,7 @@ import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SubscribeAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
-import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
-import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
@@ -121,12 +121,15 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.Collators;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.Quota;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
+import com.openexchange.user.UserService;
 
 /**
  * {@link InternalCalendarAccess}
@@ -134,7 +137,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAware, GroupwareCalendarAccess, FolderSyncAware, PersonalAlarmAware, FolderSearchAware, QuotaAware, WarningsAware {
+public class InternalCalendarAccess implements com.openexchange.chronos.provider.groupware.InternalCalendarAccess, FolderSyncAware, PersonalAlarmAware, FolderSearchAware, QuotaAware, SubscribeAware, WarningsAware {
 
     private final CalendarSession session;
     private final ServiceLookup services;
@@ -175,15 +178,6 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
             default:
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
         }
-    }
-
-    @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
-        for (GroupwareFolderType type : GroupwareFolderType.values()) {
-            folders.addAll(getVisibleFolders(type));
-        }
-        return folders;
     }
 
     @Override
@@ -419,6 +413,22 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
         return session.get(PARAMETER_CONNECTION(), Connection.class);
     }
 
+    private EntityInfo optUserEntityInfo(int userId) {
+        try {
+            User user;
+            if (session.getUserId() == userId) {
+                user = ServerSessionAdapter.valueOf(session.getSession()).getUser();
+            } else {
+                user = services.getServiceSafe(UserService.class).getUser(userId, session.getContextId());
+            }
+            EntityInfo.Type type = user.isGuest() ? (user.isAnonymousGuest() ? EntityInfo.Type.ANONYMOUS : EntityInfo.Type.GUEST) : EntityInfo.Type.USER;
+            return new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, user.getGivenName(), user.getSurname(), user.getMail(), user.getId(), null, type);
+        } catch (OXException e) {
+            getLogger(InternalCalendarAccess.class).warn("Error resolving entity information for user {} in context {}.", I(userId), I(session.getContextId()), e);
+            return null;
+        }
+    }
+
     /**
      * Gets a list of groupware calendar folders representing the userized folders in the supplied folder response.
      *
@@ -430,6 +440,15 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
          * convert to calendar folder
          */
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
+        /*
+         * enrich with entity info unless already set
+         */
+        if (null == userizedFolder.getCreatedFrom() && 0 < userizedFolder.getCreatedBy()) {
+            calendarFolder.setCreatedFrom(optUserEntityInfo(userizedFolder.getCreatedBy()));
+        }
+        if (null == userizedFolder.getModifiedFrom() && 0 < userizedFolder.getModifiedBy()) {
+            calendarFolder.setModifiedFrom(optUserEntityInfo(userizedFolder.getModifiedBy()));
+        }
         /*
          * apply further extended properties & capabilities
          */

@@ -213,7 +213,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             }
 
             final FolderEqualsWrapper targetWrapper = movedFolders.get(targetId);
-            if (targetId == null || targetWrapper == null) {
+            if (targetWrapper == null) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();
             }
             folderMapping.addMapping(fuid, originWrapper.getFolder(), targetId, targetWrapper.getFolder());

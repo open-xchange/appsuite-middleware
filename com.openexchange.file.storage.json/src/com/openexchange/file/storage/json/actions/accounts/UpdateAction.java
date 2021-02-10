@@ -53,11 +53,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountMetaDataUtil;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -87,10 +90,19 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
         }
 
         final FileStorageAccount account = parser.parse(data);
-        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension;
+        FileStorageService fileStorageService = account.getFileStorageService();
+        if(fileStorageService instanceof SharingFileStorageService) {
+            //Clear last recent error in order to try the new configuration
+            ((SharingFileStorageService)fileStorageService).resetRecentError(account.getId(), session);
+        }
+        final boolean doConnectionCheck = account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension && account.getConfiguration() != null;
 
         //load existing account for resetting if the connection check failed
-        FileStorageAccount existingAccount = doConnectionCheck ? account.getFileStorageService().getAccountManager().getAccount(account.getId(), session) : null;
+        FileStorageAccount existingAccount = account.getFileStorageService().getAccountManager().getAccount(account.getId(), session);
+        if(existingAccount != null) {
+            //Preserve account meta data when updating
+            FileStorageAccountMetaDataUtil.copy(existingAccount, account);
+        }
 
         //perform update
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
@@ -101,7 +113,9 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
                 ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
             } catch (OXException e) {
                 //reset
-                account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                if(existingAccount != null) {
+                    account.getFileStorageService().getAccountManager().updateAccount(existingAccount, session);
+                }
                 throw e;
             }
         }

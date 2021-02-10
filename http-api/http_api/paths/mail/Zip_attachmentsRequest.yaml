@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets multiple mail attachments as a ZIP file.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -35,3 +38,7 @@
             schema:
               type: string
               format: binary
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

@@ -224,7 +224,7 @@ public final class MimeStructureFixer {
      * @return The MIME message with fixed multipart structure
      * @throws OXException If fix attempt fails
      */
-    public MimeMessage process(final MimeMessage mimeMessage) throws OXException {
+    public MimeMessage process(MimeMessage mimeMessage) throws OXException {
         if (null == mimeMessage) {
             return mimeMessage;
         }
@@ -281,7 +281,7 @@ public final class MimeStructureFixer {
         }
     }
 
-    private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
+    private MimeMessage process0(MimeMessage mimeMessage, ContentType contentType) throws OXException {
         try {
             // Remember original Message-ID
             String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
@@ -434,7 +434,7 @@ public final class MimeStructureFixer {
                     newSubMultipart.addBodyPart(contentBodyPart);
 
                     // Add body parts
-                    for (final BodyPart nextBodyPart : bodyParts) {
+                    for (BodyPart nextBodyPart : bodyParts) {
                         newSubMultipart.addBodyPart(nextBodyPart);
                     }
 
@@ -452,7 +452,7 @@ public final class MimeStructureFixer {
                     contentBodyPart.setHeader(CONTENT_TRANSFER_ENC, "quoted-printable");
 
                     // Add body parts
-                    for (final BodyPart nextBodyPart : bodyParts) {
+                    for (BodyPart nextBodyPart : bodyParts) {
                         multipart.addBodyPart(nextBodyPart);
                     }
                 }
@@ -541,7 +541,7 @@ public final class MimeStructureFixer {
         return sb.toString();
     }
 
-    private ContentType getContentType(final Part part) throws OXException {
+    private ContentType getContentType(Part part) throws OXException {
         try {
             final String[] tmp = part.getHeader(CONTENT_TYPE);
             return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
@@ -550,7 +550,7 @@ public final class MimeStructureFixer {
         }
     }
 
-    private String getContentId(final String sContentId) {
+    private String getContentId(String sContentId) {
         if (null == sContentId) {
             return null;
         }
@@ -568,7 +568,7 @@ public final class MimeStructureFixer {
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
      * @throws OXException If part's headers cannot be accessed or parsed
      */
-    private static boolean isInline(final Part part, final ContentType contentType) throws OXException {
+    private static boolean isInline(Part part, ContentType contentType) throws OXException {
         try {
             final ContentDisposition cd;
             final boolean hasDisposition;
@@ -588,7 +588,7 @@ public final class MimeStructureFixer {
         }
     }
 
-    private static boolean isEmpty(final String string) {
+    private static boolean isEmpty(String string) {
         if (null == string) {
             return true;
         }

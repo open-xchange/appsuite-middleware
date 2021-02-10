@@ -50,12 +50,13 @@
 package com.openexchange.ms.internal.portable;
 
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.ITopic;
 import com.hazelcast.nio.serialization.HazelcastSerializationException;
 import com.hazelcast.nio.serialization.Portable;
+import com.hazelcast.topic.ITopic;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.internal.AbstractHzTopic;
 
@@ -82,7 +83,7 @@ public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P
     }
 
     @Override
-    protected String registerListener(MessageListener<P> listener, String senderID) {
+    protected UUID registerListener(MessageListener<P> listener, String senderID) {
         try {
             return hzTopic.addMessageListener(new PortableHzMessageListener<P>(listener, senderID));
         } catch (HazelcastInstanceNotActiveException e) {
@@ -91,7 +92,7 @@ public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P
     }
 
     @Override
-    protected boolean unregisterListener(String registrationID) {
+    protected boolean unregisterListener(UUID registrationID) {
         try {
             return hzTopic.removeMessageListener(registrationID);
         } catch (HazelcastInstanceNotActiveException e) {

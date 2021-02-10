@@ -65,6 +65,7 @@ import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.context.matching.ContextSetTerm;
 import com.openexchange.config.cascade.context.matching.ContextSetTermParser;
@@ -74,6 +75,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
+import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.data.ResellerTaxonomy;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -89,7 +92,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
 
-    private static final String SCOPE = "contextSets";
+    private static final String SCOPE = ConfigViewScope.CONTEXT_SETS.getScopeName();
 
     private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
 
@@ -107,8 +110,8 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     public ContextSetConfigProvider(ServiceLookup services) {
         super(services);
         userConfigAnalyzer = new UserConfigurationAnalyzer();
-        contextSetConfigs = new ConcurrentLinkedQueue<ContextSetConfig>();
-        additionalPredicates = new ConcurrentLinkedQueue<AdditionalPredicates>();
+        contextSetConfigs = new ConcurrentLinkedQueue<>();
+        additionalPredicates = new ConcurrentLinkedQueue<>();
         init();
     }
 
@@ -129,7 +132,15 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     protected Set<String> getSpecification(Context context, UserPermissionBits perms) throws OXException {
         // Gather available tags
-        final Set<String> tags = new HashSet<String>(64);
+        final Set<String> tags = new HashSet<>(64);
+
+        // Tags from the reseller stack
+        ResellerService resellerService = services.getOptionalService(ResellerService.class);
+        if (resellerService != null) {
+            for (ResellerTaxonomy resellerTaxonomy : resellerService.getTaxonomiesByContext(context.getContextId())) {
+                tags.add(resellerTaxonomy.getTaxonomy());
+            }
+        }
 
         // Special tag that applies to the context
         tags.add(context.getName());
@@ -244,7 +255,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     protected List<Map<String, Object>> getConfigData(Set<String> tags) {
-        List<Map<String, Object>> retval = new LinkedList<Map<String, Object>>();
+        List<Map<String, Object>> retval = new LinkedList<>();
         for (ContextSetConfig c : contextSetConfigs) {
             if (c.matches(tags)) {
                 retval.add(c.getConfiguration());
@@ -253,6 +264,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         return retval;
     }
 
+    @SuppressWarnings("cast")
     protected void prepare(Map<String, Object> yamlFiles) {
         ContextSetTermParser parser = new ContextSetTermParser();
         for (Map.Entry<String, Object> file : yamlFiles.entrySet()) {
@@ -305,7 +317,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     public String getScope() {
-        return "contextSets";
+        return ConfigViewScope.CONTEXT_SETS.getScopeName();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

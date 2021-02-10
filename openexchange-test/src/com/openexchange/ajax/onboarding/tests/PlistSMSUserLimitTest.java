@@ -83,7 +83,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         String jsonString = "{\"sms\":\"+49276183850\"}";
 
         for (int x = 0; x < 3; x++) {
-            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+            CommonResponse response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
 
             if (x < 2) {
@@ -103,7 +103,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         String jsonString = "{\"sms\":\"+49276183850\"}";
 
         for (int x = 0; x < 10; x++) {
-            CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+            CommonResponse response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
 
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
 
@@ -120,7 +120,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         Thread.sleep(122000);
 
         // Execute another sms request which shouldn't run into the user sms limit
-        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+        CommonResponse response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getError());
         // Expecting an sipgate authorization exception
         checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);

@@ -68,7 +68,7 @@ import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
@@ -251,7 +251,7 @@ public class DatabaseFolder extends AbstractFolder {
             case FolderObject.CALENDAR:
                 return CalendarContentType.getInstance();
             case FolderObject.CONTACT:
-                return ContactContentType.getInstance();
+                return ContactsContentType.getInstance();
             case FolderObject.TASK:
                 return TaskContentType.getInstance();
             case FolderObject.INFOSTORE:
@@ -441,9 +441,25 @@ public class DatabaseFolder extends AbstractFolder {
         return true;
     }
 
-
     @Override
     public void setSubscribed(boolean subscribed) {
         // ignore
     }
+
+    @Override
+    public boolean hasSubscribedSubfolders() {
+        /*
+         * only pass parent subscribed subfolders flag if subscribed to mimic recursive character of subscribed flag in database folders
+         */
+        return isSubscribed() && super.hasSubscribedSubfolders();
+    }
+
+    @Override
+    public String[] getSubfolderIDs() {
+        /*
+         * indicate empty subfolders array to mimic recursive character of subscribed flag in database folders
+         */
+        return isSubscribed() ? super.getSubfolderIDs() : new String[0];
+    }
+
 }

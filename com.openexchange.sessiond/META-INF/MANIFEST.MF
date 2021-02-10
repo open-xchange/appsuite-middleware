@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
+ com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
@@ -18,7 +19,6 @@ Import-Package: com.google.common.annotations,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
  com.hazelcast.transaction,
- com.hazelcast.util,
  com.openexchange.authentication,
  com.openexchange.config,
  com.openexchange.context,
@@ -60,7 +60,7 @@ Import-Package: com.google.common.annotations,
  io.micrometer.core.instrument,
  io.micrometer.core.instrument.composite,
  javax.management,
- javax.servlet.http;version="4.0.0",
+ javax.servlet.http,
  javax.ws.rs,
  javax.ws.rs.core,
  org.apache.commons.lang,
@@ -71,3 +71,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.sessiond.osgi.SessiondActivator
+Automatic-Module-Name: com.openexchange.sessiond

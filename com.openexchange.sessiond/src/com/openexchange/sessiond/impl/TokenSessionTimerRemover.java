@@ -50,6 +50,8 @@
 package com.openexchange.sessiond.impl;
 
 import org.slf4j.Logger;
+import com.openexchange.sessiond.impl.container.TokenSessionContainer;
+import com.openexchange.sessiond.impl.container.TokenSessionControl;
 
 /**
  * {@link TokenSessionTimerRemover}

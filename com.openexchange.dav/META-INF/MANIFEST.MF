@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common *DAV logic
 Bundle-SymbolicName: com.openexchange.dav
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -103,3 +103,4 @@ Export-Package: com.openexchange.dav,
  com.openexchange.dav.reports,
  com.openexchange.dav.resources
 Bundle-Activator: com.openexchange.dav.osgi.DAVActivator
+Automatic-Module-Name: com.openexchange.dav

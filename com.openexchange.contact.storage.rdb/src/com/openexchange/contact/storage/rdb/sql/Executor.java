@@ -816,6 +816,21 @@ public class Executor {
         }
     }
 
+    public int replace(Connection connection, Table table, Contact contact, ContactField[] fields) throws SQLException, OXException {
+        String sql = new StringBuilder()
+            .append("REPLACE INTO ").append(table).append(" (").append(Mappers.CONTACT.getColumns(fields))
+            .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");")
+        .toString();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(sql);
+            Mappers.CONTACT.setParameters(stmt, contact, fields);
+            return logExecuteUpdate(stmt);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
     public int insert(final Connection connection, final Table table, final DistListMember member, final DistListMemberField[] fields)
     		throws SQLException, OXException {
         member.setUuid(UUID.randomUUID());

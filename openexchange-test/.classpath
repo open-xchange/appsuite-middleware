@@ -10,7 +10,6 @@
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
-	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar" sourcepath="lib/source/jchronic-0.2.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.12.jar" sourcepath="lib/source/junit-4.12-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/junitperf-1.9.1.jar"/>
@@ -152,8 +151,6 @@
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
-	<classpathentry kind="lib" path="lib/http_api_client-1.0-SNAPSHOT.jar" sourcepath="lib/source/http_api_client-1.0-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="lib/rest_api_client-1.0-SNAPSHOT.jar" sourcepath="lib/source/rest_api_client-1.0-SNAPSHOT-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.guava"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.userfeedback.rest"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.rest.services"/>
@@ -203,10 +200,12 @@
 	<classpathentry kind="lib" path="lib/jersey-test-framework-core-2.26.jar" sourcepath="lib/source/jersey-test-framework-core-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="lib/source/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.14.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.12.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.13.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.sipgate"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta.activation-api-1.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta.xml.bind-api-2.3.3.jar"/>
+	<classpathentry kind="lib" path="lib/http_api_client.jar" sourcepath="lib/source/http_api_client-sources.jar"/>
+	<classpathentry kind="lib" path="lib/rest_api_client.jar" sourcepath="lib/source/rest_api_client-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

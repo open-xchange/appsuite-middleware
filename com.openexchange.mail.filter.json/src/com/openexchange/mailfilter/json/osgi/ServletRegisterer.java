@@ -57,6 +57,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServlet;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * Dependently registers the share servlet.
@@ -154,7 +155,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer<Object,
     }
 
     private void unregisterServlet(String alias, HttpService httpService) {
-        httpService.unregister(alias);
+        HttpServices.unregister(alias, httpService);
         LOG.info("Mail filter servlet successfully unregistered");
     }
 

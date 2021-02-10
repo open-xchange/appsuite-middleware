@@ -67,7 +67,7 @@ public final class FullnameArgument {
      *
      * @param fullName The full name
      */
-    public FullnameArgument(final String fullName) {
+    public FullnameArgument(String fullName) {
         this(MailAccount.DEFAULT_ID, fullName);
     }
 
@@ -77,7 +77,7 @@ public final class FullnameArgument {
      * @param accountId The account ID
      * @param fullName The full name
      */
-    public FullnameArgument(final int accountId, final String fullName) {
+    public FullnameArgument(int accountId, String fullName) {
         super();
         this.accountId = accountId;
         this.fullName = fullName;
@@ -134,7 +134,7 @@ public final class FullnameArgument {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

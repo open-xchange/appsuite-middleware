@@ -965,6 +965,109 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.enabled
+      description: |
+        Enable/disable the mail compose implementation based on actual draft messages. If disabled, the database+filestore based implementation
+        is used. If enabled later on, the draft-based approach is used for all new composition spaces while existing spaces created with the old
+        implementation will continue to use this until being closed (sent, saved as draft or discarded).
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.inMemoryThreshold
+      description: |
+        A value in bytes that defines up to which size attachments and full messages are kept in memory before being spooled to disk for processing.
+      defaultValue: "512000"
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+        - com.openexchange.mail.compose.mailstorage.spoolDir
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.spoolDir
+      description: |
+        Path to a local directory used for spooling attachments and full messages that exceed the in-memory threshold during processing. Falls back to `UPLOAD_DIRECTORY` if not defined.
+      defaultValue: "<empty>"
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.mail.compose.mailstorage.inMemoryThreshold
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.fileCacheEnabled
+      description: |
+        Enables local caching of full messages. The cache is used to reduce mail storage traffic (usually IMAP) that downloads full messages to alter them before
+        storing a modified draft version.
+        
+        The cache gets cleared during server start and is periodically cleaned up based on a max. idle time per file.
+      defaultValue: false
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.mail.compose.mailstorage.fileCacheDir
+        - com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.fileCacheDir
+      description: |
+        Path to a local directory used for caching of full messages. Falls back to `com.openexchange.mail.compose.mailstorage.spoolDir` if not defined.
+      defaultValue: "<empty>"
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.mail.compose.mailstorage.fileCacheEnabled
+        - com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.fileCacheMaxIdleSeconds
+      description: |
+        The max. time full messages might stay in local file cache without being read. A peridic task deletes files that have not been accessed for at least this long.
+      defaultValue: 300
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.inMemoryCacheMaxIdleSeconds
+      description: |
+        The max. time metadata records about open composition spaces might stay in an in-memory cache without being accessed. Attempts to operate on open composition
+        spaces that have no local cache record will result in mail storage lookups, usually IMAP header searches.
+      defaultValue: 3600
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.mailstorage.eagerUploadChecksEnabled
+      description: |
+        Gets whether eager upload checks for max. mail size and quota are enabled. With enabled checks, incoming requests that
+        violate these (for example by exceeding it with an attachment upload) are rejected with an according error
+        response before the request content was fully consumed and thus allowing to fail early and not forcing the client to upload
+        large contents that would lead to limit restriction errors anyway.
+      defaultValue: false
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: false
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
     - key: com.openexchange.mail.compose.rdbstorage.content.fileCacheDir
       description: |
         Path to a directory used for caching of big message content exceeding database's max. package size. If not specified the directory

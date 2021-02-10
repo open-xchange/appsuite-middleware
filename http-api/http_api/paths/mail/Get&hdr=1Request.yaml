@@ -4,6 +4,10 @@
     tags:
       - Mail
     summary: Gets the message headers as plain text.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     description: >
       #### Note
 
@@ -17,7 +21,6 @@
 
       The parameters below specify the ones that have an effect on the request.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -54,3 +57,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailHeadersResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

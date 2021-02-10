@@ -153,7 +153,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     }
 
     @Override
-    protected String getCommand(final int argsIndex) {
+    protected String getCommand(int argsIndex) {
         final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
@@ -175,7 +175,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     }
 
     @Override
-    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
@@ -234,7 +234,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
      * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
      *         <code>long</code>.
      */
-    protected static long parseLong(final String s) {
+    protected static long parseLong(String s) {
         return StorageUtility.parseUnsignedLong(s);
     }
 

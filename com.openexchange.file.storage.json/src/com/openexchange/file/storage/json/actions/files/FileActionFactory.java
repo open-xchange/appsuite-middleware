@@ -97,6 +97,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("advancedSearch", new AdvancedSearchAction());
         actions.put("shares", new SharesAction());
         actions.put("notify", new NotifyAction());
+        actions.put("backwardLink", new BackwardLinkAction());
 
         actions.put("saveAs", new SaveAsAction());
 
@@ -111,6 +112,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("checkname", new CheckNameAction());
 
         actions.put("restore", new RestoreAction());
+
         this.actions = actions.build();
     }
 

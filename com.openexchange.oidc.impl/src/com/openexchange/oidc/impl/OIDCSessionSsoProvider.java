@@ -93,17 +93,13 @@ public class OIDCSessionSsoProvider implements SessionSsoProvider {
             return false;
         }
 
-        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, loginConfiguration);
-        if (autologinCookie == null) {
+        Cookie sessionCookie = OIDCTools.loadSessionCookie(request, loginConfiguration);
+        if (sessionCookie == null) {
             return false;
         }
 
-        Session session = OIDCTools.getSessionFromAutologinCookie(autologinCookie, request);
-        if (session == null) {
-            return false;
-        }
-
-        return true;
+        Session session = OIDCTools.getSessionFromSessionCookie(sessionCookie, request);
+        return isSsoSession(session);
     }
 
 }

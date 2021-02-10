@@ -52,7 +52,7 @@ package com.openexchange.imap.debug;
 import java.io.PrintStream;
 
 /**
- * {@link DevNullPrintStream} - A print stream writing passed bytes to an instance of <code>org.slf4j.Logger</code>.
+ * {@link DevNullPrintStream} - A print stream simply swallowing bytes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4

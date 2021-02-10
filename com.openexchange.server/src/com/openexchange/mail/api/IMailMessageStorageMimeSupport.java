@@ -49,8 +49,15 @@
 
 package com.openexchange.mail.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link IMailMessageStorageMimeSupport} - Extends basic message storage by MIME support.
@@ -86,6 +93,50 @@ public interface IMailMessageStorageMimeSupport extends IMailMessageStorage {
      * @return The denoted MIME message
      * @throws OXException If MIME message cannot be returned
      */
-    Message getMimeMessage(String fullName, final String id, boolean markSeen) throws OXException;
+    Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException;
+
+    /**
+     * Output the denoted message as an RFC 822 format stream.
+     *
+     * @param fullName The folder full name
+     * @param id The message identifier
+     * @param os The stream to write to
+     * @throws OXException If an error occurs writing to the stream
+     */
+    default void writeMimeMessage(String fullName, String id, OutputStream os) throws OXException {
+        Message mimeMessage = getMimeMessage(fullName, id, false);
+        if (mimeMessage == null) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+        }
+
+        try {
+            mimeMessage.writeTo(os);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Gets the MIME format stream corresponding to denoted message.
+     *
+     * @param fullName The folder full name
+     * @param id The message identifier
+     * @return The MIME format stream
+     * @exception OXException for failures
+     */
+    default InputStream getMimeStream(String fullName, String id) throws OXException {
+        Message mimeMessage = getMimeMessage(fullName, id, false);
+        if (mimeMessage == null) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+        }
+
+        try {
+            return MimeMessageUtility.getStreamFromPart(mimeMessage);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
 }

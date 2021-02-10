@@ -4,8 +4,8 @@
     tags:
       - Chronos
     summary: Retrieves a list of all supported languages by SchedJoules
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

@@ -483,7 +483,10 @@ For the GUI preferences please also see http://www.open-xchange.com/wiki/index.p
 : 	[DEPRECATED] Access to Olox2.0
 
 **--default-folder-mode**
-: 	The mode how the default folders should be created. 'default', 'default-deletable', 'no-default-folders'. If not selected, 'default' is applied. 
+: 	The mode how the default folders should be created. 'default', 'default-deletable', 'no-default-folders'. If not selected, 'default' is applied.
+
+**--convert-drive-user-folders**
+: 	Convert drive user folders into normal folders.
 
 # Importing CSV Files
 With the `--csv-import <CSV file>` option a full path to a CSV file with user data to import can be specified. This option makes mandatory command line options obsolete, except credential options (if needed). But they have to be set in the CSV file.

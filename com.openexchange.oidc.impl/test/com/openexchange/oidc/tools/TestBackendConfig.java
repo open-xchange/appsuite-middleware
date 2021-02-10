@@ -49,6 +49,9 @@
 
 package com.openexchange.oidc.tools;
 
+import static com.openexchange.java.Autoboxing.b;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,7 +155,7 @@ public class TestBackendConfig implements OIDCBackendConfig {
 
     @Override
     public boolean isSSOLogout() {
-        return getOrDefault(OIDCBackendProperty.ssoLogout);
+        return b(Boolean.class.cast(getOrDefault(OIDCBackendProperty.ssoLogout)));
     }
 
     @Override
@@ -172,7 +175,7 @@ public class TestBackendConfig implements OIDCBackendConfig {
 
     @Override
     public int getOauthRefreshTime() {
-        return getOrDefault(OIDCBackendProperty.oauthRefreshTime);
+        return i(getOrDefault(OIDCBackendProperty.oauthRefreshTime));
     }
 
     @Override
@@ -222,12 +225,12 @@ public class TestBackendConfig implements OIDCBackendConfig {
 
     @Override
     public long getTokenLockTimeoutSeconds() {
-        return getOrDefault(OIDCBackendProperty.tokenLockTimeoutSeconds);
+        return l(getOrDefault(OIDCBackendProperty.tokenLockTimeoutSeconds));
     }
 
     @Override
     public boolean tryRecoverStoredTokens() {
-        return getOrDefault(OIDCBackendProperty.tryRecoverStoredTokens);
+        return b(Boolean.class.cast(getOrDefault(OIDCBackendProperty.tryRecoverStoredTokens)));
     }
 
     public void setProperty(OIDCBackendProperty property, Object value) {

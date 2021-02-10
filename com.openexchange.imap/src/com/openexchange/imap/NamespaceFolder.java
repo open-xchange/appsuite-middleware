@@ -73,7 +73,7 @@ public class NamespaceFolder extends IMAPFolder {
      * @param name The folder's name
      * @param separator The folder's separator
      */
-    public NamespaceFolder(final IMAPStore store, final String name, final char separator) {
+    public NamespaceFolder(IMAPStore store, String name, char separator) {
         super(name, separator, store, Boolean.TRUE);
         exists = true; // of course
         type = HOLDS_FOLDERS; // obviously
@@ -93,13 +93,13 @@ public class NamespaceFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder[] list(final String pattern) throws MessagingException {
+    public Folder[] list(String pattern) throws MessagingException {
         String fullName = this.fullName;
         char separator = getSeparator();
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 return p.list("", new StringBuilder().append(fullName).append(separator).append(pattern).toString());
             }
         });
@@ -114,13 +114,13 @@ public class NamespaceFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder[] listSubscribed(final String pattern) throws MessagingException {
+    public Folder[] listSubscribed(String pattern) throws MessagingException {
         String fullName = this.fullName;
         char separator = getSeparator();
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+            public Object doCommand(IMAPProtocol p) throws ProtocolException {
                 return p.lsub("", new StringBuilder().append(fullName).append(separator).append(pattern).toString());
             }
         });
@@ -134,7 +134,7 @@ public class NamespaceFolder extends IMAPFolder {
         return folders;
     }
 
-    private static final String getFullname(final ListInfo listInfo) {
+    private static final String getFullname(ListInfo listInfo) {
         String fullName = listInfo.name;
         final char separator = listInfo.separator;
         final int len = fullName.length();
@@ -151,7 +151,7 @@ public class NamespaceFolder extends IMAPFolder {
     }
 
     @Override
-    public Folder getFolder(final String name) throws MessagingException {
+    public Folder getFolder(String name) throws MessagingException {
         final Folder[] folders = list(new StringBuilder(name).append('%').toString());
         for (int i = 0; i < folders.length; i++) {
             if (folders[i].getName().equals(name)) {
@@ -162,19 +162,19 @@ public class NamespaceFolder extends IMAPFolder {
     }
 
     @Override
-    public boolean delete(final boolean recurse) throws MessagingException {
+    public boolean delete(boolean recurse) throws MessagingException {
         // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot delete Namespace Folder");
     }
 
     @Override
-    public boolean renameTo(final Folder f) throws MessagingException {
+    public boolean renameTo(Folder f) throws MessagingException {
         // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot rename Namespace Folder");
     }
 
     @Override
-    public void appendMessages(final Message[] msgs) throws MessagingException {
+    public void appendMessages(Message[] msgs) throws MessagingException {
         // Not applicable on NamespaceFolder
         throw new MethodNotSupportedException("Cannot append to Namespace Folder");
     }

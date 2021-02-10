@@ -202,7 +202,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @return The appropriate {@link MailFolderInfo} instance
      */
-    public MailFolderInfo asMailFolderInfo(final int accountId) {
+    public MailFolderInfo asMailFolderInfo(int accountId) {
         final MailFolderInfo mfi = new MailFolderInfo();
         mfi.setAccountId(accountId);
         mfi.setDefaultFolder(defaultFolder);
@@ -248,7 +248,7 @@ public class MailFolder implements Serializable, Cloneable {
      * @param name The name
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
-    public boolean containsProperty(final String name) {
+    public boolean containsProperty(String name) {
         return properties.containsKey(name);
     }
 
@@ -258,7 +258,7 @@ public class MailFolder implements Serializable, Cloneable {
      * @param name The name
      * @return The value or <code>null</code>
      */
-    public Object getProperty(final String name) {
+    public Object getProperty(String name) {
         return properties.get(name);
     }
 
@@ -270,7 +270,7 @@ public class MailFolder implements Serializable, Cloneable {
      * @param name The name
      * @param value The value
      */
-    public void setProperty(final String name, final Object value) {
+    public void setProperty(String name, Object value) {
         if (null == value) {
             properties.remove(name);
         } else {
@@ -303,7 +303,7 @@ public class MailFolder implements Serializable, Cloneable {
                 final List<MailPermission> thisPerms = permissions;
                 if (thisPerms != null) {
                     final List<MailPermission> l = new ArrayList<MailPermission>(thisPerms.size());
-                    for (final MailPermission mailPermission : thisPerms) {
+                    for (MailPermission mailPermission : thisPerms) {
                         l.add((MailPermission) mailPermission.clone());
                     }
                     clone.permissions = l;
@@ -348,7 +348,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param fullname the full name to set
      */
-    public void setFullname(final String fullname) {
+    public void setFullname(String fullname) {
         this.fullname = fullname;
         b_fullname = true;
     }
@@ -384,7 +384,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param hasSubfolders the has-subfolders flag to set
      */
-    public void setSubfolders(final boolean hasSubfolders) {
+    public void setSubfolders(boolean hasSubfolders) {
         this.hasSubfolders = hasSubfolders;
         b_hasSubfolders = true;
     }
@@ -420,7 +420,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
-    public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
+    public void setSubscribedSubfolders(boolean hasSubscribedSubfolders) {
         this.hasSubscribedSubfolders = hasSubscribedSubfolders;
         b_hasSubscribedSubfolders = true;
     }
@@ -519,7 +519,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param name the name to set
      */
-    public void setDefaultFolderType(final DefaultFolderType defaulFolderType) {
+    public void setDefaultFolderType(DefaultFolderType defaulFolderType) {
         this.defaulFolderType = defaulFolderType;
         b_defaulFolderType = true;
     }
@@ -557,7 +557,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param name the name to set
      */
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
         b_name = true;
     }
@@ -597,7 +597,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param subscribed the subscription status to set
      */
-    public void setSubscribed(final boolean subscribed) {
+    public void setSubscribed(boolean subscribed) {
         this.subscribed = subscribed;
         b_subscribed = true;
     }
@@ -634,7 +634,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param deletedMessageCount The number of messages marked for deletion or <code>-1</code> if this mail folder does not hold messages
      */
-    public void setDeletedMessageCount(final int deletedMessageCount) {
+    public void setDeletedMessageCount(int deletedMessageCount) {
         this.deletedMessageCount = deletedMessageCount;
         b_deletedMessageCount = true;
     }
@@ -670,7 +670,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
-    public void setExists(final boolean exists) {
+    public void setExists(boolean exists) {
         this.exists = exists;
         b_exists = true;
     }
@@ -707,7 +707,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param messageCount The number of messages or <code>-1</code> if this mail folder does not hold messages
      */
-    public void setMessageCount(final int messageCount) {
+    public void setMessageCount(int messageCount) {
         this.messageCount = messageCount;
         b_messageCount = true;
     }
@@ -744,7 +744,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param newMessageCount The number of new messages or <code>-1</code> if this mail folder does not hold messages
      */
-    public void setNewMessageCount(final int newMessageCount) {
+    public void setNewMessageCount(int newMessageCount) {
         this.newMessageCount = newMessageCount;
         b_newMessageCount = true;
     }
@@ -781,7 +781,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param unreadMessageCount The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      */
-    public void setUnreadMessageCount(final int unreadMessageCount) {
+    public void setUnreadMessageCount(int unreadMessageCount) {
         this.unreadMessageCount = unreadMessageCount;
         b_unreadMessageCount = true;
     }
@@ -820,7 +820,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param separator the separator to set
      */
-    public void setSeparator(final char separator) {
+    public void setSeparator(char separator) {
         this.separator = separator;
         b_separator = true;
     }
@@ -858,7 +858,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param parentFullname the parent fullname to set
      */
-    public void setParentFullname(final String parentFullname) {
+    public void setParentFullname(String parentFullname) {
         this.parentFullname = parentFullname;
         b_parentFullname = true;
     }
@@ -894,7 +894,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
-    public void setHoldsMessages(final boolean holdsMessages) {
+    public void setHoldsMessages(boolean holdsMessages) {
         this.holdsMessages = holdsMessages;
         b_holdsMessages = true;
     }
@@ -930,7 +930,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
-    public void setHoldsFolders(final boolean holdsFolders) {
+    public void setHoldsFolders(boolean holdsFolders) {
         this.holdsFolders = holdsFolders;
         b_holdsFolders = true;
     }
@@ -978,7 +978,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param ownPermission The own permission to set
      */
-    public void setOwnPermission(final MailPermission ownPermission) {
+    public void setOwnPermission(MailPermission ownPermission) {
         this.ownPermission = ownPermission;
         b_ownPermission = true;
     }
@@ -1014,7 +1014,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param rootFolder the root folder flag to set
      */
-    public void setRootFolder(final boolean rootFolder) {
+    public void setRootFolder(boolean rootFolder) {
         this.rootFolder = rootFolder;
         b_rootFolder = true;
     }
@@ -1050,7 +1050,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param defaultFolder the default folder flag to set
      */
-    public void setDefaultFolder(final boolean defaultFolder) {
+    public void setDefaultFolder(boolean defaultFolder) {
         this.defaultFolder = defaultFolder;
         b_defaultFolder = true;
     }
@@ -1060,7 +1060,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param permission The permission to add
      */
-    public void addPermission(final MailPermission permission) {
+    public void addPermission(MailPermission permission) {
         if (null == permission) {
             return;
         } else if (null == permissions) {
@@ -1075,7 +1075,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param permissions The array of permissions to add
      */
-    public void addPermissions(final MailPermission[] permissions) {
+    public void addPermissions(MailPermission[] permissions) {
         if ((null == permissions) || (permissions.length == 0)) {
             return;
         } else if (null == this.permissions) {
@@ -1090,7 +1090,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param permissions The collection of permissions to add
      */
-    public void addPermissions(final Collection<? extends MailPermission> permissions) {
+    public void addPermissions(Collection<? extends MailPermission> permissions) {
         if ((null == permissions) || (permissions.isEmpty())) {
             return;
         } else if (null == this.permissions) {
@@ -1166,7 +1166,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param supportsUserFlags the supports-user-flags flag to set
      */
-    public void setSupportsUserFlags(final boolean supportsUserFlags) {
+    public void setSupportsUserFlags(boolean supportsUserFlags) {
         this.supportsUserFlags = supportsUserFlags;
         b_supportsUserFlags = true;
     }
@@ -1202,7 +1202,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param shared The shared flag to set
      */
-    public void setShared(final boolean shared) {
+    public void setShared(boolean shared) {
         this.shared = shared;
         b_shared = true;
     }
@@ -1238,7 +1238,7 @@ public class MailFolder implements Serializable, Cloneable {
      *
      * @param isPublic The public flag to set
      */
-    public void setPublic(final boolean isPublic) {
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
         b_public = true;
     }

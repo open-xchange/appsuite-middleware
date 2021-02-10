@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.java.GeoLocation;
@@ -112,6 +113,8 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     private Double cameraFocalLength = null;
     protected Map<String, Object> mediaMeta;
     protected MediaStatus mediaStatus = null;
+    protected EntityInfo createdFrom;
+    protected EntityInfo modifiedFrom;
 
     /**
      * Initializes a new {@link DefaultDocumentMetadata}.
@@ -590,6 +593,26 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
         this.mediaStatus = mediaStatus;
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
 
     @Override

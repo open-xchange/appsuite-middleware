@@ -92,11 +92,11 @@ public final class Bug10836Test extends AbstractSecondUserChronosTest {
         id.setFolder(folderId);
         id.setId(createEvent.getId());
         body.add(id);
-        EventsResponse response = userApi2.getChronosApi().getEventList(userApi2.getSession(), body, null, null);
+        EventsResponse response = userApi2.getChronosApi().getEventList(body, null, null);
         assertNotNull("Missing error.", response.getError());
 
         id.setFolder(defaultFolderId2);
-        response = userApi2.getChronosApi().getEventList(userApi2.getSession(), body, null, null);
+        response = userApi2.getChronosApi().getEventList(body, null, null);
         assertNotNull("Missing error.", response.getError());
     }
 }

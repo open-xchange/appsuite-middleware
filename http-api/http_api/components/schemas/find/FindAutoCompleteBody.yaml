@@ -9,6 +9,6 @@ properties:
       An array of already selected facets, meaning categories the user has
       filtered by before.
     items:
-      $ref: '#/components/schemas/FindFacetData'
+      $ref: '#/components/schemas/FindActiveFacet'
   options:
     $ref: '#/components/schemas/FindOptionsData'

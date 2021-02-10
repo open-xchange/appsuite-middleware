@@ -88,26 +88,32 @@ public enum MobileProvisioningJsonExceptionCodes implements DisplayableOXExcepti
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
+    @Override
     public String getPrefix() {
         return "MCJ";
     }
 
+    @Override
     public com.openexchange.exception.Category getCategory() {
         return category;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
     
+    @Override
     public String getDisplayMessage() {
         return displayMessage;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

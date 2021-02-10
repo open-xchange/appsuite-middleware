@@ -75,7 +75,7 @@ public class DownloadTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadCalDAVProfile() throws Exception {
         ClientonboardingApi api = getApi();
-        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "caldav");
+        byte[] response = api.downloadClientOnboardingProfile("caldav");
         assertNotNull(response);
         String profile = new String(response, "UTF-8");
         assertTrue(profile.contains("PayloadIdentifier"));
@@ -89,7 +89,7 @@ public class DownloadTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadCardDAVProfile() throws Exception {
         ClientonboardingApi api = getApi();
-        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "carddav");
+        byte[] response = api.downloadClientOnboardingProfile("carddav");
         assertNotNull(response);
         String profile = new String(response, "UTF-8");
         assertTrue(profile.contains("PayloadIdentifier"));
@@ -103,7 +103,7 @@ public class DownloadTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadDAVProfile() throws Exception {
         ClientonboardingApi api = getApi();
-        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "dav");
+        byte[] response = api.downloadClientOnboardingProfile("dav");
         assertNotNull(response);
         String profile = new String(response, "UTF-8");
         assertTrue(profile.contains("PayloadIdentifier"));
@@ -118,7 +118,7 @@ public class DownloadTest extends AbstractOnboardingTest {
     @Test
     public void testInvalidProfileName() throws Exception {
         ClientonboardingApi api = getApi();
-        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "invalid");
+        byte[] response = api.downloadClientOnboardingProfile("invalid");
         assertNotNull(response);
         String resp = new String(response, "UTF-8");
         assertTrue(resp.contains("error"));

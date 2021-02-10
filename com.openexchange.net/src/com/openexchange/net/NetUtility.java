@@ -74,9 +74,9 @@ public class NetUtility {
     private static final class InetAddressCache {
 
         private final Object lock;
-        private final LinkedHashMap cache;
+        private final LinkedHashMap<?, ?> cache;
 
-        InetAddressCache(LinkedHashMap cache, Object lock) {
+        InetAddressCache(LinkedHashMap<?, ?> cache, Object lock) {
             super();
             this.cache = cache;
             this.lock = lock;
@@ -95,6 +95,7 @@ public class NetUtility {
         }
     }
 
+    @SuppressWarnings("unused")
     private static final class InetAddressCaches {
 
         private final InetAddressCache addressCache;
@@ -140,8 +141,8 @@ public class NetUtility {
                         Class<?> cacheClazz = Class.forName("java.net.InetAddress$Cache");
                         Field cacheField = cacheClazz.getDeclaredField("cache");
                         cacheField.setAccessible(true);
-                        LinkedHashMap posCache = (LinkedHashMap) cacheField.get(addressCache);
-                        LinkedHashMap negCache = (LinkedHashMap) cacheField.get(negativeCache);
+                        LinkedHashMap<?, ?> posCache = LinkedHashMap.class.cast(cacheField.get(addressCache));
+                        LinkedHashMap<?, ?> negCache = LinkedHashMap.class.cast(cacheField.get(negativeCache));
 
                         // Both - addressCache and negativeCache -  are guarded by addressCache mutex
                         InetAddressCache positiveInetAddressCache = new InetAddressCache(posCache, addressCache);

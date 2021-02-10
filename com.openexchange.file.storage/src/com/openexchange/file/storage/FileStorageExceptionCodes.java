@@ -352,9 +352,9 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     FILE_ALREADY_EXISTS("A file with that name already exists.", Category.CATEGORY_USER_INPUT, 69, FileStorageExceptionMessages.FILE_ALREADY_EXISTS),
 
     /**
-     * The file(s) were not moved due to possible data loss. Please review the warnings for details.
+     * The file(s) \"%1$s\" were not moved due to possible data loss. Please review the warnings for details.
      */
-    FILE_MOVE_ABORTED("The file(s) were not moved due to possible data loss. Please review the warnings for details.", Category.CATEGORY_CONFLICT, 70, FileStorageExceptionMessages.FILE_MOVE_ABORTED_MSG),
+    FILE_MOVE_ABORTED("The file(s) \"%1$s\" were not moved due to possible data loss. Please review the warnings for details.", Category.CATEGORY_CONFLICT, 70, FileStorageExceptionMessages.FILE_MOVE_ABORTED_MSG),
 
     /**
      * The specified MIME type is not allowed being set
@@ -370,6 +370,41 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid account name
      */
     ACCOUNT_NAME_TOO_LONG("Invalid account name.", Category.CATEGORY_ERROR, 73, FileStorageExceptionMessages.ACCOUNT_NAME_TO_LONG_MSG),
+
+    /**
+     * With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.
+     */
+    MOVE_TO_NOT_SHARED_WARNING("With moving the file \"%1$s\" out of shared folder \"%2$s\" to shared folder \"%3$s\" people will lose access.", CATEGORY_WARNING, 74, FileStorageExceptionMessages.MOVE_TO_NOT_SHARED_WARNING),
+
+    /**
+     * The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.
+     */
+    MOVE_TO_ANOTHER_SHARED_WARNING("The file \"%1$s\" will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%2$s\" will lose access.", CATEGORY_WARNING, 75, FileStorageExceptionMessages.MOVE_TO_ANOTHER_SHARED_WARNING),
+
+    /**
+     * The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".
+     */
+    MOVE_TO_SHARED_WARNING("The file \"%1$s\" will be shared with everyone who has access to \"%3$s\".", CATEGORY_WARNING, 76, FileStorageExceptionMessages.MOVE_TO_SHARED_WARNING),
+
+    /**
+     * With moving file \"%1$s\" its permissions will get lost.
+     */
+    MOVE_SHARED_FILE_WARNING("With moving file \"%1$s\" its permissions will get lost.", CATEGORY_WARNING, 77, FileStorageExceptionMessages.MOVE_SHARED_FILE),
+
+    /**
+     * The account could not be updated: 1$s
+     */
+    UNALLOWED_ACCOUNT_UPDATE("The account could not be updated: 1$s", Category.CATEGORY_ERROR, 78, FileStorageExceptionMessages.UNALLOWED_ACCOUNT_UPDATE_MSG),
+
+    /**
+     * Searching folder by folder name is not supported
+     */
+    NO_SEARCH_SUPPORT("Searching folder by folder name is not supported", Category.CATEGORY_ERROR, 79, FileStorageExceptionMessages.NO_SEARCH_SUPPORT_MSG),
+
+    /**
+     * Maximum number of %1$d accounts for provider %2$s is exceeded.
+     */
+    MAX_ACCOUNTS_EXCEEDED("Maximum number of %1$d accounts for provider %2$s is exceeded.", Category.CATEGORY_ERROR, 80, FileStorageExceptionMessages.MAX_ACCOUNTS_EXCEEDED_MSG),
 
     ;
 

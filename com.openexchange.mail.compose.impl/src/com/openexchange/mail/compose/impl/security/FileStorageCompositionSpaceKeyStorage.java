@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.impl.security;
 
 import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getFileStorageId;
+import static com.openexchange.mail.compose.impl.util.TimeLimitedFileStorageOperation.createBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -88,6 +90,8 @@ import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStor
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 
 
 /**
@@ -198,7 +202,18 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
             FileStorage fileStorage = fileStorageRef.fileStorage;
             InputStream file = null;
             try {
-                file = fileStorage.getFile(fileStorageLocation.identifier);
+                Task<InputStream> getFileTask = new AbstractTask<InputStream>() {
+
+                    @Override
+                    public InputStream call() throws Exception {
+                        return fileStorage.getFile(fileStorageLocation.identifier);
+                    }
+                };
+                file = createBuilder(getFileTask, fileStorage)
+                    .withOnTimeOutHandler(() -> CompositionSpaceErrorCode.FAILED_RETRIEVAL_KEY.create(UUIDs.getUnformattedString(compositionSpaceId)))
+                    .withWaitTimeoutSeconds(5)
+                    .buildAndSubmit()
+                    .getResult();
                 if (null != file) {
                     String obfuscatedBase64EncodedKey = Charsets.toAsciiString(Streams.stream2bytes(file));
                     Key key = base64EncodedString2Key(unobfuscate(obfuscatedBase64EncodedKey));
@@ -226,7 +241,24 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         Key newRandomKey = generateRandomKey();
         String newObfuscatedBase64EncodedKey = obfuscate(key2Base64EncodedString(newRandomKey));
         byte[] bytes = Charsets.toAsciiBytes(newObfuscatedBase64EncodedKey);
-        String newFileStorageLocation = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+        AtomicBoolean deleteLocation = new AtomicBoolean(false);
+        Task<String> saveNewKeyTask = new AbstractTask<String>() {
+
+            @Override
+            public String call() throws Exception {
+                String location = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+                if (deleteLocation.get()) {
+                    fileStorage.deleteFile(location);
+                    return null;
+                }
+                return location;
+            }
+        };
+        String newFileStorageLocation = createBuilder(saveNewKeyTask, fileStorage)
+            .withTaskFlag(deleteLocation)
+            .withWaitTimeoutSeconds(10)
+            .buildAndSubmit()
+            .getResult();
         try {
             insertFileStorageLocation(newFileStorageLocation, fileStorageRef.dedicatedFileStorageId, compositionSpaceId, session);
             newFileStorageLocation = null;
@@ -309,11 +341,17 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
     private boolean deleteFileStorageLocation(UUID compositionSpaceId, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
+        boolean deleted = false;
         Connection con = databaseService.getWritable(session.getContextId());
         try {
-            return deleteFileStorageLocation(compositionSpaceId, session, con);
+            deleted = deleteFileStorageLocation(compositionSpaceId, session, con);
+            return deleted;
         } finally {
-            databaseService.backWritable(session.getContextId(), con);
+            if (deleted) {
+                databaseService.backWritable(session.getContextId(), con);
+            } else {
+                databaseService.backWritableAfterReading(session.getContextId(), con);
+            }
         }
     }
 

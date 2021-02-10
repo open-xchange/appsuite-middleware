@@ -475,10 +475,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     sequenceNumber = Math.max(sequenceNumber, versionToDelete.getFile().getSequenceNumber());
                     checksumsToRemove.add(versionToDelete.getFileChecksum());
                 }
-                List<String> notRemovedIDs = session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber, true);
-                for (String notRemovedID : notRemovedIDs) {
-                    //TODO: keep those checksums?
-                }
+                session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber, true);
                 /*
                  * remove checksums accordingly
                  */

@@ -96,8 +96,8 @@ tags:
       in a single request.
   - name: Quota
     description: >-
-      The filestore module allows accessing information about the use and quota of
-      the filestore.
+      The quota module allows accessing information about the limit and current
+      usage of a certain storage type.
   - name: Import
     description: >-
       The module import allows to import specific module data (like Contacts,
@@ -127,7 +127,6 @@ tags:
       condition is true.
 
       The test condition consists of a test command and some arguments for this
-      command depending on the command itself. Because the available tests depend
       on the mail filter server, these tests must be determined at runtime. So
       that no test field is transferred to the server which it isn't able to
       handle. Examples for tests are `address`, `allof` and `anyof`.
@@ -232,6 +231,10 @@ tags:
       `/folders?action=shares` of module "folders" or `/infostore?action=shares`
 
       of module "infostore".
+  - name: Share/Redeem
+    description: >
+      The share/redeem module is used to redeem previously reserved tokens during 
+      the share login workflow.
   - name: Passwordchange
     description: Via the passwordchange module the users can change their password.
   - name: Filestorage
@@ -275,12 +278,44 @@ tags:
 paths: 
    source: ./paths/ 
 
-components: 
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: query
+      name: session
+      description: The default security scheme which uses a session ID previously obtained from the login module. Used in combination with a session cookie.
+    oauth: 
+      type: oauth2
+      description: The security scheme for oauth enabled modules of the middleware
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.server.example.com/auth/realms/myrealm/protocol/openid-connect/auth
+          tokenUrl: https://auth.server.example.com/auth/realms/myrealm/protocol/openid-connect/token          
+          scopes:
+            write_userconfig: allows the user to make changes to the configuration
+            read_mail: allows to read mails
+            write_mail: allows to store, delete and sent mails
+            read_contacts: allows to read contacts
+            write_contacts: allows to create, update and delete contacts
+            read_calendar: allows to read events in the calendar
+            write_calendar: allows to create, update and delete events in the calendar
+            read_mailaccount: allows to read the data of mail accounts
+            write_mailaccount: allows to create, update and delete mail accounts
+            read_tasks: allows to read tasks
+            write_tasks: allows to create, update and delete tasks
+            read_files: allows read access to file storage backends
+            write_files: allows to create, update and delete a file storage account
+            read_reminder: allows to read reminders
+            write_reminder: allows to update and delete reminders
+  responses:
+    $ref: ./components/responses/index.yaml
+    
   schemas: 
-   $ref: ./components/schemas/index.yaml 
+    $ref: ./components/schemas/index.yaml 
 
   parameters: 
-   $ref: ./components/parameters/index.yaml 
+    $ref: ./components/parameters/index.yaml 
 
   requestBodies: 
-   $ref: ./components/requestBodies/index.yaml
+    $ref: ./components/requestBodies/index.yaml

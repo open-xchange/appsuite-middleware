@@ -4,9 +4,21 @@
     tags:
       - Contacts
     summary: Gets a list of users.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: integer
+      description: A JSON array with user IDs.
+      required: true      
     responses:
       '200':
         description: >
@@ -24,12 +36,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              type: integer
-      description: A JSON array with user IDs.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

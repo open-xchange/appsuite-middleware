@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IAtomicLong;
+import com.hazelcast.cp.IAtomicLong;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -95,34 +95,22 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
 
     @Override
     public ScheduledTimerTask scheduleWithFixedDelay(final String id, final Runnable task, final long initialDelay, final long delay) {
-        return services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
-
-            @Override
-            public void run() {
-                runIfDue(id, task, delay, true);
-            }
-        }, getEffectiveInitialDelay(id, initialDelay, delay), delay);
+        return services.getService(TimerService.class).scheduleWithFixedDelay(() -> runIfDue(id, task, delay, true), getEffectiveInitialDelay(id, initialDelay, delay), delay);
     }
 
     @Override
     public ScheduledTimerTask scheduleAtFixedRate(final String id, final Runnable task, long initialDelay, final long period) {
-        return services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                runIfDue(id, task, period, false);
-            }
-        }, getEffectiveInitialDelay(id, initialDelay, period), period);
+        return services.getService(TimerService.class).scheduleAtFixedRate(() -> runIfDue(id, task, period, false), getEffectiveInitialDelay(id, initialDelay, period), period);
     }
 
     private long getEffectiveInitialDelay(String id, long initialDelay, long interval) {
         HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hazelcastInstance) {
-            LOG.warn("No {} available, unable to determine effective initial delay for task {} on this node.",
-                HazelcastInstance.class.getName(), id);
+            LOG.debug("No {} available yet, using {}ms as initial delay for task {} on this node.",
+                HazelcastInstance.class.getName(), Long.valueOf(initialDelay), id);
             return initialDelay;
         }
-        IAtomicLong clusterExecutionTime = hazelcastInstance.getAtomicLong(id);
+        IAtomicLong clusterExecutionTime = hazelcastInstance.getCPSubsystem().getAtomicLong(id);
         long lastExecuted = clusterExecutionTime.get();
         if (0 == lastExecuted) {
             // no last execution time known
@@ -145,7 +133,7 @@ public class ClusterTimerServiceImpl implements ClusterTimerService {
                 LOG.warn("No {} available, skipping execution of task {} on this node.", HazelcastInstance.class.getName(), id);
                 return;
             }
-            IAtomicLong clusterExecutionTime = hazelcastInstance.getAtomicLong(id);
+            IAtomicLong clusterExecutionTime = hazelcastInstance.getCPSubsystem().getAtomicLong(id);
             long lastExecuted = clusterExecutionTime.get();
             long now = hazelcastInstance.getCluster().getClusterTime();
             if (lastExecuted + interval > now) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Default storage for Application Authentication
 Bundle-SymbolicName: com.openexchange.authentication.application.storage.rdb
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.authentication.application.storage.rdb.osgi.ApplicationPasswordStorageActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

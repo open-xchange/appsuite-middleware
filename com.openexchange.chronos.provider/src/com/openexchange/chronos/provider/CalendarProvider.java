@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.provider;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -88,6 +90,20 @@ public interface CalendarProvider {
      * @see CalendarProviders#getMaxAccountsPropertyName(CalendarProvider)
      */
     int getDefaultMaxAccounts();
+
+    /**
+     * Gets a value indicating whether the calendar provider is enabled by <b>default</b> or not.
+     * <p/>
+     * <i>Note: The value may still be overridden by the corresponding configuration property.</i>
+     * <p/>
+     * Returns <code>true</code> by default, override if applicable.
+     *
+     * @return <code>true</code> if the provider is enabled by default, <code>false</code>, otherwise
+     * @see CalendarProviders#getEnabledPropertyName(CalendarProvider)
+     */
+    default boolean getDefaultEnabled() {
+        return true;
+    }
 
     /**
      * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
@@ -156,6 +172,19 @@ public interface CalendarProvider {
      */
     default boolean isAvailable(Session session) {
         return true;
+    }
+
+    /**
+     * Gets a collection of <i>secret</i> properties (as used as keys within the account's <i>user</i> configuration object). Each key
+     * indicated here will lead to the associated value being encrypted automatically when account data of the provider is stored, and
+     * decrypted automatically when account data of the provider is loaded again from the storage.
+     * <p/>
+     * Returns an ampty set by default, override as needed.
+     *
+     * @return The <i>secret</i> properties in account configurations of this calendar provider, or an empty set if there are none
+     */
+    default Set<String> getSecretProperties() {
+        return Collections.emptySet();
     }
 
 }

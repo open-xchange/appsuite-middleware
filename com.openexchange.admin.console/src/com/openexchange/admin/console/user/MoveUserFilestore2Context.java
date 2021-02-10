@@ -58,13 +58,12 @@ import com.openexchange.admin.rmi.dataobjects.User;
 public class MoveUserFilestore2Context extends UserAbstraction {
 
     public static void main(String args[]) {
-        new MoveUserFilestore2Context(args);
+        new MoveUserFilestore2Context().execute(args);
     }
 
     // -----------------------------------------------------------------------------------------------
 
-    public MoveUserFilestore2Context(String[] args) {
-
+    public void execute(String[] args) {
         final AdminParser parser = new AdminParser("moveuserfilestore2context");
         setOptions(parser);
 

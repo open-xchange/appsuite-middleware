@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -55,18 +56,16 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class EnableAll extends ContextAbstraction {
 
-    public EnableAll(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("enableallcontext");
-
+    public void execute(final String[] args) {
+        AdminParser parser = new AdminParser("enableallcontext");
         setDefaultCommandLineOptionsWithoutContextID(parser);
         try {
-            parser.ownparse(args2);
+            parser.ownparse(args);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            OXContextInterface oxres = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
 
             oxres.enableAll(auth);
 
@@ -79,13 +78,12 @@ public class EnableAll extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new EnableAll(args);
+        new EnableAll().execute(args);
     }
 
     @Override
     protected String getObjectName() {
         return "all contexts";
     }
-
 
 }

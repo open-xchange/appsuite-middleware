@@ -1,40 +1,3 @@
-package com.openexchange.spamhandler.spamexperts.servlets;
-
-import static com.openexchange.java.Autoboxing.I;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.google.common.io.BaseEncoding;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.ManagedHttpClient;
-import com.openexchange.session.Session;
-import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
-import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.User;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -84,6 +47,42 @@ import com.openexchange.user.User;
  *
  */
 
+package com.openexchange.spamhandler.spamexperts.servlets;
+
+import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.ManagedHttpClient;
+import com.openexchange.session.Session;
+import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * This request handler currently know these actions:
@@ -297,6 +296,7 @@ public final class SpamExpertsServletRequest {
      * @return The built URI string
      * @throws IllegalArgumentException If the given string violates RFC 2396
      */
+    @SuppressWarnings("deprecation")
     private URI buildUri(URI baseUri, List<NameValuePair> queryString, String optPath) {
         try {
             URIBuilder builder = new URIBuilder();

@@ -60,6 +60,13 @@ import com.openexchange.exception.OXException;
 public interface Processor {
 
     /**
+     * Gets this processor's name.
+     *
+     * @return The name
+     */
+    String getName();
+
+    /**
      * Schedules the specified task for being executed associated with given key (if any).
      *
      * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key

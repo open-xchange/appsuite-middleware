@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Notifies users or groups about a shared infoitem.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the shared infoitem to notify about.

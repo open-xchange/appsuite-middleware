@@ -87,6 +87,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
+import com.openexchange.logging.LogUtility;
 import com.openexchange.objectusecount.BatchIncrementArguments;
 import com.openexchange.objectusecount.BatchIncrementArguments.ObjectAndFolder;
 import com.openexchange.objectusecount.IncrementArguments;
@@ -388,13 +389,7 @@ public final class MemorizerWorker {
             return;
         }
 
-        LOG.debug("Contact collector run for addresses: {}", new Object() {
-
-            @Override
-            public String toString() {
-                return addresses.toString();
-            }
-        });
+        LOG.debug("Contact collector run for addresses: {}", LogUtility.toStringObjectFor(addresses));
 
         UserConfiguration userConfig;
         ContactService contactService;

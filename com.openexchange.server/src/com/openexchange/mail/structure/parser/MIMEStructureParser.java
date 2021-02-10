@@ -96,7 +96,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MIMEStructureParser {
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         try {
             {
                 final JSONObject jsonMail = new JSONObject("{\n" +
@@ -168,7 +168,7 @@ public final class MIMEStructureParser {
      * @return The RFC822 bytes
      * @throws OXException If parsing fails
      */
-    public static byte[] parseStructure2MIME(final JSONObject jsonStructure) throws OXException {
+    public static byte[] parseStructure2MIME(JSONObject jsonStructure) throws OXException {
         try {
             /*
              * Parse JSON to MIME message
@@ -197,7 +197,7 @@ public final class MIMEStructureParser {
      * @return The {@link MailMessage} instance
      * @throws OXException If parsing fails
      */
-    public static MailMessage parseStructure(final JSONObject jsonStructure) throws OXException {
+    public static MailMessage parseStructure(JSONObject jsonStructure) throws OXException {
         /*
          * Parse JSON to MIME message
          */
@@ -216,7 +216,7 @@ public final class MIMEStructureParser {
      * @return The transportable {@link ComposedMailMessage} instance
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final Session session) throws OXException {
+    public static ComposedMailMessage parseStructure(JSONObject jsonStructure, Session session) throws OXException {
         /*
          * Create appropriate ComposedMailMessage instance
          */
@@ -232,25 +232,25 @@ public final class MIMEStructureParser {
      * @return The transportable {@link ComposedMailMessage} instance
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parseStructure(final JSONObject jsonStructure, final ServerSession session) throws OXException {
+    public static ComposedMailMessage parseStructure(JSONObject jsonStructure, ServerSession session) throws OXException {
         /*
          * Create appropriate ComposedMailMessage instance
          */
         return new ComposedMailWrapper(parseStructure(jsonStructure), session, session.getContext());
     }
 
-    private static MimeMessage parseStructure2Message(final JSONObject jsonStructure) throws OXException {
+    private static MimeMessage parseStructure2Message(JSONObject jsonStructure) throws OXException {
         final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
         parseMessage(jsonStructure, mimeMessage);
         return mimeMessage;
     }
 
-    private static void parseMessage(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws OXException {
+    private static void parseMessage(JSONObject jsonMessage, MimeMessage mimeMessage) throws OXException {
         parseFlags(jsonMessage, mimeMessage);
         parsePart(jsonMessage, mimeMessage);
     }
 
-    private static void parseFlags(final JSONObject jsonMessage, final MimeMessage mimeMessage) throws OXException {
+    private static void parseFlags(JSONObject jsonMessage, MimeMessage mimeMessage) throws OXException {
         try {
             Flags msgFlags = null;
             /*
@@ -329,7 +329,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parsePart(final JSONObject jsonPart, final MimePart mimePart) throws OXException {
+    private static void parsePart(JSONObject jsonPart, MimePart mimePart) throws OXException {
         try {
             /*
              * Parse headers
@@ -362,7 +362,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseMessageBody(final JSONObject jsonMessage, final MimePart mimePart) throws OXException {
+    private static void parseMessageBody(JSONObject jsonMessage, MimePart mimePart) throws OXException {
         try {
             final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             parseMessage(jsonMessage, mimeMessage);
@@ -373,7 +373,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseMultipartBody(final JSONArray jsonMultiparts, final MimePart mimePart, final String subtype) throws OXException {
+    private static void parseMultipartBody(JSONArray jsonMultiparts, MimePart mimePart, String subtype) throws OXException {
         try {
             final MimeMultipart multipart = new MimeMultipart(subtype);
             final int length = jsonMultiparts.length();
@@ -391,7 +391,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws OXException {
+    private static void parseSimpleBodyText(JSONObject jsonBody, MimePart mimePart, ContentType contentType) throws OXException {
         try {
             if (isText(contentType.getBaseType())) {
                 MessageUtility.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType(), mimePart);
@@ -409,7 +409,7 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseSimpleBodyBinary(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws OXException {
+    private static void parseSimpleBodyBinary(JSONObject jsonBody, MimePart mimePart, ContentType contentType) throws OXException {
         try {
             mimePart.setDataHandler(new DataHandler(new MessageDataSource(Base64.decodeBase64(jsonBody.getString("data").getBytes(
                 "US-ASCII")), contentType.getBaseType())));
@@ -440,10 +440,10 @@ public final class MIMEStructureParser {
 
     private static final Set<String> HEADERS_DATE = ImmutableSet.of("date");
 
-    private static void parseHeaders(final JSONObject jsonHeaders, final MimePart mimePart, final ContentType contentType) throws OXException {
+    private static void parseHeaders(JSONObject jsonHeaders, MimePart mimePart, ContentType contentType) throws OXException {
         try {
             final StringBuilder headerNameBuilder = new StringBuilder(16);
-            for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
+            for (Entry<String, Object> entry : jsonHeaders.entrySet()) {
                 final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
                 if (HEADERS_ADDRESS.contains(name)) {
                     final JSONArray jsonAddresses = (JSONArray) entry.getValue();
@@ -504,8 +504,8 @@ public final class MIMEStructureParser {
         }
     }
 
-    private static void parseParameterList(final JSONObject jsonParameters, final ParameterizedHeader parameterizedHeader) throws JSONException {
-        for (final Entry<String, Object> entry : jsonParameters.entrySet()) {
+    private static void parseParameterList(JSONObject jsonParameters, ParameterizedHeader parameterizedHeader) throws JSONException {
+        for (Entry<String, Object> entry : jsonParameters.entrySet()) {
             final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
             if ("read-date".equals(name)) {
                 final JSONObject jsonDate = (JSONObject) entry.getValue();
@@ -530,10 +530,10 @@ public final class MIMEStructureParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
-    private static boolean isText(final String contentType) {
+    private static boolean isText(String contentType) {
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_TEXT) {
+            for (String subtype : SUB_TEXT) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
@@ -542,7 +542,7 @@ public final class MIMEStructureParser {
         return false;
     }
 
-    private static String toHeaderCase(final String name, final StringBuilder builder) {
+    private static String toHeaderCase(String name, StringBuilder builder) {
         if (null == name) {
             return null;
         }

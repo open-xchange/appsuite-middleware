@@ -2,4 +2,4 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: string
+    $ref: '#/components/schemas/MailComposeMailPathModel'

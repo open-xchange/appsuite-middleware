@@ -3,11 +3,15 @@
     operationId: getEventsNeedingAction
     tags:
       - Chronos
-    summary: >-
+    summary: Gets all events with participation status "NEEDS-ACTION"
+    description: >-
       Gets all events where the session userattendee's participation status
       equals "NEEDS-ACTION".
+    security:
+      - session: []     
+      - oauth:
+        - read_calendar      
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: rangeStart
         description: >
@@ -41,3 +45,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/EventsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

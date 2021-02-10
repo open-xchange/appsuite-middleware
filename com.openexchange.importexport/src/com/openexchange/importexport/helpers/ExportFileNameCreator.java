@@ -66,7 +66,7 @@ import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
@@ -143,7 +143,7 @@ public class ExportFileNameCreator {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.ICAL_APPOINTMENT_NAME);
                 } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.ICAL_EVENT_NAME);
-                } else if (ContactContentType.getInstance().equals(userizedFolder.getContentType())) {
+                } else if (ContactsContentType.getInstance().equals(userizedFolder.getContentType())) {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.CONTACTS_NAME);
                 }else {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
@@ -172,7 +172,7 @@ public class ExportFileNameCreator {
             if (null == batchId || batchId.equals("")) {
                 sb.append(getLocalizedFileName(session, folderObj.getLocalizedName(session.getUser().getLocale())));
             } else {
-                if (ContactContentType.getInstance().equals(folderObj.getContentType())) {
+                if (ContactsContentType.getInstance().equals(folderObj.getContentType())) {
                     sb.append(createSingleContactName(session, folder, batchId));
                 } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(folderObj.getContentType())) {
                     CalendarService calendarService = ImportExportServices.getCalendarService();

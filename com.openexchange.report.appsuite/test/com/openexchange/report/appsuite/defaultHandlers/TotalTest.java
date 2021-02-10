@@ -1,6 +1,7 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import java.util.HashMap;
@@ -76,13 +77,13 @@ public class TotalTest {
         macdetail.put(CAPS1, new HashMap<String, Long>());
         macdetail.put(CAPS2, new HashMap<String, Long>());
         macdetail.put(CAPS3, new HashMap<String, Long>());
-        addValuesToMap(macdetail, CAPS1, Report.ADMIN, 1l);
-        addValuesToMap(macdetail, CAPS1, Report.TOTAL, 1l);
-        addValuesToMap(macdetail, CAPS2, Report.TOTAL, 5l);
-        addValuesToMap(macdetail, CAPS2, Report.GUESTS, 3l);
-        addValuesToMap(macdetail, CAPS2, Report.DISABLED, 2l);
-        addValuesToMap(macdetail, CAPS3, Report.TOTAL, 2l);
-        addValuesToMap(macdetail, CAPS3, Report.LINKS, 8l);
+        addValuesToMap(macdetail, CAPS1, Report.ADMIN, L(1l));
+        addValuesToMap(macdetail, CAPS1, Report.TOTAL, L(1l));
+        addValuesToMap(macdetail, CAPS2, Report.TOTAL, L(5l));
+        addValuesToMap(macdetail, CAPS2, Report.GUESTS, L(3l));
+        addValuesToMap(macdetail, CAPS2, Report.DISABLED, L(2l));
+        addValuesToMap(macdetail, CAPS3, Report.TOTAL, L(2l));
+        addValuesToMap(macdetail, CAPS3, Report.LINKS, L(8l));
     }
 
     private void initReport() {
@@ -92,15 +93,15 @@ public class TotalTest {
     }
 
     private void fillReport() {
-        report.set(Report.TOTAL, Report.USERS, 80l);
-        report.set(Report.TOTAL, Report.GUESTS, 40l);
-        report.set(Report.TOTAL, Report.LINKS, 50l);
-        report.set(Report.TOTAL, Report.CONTEXTS, 5l);
-        report.set(Report.TOTAL, Report.CONTEXTS_DISABLED, 0l);
-        report.set(Report.TOTAL, Report.USERS_DISABLED, 20l);
-        report.set(Report.TOTAL, Report.CONTEXT_USERS_MAX, 30l);
-        report.set(Report.TOTAL, Report.CONTEXT_USERS_MIN, 10l);
-        report.set(Report.TOTAL, Report.CONTEXT_USERS_AVG, 16l);
+        report.set(Report.TOTAL, Report.USERS, L(80l));
+        report.set(Report.TOTAL, Report.GUESTS, L(40l));
+        report.set(Report.TOTAL, Report.LINKS, L(50l));
+        report.set(Report.TOTAL, Report.CONTEXTS, L(5l));
+        report.set(Report.TOTAL, Report.CONTEXTS_DISABLED, L(0l));
+        report.set(Report.TOTAL, Report.USERS_DISABLED, L(20l));
+        report.set(Report.TOTAL, Report.CONTEXT_USERS_MAX, L(30l));
+        report.set(Report.TOTAL, Report.CONTEXT_USERS_MIN, L(10l));
+        report.set(Report.TOTAL, Report.CONTEXT_USERS_AVG, L(16l));
     }
 
     private void addValuesToMap(Map<String, Object> macdetail, String macDetailKey, String insertKey, Long insertValue) {

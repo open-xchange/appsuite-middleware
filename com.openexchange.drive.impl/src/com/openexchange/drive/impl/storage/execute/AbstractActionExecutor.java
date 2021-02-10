@@ -134,6 +134,7 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
         return getActionsForClient(syncResult);
     }
 
+    @SuppressWarnings("unused")
     protected List<AbstractAction<T>> getActionsForClient(IntermediateSyncResult<T> syncResult) throws OXException {
         /*
          * return new actions for client if set

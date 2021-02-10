@@ -90,6 +90,7 @@ import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
 import com.openexchange.user.User;
@@ -114,6 +115,8 @@ public class CaldavActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
     private OSGiPropertyMixin mixin;
+    private String httpAliasCalDAV;
+    private String httpAliasDevNull;
 
     /**
      * Initializes a new {@link CaldavActivator}.
@@ -138,9 +141,11 @@ public class CaldavActivator extends HousekeepingActivator {
             final HttpService httpService = getService(HttpService.class);
 
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            httpService.registerServlet(getInternalPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
+            httpAliasCalDAV = getInternalPath(configViewFactory, SERVLET_PATH);
+            httpService.registerServlet(httpAliasCalDAV, new CalDAV(performer), null, null);
             httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(getExternalPath(configViewFactory, SERVLET_PATH), Interface.CALDAV), null, null);
-            httpService.registerServlet(getInternalPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
+            httpAliasDevNull = getInternalPath(configViewFactory, NULL_PATH);
+            httpService.registerServlet(httpAliasDevNull, new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
@@ -234,14 +239,21 @@ public class CaldavActivator extends HousekeepingActivator {
     protected synchronized void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
-            httpService.unregister(getInternalPath(configViewFactory, SERVLET_PATH));
-            httpService.unregister(getInternalPath(configViewFactory, NULL_PATH));
+            String alias = this.httpAliasCalDAV;
+            if (alias != null) {
+                this.httpAliasCalDAV = null;
+                HttpServices.unregister(alias, httpService);
+            }
+            alias = this.httpAliasDevNull;
+            if (alias != null) {
+                this.httpAliasDevNull = null;
+                HttpServices.unregister(alias, httpService);
+            }
         }
         final OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
-            mixin.close();
             this.mixin = null;
+            mixin.close();
         }
         super.stopBundle();
     }

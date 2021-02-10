@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Conversion
 Bundle-SymbolicName: com.openexchange.conversion
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
@@ -17,3 +17,4 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Export-Package: com.openexchange.conversion
 Bundle-Activator: com.openexchange.conversion.osgi.ConversionActivator
+Automatic-Module-Name: com.openexchange.conversion

@@ -4,8 +4,9 @@
     tags:
       - OAuth
     summary: Gets all OAuth accounts.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
         description: >-

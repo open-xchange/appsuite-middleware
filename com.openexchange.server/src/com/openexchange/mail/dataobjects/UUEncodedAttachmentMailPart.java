@@ -73,7 +73,7 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
      *
      * @param uuencPart The uuencoded part
      */
-    public UUEncodedAttachmentMailPart(final UUEncodedPart uuencPart) {
+    public UUEncodedAttachmentMailPart(UUEncodedPart uuencPart) {
         super();
         this.uuencPart = uuencPart;
     }
@@ -104,7 +104,7 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return null;
     }
 

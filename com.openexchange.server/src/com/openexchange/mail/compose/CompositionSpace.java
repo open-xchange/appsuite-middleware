@@ -49,22 +49,13 @@
 
 package com.openexchange.mail.compose;
 
-import java.util.UUID;
-
 /**
  * {@link CompositionSpace} - Represents a composition space, which is uniquely identifiable and holds a message, which is being composed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public interface CompositionSpace {
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    UUID getId();
+public interface CompositionSpace extends CompositionSpaceInfo {
 
     /**
      * Gets the message, which is being composed.
@@ -74,10 +65,10 @@ public interface CompositionSpace {
     Message getMessage();
 
     /**
-     * Gets the last-modified time stamp, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * Gets the currently attached client token.
      *
-     * @return The last-modified time stamp
+     * @return The client token
      */
-    long getLastModified();
+    ClientToken getClientToken();
 
 }

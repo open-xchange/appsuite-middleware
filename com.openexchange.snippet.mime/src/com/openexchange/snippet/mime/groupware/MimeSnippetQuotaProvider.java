@@ -54,9 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -69,6 +67,7 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.AccountQuotas;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -168,8 +167,8 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public List<AccountQuota> getFor(Session session) throws OXException {
-        return Collections.singletonList(getFor(session, "0"));
+    public AccountQuotas getFor(Session session) throws OXException {
+        return new AccountQuotas(getFor(session, "0"));
     }
 
     // --------------------------------------------------------------------------------------------------------------

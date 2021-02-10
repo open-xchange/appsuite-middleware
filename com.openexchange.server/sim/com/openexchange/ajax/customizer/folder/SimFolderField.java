@@ -52,7 +52,7 @@ package com.openexchange.ajax.customizer.folder;
 import java.util.List;
 import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -80,7 +80,7 @@ public class SimFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
+    public Object getValue(Folder folder, ServerSession session) {
         return value;
     }
 
@@ -106,7 +106,7 @@ public class SimFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+    public List<Object> getValues(List<Folder> folder, ServerSession session) {
         return AdditionalFieldsUtils.bulk(this, folder, session);
     }
 

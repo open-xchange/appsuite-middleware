@@ -127,12 +127,12 @@ public final class SessionMailCache {
     /**
      * Clears all user-related cached data.
      */
-    public static void clearAll(final Session session) {
+    public static void clearAll(Session session) {
         try {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != storageService) {
                 final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-                for (final MailAccount mailAccount : accounts) {
+                for (MailAccount mailAccount : accounts) {
                     SessionMailCache.getInstance(session, mailAccount.getId()).clear();
                 }
             }
@@ -164,7 +164,7 @@ public final class SessionMailCache {
      *
      * @param entry The mail cache entry
      */
-    public <V extends Object> void put(final SessionMailCacheEntry<V> entry) {
+    public <V extends Object> void put(SessionMailCacheEntry<V> entry) {
         if (null == entry.getValue()) {
             cache.remove(entry.getKey());
         } else {
@@ -179,7 +179,7 @@ public final class SessionMailCache {
      * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
-    public <V extends Object> void get(final SessionMailCacheEntry<V> entry) {
+    public <V extends Object> void get(SessionMailCacheEntry<V> entry) {
         entry.setValue(entry.getEntryClass().cast(cache.get(entry.getKey())));
     }
 
@@ -190,7 +190,7 @@ public final class SessionMailCache {
      * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
-    public <V extends Object> void remove(final SessionMailCacheEntry<V> entry) {
+    public <V extends Object> void remove(SessionMailCacheEntry<V> entry) {
         entry.setValue(entry.getEntryClass().cast(cache.remove(entry.getKey())));
     }
 

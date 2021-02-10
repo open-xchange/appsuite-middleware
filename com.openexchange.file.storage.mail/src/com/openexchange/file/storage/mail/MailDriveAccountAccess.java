@@ -113,7 +113,10 @@ public final class MailDriveAccountAccess implements FileStorageAccountAccess, C
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(MailDriveFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(MailDriveFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(MailDriveFolderAccess.class, capability);
     }
 
     @Override

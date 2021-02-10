@@ -631,13 +631,16 @@ public class DriveServiceImpl implements DriveService {
          */
         if (DriveClientType.ANDROID.equals(session.getDriveSession().getClientType()) || DriveClientType.IOS.equals(session.getDriveSession().getClientType())) {
             int zeroByteClientVersionCount = 0;
+            boolean updateForNonZeroByteFile = false;
             for (Entry<String, ThreeWayComparison<FileVersion>> entry : mapper) {
                 ThreeWayComparison<FileVersion> comparison = entry.getValue();
                 if (null != comparison.getClientVersion() && DriveConstants.EMPTY_MD5.equals(comparison.getClientVersion().getChecksum()) && null != comparison.getOriginalVersion()) {
                     zeroByteClientVersionCount++;
+                    updateForNonZeroByteFile = updateForNonZeroByteFile ||
+                        null != comparison.getServerVersion() && false == DriveConstants.EMPTY_MD5.equals(comparison.getServerVersion().getChecksum());
                 }
             }
-            if (0 < zeroByteClientVersionCount && zeroByteClientVersionCount == clientVersions.size()) {
+            if (0 < zeroByteClientVersionCount && zeroByteClientVersionCount == clientVersions.size() && updateForNonZeroByteFile) {
                 OXException error = DriveExceptionCodes.ZERO_BYTE_FILES.create(path);
                 LOG.warn("Client synchronization aborted for {}", session, error);
                 IntermediateSyncResult<FileVersion> errorResult = new IntermediateSyncResult<FileVersion>();

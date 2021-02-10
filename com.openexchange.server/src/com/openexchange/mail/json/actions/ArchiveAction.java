@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.ArchiveDataWrapper;
 import com.openexchange.mail.FolderAndId;
@@ -73,6 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class ArchiveAction extends AbstractArchiveMailAction {
 
     /**
@@ -80,12 +82,12 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
      *
      * @param services
      */
-    public ArchiveAction(final ServiceLookup services) {
+    public ArchiveAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
+    protected AJAXRequestResult performArchive(MailRequest req) throws OXException {
         try {
             /*
              * Read in parameters
@@ -119,7 +121,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
         }
     }
 
-    private List<ArchiveDataWrapper> archive(JSONArray jArray, final String folderId, boolean useDefaultName, boolean createIfAbsent, final MailRequest req) throws JSONException, OXException {
+    private List<ArchiveDataWrapper> archive(JSONArray jArray, String folderId, boolean useDefaultName, boolean createIfAbsent, MailRequest req) throws JSONException, OXException {
         ServerSession session = req.getSession();
         int length = jArray.length();
         if (folderId == null) {

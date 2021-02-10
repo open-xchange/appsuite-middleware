@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -92,8 +90,6 @@ import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.http.Cookies;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -208,11 +204,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             }
         }
 
-        // open-xchange-saml-<hash> cookie Value to lookup related session
-        String samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
-
         // Do the login
-        LoginResult result = login(req, context, user, reservation.getState(), conf, samlCookieValue);
+        LoginResult result = login(req, context, user, reservation.getState(), conf);
 
         // Obtain associated session
         Session session = result.getSession();
@@ -227,9 +220,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
 
-        // Set SAML cookie
-        Cookie samlSessionCookie = configureSAMLCookie(req, samlCookieValue, session);
-        resp.addCookie(samlSessionCookie);
+        // Set session cookie
+        LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
 
         // Send redirect
         String uiWebPath = req.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
@@ -241,21 +233,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath, uriFragment));
     }
 
-    private Cookie configureSAMLCookie(HttpServletRequest req, String samlCookieValue, Session session) {
-        boolean isHttps = Tools.considerSecure(req);
-        String hostName = SAMLLoginTools.getHostName(services.getOptionalService(HostnameService.class), req);
-        Cookie samlSessionCookie = new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + session.getHash(), samlCookieValue);
-        samlSessionCookie.setPath("/");
-        samlSessionCookie.setSecure(isHttps);
-        samlSessionCookie.setMaxAge(-1);
-        String cookieDomain = Cookies.getDomainValue(hostName);
-        if (cookieDomain != null) {
-            samlSessionCookie.setDomain(cookieDomain);
-        }
-        return samlSessionCookie;
-    }
-
-    protected LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {
+    protected LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
         // The properties derived from optional state
         final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 
@@ -267,7 +245,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, props, new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
-                Authenticated authenticated = enhanceAuthenticated(new AuthenticatedImpl(context.getLoginInfo()[0], user.getLoginInfo()), samlCookieValue, optState);
+                Authenticated authenticated = enhanceAuthenticated(new AuthenticatedImpl(context.getLoginInfo()[0], user.getLoginInfo()), optState);
                 return authenticated;
             }
         });
@@ -275,7 +253,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         return loginResult;
     }
 
-    Authenticated enhanceAuthenticated(Authenticated authenticated, final String samlCookieValue, final Map<String, String> reservationState) {
+    Authenticated enhanceAuthenticated(Authenticated authenticated, final Map<String, String> reservationState) {
         if (reservationState != null) {
             String samlAuthenticated = reservationState.get(SAMLSessionParameters.AUTHENTICATED);
             if (samlAuthenticated != null && Boolean.parseBoolean(samlAuthenticated)) {
@@ -301,10 +279,6 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                         String sessionNotOnOrAfter = reservationState.get(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER);
                         if (sessionNotOnOrAfter != null) {
                             session.setParameter(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
-                        }
-
-                        if (samlCookieValue != null) {
-                            session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
                         }
 
                         String singleLogout = reservationState.get(SAMLSessionParameters.SINGLE_LOGOUT);
@@ -372,24 +346,31 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation, SAMLBackend samlBackend) throws OXException {
         if (samlBackend.getConfig().isAutoLoginEnabled()) {
             LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
-            Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
-            if (samlCookie == null) {
+            Cookie sessionCookie = SAMLLoginTools.getSessionCookie(httpRequest, loginConfiguration);
+            if (sessionCookie == null) {
                 return null;
             }
 
-            Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, services.getService(SessiondService.class));
+            Session session = SAMLLoginTools.getSessionForSessionCookie(sessionCookie, services.getService(SessiondService.class));
             if (session == null) {
                 // cookie exists but no according session was found => remove it
-                Cookie toRemove = (Cookie) samlCookie.clone();
+                Cookie toRemove = (Cookie) sessionCookie.clone();
                 toRemove.setMaxAge(0);
                 httpResponse.addCookie(toRemove);
 
-                LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                LOG.debug("Found no session for session cookie '{}' with value '{}'", sessionCookie.getName(), sessionCookie.getValue());
+                return null;
+            }
+            int expectedContextId = reservation.getContextId();
+            int expectedUserId = reservation.getUserId();
+            if (expectedContextId != session.getContextId() || expectedUserId != session.getUserId()) {
+                // wrong session
+                LOG.debug("Session {} does not match expected session for reservation {}.", session.getSessionID(), reservation.getToken());
                 return null;
             }
 
             try {
-                LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                LOG.debug("Found session '{}' for session cookie '{}' with value '{}'", session.getSessionID(), sessionCookie.getName(), sessionCookie.getValue());
                 String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
                 SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
                 // compare against authInfo
@@ -400,7 +381,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                     }
                     return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
                 }
-                LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
+                LOG.debug("Session in session cookie is different to authInfo user and context");
             } catch (OXException e) {
                 LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
             }

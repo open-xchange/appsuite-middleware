@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JDOM Parser
 Bundle-SymbolicName: com.openexchange.xml
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.osgi,
@@ -54,6 +54,7 @@ Import-Package: com.openexchange.osgi,
  org.yaml.snakeyaml.util
 Export-Package: com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
+ com.openexchange.xml.util,
  org.jdom2,
  org.jdom2.adapters,
  org.jdom2.filter,
@@ -83,3 +84,4 @@ Bundle-ClassPath: .,
  lib/spring-jcl-5.2.6.RELEASE.jar,
  lib/javax.inject-1.jar
 Bundle-Activator: com.openexchange.xml.osgi.Activator
+Automatic-Module-Name: com.openexchange.xml

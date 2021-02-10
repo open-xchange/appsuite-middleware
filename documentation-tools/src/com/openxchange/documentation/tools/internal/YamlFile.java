@@ -63,6 +63,13 @@ public class YamlFile {
     private List<Property> properties;
 
     /**
+     * Initializes a new {@link YamlFile}.
+     */
+    public YamlFile() {
+        super();
+    }
+
+    /**
      * Gets the feature_description
      *
      * @return The feature_description
@@ -115,7 +122,4 @@ public class YamlFile {
     public void setFeature_name(String feature_name) {
         this.feature_name = feature_name;
     }
-
-
-
 }

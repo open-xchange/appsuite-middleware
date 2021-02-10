@@ -73,20 +73,22 @@ public interface AntiVirusService {
      * @param stream The {@link InputStreamClosure} which retrieves the InputStream if necessary
      * @param uniqueId an identifier that uniquely identifies the specified {@link InputStream}
      * @param contentLength The length of the {@link InputStream} in bytes
+     * @param content The optional encapsulated HTTP content
      * @return the {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-    AntiVirusResult scan(InputStreamClosure stream, String uniqueId, long contentLength) throws OXException;
+    AntiVirusResult scan(InputStreamClosure stream, String uniqueId, long contentLength, AntiVirusEncapsulatedContent content) throws OXException;
 
     /**
      * Scans the contents of the specified {@link IFileHolder}
      * 
      * @param fileHolder The {@link IFileHolder}
      * @param uniqueId an identifier that uniquely identifies the {@link InputStream} of the specified {@link IFileHolder}
+     * @param content The optional encapsulated HTTP content
      * @return the {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-    AntiVirusResult scan(IFileHolder fileHolder, String uniqueId) throws OXException;
+    AntiVirusResult scan(IFileHolder fileHolder, String uniqueId, AntiVirusEncapsulatedContent content) throws OXException;
 
     /**
      * Scans the specified {@link File}
@@ -94,20 +96,22 @@ public interface AntiVirusService {
      * @param file The {@link File} to scan
      * @param uniqueId an identifier that uniquely identifies the specified {@link File}
      * @param fileSize The file's size in bytes
+     * @param content The optional encapsulated HTTP content
      * @return the {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-    AntiVirusResult scan(File file, String uniqueId, long fileSize) throws OXException;
+    AntiVirusResult scan(File file, String uniqueId, long fileSize, AntiVirusEncapsulatedContent content) throws OXException;
 
     /**
      * Scans the specified {@link ManagedFile}
      * 
      * @param managedFile The {@link ManagedFile} to scan
      * @param uniqueId an identifier that uniquely identifies the {@link InputStream} of the specified {@link ManagedFile}
+     * @param content The optional encapsulated HTTP content
      * @return the {@link AntiVirusResult}
      * @throws OXException if an error is occurred
      */
-    AntiVirusResult scan(ManagedFile managedFile, String uniqueId) throws OXException;
+    AntiVirusResult scan(ManagedFile managedFile, String uniqueId, AntiVirusEncapsulatedContent content) throws OXException;
 
     /**
      * Whether the service can stream the data through the ICAP server
@@ -116,7 +120,6 @@ public interface AntiVirusService {
      *         the ICAP server.
      */
     boolean canStream();
-
 
     /**
      * Checks whether the capability of the {@link AntiVirusService} is enabled

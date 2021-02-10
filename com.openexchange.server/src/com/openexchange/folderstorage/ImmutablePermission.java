@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link ImmutablePermission} - An immutable permission.
  * <p>
@@ -57,7 +59,7 @@ package com.openexchange.folderstorage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class ImmutablePermission implements Permission {
+public class ImmutablePermission extends BasicPermission {
 
     /**
      * serialVersionUID
@@ -76,7 +78,9 @@ public class ImmutablePermission implements Permission {
     /** A builder for an immutable permission */
     public static class Builder {
 
+        private String identifier;
         private int entity = -1;
+        private EntityInfo entityInfo;
         private boolean group;
         private int system;
         private FolderPermissionType type = FolderPermissionType.NORMAL;
@@ -114,6 +118,17 @@ public class ImmutablePermission implements Permission {
         }
 
         /**
+         * Sets the identifier
+         *
+         * @param entity The identifier to set
+         * @return This builder
+         */
+        public Builder setIdentifier(String identifier) {
+            this.identifier = identifier;
+            return this;
+        }
+
+        /**
          * Sets the entity identifier; either user or group identifier
          *
          * @param entity The entity identifier to set
@@ -121,6 +136,17 @@ public class ImmutablePermission implements Permission {
          */
         public Builder setEntity(int entity) {
             this.entity = entity;
+            return this;
+        }
+
+        /**
+         * Sets the entity info
+         *
+         * @param entityInfo The entity info to set
+         * @return This builder
+         */
+        public Builder setEntity(EntityInfo entityInfo) {
+            this.entityInfo = entityInfo;
             return this;
         }
 
@@ -230,108 +256,22 @@ public class ImmutablePermission implements Permission {
          * @return The immutable permission
          */
         public ImmutablePermission build() {
-            return new ImmutablePermission(entity, group, system, admin, folderPermission, readPermission, writePermission, deletePermission, type, legator);
+            return new ImmutablePermission(identifier, entity, entityInfo, group, system, admin, folderPermission, readPermission, writePermission, deletePermission, type, legator);
         }
     }
 
     // ------------------------------------------------------------------------------------------------------
 
-    private final int entity;
-    private final boolean group;
-    private final int system;
-    private final FolderPermissionType type;
-    private final String legator;
-    private final boolean admin;
-    private final int folderPermission;
-    private final int readPermission;
-    private final int writePermission;
-    private final int deletePermission;
-    private final int hash;
-
     /**
      * Initializes a new {@link ImmutablePermission}.
      */
-    ImmutablePermission(int entity, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type, String legator) {
-        super();
-        this.entity = entity;
-        this.group = group;
+    ImmutablePermission(String identifier, int entity, EntityInfo entityInfo, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type, String legator) {
+        super(entity, group, Permissions.createPermissionBits(folderPermission, readPermission, writePermission, deletePermission, admin));
+        this.identifier = null != identifier ? identifier : String.valueOf(entity);
+        this.entityInfo = entityInfo;
         this.system = system;
         this.type = type;
         this.legator = legator;
-        this.admin = admin;
-        this.folderPermission = folderPermission;
-        this.readPermission = readPermission;
-        this.writePermission = writePermission;
-        this.deletePermission = deletePermission;
-
-        int prime = 31;
-        int result = 1;
-        result = prime * result + (admin ? 1231 : 1237);
-        result = prime * result + (group ? 1231 : 1237);
-        result = prime * result + entity;
-        result = prime * result + folderPermission;
-        result = prime * result + readPermission;
-        result = prime * result + writePermission;
-        result = prime * result + deletePermission;
-        result = prime * result + system;
-        result = prime * result + (type==null ? 0 : type.getTypeNumber());
-        result = prime * result + (legator==null ? 0 : legator.hashCode());
-        hash = result;
-    }
-
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            // Cannot occur
-            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
-        }
-    }
-
-    @Override
-    public boolean isVisible() {
-        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
-    }
-
-    @Override
-    public int getDeletePermission() {
-        return deletePermission;
-    }
-
-    @Override
-    public int getEntity() {
-        return entity;
-    }
-
-    @Override
-    public int getFolderPermission() {
-        return folderPermission;
-    }
-
-    @Override
-    public int getReadPermission() {
-        return readPermission;
-    }
-
-    @Override
-    public int getSystem() {
-        return system;
-    }
-
-    @Override
-    public int getWritePermission() {
-        return writePermission;
-    }
-
-    @Override
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    @Override
-    public boolean isGroup() {
-        return group;
     }
 
     @Override
@@ -350,8 +290,18 @@ public class ImmutablePermission implements Permission {
     }
 
     @Override
+    public void setIdentifier(String identifier) {
+        throw new UnsupportedOperationException("ImmutablePermission.setIdentifier()");
+    }
+
+    @Override
     public void setEntity(final int entity) {
         throw new UnsupportedOperationException("ImmutablePermission.setEntity()");
+    }
+
+    @Override
+    public void setEntityInfo(EntityInfo entityInfo) {
+        throw new UnsupportedOperationException("ImmutablePermission.setEntityInfo()");
     }
 
     @Override
@@ -390,68 +340,8 @@ public class ImmutablePermission implements Permission {
     }
 
     @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        Permission other = (Permission) obj;
-        if (admin != other.isAdmin()) {
-            return false;
-        }
-        if (group != other.isGroup()) {
-            return false;
-        }
-        if (entity != other.getEntity()) {
-            return false;
-        }
-        if (folderPermission != other.getFolderPermission()) {
-            return false;
-        }
-        if (readPermission != other.getReadPermission()) {
-            return false;
-        }
-        if (writePermission != other.getWritePermission()) {
-            return false;
-        }
-        if (deletePermission != other.getDeletePermission()) {
-            return false;
-        }
-        if (system != other.getSystem()) {
-            return false;
-        }
-        if (type != other.getType()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "ImmutablePermission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", type=" + type + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
-    }
-
-    @Override
-    public FolderPermissionType getType() {
-        return type;
-    }
-
-    @Override
     public void setType(FolderPermissionType type) {
         throw new UnsupportedOperationException("ImmutablePermission.setType()");
-    }
-
-    @Override
-    public String getPermissionLegator() {
-        return legator;
     }
 
     @Override

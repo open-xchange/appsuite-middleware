@@ -93,11 +93,10 @@ public class RevokeEndpoint extends OAuthEndpoint {
                 if (Strings.isEmpty(refreshToken)) {
                     failWithMissingParameter(response, "refresh_token");
                     return;
-                } else {
-                    if (!grantManagement.revokeByRefreshToken(refreshToken)) {
-                        failWithInvalidParameter(response, "refresh_token");
-                        return;
-                    }
+                }
+                if (!grantManagement.revokeByRefreshToken(refreshToken)) {
+                    failWithInvalidParameter(response, "refresh_token");
+                    return;
                 }
             } else {
                 if (!grantManagement.revokeByAccessToken(accessToken)) {
@@ -112,5 +111,4 @@ public class RevokeEndpoint extends OAuthEndpoint {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
     }
-
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test;
 
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -456,7 +457,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", "foobar.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN).toString().toLowerCase());
-        assertFalse("No domain mismatch was expected", result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, Boolean.class));
+        assertFalse("No domain mismatch was expected", b(result.getAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, Boolean.class)));
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         assertAuthenticityMechanismResult(results.get(0), "fooBAR.com", DMARCResult.NONE);

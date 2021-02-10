@@ -51,7 +51,7 @@ package com.openexchange.sms.tools.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;

@@ -82,7 +82,7 @@ public final class MailSessionCache {
      * @param session The session whose mail cache shall be returned
      * @return The session-bound mail cache.
      */
-    public static MailSessionCache getInstance(final Session session) {
+    public static MailSessionCache getInstance(Session session) {
         if (null == session) {
             return null;
         }
@@ -122,7 +122,7 @@ public final class MailSessionCache {
      * @param session The session whose mail cache shall be returned
      * @return The session-bound mail cache or <code>null</code>
      */
-    public static MailSessionCache optInstance(final Session session) {
+    public static MailSessionCache optInstance(Session session) {
         if (null == session) {
             return null;
         }
@@ -145,7 +145,7 @@ public final class MailSessionCache {
      *
      * @param session The session whose mail cache shall be dropped
      */
-    public static void dropInstance(final Session session) {
+    public static void dropInstance(Session session) {
         final String key = MailSessionParameterNames.getParamMainCache();
         MailSessionCache mailCache = null;
         try {
@@ -182,7 +182,7 @@ public final class MailSessionCache {
      * @param session The session whose mail cache shall be dropped
      * @return <code>true</code> if session-associated instance was cleared; otherwise <code>false</code>
      */
-    public static void clearInstance(final Session session) {
+    public static void clearInstance(Session session) {
         final String key = MailSessionParameterNames.getParamMainCache();
         MailSessionCache mailCache = null;
         try {
@@ -262,11 +262,11 @@ public final class MailSessionCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public static void removeDefaultFolderInformationFrom(final int accountId, final int userId, final int contextId) {
+    public static void removeDefaultFolderInformationFrom(int accountId, int userId, int contextId) {
         final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
         if (null != sessiondService) {
             final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            for (final Session s : sessions) {
+            for (Session s : sessions) {
                 final MailSessionCache sessionCache = optInstance(s);
                 if (null != sessionCache) {
                     sessionCache.removeParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
@@ -297,7 +297,7 @@ public final class MailSessionCache {
      * @param parameterName The parameter name
      * @return The parameter or <code>null</code>
      */
-    public <T extends Object> T getParameter(final int accountId, final String parameterName) {
+    public <T extends Object> T getParameter(int accountId, String parameterName) {
         final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return null;
@@ -317,7 +317,7 @@ public final class MailSessionCache {
      * @param parameterName The parameter name
      * @return <code>true</code> if a parameter is associated with given account ID and parameter name; otherwise <code>false</code>
      */
-    public boolean containsParameter(final int accountId, final String parameterName) {
+    public boolean containsParameter(int accountId, String parameterName) {
         final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return false;
@@ -332,7 +332,7 @@ public final class MailSessionCache {
      * @param parameterName The parameter name
      * @param parameterValue The parameter value
      */
-    public void putParameter(final int accountId, final String parameterName, final Object parameterValue) {
+    public void putParameter(int accountId, String parameterName, Object parameterValue) {
         ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
@@ -357,7 +357,7 @@ public final class MailSessionCache {
      * @param parameterValue The parameter value
      * @return The parameter value previously associated with given account ID and parameter name
      */
-    public Object putParameterIfAbsent(final int accountId, final String parameterName, final Object parameterValue) {
+    public Object putParameterIfAbsent(int accountId, String parameterName, Object parameterValue) {
         ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
@@ -379,7 +379,7 @@ public final class MailSessionCache {
      * @param parameterName The parameter name
      * @return The parameter previously associated with given account ID and parameter name or <code>null</code>
      */
-    public Object removeParameter(final int accountId, final String parameterName) {
+    public Object removeParameter(int accountId, String parameterName) {
         final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return null;
@@ -392,7 +392,7 @@ public final class MailSessionCache {
      *
      * @param accountId The account ID
      */
-    public void removeAccountParameters(final int accountId) {
+    public void removeAccountParameters(int accountId) {
         final ConcurrentMap<String, Object> removed = map.remove(accountId);
         if (null != removed) {
             removed.clear();

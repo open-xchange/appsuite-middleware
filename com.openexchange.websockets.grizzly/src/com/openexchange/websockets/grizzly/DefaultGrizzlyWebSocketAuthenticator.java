@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -137,7 +138,9 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
             Cookie[] cookies = request.getCookies();
             if (cookies == null) {
                 // No cookies available. Hence, no need to check secret.
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_EXPECTED_SECRET_COOKIE.getIdentifier());
+                throw oxe;
             }
 
             // Check secret...

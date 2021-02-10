@@ -62,6 +62,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
@@ -90,6 +91,7 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class SearchAction extends AbstractMailAction {
 
     /**
@@ -97,18 +99,18 @@ public final class SearchAction extends AbstractMailAction {
      *
      * @param services
      */
-    public SearchAction(final ServiceLookup services) {
+    public SearchAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             /*
              * Read parameters
              */
             String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
             int[] columns = columnCollection.getFields();
             String[] headers = columnCollection.getHeaders();
             String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);

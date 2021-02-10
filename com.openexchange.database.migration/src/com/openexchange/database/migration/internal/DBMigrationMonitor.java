@@ -64,29 +64,40 @@ import com.openexchange.database.migration.DBMigrationMonitorService;
  */
 public class DBMigrationMonitor implements DBMigrationMonitorService {
 
-    private final ConcurrentMap<String, Thread> statesBySchema = new ConcurrentHashMap<String, Thread>();
-
-    // prevent instantiation
-    private DBMigrationMonitor() {
-    }
-
     /**
      * SingletonHolder is loaded on the first execution of DBMigrationMonitor.getInstance() or the first access to SingletonHolder.INSTANCE,
      * not before.
      */
     private static class SingletonHolder {
-        private static final DBMigrationMonitor INSTANCE = new DBMigrationMonitor();
+        static final DBMigrationMonitor INSTANCE = new DBMigrationMonitor();
     }
 
+    /**
+     * Gets the singleton database migration monitor instance.
+     *
+     * @return The instance
+     */
     public static DBMigrationMonitor getInstance() {
         return SingletonHolder.INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<String, Thread> statesBySchema;
+
+    /**
+     * Initializes a new {@link DBMigrationMonitor}.
+     */
+    DBMigrationMonitor() {
+        super();
+        statesBySchema = new ConcurrentHashMap<String, Thread>();
     }
 
     /**
      * Adds a new liquibase changelog file name desired to execute to this monitor. This indicates that one or more update tasks for this
      * schema have been scheduled and are going to be executed by the same thread that performs this call.
      *
-     * @param String - string with the liquibase changelog file name to execute
+     * @param fileName The name of the liquibase changelog file to execute
      * @return Whether the state was added or not. If the same thread already added a state, <code>false</code> is returned and the state is
      *         not added.
      */
@@ -95,23 +106,18 @@ public class DBMigrationMonitor implements DBMigrationMonitorService {
     }
 
     /**
-     * Removes the given executed liquibase changelog filename if it has been added by this thread.
+     * Removes the given executed liquibase changelog file name if it has been added by this thread.
      *
-     * @param String - string with the liquibase changelog filename to remove
+     * @param fileName The name of the liquibase changelog file to remove
      * @return Whether a state has been removed or not (i.e. wasn't added before).
      */
     public boolean removeFile(String fileName) {
         return statesBySchema.remove(fileName, Thread.currentThread());
     }
 
-    /**
-     * Returns a list of {@link String}s with the currently scheduled files. Every item indicates that one or more changelog files have been
-     * scheduled and are going to be executed or are currently running.
-     *
-     * @return A list of states
-     */
     @Override
     public Collection<String> getScheduledFiles() {
         return new ArrayList<String>(statesBySchema.keySet());
     }
+
 }

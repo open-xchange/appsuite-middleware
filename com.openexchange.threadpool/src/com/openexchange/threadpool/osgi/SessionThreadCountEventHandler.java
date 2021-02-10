@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.session.ThreadCountEntry;
@@ -101,7 +102,7 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
             return;
         }
         final StringBuilder info = new StringBuilder(1024);
-        final String lineSeparator = System.getProperty("line.separator");
+        final String lineSeparator = Strings.getLineSeparator();
         info.append("Detected ").append(num).append(" threads belonging to session \"").append(sessionId);
         info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):").append(lineSeparator);
 

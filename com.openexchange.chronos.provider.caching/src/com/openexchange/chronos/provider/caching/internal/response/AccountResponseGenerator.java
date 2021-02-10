@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
@@ -102,7 +101,12 @@ public class AccountResponseGenerator extends ResponseGenerator {
                     if (isSeriesMaster(event) && Strings.isNotEmpty(event.getRecurrenceRule())) {
                         RecurrenceIterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until);
                         if (isResolveOccurrences(parameters)) {
-                            allEvents.addAll(Lists.newArrayList(iterator));
+                            while (iterator.hasNext()) {
+                                Event occurrence = iterator.next();
+                                if (isInRange(occurrence, from, until, timeZone)) {
+                                    allEvents.add(occurrence);
+                                }
+                            }
                         } else if (iterator.hasNext()) {
                             allEvents.add(event);
                         }

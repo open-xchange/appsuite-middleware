@@ -1,3 +1,4 @@
+
 package com.openexchange.mobile.configuration.generator.test;
 
 import java.io.FileOutputStream;
@@ -18,14 +19,13 @@ import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPoolService;
 
-
 public class MobileConfigSignerTest {
 
     private static final String SIGNEDJAVA_MOBILECONFIG = "testdata/signedjava.mobileconfig";
     private static final String EAS_MOBILECONFIG = "testdata/eas.mobileconfig";
 
     @Before
-    public void setUp(){
+    public void setUp() {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.OpensslBinary.getName(), "/usr/bin/openssl");
         service.stringProperties.put(Property.CertFile.getName(), "define");
@@ -39,7 +39,7 @@ public class MobileConfigSignerTest {
     }
 
     @Test
-    public void signerTest() throws IOException, InterruptedException, ConfigurationException {
+    public void signerTest() throws IOException, ConfigurationException {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter);
@@ -53,10 +53,11 @@ public class MobileConfigSignerTest {
     }
 
     @Test
-    public void signerTestTooLong() throws IOException, InterruptedException, ConfigurationException {
+    public void signerTestTooLong() throws IOException, ConfigurationException {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+
             @Override
             protected List<String> getCommand() throws ConfigurationException {
                 return Arrays.asList("sleep", "10");
@@ -78,10 +79,10 @@ public class MobileConfigSignerTest {
     }
 
     @Test
-    public void signerTestWrongResult() throws IOException, InterruptedException, ConfigurationException {
-        final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
+    public void signerTestWrongResult() throws IOException, ConfigurationException {
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+
             @Override
             protected List<String> getCommand() throws ConfigurationException {
                 return Arrays.asList("/bin/false");
@@ -89,7 +90,9 @@ public class MobileConfigSignerTest {
         };
         final char[] buf = new char[1024];
         int read;
-        read = fileReader.read(buf);
+        try (FileReader fileReader = new FileReader(EAS_MOBILECONFIG)) {
+            read = fileReader.read(buf);
+        }
         mobileConfigSigner.write(buf, 0, read);
         try {
             mobileConfigSigner.close();

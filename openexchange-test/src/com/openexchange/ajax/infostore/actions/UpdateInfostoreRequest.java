@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -67,8 +68,8 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfostoreResponse> {
 
     private File metadata;
-    private java.io.File upload;
-    private Field[] fields;
+    private final java.io.File upload;
+    private final Field[] fields;
     private final String id;
     private final Date lastModified;
     private Transport notificationTransport;
@@ -78,6 +79,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     public UpdateInfostoreRequest(File data, Field[] fields, java.io.File upload, Date lastModified) {
         this.metadata = data;
         this.id = data.getId();
+        Assert.assertNotNull(lastModified);
         this.lastModified = lastModified;
         this.upload = upload;
         this.fields = fields;

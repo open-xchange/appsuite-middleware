@@ -168,6 +168,21 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     List<String> move(List<String> sourceIds, long sequenceNumber, String destFolderId, boolean adjustFilenamesAsNeeded) throws OXException;
 
     /**
+     * Moves denoted files to specified destination folder.
+     *
+     * @param sourceIds The file identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param destFolderId The identifier of the destination folder
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
+     * @param ignoreWarnings true to force the folder move even if warnings are detected, false, otherwise
+     * @return The identifiers of those files that could <b>not</b> be moved successfully
+     * @throws OXException If move fails
+     */
+    default List<String> move(List<String> sourceIds, long sequenceNumber, String destFolderId, boolean adjustFilenamesAsNeeded, @SuppressWarnings("unused") boolean ignoreWarnings) throws OXException {
+        return move(sourceIds, sequenceNumber, destFolderId, adjustFilenamesAsNeeded, false);
+    }
+
+    /**
      * Loads the documents content
      *
      * @param id The id of the document
@@ -622,5 +637,18 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @throws OXException If restore fails
      */
     Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException;
+
+    /**
+     * Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a specific target, which can be used
+     * to open the regular, browser-based guest mode on the remote host.
+     * <p/>
+     * Only available if supported by the targeted file storage account.
+     *
+     * @param folderId The targeted folder in the guest account
+     * @param id The targeted item in the guest account, or <code>null</code> when pointing to a folder
+     * @param additionals Additional data to include in the resulting backward link's share target, or <code>null</code> if not set
+     * @return The generated backward link
+     */
+    String getBackwardLink(String folderId, String id, Map<String, String> additionals) throws OXException;
 
 }

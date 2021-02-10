@@ -60,7 +60,7 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * 
+ *
  * {@link Bug13090Test}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -80,7 +80,7 @@ public class Bug13090Test extends AbstractChronosTest {
         EventData series = EventFactory.createSeriesEvent(getCalendaruser(), "Bug13090Test", 4, folderId);
         EventData createEvent = eventManager.createEvent(series, true);
         try {
-            ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(getSessionId(), folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE);
+            ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, null, Boolean.FALSE, null, null, null, null, Boolean.FALSE);
             eventManager.handleUpdate(response, true);
         } catch (ChronosApiException e) {
             assertEquals("Wrong exception code.", CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create().getErrorCode(), e.getErrorCode());

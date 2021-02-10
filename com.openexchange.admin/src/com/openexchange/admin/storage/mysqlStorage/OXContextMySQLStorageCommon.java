@@ -57,6 +57,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,6 +83,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.AssignmentInsertData;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.pipesnfilters.DataSource;
@@ -438,6 +440,9 @@ public class OXContextMySQLStorageCommon {
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
@@ -708,6 +713,9 @@ public class OXContextMySQLStorageCommon {
             stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count" + (increment ? '+' : '-') + "1 WHERE filestore_id=?");
             stmt.setInt(1, ctx.getFilestoreId().intValue());
             stmt.executeUpdate();
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -761,6 +769,12 @@ public class OXContextMySQLStorageCommon {
             stmt = configdbCon.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=?");
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
+        } catch (DataTruncation e) {
+            if (!increment) {
+                OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+                throw new StorageException(oxe.getMessage(), oxe);
+            }
+            throw new StorageException(e.getMessage(), e);
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -817,6 +831,12 @@ public class OXContextMySQLStorageCommon {
             stmt.setInt(1, db.getId().intValue());
             stmt.setString(2, schema);
             stmt.executeUpdate();
+        } catch (DataTruncation e) {
+            if (!increment) {
+                OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+                throw new StorageException(oxe.getMessage(), oxe);
+            }
+            throw new StorageException(e.getMessage(), e);
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {

@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
@@ -271,9 +272,11 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
+        registerService(AJAXActionAnnotationProcessor.class, new RestrictedActionAnnotationProcessor());
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix, true);
+        final OAuthDispatcherServlet oAuthDispatcherServletWithoutPrefix = new OAuthDispatcherServlet(this, prefix, false);
         trackService(OAuthResourceService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
@@ -313,9 +316,11 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
                 if (null == servlets.putIfAbsent(module, PRESENT)) {
-                    registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        registerSessionServlet(prefix + module, oAuthDispatcherServletWithoutPrefix);
                         registerSessionServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module, oAuthDispatcherServlet);
+                    } else {
+                        registerSessionServlet(prefix + module, dispatcherServlet);
                     }
                 }
             }

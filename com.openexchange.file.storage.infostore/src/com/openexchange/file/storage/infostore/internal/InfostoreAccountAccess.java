@@ -82,7 +82,10 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(InfostoreAdapterFileAccess.class, capability);
+        if (capability.isFileAccessCapability()) {
+            return FileStorageCapabilityTools.supportsByClass(InfostoreAdapterFileAccess.class, capability);
+        }
+        return FileStorageCapabilityTools.supportsFolderCapabilityByClass(InfostoreFolderAccess.class, capability);
     }
 
     @Override

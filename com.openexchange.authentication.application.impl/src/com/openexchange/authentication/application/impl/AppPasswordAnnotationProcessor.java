@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.authentication.application.exceptions.AppPasswordExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -92,7 +92,7 @@ public class AppPasswordAnnotationProcessor extends AbstractAJAXActionAnnotation
             return; // Not a restricted session, just return
         }
         RestrictedAction restrAction = action.getClass().getAnnotation(RestrictedAction.class);
-        String requiredScope = restrAction.type().val() + restrAction.module();
+        String requiredScope = restrAction.type().getScope(restrAction.module());
 
         // Check if this action requires full auth.  If so, reject now
         if (RestrictedAction.REQUIRES_FULL_AUTH.equals(restrAction.module())) {

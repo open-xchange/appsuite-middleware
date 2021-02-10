@@ -69,6 +69,7 @@ import org.xml.sax.SAXException;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
@@ -82,8 +83,8 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @since v7.10.0
  */
 public abstract class AbstractDAVSubscribeService extends AbstractSubscribeService {
-    
-    public final static String CLIENT_ID = "davsub"; 
+
+    public final static String CLIENT_ID = "davsub";
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -93,9 +94,11 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
 
     /**
      * Initializes a new {@link AbstractDAVSubscribeService}.
+     *
+     * @throws OXException
      */
-    protected AbstractDAVSubscribeService(ServiceLookup services) {
-        super();
+    protected AbstractDAVSubscribeService(ServiceLookup services) throws OXException {
+        super(services.getServiceSafe(com.openexchange.folderstorage.FolderService.class));
         this.services = services;
         this.subscriptionSource = initSS();
     }
@@ -153,18 +156,18 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      */
     protected Document getResponseBodyAsDocument(HttpResponse httpResponse) throws IOException {
         InputStream in = httpResponse.getEntity().getContent();
-        if (in != null) {
-            try {
-                return DomUtil.parseDocument(in);
-            } catch (ParserConfigurationException e) {
-                throw new IOException("XML parser configuration error", e);
-            } catch (SAXException e) {
-                throw new IOException("XML parsing error", e);
-            } finally {
-                Streams.close(in);
-            }
+        if (in == null) {
+            return null;
         }
-        return null;
+        try {
+            return DomUtil.parseDocument(in);
+        } catch (ParserConfigurationException e) {
+            throw new IOException("XML parser configuration error", e);
+        } catch (SAXException e) {
+            throw new IOException("XML parsing error", e);
+        } finally {
+            Streams.close(in);
+        }
     }
 
     /**
@@ -173,12 +176,13 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      * @param request The HTTP request
      */
     protected static void reset(HttpRequestBase request) {
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (Exception e) {
-                // Ignore
-            }
+        if (null == request) {
+            return;
+        }
+        try {
+            request.reset();
+        } catch (Exception e) {
+            // Ignore
         }
     }
 
@@ -188,15 +192,17 @@ public abstract class AbstractDAVSubscribeService extends AbstractSubscribeServi
      * @param response The HTTP response to consume and close
      */
     protected static void consume(HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
+        if (null == response) {
+            return;
+        }
+        HttpEntity entity = response.getEntity();
+        if (null == entity) {
+            return;
+        }
+        try {
+            EntityUtils.consume(entity);
+        } catch (Exception e) {
+            // Ignore
         }
     }
 

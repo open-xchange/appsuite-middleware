@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Analyzes an itip message.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: dataSource
         description: >-

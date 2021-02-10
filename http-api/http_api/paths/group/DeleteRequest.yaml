@@ -4,8 +4,9 @@
     tags:
       - Groups
     summary: Deletes a group.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the group to delete.

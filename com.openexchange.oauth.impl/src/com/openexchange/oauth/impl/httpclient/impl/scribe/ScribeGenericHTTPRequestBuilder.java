@@ -60,6 +60,8 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPGenericRequestBuilder;
 import com.openexchange.http.client.builder.HTTPRequest;
@@ -72,6 +74,8 @@ import com.openexchange.oauth.impl.httpclient.OAuthHTTPRequestBuilder;
 
 public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericRequestBuilder<T>> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
+
     protected final Map<String, String> parameters;
     protected final Map<String, String> headers;
     protected final OAuthHTTPRequestBuilder coreBuilder;
@@ -81,6 +85,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
     protected final OAuthService scribeOAuthService;
     protected final Class<? extends org.scribe.builder.api.Api> provider;
 
+
     /**
      * Initializes a new {@link ScribeGenericHTTPRequestBuilder}.
      *
@@ -89,8 +94,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
      */
     protected ScribeGenericHTTPRequestBuilder(final OAuthHTTPRequestBuilder coreBuilder) {
         super();
-        parameters = new TreeMap<String, String>();
-        headers = new TreeMap<String, String>();
+        parameters = new TreeMap<>();
+        headers = new TreeMap<>();
         this.coreBuilder = coreBuilder;
         provider = getProvider(coreBuilder.getApi());
         scribeOAuthService = new ServiceBuilder().provider(getProvider(coreBuilder.getApi())).apiKey(coreBuilder.getApiKey()).apiSecret(coreBuilder.getSecret()).build();
@@ -169,6 +174,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
             try {
                 finalUrl = isVerbatimUrl ? verbatimUrl : new URIBuilder(baseUrl).build().toString();
             } catch (URISyntaxException e) {
+                LOGGER.debug("Unable to build URL.", e);
                 finalUrl = baseUrl;
             }
             request = new OAuthRequest(getVerb(), finalUrl);

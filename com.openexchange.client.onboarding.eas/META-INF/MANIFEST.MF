@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange onboarding EAS bundle
 Bundle-SymbolicName: com.openexchange.client.onboarding.eas
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
@@ -27,6 +27,7 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.openexchange.osgi,
  com.openexchange.plist,
  com.openexchange.server,
+ com.openexchange.serverconfig,
  com.openexchange.session,
  com.sun.istack.internal,
  com.sun.xml.internal.ws,
@@ -130,3 +131,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.helpers
 Bundle-Activator: com.openexchange.client.onboarding.eas.osgi.OnboardingEASActivator
 Export-Package: com.openexchange.client.onboarding.eas.custom
+Automatic-Module-Name: com.openexchange.client.onboarding.eas

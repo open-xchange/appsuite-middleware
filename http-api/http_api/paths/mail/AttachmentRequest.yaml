@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets a mail attachment.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -105,13 +108,20 @@
             schema:
               type: string
               format: byte
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
   put:
     operationId: putMailAttachment
     tags:
       - Mail
     summary: Stores a mail attachment to the drive.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mails    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
@@ -131,6 +141,16 @@
         required: true
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutAttachmentBody'
+      description: >
+        A possible empty JSON object containing the optional fields
+        `description` and `filename`. The filename and description values will
+        be used for the newly created file in the drive module.
+      required: true          
     responses:
       '200':
         description: >-
@@ -162,13 +182,7 @@
                     filename:
                       type: string
                       description: Name of the newly created drive file.
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PutAttachmentBody'
-      description: >
-        A possible empty JSON object containing the optional fields
-        `description` and `filename`. The filename and description values will
-        be used for the newly created file in the drive module.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'                      

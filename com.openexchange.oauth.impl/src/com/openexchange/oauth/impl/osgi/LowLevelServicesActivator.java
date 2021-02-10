@@ -49,11 +49,24 @@
 
 package com.openexchange.oauth.impl.osgi;
 
+import java.util.Arrays;
+import java.util.Collection;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.impl.internal.groupware.CreateOAuthAccountTable;
+import com.openexchange.oauth.impl.internal.groupware.DropForeignKeyFromOAuthAccountTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAccountsTableUtf8Mb4UpdateTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAccountsTableUtf8Mb4UpdateTaskV2;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAddExpiryDateColumnTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAddIdentityColumnTaskV2;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 import com.openexchange.oauth.impl.internal.groupware.OAuthDeleteListener;
+import com.openexchange.oauth.impl.internal.groupware.RemoveLinkedInScopeUpdateTask;
+import com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -77,8 +90,19 @@ public class LowLevelServicesActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateOAuthAccountTable(), null);
         registerService(DeleteListener.class, new OAuthDeleteListener(), null);
-        track(DatabaseService.class, new UpdateTaskRegisterer(context));
-        openTrackers();
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+            @Override
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                //@formatter:off
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(),
+                    new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask(),
+                    new DropForeignKeyFromOAuthAccountTask(), new OAuthAddIdentityColumnTaskV2(),
+                    new OAuthAccountsTableUtf8Mb4UpdateTask(), new OAuthAccountsTableUtf8Mb4UpdateTaskV2(),
+                    new RemoveLinkedInScopeUpdateTask(), new OAuthAddExpiryDateColumnTask());
+                //@formatter:on
+            }
+        });
     }
 
     @Override

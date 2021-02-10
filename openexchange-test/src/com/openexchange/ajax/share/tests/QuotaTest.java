@@ -49,26 +49,20 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
-import java.io.IOException;
-import java.rmi.Naming;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.json.JSONException;
+import java.util.Map.Entry;
+import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
+import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -83,6 +77,7 @@ import com.openexchange.share.ShareTarget;
 public class QuotaTest extends ShareTest {
 
     private AJAXClient client2;
+    private JSONObject oldConfig;
     private Map<Integer, FolderObject> foldersToDelete;
 
     @Override
@@ -90,43 +85,25 @@ public class QuotaTest extends ShareTest {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         client2 = getClient2();
-        Map<String, String> userAttributes = new HashMap<String, String>();
-        userAttributes.put("com.openexchange.quota.invite_guests", "0");
-        userAttributes.put("com.openexchange.quota.share_links", "0");
-        setQuota(userAttributes);
-    }
-
-    private void setQuota(Map<String, String> props) throws Exception {
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        for (String property : props.keySet()) {
-            user.setUserAttribute("config", property, props.get(property));
-        }
-        Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(getContext(client2), user, credentials);
-
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(getContext(client2), user, "quota", credentials);
-        System.out.println("User configuration related to 'quota' after changing the following properties:");
-        for (String property : props.keySet()) {
-            System.out.println(property + "' to " + props.get(property));
-        }
-        for (UserProperty prop : userConfigurationSource) {
-            System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
-        }
-    }
-
-    private Context getContext(AJAXClient client) throws OXException, IOException, JSONException {
-        return new Context(I(client.getValues().getContextId()));
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put("com.openexchange.quota.invite_guests", "0");
+        properties.put("com.openexchange.quota.share_links", "0");
+        ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "user", null);
+        ChangePropertiesResponse changePropertiesResponse = client2.execute(changePropertiesRequest);
+        oldConfig = ResponseWriter.getJSON(changePropertiesResponse.getResponse()).getJSONObject("data");
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
             if (null != client2) {
-                Map<String, String> userAttributes = new HashMap<String, String>();
-                userAttributes.put("com.openexchange.quota.invite_guests", null);
-                userAttributes.put("com.openexchange.quota.share_links", null);
-                setQuota(userAttributes);
+                if (null != oldConfig) {
+                    Map<String, String> oldProperties = new HashMap<String, String>();
+                    for (Entry<String, Object> entry : oldConfig.entrySet()) {
+                        oldProperties.put(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                    client2.execute(new ChangePropertiesRequest(oldProperties, "user", null));
+                }
                 if (null != foldersToDelete && 0 < foldersToDelete.size()) {
                     deleteFoldersSilently(client2, foldersToDelete);
                 }

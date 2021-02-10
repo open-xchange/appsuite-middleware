@@ -65,12 +65,13 @@ import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentStorageService;
 import com.openexchange.mail.compose.AttachmentStorages;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.ContentId;
+import com.openexchange.mail.compose.HeaderUtility;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.Meta;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
-import com.openexchange.mail.compose.impl.HeaderUtility;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -123,32 +124,44 @@ public class EditCopy extends AbstractOpener {
         Optional<Message.ContentType> optionalContentType = Optional.empty();
         {
             String headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_CONTENT_TYPE));
-            Message.ContentType ct = Message.ContentType.contentTypeFor(headerValue);
-            if (ct != null) {
-                optionalContentType = Optional.of(ct);
+            if (Strings.isNotEmpty(headerValue)) {
+                Message.ContentType ct = Message.ContentType.contentTypeFor(headerValue);
+                if (ct != null) {
+                    optionalContentType = Optional.of(ct);
+                }
             }
 
             headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_META));
-            Meta parsedMeta = HeaderUtility.headerValue2Meta(headerValue);
-            state.metaBuilder.applyFromDraft(parsedMeta);
+            if (Strings.isNotEmpty(headerValue)) {
+                Meta parsedMeta = HeaderUtility.headerValue2Meta(headerValue);
+                state.metaBuilder.applyFromDraft(parsedMeta);
+            }
 
             headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SECURITY));
-            Security parsedSecurity = HeaderUtility.headerValue2Security(headerValue);
-            state.message.setSecurity(parsedSecurity);
+            if (Strings.isNotEmpty(headerValue)) {
+                Security parsedSecurity = HeaderUtility.headerValue2Security(headerValue);
+                state.message.setSecurity(parsedSecurity);
+            }
 
             headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
-            SharedAttachmentsInfo parsedSharedAttachments = HeaderUtility.headerValue2SharedAttachments(headerValue);
-            state.message.setsharedAttachmentsInfo(parsedSharedAttachments);
+            if (Strings.isNotEmpty(headerValue)) {
+                SharedAttachmentsInfo parsedSharedAttachments = HeaderUtility.headerValue2SharedAttachments(headerValue);
+                state.message.setsharedAttachmentsInfo(parsedSharedAttachments);
+            }
 
             headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_READ_RECEIPT));
-            if ("true".equalsIgnoreCase(headerValue)) {
-                state.message.setRequestReadReceipt(true);
+            if (Strings.isNotEmpty(headerValue)) {
+                if ("true".equalsIgnoreCase(headerValue)) {
+                    state.message.setRequestReadReceipt(true);
+                }
             }
 
             headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_CUSTOM_HEADERS));
-            Map<String, String> customHeaders = HeaderUtility.headerValue2CustomHeaders(headerValue);
-            if (customHeaders != null) {
-                state.message.setCustomHeaders(customHeaders);
+            if (Strings.isNotEmpty(headerValue)) {
+                Map<String, String> customHeaders = HeaderUtility.headerValue2CustomHeaders(headerValue);
+                if (customHeaders != null) {
+                    state.message.setCustomHeaders(customHeaders);
+                }
             }
         }
 
@@ -256,16 +269,17 @@ public class EditCopy extends AbstractOpener {
                         state.attachments = new ArrayList<>(inlineParts.size());
                     }
 
-                    Map<String, Attachment> inlineAttachments = new HashMap<String, Attachment>(inlineParts.size());
+                    Map<ContentId, Attachment> inlineAttachments = new HashMap<ContentId, Attachment>(inlineParts.size());
                     int i = 0;
                     for (Map.Entry<String, MailPart> inlineEntry : inlineParts.entrySet()) {
                         MailPart mailPart = inlineEntry.getValue();
                         // Compile & store attachment
-                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, inlineEntry.getKey(), i + 1, state.compositionSpaceId);
+                        ContentId contentId = ContentId.valueOf(inlineEntry.getKey());
+                        AttachmentDescription attachment = AttachmentStorages.createInlineAttachmentDescriptionFor(mailPart, contentId, i + 1, state.compositionSpaceId);
                         Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                         state.attachments.add(partAttachment);
 
-                        inlineAttachments.put(inlineEntry.getKey(), partAttachment);
+                        inlineAttachments.put(contentId, partAttachment);
                         i++;
                     }
 

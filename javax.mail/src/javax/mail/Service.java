@@ -40,6 +40,7 @@
 
 package javax.mail;
 
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EventListener;
@@ -680,5 +681,24 @@ public abstract class Service implements AutoCloseable {
      */
     EventQueue getEventQueue() {
 	return q;
+    }
+
+    /**
+     * Gets the debug setting for this Service.
+     *
+     * @return current debug setting
+     */
+    public boolean getDebug() {
+    return session.getDebug();
+    }
+
+    /**
+     * Returns the stream to be used for debugging output.  If no stream
+     * has been set, <code>System.out</code> is returned.
+     *
+     * @return      the PrintStream to use for debugging output
+     */
+    public PrintStream getDebugOut() {
+    return session.getDebugOut();
     }
 }

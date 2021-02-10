@@ -92,7 +92,7 @@ abstract class AbstractMicrosoftGraphAPI {
 
     /**
      * Gets the REST resource from the specified path
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The resource's path
      * @return A {@link JSONObject} with the resource
@@ -105,7 +105,7 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Gets the REST resource from the specified path and the specified query
      * parameters
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The resource's path
      * @param queryParams the request's query parameters
@@ -119,20 +119,20 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Gets the stream from the specified path. Use to stream data from the
      * remote end-point to the client, i.e. download.
-     * 
+     *
      * @param path The path
      * @return The {@link InputStream}
      * @throws OXException if an error is occurred
      */
     InputStream getStream(String path) throws OXException {
-        return client.download(new HttpGet(path));
+        return client.download(() -> new HttpGet(path));
     }
 
     //////////////////////////////// POST ///////////////////////////////////////
 
     /**
      * Posts the specified {@link JSONObject} body to the specified path
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The path
      * @param body The body to post
@@ -141,7 +141,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject postResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.POST, accessToken, path);
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
@@ -149,7 +149,7 @@ abstract class AbstractMicrosoftGraphAPI {
 
     /**
      * Puts the specified {@link JSONObject} body to the specified path
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The path
      * @param body The body to post
@@ -158,7 +158,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject putResource(String accessToken, String path, String contentType, InputStream body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.PUT, accessToken, path, contentType);
-        request.sethBodyEntity(new InputStreamEntity(body, contentType));
+        request.setBodyEntity(new InputStreamEntity(body, contentType));
         return executeRequest(request);
     }
 
@@ -166,7 +166,7 @@ abstract class AbstractMicrosoftGraphAPI {
 
     /**
      * Deletes a resource
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The path
      * @throws OXException if an error is occurred
@@ -179,7 +179,7 @@ abstract class AbstractMicrosoftGraphAPI {
 
     /**
      * Patches the specified {@link JSONObject} body to the specified path
-     * 
+     *
      * @param accessToken The oauth access token
      * @param path The path
      * @param body The body to post
@@ -188,7 +188,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject patchResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = createRequest(RESTMethod.PATCH, accessToken, path);
-        request.sethBodyEntity(new JSONObjectEntity(body));
+        request.setBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
@@ -197,7 +197,7 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod} and access token
      * for the specified end-point
-     * 
+     *
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
@@ -210,7 +210,7 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token
      * and content type for the specified end-point
-     * 
+     *
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
@@ -224,7 +224,7 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token
      * and query parameters for the specified end-point
-     * 
+     *
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
@@ -238,7 +238,7 @@ abstract class AbstractMicrosoftGraphAPI {
     /**
      * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token, content type
      * and query parameters for the specified end-point
-     * 
+     *
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
@@ -258,7 +258,7 @@ abstract class AbstractMicrosoftGraphAPI {
 
     /**
      * Executes the specified {@link MicrosoftGraphRequest}
-     * 
+     *
      * @param request the request to execute
      * @return The response body as a {@link JSONObject}
      * @throws OXException if an error is occurred

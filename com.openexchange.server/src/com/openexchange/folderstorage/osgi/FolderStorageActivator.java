@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.osgi;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -67,13 +68,17 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.admin.HideAdminService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
 import com.openexchange.folderstorage.calendar.osgi.CalendarFolderStorageActivator;
+import com.openexchange.folderstorage.contact.osgi.ContactsFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
@@ -84,7 +89,6 @@ import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
 import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -111,7 +115,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
         protected DisplayNameFolderField() {
             super();
-            cache = CacheBuilder.newBuilder().maximumSize(1024).build();
+            cache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
         }
 
         @Override
@@ -120,7 +124,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         @Override
-        public Object getValue(final FolderObject folder, final ServerSession session) {
+        public Object getValue(final Folder folder, final ServerSession session) {
             final int createdBy = folder.getCreatedBy();
             if (createdBy <= 0) {
                 return JSONObject.NULL;
@@ -154,7 +158,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         @Override
-        public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
+        public List<Object> getValues(final List<Folder> folder, final ServerSession session) {
             return AdditionalFieldsUtils.bulk(this, folder, session);
         }
 
@@ -184,7 +188,9 @@ public final class FolderStorageActivator implements BundleActivator {
         UserPermissionService.class,
         ObjectUseCountService.class,
         HideAdminService.class,
-        PrincipalUseCountService.class
+        PrincipalUseCountService.class,
+        ConfigViewFactory.class,
+        LeanConfigurationService.class
     };
 
     @Override
@@ -235,6 +241,7 @@ public final class FolderStorageActivator implements BundleActivator {
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
             activators.add(new FileStorageFolderStorageActivator()); // File storage impl
             activators.add(new CalendarFolderStorageActivator()); // Calendar storage impl
+            activators.add(new ContactsFolderStorageActivator()); // Contacts storage impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator

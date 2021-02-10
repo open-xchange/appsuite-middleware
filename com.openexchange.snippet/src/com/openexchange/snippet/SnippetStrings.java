@@ -82,4 +82,16 @@ public class SnippetStrings implements LocalizableStrings {
     // Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
     public static final String UPDATE_DENIED_MSG = "You are not allowed to modify the signature";
 
+    // The user entered a very long display name, which cannot be stored due to data truncation
+    public static final String DISPLAY_NAME_TOO_LONG_MSG = "The entered display name is too long. Please use a shorter one.";
+
+    // The user entered a very long snippet identifier, which cannot be stored due to data truncation
+    public static final String ID_TOO_LONG_MSG = "The entered identifier is too long. Please use a shorter one.";
+
+    // The user entered a very long module identifier, which cannot be stored due to data truncation
+    public static final String MODULE_TOO_LONG_MSG = "The entered module identifier is too long. Please use a shorter one.";
+
+    // The user entered a very long type identifier, which cannot be stored due to data truncation
+    public static final String TYPE_TOO_LONG_MSG = "The entered type identifier is too long. Please use a shorter one.";
+
 }

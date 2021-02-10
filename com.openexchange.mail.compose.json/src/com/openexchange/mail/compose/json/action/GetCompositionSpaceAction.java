@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.compose.json.action;
 
-import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -79,13 +79,13 @@ public class GetCompositionSpaceAction extends AbstractMailComposeAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
-        CompositionSpace compositionSpace = compositionSpaceService.getCompositionSpace(uuid, session);
-        return new AJAXRequestResult(compositionSpace, "compositionSpace");
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+
+        CompositionSpace compositionSpace = compositionSpaceService.getCompositionSpace(compositionSpaceId.getId());
+        return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

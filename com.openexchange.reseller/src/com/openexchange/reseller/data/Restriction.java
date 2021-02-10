@@ -49,13 +49,17 @@
 
 package com.openexchange.reseller.data;
 
+import java.io.Serializable;
+
 /**
  * {@link Restriction} - A restriction associated with a reseller administrator.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class Restriction implements Cloneable {
+public class Restriction implements Cloneable, Serializable {
+
+    private static final long serialVersionUID = -5606359645775067497L;
 
     /**
      * The maximum number of contexts a subadmin may create
@@ -206,7 +210,7 @@ public class Restriction implements Cloneable {
         try {
             return (Restriction) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented", e);
         }
     }
 

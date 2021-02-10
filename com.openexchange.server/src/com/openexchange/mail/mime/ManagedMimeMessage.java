@@ -100,7 +100,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws OXException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private ManagedMimeMessage(final MailMessage original, final Date receivedDate) throws MessagingException, OXException, IOException {
+    private ManagedMimeMessage(MailMessage original, Date receivedDate) throws MessagingException, OXException, IOException {
         super(MimeDefaultSession.getDefaultSession());
         final File[] files = new File[1];
         final InputStream in = getInputStreamFor(original, files);
@@ -119,7 +119,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
+    public ManagedMimeMessage(Session session, File file) throws MessagingException, IOException {
         this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), null);
     }
 
@@ -132,11 +132,11 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public ManagedMimeMessage(final Session session, final File file, final Date receivedDate) throws MessagingException, IOException {
+    public ManagedMimeMessage(Session session, File file, Date receivedDate) throws MessagingException, IOException {
         this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), receivedDate);
     }
 
-    private ManagedMimeMessage(final Session session, final File file, final InputStream in, final Date receivedDate) throws MessagingException {
+    private ManagedMimeMessage(Session session, File file, InputStream in, Date receivedDate) throws MessagingException {
         super(session, in);
         closeables = new ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
@@ -195,7 +195,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * ######################################## Helpers ########################################
      */
 
-    private static InputStream getInputStreamFor(final MailMessage mail, final File[] files) throws OXException, IOException {
+    private static InputStream getInputStreamFor(MailMessage mail, File[] files) throws OXException, IOException {
         final long size = mail.getSize();
         if (size > 0 && size <= DEFAULT_MAX_INMEMORY_SIZE) {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUFFER_SIZE);

@@ -112,18 +112,20 @@ public final class Utils {
     public static SearchTerm<?> prepareSearchTerm(final SearchRequest searchRequest) throws OXException {
         final List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
         for (DriveFacetType type : DriveFacetType.values()) {
-            final List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
-            if (facets != null && !facets.isEmpty()) {
-                final Pair<OP, OP> ops = operationsFor(type);
-                final List<Filter> filters = new LinkedList<Filter>();
-                for (final ActiveFacet facet : facets) {
-                    final Filter filter = facet.getFilter();
-                    if (filter != Filter.NO_FILTER) {
-                        filters.add(filter);
+            if (false == DriveFacetType.FOLDER_NAME.equals(type)) {
+                final List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
+                if (facets != null && !facets.isEmpty()) {
+                    final Pair<OP, OP> ops = operationsFor(type);
+                    final List<Filter> filters = new LinkedList<Filter>();
+                    for (final ActiveFacet facet : facets) {
+                        final Filter filter = facet.getFilter();
+                        if (filter != Filter.NO_FILTER) {
+                            filters.add(filter);
+                        }
                     }
-                }
 
-                facetTerms.add(prepareFilterTerm(filters, ops.getFirst(), ops.getSecond()));
+                    facetTerms.add(prepareFilterTerm(filters, ops.getFirst(), ops.getSecond()));
+                }
             }
         }
 

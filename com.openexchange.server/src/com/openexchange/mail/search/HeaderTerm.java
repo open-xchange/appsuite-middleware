@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link HeaderTerm}
+ * {@link HeaderTerm} - Checks if the value of a certain header matches a given string.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -74,7 +74,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
     /**
      * Initializes a new {@link HeaderTerm}
      */
-    public HeaderTerm(final String headerName, final String headerValue) {
+    public HeaderTerm(String headerName, String headerValue) {
         super();
         hdr = new String[] { headerName, headerValue };
     }
@@ -95,12 +95,12 @@ public final class HeaderTerm extends SearchTerm<String[]> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.HEADERS);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         final String val = mailMessage.getHeader(hdr[0], ", ");
         if (val == null) {
             if (hdr[1] == null) {
@@ -115,7 +115,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final String[] val;
         try {
             val = msg.getHeader(hdr[0]);

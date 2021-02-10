@@ -67,7 +67,7 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * 
+ *
  * {@link Bug12842Test}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -237,12 +237,12 @@ public class Bug12842Test extends AbstractChronosTest {
         EventData event = EventFactory.createSingleEvent(getCalendaruser(), "Bug12842Test", startDate, endDate, folderId);
         event.setRrule(RRuleFactory.getFrequencyWithoutLimit(freq));
         eventManager.createEvent(event, true);
-        
+
         // create second event
         EventData conflictingEvent = event;
         String conflictingSummary = "ConflictingEvent";
         conflictingEvent.setSummary(conflictingSummary);
-        
+
         Calendar cal2 = Calendar.getInstance();
         cal2.setTime(calendar.getTime());
         cal2.set(Calendar.DAY_OF_MONTH, 28); // Use the last possible day, which occurs in every month.
@@ -273,8 +273,8 @@ public class Bug12842Test extends AbstractChronosTest {
         conflictingEvent.setStartDate(DateTimeUtil.getDateTime(cal2));
         cal2.set(Calendar.HOUR_OF_DAY, conflictEnd);
         conflictingEvent.setEndDate(DateTimeUtil.getDateTime(cal2));
-        
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, conflictingEvent, Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(folderId, conflictingEvent, Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(response.getErrorDesc(), response.getError());
         if (shouldConflict) {
             assertFalse(response.getData().getConflicts().isEmpty());
@@ -284,7 +284,7 @@ public class Bug12842Test extends AbstractChronosTest {
             assertTrue(conflictsOfInteresst.isEmpty());
             eventManager.handleCreation(response);
         }
-        
+
         eventManager.cleanUp();
     }
 

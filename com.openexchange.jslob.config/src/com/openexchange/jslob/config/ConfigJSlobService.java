@@ -81,6 +81,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.IValueHandlerExtended;
@@ -821,7 +822,7 @@ public final class ConfigJSlobService implements JSlobService {
                                 Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
                                 if (!value.equals(oldValue)) {
-                                    view.set("user", attributedProperty.propertyName, value);
+                                    view.set(ConfigViewScope.USER.getScopeName(), attributedProperty.propertyName, value);
                                 }
                             }
                         }
@@ -1034,7 +1035,7 @@ public final class ConfigJSlobService implements JSlobService {
                 if (equiv != null) {
                     String configTreePath = equiv.lob2config.get(path.get(0).getName());
                     Object value = jsonUpdate.getValue();
-                    if (null != value) {
+                    if (null != value && configTreePath != null) {
                         SettingStorage stor = SettingStorage.getInstance(session);
                         ConfigTree configTree = ConfigTree.getInstance();
                         Setting setting = configTree.getSettingByPath(configTreePath);
@@ -1087,7 +1088,7 @@ public final class ConfigJSlobService implements JSlobService {
                              */
                             throw JSlobExceptionCodes.PROTECTED.create(sPath);
                         }
-                        view.set("user", attributedProperty.propertyName, newValue);
+                        view.set(ConfigViewScope.USER.getScopeName(), attributedProperty.propertyName, newValue);
                     }
                 }
                 return;
@@ -1279,7 +1280,7 @@ public final class ConfigJSlobService implements JSlobService {
             // Lastly, let's add configurability.
             final String finalScope = preferenceItem.get(METADATA_FINAL);
             final String isProtected = preferenceItem.get(METADATA_PROTECTED);
-            final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
+            final boolean writable = (finalScope == null || finalScope.equals(ConfigViewScope.USER.getScopeName())) && (isProtected == null || !Boolean.parseBoolean(isProtected));
             if (!writable) {
                 jMetaData.put("configurable", Boolean.valueOf(writable));
             }
@@ -1444,9 +1445,6 @@ public final class ConfigJSlobService implements JSlobService {
         /** The property name of the preference item property. */
         protected final String propertyName;
 
-        /** The preference path; ending with <code>"/value"</code>. */
-        protected final String preferencePath;
-
         /** The property representing a preference item. */
         protected final ComposedConfigProperty<String> property;
 
@@ -1460,7 +1458,6 @@ public final class ConfigJSlobService implements JSlobService {
             super();
             this.propertyName = propertyName;
             this.property = property;
-            this.preferencePath = preferencePath;
             this.isProtected = isProtected;
             path = JSONPathElement.parsePath(preferencePath);
         }

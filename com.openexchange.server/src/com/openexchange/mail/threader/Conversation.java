@@ -95,7 +95,7 @@ public final class Conversation {
     /**
      * Initializes a new {@link Conversation}.
      */
-    public Conversation(final Conversation copy) {
+    public Conversation(Conversation copy) {
         super();
         // Must not be null
         messages = copy.messages;
@@ -106,7 +106,7 @@ public final class Conversation {
     /**
      * Initializes a new {@link Conversation}.
      */
-    public Conversation(final MailMessage message) {
+    public Conversation(MailMessage message) {
         this();
         addMessage(message);
     }
@@ -114,10 +114,10 @@ public final class Conversation {
     /**
      * Initializes a new {@link Conversation}.
      */
-    public Conversation(final Collection<MailMessage> messages) {
+    public Conversation(Collection<MailMessage> messages) {
         this();
         if (null != messages) {
-            for (final MailMessage message : messages) {
+            for (MailMessage message : messages) {
                 addMessage(message);
             }
         }
@@ -129,14 +129,14 @@ public final class Conversation {
      * @param message The message to add
      * @return This conversation with message added
      */
-    public Conversation addMessage(final MailMessage message) {
+    public Conversation addMessage(MailMessage message) {
         if (null != message) {
             addWrapper(new MailMessageWrapper(message));
         }
         return this;
     }
 
-    private void addWrapper(final MailMessageWrapper mmw) {
+    private void addWrapper(MailMessageWrapper mmw) {
         if (messages.add(mmw)) {
             final MailMessage message = mmw.message;
             final String messageId = message.getMessageId();
@@ -151,7 +151,7 @@ public final class Conversation {
             */
             final String[] sReferences = message.getReferences();
             if (null != sReferences) {
-                for (final String sReference : sReferences) {
+                for (String sReference : sReferences) {
                     if (null != sReference) {
                         references.add(sReference);
                     }
@@ -166,10 +166,10 @@ public final class Conversation {
      * @param other The other conversation to join with
      * @return This conversation
      */
-    public Conversation join(final Conversation other) {
+    public Conversation join(Conversation other) {
         if (null != other) {
             final Set<MailMessageWrapper> messages = other.messages;
-            for (final MailMessageWrapper mmw : messages) {
+            for (MailMessageWrapper mmw : messages) {
                 addWrapper(mmw);
             }
         }
@@ -182,7 +182,7 @@ public final class Conversation {
      * @param message The message
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
-    public boolean referencesOrIsReferencedBy(final MailMessage message) {
+    public boolean referencesOrIsReferencedBy(MailMessage message) {
         if (!this.references.isEmpty()) {
             final String messageId = message.getMessageId();
             if (null != messageId && this.references.contains(messageId)) {
@@ -213,7 +213,7 @@ public final class Conversation {
      * @param other The other conversation
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
-    public boolean referencesOrIsReferencedBy(final Conversation other) {
+    public boolean referencesOrIsReferencedBy(Conversation other) {
         if (!this.references.isEmpty()) {
             if (containsAny(this.references, other.messageIds) || (other.references.isEmpty() ? false : containsAny(this.references, other.references))) {
                 return true;
@@ -235,7 +235,7 @@ public final class Conversation {
      * @param other The other conversation possibly referenced
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
-    public boolean references(final Conversation other) {
+    public boolean references(Conversation other) {
         return this.references.isEmpty() ? false : (containsAny(this.references, other.messageIds) || (other.references.isEmpty() ? false : containsAny(this.references, other.references)));
     }
 
@@ -245,7 +245,7 @@ public final class Conversation {
      * @param other The other conversation
      * @return <code>true</code> if referenced-by; otherwise <code>false</code>
      */
-    public boolean isReferencedBy(final Conversation other) {
+    public boolean isReferencedBy(Conversation other) {
         return other.references.isEmpty() ? false : containsAny(this.messageIds, other.references);
     }
 
@@ -256,7 +256,7 @@ public final class Conversation {
      * @param col The second collection, must not be <code>null</code>
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
-    private static boolean containsAny(final Set<String> set, final Collection<String> col) {
+    private static boolean containsAny(Set<String> set, Collection<String> col) {
         final Iterator<String> it = col.iterator();
         for (int i = col.size(); i-- > 0;) {
             if (set.contains(it.next())) {
@@ -273,7 +273,7 @@ public final class Conversation {
      * @param arr The second collection, must not be <code>null</code>
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
-    private static boolean containsAny(final Set<String> set, final String[] arr) {
+    private static boolean containsAny(Set<String> set, String[] arr) {
         for (int i = arr.length; i-- > 0;) {
             if (set.contains(arr[i])) {
                 return true;
@@ -297,12 +297,12 @@ public final class Conversation {
      * @param comparator The comparator used for sorting listed messages
      * @return The messages with given sorting
      */
-    public List<MailMessage> getMessages(final Comparator<MailMessage> comparator) {
+    public List<MailMessage> getMessages(Comparator<MailMessage> comparator) {
         if (messages.isEmpty()) {
             return Collections.emptyList();
         }
         final List<MailMessage> ret = new ArrayList<MailMessage>(messages.size());
-        for (final MailMessageWrapper mmw : messages) {
+        for (MailMessageWrapper mmw : messages) {
             ret.add(mmw.message);
         }
         Collections.sort(ret, null == comparator ? COMPARATOR_DESC : comparator);
@@ -319,7 +319,7 @@ public final class Conversation {
         final MailMessage message;
         private final int hash;
 
-        MailMessageWrapper(final MailMessage message) {
+        MailMessageWrapper(MailMessage message) {
             super();
             this.message = message;
             final String id = message.getMailId();
@@ -337,7 +337,7 @@ public final class Conversation {
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }

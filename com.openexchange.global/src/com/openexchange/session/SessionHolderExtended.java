@@ -49,8 +49,6 @@
 
 package com.openexchange.session;
 
-import com.openexchange.session.Session;
-
 /**
  * {@link SessionHolderExtended} - Extends the {@link SessionHolder} interface by {@link #optSessionObject()} method.
  *

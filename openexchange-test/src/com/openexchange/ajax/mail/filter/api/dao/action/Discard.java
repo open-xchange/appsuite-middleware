@@ -72,13 +72,11 @@ public class Discard extends AbstractAction implements Action<DiscardActionArgum
         return ActionCommand.discard;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setArgument(DiscardActionArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + ActionCommand.discard + "' action can not have any arguments");
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Object getArgument(DiscardActionArgument argument) {
         throw new UnsupportedOperationException("The '" + ActionCommand.discard + "' action does not have any arguments");

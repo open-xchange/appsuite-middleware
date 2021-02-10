@@ -1,6 +1,5 @@
 '/mail/compose/{id}/attachments/{attachmentId}':
   parameters:
-    - $ref: '#/components/parameters/gblQueryParamSession'
     - in: path
       name: id
       description: The ID of the composition space
@@ -17,9 +16,14 @@
     operationId: postAttachmentsById
     tags:
       - MailCompose
-    summary: >-
+    summary: Replaces an existing attachment
+    security: 
+      - session: []       
+    description: >-
       Uploads an attachment again and removes the old attachment from the
       server. Used for image resize.
+    parameters:
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
         description: A JSON object containing the newly added attachment.
@@ -48,7 +52,10 @@
     operationId: getAttachmentsById
     tags:
       - MailCompose
-    summary: Get binary attachment. This URL pattern can be used for inline images.
+    summary: Get binary attachment
+    security: 
+      - session: []       
+    description: This URL pattern can be used for inline images.
     responses:
       '200':
         description: The attachment as file.
@@ -66,18 +73,17 @@
     tags:
       - MailCompose
     summary: Delete an existing attachment.
+    security: 
+      - session: []       
+    parameters:
+      - $ref: '#/components/parameters/MailComposeClientToken'
     responses:
       '200':
-        description: A JSON object containing the success status.
+        description: A JSON object containing the current state of the mail compose
         content:
           application/json:
             schema:
-              type: object
-              title: DeleteAttachmentsByIdBody
-              properties:
-                success:
-                  type: boolean
-                  description: true if the attachment has been successfully deleted
+              $ref: '#/components/schemas/MailComposeAttachmentResponse'
       '400':
         description: 'Bad request, response contains error message.'
       '401':

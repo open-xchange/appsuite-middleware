@@ -90,7 +90,7 @@ public class TrashCleaner implements Runnable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrashCleaner.class);
 
     private final ServerSession session;
-    private final Date maxLastModified;
+    final Date maxLastModified;
 
     private FolderService folderService;
 
@@ -156,7 +156,7 @@ public class TrashCleaner implements Runnable {
         if (null == subfolderIDs || 0 == subfolderIDs.length) {
             return Collections.emptyList();
         }
-        List<UserizedFolder> deletableFolders = new ArrayList<UserizedFolder>();
+        List<UserizedFolder> deletableFolders = new ArrayList<>();
         FolderResponse<UserizedFolder[]> folderResponse = getFolderService().getSubfolders(FolderStorage.REAL_TREE_ID, parentFolder.getID(), true, session, null);
         if (null != folderResponse) {
             UserizedFolder[] subfolders = folderResponse.getResponse();
@@ -177,7 +177,7 @@ public class TrashCleaner implements Runnable {
          */
         SearchIterator<DocumentMetadata> searchIterator = null;
         long sequenceNumber = 0;
-        List<IDTuple> deletableDocuments = new ArrayList<IDTuple>();
+        List<IDTuple> deletableDocuments = new ArrayList<>();
         try {
             searchIterator = searchDeletableFiles(folder);
             while (searchIterator.hasNext()) {
@@ -251,5 +251,4 @@ public class TrashCleaner implements Runnable {
     public String toString() {
         return "TrashCleaner [user=" + session.getUserId() + ", context=" + session.getContextId() + "]";
     }
-
 }

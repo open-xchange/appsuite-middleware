@@ -69,6 +69,7 @@ Following clients can be configured:
 | DAV Subscribe | davsub |
 | Dovecot Admin | dovadm |
 | Dropbox | dropbox |
+| HTTP API client | apiClient |
 | iCAL Feed | icalfeed |
 | Microsoft Graph | msgraph |
 | Nextcloud | nextcloud |

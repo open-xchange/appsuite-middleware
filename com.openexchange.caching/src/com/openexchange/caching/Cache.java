@@ -124,6 +124,7 @@ public interface Cache {
      *
      * @param key The key
      * @return The cached object if found or <code>null</code>
+     * @throws IllegalArgumentException If given key is <code>null</code>
      */
     Object get(Serializable key);
 
@@ -138,6 +139,7 @@ public interface Cache {
      *
      * @param key The key
      * @return A reference to cache element wrapper if found or <code>null</code>
+     * @throws IllegalArgumentException If given key is <code>null</code>
      */
     CacheElement getCacheElement(Serializable key);
 
@@ -147,7 +149,7 @@ public interface Cache {
      * <p>
      * Each time an element is added to the cache without element attributes, the default element attributes are cloned.
      *
-     * @return The default element attributes used by this cache.
+     * @return The default element attributes used by this cache
      * @throws OXException If default element attributes cannot be returned
      */
     ElementAttributes getDefaultElementAttributes() throws OXException;
@@ -157,7 +159,8 @@ public interface Cache {
      *
      * @param key The key
      * @param group The group name.
-     * @return The cached value, <code>null</code> if not found.
+     * @return The cached value, <code>null</code> if not found
+     * @throws IllegalArgumentException If given key or group is <code>null</code>
      */
     Object getFromGroup(Serializable key, String group);
 
@@ -165,6 +168,7 @@ public interface Cache {
      * Invalidates a group: remove all the group members
      *
      * @param group The name of the group to invalidate
+     * @throws IllegalArgumentException If given group is <code>null</code>
      */
     void invalidateGroup(String group);
 
@@ -173,12 +177,13 @@ public interface Cache {
      * replaced. Names are scoped to a cache so they must be unique within the cache they are placed. ObjectExistsException
      *
      * @param key The key
-     * @param obj Object to store
-     * @exception OXException If put operation on cache fails
+     * @param object Object to store
+     * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If given key or object is <code>null</code>
      * @deprecated Use {@link #put(Serializable, Serializable, boolean)} instead and supply the <code>invalidate</code>-flag explicitly.
      */
     @Deprecated
-    void put(Serializable key, Serializable obj) throws OXException;
+    void put(Serializable key, Serializable object) throws OXException;
 
     /**
      * Place a new object in the cache, associated with key name. If there is currently an object associated with name in the cache it is
@@ -189,11 +194,12 @@ public interface Cache {
      * set it to<code>false</code>.
      *
      * @param key The key
-     * @param obj Object to store
+     * @param object Object to store
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
-     * @exception OXException If put operation on cache fails
+     * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If given key or object is <code>null</code>
      */
-    void put(Serializable key, Serializable obj, boolean invalidate) throws OXException;
+    void put(Serializable key, Serializable object, boolean invalidate) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -201,14 +207,15 @@ public interface Cache {
      * If the key or the value is null, and InvalidArgumentException is thrown.
      *
      * @param key The key
-     * @param val The object to store
+     * @param value The object to store
      * @param attr The object's element attributes
      * @exception OXException If put operation on cache fails
+     * @throws IllegalArgumentException If given key or value is <code>null</code>
      * @deprecated Use {@link #put(Serializable, Serializable, ElementAttributes, boolean)} instead and supply the <code>invalidate</code>-
      *             flag explicitly.
      */
     @Deprecated
-    void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException;
+    void put(Serializable key, Serializable value, ElementAttributes attr) throws OXException;
 
     /**
      * Constructs a cache element with these attributes, and puts it into the cache.
@@ -220,12 +227,13 @@ public interface Cache {
      * set it to<code>false</code>.
      *
      * @param key The key
-     * @param val The object to store
+     * @param value The object to store
      * @param attr The object's element attributes
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
-     * @exception OXException If put operation on cache fails
+     * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If given key or value is <code>null</code>
      */
-    void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException;
+    void put(Serializable key, Serializable value, ElementAttributes attr, boolean invalidate) throws OXException;
 
     /**
      * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
@@ -236,6 +244,7 @@ public interface Cache {
      * @param value The object to cache
      * @param attr The objects attributes.
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      * @deprecated Use {@link #putInGroup(Serializable, String, Object, ElementAttributes, boolean)} instead and supply the
      *             <code>invalidate</code>-flag explicitly.
      */
@@ -256,6 +265,7 @@ public interface Cache {
      * @param attr The objects attributes.
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      */
     void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException;
 
@@ -267,6 +277,7 @@ public interface Cache {
      * @param groupName The group name.
      * @param value The object to cache
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      * @deprecated Use {@link #putInGroup(Serializable, String, Serializable, boolean)} instead and supply the <code>invalidate</code>-
      *             flag explicitly.
      */
@@ -286,6 +297,7 @@ public interface Cache {
      * @param value The object to cache
      * @param invalidate <code>true</code> to trigger remote invalidation processing for the cache entry, <code>false</code>, otherwise.
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      */
     void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException;
 
@@ -296,6 +308,7 @@ public interface Cache {
      * @param key The key
      * @param value Object to store
      * @exception OXException If the item is already in the cache.
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      */
     void putSafe(Serializable key, Serializable value) throws OXException;
 
@@ -304,6 +317,7 @@ public interface Cache {
      *
      * @param key The key
      * @throws OXException If remove operation on cache fails
+     * @throws IllegalArgumentException If given key is <code>null</code>
      */
     void remove(Serializable key) throws OXException;
 
@@ -329,6 +343,7 @@ public interface Cache {
      *
      * @param key The key
      * @throws OXException If remove operation on cache fails
+     * @throws IllegalArgumentException If given key is <code>null</code>
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     void localRemove(Serializable key) throws OXException;
@@ -340,6 +355,7 @@ public interface Cache {
      * @param key The key
      * @param value Object to store
      * @throws OXException If put operation on cache fails
+     * @throws IllegalArgumentException If either one of passed arguments is <code>null</code>
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     void localPut(Serializable key, Serializable value) throws OXException;
@@ -349,6 +365,7 @@ public interface Cache {
      *
      * @param key The key
      * @param group The group name.
+     * @throws IllegalArgumentException If given key or group is <code>null</code>
      */
     void removeFromGroup(Serializable key, String group);
 
@@ -357,6 +374,7 @@ public interface Cache {
      *
      * @param keys The keys
      * @param group The group name.
+     * @throws IllegalArgumentException If given group is <code>null</code>
      */
     void removeFromGroup(List<Serializable> keys, String group);
 
@@ -366,6 +384,7 @@ public interface Cache {
      *
      * @param key The key
      * @param group The group name.
+     * @throws IllegalArgumentException If given key or group is <code>null</code>
      * @see SupportsLocalOperations SupportsLocalOperations marker interface to check if supported
      */
     void localRemoveFromGroup(Serializable key, String group);
@@ -415,6 +434,7 @@ public interface Cache {
      * Gets the set of keys of objects currently in the group.
      * @param group
      * @return a set of keys
+     * @throws IllegalArgumentException If given group is <code>null</code>
      */
     Set<?> getGroupKeys(String group) throws OXException;
 

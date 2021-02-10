@@ -236,7 +236,7 @@ public class OAuthDispatcherServletTest {
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(com.openexchange.oauth.provider.resourceserver.OAuthResourceService.class, resourceService);
-        servlet = new OAuthDispatcherServlet(serviceLookup, "/ajax/");
+        servlet = new OAuthDispatcherServlet(serviceLookup, "/ajax/", true);
         request = new SimHttpServletRequest();
         request.setMethod("GET");
 

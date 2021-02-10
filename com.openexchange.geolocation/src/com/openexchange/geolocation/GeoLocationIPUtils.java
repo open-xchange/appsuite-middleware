@@ -51,7 +51,6 @@ package com.openexchange.geolocation;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Pair;
 import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
@@ -70,9 +69,8 @@ public final class GeoLocationIPUtils {
      *
      * @param ipAddress The IP address to convert
      * @return The number representation of the IP address
-     * @throws OXException if the specified IP address is invalid
      */
-    public static BigInteger convertIp(InetAddress ipAddress) throws OXException {
+    public static BigInteger convertIp(InetAddress ipAddress) {
         IPAddressString addressString = new IPAddressString(ipAddress.getHostAddress());
         if (addressString.isIPv4() || addressString.getAddress().isIPv4Convertible()) {
             return new BigInteger(Long.toString(addressString.getAddress().toIPv4().longValue()));
@@ -105,6 +103,6 @@ public final class GeoLocationIPUtils {
     public static Pair<BigInteger, BigInteger> getIPv6Range(String cidr) {
         IPAddressString ipv6Str = new IPAddressString(cidr);
         IPAddress address = ipv6Str.getAddress();
-        return new Pair<BigInteger, BigInteger>(address.getLower().getValue(), address.getUpper().getValue());
+        return new Pair<>(address.getLower().getValue(), address.getUpper().getValue());
     }
 }

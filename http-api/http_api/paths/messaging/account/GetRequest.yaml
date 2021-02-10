@@ -4,8 +4,9 @@
     tags:
       - Messaging
     summary: Gets a messaging account.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: messagingService
         description: The messaging service ID that the account belongs to.

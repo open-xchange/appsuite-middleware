@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share API bundle
 Bundle-SymbolicName: com.openexchange.share.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
+Automatic-Module-Name: com.openexchange.share.json
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -22,6 +23,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
+ com.openexchange.annotation,
  com.openexchange.authentication,
  com.openexchange.authorization,
  com.openexchange.capabilities,
@@ -30,6 +32,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.contact.storage,
  com.openexchange.context,
  com.openexchange.conversion,
+ com.openexchange.conversion.datahandler,
  com.openexchange.crypto,
  com.openexchange.dispatcher,
  com.openexchange.exception,
@@ -37,6 +40,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.file.storage.composition,
  com.openexchange.folderstorage,
  com.openexchange.group,
+ com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
@@ -63,6 +67,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.share.groupware,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.share.subscription,
  com.openexchange.tools,
  com.openexchange.tools.iterator,
  com.openexchange.tools.servlet,

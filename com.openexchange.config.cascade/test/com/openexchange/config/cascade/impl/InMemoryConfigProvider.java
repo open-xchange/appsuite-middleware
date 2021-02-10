@@ -70,17 +70,17 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+    public BasicProperty get(final String propertyName, final int contextId, final int userId) throws OXException {
         return new BasicProperty() {
 
             @Override
             public String get() throws OXException {
-                return values.get(property);
+                return values.get(propertyName);
             }
 
             @Override
             public void set(String value) throws OXException {
-                values.put(property, value);
+                values.put(propertyName, value);
             }
 
             @Override
@@ -94,11 +94,11 @@ public class InMemoryConfigProvider implements ConfigProviderService{
             }
 
             private ConcurrentHashMap<String, String> getMetadata() {
-                ConcurrentHashMap<String, String> retval = metadata.get(property);
+                ConcurrentHashMap<String, String> retval = metadata.get(propertyName);
                 if (retval == null) {
-                    retval = metadata.putIfAbsent(property, new ConcurrentHashMap<String, String>());
+                    retval = metadata.putIfAbsent(propertyName, new ConcurrentHashMap<String, String>());
                     if (retval == null) {
-                        retval = metadata.get(property);
+                        retval = metadata.get(propertyName);
                     }
                 }
                 return retval;
@@ -106,7 +106,7 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
             @Override
             public boolean isDefined() throws OXException {
-                return values.contains(property);
+                return values.contains(propertyName);
             }
 
             @Override

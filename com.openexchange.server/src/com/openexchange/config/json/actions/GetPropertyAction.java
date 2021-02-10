@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -100,7 +101,7 @@ public class GetPropertyAction extends AbstractConfigAction {
         ServerSession session = req.getSession();
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
 
-        ConfigProperty<String> property = view.property("context", propertyName, String.class);
+        ConfigProperty<String> property = view.property(ConfigViewScope.CONTEXT.getScopeName(), propertyName, String.class);
         if (false == property.isDefined()) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
         }

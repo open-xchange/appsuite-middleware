@@ -111,7 +111,11 @@ import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.oauth.RefreshResult;
+import com.openexchange.session.oauth.SessionOAuthTokenService;
+import com.openexchange.session.oauth.TokenRefreshConfig;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -182,12 +186,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String redirectURL = "";
         LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         try {
-            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+            Cookie sessionCookie = OIDCTools.loadSessionCookie(request, this.loginConfiguration);
 
-            if (autologinCookie == null) {
+            if (sessionCookie == null) {
                 return null;
             }
-            redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
+            redirectURL = this.getAutologinByCookieURL(request, response, sessionCookie);
         } catch (OXException e) {
             LOG.debug("Failed to load autologin url for request: {}", request.getRequestURI());
         }
@@ -195,19 +199,43 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return redirectURL;
     }
 
-    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
-        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
-        if (oidcAtologinCookie != null) {
-            Session session = OIDCTools.getSessionFromAutologinCookie(oidcAtologinCookie, request);
+    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie sessionCookie) {
+        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie sessionCookie: {})", request.getRequestURI(), sessionCookie != null ? sessionCookie.getValue() : "null");
+        if (sessionCookie != null) {
+            Session session = OIDCTools.getSessionFromSessionCookie(sessionCookie, request);
             if (session != null) {
-                return this.getRedirectLocationForSession(request, session);
+                try {
+                    OIDCTools.validateSession(session, request);
+                    SessionOAuthTokenService sessionOAuthTokenService = services.getOptionalService(SessionOAuthTokenService.class);
+                    if (null != sessionOAuthTokenService) {
+                        OIDCBackendConfig config = backend.getBackendConfig();
+                        OIDCTokenRefresher refresher = new OIDCTokenRefresher(backend, session);
+                        TokenRefreshConfig refreshConfig = OIDCTools.getTokenRefreshConfig(config);
+                        try {
+                            RefreshResult result = sessionOAuthTokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
+                            if (result.isSuccess()) {
+                                return this.getRedirectLocationForSession(request, session);
+                            }
+                            LOG.debug("Error checking and refreshing tokens for session {}", session.getSessionID());
+                            return null;
+                        } catch (InterruptedException e) {
+                            LOG.warn("Thread was interrupted while checking session oauth tokens", e);
+                            // keep interrupted state
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    LOG.debug("Session {} found but SessionOAuthTokenService unavailable.", session.getSessionID());
+                } catch (OXException e) {
+                    LOG.debug(e.getMessage(), e);
+                }
+                return null;
             }
             //No session found, log that
-            LOG.debug("No valid session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
+            LOG.debug("No valid session found for OIDC Cookie with value: {}", sessionCookie.getValue());
         }
 
-        if (oidcAtologinCookie != null) {
-            Cookie toRemove = (Cookie) oidcAtologinCookie.clone();
+        if (sessionCookie != null) {
+            Cookie toRemove = (Cookie) sessionCookie.clone();
             toRemove.setMaxAge(0);
             response.addCookie(toRemove);
         }
@@ -469,7 +497,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         //logout user
         Session session = this.getSessionFromId(sessionId);
         if (null == session) {
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+            throw oxe;
         }
         return this.getRedirectForLogoutFromOXServer(session, request, response, logoutRequestInfo);
     }

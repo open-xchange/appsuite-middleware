@@ -70,9 +70,10 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AllActionTest {
+
     // Success Case
-         @Test
-     public void testSuccess() throws OXException {
+    @Test
+    public void testSuccess() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService messagingService = new SimMessagingService();
@@ -97,8 +98,8 @@ public class AllActionTest {
 
     // Error Cases
 
-         @Test
-     public void testOXException() throws OXException {
+    @Test
+    public void testOXException() {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
 

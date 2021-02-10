@@ -62,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
@@ -394,7 +395,7 @@ public class FindRequest {
      * @return The parameter value or <code>null</code> if absent
      * @throws OXException If parameter cannot be coerced to specified type
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
+    public <T> T getParameter(final String name, @NonNull Class<T> coerceTo) throws OXException {
         return request.getParameter(name, coerceTo);
     }
 

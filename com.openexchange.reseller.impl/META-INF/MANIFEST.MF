@@ -2,18 +2,25 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Reseller Impl
 Bundle-SymbolicName: com.openexchange.reseller.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Activator: com.openexchange.reseller.osgi.Activator
-Import-Package: com.openexchange.database,
+Bundle-Activator: com.openexchange.reseller.impl.osgi.ResellerServiceActivator
+Import-Package: com.google.common.collect,
+ com.openexchange.caching,
+ com.openexchange.capabilities,
+ com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
  com.openexchange.java,
+ com.openexchange.lock,
  com.openexchange.osgi,
  com.openexchange.reseller,
+ com.openexchange.reseller.cache,
  com.openexchange.reseller.data,
- org.slf4j,
  com.openexchange.server,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Automatic-Module-Name: com.openexchange.reseller.impl
 

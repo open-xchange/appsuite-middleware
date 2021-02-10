@@ -73,7 +73,6 @@ import com.openxchange.documentation.tools.internal.Property;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@SuppressWarnings("static-access")
 public class ShowConfigDocu {
 
     private static final Options options = new Options();
@@ -140,25 +139,25 @@ public class ShowConfigDocu {
                     String tag = parse.getOptionValue(TAG_OPTION);
                     if (tag == null) {
                         props = configDocu.getProperties();
+                    } else {
+                        switch (tag) {
+                            case RELOADABLE_TAG:
+                                props = configDocu.getProperties();
+                                props = props.stream()
+                                    .filter(Property::isReloadable)
+                                    .collect(Collectors.toList());
+                                break;
+                            case CONFIG_CASCADE_TAG:
+                                props = configDocu.getProperties();
+                                props = props.stream()
+                                    .filter(Property::isConfigcascadeAware)
+                                    .collect(Collectors.toList());
+                                break;
+                            default:
+                                props = configDocu.getProperties(tag);
+                                break;
+                        }
                     }
-                    switch (tag) {
-                        case RELOADABLE_TAG:
-                            props = configDocu.getProperties();
-                            props = props.stream()
-                                .filter(prop -> prop.isReloadable())
-                                .collect(Collectors.toList());
-                            break;
-                        case CONFIG_CASCADE_TAG:
-                            props = configDocu.getProperties();
-                            props = props.stream()
-                                .filter(prop -> prop.isConfigcascadeAware())
-                                .collect(Collectors.toList());
-                            break;
-                        default:
-                            props = configDocu.getProperties(tag);
-                            break;
-                    }
-
                 } else {
                     props = configDocu.getProperties();
                 }
@@ -178,7 +177,7 @@ public class ShowConfigDocu {
 
                 boolean useAnsi = true;
                 if (parse.hasOption(ANSI_OPTION)) {
-                    useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION));
+                    useAnsi = Boolean.valueOf(parse.getOptionValue(ANSI_OPTION)).booleanValue();
                 }
 
                 printProperties(props, useAnsi, onlyKey);
@@ -199,10 +198,7 @@ public class ShowConfigDocu {
         List<String> sortedTags = new ArrayList<>(tags);
         Collections.sort(sortedTags, IGNORE_CASE_COMP);
         System.out.println("Available tags:\n");
-        for(String tag : sortedTags) {
-            System.out.println(tag);
-        }
-
+        sortedTags.stream().forEach(tag -> System.out.println(tag));
     }
 
     private static void printProperties(List<Property> props, boolean useAnsi, boolean onlyKey) {
@@ -211,12 +207,12 @@ public class ShowConfigDocu {
         } else {
             System.out.println("Properties:");
         }
-        for (Property prop : props) {
+        props.stream().forEach(prop -> {
             printProperty(prop, null, useAnsi, onlyKey);
             if (!onlyKey) {
                 System.out.println("\n" + format("-------------------------------------------------", ANSI_RED, useAnsi) + "\n");
             }
-        }
+        });
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -251,28 +247,29 @@ public class ShowConfigDocu {
             }
             first = false;
         }
-        for(String tag: prop.getTags()) {
+        for (String tag : prop.getTags()) {
             if (first) {
                 System.out.print(tag);
                 first = false;
             } else {
-                System.out.print(format(" | ", ANSI_RED, useAnsi)+tag);
+                System.out.print(format(" | ", ANSI_RED, useAnsi) + tag);
             }
         }
     }
 
     private static String formatDescription(String value, boolean useAnsi) {
+        String v = value;
         if (useAnsi) {
-            value = value.replaceAll("<code>|\\[\\[", ANSI_FRAME+" ");
-            value = value.replaceAll("</code>|\\]\\]", " "+ANSI_RESET);
-            value = value.replaceAll("<b>", ANSI_BOLD);
-            value = value.replaceAll("</b>", ANSI_RESET);
+            v = v.replaceAll("<code>|\\[\\[", ANSI_FRAME + " ");
+            v = v.replaceAll("</code>|\\]\\]", " " + ANSI_RESET);
+            v = v.replaceAll("<b>", ANSI_BOLD);
+            v = v.replaceAll("</b>", ANSI_RESET);
         } else {
-            value = value.replaceAll("\\[\\[|\\]\\]", "");
+            v = v.replaceAll("\\[\\[|\\]\\]", "");
         }
-        value = value.replaceAll("<li>", "-");
-        value = value.replaceAll("\\<[^>]*>", "");
-        return "  " + value.replaceAll("\n", "\n  ");
+        v = v.replaceAll("<li>", "-");
+        v = v.replaceAll("\\<[^>]*>", "");
+        return "  " + v.replaceAll("\n", "\n  ");
     }
 
     private static String format(String value, String color, boolean useAnsi) {

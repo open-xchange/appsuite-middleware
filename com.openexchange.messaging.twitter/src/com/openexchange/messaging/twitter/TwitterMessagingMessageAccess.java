@@ -94,14 +94,10 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     // private final TwitterService twitterService;
 
     private final TwitterAccess twitterAccess;
-
     private final int id;
-
     private final int user;
-
     private final int cid;
 
-    private final Session session;
 
     /**
      * Initializes a new {@link TwitterMessagingMessageAccess}.
@@ -112,7 +108,6 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         id = account.getId();
         user = session.getUserId();
         cid = session.getContextId();
-        this.session = session;
     }
 
     @Override
@@ -161,7 +156,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     }
 
     private TwitterMessagingMessage get(final long id) throws OXException {
-        return new TwitterMessagingMessage(twitterAccess.showStatus(id), session);
+        return new TwitterMessagingMessage(twitterAccess.showStatus(id));
     }
 
     @Override
@@ -247,7 +242,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getHomeTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
+                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
                     if (searchTerm.matches(message)) {
                         msgs.add(message);
                     }
@@ -256,7 +251,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getHomeTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status, session);
+                    final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
                     msgs.add(message);
                }
             }

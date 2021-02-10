@@ -63,6 +63,7 @@ import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link HTTPDeferrerActivator}
@@ -135,8 +136,8 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         if (null != service) {
             String alias = this.alias;
             if (null != alias) {
-                service.unregister(alias);
                 this.alias = null;
+                HttpServices.unregister(alias, service);
             }
         }
         super.stopBundle();

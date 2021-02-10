@@ -738,7 +738,7 @@ public final class MessageWriter {
                         if (mail.containsSentDate() && mail.getSentDate() != null) {
                             long value = addUserTimezone(mail.getSentDate().getTime(), timeZone);
                             jsonContainer.toObject().put(MailJSONField.SENT_DATE.getKey(), value);
-                            if (MailProperties.getInstance().isPreferSentDate(userId, contextId)) {
+                            if (false && MailProperties.getInstance().isPreferSentDate(userId, contextId)) {
                                 jsonContainer.toObject().put(MailJSONField.DATE.getKey(), value);
                             }
                         }
@@ -767,7 +767,7 @@ public final class MessageWriter {
                         if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
                             long value = addUserTimezone(mail.getReceivedDate().getTime(), timeZone);
                             jsonContainer.toObject().put(MailJSONField.RECEIVED_DATE.getKey(), value);
-                            if (false == MailProperties.getInstance().isPreferSentDate(userId, contextId)) {
+                            if (false && false == MailProperties.getInstance().isPreferSentDate(userId, contextId)) {
                                 jsonContainer.toObject().put(MailJSONField.DATE.getKey(), value);
                             }
                         }
@@ -776,6 +776,48 @@ public final class MessageWriter {
                             jsonContainer.toArray().put(addUserTimezone(mail.getReceivedDate().getTime(), timeZone));
                         } else {
                             jsonContainer.toArray().put(JSONObject.NULL);
+                        }
+                    }
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        writers.put(MailListField.DATE, new MailFieldWriter() {
+
+            @Override
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int userId, int contextId, TimeZone optTimeZone) throws OXException {
+                try {
+                    TimeZone timeZone = optTimeZone;
+                    if (null == timeZone) {
+                        timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(userId, contextId).getTimeZone());
+                    }
+
+                    if (MailProperties.getInstance().isPreferSentDate(userId, contextId)) {
+                        if (withKey) {
+                            if (mail.containsSentDate() && mail.getSentDate() != null) {
+                                long value = addUserTimezone(mail.getSentDate().getTime(), timeZone);
+                                jsonContainer.toObject().put(MailJSONField.DATE.getKey(), value);
+                            }
+                        } else {
+                            if (mail.containsSentDate() && mail.getSentDate() != null) {
+                                jsonContainer.toArray().put(addUserTimezone(mail.getSentDate().getTime(), timeZone));
+                            } else {
+                                jsonContainer.toArray().put(JSONObject.NULL);
+                            }
+                        }
+                    } else {
+                        if (withKey) {
+                            if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
+                                long value = addUserTimezone(mail.getReceivedDate().getTime(), timeZone);
+                                jsonContainer.toObject().put(MailJSONField.DATE.getKey(), value);
+                            }
+                        } else {
+                            if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
+                                jsonContainer.toArray().put(addUserTimezone(mail.getReceivedDate().getTime(), timeZone));
+                            } else {
+                                jsonContainer.toArray().put(JSONObject.NULL);
+                            }
                         }
                     }
                 } catch (JSONException e) {

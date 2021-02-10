@@ -54,14 +54,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -70,15 +68,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 @RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class UpdateAction extends TaskAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
-
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param services
      */
     public UpdateAction(final ServiceLookup services) {
@@ -100,7 +95,7 @@ public class UpdateAction extends TaskAction {
 
         task.setObjectID(id);
 
-        convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
+        convertExternalToInternalUsersIfPossible(task, session.getContext());
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);

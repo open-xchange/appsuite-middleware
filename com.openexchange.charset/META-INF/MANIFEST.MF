@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Charset
 Bundle-SymbolicName: com.openexchange.charset
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.charset.osgi.CharsetActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -18,3 +18,4 @@ Import-Package: com.openexchange.java,
  sun.misc,
  sun.reflect
 Export-Package: com.openexchange.charset
+Automatic-Module-Name: com.openexchange.charset

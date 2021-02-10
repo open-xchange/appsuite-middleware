@@ -24,5 +24,14 @@ class LeftoverClientConfigProvider extends AbstractHttpClientModifer implements 
     public String getClientIdPattern() {
         return "*";
     }
+    
+    @Override
+    @NonNull
+    public String getGroupName() {
+        /*
+         * Fall back to generic HTTP client config with this
+         */
+        return "";
+    }
 
 }

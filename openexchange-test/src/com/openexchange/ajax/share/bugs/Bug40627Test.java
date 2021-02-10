@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -89,21 +90,25 @@ import com.openexchange.tools.arrays.Arrays;
 public class Bug40627Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedFolderPermissions(createAnonymousGuestPermission());
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedFolderPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedFolderPermissions(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest"));
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedObjectPermissionAsAnonymousGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createAnonymousGuestPermission()));
     }
 
     @Test
+    @TryAgain
     public void testCheckExtendedObjectPermissionAsInvitedGuest() throws Exception {
         testCheckExtendedObjectPermissions(asObjectPermission(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest")));
     }
@@ -146,7 +151,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -165,6 +170,19 @@ public class Bug40627Test extends ShareTest {
             visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
         }
         checkExtendedPermissions(getClient(), folderShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
+    }
+
+    /**
+     * Discovers the share url for the given guest and checks that one exists
+     *
+     * @param guest The guest
+     * @return The share url
+     * @throws Exception
+     */
+    private String discoverShare(ExtendedPermissionEntity guest) throws Exception {
+        String shareURL = discoverShareURL(guest);
+        assertNotNull("Share mail not found", shareURL);
+        return shareURL;
     }
 
     private void testCheckExtendedObjectPermissions(FileStorageGuestObjectPermission guestPermission) throws Exception {
@@ -203,7 +221,7 @@ public class Bug40627Test extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShare(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission, contents);
         /*

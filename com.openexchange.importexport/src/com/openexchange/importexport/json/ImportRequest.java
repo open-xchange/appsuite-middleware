@@ -130,13 +130,11 @@ public class ImportRequest {
 	        "callback", AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ACTION, AJAXServlet.PARAMETER_SESSION));
 	    Map<String, String[]> optionalParameters = new HashMap<String, String[]>();
 	    Map<String, String> parameters = this.request.getParameters();
-	    if (null != parameters) {
-	        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-	            if (false == defaultParameters.contains(parameter.getKey())) {
-	                optionalParameters.put(parameter.getKey(), new String[] { parameter.getValue() });
-	            }
+        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+            if (false == defaultParameters.contains(parameter.getKey())) {
+                optionalParameters.put(parameter.getKey(), new String[] { parameter.getValue() });
             }
-	    }
+        }
         return optionalParameters;
 	}
 }

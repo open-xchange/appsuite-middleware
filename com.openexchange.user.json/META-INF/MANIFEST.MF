@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange User HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.user.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -20,6 +20,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.anonymizer,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.annotation,
@@ -91,3 +92,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.user.json.osgi.UserJSONActivator
 Require-Bundle: slf4j.api
+Automatic-Module-Name: com.openexchange.user.json

@@ -1,0 +1,20 @@
+/quota?action=unified:
+  get:
+    operationId: getUnifiedUsage
+    tags:
+      - Quota
+    summary: Gets the unified usage data
+    security: 
+        - session: []    
+    responses:
+      '200':
+        description: >
+          A JSON object containing the unified quota. In case of errors the
+          responsible
+
+          fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuotaResponse'

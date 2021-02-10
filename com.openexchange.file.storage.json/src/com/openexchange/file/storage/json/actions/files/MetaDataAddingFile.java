@@ -58,6 +58,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
 
@@ -518,6 +519,26 @@ public class MetaDataAddingFile implements DelegatingFile {
     @Override
     public void setMediaStatus(MediaStatus mediaStatus) {
         file.setMediaStatus(mediaStatus);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return file.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        file.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return file.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        file.setModifiedFrom(modifiedFrom);
     }
 
 }

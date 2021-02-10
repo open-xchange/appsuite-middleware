@@ -85,13 +85,13 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     }
 
     @Override
-    public abstract boolean exists(final String fullName) throws OXException;
+    public abstract boolean exists(String fullName) throws OXException;
 
     @Override
-    public abstract MailFolder getFolder(final String fullName) throws OXException;
+    public abstract MailFolder getFolder(String fullName) throws OXException;
 
     @Override
-    public abstract MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException;
+    public abstract MailFolder[] getSubfolders(String parentFullName, boolean all) throws OXException;
 
     /**
      * Gets the mailbox's root folder.
@@ -137,7 +137,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @throws OXException If either folder does not exist or cannot be renamed
      */
     @Override
-    public String renameFolder(final String fullName, final String newName) throws OXException {
+    public String renameFolder(String fullName, String newName) throws OXException {
         final MailFolder folder = getFolder(fullName);
         if (com.openexchange.java.Strings.isEmpty(newName)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
@@ -155,7 +155,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     }
 
     @Override
-    public String deleteFolder(final String fullName) throws OXException {
+    public String deleteFolder(String fullName) throws OXException {
         return deleteFolder(fullName, false);
     }
 
@@ -163,7 +163,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     public abstract String deleteFolder(String fullName, boolean hardDelete) throws OXException;
 
     @Override
-    public void clearFolder(final String fullName) throws OXException {
+    public void clearFolder(String fullName) throws OXException {
         clearFolder(fullName, false);
     }
 
@@ -171,7 +171,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     public abstract void clearFolder(String fullName, boolean hardDelete) throws OXException;
 
     @Override
-    public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
+    public MailFolder[] getPath2DefaultFolder(String fullName) throws OXException {
         if (fullName.equals(MailFolder.ROOT_FOLDER_ID)) {
             return new MailFolder[0];
         }
@@ -187,14 +187,14 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
     @Override
-    public Quota getStorageQuota(final String fullName) throws OXException {
+    public Quota getStorageQuota(String fullName) throws OXException {
         return getQuotas(fullName, STORAGE)[0];
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
     @Override
-    public Quota getMessageQuota(final String fullName) throws OXException {
+    public Quota getMessageQuota(String fullName) throws OXException {
         return getQuotas(fullName, MESSAGE)[0];
     }
 

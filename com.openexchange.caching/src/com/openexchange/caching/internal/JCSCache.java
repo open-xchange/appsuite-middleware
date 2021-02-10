@@ -286,16 +286,19 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public Object get(final Serializable key) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
         return cache.get(key);
     }
 
     @Override
     public CacheElement getCacheElement(final Serializable key) {
-        final ICacheElement cacheElement = cache.getCacheElement(key);
-        if (cacheElement == null) {
-            return null;
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
         }
-        return new CacheElement2JCS(cacheElement);
+        final ICacheElement cacheElement = cache.getCacheElement(key);
+        return cacheElement == null ? null : new CacheElement2JCS(cacheElement);
     }
 
     @Override
@@ -309,51 +312,93 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public Object getFromGroup(final Serializable key, final String group) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (group == null) {
+            throw new IllegalArgumentException("group must not be null");
+        }
         return cache.getFromGroup(key, group);
     }
 
     @Override
     public void invalidateGroup(final String group) {
+        if (group == null) {
+            throw new IllegalArgumentException("group must not be null");
+        }
         cache.invalidateGroup(group);
         postRemove(null, group, false);
     }
 
     @Override
-    public void put(final Serializable key, final Serializable obj) throws OXException {
+    public void put(final Serializable key, final Serializable object) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (object == null) {
+            throw new IllegalArgumentException("object must not be null");
+        }
         try {
-            cache.put(key, obj);
+            cache.put(key, object);
         } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+    public void put(Serializable key, Serializable object, boolean invalidate) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (object == null) {
+            throw new IllegalArgumentException("object must not be null");
+        }
         if (invalidate) {
             remove(key);
         }
-        put(key, obj);
+        put(key, object);
     }
 
     @Override
-    public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws OXException {
+    public void put(final Serializable key, final Serializable value, final ElementAttributes attr) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         try {
-            cache.put(key, val, new JCSElementAttributesDelegator(attr));
+            cache.put(key, value, new JCSElementAttributesDelegator(attr));
         } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+    public void put(Serializable key, Serializable value, ElementAttributes attr, boolean invalidate) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         if (invalidate) {
             remove(key);
         }
-        put(key, val, attr);
+        put(key, value, attr);
     }
 
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (groupName == null) {
+            throw new IllegalArgumentException("groupName must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         try {
             cache.putInGroup(key, groupName, value);
         } catch (org.apache.jcs.access.exception.CacheException e) {
@@ -363,6 +408,15 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (groupName == null) {
+            throw new IllegalArgumentException("groupName must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         if (invalidate) {
             removeFromGroup(key, groupName);
         }
@@ -371,6 +425,15 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (groupName == null) {
+            throw new IllegalArgumentException("groupName must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (org.apache.jcs.access.exception.CacheException e) {
@@ -380,6 +443,15 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (groupName == null) {
+            throw new IllegalArgumentException("groupName must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         if (invalidate) {
             removeFromGroup(key, groupName);
         }
@@ -388,6 +460,12 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void putSafe(final Serializable key, final Serializable value) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         try {
             cache.putSafe(key, value);
         } catch (ObjectExistsException e) {
@@ -399,6 +477,9 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void remove(final Serializable key) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
         try {
             cache.remove(key);
             postRemove(key, null, false);
@@ -409,13 +490,21 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void remove(List<Serializable> keys) throws OXException {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
         for (Serializable key : keys) {
-            remove(key);
+            if (key != null) {
+                remove(key);
+            }
         }
     }
 
     @Override
     public void localRemove(final Serializable key) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
         try {
             cacheControl.localRemove(key);
             postRemove(key, null, false);
@@ -426,6 +515,12 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void localPut(final Serializable key, final Serializable value) throws OXException {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null");
+        }
         try {
             final org.apache.jcs.engine.CacheElement ce = new org.apache.jcs.engine.CacheElement(cacheControl.getCacheName(), key, value);
             ce.setElementAttributes(cacheControl.getElementAttributes());
@@ -437,19 +532,39 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (group == null) {
+            throw new IllegalArgumentException("group must not be null");
+        }
         cache.remove(key, group);
         postRemove(key, group, false);
     }
 
     @Override
     public void removeFromGroup(List<Serializable> keys, final String group) {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
+        if (group == null) {
+            throw new IllegalArgumentException("group must not be null");
+        }
         for (Serializable key : keys) {
-            removeFromGroup(key, group);
+            if (key != null) {
+                removeFromGroup(key, group);
+            }
         }
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
+        if (key == null) {
+            throw new IllegalArgumentException("key must not be null");
+        }
+        if (group == null) {
+            throw new IllegalArgumentException("group must not be null");
+        }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
         postRemove(key, group, false);

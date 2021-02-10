@@ -55,6 +55,7 @@ import com.openexchange.blackwhitelist.BlackWhiteListServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.service.http.HttpServices;
 
 /**
  * {@link Activator}
@@ -128,10 +129,10 @@ public class Activator extends DeferredActivator {
         if (httpService != null) {
             String alias = this.alias;
             if (null != alias) {
-                httpService.unregister(alias);
+                this.alias = null;
+                HttpServices.unregister(alias, httpService);
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
                 logger.info("Black-/Whitelist Servlet unregistered.");
-                this.alias = null;
             }
         }
     }

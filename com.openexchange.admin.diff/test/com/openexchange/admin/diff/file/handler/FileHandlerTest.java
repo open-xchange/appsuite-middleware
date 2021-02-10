@@ -80,7 +80,7 @@ public class FileHandlerTest {
     private File rootFolder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         rootFolder = Mockito.mock(File.class);

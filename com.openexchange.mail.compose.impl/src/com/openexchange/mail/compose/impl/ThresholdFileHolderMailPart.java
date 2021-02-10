@@ -63,9 +63,9 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.compose.AttachmentDescription;
+import com.openexchange.mail.compose.ContentId;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -125,13 +125,9 @@ public class ThresholdFileHolderMailPart extends MailPart implements ComposedMai
     }
 
     private void determineContentId(AttachmentDescription attachmentDescription) {
-        String contentId = attachmentDescription.getContentId();
-        if (Strings.isNotEmpty(contentId)) {
-            contentId = contentId.trim();
-            if (!contentId.startsWith("<") && !contentId.endsWith(">")) {
-                contentId = new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString();
-            }
-            setContentId(contentId);
+        ContentId contentId = attachmentDescription.getContentId();
+        if (contentId != null) {
+            setContentId(contentId.getContentIdForHeader());
         }
     }
 

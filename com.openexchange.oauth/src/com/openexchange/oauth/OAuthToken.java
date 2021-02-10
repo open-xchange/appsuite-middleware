@@ -59,7 +59,8 @@ package com.openexchange.oauth;
 public interface OAuthToken {
 
     /**
-     * The constant for an empty token. Provides the empty string for both {@link #getToken()} and {@link #getSecret()}.
+     * The constant for an empty token. Provides the empty string for both {@link #getToken()} and {@link #getSecret()}
+     * and <code>-1</code> for the TTL.
      */
     public static final OAuthToken EMPTY_TOKEN = new OAuthToken() {
 
@@ -71,6 +72,11 @@ public interface OAuthToken {
         @Override
         public String getSecret() {
             return "";
+        }
+
+        @Override
+        public long getExpiration() {
+            return -1;
         }
     };
 
@@ -87,4 +93,11 @@ public interface OAuthToken {
      * @return The secret
      */
     String getSecret();
+
+    /**
+     * Returns the expiration time stamp of the token, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @return The expiration time stamp or a value equal to/less than <code>0</code> (zero) to signal no expiration time stamp
+     */
+    long getExpiration();
 }

@@ -50,7 +50,7 @@
 package com.openexchange.pns;
 
 /**
- * {@link PushMatch} - Represents a push subscription.
+ * {@link PushMatch} - Represents a matching push subscription of a user to a certain topic.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3

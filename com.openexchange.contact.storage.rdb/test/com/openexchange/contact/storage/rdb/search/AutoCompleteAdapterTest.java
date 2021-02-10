@@ -64,48 +64,48 @@ import com.openexchange.java.SimpleTokenizer;
 public class AutoCompleteAdapterTest {
 
     @Test
-    public void testDetectWildcard() throws Exception {
+    public void testDetectWildcard() {
         String query = "hund wu?st hallo* ot*to d?d?* * hier";
         assertPatterns(query, "%");
     }
 
     @Test
-    public void testExcludeDuplicatePatterns() throws Exception {
+    public void testExcludeDuplicatePatterns() {
         String query = "hund wurst wurst hund hund hund wurst hund";
         assertPatterns(query, "hund%", "wurst%");
     }
 
     @Test
-    public void testExcludeRedundantPatterns_1() throws Exception {
+    public void testExcludeRedundantPatterns_1() {
         String query = "hund hundewurst hu hu husten hustenanfall";
         assertPatterns(query, "hu%");
     }
 
     @Test
-    public void testExcludeRedundantPatterns_2() throws Exception {
+    public void testExcludeRedundantPatterns_2() {
         String query = "hu*nd hundewurst hun husten hustenanfall";
         assertPatterns(query, "hu%nd%", "hun%", "husten%");
     }
 
     @Test
-    public void testShrinkWildcards_1() throws Exception {
+    public void testShrinkWildcards_1() {
         String query = "*********";
         assertPatterns(query, "%");
     }
 
     @Test
-    public void testShrinkWildcards_2() throws Exception {
+    public void testShrinkWildcards_2() {
         String query = "hu**n*****d*********";
         assertPatterns(query, "hu%n%d%");
     }
 
     @Test
-    public void testShrinkWildcards_() throws Exception {
+    public void testShrinkWildcards_() {
         String query = "hu**n**\\***d*********";
         assertPatterns(query, "hu%n%\\%%d%");
     }
 
-    private static void assertPatterns(String query, String... expectedPatterns) throws Exception {
+    private static void assertPatterns(String query, String... expectedPatterns) {
         List<String> patterns = AutocompleteAdapter.preparePatterns(SimpleTokenizer.tokenize(query));
         if (null == expectedPatterns || 0 == expectedPatterns.length) {
             assertTrue(null == patterns || 0 == patterns.size());

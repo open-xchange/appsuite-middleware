@@ -148,13 +148,4 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
             Databases.closeSQLStuff(rs);
         }
     }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return MessagingGenericServiceRegistry.getService(clazz);
-        } catch (RuntimeException e) {
-            throw new OXException(e);
-        }
-    }
-
 }

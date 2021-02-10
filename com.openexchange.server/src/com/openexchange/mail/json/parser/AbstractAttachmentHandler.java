@@ -77,7 +77,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
      * @param session The session providing needed user information
      * @throws OXException If initialization fails
      */
-    public AbstractAttachmentHandler(final Session session) throws OXException {
+    public AbstractAttachmentHandler(Session session) throws OXException {
         super();
         attachments = new ArrayList<MailPart>(4);
 

@@ -67,6 +67,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveEventImpl;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.ExceptionUtils;
@@ -95,7 +96,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     private final ConcurrentMap<Integer, FolderBuffer> folderBuffers;
     private final ScheduledTimerTask periodicPublisher;
     private final int consolidationTime;
-    private final int maxDelayTime ;
+    private final int maxDelayTime;
     private final int defaultDelayTime;
     private final DriveUtility driveUtility;
 
@@ -115,24 +116,20 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         this.maxDelayTime = configService.getIntProperty("com.openexchange.drive.events.maxDelayTime", 10000);
         this.defaultDelayTime = configService.getIntProperty("com.openexchange.drive.events.defaultDelayTime", 2500);
         int publisherDelay = configService.getIntProperty("com.openexchange.drive.events.publisherDelay", 2500);
-        this.periodicPublisher = DriveEventServiceLookup.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    for (Iterator<FolderBuffer> iterator = folderBuffers.values().iterator(); iterator.hasNext();) {
-                        FolderBuffer buffer = iterator.next();
-                        if (buffer.isReady()) {
-                            iterator.remove();
-                            notifyPublishers(buffer);
-                        }
+        this.periodicPublisher = DriveEventServiceLookup.getService(TimerService.class, true).scheduleWithFixedDelay(() -> {
+            try {
+                for (Iterator<FolderBuffer> iterator = folderBuffers.values().iterator(); iterator.hasNext();) {
+                    FolderBuffer buffer = iterator.next();
+                    if (buffer.isReady()) {
+                        iterator.remove();
+                        notifyPublishers(buffer);
                     }
-                } catch (Exception e) {
-                    LOG.warn("error publishing drive events.", e);
-                } catch (Throwable t) {
-                    ExceptionUtils.handleThrowable(t);
-                    LOG.warn("error publishing drive events.", t);
                 }
+            } catch (Exception e) {
+                LOG.warn("error publishing drive events.", e);
+            } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+                LOG.warn("error publishing drive events.", t);
             }
         }, publisherDelay, publisherDelay);
     }
@@ -172,8 +169,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     }
 
     private static boolean check(Event event) {
-        return null != event && event.containsProperty(SESSION) &&
-            (event.containsProperty(FOLDER_ID) || event.containsProperty(PARENT_FOLDER_ID));
+        return null != event && event.containsProperty(SESSION) && (event.containsProperty(FOLDER_ID) || event.containsProperty(PARENT_FOLDER_ID));
     }
 
     static boolean isAboutChangedContents(Event event) {
@@ -204,41 +200,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                 LOG.trace("Skipping event processing for ignored file: {}", fileName);
                 return;
             }
-            /*
-             * create task to insert affected folders into buffer
-             */
-            AbstractTask<Void> insertTask = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    /*
-                     * extract properties
-                     */
-                    Integer contextID = Integer.valueOf(session.getContextId());
-                    String folderID = (String) (event.containsProperty(PARENT_FOLDER_ID) ? event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
-                    String oldParentFolderID = (String) event.getProperty(OLD_PARENT_FOLDER_ID);
-                    String[] folderPath = (String[]) event.getProperty(FOLDER_PATH);
-                    /*
-                     * get buffer for this context
-                     */
-                    FolderBuffer buffer = folderBuffers.get(contextID);
-                    if (null == buffer) {
-                        buffer = new FolderBuffer(contextID.intValue(), consolidationTime, maxDelayTime, defaultDelayTime);
-                        FolderBuffer existingBuffer = folderBuffers.putIfAbsent(contextID, buffer);
-                        if (null != existingBuffer) {
-                            buffer = existingBuffer;
-                        }
-                    }
-                    /*
-                     * add to buffer
-                     */
-                    buffer.add(session, folderID, null != folderPath ? Arrays.asList(folderPath) : null, isAboutChangedContents(event));
-                    if (null != oldParentFolderID) {
-                        buffer.add(session, oldParentFolderID, null, false);
-                    }
-                    return null;
-                }
-            };
+            AbstractTask<Void> insertTask = createInsertTask(event, session, folderBuffers, consolidationTime, maxDelayTime, defaultDelayTime);
             /*
              * add event to buffer asynchronously if possible
              */
@@ -265,6 +227,44 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         if (publishers.remove(publisher)) {
             LOG.debug("Removed drive event publisher: {}", publisher);
         }
+    }
+
+    /**
+     * Creates a task to insert affected folders into buffer
+     */
+    private AbstractTask<Void> createInsertTask(Event event, Session session, ConcurrentMap<Integer, FolderBuffer> folderBuffers, int consolidationTime, int maxDelayTime, int defaultDelayTime) {
+        return new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                /*
+                 * extract properties
+                 */
+                Integer contextID = Integer.valueOf(session.getContextId());
+                String folderID = (String) (event.containsProperty(PARENT_FOLDER_ID) ? event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
+                String oldParentFolderID = (String) event.getProperty(OLD_PARENT_FOLDER_ID);
+                String[] folderPath = (String[]) event.getProperty(FOLDER_PATH);
+                /*
+                 * get buffer for this context
+                 */
+                FolderBuffer buffer = folderBuffers.get(contextID);
+                if (null == buffer) {
+                    buffer = new FolderBuffer(contextID.intValue(), consolidationTime, maxDelayTime, defaultDelayTime);
+                    FolderBuffer existingBuffer = folderBuffers.putIfAbsent(contextID, buffer);
+                    if (null != existingBuffer) {
+                        buffer = existingBuffer;
+                    }
+                }
+                /*
+                 * add to buffer
+                 */
+                buffer.add(session, folderID, null != folderPath ? Arrays.asList(folderPath) : null, isAboutChangedContents(event));
+                if (null != oldParentFolderID) {
+                    buffer.add(session, oldParentFolderID, null, false);
+                }
+                return null;
+            }
+        };
     }
 
 }

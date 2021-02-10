@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -225,7 +225,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
 
     /**
      * Extracts the value of the 'apiVersion' URL parameter if present.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @return The value of the 'apiVersion' URL parameter. If the parameter is absent 0 is returned.
      * @throws OXException if value coercion fails or if the parameter contains an invalid value

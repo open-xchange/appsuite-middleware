@@ -74,7 +74,7 @@ public final class MailProviderProxyGenerator {
      * @param context The bundle context (needed to get/unget the service)
      * @return A new proxy object for mail provider
      */
-    public static MailProvider newMailProviderProxy(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+    public static MailProvider newMailProviderProxy(ServiceReference mailProviderServiceReference, BundleContext context) {
         try {
             return (MailProvider) java.lang.reflect.Proxy.newProxyInstance(
                 MailProvider.class.getClassLoader(),
@@ -102,14 +102,14 @@ public final class MailProviderProxyGenerator {
         /**
          * Initializes a new {@link MailProviderProxyGenerator}
          */
-        private MailProviderInvocationHandler(final ServiceReference mailProviderServiceReference, final BundleContext context) {
+        private MailProviderInvocationHandler(ServiceReference mailProviderServiceReference, BundleContext context) {
             super();
             this.mailProviderServiceReference = mailProviderServiceReference;
             this.context = context;
         }
 
         @Override
-        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Object result;
             try {
                 final MailProvider provider = (MailProvider) context.getService(mailProviderServiceReference);

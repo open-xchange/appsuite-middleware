@@ -245,6 +245,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 } else {
                     ret = new FileHolder(inputStm, cachedResource.getSize(), cachedMimeType, cachedResource.getFileName());
                 }
+
+                LOG.debug("Returning cached image (MW)");
             }
         }
 
@@ -361,6 +363,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
             transformations.compress();
         }
 
+        LOG.debug("Returning transformed image (MW)");
+
         // return transformed image
         return transformations.getTransformedImage(transformParams.getImageType().getShortName());
     }
@@ -465,7 +469,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             final ThresholdFileHolder optImageFileHolder = ((transformedImageFile instanceof ThresholdFileHolder) ? (ThresholdFileHolder) transformedImageFile : null);
                             final long size = transformedImage.getSize();
 
-                            if (transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) {
+                            // writing into cache is only needed if expense is high and
+                            // IC was not able to perform caching on IC server side
+                            if ((transformedImage.getTransformationExpenses() == ImageTransformations.HIGH_EXPENSE) && (null == xformParams.getICCacheKey())) {
                                 writeCachedResource(session, cacheKey, xformParams.getImageMimeType(), transformedImage, optImageFileHolder, fileName, size);
                             }
 
@@ -501,8 +507,12 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
                 if (resultFile != repetitiveFile) {
                     Streams.close(repetitiveFile);
+                } else {
+                    LOG.debug("Returning original image (MW)");
                 }
             }
+        } else {
+            LOG.debug("Returning original image (MW)");
         }
 
         return resultFile;

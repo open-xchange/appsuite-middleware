@@ -83,6 +83,7 @@ import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
+import com.openexchange.xml.util.XMLUtils;
 
 public class ParallelsSpamdService implements SpamdService {
 
@@ -249,9 +250,8 @@ public class ParallelsSpamdService implements SpamdService {
 
             // check if contains a "faultcode" part, if no, parse for data
             if (!xml_rpc_response.contains("<name>faultCode</name>")){
-
-                final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-                final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+                DocumentBuilderFactory dbf = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
+                final DocumentBuilder docBuilder = dbf.newDocumentBuilder();
                 final Document doc = docBuilder.parse (new ByteArrayInputStream(xml_rpc_response.getBytes(StandardCharsets.UTF_8)));
 
                 // normalize text representation

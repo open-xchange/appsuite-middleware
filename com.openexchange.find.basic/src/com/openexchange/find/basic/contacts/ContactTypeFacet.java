@@ -138,6 +138,14 @@ public class ContactTypeFacet extends ExclusiveFacet {
         return facetValues;
     }
 
+    /**
+     * Creates a new {@link SearchTerm} with the specified queries
+     *
+     * @param session The session
+     * @param queries The queries
+     * @return The new {@link SearchTerm}
+     * @throws OXException if an error is occurred
+     */
     public SearchTerm<?> getSearchTerm(ServerSession session, List<String> queries) throws OXException {
         if (!queries.isEmpty()) {
             if (Type.CONTACT.getIdentifier().equals(queries.get(0))) {

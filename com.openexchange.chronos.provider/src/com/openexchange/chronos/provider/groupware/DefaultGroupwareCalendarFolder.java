@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Map;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link DefaultGroupwareCalendarFolder}
@@ -64,8 +65,8 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
 
     private String parentId;
     private boolean isDefaultFolder;
-    private int modifiedBy;
-    private int createdBy;
+    private EntityInfo modifiedFrom;
+    private EntityInfo createdFrom;
     private Date creationDate;
     private GroupwareFolderType folderType;
     private Map<String, Object> meta;
@@ -88,8 +89,8 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
             parentId = groupwareFolder.getParentId();
             isDefaultFolder = groupwareFolder.isDefaultFolder();
-            modifiedBy = groupwareFolder.getModifiedBy();
-            createdBy = groupwareFolder.getCreatedBy();
+            modifiedFrom = groupwareFolder.getModifiedFrom();
+            createdFrom = groupwareFolder.getCreatedFrom();
             creationDate = groupwareFolder.getCreationDate();
             folderType = groupwareFolder.getType();
             meta = groupwareFolder.getMeta();
@@ -106,21 +107,21 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
     }
 
     @Override
-    public int getModifiedBy() {
-        return modifiedBy;
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
     }
 
-    public void setModifiedBy(int modifiedBy) {
-        this.modifiedBy = modifiedBy;
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
 
     @Override
-    public int getCreatedBy() {
-        return createdBy;
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
     }
 
-    public void setCreatedBy(int createdBy) {
-        this.createdBy = createdBy;
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
     }
 
     @Override

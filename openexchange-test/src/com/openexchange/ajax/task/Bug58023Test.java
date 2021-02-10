@@ -93,12 +93,12 @@ public class Bug58023Test extends AbstractAPIClientSession {
         super.setUp();
         tasksApi = new TasksApi(apiClient);
         foldersApi = new FoldersApi(apiClient);
-        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName(), null, null).getData();
+        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), generateFolderBody(), "1", Module.TASK.getName(), null, null).getData();
     }
 
     public String getPrivateTaskFolder() throws ApiException {
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath(), apiClient.getSession());
+        ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath());
         Object data = checkResponse(configNode);
         return String.valueOf(data);
     }
@@ -137,13 +137,13 @@ public class Bug58023Test extends AbstractAPIClientSession {
         rememberClient(apiClient2);
         TasksApi tasksApi2 = new TasksApi(apiClient2);
 
-        TasksResponse allTasks = tasksApi2.getAllTasks(apiClient2.getSession(), privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
+        TasksResponse allTasks = tasksApi2.getAllTasks(privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
 
         assertEquals("Folder cannot be found.", allTasks.getError());
         assertEquals("TSK-0006", allTasks.getCode());
         assertTrue(allTasks.getErrorDesc().startsWith("Folder " + privateTaskFolder));
 
-        allTasks = tasksApi.getAllTasks(apiClient.getSession(), privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
+        allTasks = tasksApi.getAllTasks(privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> allTasksArray = (ArrayList<ArrayList<Object>>) allTasks.getData();
         assertEquals(0, allTasksArray.size());
     }
@@ -154,13 +154,13 @@ public class Bug58023Test extends AbstractAPIClientSession {
         rememberClient(apiClient2);
         TasksApi tasksApi2 = new TasksApi(apiClient2);
 
-        TaskResponse task = tasksApi2.getTask(apiClient2.getSession(), "333", privateTaskFolder);
+        TaskResponse task = tasksApi2.getTask("333", privateTaskFolder);
 
         assertEquals("Folder cannot be found.", task.getError());
         assertEquals("TSK-0006", task.getCode());
         assertTrue(task.getErrorDesc().startsWith("Folder " + privateTaskFolder));
 
-        task = tasksApi.getTask(apiClient.getSession(), "333", privateTaskFolder);
+        task = tasksApi.getTask("333", privateTaskFolder);
         assertTrue(Strings.isNotEmpty(task.getError())); // task does not exist
     }
 

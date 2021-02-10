@@ -63,7 +63,7 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * 
+ *
  * {@link Bug12444Test}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -73,7 +73,7 @@ public final class Bug12444Test extends AbstractChronosTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name test name.
      */
     public Bug12444Test() {
@@ -88,8 +88,8 @@ public final class Bug12444Test extends AbstractChronosTest {
         externalWithoutEmail.setCn("External");
         externalWithoutEmail.setCuType(CuTypeEnum.INDIVIDUAL);
         attendees.add(externalWithoutEmail);
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.FALSE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
-        
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(folderId, event, Boolean.FALSE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+
         assertNotNull("Server responded not with expected exception.", response.getError());
         assertEquals("Wrong exception code.", CalendarExceptionCodes.INVALID_CALENDAR_USER.getPrefix()+"-"+CalendarExceptionCodes.INVALID_CALENDAR_USER.getNumber(), response.getCode());
         assertEquals("Wrong exception category.", Category.CATEGORY_USER_INPUT.getType().getName(), response.getCategories());

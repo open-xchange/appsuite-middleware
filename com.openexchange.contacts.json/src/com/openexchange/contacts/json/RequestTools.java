@@ -49,11 +49,13 @@
 
 package com.openexchange.contacts.json;
 
+import static com.openexchange.contact.ContactIDUtil.createContactID;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -64,6 +66,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.contact.ContactID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -72,7 +75,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-
 
 /**
  * {@link RequestTools}
@@ -94,20 +96,25 @@ public class RequestTools {
         }
     }
 
-    public static int[][] buildObjectIdAndFolderId(final JSONArray json) throws OXException {
-        final int[][] objectIdAndFolderId = new int[json.length()][];
+    /**
+     * Retrieves the contact ids from the specified json array
+     *
+     * @param json The json array to parse
+     * @return a list with all the contact ids
+     * @throws OXException if a JSON error is occurred
+     */
+    public static List<ContactID> getContactIds(JSONArray json) throws OXException {
+        List<ContactID> contactIds = new ArrayList<>(json.length());
         for (int i = 0; i < json.length(); i++) {
             try {
-                final JSONObject object = json.getJSONObject(i);
-                final int folder = object.getInt("folder");
-                final int id = object.getInt("id");
-                objectIdAndFolderId[i] = new int[] { id, folder };
+                JSONObject object = json.getJSONObject(i);
+                contactIds.add(createContactID(object.getString("folder"), object.getString("id")));
             } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
 
-        return objectIdAndFolderId;
+        return contactIds;
     }
 
     /**
@@ -117,27 +124,27 @@ public class RequestTools {
      * @param contact The contact
      * @throws OXException If applying image data to contact fails
      */
-	public static void setImageData(final ContactRequest request, final Contact contact) throws OXException {
-		UploadEvent uploadEvent = null;
-		try {
-		    uploadEvent = request.getUploadEvent();
-		    final UploadFile uploadFile;
+    public static void setImageData(final ContactRequest request, final Contact contact) throws OXException {
+        UploadEvent uploadEvent = null;
+        try {
+            uploadEvent = request.getUploadEvent();
+            final UploadFile uploadFile;
             {
                 final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
                 uploadFile = null == list || list.isEmpty() ? null : list.get(0);
             }
-		    if (null == uploadFile) {
-		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
-		    }
-		    setImageData(contact, uploadFile);
-		} finally {
-		    if (null != uploadEvent) {
-		        uploadEvent.cleanUp();
-		    }
-		}
-	}
+            if (null == uploadFile) {
+                throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
+            }
+            setImageData(contact, uploadFile);
+        } finally {
+            if (null != uploadEvent) {
+                uploadEvent.cleanUp();
+            }
+        }
+    }
 
-	/**
+    /**
      * Applies image data from request to given contact.
      *
      * @param request The request providing image data
@@ -323,22 +330,19 @@ public class RequestTools {
                     if (month1 == month2 && dayOfMonth1 == dayOfMonth2) {
                         // same month/date, compare years
                         return Integer.compare(year1, year2);
-                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
-                        (month2 >= monthReference || month2 == monthReference && dayOfMonth2 >= dayOfMonthReference)) {
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) && (month2 >= monthReference || month2 == monthReference && dayOfMonth2 >= dayOfMonthReference)) {
                         // both after reference date, use default comparison
                         int monthResult = Integer.compare(month1, month2);
                         return 0 != monthResult ? monthResult : Integer.compare(dayOfMonth1, dayOfMonth2);
-                    } else if ((month1 < monthReference || month1 == monthReference && dayOfMonth1 < dayOfMonthReference) &&
-                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
+                    } else if ((month1 < monthReference || month1 == monthReference && dayOfMonth1 < dayOfMonthReference) && (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // both before reference date, use default comparison
                         int monthResult = Integer.compare(month1, month2);
                         return 0 != monthResult ? monthResult : Integer.compare(dayOfMonth1, dayOfMonth2);
-                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
-                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) && (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // first is next
                         return -1;
                     } else {
-                     // second is next
+                        // second is next
                         return 1;
                     }
                 }

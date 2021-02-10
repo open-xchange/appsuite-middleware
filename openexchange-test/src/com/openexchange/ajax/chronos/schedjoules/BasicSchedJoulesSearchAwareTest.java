@@ -90,7 +90,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
         FindApi findApi = defaultUserApi.getFindApi();
-        FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, DEFAULT_COLUMNS, null);
+        FindQueryResponse response = findApi.doQuery("calendar", queryBody, DEFAULT_COLUMNS, null);
         assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);
@@ -108,7 +108,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
         FindApi findApi = defaultUserApi.getFindApi();
-        FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, "400", null);
+        FindQueryResponse response = findApi.doQuery("calendar", queryBody, "400", null);
         assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);

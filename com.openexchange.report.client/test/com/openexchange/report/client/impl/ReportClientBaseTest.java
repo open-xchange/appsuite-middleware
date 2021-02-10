@@ -49,6 +49,7 @@
 
 package com.openexchange.report.client.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
@@ -64,7 +65,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
-import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -98,6 +98,7 @@ import com.openexchange.report.client.transport.TransportHandler;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
+@SuppressWarnings("synthetic-access")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ObjectHandler.class, VersionHandler.class })
 public class ReportClientBaseTest {
@@ -218,8 +219,8 @@ public class ReportClientBaseTest {
         Mockito.when(serverConnection.invoke(reportClientBase.getAppSuiteReportingName(), "retrieveLastReport", new Object[] { "default" }, new String[] { String.class.getCanonicalName() })).thenReturn(report);
         Mockito.when(serverConnection.invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { "default" }, new String[] { String.class.getCanonicalName() })).thenReturn(UUID_CONST);
 
-        Mockito.when(report.get("startTime")).thenReturn(new Date().getTime() - 10000);
-        Mockito.when(report.get("stopTime")).thenReturn(new Date().getTime());
+        Mockito.when(report.get("startTime")).thenReturn(L(new Date().getTime() - 10000));
+        Mockito.when(report.get("stopTime")).thenReturn(L(new Date().getTime()));
         Mockito.when(report.get("tasks")).thenReturn(new Integer(1111));
         Mockito.when(report.get("pendingTasks")).thenReturn(new Integer(2));
         Mockito.when(report.get("uuid")).thenReturn(UUID_CONST);
@@ -228,7 +229,7 @@ public class ReportClientBaseTest {
         PowerMockito.whenNew(ReportConfiguration.class).withAnyArguments().thenReturn(reportConfiguration);
     }
 
-    private void setUpOldReportStyle() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException, InvalidAttributeValueException {
+    private void setUpOldReportStyle() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         PowerMockito.mockStatic(ObjectHandler.class);
 
         contextDetails = new ArrayList<>();
@@ -288,7 +289,7 @@ public class ReportClientBaseTest {
         assertTrue(systemOutRule.getLog().contains(ReportClientBase.NO_REPORT_FOUND_MSG));
     }
 
-     @Test
+    @Test
      public void testStart_noOptionSet_reportSentAndPrinted_inAppsuiteStyle() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
@@ -706,11 +707,6 @@ public class ReportClientBaseTest {
 
         private final List<String> params = new ArrayList<>();
 
-        private static final String OPT_HELP_SHORT = "-h";
-        private static final String OPT_HOST_SHORT = "-H";
-        private static final String OPT_TIMEOUT_SHORT = "-T";
-        private static final String OPT_JMX_AUTH_PASSWORD_SHORT = "-P";
-        private static final String OPT_JMX_AUTH_USER_SHORT = "-J";
         private static final String OPT_SEND_ONLY_SHORT = "-s";
         private static final String OPT_DISPLAY_ONLY_SHORT = "-d";
         private static final String OPT_CSV_SHORT = "-c";
@@ -725,31 +721,6 @@ public class ReportClientBaseTest {
         private static final String OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT = "-o";
         private static final String OPT_TIMEFRAME_START = "-S";
         private static final String OPT_TIMEFRAME_END = "-E";
-
-        public Builder addHelp() {
-            params.add(OPT_HELP_SHORT);
-            return this;
-        }
-
-        public Builder addHost() {
-            params.add(OPT_HOST_SHORT);
-            return this;
-        }
-
-        public Builder addTimeout() {
-            params.add(OPT_TIMEOUT_SHORT);
-            return this;
-        }
-
-        public Builder addJmxAuthPwd(String param) {
-            params.add(OPT_JMX_AUTH_PASSWORD_SHORT + " " + param);
-            return this;
-        }
-
-        public Builder addJmxAuthUser(String param) {
-            params.add(OPT_JMX_AUTH_USER_SHORT + " " + param);
-            return this;
-        }
 
         public Builder addSend() {
             params.add(OPT_SEND_ONLY_SHORT);

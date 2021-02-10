@@ -89,7 +89,7 @@ public enum DisplayMode {
      * @param other The other mode
      * @return <code>true</code> if this mode is included in given mode; otherwise <code>false</code>
      */
-    public boolean isIncluded(final DisplayMode other) {
+    public boolean isIncluded(DisplayMode other) {
         return ordinal() <= other.ordinal();
     }
 

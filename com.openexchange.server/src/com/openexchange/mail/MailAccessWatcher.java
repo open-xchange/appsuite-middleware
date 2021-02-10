@@ -51,6 +51,7 @@ package com.openexchange.mail;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.watcher.MailAccessDelayElement;
@@ -174,7 +175,7 @@ public final class MailAccessWatcher {
      */
     public static int getNumberOfIdlingMailAccesses() {
         int count = 0;
-        for (final MailAccessDelayElement element : MAIL_ACCESSES) {
+        for (MailAccessDelayElement element : MAIL_ACCESSES) {
             final MailAccess<?, ?> mailAccess = element.mailAccess;
             if (mailAccess.isConnectedUnsafe() && mailAccess.isWaiting()) {
                 count++;
@@ -193,11 +194,11 @@ public final class MailAccessWatcher {
         private final String lineSeparator;
         private final MailAccessDelayQueue.ElementFilter filter;
 
-        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.slf4j.Logger logger) {
+        public WatcherTask(MailAccessDelayQueue mailAccesses, org.slf4j.Logger logger) {
             super();
             queue = mailAccesses;
             this.logger = logger;
-            final String lineSeparator = System.getProperty("line.separator");
+            final String lineSeparator = Strings.getLineSeparator();
             this.lineSeparator = lineSeparator;
             // Specify filter expression
             filter = new MailAccessDelayQueue.ElementFilter() {
@@ -245,7 +246,7 @@ public final class MailAccessWatcher {
                     /*
                      * Close exceeded accesses if allowed to
                      */
-                    for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
+                    for (MailAccess<?, ?> mailAccess : exceededAcesses) {
                         sb.setLength(0);
                         sb.append("CLOSING MAIL CONNECTION BY WATCHER:").append(lineSeparator).append(mailAccess.toString());
                         mailAccess.close(false);

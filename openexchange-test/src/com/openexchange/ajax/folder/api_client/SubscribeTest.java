@@ -148,7 +148,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
      */
     @SuppressWarnings({ "unchecked" })
     protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null, Boolean.TRUE);
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(module, columns, tree, null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -158,7 +158,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
 
     @Test
     public void checkDefaultFolder() throws ApiException {
-        FolderData root = checkResponse(foldersApi.getFolder(getSessionId(), defaultFolder, TREE, module, null));
+        FolderData root = checkResponse(foldersApi.getFolder(defaultFolder, TREE, module, null));
         assertTrue(root.getStandardFolder().booleanValue());
 
         FolderBody body = new FolderBody();
@@ -166,7 +166,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         update.setId(defaultFolder);
         update.setSubscribed(FALSE);
         body.setFolder(update);
-        FolderUpdateResponse resp = foldersApi.updateFolder(getSessionId(), defaultFolder, body, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        FolderUpdateResponse resp = foldersApi.updateFolder(defaultFolder, body, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNotNull(resp.getError());
         assertEquals("FLD-1044", resp.getCode());
     }
@@ -189,13 +189,13 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         data.setPermissions(perms);
 
         body.setFolder(data);
-        FolderUpdateResponse resp = foldersApi.createFolder(defaultFolder, getSessionId(), body, TREE, module, null, null);
+        FolderUpdateResponse resp = foldersApi.createFolder(defaultFolder, body, TREE, module, null, null);
         assertNull(resp.getError());
         assertNotNull(resp.getData());
         String newFolder = rememberFolder(resp.getData());
 
         // 2. Check is subscribed
-        FolderData fData = checkResponse(foldersApi.getFolder(getSessionId(), newFolder, TREE, module, null));
+        FolderData fData = checkResponse(foldersApi.getFolder(newFolder, TREE, module, null));
         assertTrue("Folder should be subscribed", fData.getSubscribed().booleanValue());
 
         // 3. Change subscription to false
@@ -205,12 +205,12 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         updateData.setSubscribed(FALSE);
         updateData.setPermissions(perms);
         updateBody.setFolder(updateData);
-        FolderUpdateResponse updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
         // 4. Check subscribed status again
-        fData = checkResponse(foldersApi.getFolder(getSessionId(), newFolder, TREE, module, null));
+        fData = checkResponse(foldersApi.getFolder(newFolder, TREE, module, null));
         assertFalse("Folder shouldn't be subscribed anymore", fData.getSubscribed().booleanValue());
 
         // 5. Change subscription back to true
@@ -220,12 +220,12 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
         updateData.setSubscribed(TRUE);
         updateData.setPermissions(perms);
         updateBody.setFolder(updateData);
-        updateResponse = foldersApi.updateFolder(getSessionId(), newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null);
+        updateResponse = foldersApi.updateFolder(newFolder, updateBody, FALSE, getLastTimeStamp(), TREE, module, FALSE, null, null, Boolean.TRUE);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
         // 6. Check subscribed status again
-        fData = checkResponse(foldersApi.getFolder(getSessionId(), newFolder, TREE, module, null));
+        fData = checkResponse(foldersApi.getFolder(newFolder, TREE, module, null));
         assertTrue("Folder should be subscribed again", fData.getSubscribed().booleanValue());
     }
 
@@ -237,7 +237,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         ArrayList<String> list = toDelete.stream().collect(Collectors.toCollection(ArrayList::new));
-        foldersApi.deleteFolders(getSessionId(), list, TREE, getLastTimeStamp(), module, TRUE, FALSE, FALSE, null);
+        foldersApi.deleteFolders(list, TREE, getLastTimeStamp(), module, TRUE, FALSE, FALSE, null, Boolean.FALSE);
         super.tearDown();
     }
 

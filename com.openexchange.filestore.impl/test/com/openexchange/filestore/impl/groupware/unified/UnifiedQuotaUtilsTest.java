@@ -1,6 +1,7 @@
 
 package com.openexchange.filestore.impl.groupware.unified;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -56,7 +57,7 @@ public class UnifiedQuotaUtilsTest {
             PowerMockito.when(Services.optService(ConfigViewFactory.class)).thenReturn(mockedConfigViewFactory);
             PowerMockito.when(mockedConfigViewFactory.getView(0, 0)).thenReturn(mockedConfigView);
             PowerMockito.when(mockedConfigView.property(COM_OPENEXCHANGE_UNIFIEDQUOTA_ENABLED, String.class)).thenReturn(mockedComposedConfigProperty);
-            PowerMockito.when(mockedComposedConfigProperty.isDefined()).thenReturn(true);
+            PowerMockito.when(B(mockedComposedConfigProperty.isDefined())).thenReturn(B(true));
             PowerMockito.when(mockedComposedConfigProperty.get()).thenReturn("true");
         } catch (OXException e) {
             e.printStackTrace();
@@ -84,7 +85,7 @@ public class UnifiedQuotaUtilsTest {
 
     @Test
     public void isUnifiedQuotaEnabledFor_DefinedIsFalseTest() throws OXException {
-        PowerMockito.when(mockedComposedConfigProperty.isDefined()).thenReturn(false);
+        PowerMockito.when(B(mockedComposedConfigProperty.isDefined())).thenReturn(B(false));
         boolean unifiedQuotaEnabled = UnifiedQuotaUtils.isUnifiedQuotaEnabledFor(0, 0);
         assertTrue("false expected but got true", unifiedQuotaEnabled == false);
     }

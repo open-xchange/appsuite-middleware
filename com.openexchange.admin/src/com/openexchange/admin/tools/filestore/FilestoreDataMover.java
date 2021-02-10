@@ -267,7 +267,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             throw e;
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         }
         return null;
     }
@@ -333,7 +333,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             thrown = e; throw new StorageException(e.getMessage(), e);
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            thrown = e; throw StorageException.storageExceotionFor(e);
+            thrown = e; throw StorageException.storageExceptionFor(e);
         } catch (Error x) {
             thrown = x; throw x;
         } catch (Throwable t) {

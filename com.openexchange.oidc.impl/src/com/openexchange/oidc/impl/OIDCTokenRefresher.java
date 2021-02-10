@@ -115,8 +115,8 @@ public class OIDCTokenRefresher implements TokenRefresher {
                 }
                 return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
             }));
-            return validateResponse(request, response);
-        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException | OXException e) {
+            return validateResponse(response);
+        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             LOG.info("Unable to refresh access token for user {} in context {}. Session will be invalidated.",
                 I(session.getUserId()), I(session.getContextId()));
             TokenRefreshResponse.Error error = new TokenRefreshResponse.Error(ErrorType.TEMPORARY, "refresh_failed", e.getMessage());
@@ -124,7 +124,7 @@ public class OIDCTokenRefresher implements TokenRefresher {
         }
     }
 
-    private TokenRefreshResponse validateResponse(TokenRequest request, TokenResponse response) throws OXException {
+    private TokenRefreshResponse validateResponse(TokenResponse response) {
         if (!response.indicatesSuccess()) {
             TokenErrorResponse errorResponse = (TokenErrorResponse) response;
             LOG.debug("Got token error response to refresh request for session '{}'", session.getSessionID());

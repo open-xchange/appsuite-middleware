@@ -109,7 +109,7 @@ public class SimOAuthResourceService implements OAuthResourceService {
 
             @Override
             public Session getSession() {
-                return sessionProvider.createSession(grant);
+                return getSessionProvider().createSession(grant);
             }
 
             @Override
@@ -181,7 +181,17 @@ public class SimOAuthResourceService implements OAuthResourceService {
         tokens.remove(accessToken);
     }
 
+    /**
+     * Gets the sessionProvider
+     *
+     * @return The sessionProvider
+     */
+    public SessionProvider getSessionProvider() {
+        return sessionProvider;
+    }
+
     public static interface SessionProvider {
+
         Session createSession(TestGrant grant);
     }
 

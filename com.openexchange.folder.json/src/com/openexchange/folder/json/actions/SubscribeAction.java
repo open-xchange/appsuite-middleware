@@ -77,6 +77,7 @@ public final class SubscribeAction extends AbstractFolderAction {
 
         protected final String sourceTree;
         protected final String folderId;
+        @SuppressWarnings("unused")
         protected final boolean subscribe;
 
         protected SubscribeParams(final String sourceTree, final String folderId, final boolean subscribe) {

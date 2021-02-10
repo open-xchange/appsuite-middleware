@@ -272,4 +272,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // User tried to send an email, which has been composed as a reply or forward referencing a message, which no longer exists
     public static final String ORIGINAL_MAIL_NOT_FOUND_MSG = "As the original email no longer exists, your email has been sent as a new one.";
 
+    // User tried to access a mail folder within an mail account which he can't access with his client. E.g. accessing external mail accounts with an oauth client
+    public final static String NO_ACCOUNT_ACCESS_MSG = "No account access permitted.";
+
 }

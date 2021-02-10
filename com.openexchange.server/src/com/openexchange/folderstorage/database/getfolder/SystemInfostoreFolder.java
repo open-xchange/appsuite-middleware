@@ -66,6 +66,7 @@ import java.util.List;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FederatedSharingFolders;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.AltNameLocalizedDatabaseFolder;
 import com.openexchange.folderstorage.database.DatabaseFolder;
@@ -156,7 +157,8 @@ public final class SystemInfostoreFolder {
                             folder.getObjectID(), user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), context, connection);
                         if (1 < visibleSubfolderIDs.size() ||
                             1 == visibleSubfolderIDs.size() && false == visibleSubfolderIDs.remove(getDefaultInfoStoreFolderId(session, context, connection)) ||
-                            0 < new OXFolderAccess(connection, context).getItemCount(folder, session, context)) {
+                            0 < new OXFolderAccess(connection, context).getItemCount(folder, session, context) ||
+                            FederatedSharingFolders.hasFederalSharingAccount(session)) {
                             subfolderIDs.add(0, new String[] { String.valueOf(folder.getObjectID()), stringHelper.getString(SYSTEM_USER_FILES_FOLDER_NAME) });
                         }
                     } else {
@@ -168,7 +170,8 @@ public final class SystemInfostoreFolder {
                      * only include public infostore root if there are visible subfolders, or user has full public folder access and is able to create subfolders
                      */
                     if (permissionBits.hasFullPublicFolderAccess() && folder.getEffectiveUserPermission(user.getId(), permissionBits, connection).canCreateSubfolders() ||
-                        0 < OXFolderIteratorSQL.getVisibleSubfolders(folder.getObjectID(), user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), context, connection).size()) {
+                        0 < OXFolderIteratorSQL.getVisibleSubfolders(folder.getObjectID(), user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), context, connection).size() ||
+                        FederatedSharingFolders.hasFederalSharingAccount(session)) {
                         String name = stringHelper.getString(altNames ? SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                         subfolderIDs.add(new String[] { String.valueOf(folder.getObjectID()), name });
                     }

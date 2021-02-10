@@ -288,13 +288,11 @@
 		<comment>This changeset executes a custom task which adds an INDEX to filestore2user table.</comment>
 		<customChange class="com.openexchange.database.internal.change.custom.AddIndexForFilestore2UserCustomTaskChange" />
 	</changeSet>
-	<!--
-    <changeSet id="7.12.0:swift_token:drop" author="daniel.becker@open-xchange.com" failOnError="false" logicalFilePath="swiftConfigdbChangeLog">
+    <changeSet id="7.10.5:swift_token:drop" author="daniel.becker@open-xchange.com" failOnError="false" logicalFilePath="swiftConfigdbChangeLog">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="swift_token" />
         </preConditions>
          <dropTable tableName="swift_token"/>
         <comment>Drops the swift_token table</comment>
     </changeSet>
-    -->
 </databaseChangeLog>

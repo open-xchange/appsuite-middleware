@@ -66,10 +66,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ReCaptchaServlet extends DataServlet {
 
+    private static final long serialVersionUID = 2748741720778811479L;
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReCaptchaServlet.class);
 
     private static final String ACTION_HTML = "html";
-
     private static final String ACTION_KEY = "key";
 
     // -----------------------------------------------------------------------------------------------------

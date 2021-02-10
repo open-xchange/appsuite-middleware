@@ -22,13 +22,13 @@ Description: Backend extension to provision synchronization with mobile phones
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-mobile-configuration-generator
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Depends: ${misc:Depends}, open-xchange-eas-provisioning-core
 Section: oldlibs
 Description: transitional dummy package
 
 Package: open-xchange-mobile-configuration-json
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-eas-provisioning-core
+Depends: ${misc:Depends}, open-xchange-eas-provisioning-core
 Section: oldlibs
 Description: transitional dummy package
 

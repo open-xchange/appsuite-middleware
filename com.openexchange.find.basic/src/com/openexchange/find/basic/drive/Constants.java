@@ -84,8 +84,12 @@ public final class Constants {
 
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
-    
+
+    /** The field for file extension */
     public static final String FIELD_FILE_EXTENSION = "file_extension";
+
+    /** The field for folder name */
+    public static final String FIELD_FOLDER_NAME = "folder_name";
 
     // ---------------------------------------------------------------------------------------------------------- //
 

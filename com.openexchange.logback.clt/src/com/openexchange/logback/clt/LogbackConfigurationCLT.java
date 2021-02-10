@@ -323,6 +323,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     /**
      * {@link CommandLineExecutor} - Specifies all command line executors
      */
+    @SuppressWarnings("synthetic-access")
     private enum CommandLineExecutor {
         CONTEXT {
 

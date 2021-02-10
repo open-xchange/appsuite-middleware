@@ -79,13 +79,13 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     /**
      * Initializes a new {@link TransportProviderServiceTracker}
      */
-    public TransportProviderServiceTracker(final BundleContext context) {
+    public TransportProviderServiceTracker(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public synchronized TransportProvider addingService(final ServiceReference<TransportProvider> reference) {
+    public synchronized TransportProvider addingService(ServiceReference<TransportProvider> reference) {
         final BundleContext context = this.context;
         final TransportProvider transportProvider = context.getService(reference);
         if (null == transportProvider) {
@@ -143,12 +143,12 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     }
 
     @Override
-    public void modifiedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
+    public void modifiedService(ServiceReference<TransportProvider> reference, TransportProvider service) {
         // Nothing to do
     }
 
     @Override
-    public synchronized void removedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
+    public synchronized void removedService(ServiceReference<TransportProvider> reference, TransportProvider service) {
         if (null != service) {
             try {
                 try {

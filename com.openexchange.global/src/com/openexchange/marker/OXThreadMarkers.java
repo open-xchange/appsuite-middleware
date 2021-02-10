@@ -132,4 +132,27 @@ public class OXThreadMarkers {
         return false;
     }
 
+    /**
+     * Un-Remembers specified {@code Closeable} instance.
+     *
+     * @param closeable The {@code Closeable} instance
+     * @return <code>true</code> if successfully removed; otherwise <code>false</code>
+     */
+    public static boolean unrememberCloseable(Closeable closeable) {
+        if (null == closeable) {
+            return false;
+        }
+
+        Thread t = Thread.currentThread();
+        if (t instanceof OXThreadMarker) {
+            try {
+                return ThreadLocalCloseableControl.getInstance().removeCloseable(closeable);
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        return false;
+    }
+
 }

@@ -50,7 +50,6 @@
 package com.openexchange.mail.compose.json.action;
 
 import java.util.Optional;
-import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,9 +62,12 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
-import com.openexchange.mail.compose.json.util.UploadFileFileIterator;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
+import com.openexchange.mail.compose.UploadLimits;
+import com.openexchange.mail.compose.json.converter.CompositionSpaceJSONResultConverter;
+import com.openexchange.mail.compose.json.util.UploadFileFileIterator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,20 +91,18 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
+
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
 
         // Check for optional body data
         Optional<StreamedUploadFileIterator> optionalUploadedAttachments = Optional.empty();
         {
             // Determine upload quotas
-            UploadLimitations uploadLimitations = getUploadLimitations(session);
-            long maxSize = uploadLimitations.maxUploadSize;
-            long maxFileSize = uploadLimitations.maxUploadFileSize;
+            UploadLimits uploadLimits = compositionSpaceService.getAttachmentUploadLimits(compositionSpaceId.getId());
 
-            boolean hasFileUploads = requestData.hasUploads(maxFileSize, maxSize, true);
+            boolean hasFileUploads = requestData.hasUploads(uploadLimits.getPerAttachmentLimit(), uploadLimits.getPerRequestLimit(), true);
             StreamedUpload upload = null;
             UploadEvent uploadEvent = null;
             try {
@@ -131,7 +131,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(uuid, md, session);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, getClientToken(requestData));
                 }
 
                 if (hasFileUploads) {
@@ -155,7 +155,7 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
                 if (null != jMessage) {
                     MessageDescription md = new MessageDescription();
                     parseJSONMessage(jMessage, md);
-                    compositionSpaceService.updateCompositionSpace(uuid, md, session);
+                    compositionSpaceService.updateCompositionSpace(compositionSpaceId.getId(), md, getClientToken(requestData));
                 }
 
                 if (hasFileUploads) {
@@ -164,8 +164,10 @@ public class SaveDraftCompositionSpaceAction extends AbstractMailComposeAction {
             }
         }
 
-        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(uuid, optionalUploadedAttachments, true, session);
-        return new AJAXRequestResult(mailPath.toString(), "string");
+        MailPath mailPath = compositionSpaceService.saveCompositionSpaceToDraftMail(
+            compositionSpaceId.getId(), optionalUploadedAttachments, true, getClientToken(requestData));
+        JSONObject jMailPath = CompositionSpaceJSONResultConverter.convertMailPath(mailPath);
+        return new AJAXRequestResult(jMailPath, "json").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

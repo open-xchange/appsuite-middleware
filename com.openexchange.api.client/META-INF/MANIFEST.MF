@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The share API bundle
+Bundle-SymbolicName: com.openexchange.api.client
+Bundle-Version: 7.10.5
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.ajax,
+ com.openexchange.annotation,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.rest.client.httpclient,
+ com.openexchange.server,
+ com.openexchange.session,
+ javax.mail.internet,
+ org.apache.http,
+ org.apache.http.client,
+ org.apache.http.client.methods,
+ org.apache.http.protocol,
+ org.json,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Export-Package: com.openexchange.api.client
+Automatic-Module-Name: com.openexchange.api.client

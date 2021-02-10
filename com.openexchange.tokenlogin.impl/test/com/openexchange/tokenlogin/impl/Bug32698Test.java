@@ -67,7 +67,7 @@ import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -142,6 +142,7 @@ public class Bug32698Test {
 
     private final ConcurrentMap<String, String> myMap2 = new ConcurrentHashMap<String, String>();
 
+    @SuppressWarnings("synthetic-access")
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -222,7 +223,7 @@ public class Bug32698Test {
     public void testTokenIsDifferentAfterUsingItOnOtherOx() throws Exception {
         PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.peekSession(ArgumentMatchers.anyString())).thenReturn(this.session);
-        PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.addSession(ArgumentMatchers.any(AddSessionParameter.class))).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
@@ -236,13 +237,13 @@ public class Bug32698Test {
         String localToken2 = this.tokenLoginServiceImpl.acquireToken(this.session);
         Assert.assertFalse(localToken.equals(localToken2));
 
-        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+        Mockito.verify(sessiondService, Mockito.times(1)).addSession(ArgumentMatchers.any(AddSessionParameter.class));
     }
 
     @Test(expected = OXException.class)
     public void testTokenIsInvalidated() throws Exception {
         PowerMockito.when(this.sessiondService.getSession(ArgumentMatchers.anyString())).thenReturn(this.session);
-        PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.addSession(ArgumentMatchers.any(AddSessionParameter.class))).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
@@ -257,13 +258,14 @@ public class Bug32698Test {
 
         Assert.assertFalse(returnedSession.equals(returnedSession2));
 
-        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+        Mockito.verify(sessiondService, Mockito.times(1)).addSession(ArgumentMatchers.any(AddSessionParameter.class));
     }
 
     /**
      * @throws OXException
      * @throws Exception
      */
+    @SuppressWarnings("synthetic-access")
     private void configureTokenLoginServices() throws OXException, Exception {
 
         this.tokenLoginServiceImpl = PowerMockito.spy(new TokenLoginServiceImpl(this.maxIdleTime, this.configService) {
@@ -287,7 +289,7 @@ public class Bug32698Test {
         this.tokenLoginServiceImpl2.setToken2sessionIdMapNameHzMapName("token2sessionIdMapName");
 
         PowerMockito.when(tokenLoginServiceImpl, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(org.mockito.ArgumentMatchers.eq("token2sessionIdMapName")).thenAnswer(new Answer<IMap<String, String>>() {
-
+            
             @Override
             public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
                 return tokenIMap;

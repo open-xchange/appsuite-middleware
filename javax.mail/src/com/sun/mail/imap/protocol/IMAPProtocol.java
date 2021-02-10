@@ -994,7 +994,6 @@ public class IMAPProtocol extends Protocol {
 	Response r = null;
 	boolean done = false;
 
-	String type1Msg = null;
 	int flags = PropUtil.getIntProperty(props,
 	    "mail." + name + ".auth.ntlm.flags", 0);
     boolean v2 = PropUtil.getBooleanProperty(props,
@@ -3137,44 +3136,59 @@ public class IMAPProtocol extends Protocol {
 			);
 	args.writeAtom(msgSequence);
 
-	Response[] r;
-
-	if (charset == null) { // text is all US-ASCII
-        r = command("SEARCH", args);
-    } else {
-        r = command("SEARCH CHARSET " + charset, args);
-    }
-
-	final Response response = r[r.length-1];
-	int[] matches = null;
-
-	// Grab all SEARCH responses
-	if (response.isOK()) { // command succesful
-	    gnu.trove.list.TIntList v = new gnu.trove.list.array.TIntArrayList(r.length);
-	    int num;
-	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
-
-		final IMAPResponse ir = (IMAPResponse)r[i];
-		// There *will* be one SEARCH response.
-		if (ir.keyEquals("SEARCH")) {
-		    while ((num = ir.readNumber()) != -1) {
-                v.add(num);
-            }
-		    r[i] = null;
-		}
+	while (true) {
+	    Response[] r;
+	    if (charset == null) { // text is all US-ASCII
+	        r = command("SEARCH", args);
+	    } else {
+	        r = command("SEARCH CHARSET " + charset, args);
 	    }
 
-	    // Copy the list into 'matches'
-	    matches = v.toArray();
-	}
-
-	// dispatch remaining untagged responses
-	notifyResponseHandlers(r);
-	handleResult(response);
-	return matches;
+    	Response response = r[r.length-1];
+    	int[] matches = null;
+    	boolean contentChanged = false;
+    
+    	// Grab all SEARCH responses
+    	if (response.isOK()) { // command successful
+    	    gnu.trove.list.TIntList v = null;
+    	    for (int i = 0, len = r.length; !contentChanged && i < len; i++) {
+    		if (!(r[i] instanceof IMAPResponse)) {
+                continue;
+            }
+    
+    		IMAPResponse ir = (IMAPResponse)r[i];
+    		// There *will* be one SEARCH response.
+    		if (ir.keyEquals("SEARCH")) {
+    		    if (v == null) {
+    		        v = new gnu.trove.list.array.TIntArrayList();
+                }
+    		    for (int num; (num = ir.readNumber()) != -1;) {
+                    v.add(num);
+                }
+    		    r[i] = null;
+    		} else if (ir.keyEquals("EXISTS")) { // EXISTS
+                // Server signals that there is a new message
+                contentChanged = true;
+            } else if (ir.keyEquals("EXPUNGE")) { // EXPUNGE
+                // Server signals that there a message has been dropped
+                contentChanged = true;
+            } else if (ir.keyEquals("FETCH")) { // FETCH
+                // Server signals that a message has changed
+                contentChanged = true;
+            }
+    	    }
+    
+    	    // Copy the list into 'matches'
+    	    matches = v == null ? new int[0] : v.toArray();
+    	}
+    
+    	// dispatch remaining untagged responses
+    	notifyResponseHandlers(r);
+    	handleResult(response);
+    	if (!contentChanged) {	    
+    	    return matches;
+    	}
+	    }
     }
 
     /**
@@ -3238,36 +3252,52 @@ public class IMAPProtocol extends Protocol {
         args.writeAtom("ALL");
     }
 
-	final Response[] r = command("SORT", args);
-	final Response response = r[r.length-1];
-	int[] matches = null;
-
-	// Grab all SORT responses
-	if (response.isOK()) { // command succesful
-	    gnu.trove.list.TIntList v = new gnu.trove.list.array.TIntArrayList(r.length);
-	    int num;
-	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
-
-		final IMAPResponse ir = (IMAPResponse)r[i];
-		if (ir.keyEquals("SORT")) {
-		    while ((num = ir.readNumber()) != -1) {
-                v.add(num);
+	while (true) {
+    	Response[] r = command("SORT", args);
+    	Response response = r[r.length-1];
+    	int[] matches = null;
+    	boolean contentChanged = false;
+    
+    	// Grab all SORT responses
+    	if (response.isOK()) { // command successful
+    	    gnu.trove.list.TIntList v = null;
+    	    for (int i = 0, len = r.length; !contentChanged && i < len; i++) {
+    		if (!(r[i] instanceof IMAPResponse)) {
+                continue;
             }
-		    r[i] = null;
-		}
-	    }
-
-	    // Copy the vector into 'matches'
-	    matches = v.toArray();
-	}
-
-	// dispatch remaining untagged responses
-	notifyResponseHandlers(r);
-	handleResult(response);
-	return matches;
+    
+    		IMAPResponse ir = (IMAPResponse)r[i];
+    		if (ir.keyEquals("SORT")) {
+    		    if (v == null) {
+    		        v = new gnu.trove.list.array.TIntArrayList();
+    		    }
+    		    for (int num; (num = ir.readNumber()) != -1;) {
+                    v.add(num);
+                }
+    		    r[i] = null;
+    		} else if (ir.keyEquals("EXISTS")) { // EXISTS
+    		    // Server signals that there is a new message
+    		    contentChanged = true;
+    		} else if (ir.keyEquals("EXPUNGE")) { // EXPUNGE
+                // Server signals that there a message has been dropped
+                contentChanged = true;
+            } else if (ir.keyEquals("FETCH")) { // FETCH
+                // Server signals that a message has changed
+    		    contentChanged = true;
+            }
+    	    }
+    
+    	    // Copy the vector into 'matches'
+    	    matches = v == null ? new int[0] : v.toArray();
+    	}
+    
+    	// dispatch remaining untagged responses
+    	notifyResponseHandlers(r);
+    	handleResult(response);
+    	if (!contentChanged) {        
+    	    return matches;
+        }
+        }
     }
 
     /**

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Change History Impl
 Bundle-SymbolicName: com.openexchange.passwordchange.history.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Description: The Open-Xchange password change history implementation bundle that tracks changes of passwords. 
@@ -36,3 +36,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.passwordchange.history.impl

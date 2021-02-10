@@ -49,6 +49,7 @@
 
 package com.openexchange.session.oauth.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -79,7 +80,7 @@ public class OAuthTokenUpdaterImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthTokenUpdaterImpl.class);
 
-    private static final long REMOTE_SESSION_LOOKUP_TIMEOUT_MILLIS = 5000l;
+    private static final long REMOTE_SESSION_LOOKUP_TIMEOUT_MILLIS = 5000L;
 
     private final Session session;
     private final TokenRefresher refresher;
@@ -161,8 +162,8 @@ public class OAuthTokenUpdaterImpl {
             // would immediately try to refresh it again.
             LOG.info("Discarding refreshed tokens for session '{}'. Expiration is lower than configured refresh threshold: {}sec / {}sec",
                 session.getSessionID(),
-                TimeUnit.MILLISECONDS.toSeconds(tokens.getExpiresInMillis()),
-                refreshConfig.getRefreshThresholdUnit().toSeconds(refreshConfig.getRefreshThreshold()));
+                L(TimeUnit.MILLISECONDS.toSeconds(tokens.getExpiresInMillis())),
+                L(refreshConfig.getRefreshThresholdUnit().toSeconds(refreshConfig.getRefreshThreshold())));
             return RefreshResult.fail(FailReason.PERMANENT_ERROR, "Expiration date of new tokens is lower than refresh threshold");
         }
 
@@ -185,7 +186,7 @@ public class OAuthTokenUpdaterImpl {
     private RefreshResult handleError(OAuthTokens oldTokens, Error error) {
         switch (error.getType()) {
             case INVALID_REFRESH_TOKEN:
-                LOG.info("Token refresh failed for due to invalid refresh token for session '{}'", session.getSessionID());
+                LOG.info("Token refresh failed due to invalid refresh token for session '{}'", session.getSessionID());
                 return handleInvalidRefreshToken(oldTokens);
             case TEMPORARY:
                 if (error.hasException()) {

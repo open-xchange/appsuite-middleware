@@ -4,8 +4,9 @@
     tags:
       - Jobqueue
     summary: Gets the informartion about a certain job held in job queue
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier for the job

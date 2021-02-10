@@ -56,6 +56,7 @@ import org.scribe.model.Verb;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.api.YahooApi2;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;

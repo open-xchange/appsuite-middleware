@@ -49,17 +49,29 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.MetadataAware;
 import com.openexchange.file.storage.json.FileStorageAccountParser;
 import com.openexchange.file.storage.json.FileStorageAccountWriter;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -90,6 +102,115 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
             return doIt(requestData, session);
         } catch (JSONException x) {
             throw FileStorageExceptionCodes.JSON_ERROR.create(x,x.toString());
+        }
+    }
+
+    /**
+     * Optionally gets the account's root folder from a file storage account.
+     *
+     * @param access The file storage account access to get the root folder from
+     * @return The root folder, or <code>null</code> if there is none
+     */
+    protected FileStorageFolder optRootFolder(FileStorageAccountAccess access) throws OXException {
+        try {
+            return access.getRootFolder();
+        } catch (OXException e) {
+            if (FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    protected JSONObject optMetadata(Session session, FileStorageAccount account) throws OXException {
+        if (MetadataAware.class.isInstance(account.getFileStorageService())) {
+            return ((MetadataAware) account.getFileStorageService()).getMetadata(session, account);
+        }
+        return null;
+    }
+
+    protected Set<String> determineCapabilities(FileStorageAccountAccess access) {
+        if (!(access instanceof CapabilityAware)) {
+            return null;
+        }
+
+        CapabilityAware capabilityAware = (CapabilityAware) access;
+        Set<String> caps = new HashSet<String>();
+
+        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.LOCKS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.READ_ONLY.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.COUNT_TOTAL);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.COUNT_TOTAL.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.CASE_INSENSITIVE);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_RENAME_FOLDERS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.RESTORE);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RESTORE.name());
+        }
+
+        return caps;
+    }
+
+    protected static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            return Locale.US;
         }
     }
 

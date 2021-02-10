@@ -146,7 +146,7 @@ public class HttpServiceImpl implements HttpServiceExtension {
      */
     @Override
     public void registerServlet(
-            final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext)
+            final String alias, final Servlet servlet, final Dictionary<?, ?> initparams, HttpContext httpContext)
             throws ServletException, NamespaceException {
 
         // LOG.info("Registering servlet: {}, under: {}, with: {} and context: {}", servlet, alias, initparams, httpContext);
@@ -184,7 +184,7 @@ public class HttpServiceImpl implements HttpServiceExtension {
      * {@inheritDoc}
      */
     @Override
-    public void registerFilter(Filter filter, String urlPattern, Dictionary initParams, HttpContext context)
+    public void registerFilter(Filter filter, String urlPattern, Dictionary<?, ?> initParams, HttpContext context)
     throws ServletException {
         LOG.info("Registering servlet: {}, under url-pattern: {}, with: {} and context: {}", filter, urlPattern, initParams, context);
         mainHttpHandler.registerFilter(filter, urlPattern, initParams, context, this);

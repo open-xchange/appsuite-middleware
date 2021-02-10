@@ -85,9 +85,9 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
 
-        user2 = new UserApi(client, enhancedClient, testUser2, false);
-        folderId2 = getDefaultFolder(user2.getSession(), client);
-        eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
+        user2 = new UserApi(client, enhancedClient, testUser2);
+        folderId2 = getDefaultFolder(client);
+        eventManager2 = new EventManager(user2, getDefaultFolder(client));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
-        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, L(timestamp), body, recurrenceId, Boolean.FALSE, null, null, null, null, null, null);
+        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(folderId2, eventId, L(timestamp), body, recurrenceId, Boolean.FALSE, null, null, null, null, null, null);
         List<EventData> updates = calendarResult.getData().getUpdated();
         assertTrue(updates.size() == 1);
         return updates.get(0);

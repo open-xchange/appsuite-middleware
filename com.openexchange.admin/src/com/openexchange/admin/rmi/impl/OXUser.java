@@ -65,16 +65,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.internet.idn.IDNA;
+import java.util.regex.PatternSyntaxException;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
+import com.openexchange.admin.properties.PropertyScope;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -104,7 +104,6 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
@@ -113,10 +112,10 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -124,7 +123,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
@@ -186,10 +185,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
             logAndReturnException(LOGGER, remoteException, exceptionId, credentials, contextId, userId);
         }
-    }
-
-    private boolean usernameIsChangeable() {
-        return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
     }
 
     @Override
@@ -351,7 +346,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log(LogLevel.ERROR, LOGGER, credentials, invalidDataException, EMPTY_STRING);
                 throw invalidDataException;
             }
-            final int user_id = user.getId().intValue();
 
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -361,6 +355,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException(e);
             }
 
+            final int user_id = user.getId().intValue();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException(ctx.getIdAsString());
             } else if (!tool.existsUser(ctx, user_id)) {
@@ -1059,7 +1054,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkUserAttributes(usrdata);
             final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
-            checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
+            tool.checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
 
             // Check if he wants to change the filestore id
             {
@@ -1509,7 +1504,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, RemoteException {
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws StorageException, InvalidCredentialsException, InvalidDataException, DatabaseUpdateException, RemoteException {
         try {
             try {
                 doNullCheck(usr, access);
@@ -1544,7 +1539,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int retval = oxu.create(ctx, usr, access);
             usr.setId(Integer.valueOf(retval));
-            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -1628,7 +1623,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     view = viewFactory.getView(usr.getId().intValue(), ctx.getId().intValue());
                     Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                     if (check != null && check.booleanValue()) {
-                        ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                        ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), "com.openexchange.mail.specialuse.check", Boolean.class);
                         prop.set(Boolean.TRUE);
                         usr.setUserAttribute("config", "com.openexchange.mail.specialuse.check", Boolean.TRUE.toString());
                     }
@@ -1693,9 +1688,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             int contextAdminId = tool.getAdminForContext(ctx);
-            List<User> filestoreOwners = new java.util.LinkedList<User>();
+            List<User> filestoreOwners = new java.util.LinkedList<>();
             {
-                Set<Integer> dubCheck = new HashSet<Integer>();
+                Set<Integer> dubCheck = new HashSet<>();
                 for (final User user : users) {
                     if (destUser != null && user.getId().intValue() == destUser.intValue()) {
                         throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
@@ -1771,11 +1766,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             User[] retusers = oxu.getData(ctx, users);
 
-            final List<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+            final List<OXUserPluginInterface> interfacelist = new ArrayList<>();
 
             // Here we define a list which takes all exceptions which occur during plugin-processing
             // By this we are able to throw all exceptions to the client while concurrently processing all plugins
-            final List<Exception> exceptionlist = new ArrayList<Exception>();
+            final List<Exception> exceptionlist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -1866,7 +1861,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 String property = "com.openexchange.unifiedquota.enabled";
                 Boolean enabled = view.opt(property, Boolean.class, Boolean.FALSE);
                 if (enabled != null && enabled.booleanValue()) {
-                    ConfigProperty<Boolean> prop = view.property("user", property, Boolean.class);
+                    ConfigProperty<Boolean> prop = view.property(ConfigViewScope.USER.getScopeName(), property, Boolean.class);
                     prop.set(Boolean.FALSE);
                     user.setUserAttribute("config", property, Boolean.FALSE.toString());
                 }
@@ -1913,6 +1908,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log(LogLevel.ERROR, LOGGER, credentials, e, EMPTY_STRING);
                 throw e;
             }
+            checkExistence(ctx);
             if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                 auth.setLogin(auth.getLogin().toLowerCase());
             }
@@ -2213,190 +2209,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    /**
-     * checking for some requirements when changing existing user data
-     *
-     * @param ctx The {@link Context}
-     * @param newuser The {@link User}
-     * @param dbuser The database {@link User}
-     * @param prop Additional {@link PropertyHandler}
-     * @throws StorageException If user can't be found
-     * @throws InvalidDataException If data already exists or is flawed
-     */
-    private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
-        if (newuser.getName() != null) {
-            if (usernameIsChangeable()) {
-                if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-                    tool.validateUserName(newuser.getName());
-                }
-                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-                    newuser.setName(newuser.getName().toLowerCase());
-                }
-            }
-            // must be loaded additionally because the user loading method gets the new user name passed and therefore does not load the
-            // current one.
-            final String currentName = tool.getUsernameByUserID(ctx, newuser.getId().intValue());
-            if (!newuser.getName().equals(currentName)) {
-                if (usernameIsChangeable()) {
-                    if (tool.existsUserName(ctx, newuser.getName())) {
-                        throw new InvalidDataException("User " + newuser.getName() + " already exists in this context");
-                    }
-                } else {
-                    throw new InvalidDataException("Changing username is disabled!");
-                }
-            }
-        }
-
-        {
-            String lang = newuser.getLanguage();
-            if (lang != null && lang.indexOf('_') < 0) {
-                throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
-            }
-        }
-
-        String newDefaultSenderAddress = newuser.getDefaultSenderAddress();
-        String newPrimaryEmail = newuser.getPrimaryEmail();
-        String newEmail1 = newuser.getEmail1();
-        boolean mailCheckNeeded = (null != newDefaultSenderAddress) || (null != newPrimaryEmail) || (null != newEmail1) || (null != newuser.getAliases());
-
-        if (prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true)) {
-            if (newPrimaryEmail != null && !newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                throw new InvalidDataException("primary mail must not be changed");
-            }
-        }
-
-        GenericChecks.checkChangeValidPasswordMech(newuser);
-
-        // if no password mech supplied, use the old one as set in db
-        if (newuser.getPasswordMech() == null) {
-            newuser.setPasswordMech(dbuser.getPasswordMech());
-        }
-
-        if (mailCheckNeeded) {
-            // Check if E-Mail addresses should be checked for context administrator, too (default is false)
-            boolean enableAdminMailChecks = false;
-            {
-                ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null != configService) {
-                    enableAdminMailChecks = configService.getBoolProperty(AdminProperties.User.ENABLE_ADMIN_MAIL_CHECKS, enableAdminMailChecks);
-                }
-            }
-
-            // Validate E-Mail addresses for either all users (com.openexchange.admin.enableAdminMailChecks=true) or only non-admin users
-            if (enableAdminMailChecks || !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
-                // checks below throw InvalidDataException
-                tool.checkValidEmailsInUserObject(newuser);
-                Set<String> useraliases = newuser.getAliases();
-                if (useraliases == null) {
-                    useraliases = dbuser.getAliases();
-                }
-                if (null != useraliases) {
-                    Set<String> tmp = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-                    for (String email : useraliases) {
-                        tmp.add(IDNA.toIDN(email));
-                    }
-                    useraliases = tmp;
-                }
-
-                if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
-                    // primary mail value must be same with email1
-                    throw new InvalidDataException("email1 not equal with primarymail!");
-                }
-
-                if (useraliases == null) {
-                    useraliases = Collections.emptySet();
-                } else {
-                    Set<String> useraliasesAddresses = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-                    for (String sAddr : useraliases) {
-                        try {
-                            QuotedInternetAddress addr = new QuotedInternetAddress(sAddr, false);
-                            useraliasesAddresses.add(addr.getIDNAddress());
-                            useraliasesAddresses.add(QuotedInternetAddress.toACE(addr.getAddress()));
-                        } catch (Exception e) {
-                            // Failed to parse as E-Mail address
-                            useraliasesAddresses.add(IDNA.toIDN(extractRealMailAddressFrom(sAddr)));
-                        }
-                    }
-                    useraliases = useraliasesAddresses;
-                }
-
-                String check_primary_mail;
-                String check_email1;
-                String check_default_sender_address;
-                if (newPrimaryEmail != null) {
-                    check_primary_mail = IDNA.toIDN(newPrimaryEmail);
-                    if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                        tool.primaryMailExists(ctx, newPrimaryEmail);
-                    }
-                } else {
-                    final String email = dbuser.getPrimaryEmail();
-                    check_primary_mail = email == null ? email : IDNA.toIDN(email);
-                }
-                check_primary_mail = parseRealMailAddressFrom(check_primary_mail, true);
-
-                if (newEmail1 != null) {
-                    check_email1 = IDNA.toIDN(newEmail1);
-                } else {
-                    final String s = dbuser.getEmail1();
-                    check_email1 = s == null ? s : IDNA.toIDN(s);
-                }
-                check_email1 = parseRealMailAddressFrom(check_email1, true);
-
-                if (newDefaultSenderAddress != null) {
-                    check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
-                } else {
-                    final String s = dbuser.getDefaultSenderAddress();
-                    check_default_sender_address = s == null ? s : IDNA.toIDN(s);
-                }
-                check_default_sender_address = parseRealMailAddressFrom(check_default_sender_address, true);
-
-                final boolean found_primary_mail = useraliases.contains(check_primary_mail);
-                final boolean found_email1 = useraliases.contains(check_email1);
-                final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
-
-                if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                    throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
-                }
-                // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-                // which is not very good when just changing the displayname for example
-                if (newPrimaryEmail != null && newEmail1 == null) {
-                    throw new InvalidDataException("email1 not sent but required!");
-
-                }
-            }
-        }
-
-        // TODO mail checks
-    }
-
-    private static String parseRealMailAddressFrom(String sAddress, boolean idn) {
-        if (sAddress == null) {
-            return null;
-        }
-
-        try {
-            QuotedInternetAddress addr = new QuotedInternetAddress(sAddress, false);
-            return idn ? addr.getIDNAddress() : QuotedInternetAddress.toACE(addr.getAddress());
-        } catch (Exception e) {
-            // Failed to parse as E-Mail address
-            String s = extractRealMailAddressFrom(sAddress);
-            return idn ? IDNA.toIDN(s) : s;
-        }
-    }
-
-    private static String extractRealMailAddressFrom(String sAddress) {
-        if (sAddress == null) {
-            return null;
-        }
-
-        int indexOf = sAddress.indexOf('<');
-        if (indexOf < 0) {
-            return sAddress;
-        }
-
-        return sAddress.substring(indexOf + 1, sAddress.indexOf('>'));
-    }
-
     private static void checkContext(final Context ctx) throws InvalidDataException {
         if (null == ctx || null == ctx.getId()) {
             throw new InvalidDataException("Context invalid");
@@ -2430,7 +2242,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
-        final ArrayList<User> list = new ArrayList<User>(retusers.length);
+        final ArrayList<User> list = new ArrayList<>(retusers.length);
         for (final User user : retusers) {
             if (!tool.isContextAdmin(ctx, user.getId().intValue())) {
                 list.add(user);
@@ -2478,7 +2290,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 try {
                     permissionBits = Integer.parseInt(filter);
                 } catch (NumberFormatException nfe) {
-                    final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
+                    final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter, true);
                     if (namedAccessCombination == null) {
                         throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"", nfe);
                     }
@@ -2563,6 +2375,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public int getPermissionBits(UserModuleAccess namedAccessCombination) {
         int retval = 0;
 
@@ -2642,7 +2455,34 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      * Property name black list REGEX. Taken from the oxsysreport
      */
-    private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
+    private static final Pattern PROPERTY_NAME_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[pP]asswd[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*|[uU]ser[[:blank:]]*");
+
+    private static final List<String> PROPERTY_VALUE_BLACK_LIST_TOKENS = ImmutableList.of("user", "login", "password", "passwd", "secret", "key");
+
+    private static boolean isBlacklisted(ConfigurationProperty property, Optional<Pattern> optionalAdditionalConfigCheckPattern) {
+        if (PROPERTY_NAME_BLACK_LIST.matcher(property.getName()).find()) {
+            return true;
+        }
+
+        // Optional<Boolean> found = optionalAdditionalConfigCheckPattern.map((p) -> Boolean.valueOf(p.matcher(property.getName()).find()));
+        if (optionalAdditionalConfigCheckPattern.isPresent() && optionalAdditionalConfigCheckPattern.get().matcher(property.getName()).find()) {
+            return true;
+        }
+
+        String value = Strings.asciiLowerCase(property.getValue());
+        StringBuilder tokenBuilder = new StringBuilder();
+        for (String token : PROPERTY_VALUE_BLACK_LIST_TOKENS) {
+            tokenBuilder.setLength(0);
+            if (value.indexOf(tokenBuilder.append(token).append('=').toString()) >= 0) {
+                return true;
+            }
+            tokenBuilder.setLength(0);
+            if (value.indexOf(tokenBuilder.append(token).append(':').toString()) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      *
@@ -2657,8 +2497,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Invalid context id.");
         }
 
-        List<UserProperty> userProperties = new ArrayList<UserProperty>();
-
         Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
 
         try {
@@ -2672,17 +2510,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final CapabilityService capabilityService = AdminServiceRegistry.getInstance().getService(CapabilityService.class);
             if (capabilityService == null) {
                 log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), null, "CapabilityService absent. Unable to retrieve user configuration.");
-                return userProperties;
+                return Collections.emptyList();
             }
+
+            Optional<Pattern> optionalAdditionalConfigCheckPattern = Optional.empty();
+            try {
+                String regex = AdminProperties.optScopedProperty(AdminProperties.User.ADDITIONAL_CONFIG_CHECK_REGEX, PropertyScope.propertyScopeForDefaultSearchPath(user_id, ctx.getId().intValue()), String.class);
+                optionalAdditionalConfigCheckPattern = Optional.ofNullable(Strings.isEmpty(regex) ? null : Pattern.compile(regex.trim()));
+            } catch (PatternSyntaxException e) {
+                log(LogLevel.WARNING, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(user_id), e, "Unable to compile the value of the '{}' property to a regular expression.", AdminProperties.User.ADDITIONAL_CONFIG_CHECK_REGEX);
+            }
+
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
-
+            List<UserProperty> userProperties = new ArrayList<>(capabilitiesSource.size());
             for (ConfigurationProperty property : capabilitiesSource) {
-                Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
-                String value = m.find() ? "<OBFUSCATED>" : property.getValue();
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), value));
+                String value = isBlacklisted(property, optionalAdditionalConfigCheckPattern) ? "<OBFUSCATED>" : property.getValue();
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata()));
             }
 
-            Collections.sort(userProperties, new OXUserPropertySorter());
+            Collections.sort(userProperties, OXUserPropertySorter.getInstance());
 
             return userProperties;
         } catch (OXException e) {
@@ -2708,7 +2554,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Invalid context id.");
         }
 
-        Map<String, Map<String, Set<String>>> capabilitiesSource = new HashMap<String, Map<String, Set<String>>>();
+        Map<String, Map<String, Set<String>>> capabilitiesSource = new HashMap<>();
 
         Credentials auth = credentials == null ? new Credentials(EMPTY_STRING, EMPTY_STRING) : credentials;
 

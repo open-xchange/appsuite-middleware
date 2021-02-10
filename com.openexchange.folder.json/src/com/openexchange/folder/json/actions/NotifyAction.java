@@ -56,18 +56,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.NotificationData;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.ShareTargetPath;
@@ -83,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(OAuthAction.CUSTOM)
+@RestrictedAction(module = AbstractFolderAction.MODULE, type = RestrictedAction.Type.READ, hasCustomOAuthScopeCheck = true)
 public final class NotifyAction extends AbstractFolderAction {
 
     /** The action identifier */
@@ -142,7 +141,7 @@ public final class NotifyAction extends AbstractFolderAction {
          * obtain existing folder permissions from folder service
          */
         FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
+        UserizedFolder folder = folderService.getFolder(treeId, folderId, session, getDecorator(request));
         if (isOAuthRequest(request) && !mayWriteViaOAuthRequest(folder.getContentType(), getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.writeScopeForContentType(folder.getContentType()));
         }
@@ -178,7 +177,7 @@ public final class NotifyAction extends AbstractFolderAction {
         }
 
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
+        ContentType contentType = folderService.getFolder(treeId, id, session, getDecorator(request)).getContentType();
         return mayWriteViaOAuthRequest(contentType, access);
     }
 

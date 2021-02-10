@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,20 +64,12 @@ import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -140,107 +132,25 @@ public class MoveAction extends AbstractWriteAction {
         boolean adjustFilenamesAsNeeded = AJAXRequestDataTools.parseBoolParameter("autorename", request.getRequestData(), true);
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        IDBasedFolderAccess folderAccess = request.getFolderAccess();
         String destFolder = request.getFolderId();
 
-        List<String> oldFiles = new LinkedList<>();
-        LinkedList<String> deleteableFolders = new LinkedList<>();
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+        List<String> conflictingFiles = new ArrayList<>(pairs.size());
+        List<String> filesToMove = pairs.stream().map(p -> p.getIdentifier()).collect(Collectors.toList());
 
-        boolean error = true;
-        try {
-            List<String> conflicting = new ArrayList<>(pairs.size());
-            for (IdVersionPair pair : pairs) {
-                String fileId = pair.getIdentifier();
-                if (fileId == null) {
-                    // Resource denotes a folder
-                    String folderId = pair.getFolderId();
-                    FileStorageFolder srcFolder = folderAccess.getFolder(new FolderID(folderId));
-
-                    DefaultFileStorageFolder newFolder = new DefaultFileStorageFolder();
-                    newFolder.setName(srcFolder.getName());
-                    newFolder.setParentId(destFolder);
-                    newFolder.setSubscribed(srcFolder.isSubscribed());
-                    for (FileStoragePermission permission : srcFolder.getPermissions()) {
-                        newFolder.addPermission(permission);
-                    }
-
-                    String newFolderID = folderAccess.createFolder(newFolder);
-                    List<String> fileIds = new ArrayList<>();
-                    {
-                        TimedResult<File> documents = fileAccess.getDocuments(folderId);
-                        SearchIterator<File> iter = documents.results();
-                        try {
-                            while (iter.hasNext()) {
-                                File file = iter.next();
-                                fileIds.add(file.getId());
-                            }
-                        } finally {
-                            SearchIterators.close(iter);
-                        }
-                    }
-
-                    deleteableFolders.addLast(newFolderID);
-                    conflicting.addAll(fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID, adjustFilenamesAsNeeded));
-
-                    deleteableFolders.removeLast();
-                    deleteableFolders.addLast(folderId);
-                } else {
-                    // Resource denotes a file
-                    oldFiles.add(fileId);
-                }
-            }
-
-            if (!oldFiles.isEmpty()) {
-                conflicting.addAll(fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder, adjustFilenamesAsNeeded));
-            }
-
-            {
-                for (String folderId : deleteableFolders) {
-                    try {
-                        folderAccess.deleteFolder(folderId, true);
-                    } catch (Exception e) {
-                        /* ignore */}
-                }
-            }
-
-            error = false;
-            AJAXRequestResult result = result(conflicting, request);
-
-            // Add any warnings to the response
-            Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
-            result.addWarnings(warnings);
-
-            boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
-            if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
-                result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
-            }
-
-            if (ignoreWarnings) {
-                for (String fid : oldFiles) {
-                    moveFile(fid, destFolder, fileAccess);
-                }
-            }
-
-            return result;
-        } finally {
-            if (error) {
-                for (String folderId : deleteableFolders) {
-                    try {
-                        folderAccess.deleteFolder(folderId, true);
-                    } catch (Exception e) {
-                        /* ignore */}
-                }
-            }
+        if (!filesToMove.isEmpty()) {
+            conflictingFiles.addAll(fileAccess.move(filesToMove, FileStorageFileAccess.DISTANT_FUTURE, destFolder, adjustFilenamesAsNeeded, ignoreWarnings));
         }
-    }
 
-    private String moveFile(String fileId, String newFolderId, IDBasedFileAccess fileAccess) throws OXException {
-        DefaultFile file = new DefaultFile();
-        file.setId(fileId);
-        file.setFolderId(newFolderId);
+        AJAXRequestResult result = result(conflictingFiles, request);
 
-        // Save file metadata without binary payload
-        return fileAccess.saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE, fields, true, false);
+        // Add any warnings to the response
+        Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+        result.addWarnings(warnings);
+        if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
+            result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create(conflictingFiles.stream().collect(Collectors.joining(","))));
+        }
+        return result;
     }
 
     private static String getFilenameSave(FileID id, IDBasedFileAccess fileAccess) {

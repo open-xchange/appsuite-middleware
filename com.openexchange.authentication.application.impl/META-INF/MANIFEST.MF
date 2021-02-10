@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Application Authentication
 Bundle-SymbolicName: com.openexchange.authentication.application.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.authentication.application.impl.osgi.ApplicationPasswordActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -10,10 +10,10 @@ Automatic-Module-Name: com.openexchange.authentication.appSpecific
 Import-Package: ch.qos.logback.classic,
  com.google.common.collect,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.authentication,
  com.openexchange.authentication.application,
- com.openexchange.authentication.application.ajax,
  com.openexchange.authentication.application.exceptions,
  com.openexchange.authentication.application.notification,
  com.openexchange.authentication.application.storage,

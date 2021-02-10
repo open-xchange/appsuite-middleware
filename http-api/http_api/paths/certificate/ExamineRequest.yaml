@@ -4,12 +4,13 @@
     tags:
       - Certificate
     summary: Examines an untrusted SSL certificate from a previous endpoint call
+    security: 
+        - session: []    
     description: >-
       Examines an untrusted SSL certificate from a previous endpoint call. The
       SSL certificate is cached for a brief amount of time by the middleware (2
       minutes).
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
         description: The fingerprint of the SSL certificate

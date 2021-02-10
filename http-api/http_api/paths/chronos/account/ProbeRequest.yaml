@@ -7,8 +7,18 @@
     summary: >-
       Probe to check given ICal calendar properties before creating a new
       account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []
+        - oauth:
+          - read_calendar      
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CalendarAccountProbeData'
+      description: |
+        The properties to check.
+      required: true
     responses:
       '200':
         description: >
@@ -20,11 +30,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/CalendarAccountProbeResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CalendarAccountProbeData'
-      description: |
-        The properties to check.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'       

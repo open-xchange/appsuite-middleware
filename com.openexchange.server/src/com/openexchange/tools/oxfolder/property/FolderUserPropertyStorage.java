@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder.property;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -73,7 +74,9 @@ public interface FolderUserPropertyStorage {
      * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException;
+    default void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException {
+        deleteFolderProperties(contextId, folderId, new int[] { userId }, propertyKeys);
+    }
 
     /**
      * Deletes all given user-specific properties for a given folder.
@@ -85,7 +88,9 @@ public interface FolderUserPropertyStorage {
      * @param connection The {@link Connection} to to use for the transaction
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys, Connection connection) throws OXException;
+    default void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys, Connection connection) throws OXException {
+        deleteFolderProperties(contextId, folderId, new int[] { userId }, propertyKeys, connection);
+    }
 
     /**
      * Deletes a single property for a user from a folder.
@@ -96,7 +101,9 @@ public interface FolderUserPropertyStorage {
      * @param key The name of the property
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperty(int contextId, int folderId, int userId, String key) throws OXException;
+    default void deleteFolderProperty(int contextId, int folderId, int userId, String key) throws OXException {
+        deleteFolderProperty(contextId, folderId, userId, key, null);
+    }
 
     /**
      * Deletes a single property for a user from a folder.
@@ -108,7 +115,36 @@ public interface FolderUserPropertyStorage {
      * @param connection The {@link Connection} to to use for the transaction
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException;
+    default void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
+        if (null != key) {
+            deleteFolderProperties(contextId, folderId, userId, Collections.singleton(key), connection);
+        }
+    }
+
+    /**
+     * Deletes all given user-specific properties for multiple users for a given folder.
+     *
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
+     * @param userIds The identifiers of the users to delete the properties for. If the array is <code>null</code>
+     *            or empty all properties for the folder will be deleted
+     * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys) throws OXException;
+
+    /**
+     * Deletes all given user-specific properties for multiple users for a given folder.
+     *
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
+     * @param userIds The identifiers of the users to delete the properties for. If the array is <code>null</code>
+     *            or empty all properties for the folder will be deleted
+     * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void deleteFolderProperties(int contextId, int folderId, int[] userIds, Set<String> propertyKeys, Connection connection) throws OXException;
 
     /**
      * Check if a folder has user-specific properties and therefore exits

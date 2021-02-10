@@ -77,7 +77,7 @@ public abstract class AbstractArchiveMailAction extends AbstractMailAction {
     }
 
     @Override
-    protected final AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+    protected final AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         // Check required "archive_emails" capability
         {
             CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);

@@ -208,7 +208,7 @@ import com.openexchange.mail.conversion.AttachmentMailPartDataSource;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
-import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
@@ -707,10 +707,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Permission checker
         {
-            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl(configService);
+            PermissionConfigurationCheckerImpl checker = new PermissionConfigurationCheckerImpl();
             checker.checkConfig(configService);
             registerService(PermissionConfigurationChecker.class, checker);
-            registerService(Reloadable.class, checker);
         }
 
         // Start up server the usual way

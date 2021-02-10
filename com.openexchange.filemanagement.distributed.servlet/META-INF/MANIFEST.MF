@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servlet for distributed File Management
 Bundle-SymbolicName: com.openexchange.filemanagement.distributed.servlet
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.filemanagement.distributed.servlet.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -13,6 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.server,
  javax.servlet,
  javax.servlet.http,
@@ -21,3 +22,4 @@ Import-Package: com.openexchange.config,
  org.osgi.service.http,
  org.slf4j
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.openexchange.filemanagement.distributed.servlet

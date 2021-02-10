@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Before;
@@ -46,6 +47,10 @@ public class SearchTest extends AbstractAJAXSession {
             com.openexchange.file.storage.File tempFile = InfostoreTestManager.createFile(folderId, "Test " + i, "text/javascript");
             tempFile.setDescription("this is document " + alphabet[i]);
             itm.newAction(tempFile);
+            if (itm.getLastResponse().hasError() && null != itm.getLastResponse().getException()) {
+                throw itm.getLastResponse().getException();
+            }
+            assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
             all[i] = "Test " + i;
         }
     }
@@ -87,7 +92,7 @@ public class SearchTest extends AbstractAJAXSession {
         assertFalse(itm.getLastResponse().hasError());
 
         JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
-
+        assertEquals(3, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 5");
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 25");
@@ -97,6 +102,7 @@ public class SearchTest extends AbstractAJAXSession {
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
 
+        assertEquals(3, arrayOfarrays.length());
         assertTitle(0, arrayOfarrays, "Test 25");
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 5");
@@ -136,21 +142,6 @@ public class SearchTest extends AbstractAJAXSession {
         assertEquals("IFO-0400", itm.getLastResponse().getException().getErrorCode());
     }
 
-    @Test
-    public void testCategories() throws Exception {
-        final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
-        com.openexchange.file.storage.File file = itm.getAction(id);
-        file.setCategories("[\"curiosity\", \"cat\", \"danger\"]");
-        itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.CATEGORIES }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
-
-        List<com.openexchange.file.storage.File> files = itm.search("curiosity", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-
-        assertTitles(files, file.getTitle());
-
-    }
-
     // Node 2652
     @Test
     public void testLastModifiedUTC() throws JSONException, IOException, OXException {
@@ -184,9 +175,10 @@ public class SearchTest extends AbstractAJAXSession {
     }
 
     public static void assertTitles(final List<com.openexchange.file.storage.File> files, final String... titles) {
-        final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
+        List<String> list = Arrays.asList(titles);
+        final Set<String> titlesSet = new HashSet<String>(list);
 
-        final String error = "Expected: " + titlesSet + " but got " + files;
+        final String error = String.format("Expected: [%s] but got [%s]", list.stream().collect(Collectors.joining(", ")), files.stream().map(f -> f.getTitle()).collect(Collectors.joining(", ")));
         assertEquals(error, titles.length, files.size());
         for (int i = 0; i < files.size(); i++) {
             final com.openexchange.file.storage.File entry = files.get(i);

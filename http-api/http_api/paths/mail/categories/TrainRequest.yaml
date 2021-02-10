@@ -4,11 +4,12 @@
     tags:
       - Mail_categories
     summary: Add a new rule
+    security: 
+        - session: []    
     description: >-
       Adds a new rule with the given mail addresses to the given category and
       optionally reorganize all existing mails in the inbox.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: category_id
         description: The identifier of a category.

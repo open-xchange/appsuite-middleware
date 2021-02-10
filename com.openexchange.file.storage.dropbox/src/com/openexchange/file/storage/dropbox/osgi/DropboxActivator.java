@@ -51,6 +51,7 @@ package com.openexchange.file.storage.dropbox.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
@@ -87,7 +88,7 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, 
                                 TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class,
-                                HttpClientService.class, VersionService.class };
+                                HttpClientService.class, VersionService.class, ClusterLockService.class };
     }
 
     @Override

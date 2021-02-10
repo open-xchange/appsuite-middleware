@@ -116,7 +116,7 @@ public final class IndexRange {
     /**
      * Initializes a new {@link IndexRange}
      */
-    public IndexRange(final int start, final int end) {
+    public IndexRange(int start, int end) {
         super();
         if (start < 0) {
             throw new IllegalArgumentException("start index is less than zero");
@@ -139,7 +139,7 @@ public final class IndexRange {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

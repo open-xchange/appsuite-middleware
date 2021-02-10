@@ -73,6 +73,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug44962Test}
@@ -118,106 +119,127 @@ public class Bug44962Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToDriveFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToDriveFolder() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, false, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToDriveFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(FolderObject.INFOSTORE, false, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToDriveFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, true, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToDriveFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToDriveFolder() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, false, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToDriveFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(FolderObject.INFOSTORE, false, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToPimFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteGuestToFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToPimFolder() throws Exception {
         inviteGuestToFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToPimFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToPimFolderWithReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(randomPimModule(), true, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToPimFolderWithInviteGuestsAndReadCreateSharedFolders() throws Exception {
         inviteUserToFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteUserToPimFolder() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0072");
     }
 
     @Test
+    @TryAgain
     public void testDontInviteUserToPimFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
     @Test
+    @TryAgain
     public void testInviteGuestToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToPublicPimFolder() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
     }
 
     @Test
+    @TryAgain
     public void testDontInviteGuestToPublicPimFolderWithInviteGuests() throws Exception {
         inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToPublicPimFolderWithEditPublicFolders() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), true, Boolean.FALSE, null);
     }
 
     @Test
+    @TryAgain
     public void testInviteUserToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
     @Test
+    @TryAgain
     public void testDontInviteUserToPublicPimFolder() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0005");
     }
 
     @Test
+    @TryAgain
     public void testDontInviteUserToPublicPimFolderWithInviteGuests() throws Exception {
         inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0005");
     }

@@ -57,7 +57,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
@@ -68,6 +67,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
  * @author cutmasta,d7
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class BasicCommandlineOptions {
 
     private static final char dividechar = ' ';
@@ -197,7 +197,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     public static final Hashtable<String, String> getEnvOptions() {
-        final Hashtable<String, String> opts = new Hashtable<String, String>();
+        final Hashtable<String, String> opts = new Hashtable<>();
         for (final String opt : ENV_OPTIONS) {
             try {
                 final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
@@ -257,7 +257,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected final void printServerException(final Exception e, final AdminParser parser) {
+    protected static final void printServerException(final Exception e, final AdminParser parser) {
         StringBuilder output = new StringBuilder();
         final String msg = e.getMessage();
         if (parser != null && parser.checkNoNewLine()) {
@@ -286,7 +286,7 @@ public abstract class BasicCommandlineOptions {
     //        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     //    }
 
-    protected final void printError(final String msg, final AdminParser parser) {
+    protected static final void printError(final String msg, final AdminParser parser) {
         String output = null;
         if (parser == null) {
             output = msg;
@@ -393,48 +393,31 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
-
-        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg);
-        //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
-        //        if (hasarg) {
-        //            retval.hasArg();
-        //        }
-        //        retval.setRequired(required);
-        return retval;
+        return admp.addOption(longopt, longopt, description, required, hasarg);
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-
-        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
-        return retval;
+        return admp.addOption(longopt, longopt, description, required, hasarg, extended);
     }
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-
-        final CLIOption retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
-        return retval;
+        return admp.addOption(longopt, argdescription, description, required, hasarg, extended);
     }
 
     protected final CLIOption setIntegerLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-
-        final CLIOption retval = admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
-        return retval;
+        return admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
     }
 
     protected final CLIOption setSettableBooleanLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
-
-        final CLIOption retval = admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
-        return retval;
+        return admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
     }
 
     protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
-        final CLIOption retval = admp.addOption(shortopt, longopt, argdescription, description, required);
-        return retval;
+        return admp.addOption(shortopt, longopt, argdescription, description, required);
     }
 
     protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
-        final CLIOption retval = admp.addOption(shortopt, longopt, longopt, description, required, hasarg);
-        return retval;
+        return admp.addOption(shortopt, longopt, longopt, description, required, hasarg);
     }
 
     protected final CLIOption setShortLongOptWithDefault(final AdminParser admp, final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
@@ -537,7 +520,7 @@ public abstract class BasicCommandlineOptions {
         setAdminPassOption(parser);
     }
 
-    protected void sysexit(final int exitcode) {
+    protected static void sysexit(final int exitcode) {
         // see http://java.sun.com/j2se/1.5.0/docs/guide/rmi/faq.html#leases
         System.gc();
         System.runFinalization();
@@ -559,9 +542,8 @@ public abstract class BasicCommandlineOptions {
      *
      * @param parser The {@link AdminParser}
      * @return The {@link Credentials}
-     * @throws InvalidCredentialsException in case the credentials are missing
      */
-    protected final Credentials credentialsparsing(final AdminParser parser) throws InvalidCredentialsException {
+    protected final Credentials credentialsparsing(final AdminParser parser) {
         // prefer password from options
         String password = (String) parser.getOptionValue(this.adminPassOption);
         if (null == password && null != ADMIN_PASSWORD) {
@@ -646,7 +628,7 @@ public abstract class BasicCommandlineOptions {
             // fill up part
             try {
                 columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 // there's no number, so use longest line as alignment value
                 columnsizes[i] = longestLine(data, columnnames, i);
             }

@@ -49,6 +49,7 @@
 
 package com.openexchange.configuration;
 
+import java.io.File;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
@@ -84,7 +85,15 @@ public class AJAXConfig extends AbstractConfig {
             synchronized (AJAXConfig.class) {
                 if (null == singleton) {
                     singleton = new AJAXConfig();
-                    singleton.loadPropertiesInternal();
+                    String propertyFileName = singleton.getPropertyFileName();
+                    //Check for custom ajax properties
+                    String customPropertyFileName = propertyFileName.replace(".properties", "-custom.properties");
+                    final File customPropFile = new File(customPropertyFileName);
+                    if (customPropFile.exists() && customPropFile.canRead()) {
+                        singleton.loadPropertiesInternal(customPropertyFileName);
+                    } else {
+                        singleton.loadPropertiesInternal(propertyFileName);
+                    }
                 }
             }
         }
@@ -138,8 +147,21 @@ public class AJAXConfig extends AbstractConfig {
         TEST_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
-        
+
         PATH_PREFIX("pathPrefix"),
+
+        /**
+         * The token endpoint of an oauth authentication server (e.g. keycloak)
+         */
+        OAUTH_TOKEN_ENDPOINT("oauthTokenEndpoint"),
+        /**
+         * The client id configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_ID("oauthClientID"),
+        /**
+         * The client secret configured in the oauth authentication server
+         */
+        OAUTH_CLIENT_PASSWORD("oauthClientPassword")
 
         ;
 

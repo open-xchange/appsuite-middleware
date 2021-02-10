@@ -61,9 +61,10 @@ import org.junit.Test;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.ComposeBody;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
-import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeResponseMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
+import com.openexchange.testing.httpclient.models.MailDestinationData;
 
 /**
  * {@link AttachmentsTest}
@@ -75,9 +76,9 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testAttachment() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        check(api.postAttachments(getSessionId(), model.getId(), attachment));
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        check(api.postAttachments(model.getId(), attachment, null));
+        MailComposeResponse response = api.getMailComposeById(model.getId());
         assertNotNull("Expected attachments.", response.getData().getAttachments());
         check(response);
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
@@ -87,10 +88,10 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testSendWithAttachment() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        check(api.postAttachments(getSessionId(), model.getId(), attachment));
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        check(api.postAttachments(model.getId(), attachment, null));
 
-        MailComposeResponse loaded = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeResponse loaded = api.getMailComposeById(model.getId());
         check(loaded);
         assertNotNull(loaded);
         assertEquals("Wrong Composition Space loaded.", model.getId(), loaded.getData().getId());
@@ -100,26 +101,27 @@ public class AttachmentsTest extends AbstractMailComposeTest {
         model.setSubject(UUID.randomUUID().toString());
         model.setContent(UUID.randomUUID().toString());
 
-        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson(), attachment2);
+        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(model.getId(), model.toJson(), null, attachment2);
         check(postMailComposeSend);
         assertTrue(postMailComposeSend.getErrorDesc(), Strings.isEmpty(postMailComposeSend.getError()));
 
-        loaded = api.getMailComposeById(getSessionId(), model.getId());
+        loaded = api.getMailComposeById(model.getId());
         assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
         assertNull("No data expected", loaded.getData());
     }
 
     @Test
     public void testReplaceAttachment() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        check(api.postAttachments(getSessionId(), model.getId(), attachment));
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        check(api.postAttachments(model.getId(), attachment, null));
+        MailComposeResponse response = api.getMailComposeById(model.getId());
         check(response);
         Long size1 = response.getData().getAttachments().get(0).getSize();
 
-        MailComposeAttachmentResponse updateresponse = api.postAttachmentsById(getSessionId(), model.getId(), response.getData().getAttachments().get(0).getId(), attachment2);
+        MailComposeAttachmentResponse updateresponse = api.postAttachmentsById(model.getId(), response.getData().getAttachments().get(0).getId(), attachment2, null);
+
         check(updateresponse);
-        response = api.getMailComposeById(getSessionId(), model.getId());
+        response = api.getMailComposeById(model.getId());
         check(response);
 
         assertNotNull("Expected attachments.", response.getData().getAttachments());
@@ -131,20 +133,23 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testOriginalAttachment() throws Exception {
+        MailDestinationData mailWithAttachment = importTestMailWithAttachment();
+
         ComposeBody body = new ComposeBody();
         body.setFolderId(mailWithAttachment.getFolderId());
         body.setId(mailWithAttachment.getId());
-        MailComposeResponse reply = api.postMailCompose(getSessionId(), "REPLY", null, Collections.singletonList(body));
+        MailComposeResponse reply = api.postMailCompose("REPLY", null, null, Collections.singletonList(body));
+
         check(reply);
-        MailComposeMessageModel data = reply.getData();
+        MailComposeResponseMessageModel data = reply.getData();
         compositionSpaceIds.add(data.getId());
 
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), data.getId());
+        MailComposeResponse response = api.getMailComposeById(data.getId());
         check(response);
         assertEquals("Expected no attachment.", 0, response.getData().getAttachments().size());
 
-        check(api.postAttachmentsOriginal(getSessionId(), data.getId()));
-        response = api.getMailComposeById(getSessionId(), data.getId());
+        check(api.postAttachmentsOriginal(data.getId(), null));
+        response = api.getMailComposeById(data.getId());
         check(response);
         assertNotNull("Expected attachments.", response.getData().getAttachments());
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
@@ -153,9 +158,9 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testVcard() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        check(api.postAttachmentsVcard(getSessionId(), model.getId()));
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        check(api.postAttachmentsVcard(model.getId(), null));
+        MailComposeResponse response = api.getMailComposeById(model.getId());
         check(response);
         assertNotNull("Expected attachments.", response.getData().getAttachments());
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
@@ -165,27 +170,29 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
     @Test
     public void testDeleteAttachment() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        check(api.postAttachments(getSessionId(), model.getId(), attachment));
-        MailComposeResponse response = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        check(api.postAttachments(model.getId(), attachment, null));
+        MailComposeResponse response = api.getMailComposeById(model.getId());
         check(response);
         assertNotNull("Expected attachments.", response.getData().getAttachments());
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
         assertEquals("Wrong attachment name.", attachment.getName(), response.getData().getAttachments().get(0).getName());
         assertTrue("Empty file.", l(response.getData().getAttachments().get(0).getSize()) > 0L);
 
-        api.deleteAttachmentsById(getSessionId(), model.getId(), response.getData().getAttachments().get(0).getId());
-        response = api.getMailComposeById(getSessionId(), model.getId());
+        MailComposeAttachmentResponse deleteResp = api.deleteAttachmentsById(model.getId(), response.getData().getAttachments().get(0).getId(), null);
+        check(deleteResp);
+        assertEquals("Expected no attachment.", 0, deleteResp.getData().getAttachments().size());
+        response = api.getMailComposeById(model.getId());
         check(response);
         assertEquals("Expected no attachment.", 0, response.getData().getAttachments().size());
     }
 
     @Test
     public void testGetAttachment() throws Exception {
-        MailComposeMessageModel model = createNewCompositionSpace();
-        MailComposeAttachmentResponse postAttachments = api.postAttachments(getSessionId(), model.getId(), attachment);
+        MailComposeResponseMessageModel model = createNewCompositionSpace();
+        MailComposeAttachmentResponse postAttachments = api.postAttachments(model.getId(), attachment, null);
         check(postAttachments);
-        byte[] attachmentsById = api.getAttachmentsById(getSessionId(), model.getId(), postAttachments.getData().getId());
+        byte[] attachmentsById = api.getAttachmentsById(model.getId(), postAttachments.getData().getAttachments().get(0).getId());
         assertTrue("No data.", attachmentsById.length > 100);
     }
 }

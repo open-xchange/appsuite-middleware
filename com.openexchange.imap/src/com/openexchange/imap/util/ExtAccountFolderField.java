@@ -65,16 +65,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailException;
@@ -138,9 +136,10 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                         mailAccess.connect();
                     }
                 }
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess1 = mailAccess;
 
 
-                folderStorage = getImapFolderStorage(mailAccess);
+                folderStorage = com.openexchange.imap.IMAPAccess.getIMAPFolderStorageFrom(mailAccess1);
                 IMAPStore imapStore = folderStorage.getImapStore();
                 Map<String, FolderInfo> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
                 if (null == folders) {
@@ -167,8 +166,8 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        String fullName = folder.getFullName();
+    public Object getValue(Folder folder, ServerSession session) {
+        String fullName = folder.getID();
         if (Strings.isEmpty(fullName)) {
             return JSONObject.NULL;
         }
@@ -213,7 +212,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+    public List<Object> getValues(List<Folder> folder, ServerSession session) {
         return AdditionalFieldsUtils.bulk(this, folder, session);
     }
 
@@ -242,34 +241,13 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     /**
-     * Get the IMP folder storage from the specified mail access
-     *
-     * @param mailAccess
-     * @return
-     * @throws OXException
-     */
-    private IMAPFolderStorage getImapFolderStorage(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailFolderStorage fstore = mailAccess.getFolderStorage();
-        if (!(fstore instanceof IMAPFolderStorage)) {
-            if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-            }
-            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-            if (!(fstore instanceof IMAPFolderStorage)) {
-                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
-            }
-        }
-        return (IMAPFolderStorage) fstore;
-    }
-
-    /**
      * Get the external account folders
      *
      * @param imapFolder
      * @return
      * @throws OXException
      */
-    private Map<String, FolderInfo> getExternalAccountFolders(final IMAPFolder imapFolder) throws OXException {
+    private Map<String, FolderInfo> getExternalAccountFolders(IMAPFolder imapFolder) throws OXException {
         try {
             final Map<String, FolderInfo> results = new HashMap<String, FolderInfo>(8);
             imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -303,6 +281,9 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                 // * METADATA INBOX/teppo.testaaja.in@gmail.com (/shared/vendor/vendor.dovecot/ext-account {27} teppo.testaaja.in@gmail.com /shared/vendor/vendor.dovecot/alias NIL)
                                 // * METADATA INBOX/QUARANTAINE (/shared/vendor/vendor.dovecot/ext-account NIL /shared/vendor/vendor.dovecot/alias NIL)
                                 String fullName = ir.readAtomString();
+                                if (!ir.supportsUtf8()) {
+                                    fullName = BASE64MailboxDecoder.decode(fullName);
+                                }
                                 String[] metadatas = ir.readAtomStringList();
                                 int length = metadatas == null ? -1 : metadatas.length;
                                 int index = 0;
@@ -391,7 +372,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
         metadataResponse.skipSpaces();
         String fullName = metadataResponse.readAtomString();
         if (!metadataResponse.supportsUtf8()) {
-            fullName = BASE64MailboxDecoder.decode(metadataResponse.readAtomString());
+            fullName = BASE64MailboxDecoder.decode(fullName);
         }
 
         // Read until opening parenthesis or EOF

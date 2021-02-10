@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Testservlet Bundle
 Bundle-SymbolicName: com.openexchange.http.testservlet
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: osgi.TestServletActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -16,6 +16,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.server,
  com.openexchange.version,
  javax.net,
@@ -26,3 +27,4 @@ Import-Package: com.google.common.annotations,
  org.apache.commons.text,
  org.osgi.framework,
  org.osgi.service.http
+Automatic-Module-Name: com.openexchange.http.testservlet

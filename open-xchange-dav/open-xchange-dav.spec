@@ -4,10 +4,9 @@ Name:          open-xchange-dav
 BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: open-xchange-core >= @OXVERSION@
-BuildRequires: open-xchange-pns-impl >= @OXVERSION@
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -17,7 +16,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange CardDAV and CalDAV implementation
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-pns-impl >= @OXVERSION@
 Provides:      open-xchange-caldav = %{version}
 Obsoletes:     open-xchange-caldav < %{version}
 Provides:      open-xchange-carddav = %{version}
@@ -73,6 +71,29 @@ EOF
         fi
         ox_scr_done SCR-785
     fi
+
+    SCR=SCR-812
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/carddav.properties
+      old_prop_key=com.openexchange.carddav.reducedAggregatedCollection
+      new_prop_key=com.openexchange.carddav.aggregatedCollectionFolders
+      old_default_value="false"
+      new_equivalent="reduced_synced"
+      if ox_exists_property ${old_prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${old_prop_key} ${prop_file})
+        if [ "${old_default_value}" = "${prop_val}" ]
+        then
+          ox_remove_property ${old_prop_key} ${prop_file}
+        else
+          ox_remove_property ${old_prop_key} ${prop_file}
+          ox_set_property ${new_prop_key} ${new_equivalent} ${prop_file}
+        fi
+      fi
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 %clean
@@ -90,28 +111,18 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
-* Tue Feb 02 2021 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2021-02-08 (5945)
-* Tue Jan 19 2021 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2021-01-25 (5937)
-* Tue Jan 05 2021 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2021-01-11 (5930)
-* Wed Dec 09 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-12-14 (5924)
-* Mon Nov 16 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-11-23 (5905)
-* Wed Nov 04 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-11-09 (5891)
-* Tue Oct 20 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-10-26 (5888)
+* Fri Feb 05 2021 Steffen Templin <marcus.klein@open-xchange.com>
+Third candidate for 7.10.5 release
+* Mon Feb 01 2021 Steffen Templin <marcus.klein@open-xchange.com>
+Second candidate for 7.10.5 release
+* Fri Jan 15 2021 Steffen Templin <marcus.klein@open-xchange.com>
+First candidate for 7.10.5 release
+* Thu Dec 17 2020 Steffen Templin <marcus.klein@open-xchange.com>
+Second preview of 7.10.5 release
+* Fri Nov 27 2020 Steffen Templin <marcus.klein@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-10-12 (5879)
-* Wed Sep 23 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-09-29 (5869)
-* Fri Sep 11 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-09-14 (5857)
-* Mon Aug 24 2020 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2020-08-24 (5842)
+prepare for 7.10.5 release
 * Wed Aug 05 2020 Steffen Templin <marcus.klein@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Steffen Templin <marcus.klein@open-xchange.com>

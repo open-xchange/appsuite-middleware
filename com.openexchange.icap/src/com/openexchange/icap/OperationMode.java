@@ -50,6 +50,8 @@
 package com.openexchange.icap;
 
 import java.io.InputStream;
+import org.slf4j.LoggerFactory;
+import com.openexchange.icap.header.ICAPRequestHeader;
 import com.openexchange.java.Strings;
 
 /**
@@ -119,6 +121,7 @@ public enum OperationMode {
         try {
             return OperationMode.valueOf(s.toUpperCase().replaceAll("-", "_"));
         } catch (Exception e) {
+            LoggerFactory.getLogger(OperationMode.class).debug("Unknown operation mode '{}'", s, e);
             return OperationMode.DOUBLE_FETCH;
         }
     }

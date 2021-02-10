@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseDataWithWarnings.yaml
+  data:
+    type: string
+    description: The new infoitem identifier.

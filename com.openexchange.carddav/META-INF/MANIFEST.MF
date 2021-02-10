@@ -2,22 +2,24 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
 Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.carddav
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io,
- com.openexchange.annotation,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler.oauth,
+ com.openexchange.annotation,
  com.openexchange.authentication,
- com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.config.lean,
  com.openexchange.contact,
  com.openexchange.contact.similarity,
+ com.openexchange.contact.storage,
  com.openexchange.contact.vcard,
  com.openexchange.contact.vcard.storage,
  com.openexchange.dav,
@@ -52,6 +54,7 @@ Import-Package: com.google.common.io,
  com.openexchange.oauth.provider.resourceserver,
  com.openexchange.oauth.provider.resourceserver.scope,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.preferences,
  com.openexchange.resource,
  com.openexchange.search,

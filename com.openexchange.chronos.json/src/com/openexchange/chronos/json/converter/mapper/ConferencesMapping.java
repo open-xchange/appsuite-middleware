@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
+import com.openexchange.groupware.tools.mappings.json.ListItemMapping;
 import com.openexchange.session.Session;
 
 /**

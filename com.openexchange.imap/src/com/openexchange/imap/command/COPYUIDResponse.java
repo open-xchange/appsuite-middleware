@@ -66,7 +66,7 @@ final class COPYUIDResponse {
 
     protected String dest;
 
-    public COPYUIDResponse(final org.slf4j.Logger logger) {
+    public COPYUIDResponse(org.slf4j.Logger logger) {
         super();
         this.logger = logger;
     }
@@ -77,7 +77,7 @@ final class COPYUIDResponse {
      * @param uids The source UIDs
      * @param retval The destination UIDs to fill
      */
-    public void fillResponse(final long[] uids, final long[] retval) {
+    public void fillResponse(long[] uids, long[] retval) {
         final long[] srcArr = toLongArray(src);
         final long[] destArr = toLongArray(dest);
         for (int in = 0; in < srcArr.length; in++) {
@@ -115,7 +115,7 @@ final class COPYUIDResponse {
      * @param uidSet The sequence of UIDs
      * @return The corresponding array of <code>long</code>.
      */
-    private static long[] toLongArray(final String uidSet) {
+    private static long[] toLongArray(String uidSet) {
         final TLongList arr = new TLongArrayList(32);
         final String[] sa = Strings.splitByComma(uidSet);
         Next: for (int i = 0; i < sa.length; i++) {

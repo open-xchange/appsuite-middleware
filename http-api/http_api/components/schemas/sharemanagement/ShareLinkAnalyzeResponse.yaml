@@ -1,0 +1,45 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+      type: object
+      properties:
+        state:
+          type: string
+          description: >
+            State to indicate a possible usage of the link
+              * `SUBSCRIBED` - State to indicate that the link belongs to a known share and is accessible.
+              * `CREDENTIALS_REFRESH` - State to indicate that the link belongs to a known share but is not accessible at the moment because the remote server indicates that credentials have been updated meanwhile.
+              * `ADDABLE` - State to indicate that the link is valid and belongs to a share that is not yet subscribed an can be added.
+              * `ADDABLE_WITH_PASSWORD` - Similar to `ADDABLE` but in addition the user needs to enter a password to add the share.
+              * `INACCESSIBLE` - State to indicate that the link belongs to a known share but is inaccessible at the moment.
+              * `REMOVED` - State to indicate that the link belongs to a known share but can no longer be accessed.
+              * `UNRESOLVABLE` - State to indicate that the share link can't be resolved at all and thus can't be subscribed.
+              * `UNSUPPORTED` - State to indicate that the subscription of the share is not supported.
+              * `FORBIDDEN` - State to indicate that the subscription of the link is not allowed.
+              * `UNSUBSCRIBED` - State to indicate that the link belongs to a known share but is not subscribed at the moment.
+          enum:
+            - SUBSCRIBED
+            - CREDENTIALS_REFRESH
+            - ADDABLE
+            - ADDABLE_WITH_PASSWORD
+            - INACCESSIBLE
+            - REMOVED
+            - UNRESOLVABLE
+            - UNSUPPORTED
+            - FORBIDDEN
+            - UNSUBSCRIBED
+        error:
+          type: object
+          properties:
+            $ref: ../common/CommonResponseData.yaml
+          description: Further details in case a share isn't `SUBSCRIBED`, `ADDABLE` or `ADDABLE_WITH_PASSWORD`
+        account:
+          type: string
+          description: The account ID of the newly created account
+        module:
+          type: string
+          description: The module of the subscription
+        folder:
+          type: string
+          description: The folder ID of the subscrition

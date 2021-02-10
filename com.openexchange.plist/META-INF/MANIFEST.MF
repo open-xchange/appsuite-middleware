@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The bundle for composing plist profiles
 Bundle-SymbolicName: com.openexchange.plist
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
@@ -16,6 +16,7 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.sw;version="4.2.0",
  com.openexchange.java,
  com.openexchange.tools,
+ com.openexchange.xml.util,
  com.sun.istack.internal,
  com.sun.xml.internal.ws,
  com.sun.xml.internal.ws.addressing,
@@ -120,3 +121,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
 Export-Package: com.openexchange.plist,
  com.openexchange.plist.xml,
  com.openexchange.plist.xml.helper
+Automatic-Module-Name: com.openexchange.plist

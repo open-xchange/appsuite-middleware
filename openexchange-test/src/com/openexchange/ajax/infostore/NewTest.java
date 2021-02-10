@@ -3,6 +3,7 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
@@ -120,7 +121,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     }
 
-    // Bug 3928 
+    // Bug 3928
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -138,7 +139,7 @@ public class NewTest extends InfostoreAJAXTest {
         assertEquals("Version Comment", obj.getVersionComment());
     }
 
-    // Bug 4120 
+    // Bug 4120
     @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -147,7 +148,7 @@ public class NewTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        assertFalse("Unexpected error: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
 
         com.openexchange.file.storage.File data = createFile(folderId, "otherFile");
         data.setFileMIMEType("text/plain");
@@ -155,6 +156,7 @@ public class NewTest extends InfostoreAJAXTest {
         itm.newAction(data, upload);
 
         com.openexchange.file.storage.File obj = itm.getAction(data.getId());
+        assertNotNull("Expect to find an object", obj);
         assertFalse(upload.getName().equals(obj.getFileName()));
     }
 

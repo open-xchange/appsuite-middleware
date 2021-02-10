@@ -49,7 +49,6 @@
 
 package com.openexchange.http.testservlet;
 
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -112,23 +111,6 @@ public final class SaneScriptTags {
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
-    }
-
-    private static String urlDecode(final String html) {
-        try {
-            return URLDecoder.decode(html, "UTF-8");
-        } catch (Exception e) {
-            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(html);
-            if (!m.find()) {
-                return html;
-            }
-            final StringBuffer sb = new StringBuffer(html.length());
-            do {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
-            } while (m.find());
-            m.appendTail(sb);
-            return sb.toString();
-        }
     }
 
     private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");

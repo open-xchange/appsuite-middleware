@@ -72,7 +72,9 @@ import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAdjustRecurre
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectFilenamesTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectOrganizerSentByTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectRangesTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectStaleOrganizerValuesTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventRemoveStaleFolderReferencesTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventUnfoldOrganizerValuesTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarStorageInterceptor;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
@@ -154,7 +156,9 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
                 new CalendarEventCorrectOrganizerSentByTask(),
                 new CalendarEventAdjustRecurrenceColumnTask(),
                 new CalendarAttendeeAddTimestampColumnTask(),
-                new CalendarAddConferenceTablesTask()
+                new CalendarAddConferenceTablesTask(),
+                new CalendarEventUnfoldOrganizerValuesTask(),
+                new CalendarEventCorrectStaleOrganizerValuesTask()
             ));
             // @formatter:on
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", true)) {

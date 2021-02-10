@@ -122,12 +122,22 @@ public class OAuthSession extends AJAXSession {
     }
 
     private void obtainAccess(TestUser user, HttpClient client) throws Exception {
+        String scheme = "https";
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        int port = 443;
         String login = user.getLogin();
         String password = user.getPassword();
         String state = UUIDs.getUnformattedStringFromRandom();
 
-        OAuthParams params = new OAuthParams().setHostname(hostname).setClientId(clientId).setClientSecret(clientSecret).setRedirectURI(redirectURI).setScope(scope.toString()).setState(state);
+        OAuthParams params = new OAuthParams()
+            .setScheme(scheme)
+            .setHostname(hostname)
+            .setPort(port)
+            .setClientId(clientId)
+            .setClientSecret(clientSecret)
+            .setRedirectURI(redirectURI)
+            .setScope(scope.toString())
+            .setState(state);
         grant = Protocol.obtainAccess(client, params, login, password);
     }
 

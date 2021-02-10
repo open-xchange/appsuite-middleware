@@ -4,8 +4,8 @@
     tags:
       - Messaging
     summary: Creates a messaging account.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

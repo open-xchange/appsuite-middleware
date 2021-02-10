@@ -49,6 +49,9 @@
 
 package com.openexchange.share.core.tools;
 
+import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,14 +65,21 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -84,6 +94,8 @@ import com.openexchange.user.User;
  * @since v7.8.0
  */
 public class ShareTool {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShareTool.class);
 
     /**
      * The user attribute key for a link target
@@ -151,12 +163,13 @@ public class ShareTool {
      * <code>
      * <pre>
      * {
-     *  "m":8,
-     *  "f":"247689",
-     *  "i":"247689/6592"
+     * "m":8,
+     * "f":"247689",
+     * "i":"247689/6592"
      * }
      * </pre>
      * </code>
+     * 
      * @param target The target
      * @return The JSON object
      */
@@ -177,12 +190,13 @@ public class ShareTool {
      * <code>
      * <pre>
      * {
-     *  "m":8,
-     *  "f":"247689",
-     *  "i":"247689/6592"
+     * "m":8,
+     * "f":"247689",
+     * "i":"247689/6592"
      * }
      * </pre>
      * </code>
+     * 
      * @param jTarget The JSON object
      * @return The target
      * @throws JSONException
@@ -267,16 +281,13 @@ public class ShareTool {
         if (Strings.isEmpty(guest.getMail())) {
             if (guest.getUserPassword() == null) {
                 return AuthenticationMode.ANONYMOUS;
-            } else {
-                return AuthenticationMode.ANONYMOUS_PASSWORD;
             }
-        } else {
-            if (guest.getUserPassword() == null) {
-                return AuthenticationMode.GUEST;
-            } else {
-                return AuthenticationMode.GUEST_PASSWORD;
-            }
+            return AuthenticationMode.ANONYMOUS_PASSWORD;
         }
+        if (guest.getUserPassword() == null) {
+            return AuthenticationMode.GUEST;
+        }
+        return AuthenticationMode.GUEST_PASSWORD;
     }
 
     /**
@@ -288,8 +299,7 @@ public class ShareTool {
     public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
         switch (recipient.getType()) {
             case ANONYMOUS:
-                return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ?
-                    AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+                return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ? AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
             case GUEST:
                 if (((GuestRecipient) recipient).getPassword() == null) {
                     return AuthenticationMode.GUEST;
@@ -301,7 +311,7 @@ public class ShareTool {
     }
 
     /**
-     * Checks whether the passed user is a guest user and its authentication mode is  either
+     * Checks whether the passed user is a guest user and its authentication mode is either
      * {@link AuthenticationMode#ANONYMOUS} or {@link AuthenticationMode#ANONYMOUS_PASSWORD}.
      *
      * @param user The user to check
@@ -378,6 +388,176 @@ public class ShareTool {
         }
         recipient.setBits(jsonObject.getInt("bits"));
         return recipient;
+    }
+
+    /**
+     * Checks if the URL looks like an OX share link
+     *
+     * @param url The URL to check
+     * @return <code>true</code> if an OX instance generated the string, <code>false</code> otherwise
+     */
+    public static boolean isShare(String url) {
+        return null != getShareToken(url);
+    }
+
+    /**
+     * Parses the given URL for a base token.
+     *
+     * @param url The URL
+     * @return The token or <code>null</code> if not applicable
+     */
+    public static String getBaseToken(String url) {
+        ShareToken shareToken = getShareToken(url);
+        if (null == shareToken) {
+            return null;
+        }
+        return shareToken.getToken();
+    }
+
+    /**
+     * Get a share token from a path
+     *
+     * @param url The URL containing the share token
+     * @return The token or <code>null</code> if not applicable
+     */
+    private static ShareToken getShareToken(String url) {
+        String token = extractBaseToken(url);
+        if (null == token) {
+            return null;
+        }
+        try {
+            ShareToken shareToken = new ShareToken(token);
+            if (shareToken.getContextID() < 0 || shareToken.getUserID() < 0) {
+                /*
+                 * No context ID mean no OX share
+                 */
+                return null;
+            }
+            return shareToken;
+        } catch (OXException e) {
+            LOGGER.debug("Error while parsing: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Extracts the share base token from a URL.
+     *
+     * @param url The path to extract the token from
+     * @return The token or <code>null</code> if no token is embedded in the path
+     */
+    public static String extractBaseToken(String url) {
+        if (Strings.isEmpty(url)) {
+            return null;
+        }
+        String prefix = SHARE_SERVLET + '/';
+        int beginIndex = url.lastIndexOf(prefix);
+        if (-1 == beginIndex) {
+            return null;
+        }
+        beginIndex += prefix.length();
+        int endIndex = url.indexOf('/', beginIndex);
+        return -1 == endIndex ? url.substring(beginIndex) : url.substring(beginIndex, endIndex);
+    }
+
+    /**
+     * Extracts the folder identifier from a share link
+     *
+     * @param shareLink The share link
+     * @return The {@link ShareTargetPath} or <code>null</code> if not applicable
+     */
+    public static ShareTargetPath getShareTarget(String shareLink) {
+        String baseToken = extractBaseToken(shareLink);
+        if (Strings.isEmpty(baseToken)) {
+            return null;
+        }
+        int beginIndex = shareLink.indexOf(baseToken) + baseToken.length();
+        if (shareLink.length() < beginIndex) {
+            return null;
+        }
+        String targetPath = shareLink.substring(beginIndex);
+        if (Strings.isEmpty(targetPath)) {
+            return null;
+        }
+        return ShareTargetPath.parse(targetPath);
+    }
+
+    /**
+     * Gets a value indicating whether two share URLs point to the
+     * same guest or not.
+     *
+     * @param shareUrl1 The one share URL
+     * @param shareUrl2 The other share URL
+     * @return <code>true</code> if both URLs point to the same guest, <code>false</code> otherwise
+     */
+    public static boolean equals(String shareUrl1, String shareUrl2) {
+        if (Strings.isEmpty(shareUrl1)) {
+            return Strings.isEmpty(shareUrl2);
+        } else if (Strings.isEmpty(shareUrl2)) {
+            return false;
+        }
+        /*
+         * Check for same host
+         */
+        try {
+            URL url1 = new URL(shareUrl1);
+            URL url2 = new URL(shareUrl2);
+
+            if (false == url1.getHost().equals(url2.getHost())) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            LOGGER.debug("Can't parse URL", e.getMessage(), e);
+            return false;
+        }
+
+        /*
+         * Check if guest user is the same
+         */
+        ShareToken shareToken1 = getShareToken(shareUrl1);
+        ShareToken shareToken2 = getShareToken(shareUrl2);
+        return null == shareToken1 ? null == shareToken2 : shareToken1.equals(shareToken2);
+    }
+
+    /**
+     * Check if share target was shared by the user who created the guest user it is shared to
+     *
+     * @param targetProxy The target proxy for share target
+     * @param guestInfo The guest user information
+     * @return <code>true</code> if share was created by guest user's creator, <code>false</code> if not
+     */
+    public static boolean checkShareAndGuestCreator(TargetProxy targetProxy, GuestInfo guestInfo) {
+        if (targetProxy.getTargetPath().isFolder()) {
+            List<TargetPermission> permissions = targetProxy.getPermissions();
+            if (null != permissions) {
+                for (TargetPermission perm : permissions) {
+                    int[] parsedPermissions = Permissions.parsePermissionBits(perm.getBits());
+                    if (parsedPermissions[4] > 0 && perm.getEntity() != guestInfo.getCreatedBy()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Not possible to check for files for now
+        return false;
+    }
+
+    /**
+     * Extracts identifier of user who created this share target from target path if available
+     *
+     * @param targetPath The ShareTargetPath
+     * @return Identifier of creating user if target path contains this information, <code>0</code> otherwise
+     */
+    public static int extractShareCreator(ShareTargetPath targetPath) {
+        if (null != targetPath) {
+            Map<String, String> additionals = targetPath.getAdditionals();
+            if (null != additionals && 0 < additionals.size()) {
+                return null != additionals.get("c") ? Integer.parseInt(additionals.get("c")) : 0;
+            }
+        }
+        return 0;
     }
 
 }

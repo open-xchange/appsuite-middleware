@@ -70,32 +70,32 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final ANDTerm term) {
+    public void visit(ANDTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final BccTerm term) {
+    public void visit(BccTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final BodyTerm term) {
+    public void visit(BodyTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final BooleanTerm term) {
+    public void visit(BooleanTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final CcTerm term) {
+    public void visit(CcTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final FlagTerm term) {
+    public void visit(FlagTerm term) {
         // Nothing to do
     }
 
@@ -105,52 +105,57 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FromTerm term) {
+    public void visit(FromTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final HeaderTerm term) {
+    public void visit(HeaderTerm term) {
+        // Nothing to do
+    }
+    
+    @Override
+    public void visit(HeaderExistenceTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final NOTTerm term) {
+    public void visit(NOTTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final ORTerm term) {
+    public void visit(ORTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final ReceivedDateTerm term) {
+    public void visit(ReceivedDateTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final SentDateTerm term) {
+    public void visit(SentDateTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final SizeTerm term) {
+    public void visit(SizeTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final SubjectTerm term) {
+    public void visit(SubjectTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final ToTerm term) {
+    public void visit(ToTerm term) {
         // Nothing to do
     }
 
     @Override
-    public void visit(final XMailboxTerm term) {
+    public void visit(XMailboxTerm term) {
         // Nothing to do
     }
 

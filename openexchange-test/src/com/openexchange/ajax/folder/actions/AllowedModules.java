@@ -50,7 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -66,7 +66,7 @@ public enum AllowedModules {
 
     MAIL(MailContentType.getInstance().toString()),
 
-    CONTACTS(ContactContentType.getInstance().toString()),
+    CONTACTS(ContactsContentType.getInstance().toString()),
 
     TASKS(TaskContentType.getInstance().toString()),
 

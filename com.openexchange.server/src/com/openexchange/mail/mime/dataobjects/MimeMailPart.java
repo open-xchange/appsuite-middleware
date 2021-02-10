@@ -206,7 +206,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      *
      * @throws OXException If setting part as content fails
      */
-    public MimeMailPart(final Part part) throws OXException {
+    public MimeMailPart(Part part) throws OXException {
         super();
         applyPart(part);
     }
@@ -217,7 +217,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param multipart The multipart
      * @throws OXException If setting multipart as content fails
      */
-    public MimeMailPart(final Multipart multipart) throws OXException {
+    public MimeMailPart(Multipart multipart) throws OXException {
         super();
         isMulti = true;
         this.multipart = new JavaMailMultipartWrapper(multipart);
@@ -243,7 +243,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      *
      * @param handleMissingStartBoundary <code>true</code> to handle <i>"Missing start boundary"</i> error; otherwise <code>false</code>
      */
-    public void setHandleMissingStartBoundary(final boolean handleMissingStartBoundary) {
+    public void setHandleMissingStartBoundary(boolean handleMissingStartBoundary) {
         this.handleMissingStartBoundary = handleMissingStartBoundary;
     }
 
@@ -253,13 +253,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param part The part
      * @throws OXException If part cannot be applied to this MIME mail part
      */
-    public void setContent(final Part part) throws OXException {
+    public void setContent(Part part) throws OXException {
         applyPart(part);
     }
 
     private static final String MULTIPART = "multipart/";
 
-    private void applyPart(final Part part) throws OXException {
+    private void applyPart(Part part) throws OXException {
         this.part = part;
         if (null == part) {
             isMulti = false;
@@ -413,7 +413,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         return getInputStream0(true);
     }
 
-    private InputStream getInputStream0(final boolean handleNpe) throws OXException {
+    private InputStream getInputStream0(boolean handleNpe) throws OXException {
         final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -462,7 +462,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
     }
 
-    private InputStream sanitizeAndGetInputStream(final Part part) throws OXException {
+    private InputStream sanitizeAndGetInputStream(Part part) throws OXException {
         try {
             Part p = part;
             final String cts = MimeMessageUtility.getHeader("Content-Type", null, p);
@@ -482,7 +482,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         return getInputStream0(false);
     }
 
-    private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
+    private InputStream getRawInputStream(Exception e) throws MessagingException, OXException {
         try {
             LOG.debug("Part's input stream could not be obtained. Trying to read from part's raw input stream instead", e);
             final Part part = this.part;
@@ -507,7 +507,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -558,7 +558,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         return false;
     }
 
-    private int handleMissingStartBoundary(final OXException e) throws OXException {
+    private int handleMissingStartBoundary(OXException e) throws OXException {
         final Throwable cause = e.getCause();
         if (!(cause instanceof MessagingException) || !"Missing start boundary".equals(((MessagingException) cause).getMessage())) {
             throw e;
@@ -589,7 +589,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -709,7 +709,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     }
 
     /** Gets the multipart content from specified part. */
-    private static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+    private static Multipart getMultipartContentFrom(Part part, String contentType) throws MessagingException, IOException {
         return MimeMessageUtility.getMultipartContentFrom(part, contentType);
     }
 
@@ -723,7 +723,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
-    private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         this.multipart = null;
         final Part part = this.part;
         if (part == null) {
@@ -797,7 +797,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
      */
-    private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         /*
          * Restore common fields
          */
@@ -854,7 +854,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private static MimeBodyPart createBodyMultipartInMemory(final InputStream data, final String contentType) throws MessagingException, IOException {
+    private static MimeBodyPart createBodyMultipartInMemory(InputStream data, String contentType) throws MessagingException, IOException {
         if (null == data) {
             return null;
         }
@@ -871,7 +871,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return A new MIME body part
      * @throws MessagingException If a messaging error occurs
      */
-    private static MimeBodyPart createBodyPartInMemory(final InputStream data) throws MessagingException {
+    private static MimeBodyPart createBodyPartInMemory(InputStream data) throws MessagingException {
         return new MimeBodyPart(data);
     }
 
@@ -882,7 +882,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return A new MIME message
      * @throws MessagingException If a messaging error occurs
      */
-    private static MimeMessage createMessageInMemory(final InputStream data) throws MessagingException {
+    private static MimeMessage createMessageInMemory(InputStream data) throws MessagingException {
         return new MimeMessage(MimeDefaultSession.getDefaultSession(), data);
     }
 
@@ -896,7 +896,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    private static byte[] getBytesFromPart(final Part part) throws IOException, MessagingException {
+    private static byte[] getBytesFromPart(Part part) throws IOException, MessagingException {
         byte[] data;
         {
             final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
@@ -915,7 +915,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    private static byte[] getBytesFromMultipart(final Multipart multipart) throws IOException, MessagingException {
+    private static byte[] getBytesFromMultipart(Multipart multipart) throws IOException, MessagingException {
         byte[] data;
         {
             final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
@@ -932,7 +932,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param data The byte array
      * @return The stripped byte array
      */
-    private static byte[] stripEmptyStartingLine(final byte[] data) {
+    private static byte[] stripEmptyStartingLine(byte[] data) {
         if (null == data || data.length <= 1) {
             return data;
         }
@@ -1069,7 +1069,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
         private final MIMEMultipartMailPart multipartMailPart;
 
-        public MIMEMultipartWrapper(final MIMEMultipartMailPart multipartMailPart) {
+        public MIMEMultipartWrapper(MIMEMultipartMailPart multipartMailPart) {
             super();
             this.multipartMailPart = multipartMailPart;
         }
@@ -1080,7 +1080,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
 
         @Override
-        public MailPart getMailPart(final int index) throws OXException {
+        public MailPart getMailPart(int index) throws OXException {
             return multipartMailPart.getEnclosedMailPart(index);
         }
 
@@ -1095,7 +1095,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
         private final Multipart jmMultipart;
 
-        public JavaMailMultipartWrapper(final Multipart multipart) {
+        public JavaMailMultipartWrapper(Multipart multipart) {
             super();
             this.jmMultipart = multipart;
         }
@@ -1110,7 +1110,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
 
         @Override
-        public MailPart getMailPart(final int index) throws OXException {
+        public MailPart getMailPart(int index) throws OXException {
             try {
                 return MimeMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);
             } catch (MessagingException e) {
@@ -1125,7 +1125,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     } // End of JavaMailMultipartWrapper
 
-    private static void closeQuitely(final Closeable closeable) {
+    private static void closeQuitely(Closeable closeable) {
         try {
             closeable.close();
         } catch (IOException e) {

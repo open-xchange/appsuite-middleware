@@ -85,15 +85,16 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.UserizedFolderImpl;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
-import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
+import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -191,7 +192,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /** The PIM content types */
-    protected static final Set<String> PIM_CONTENT_TYPES = ImmutableSet.of(CalendarContentType.getInstance().toString(), ContactContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString());
+    protected static final Set<String> PIM_CONTENT_TYPES = ImmutableSet.of(CalendarContentType.getInstance().toString(), ContactsContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString());
 
     /**
      * Checks if denoted folder is a public PIM folder
@@ -220,7 +221,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected static final Set<String> PARENTHESIS_CAPABLE = ImmutableSet.of(
         CalendarContentType.getInstance().toString(),
         TaskContentType.getInstance().toString(),
-        ContactContentType.getInstance().toString(),
+        ContactsContentType.getInstance().toString(),
         InfostoreContentType.getInstance().toString(),
         FileStorageContentType.getInstance().toString());
 
@@ -691,10 +692,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * <li>invited guest permissions must be read-only depending on the folder module</li>
      * </ul>
      *
+     * @param folder The folder being created/updated
      * @param comparedPermissions The compared permissions
+     * @param transactionManager The underlying transaction manager, or <code>null</code> if not available
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkGuestPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
+    protected void checkGuestPermissions(Folder folder, ComparedFolderPermissions comparedPermissions, TransactionManager transactionManager) throws OXException {
         /*
          * check added guest permissions
          */
@@ -707,7 +710,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
-                checkGuestPermission(session, folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo, transactionManager);
                 if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
                     throw invalidPermissions(folder, guestPermission);
                 }
@@ -739,7 +742,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
-                checkGuestPermission(session, folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo, transactionManager);
                 if (MailContentType.getInstance().toString().equals(folder.getContentType().toString())) {
                     throw invalidPermissions(folder, guestPermission);
                 }
@@ -766,11 +769,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             throw invalidPermissions(folder, guestPermission);
                         }
                     }
-                } else if (isReadOnlySharing(folder)) {
-                    /*
-                     * allow only "read-only" permissions for invited guests in non-infostore folders
-                     */
-                    checkReadOnly(folder, guestPermission);
+                } else {
+                    checkMaxPermissions(folder, guestPermission);
                 }
             }
             /*
@@ -823,23 +823,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folder The folder where the permission should be applied to
      * @param permission The guest permission
      * @param guestInfo The guest information for the added permission
+     * @param transactionManager The underlying transaction manager, or <code>null</code> if not available
      * @throws OXException
      */
-    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
+    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo, TransactionManager transactionManager) throws OXException {
         if (isAnonymous(guestInfo)) {
             /*
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
             // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
-            if (permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
+            if (false == FolderPermissionType.INHERITED.equals(permission.getType()) &&
+                isNotEqualsTarget(session, folder, guestInfo.getLinkTarget(), null != transactionManager ? transactionManager.getConnection() : null)) {
                 throw invalidPermissions(folder, permission);
             }
-        } else if (isReadOnlySharing(folder)) {
-            /*
-             * allow only "read-only" permissions for invited guests in non-infostore folders
-             */
-            checkReadOnly(folder, permission);
+        } else {
+            checkMaxPermissions(folder, permission);
         }
     }
 
@@ -851,7 +850,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     private static boolean isReadOnlySharing(Folder folder) {
         ContentType contentType = folder.getContentType();
-        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType) || ContactContentType.getInstance().equals(contentType);
+        return TaskContentType.getInstance().equals(contentType) || ContactsContentType.getInstance().equals(contentType);
+    }
+
+    /**
+     * Gets a value indicating whether a folder's content type is associated with a calendar
+     *
+     * @param contentType The content type to check
+     * @return <code>true</code> if the folder is a calendar folder, <code>false</code>, otherwise
+     */
+    private static boolean isCalendarFolder(ContentType contentType) {
+        return CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType);
     }
 
     /**
@@ -865,6 +874,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(I(Permissions.createPermissionBits(permission)), I(permission.getEntity()), folder.getID() == null ? folder.getName() : folder.getID());
     }
 
+    /**
+     * Check that the folder has only read permissions set
+     *
+     * @param folder The folder to check permissions on
+     * @param p The permission to check
+     * @throws OXException In case permissions exceed read permissions
+     */
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {
         boolean writeFolder = p.getFolderPermission() > Permission.READ_FOLDER;
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
@@ -874,13 +890,52 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
+    /**
+     * Checks that the given permissions are less than "administrator" permissions
+     *
+     * @param folder The folder the guest has permissions on
+     * @param p The guest permissions
+     * @throws OXException In case permissions are exceeded
+     */
+    private static void checkNotAdmin(Folder folder, Permission p) throws OXException {
+        boolean admin = p.isAdmin();
+        boolean writeFolder = p.getFolderPermission() >= Permission.MAX_PERMISSION;
+        boolean writeItems = p.getWritePermission() >= Permission.MAX_PERMISSION;
+        boolean deleteItems = p.getDeletePermission() >= Permission.MAX_PERMISSION;
+
+        if (admin || writeFolder || writeItems || deleteItems) {
+            throw invalidPermissions(folder, p);
+        }
+    }
+
+    /**
+     * Check that the guest permissions are appropriate for the given folder
+     *
+     * @param folder The folder to check the permissions for
+     * @param p The guest permissions on the folder
+     * @throws OXException In case permissions exceed maximums
+     */
+    private static void checkMaxPermissions(Folder folder, Permission p) throws OXException {
+        if (isReadOnlySharing(folder)) {
+            /*
+             * allow only "read-only" permissions for invited guests in non-infostore folders
+             */
+            checkReadOnly(folder, p);
+        } else if (isCalendarFolder(folder.getContentType())) {
+            /*
+             * allow only "author" permissions for invited guests in calendar folders
+             */
+            checkNotAdmin(folder, p);
+        }
+    }
+
     private static void checkIsLinkPermission(Folder folder, Permission p) throws OXException {
         if (p.isAdmin() || p.isGroup() || p.getFolderPermission() != Permission.READ_FOLDER || p.getReadPermission() != Permission.READ_ALL_OBJECTS || p.getWritePermission() != Permission.NO_PERMISSIONS || p.getDeletePermission() != Permission.NO_PERMISSIONS) {
             throw invalidPermissions(folder, p);
         }
     }
 
-    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target) throws OXException {
+    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target, Connection connection) throws OXException {
         ShareTarget folderTarget = new ShareTarget(folder.getContentType().getModule(), folder.getID());
         if (folderTarget.equals(target)) {
             return false;
@@ -888,7 +943,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         /*
          * also try adjusted share target & underlying real folder
          */
-        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId());
+        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId(), connection);
         if (adjustedTarget.equals(target)) {
             return false;
         }
@@ -1018,17 +1073,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             Matcher matcher = IS_NUMBERED_PARENTHESIS.matcher(name);
             if (matcher.find()) {
                 return new StringBuilder(name).replace(matcher.start(), matcher.end(), " (" + String.valueOf(counter) + ')').toString();
-            } else {
-                return name + " (" + counter + ')';
             }
-        } else {
-            Matcher matcher = IS_NUMBERED.matcher(name);
-            if (matcher.find()) {
-                return new StringBuilder(name).replace(matcher.start(), matcher.end(), " " + counter).toString();
-            } else {
-                return name + ' ' + counter;
-            }
+            return name + " (" + counter + ')';
         }
+        Matcher matcher = IS_NUMBERED.matcher(name);
+        if (matcher.find()) {
+            return new StringBuilder(name).replace(matcher.start(), matcher.end(), " " + counter).toString();
+        }
+        return name + ' ' + counter;
     }
 
     protected static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY = new ThreadPools.ExpectedExceptionFactory<OXException>() {

@@ -95,7 +95,7 @@ public class PGPKeySignatureVerifier {
             @Override
             public PGPSignatureVerificationResult verify(PGPSignature signature, PGPPublicKey publicKey, PGPPublicKey verificationKey) throws PGPException {
                 if (signature.isCertification()) {
-                    @SuppressWarnings("unchecked") Iterator<String> userIds = publicKey.getUserIDs();
+                    Iterator<String> userIds = publicKey.getUserIDs();
                     while (userIds.hasNext()) {
                         final String userId = userIds.next();
                         final Iterator<PGPSignature> signatures = publicKey.getSignaturesForID(userId);
@@ -122,9 +122,9 @@ public class PGPKeySignatureVerifier {
         HANDLER_LIST.add(new SignatureHandler() {
             @Override
             public PGPSignatureVerificationResult verify(PGPSignature signature, PGPPublicKey publicKey, PGPPublicKey verificationKey) throws PGPException {
-                Iterator userAttributes = publicKey.getUserAttributes();
+                Iterator<PGPUserAttributeSubpacketVector> userAttributes = publicKey.getUserAttributes();
                 while (userAttributes.hasNext()) {
-                    PGPUserAttributeSubpacketVector userAttributeVector = (PGPUserAttributeSubpacketVector) userAttributes.next();
+                    PGPUserAttributeSubpacketVector userAttributeVector = userAttributes.next();
                     signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                     boolean verified = signature.verifyCertification(userAttributeVector, publicKey);
                     if (verified) {

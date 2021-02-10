@@ -59,6 +59,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -604,6 +605,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             rollback = 2;
             return Integer.toString(id);
+        } catch (DataTruncation e) {
+            throw SnippetExceptionCodes.DATA_TRUNCATION_ERROR.create(e, new Object[0]);
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -756,6 +759,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             rollback = 2;
             return identifier;
+        } catch (DataTruncation e) {
+            throw SnippetExceptionCodes.DATA_TRUNCATION_ERROR.create(e, new Object[0]);
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -861,6 +866,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     stmt = null;
                 }
             }
+        } catch (DataTruncation e) {
+            throw SnippetExceptionCodes.DATA_TRUNCATION_ERROR.create(e, new Object[0]);
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
@@ -1192,16 +1199,4 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return Strings.asciiLowerCase(new ContentType(ct).getSubType());
     }
-
-    private static Optional<String> optionalContentSubtype(final Object misc) throws OXException {
-        if (misc == null) {
-            return Optional.empty();
-        }
-        Optional<String> optionalContentType = SnippetUtils.parseOptionalContentTypeFromMisc(misc);
-        if (!optionalContentType.isPresent()) {
-            return Optional.empty();
-        }
-        return Optional.of(Strings.asciiLowerCase(new ContentType(optionalContentType.get()).getSubType()));
-    }
-
 }

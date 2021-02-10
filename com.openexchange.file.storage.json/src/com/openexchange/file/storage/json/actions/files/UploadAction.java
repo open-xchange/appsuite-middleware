@@ -81,7 +81,6 @@ public class UploadAction extends AbstractWriteAction {
 
     @Override
     protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-
         if (Strings.isEmpty(request.getParameter(File.Field.FOLDER_ID.getName()))) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FOLDER_ID.getName());
         }
@@ -134,7 +133,7 @@ public class UploadAction extends AbstractWriteAction {
         }
 
         result.addWarnings(warnings);
-        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+        if (null == newId && false == warnings.isEmpty() && false == ignoreWarnings) {
             String name = getFilenameSave(file, null, fileAccess);
             result.setException(FileStorageExceptionCodes.FILE_SAVE_ABORTED.create(name, name));
         }

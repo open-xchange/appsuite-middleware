@@ -101,9 +101,7 @@ The `com.openexchange.oidc.tools.OIDCTools` provide a set of useful functions an
 
 ## The used Cookies
 
-The OpenID cookie for autologin features will always start with `open-xchange-oidc-`, followed by a calculated hash value. The cookie will be deleted when the session is terminated or the web browser is closed. 
-The other cookies are the `open-xchange-public-session-`, `open-xchange-secret-` and `open-xchange-session-` cookie. 
-The custom OpenId cookie is needed, because the standard autologin mechanism has to be disabled and a user to session allocation can not be made otherwise.
+The used cookies are the `open-xchange-public-session-`, `open-xchange-secret-` and `open-xchange-session-` cookie.
 
 ## Tokens
 

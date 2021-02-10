@@ -74,6 +74,8 @@ public final class UserAgents {
 
     public static final String MACOS_10_15 = "Mac OS X/10.15 (19A603) AddressBookCore/1";
 
+    public static final String MACOS_11_1 = "macOS/11.1 (20C69) AddressBookCore/2452.2";
+
     public static final String IOS_5_0_1 = "iOS/5.0.1 (9A405) dataaccessd/1.0";
 
     public static final String IOS_5_0_1_PREF = "iOS/5.0.1 (9A405) Preferences/1.0";
@@ -91,6 +93,8 @@ public final class UserAgents {
     public static final String ANDROID_CARDAV_SYNC = "CardDAV-Sync (Android) (like iOS/5.0.1 (9A405) dataaccessd/1.0)";
 
     public static final String EM_CLIENT_FOR_APP_SUITE = "eM Client for OX App Suite/6.0.28376.0";
+
+    public static final String CALDAV_SYNCHRONIZER = "CalDavSynchronizer/3.6";
 
     public static final String[] MACOS_ALL = { MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3, MACOS_10_8_1, MACOS_10_8_2
     };

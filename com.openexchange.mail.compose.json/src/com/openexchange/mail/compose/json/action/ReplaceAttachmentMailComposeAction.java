@@ -52,13 +52,14 @@ package com.openexchange.mail.compose.json.action;
 import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
-import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.UploadLimits;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -74,35 +75,29 @@ public class ReplaceAttachmentMailComposeAction extends AbstractMailComposeActio
 
     /**
      * Initializes a new {@link ReplaceAttachmentMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public ReplaceAttachmentMailComposeAction(ServiceLookup services) {
         super(services);
-    }
-
-    private boolean hasUploads(long maxFileSize, long maxSize, AJAXRequestData request) throws OXException {
-        return request.hasUploads(maxFileSize, maxSize, StreamParams.streamed(false));
     }
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         // Require attachment identifier
         String sAttachmentId = requestData.requireParameter("attachmentId");
         UUID attachmentUuid = parseAttachmentId(sAttachmentId);
 
         // Acquire composition space service
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
 
         // Determine upload quotas
-        UploadLimitations uploadLimitations = getUploadLimitations(session);
-        long maxSize = uploadLimitations.maxUploadSize;
-        long maxFileSize = uploadLimitations.maxUploadFileSize;
-
-        boolean hasFileUploads = hasUploads(maxFileSize, maxSize, requestData);
+        UploadLimits uploadLimits = compositionSpaceService.getAttachmentUploadLimits(compositionSpaceId.getId());
+        boolean hasFileUploads = hasUploads(uploadLimits, requestData);
 
         StreamedUpload upload = requestData.getStreamedUpload();
         if (null == upload) {
@@ -119,8 +114,9 @@ public class ReplaceAttachmentMailComposeAction extends AbstractMailComposeActio
         }
 
         // File upload available...
-        Attachment replacedAttachment = compositionSpaceService.replaceAttachmentInCompositionSpace(uuid, attachmentUuid, upload.getUploadFiles(), disposition, session);
-        return new AJAXRequestResult(replacedAttachment, "compositionSpaceAttachment");
+        AttachmentResult attachmentResult = compositionSpaceService.replaceAttachmentInCompositionSpace(
+            compositionSpaceId.getId(), attachmentUuid, upload.getUploadFiles(), disposition, getClientToken(requestData));
+        return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

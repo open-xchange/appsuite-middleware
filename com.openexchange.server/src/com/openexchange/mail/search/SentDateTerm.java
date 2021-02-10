@@ -72,7 +72,7 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
     /**
      * Initializes a new {@link SentDateTerm}
      */
-    public SentDateTerm(final ComparisonType comparisonType, final java.util.Date sentDate) {
+    public SentDateTerm(ComparisonType comparisonType, java.util.Date sentDate) {
         super();
         pattern = new ComparablePattern<java.util.Date>() {
 
@@ -104,12 +104,12 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.SENT_DATE);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         final Date sentDate = mailMessage.getSentDate();
         if (null == sentDate) {
             return false;
@@ -133,7 +133,7 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final Date sentDate;
         try {
             sentDate = msg.getSentDate();

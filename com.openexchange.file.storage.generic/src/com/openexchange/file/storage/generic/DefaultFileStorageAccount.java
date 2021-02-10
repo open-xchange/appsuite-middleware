@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.generic;
 
 import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
@@ -90,6 +91,11 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     protected transient FileStorageService fsService;
 
     /**
+     * The account's meta data
+     */
+    protected JSONObject metaData = new JSONObject();
+
+    /**
      * Initializes a new {@link DefaultFileStorageAccount}.
      */
     public DefaultFileStorageAccount() {
@@ -114,6 +120,11 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     @Override
     public FileStorageService getFileStorageService() {
         return fsService;
+    }
+
+    @Override
+    public JSONObject getMetadata() {
+        return metaData;
     }
 
     @Override
@@ -165,6 +176,15 @@ public class DefaultFileStorageAccount implements FileStorageAccount, ServiceAwa
     public void setFileStorageService(final FileStorageService fsService) {
         this.fsService = fsService;
         serviceId = null == fsService ? null : fsService.getId();
+    }
+
+    /**
+     * Sets the meta data
+     *
+     * @param metaData The meta data to set
+     */
+    public void setMetaData(JSONObject metaData) {
+        this.metaData = metaData;
     }
 
     @Override

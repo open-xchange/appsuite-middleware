@@ -284,7 +284,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             mailAccess = MailAccess.getInstance(session);
             mailAccess.connect();
 
-            imapFolder = (IMAPFolder) getIMAPStore(mailAccess).getFolder(fullName.getFullName());
+            imapFolder = (IMAPFolder) com.openexchange.imap.IMAPAccess.getIMAPStoreFrom(mailAccess).getFolder(fullName.getFullName());
             imapFolder.open(Folder.READ_ONLY);
 
             IMAPMessage message = (IMAPMessage) imapFolder.getMessageByUID(parseUnsignedLong(id));
@@ -298,7 +298,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
-            throw getImapMessageStorageFrom(mailAccess).handleMessagingException(fullName.getFullName(), e);
+            throw com.openexchange.imap.IMAPAccess.getImapMessageStorageFrom(mailAccess).handleMessagingException(fullName.getFullName(), e);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -427,7 +427,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                     boolean hasEsort;
                     {
-                        IMAPMessageStorage messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
+                        IMAPMessageStorage messageStorage = com.openexchange.imap.IMAPAccess.getImapMessageStorageFrom(mailAccess);
                         Map<String, String> caps = messageStorage.getImapConfig().asMap();
                         hasEsort = (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")));
                     }
@@ -464,7 +464,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                                 // ... and re-connect them
                                 mailAccess = MailAccess.getInstance(session);
                                 mailAccess.connect();
-                                imapStore = getIMAPStore(mailAccess);
+                                imapStore = com.openexchange.imap.IMAPAccess.getIMAPStoreFrom(mailAccess);
                                 folder = getIMAPFolderFor(fullName, imapStore);
                                 folder.open(Folder.READ_ONLY);
 

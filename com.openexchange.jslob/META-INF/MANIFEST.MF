@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange JSlob Bundle
 Bundle-SymbolicName: com.openexchange.jslob
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -31,3 +31,4 @@ Export-Package: com.openexchange.jslob,
  com.openexchange.jslob.shared,
  com.openexchange.jslob.storage,
  com.openexchange.jslob.storage.registry
+Automatic-Module-Name: com.openexchange.jslob

@@ -79,7 +79,7 @@ public final class ProviderUtility {
      * @return The server URL; e.g. <code>"mail.company.org:143"</code>
      * @throws OXException if the server URL can not be parsed.
      */
-    public static String toSocketAddrString(final String serverUrl, final int defaultPort) throws OXException {
+    public static String toSocketAddrString(String serverUrl, int defaultPort) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(serverUrl, new URIDefaults() {
@@ -113,7 +113,7 @@ public final class ProviderUtility {
      * @param fallback The fallback protocol if URL does not contain a protocol
      * @return Extracted protocol or <code>fallback</code> parameter
      */
-    public static String extractProtocol(final String serverUrl, final String fallback) {
+    public static String extractProtocol(String serverUrl, String fallback) {
         if (serverUrl == null) {
             return fallback;
         }
@@ -141,7 +141,7 @@ public final class ProviderUtility {
         return protocol;
     }
 
-    private static boolean isValidProtocol(final String protocol) {
+    private static boolean isValidProtocol(String protocol) {
         final int len = protocol.length();
         if (len < 1) {
             return false;

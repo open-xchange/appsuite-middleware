@@ -50,6 +50,7 @@
 package com.openexchange.serialization.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.openexchange.xml.util.XMLUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -92,7 +93,7 @@ public class SerializationFilteringConfig {
         if (!configFile.exists()) {
             throw new IOException("File not found");
         }
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbFactory = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(configFile);
         doc.getDocumentElement().normalize();

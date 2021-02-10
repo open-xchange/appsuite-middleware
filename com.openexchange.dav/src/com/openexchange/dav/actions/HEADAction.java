@@ -79,7 +79,7 @@ public class HEADAction extends DAVAction {
      * <ul>
      * <li>Content-Type</li>
      * <li>Content-Length</li>
-     * <li>ETag</li>
+     * <li>ETag (implicitly as quoted string)</li>
      * <li>Content-Disposition</li>
      * </ul>
      *
@@ -91,7 +91,7 @@ public class HEADAction extends DAVAction {
         if (false == resource.isCollection()) {
             setHeaderOpt("Content-Length", resource.getLength(), response);
         }
-        setHeaderOpt("ETag", resource.getETag(), response);
+        setHeaderOpt("ETag", resource.getETag(), true, response);
         setHeaderOpt("Content-Disposition", "attachment", response);
     }
 

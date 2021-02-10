@@ -55,14 +55,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,11 +69,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 @RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.WRITE)
 public class NewAction extends TaskAction {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.
@@ -94,7 +89,7 @@ public class NewAction extends TaskAction {
         final TaskParser taskParser = new TaskParser(req.getTimeZone());
         taskParser.parse(task, jsonobject, session.getUser().getLocale());
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
-        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
+        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext());
         sqlinterface.insertTaskObject(task);
         countObjectUse(session, task);
         final Date timestamp = task.getLastModified();

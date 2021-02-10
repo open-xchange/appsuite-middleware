@@ -4,8 +4,9 @@
     tags:
       - Messaging
     summary: Sends a messaging message.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: recipients
         description: >-

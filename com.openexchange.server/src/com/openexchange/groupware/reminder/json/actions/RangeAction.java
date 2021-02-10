@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -70,8 +71,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
-import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -85,7 +84,7 @@ import com.openexchange.user.User;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
+@RestrictedAction(module = AbstractReminderAction.MODULE, type = RestrictedAction.Type.READ)
 public final class RangeAction extends AbstractReminderAction {
 
     private static final org.slf4j.Logger LOG =

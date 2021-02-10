@@ -110,6 +110,7 @@ import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageUnregisterListener;
@@ -1326,7 +1327,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private boolean tryUpdateDBSchemaCounter(int expected, int update, Database db, Connection con) throws SQLException {
+    private boolean tryUpdateDBSchemaCounter(int expected, int update, Database db, Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=? WHERE db_pool_id=? AND schemaname=? AND count=?");
@@ -1338,6 +1339,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             closeSQLStuff(stmt);
             stmt = null;
             return success;
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -1820,7 +1824,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         LockSupport.parkNanos(nanosToWait);
     }
 
-    private boolean tryIncrementFilestoreCounter(int filestoreId, int currentCount, Connection con) throws SQLException {
+    private boolean tryIncrementFilestoreCounter(int filestoreId, int currentCount, Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             // Try to update counter
@@ -1829,6 +1833,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(2, filestoreId);
             stmt.setInt(3, currentCount);
             return stmt.executeUpdate() > 0;
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -2106,7 +2113,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private boolean optIncrement(int filestoreId, int current, Connection con) throws SQLException {
+    private boolean optIncrement(int filestoreId, int current, Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=? WHERE filestore_id=? AND count=?");
@@ -2114,6 +2121,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(2, filestoreId);
             stmt.setInt(3, current);
             return stmt.executeUpdate() > 0;
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -2662,7 +2672,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(e);
         } catch (RuntimeException e) {
             LOG.error("Runtime Error", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
@@ -3857,11 +3867,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private boolean tryIncrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException {
+    private boolean tryIncrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException, StorageException {
         return tryUpdateDBPoolCounter(true, db, con);
     }
 
-    private boolean tryUpdateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException {
+    private boolean tryUpdateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             // Try to update counter
@@ -3892,12 +3902,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
             return true;
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(stmt);
         }
     }
 
-    private void updateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException {
+    private void updateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             // Try to update counter
@@ -3918,6 +3931,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? "+" : "-") + "1 WHERE db_pool_id=?");
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -4663,7 +4679,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         return retval;
     }
-    
+
     private List<DatabaseHandle> loadDatabases(final Connection con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -4674,7 +4690,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 // No databases at all...
                 return Collections.emptyList();
             }
-    
+
             List<DatabaseHandle> databases = new LinkedList<DatabaseHandle>();
             do {
                 final DatabaseHandle db = new DatabaseHandle();

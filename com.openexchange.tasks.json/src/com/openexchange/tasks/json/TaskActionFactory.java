@@ -74,11 +74,16 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
+    public static final String MODULE = "tasks";
+
+    @Deprecated
     public static final String OAUTH_READ_SCOPE = "read_tasks";
 
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_tasks";
 
     private final Map<String, TaskAction> actions;

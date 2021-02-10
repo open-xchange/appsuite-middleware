@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Search for tasks.
+    security: 
+        - session: []      
+        - oauth:
+          - read_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamTaskColumns'
       - in: query
         name: sort
@@ -26,6 +29,13 @@
         required: false
         schema:
           type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskSearchBody'
+      description: A JSON object containing search parameters.
+      required: true          
     responses:
       '200':
         description: >
@@ -41,10 +51,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TasksResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/TaskSearchBody'
-      description: A JSON object containing search parameters.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

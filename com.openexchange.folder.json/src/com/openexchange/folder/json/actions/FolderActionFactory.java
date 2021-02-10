@@ -62,6 +62,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@SuppressWarnings("deprecation")
 @OAuthModule
 public final class FolderActionFactory implements AJAXActionServiceFactory {
 
@@ -111,6 +112,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(NotifyAction.ACTION, new NotifyAction());
         tmp.put(RestoreAction.ACTION, new RestoreAction());
         tmp.put(CheckLimitsAction.ACTION, new CheckLimitsAction());
+        tmp.put(SearchAction.ACTION, new SearchAction());
         return tmp.build();
     }
 

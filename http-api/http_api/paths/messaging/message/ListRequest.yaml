@@ -4,8 +4,9 @@
     tags:
       - Messaging
     summary: Gets a list of messaging messages.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: columns
         description: >-

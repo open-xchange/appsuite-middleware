@@ -57,7 +57,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
@@ -78,17 +78,17 @@ public class CompositionSpaceCleanUpScheduler {
     /**
      * Initializes the instance
      *
-     * @param compositionSpaceService The service to use
+     * @param compositionSpaceServiceFactory The service factory to use
      * @param services The service look-up to use
      * @return The freshly initialized instance or empty if already initialized before
      */
-    public static synchronized Optional<CompositionSpaceCleanUpScheduler> initInstance(CompositionSpaceService compositionSpaceService, ServiceLookup services) {
+    public static synchronized Optional<CompositionSpaceCleanUpScheduler> initInstance(CompositionSpaceServiceFactory compositionSpaceServiceFactory, ServiceLookup services) {
         if (INSTANCE_REFERENCE.get() != null) {
             // Already initialized
             return Optional.empty();
         }
 
-        CompositionSpaceCleanUpScheduler instance = new CompositionSpaceCleanUpScheduler(compositionSpaceService, services);
+        CompositionSpaceCleanUpScheduler instance = new CompositionSpaceCleanUpScheduler(compositionSpaceServiceFactory, services);
         INSTANCE_REFERENCE.set(instance);
         return Optional.of(instance);
     }
@@ -111,19 +111,19 @@ public class CompositionSpaceCleanUpScheduler {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final CompositionSpaceService compositionSpaceService;
+    private final CompositionSpaceServiceFactory compositionSpaceServiceFactory;
     private final ServiceLookup services;
 
 
     /**
      * Initializes a new {@link CompositionSpaceCleanUpScheduler}.
      *
-     * @param compositionSpaceService The service to use
+     * @param compositionSpaceServiceFactory The service factory to use
      * @param services The service look-up to use
      */
-    private CompositionSpaceCleanUpScheduler(CompositionSpaceService compositionSpaceService, ServiceLookup services) {
+    private CompositionSpaceCleanUpScheduler(CompositionSpaceServiceFactory compositionSpaceServiceFactory, ServiceLookup services) {
         super();
-        this.compositionSpaceService = compositionSpaceService;
+        this.compositionSpaceServiceFactory = compositionSpaceServiceFactory;
         this.services = services;
     }
 
@@ -139,7 +139,7 @@ public class CompositionSpaceCleanUpScheduler {
             return false;
         }
 
-        timerService.schedule(new CleanUpTask(session, compositionSpaceService, services), 5000L);
+        timerService.schedule(new CleanUpTask(session, compositionSpaceServiceFactory, services), 5000L);
         LOG.debug("Scheduled composition space clean-up task for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
         return true;
     }
@@ -149,20 +149,20 @@ public class CompositionSpaceCleanUpScheduler {
     private static class CleanUpTask implements Runnable {
 
         private final Session session;
-        private final CompositionSpaceService compositionSpaceService;
+        private final CompositionSpaceServiceFactory compositionSpaceServiceFactory;
         private final ServiceLookup services;
 
         /**
          * Initializes a new {@link CleanUpTask}.
          *
          * @param session The session for which this task is started
-         * @param compositionSpaceService The service used to drop expired composition spaces
+         * @param compositionSpaceServiceFactory The service factory used to drop expired composition spaces
          * @param services The service look-up
          */
-        CleanUpTask(Session session, CompositionSpaceService compositionSpaceService, ServiceLookup services) {
+        CleanUpTask(Session session, CompositionSpaceServiceFactory compositionSpaceServiceFactory, ServiceLookup services) {
             super();
             this.session = session;
-            this.compositionSpaceService = compositionSpaceService;
+            this.compositionSpaceServiceFactory = compositionSpaceServiceFactory;
             this.services = services;
         }
 
@@ -171,7 +171,7 @@ public class CompositionSpaceCleanUpScheduler {
             try {
                 long maxIdleTimeMillis = getMaxIdleTimeMillis(session);
                 if (maxIdleTimeMillis > 0) {
-                    compositionSpaceService.closeExpiredCompositionSpaces(maxIdleTimeMillis, session);
+                    compositionSpaceServiceFactory.createServiceFor(session).closeExpiredCompositionSpaces(maxIdleTimeMillis);
                 }
             } catch (Exception e) {
                 LOG.error("Failed to clean-up expired composition spaces for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);

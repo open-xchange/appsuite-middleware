@@ -209,21 +209,21 @@ public class RdbPushMatch implements PushMatch {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(128);
-        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId);
         if (client != null) {
-            builder.append("client=").append(client).append(", ");
+            builder.append(", ").append("client=").append(client);
         }
         if (transportId != null) {
-            builder.append("transportId=").append(transportId).append(", ");
+            builder.append(", ").append("transportId=").append(transportId);
         }
         if (token != null) {
-            builder.append("token=").append(token).append(", ");
+            builder.append(", ").append("token=").append(token);
         }
         if (topic != null) {
-            builder.append("topic=").append(topic).append(", ");
+            builder.append(", ").append("topic=").append(topic);
         }
         if (lastModified != null) {
-            builder.append("lastModified=").append(lastModified);
+            builder.append(", ").append("lastModified=").append(lastModified);
         }
         builder.append("}");
         return builder.toString();

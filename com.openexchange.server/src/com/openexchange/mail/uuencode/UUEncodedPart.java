@@ -83,7 +83,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     /**
      * Constructs a {@link UUEncodedPart} object containing all information about the attachment.
      */
-    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename) {
+    UUEncodedPart(int startIndex, int endIndex, String bodyPart, String filename) {
         super();
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -154,7 +154,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * @param contentType The content type to apply to data handler
      * @return A data handler for this uuencoded part
      */
-    public DataHandler getDataHandler(final String contentType) {
+    public DataHandler getDataHandler(String contentType) {
         final byte[] data = bodyPart;
         final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
@@ -207,7 +207,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * @param out - The inputStream
      * @throws java.io.IOException if an error occurs writing to the stream
      */
-    public void writeTo(final OutputStream out) throws IOException {
+    public void writeTo(OutputStream out) throws IOException {
         BufferedOutputStream bos = null;
         final InputStream in = getInputStream();
         try {

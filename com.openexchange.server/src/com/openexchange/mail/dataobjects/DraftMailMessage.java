@@ -76,12 +76,12 @@ public class DraftMailMessage extends MailMessage {
     private final MailMessage message;
 
     @Override
-    public void addReplyTo(final InternetAddress addr) {
+    public void addReplyTo(InternetAddress addr) {
         message.addReplyTo(addr);
     }
 
     @Override
-    public void addReplyTo(final InternetAddress[] addrs) {
+    public void addReplyTo(InternetAddress[] addrs) {
         message.addReplyTo(addrs);
     }
 
@@ -116,7 +116,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMessageId(final String messageId) {
+    public void setMessageId(String messageId) {
         message.setMessageId(messageId);
     }
 
@@ -136,12 +136,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setReferences(final String sReferences) {
+    public void setReferences(String sReferences) {
         message.setReferences(sReferences);
     }
 
     @Override
-    public void setReferences(final String[] references) {
+    public void setReferences(String[] references) {
         message.setReferences(references);
     }
 
@@ -161,12 +161,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         message.setContentType(contentType);
     }
 
     @Override
-    public void setContentType(final String contentType) throws OXException {
+    public void setContentType(String contentType) throws OXException {
         message.setContentType(contentType);
     }
 
@@ -186,12 +186,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setContentDisposition(final String disposition) throws OXException {
+    public void setContentDisposition(String disposition) throws OXException {
         message.setContentDisposition(disposition);
     }
 
     @Override
-    public void setContentDisposition(final ContentDisposition disposition) {
+    public void setContentDisposition(ContentDisposition disposition) {
         message.setContentDisposition(disposition);
     }
 
@@ -216,22 +216,22 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         message.setFileName(fileName);
     }
 
     @Override
-    public void addHeader(final String name, final String value) {
+    public void addHeader(String name, String value) {
         message.addHeader(name, value);
     }
 
     @Override
-    public void setHeader(final String name, final String value) {
+    public void setHeader(String name, String value) {
         message.setHeader(name, value);
     }
 
     @Override
-    public void addHeaders(final HeaderCollection headers) {
+    public void addHeaders(HeaderCollection headers) {
         message.addHeaders(headers);
     }
 
@@ -256,32 +256,32 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean containsHeader(final String name) {
+    public boolean containsHeader(String name) {
         return message.containsHeader(name);
     }
 
     @Override
-    public String[] getHeader(final String name) {
+    public String[] getHeader(String name) {
         return message.getHeader(name);
     }
 
     @Override
-    public void addFrom(final InternetAddress addr) {
+    public void addFrom(InternetAddress addr) {
         message.addFrom(addr);
     }
 
     @Override
-    public String getFirstHeader(final String name) {
+    public String getFirstHeader(String name) {
         return message.getFirstHeader(name);
     }
 
     @Override
-    public void addFrom(final InternetAddress[] addrs) {
+    public void addFrom(InternetAddress[] addrs) {
         message.addFrom(addrs);
     }
 
     @Override
-    public String getHeader(final String name, final String delimiter) {
+    public String getHeader(String name, String delimiter) {
         return message.getHeader(name, delimiter);
     }
 
@@ -301,12 +301,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public String getHeader(final String name, final char delimiter) {
+    public String getHeader(String name, char delimiter) {
         return message.getHeader(name, delimiter);
     }
 
     @Override
-    public void addTo(final InternetAddress addr) {
+    public void addTo(InternetAddress addr) {
         message.addTo(addr);
     }
 
@@ -316,12 +316,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void addTo(final InternetAddress[] addrs) {
+    public void addTo(InternetAddress[] addrs) {
         message.addTo(addrs);
     }
 
     @Override
-    public Iterator<Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+    public Iterator<Entry<String, String>> getNonMatchingHeaders(String[] nonMatchingHeaders) {
         return message.getNonMatchingHeaders(nonMatchingHeaders);
     }
 
@@ -336,7 +336,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public Iterator<Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+    public Iterator<Entry<String, String>> getMatchingHeaders(String[] matchingHeaders) {
         return message.getMatchingHeaders(matchingHeaders);
     }
 
@@ -346,22 +346,22 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void removeHeader(final String name) {
+    public void removeHeader(String name) {
         message.removeHeader(name);
     }
 
     @Override
-    public boolean hasHeaders(final String... names) {
+    public boolean hasHeaders(String... names) {
         return message.hasHeaders(names);
     }
 
     @Override
-    public void addCc(final InternetAddress addr) {
+    public void addCc(InternetAddress addr) {
         message.addCc(addr);
     }
 
     @Override
-    public void addCc(final InternetAddress[] addrs) {
+    public void addCc(InternetAddress[] addrs) {
         message.addCc(addrs);
     }
 
@@ -386,7 +386,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setSize(final long size) {
+    public void setSize(long size) {
         message.setSize(size);
     }
 
@@ -416,12 +416,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setContentId(final String contentId) {
+    public void setContentId(String contentId) {
         message.setContentId(contentId);
     }
 
     @Override
-    public void addBcc(final InternetAddress addr) {
+    public void addBcc(InternetAddress addr) {
         message.addBcc(addr);
     }
 
@@ -436,7 +436,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void addBcc(final InternetAddress[] addrs) {
+    public void addBcc(InternetAddress[] addrs) {
         message.addBcc(addrs);
     }
 
@@ -446,7 +446,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setSequenceId(final String sequenceId) {
+    public void setSequenceId(String sequenceId) {
         message.setSequenceId(sequenceId);
     }
 
@@ -491,7 +491,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMsgref(final MailPath msgref) {
+    public void setMsgref(MailPath msgref) {
         message.setMsgref(msgref);
     }
 
@@ -571,12 +571,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setFlags(final int flags) {
+    public void setFlags(int flags) {
         message.setFlags(flags);
     }
 
     @Override
-    public void setFlag(final int flag, final boolean enable) throws OXException {
+    public void setFlag(int flag, boolean enable) throws OXException {
         message.setFlag(flag, enable);
     }
 
@@ -586,7 +586,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return message.getEnclosedMailPart(index);
     }
 
@@ -611,12 +611,12 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setPrevSeen(final boolean prevSeen) {
+    public void setPrevSeen(boolean prevSeen) {
         message.setPrevSeen(prevSeen);
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         message.writeTo(out);
     }
 
@@ -636,7 +636,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setThreadLevel(final int threadLevel) {
+    public void setThreadLevel(int threadLevel) {
         message.setThreadLevel(threadLevel);
     }
 
@@ -671,7 +671,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         message.setSubject(subject);
     }
 
@@ -701,7 +701,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setSentDate(final Date sentDate) {
+    public void setSentDate(Date sentDate) {
         message.setSentDate(sentDate);
     }
 
@@ -731,17 +731,17 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         message.setReceivedDate(receivedDate);
     }
 
     @Override
-    public void addUserFlag(final String userFlag) {
+    public void addUserFlag(String userFlag) {
         message.addUserFlag(userFlag);
     }
 
     @Override
-    public void addUserFlags(final String[] userFlags) {
+    public void addUserFlags(String[] userFlags) {
         message.addUserFlags(userFlags);
     }
 
@@ -776,7 +776,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setColorLabel(final int colorLabel) {
+    public void setColorLabel(int colorLabel) {
         message.setColorLabel(colorLabel);
     }
 
@@ -796,7 +796,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setPriority(final int priority) {
+    public void setPriority(int priority) {
         message.setPriority(priority);
     }
 
@@ -816,7 +816,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setDispositionNotification(final InternetAddress dispositionNotification) {
+    public void setDispositionNotification(InternetAddress dispositionNotification) {
         message.setDispositionNotification(dispositionNotification);
     }
 
@@ -836,7 +836,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setFolder(final String folder) {
+    public void setFolder(String folder) {
         message.setFolder(folder);
     }
 
@@ -856,7 +856,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         message.setAccountId(accountId);
     }
 
@@ -876,7 +876,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setAccountName(final String accountName) {
+    public void setAccountName(String accountName) {
         message.setAccountName(accountName);
     }
 
@@ -901,7 +901,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setHasAttachment(final boolean hasAttachment) {
+    public void setHasAttachment(boolean hasAttachment) {
         message.setHasAttachment(hasAttachment);
     }
 
@@ -946,7 +946,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setAppendVCard(final boolean appendVCard) {
+    public void setAppendVCard(boolean appendVCard) {
         message.setAppendVCard(appendVCard);
     }
 
@@ -966,7 +966,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setRecentCount(final int recentCount) {
+    public void setRecentCount(int recentCount) {
         message.setRecentCount(recentCount);
     }
 
@@ -991,7 +991,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         message.setMailId(id);
     }
 
@@ -1001,7 +1001,7 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         message.setUnreadMessages(unreadMessages);
     }
 
@@ -1203,7 +1203,7 @@ public class DraftMailMessage extends MailMessage {
     /**
      * Initializes a new {@link DraftMailMessage}.
      */
-    public DraftMailMessage(final MailMessage message) {
+    public DraftMailMessage(MailMessage message) {
         super();
         this.message = message;
     }

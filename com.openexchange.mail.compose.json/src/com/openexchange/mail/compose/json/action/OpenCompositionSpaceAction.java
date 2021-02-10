@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.Message.ContentType;
@@ -93,7 +94,7 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Acquire needed service
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
+        CompositionSpaceService compositionSpaceService = getHighestRankedService(session);
 
         // Determine type
         Type type = Type.NEW;
@@ -197,8 +198,20 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
                     parameters.withContentType(ct);
                 }
             } else if (Type.NEW == type) {
-                parameters.withContentType(usm.isDisplayHtmlInlineContent() ? ContentType.TEXT_HTML : ContentType.TEXT_PLAIN);
+                int msgFormat = usm.getMsgFormat();
+                if (UserSettingMail.MSG_FORMAT_BOTH == msgFormat) {
+                    parameters.withContentType(ContentType.MULTIPART_ALTERNATIVE);
+                } else if (UserSettingMail.MSG_FORMAT_TEXT_ONLY == msgFormat) {
+                    parameters.withContentType(ContentType.TEXT_PLAIN);
+                } else {
+                    parameters.withContentType(ContentType.TEXT_HTML);
+                }
             }
+        }
+
+        ClientToken clientToken = getClaimedClientToken(requestData);
+        if (clientToken.isPresent()) {
+            parameters.withClientToken(clientToken);
         }
 
         // Does not hold since a JSON array is expected for the mail paths...
@@ -221,11 +234,11 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
         //            }
         //        }
 
-        CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build(), session);
+        CompositionSpace compositionSpace = compositionSpaceService.openCompositionSpace(parameters.build());
         if (LOG.isDebugEnabled()) {
             LOG.debug("Opened composition space '{}':{}{}", compositionSpace.getId(), Strings.getLineSeparator(), buildConsoleTableFor(compositionSpace, Optional.ofNullable(requestData.getUserAgent())));
         }
-        return new AJAXRequestResult(compositionSpace, "compositionSpace");
+        return new AJAXRequestResult(compositionSpace, "compositionSpace").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

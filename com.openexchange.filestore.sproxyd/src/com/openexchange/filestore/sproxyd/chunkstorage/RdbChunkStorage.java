@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -153,10 +154,10 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public List<Chunk> optChunks(UUID documentId) throws OXException {
+    public Optional<List<Chunk>> optChunks(UUID documentId) throws OXException {
         Connection con = databaseAccess.acquireReadOnly();
         try {
-            return getChunks(documentId, userId, contextId, false, con);
+            return Optional.ofNullable(getChunks(documentId, userId, contextId, false, con));
         } finally {
             databaseAccess.releaseReadOnly(con);
         }
@@ -175,7 +176,7 @@ public class RdbChunkStorage implements ChunkStorage {
                 if (errorOnAbsence) {
                     throw SproxydExceptionCode.NO_SUCH_DOCUMENT.create(UUIDs.getUnformattedString(documentId));
                 }
-                return Collections.emptyList();
+                return null;
             }
 
             List<Chunk> chunks = new LinkedList<Chunk>();
@@ -254,10 +255,10 @@ public class RdbChunkStorage implements ChunkStorage {
     }
 
     @Override
-    public Chunk getLastChunk(UUID documentId) throws OXException {
+    public Optional<Chunk> getLastChunk(UUID documentId) throws OXException {
         Connection con = databaseAccess.acquireReadOnly();
         try {
-            return getLastChunk(documentId, userId, contextId, con);
+            return Optional.ofNullable(getLastChunk(documentId, userId, contextId, con));
         } finally {
             databaseAccess.releaseReadOnly(con);
         }

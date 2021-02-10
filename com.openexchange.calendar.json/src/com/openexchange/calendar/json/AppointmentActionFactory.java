@@ -81,8 +81,12 @@ import com.openexchange.server.ServiceLookup;
 @OAuthModule
 public class AppointmentActionFactory implements AJAXActionServiceFactory {
 
+    public static final String MODULE = "calendar";
+
+    @Deprecated
     public static final String OAUTH_READ_SCOPE = "read_calendar";
 
+    @Deprecated
     public static final String OAUTH_WRITE_SCOPE = "write_calendar";
 
     private final Map<String, AJAXActionService> actions;

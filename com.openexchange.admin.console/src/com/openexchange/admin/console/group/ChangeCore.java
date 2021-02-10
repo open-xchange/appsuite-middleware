@@ -46,10 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.group;
 
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -99,7 +99,7 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             final String addMembers = (String) parser.getOptionValue(this.addMemberOption);
             if (addMembers != null) {
-                final User[] newMemberList = getMembers(parser, addMembers);
+                final User[] newMemberList = getMembers(addMembers);
                 if (newMemberList != null) {
                     oxgrp.addMember(ctx, grp, newMemberList, auth);
                 }
@@ -107,7 +107,7 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             final String removeMembers = (String) parser.getOptionValue(this.removeMemberOption);
             if (removeMembers != null) {
-                final User[] removeMemberList = getMembers(parser, removeMembers);
+                final User[] removeMemberList = getMembers(removeMembers);
                 if (removeMemberList != null) {
                     oxgrp.removeMember(ctx, grp, removeMemberList, auth);
                 }
@@ -126,7 +126,7 @@ public abstract class ChangeCore extends GroupAbstraction {
         }
     }
 
-    private User[] getMembers(final AdminParser parser, final String tmpmembers) {
+    private User[] getMembers(String tmpmembers) {
         final String[] split = tmpmembers.split(",");
         final User[] memberList = new User[split.length];
         for (int i = 0; i < split.length; i++) {

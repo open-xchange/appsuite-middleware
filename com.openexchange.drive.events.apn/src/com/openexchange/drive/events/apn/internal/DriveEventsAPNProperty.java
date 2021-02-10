@@ -69,31 +69,65 @@ public enum DriveEventsAPNProperty implements Property {
     enabled(Boolean.FALSE),
 
     /**
-     * Indicates which APNS service is used when sending push notifications to devices.
-     * A value of "true" will use the production service, a value of "false" the sandbox service.
-     * Default: true
+     * Specifies the authentication type to use for the APNS HTTP/2 push.
+     * Allows the values "certificate" and "jwt".
+     * - "certificates" signals to connect to APNs using provider certificates while
+     * - "jwt" signals to connect to APNs using provider authentication JSON Web Token (JWT)
+     * Default: "certificate"
      */
-    production(Boolean.TRUE),
+    authtype("certificate"),
 
     /**
      * Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the application, e.g. "/opt/open-xchange/etc/drive-apns.p12".
-     * Required if com.openexchange.drive.events.apn.[os].enabled is "true" and the package containing the restricted drive components is not installed.
+     * Required if com.openexchange.drive.events.apn.[os].enabled is "true" and "com.openexchange.drive.events.apn.[os].authtype" is "certificate" and the package containing 
+     * the restricted drive components is not installed.
      * Default: no default
      */
     keystore(null),
 
     /**
      * Note that blank or null passwords are in violation of the PKCS #12 specifications. Required if "com.openexchange.drive.events.apn.[os].enabled"
-     * is "true" .
+     * is "true" and "com.openexchange.drive.events.apn.[os].authtype" is "certificate"
      * Default: no default
      */
     password(null),
 
     /**
+     * Specifies the private key file used to connect to APNs using provider authentication JSON Web Token (JWT).
+     * Required if "com.openexchange.drive.events.apn.[os].enabled" is "true" and "com.openexchange.drive.events.apn.[os].authtype"
+     * is "jwt".
+     * Default: no default
+     */
+    privatekey(null),
+
+    /**
+     * Specifies the key identifier used to connect to APNs using provider authentication JSON Web Token (JWT).
+     * Required if "com.openexchange.drive.events.apn.[os].enabled" is "true" and "com.openexchange.drive.events.apn.[os].authtype"
+     * is "jwt".
+     * Default: no default
+     */
+    keyid(null),
+
+    /**
+     * Specifies the team identifier used to connect to APNs using provider authentication JSON Web Token (JWT).
+     * Required if "com.openexchange.drive.events.apn.[os].enabled" is "true" and "com.openexchange.drive.events.apn.[os].authtype"
+     * is "jwt".
+     * Default: no default
+     */
+    teamid(null),
+
+    /**
      * Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId
      * Default: no default
      */
-    topic(null)
+    topic(null),
+
+    /**
+     * Indicates which APNS service is used when sending push notifications to devices.
+     * A value of "true" will use the production service, a value of "false" the sandbox service.
+     * Default: true
+     */
+    production(Boolean.TRUE),
 
     ;
 

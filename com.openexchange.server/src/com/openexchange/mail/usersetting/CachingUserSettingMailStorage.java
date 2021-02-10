@@ -141,7 +141,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @throws OXException if user's mail settings could not be saved
      */
     @Override
-    public void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
+    public void saveUserSettingMail(UserSettingMail usm, int user, Context ctx, Connection writeConArg) throws OXException {
         if (usm.isNoSave()) {
             /*
              * Saving to storage denied
@@ -209,7 +209,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     @Override
-    public void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
+    public void saveUserSettingMailBits(UserSettingMail usm, int user, Context ctx, Connection writeConArg) throws OXException {
         if (usm.isNoSave()) {
             /*
              * Saving to storage denied
@@ -269,7 +269,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @throws OXException - if deletion fails
      */
     @Override
-    public void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
+    public void deleteUserSettingMail(int user, Context ctx, Connection writeConArg) throws OXException {
         try {
             Connection writeCon = writeConArg;
             boolean closeWriteCon = false;
@@ -327,7 +327,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
      * @throws OXException if loading fails
      */
     @Override
-    public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
+    public UserSettingMail loadUserSettingMail(int user, Context ctx, Connection readConArg) throws OXException {
         try {
             Cache cache = getCache();
             UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user));
@@ -509,7 +509,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
 
-    private static void loadSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection readConArg) throws OXException {
+    private static void loadSignatures(UserSettingMail usm, int user, Context ctx, Connection readConArg) throws OXException {
         try {
             Connection readCon = readConArg;
             boolean closeCon = false;
@@ -549,7 +549,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
-    private static PreparedStatement getUpdateStmt(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
+    private static PreparedStatement getUpdateStmt(UserSettingMail usm, int user, Context ctx, Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_UPDATE);
@@ -583,7 +583,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
-    private static PreparedStatement getUpdateStmtBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
+    private static PreparedStatement getUpdateStmtBits(UserSettingMail usm, int user, Context ctx, Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_UPDATE_BITS);
@@ -598,7 +598,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
-    private static PreparedStatement getInsertStmt(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
+    private static PreparedStatement getInsertStmt(UserSettingMail usm, int user, Context ctx, Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT);
@@ -634,7 +634,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";
 
-    private static boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
+    private static boolean saveSignatures(UserSettingMail usm, int user, Context ctx, Connection writeConArg) throws OXException {
         try {
             Connection writeCon = writeConArg;
             boolean closeCon = false;
@@ -678,7 +678,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
-    private static String getDisplayMsgHeadersString(final UserSettingMail usm) {
+    private static String getDisplayMsgHeadersString(UserSettingMail usm) {
         final String[] displayMsgHeaders = usm.getDisplayMsgHeaders();
         if ((displayMsgHeaders == null) || (displayMsgHeaders.length == 0)) {
             return null;
@@ -691,7 +691,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         return tmp.toString();
     }
 
-    private static void setDisplayMsgHeadersString(final UserSettingMail usm, final String displayMsgHeadersStr) {
+    private static void setDisplayMsgHeadersString(UserSettingMail usm, String displayMsgHeadersStr) {
         if (displayMsgHeadersStr == null) {
             usm.setDisplayMsgHeaders(null);
             usm.setModifiedDuringSession(true);
@@ -717,7 +717,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     @Override
-    public void removeUserSettingMail(final int user, final Context ctx) throws OXException {
+    public void removeUserSettingMail(int user, Context ctx) throws OXException {
         final Cache cache = getCache();
         if (null != cache) {
             /*

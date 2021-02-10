@@ -74,6 +74,7 @@ import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -89,7 +90,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class AbstractMailFilterServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 3006497622205429579L;
+    private static final long serialVersionUID = 3006497622205429579L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailFilterServlet.class);
 
@@ -114,7 +115,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
      * @return The locale
      * @throws OXException
      */
-    protected static Locale localeFrom(final Session session) throws OXException {
+    protected static Locale localeFrom(Session session) throws OXException {
         if (null == session) {
             return Locale.US;
         }
@@ -125,7 +126,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             // create a new HttpSession if it's missing
             req.getSession(true);
@@ -142,33 +143,35 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
     }
 
     @Override
-    public void init(final ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) throws ServletException {
         super.init(config);
         hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
     }
 
-    protected static void sendError(final HttpServletResponse resp) throws IOException {
+    protected static void sendError(HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Response response = new Response();
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Response response = new Response();
         Session session = null;
         try {
-            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId == null) {
                 throw MailFilterExceptionCode.MISSING_PARAMETER.create("session");
             }
 
-            final SessiondService service = Services.getService(SessiondService.class);
+            SessiondService service = Services.getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
             }
             session = service.getSession(sessionId);
             if (null == session) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                throw oxe;
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
@@ -177,20 +180,22 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+                throw oxe;
             }
             checkMailfilterAvailable(session);
 
-            final AbstractRequest request = createRequest();
+            AbstractRequest request = createRequest();
             request.setSession(session);
 
-
             request.setParameters(new AbstractRequest.Parameters() {
+
                 @Override
-                public String getParameter(final Parameter param) throws OXException {
-                    final String value = req.getParameter(param.getName());
+                public String getParameter(Parameter param) throws OXException {
+                    String value = req.getParameter(param.getName());
                     if (param.isRequired() && null == value) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( param.getName());
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(param.getName());
                     }
                     return value;
                 }
@@ -198,7 +203,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             /*
              * A non-download action
              */
-            final AbstractAction action = getAction();
+            @SuppressWarnings("rawtypes") AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (OXException e) {
             if (SessionExceptionCodes.hasPrefix(e)) {
@@ -229,19 +234,21 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Response response = new Response();
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Response response = new Response();
         Session session = null;
         try {
-            final String sessionId = req.getParameter(PARAMETER_SESSION);
-            final SessiondService service = Services.getService(SessiondService.class);
+            String sessionId = req.getParameter(PARAMETER_SESSION);
+            SessiondService service = Services.getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class);
             }
             session = service.getSession(sessionId);
             if (null == session) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                throw oxe;
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
@@ -250,25 +257,24 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create();
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
+                throw oxe;
             }
             checkMailfilterAvailable(session);
 
-            final AbstractRequest request = createRequest();
+            AbstractRequest request = createRequest();
             request.setSession(session);
 
-            request.setParameters(new AbstractRequest.Parameters() {
-                @Override
-                public String getParameter(final Parameter param) throws OXException {
-                    final String value = req.getParameter(param.getName());
-                    if (null == value) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( param.getName());
-                    }
-                    return value;
+            request.setParameters(param -> {
+                String value = req.getParameter(param.getName());
+                if (null == value) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(param.getName());
                 }
+                return value;
             });
             request.setBody(com.openexchange.ajax.AJAXServlet.getBody(req));
-            final AbstractAction action = getAction();
+            @SuppressWarnings("rawtypes") AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (OXException e) {
             if (SessionExceptionCodes.hasPrefix(e)) {

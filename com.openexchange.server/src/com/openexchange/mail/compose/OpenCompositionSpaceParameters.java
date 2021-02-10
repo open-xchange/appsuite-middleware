@@ -165,6 +165,7 @@ public class OpenCompositionSpaceParameters {
         private boolean requestReadReceipt;
         private SharedAttachmentsInfo sharedAttachmentsInfo;
         private Security security;
+        private ClientToken clientToken;
 
         Builder(Type type, List<MailPath> referencedMails, UserSettingMail mailSettings) {
             super();
@@ -211,8 +212,16 @@ public class OpenCompositionSpaceParameters {
             return this;
         }
 
+        public Builder withClientToken(ClientToken clientToken) {
+            this.clientToken = clientToken;
+            return this;
+        }
+
         public OpenCompositionSpaceParameters build() {
-            return new OpenCompositionSpaceParameters(type, referencedMails, appendVCard, appendOriginalAttachments, priority, contentType, requestReadReceipt, sharedAttachmentsInfo, security, mailSettings);
+            if (clientToken == null || clientToken.isAbsent()) {
+                clientToken = ClientToken.generate();
+            }
+            return new OpenCompositionSpaceParameters(type, referencedMails, appendVCard, appendOriginalAttachments, priority, contentType, requestReadReceipt, sharedAttachmentsInfo, security, mailSettings, clientToken);
         }
 
     }
@@ -229,11 +238,12 @@ public class OpenCompositionSpaceParameters {
     private final SharedAttachmentsInfo sharedAttachmentsInfo;
     private final Security security;
     private final UserSettingMail mailSettings;
+    private final ClientToken clientToken;
 
     /**
      * Initializes a new {@link OpenCompositionSpaceParameters}.
      */
-    OpenCompositionSpaceParameters(Type type, List<MailPath> referencedMails, boolean appendVCard, boolean appendOriginalAttachments, Priority priority, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, Security security, UserSettingMail mailSettings) {
+    OpenCompositionSpaceParameters(Type type, List<MailPath> referencedMails, boolean appendVCard, boolean appendOriginalAttachments, Priority priority, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, Security security, UserSettingMail mailSettings, ClientToken clientToken) {
         super();
         this.type = type;
         this.referencedMails = referencedMails;
@@ -245,6 +255,7 @@ public class OpenCompositionSpaceParameters {
         this.sharedAttachmentsInfo = sharedAttachmentsInfo;
         this.security = security;
         this.mailSettings = mailSettings;
+        this.clientToken = clientToken;
     }
 
     /**
@@ -339,6 +350,15 @@ public class OpenCompositionSpaceParameters {
      */
     public ContentType getContentType() {
         return contentType;
+    }
+
+    /**
+     * Gets the client token
+     *
+     * @return The client token
+     */
+    public ClientToken getClientToken() {
+        return clientToken;
     }
 
 }

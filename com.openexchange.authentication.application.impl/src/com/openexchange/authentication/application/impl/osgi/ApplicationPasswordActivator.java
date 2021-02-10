@@ -52,14 +52,12 @@ package com.openexchange.authentication.application.impl.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.authentication.application.AppAuthenticatorService;
 import com.openexchange.authentication.application.AppPasswordApplication;
 import com.openexchange.authentication.application.AppPasswordMailOauthService;
 import com.openexchange.authentication.application.AppPasswordService;
-import com.openexchange.authentication.application.impl.AppPasswordAnnotationProcessor;
 import com.openexchange.authentication.application.impl.AppPasswordProperty;
 import com.openexchange.authentication.application.impl.AppPasswordServiceImpl;
 import com.openexchange.authentication.application.impl.AppPasswordSessionStorageParameterNamesProvider;
@@ -84,6 +82,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ApplicationPasswordActivator}
@@ -122,6 +122,10 @@ public class ApplicationPasswordActivator extends AJAXModuleActivator {
             @Override
             public boolean isEnabled(String capability, Session session, CapabilitySet capabilities) throws OXException {
                 if (sCapability.equals(capability)) {
+                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (null == serverSession || serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                        return false;
+                    }
                     // Confirm loaded, user has the capability, and at least one storage registered
                     if (null != appPasswordService) {
                         List<AppPasswordApplication> applications = appPasswordService.getApplications(session);
@@ -174,9 +178,6 @@ public class ApplicationPasswordActivator extends AJAXModuleActivator {
         registerService(AppPasswordService.class, appPasswordService);
         registerService(AppAuthenticatorService.class, appPasswordService);
         registerService(Reloadable.class, appPasswordService);
-
-        // Inspector
-        registerService(AJAXActionAnnotationProcessor.class, new AppPasswordAnnotationProcessor());
 
         // Track plugin services
         trackService(AppPasswordMailOauthService.class);

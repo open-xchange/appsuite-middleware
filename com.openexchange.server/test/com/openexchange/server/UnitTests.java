@@ -115,7 +115,8 @@ import com.openexchange.lock.impl.AccessControlImplTest;
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
     com.openexchange.folderstorage.database.DatabaseFolderTest.class,
     com.openexchange.config.admin.internal.HideAdminServiceImplTest.class,
-    AccessControlImplTest.class
+    AccessControlImplTest.class,
+    com.openexchange.i18n.tools.replacement.AuthorizationTest.class,
 })
 public class UnitTests {
 

@@ -198,7 +198,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
-        lineSeparator = System.getProperty("line.separator");
+        lineSeparator = Strings.getLineSeparator();
         {
             TIntObjectMap<String> tmp = new TIntObjectHashMap<String>(htmlCharMap.size());
             for (Map.Entry<Character, String> entry : htmlCharMap.entrySet()) {
@@ -688,7 +688,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     } else {
                         Document document = handler.getDocument();
                         handlePrettyPrint(options, document);
-                        html = hasBody ? document.outerHtml() : document.body().html();
+                        html = hasBody || document.body() == null ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
                 } else {
@@ -717,7 +717,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     } else {
                         Document document = handler.getDocument();
                         handlePrettyPrint(options, document);
-                        html = hasBody ? document.outerHtml() : document.body().html();
+                        html = hasBody || document.body() == null ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
                 }
@@ -1547,7 +1547,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * The <base> tag must be between the document's <head> tags. Also, there must be no more than one base element per document.
          */
         final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
-        return checkBaseTag(htmlContent, externalImagesAllowed, m1.find() ? m1.start() : htmlContent.length());
+        return checkBaseTag(htmlContent, m1.find() ? m1.start() : htmlContent.length());
     }
 
     private static final Pattern PATTERN_BASE_TAG = Pattern.compile(
@@ -1562,7 +1562,7 @@ public final class HtmlServiceImpl implements HtmlService {
         "(<[a-zA-Z]+[^>]*?)(?:(?:href=\\\"([^\\\"]*)\\\")|(?:href=([^\\s>]*)))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
+    private static String checkBaseTag(final String htmlContent, final int end) {
         Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
             return htmlContent;
@@ -1711,16 +1711,6 @@ public final class HtmlServiceImpl implements HtmlService {
             } while (m.find());
         }
         return retval;
-    }
-
-    private static String trimHref(final String href) {
-        if (isEmpty(href)) {
-            return href;
-        }
-        if (href.startsWith("\"")) {
-            return href.endsWith("\"") ? href.substring(1, href.length() - 1) : href.substring(1);
-        }
-        return href;
     }
 
     @Override
@@ -2017,106 +2007,6 @@ public final class HtmlServiceImpl implements HtmlService {
         return false;
     }
 
-    private static final Pattern PATTERN_XHTML_CDATA;
-
-    private static final Pattern PATTERN_UNQUOTE1;
-
-    private static final Pattern PATTERN_UNQUOTE2;
-
-    private static final Pattern PATTERN_XHTML_COMMENT;
-
-    static {
-        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>\\s*", true);
-
-        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "\\s*");
-
-        final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
-
-        final String commentEnd = RegexUtility.concat(
-            RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false),
-            "\\s*");
-
-        final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
-
-        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "\\s*");
-
-        final String group3 = RegexUtility.group(RegexUtility.quote("</style>"), true);
-
-        final String regex = RegexUtility.concat(group1, ignore1, group2, ignore2, group3);
-
-        PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-        final String commentEnd2 = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false);
-
-        PATTERN_XHTML_COMMENT = Pattern.compile(RegexUtility.concat(commentStart, ".*?", commentEnd2), Pattern.DOTALL);
-
-        PATTERN_UNQUOTE1 = Pattern.compile(RegexUtility.quote("&lt;!--"), Pattern.CASE_INSENSITIVE);
-
-        PATTERN_UNQUOTE2 = Pattern.compile(RegexUtility.quote("--&gt;"), Pattern.CASE_INSENSITIVE);
-    }
-
-    /**
-     * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
-     *
-     * <pre>
-     * &lt;style type=&quot;text/css&quot;&gt;
-     * /*&lt;![CDATA[&#42;/
-     * &lt;!--
-     *  /* Some Definitions &#42;/
-     * --&gt;
-     * /*]]&gt;&#42;/
-     * &lt;/style&gt;
-     * </pre>
-     *
-     * is turned to
-     *
-     * <pre>
-     * &lt;style type=&quot;text/css&quot;&gt;
-     * &lt;!--
-     *  /* Some Definitions &#42;/
-     * --&gt;
-     * &lt;/style&gt;
-     * </pre>
-     *
-     * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
-     * @return The (X)HTML content with CDATA removed
-     */
-    private static String removeXHTMLCData(final String htmlContent) {
-        final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
-        if (m.find()) {
-            final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-            final Stringer sb = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
-            final String endingComment = "-->";
-            StringBuilder tmp = null;
-            do {
-                // Un-quote
-                final String match = com.openexchange.java.Strings.quoteReplacement(PATTERN_UNQUOTE2.matcher(
-                    PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->"));
-                // Check for additional HTML comments
-                if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
-                    // No additional HTML comments
-                    if (null == tmp) {
-                        tmp = new StringBuilder(match.length() + 16);
-                    } else {
-                        tmp.setLength(0);
-                    }
-                    mr.appendReplacement(sb, tmp.append("$1").append(match).append("$3").toString());
-                } else {
-                    // Additional HTML comments
-                    if (null == tmp) {
-                        tmp = new StringBuilder(match.length() + 16);
-                    } else {
-                        tmp.setLength(0);
-                    }
-                    mr.appendReplacement(sb, tmp.append("$1<!--\n").append(match).append("$3").toString());
-                }
-            } while (m.find());
-            mr.appendTail(sb);
-            return sb.toString();
-        }
-        return htmlContent;
-    }
-
     private static final Pattern PATTERN_XML_NS_DECLARATION = Pattern.compile("<\\?xml:namespace[^>]*>", Pattern.CASE_INSENSITIVE);
 
     private static String dropWeirdXmlNamespaceDeclarations(String htmlContent) {
@@ -2324,34 +2214,6 @@ public final class HtmlServiceImpl implements HtmlService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
-    }
-
-    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-    /**
-     * Turns array of bytes into string representing each byte as unsigned hex number.
-     *
-     * @param hash Array of bytes to convert to hex-string
-     * @return Generated hex string
-     */
-    private static String asHex(final byte[] hash) {
-        final int length = hash.length;
-        final char[] buf = new char[length << 1];
-        for (int i = 0, x = 0; i < length; i++) {
-            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
-            buf[x++] = HEX_CHARS[hash[i] & 0xf];
-        }
-        int pos = 0;
-        while (pos < buf.length && '0' == buf[pos]) {
-            pos++;
-        }
-        return new String(buf, pos, buf.length - pos);
-    }
-
-    private static final Pattern PAT_HEX_NBSP = Pattern.compile(Pattern.quote("&#160;"));
-
-    private static String replaceHexNbsp(final String validated) {
-        return PAT_HEX_NBSP.matcher(validated).replaceAll("&nbsp;");
     }
 
     // ----------------------------- JSoup stuff ----------------------------- //

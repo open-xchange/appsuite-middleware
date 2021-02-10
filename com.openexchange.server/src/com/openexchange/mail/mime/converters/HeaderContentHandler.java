@@ -101,7 +101,7 @@ class HeaderContentHandler implements ContentHandler {
      *
      * @param headers The header collection to fill
      */
-    protected HeaderContentHandler(final HeaderCollection headers) {
+    protected HeaderContentHandler(HeaderCollection headers) {
         super();
         this.headers = headers;
     }
@@ -135,7 +135,7 @@ class HeaderContentHandler implements ContentHandler {
     }
 
     @Override
-    public void field(final Field rawField) throws MimeException {
+    public void field(Field rawField) throws MimeException {
         if (active) {
             final String name = rawField.getName();
             if ("x-original-headers".equals(name)) {
@@ -157,17 +157,17 @@ class HeaderContentHandler implements ContentHandler {
     }
 
     @Override
-    public void preamble(final InputStream is) throws MimeException, IOException {
+    public void preamble(InputStream is) throws MimeException, IOException {
         // Ignore
     }
 
     @Override
-    public void epilogue(final InputStream is) throws MimeException, IOException {
+    public void epilogue(InputStream is) throws MimeException, IOException {
         // Ignore
     }
 
     @Override
-    public void startMultipart(final BodyDescriptor bd) throws MimeException {
+    public void startMultipart(BodyDescriptor bd) throws MimeException {
         // Ignore
     }
 
@@ -177,12 +177,12 @@ class HeaderContentHandler implements ContentHandler {
     }
 
     @Override
-    public void body(final BodyDescriptor bd, final InputStream is) throws MimeException, IOException {
+    public void body(BodyDescriptor bd, InputStream is) throws MimeException, IOException {
         // Ignore
     }
 
     @Override
-    public void raw(final InputStream is) throws MimeException, IOException {
+    public void raw(InputStream is) throws MimeException, IOException {
         // Ignore
     }
 

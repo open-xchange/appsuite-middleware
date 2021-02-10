@@ -72,11 +72,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class GetSchemaName extends ContextAbstraction {
 
     /**
-     * Initializes a new {@link GetSchemaName}.
+     * Executes the command
      *
      * @param args The CLI arguments
      */
-    public GetSchemaName(String[] args) {
+    public void execute(String[] args) {
         final AdminParser parser = new AdminParser("getschemaname");
         commonfunctions(parser, args);
     }
@@ -124,6 +124,6 @@ public class GetSchemaName extends ContextAbstraction {
     }
 
     public static void main(String[] args) {
-        new GetSchemaName(args);
+        new GetSchemaName().execute(args);
     }
 }

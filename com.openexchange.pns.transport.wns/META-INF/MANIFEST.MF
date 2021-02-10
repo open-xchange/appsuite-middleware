@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The WNS-backend transport for push notifications
 Bundle-SymbolicName: com.openexchange.pns.transport.wns
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
@@ -242,3 +242,4 @@ Export-Package: com.openexchange.pns.transport.wns
 Bundle-Activator: com.openexchange.pns.transport.wns.osgi.WnsPushNotificationTransportActivator
 Bundle-ClassPath: lib/java-wns-1.4.0.jar,
  .
+Automatic-Module-Name: com.openexchange.pns.transport.wns

@@ -207,9 +207,8 @@ public final class UserParser {
      *
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale}
-     * @throws OXException If locale string is invalid
      */
-    private static Locale parseLocaleString(final String localeStr) throws OXException {
+    private static Locale parseLocaleString(final String localeStr) {
         final Matcher match = identifierPattern.matcher(localeStr);
         Locale retval = null;
         if (match.matches()) {

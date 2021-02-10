@@ -364,7 +364,7 @@ public class AllowedAuthServId {
          * @param wildcardExpression The wild-card expression
          * @throws PatternSyntaxException If wild-card expression is invalid
          */
-        private RegExChecker(final String wildcardExpression) {
+        private RegExChecker(String wildcardExpression) {
             super();
             final Pattern pattern = Pattern.compile(Strings.wildcardToRegex(wildcardExpression));
             cache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).maximumSize(10000).build(new CacheLoader<String, Boolean>() {

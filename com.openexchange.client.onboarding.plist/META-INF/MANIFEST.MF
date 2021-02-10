@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The On-Boarding Bundle for composing plist profiles
 Bundle-SymbolicName: com.openexchange.client.onboarding.plist
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
@@ -41,6 +41,7 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.openexchange.notification.mail,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
+ com.openexchange.osgi.service.http,
  com.openexchange.osgi.util,
  com.openexchange.plist,
  com.openexchange.plist.xml,
@@ -174,3 +175,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
 Export-Package: com.openexchange.client.onboarding.plist
 Bundle-Activator: com.openexchange.client.onboarding.plist.osgi.OnboardingPlistActivator
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.client.onboarding.plist

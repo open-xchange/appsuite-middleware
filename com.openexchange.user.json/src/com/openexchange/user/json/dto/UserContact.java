@@ -296,7 +296,8 @@ public class UserContact {
     	final Comparator<User> userComparator = Comparators.getComparator(userField, sessionLocale, descending);
     	return new Comparator<UserContact>() {
 
-			@Override
+			@SuppressWarnings("synthetic-access")
+            @Override
 			public int compare(UserContact o1, UserContact o2) {
 				return userComparator.compare(o1.user, o2.user);
 			}

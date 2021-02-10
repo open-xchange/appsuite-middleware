@@ -59,7 +59,6 @@ import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.share.impl.rmi.ShareRMIService;
@@ -152,7 +151,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
 
     //////////////////////////// HELPERS ///////////////////////////
 
-    private Void removeShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException, MissingOptionException, OXException {
+    private Void removeShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException, MissingOptionException {
         ShareRMIService rmiService = getRmiStub(optRmiHostName, ShareRMIService.RMI_NAME);
         int result = 0;
         if (Strings.isNotEmpty(token)) {

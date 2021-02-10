@@ -88,6 +88,7 @@ import com.openexchange.tools.sql.SQLTestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 //TODO: Fix tests
+@SuppressWarnings("unused")
 public class OAuthServiceImplDBTest extends SQLTestCase {
 
     private OAuthServiceImpl oauth;
@@ -238,7 +239,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     }
 
     private OAuthAccount createTestAccount() throws OXException {
-        final Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
@@ -253,6 +254,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String getToken() {
                 return "requestToken";
             }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
+            }
 
         });
 
@@ -266,7 +272,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     @Test
     public void testDefaultDisplayName() throws OXException {
-        final Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
@@ -279,6 +285,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
             }
         });
 
@@ -356,7 +367,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         scopes.add(TestOAuthScope.calendar);
         scopes.add(TestOAuthScope.drive);
 
-        final Map<String, Object> update = new HashMap<String, Object>();
+        final Map<String, Object> update = new HashMap<>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         update.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
         update.put(OAuthConstants.ARGUMENT_SESSION, null);
@@ -378,7 +389,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     @Test
     public void testUnknownAccountMetadataOnCreate() {
-        final Map<String, Object> arguments = new HashMap<String, Object>();
+        final Map<String, Object> arguments = new HashMap<>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
         arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
@@ -392,6 +403,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+            
+            @Override
+            public long getExpiration() {
+                return Long.MAX_VALUE;
             }
         });
 
@@ -424,7 +440,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             scopes.add(TestOAuthScope.calendar);
             scopes.add(TestOAuthScope.drive);
 
-            final Map<String, Object> update = new HashMap<String, Object>();
+            final Map<String, Object> update = new HashMap<>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             update.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
             update.put(OAuthConstants.ARGUMENT_SESSION, null);

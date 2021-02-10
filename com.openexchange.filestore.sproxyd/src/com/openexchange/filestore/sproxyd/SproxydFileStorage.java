@@ -161,10 +161,11 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public long getFileSize(String name) throws OXException {
-        Chunk lastChunk = chunkStorage.getLastChunk(UUIDs.fromUnformattedString(name));
-        if (null == lastChunk) {
+        Optional<Chunk> optionalLastChunk = chunkStorage.getLastChunk(UUIDs.fromUnformattedString(name));
+        if (!optionalLastChunk.isPresent()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+        Chunk lastChunk = optionalLastChunk.get();
         return lastChunk.getOffset() + lastChunk.getLength();
     }
 
@@ -176,23 +177,25 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
-        List<Chunk> chunks = chunkStorage.optChunks(documentId);
-        if (null != chunks) {
-            int size = chunks.size();
-            if (0 >= size) {
-                // Apparently no such document exists; consider as deleted
-                return true;
-            }
+        Optional<List<Chunk>> optionalChunks = chunkStorage.optChunks(documentId);
+        if (!optionalChunks.isPresent()) {
+            return false;
+        }
 
-            List<UUID> scalityIds = new ArrayList<UUID>(size);
-            for (Chunk chunk : chunks) {
-                scalityIds.add(chunk.getScalityId());
-            }
-            client.delete(scalityIds);
-            chunkStorage.deleteDocument(documentId);
+        List<Chunk> chunks = optionalChunks.get();
+        int size = chunks.size();
+        if (0 >= size) {
+            // Apparently no such document exists; consider as deleted
             return true;
         }
-        return false;
+
+        List<UUID> scalityIds = new ArrayList<UUID>(size);
+        for (Chunk chunk : chunks) {
+            scalityIds.add(chunk.getScalityId());
+        }
+        client.delete(scalityIds);
+        chunkStorage.deleteDocument(documentId);
+        return true;
     }
 
     @Override
@@ -228,14 +231,17 @@ public class SproxydFileStorage implements FileStorage {
         File tmpFile = null;
         try {
             UUID documentId = UUIDs.fromUnformattedString(name);
-            Chunk lastChunk = chunkStorage.getLastChunk(documentId);
-            if (null == lastChunk) {
+            Optional<Chunk> optionalLastChunk = chunkStorage.getLastChunk(documentId);
+            if (!optionalLastChunk.isPresent()) {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(name);
             }
+
+            Chunk lastChunk = optionalLastChunk.get();
             long currentSize = lastChunk.getOffset() + lastChunk.getLength();
             if (offset != currentSize) {
                 throw FileStorageCodes.INVALID_OFFSET.create(L(offset), name, L(currentSize));
             }
+
             /*
              * spool to file
              */

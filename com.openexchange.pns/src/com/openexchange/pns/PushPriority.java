@@ -50,7 +50,7 @@
 package com.openexchange.pns;
 
 /**
- * {@link PushPriority}
+ * {@link PushPriority} - The priority with which a submitted notification is handled. The higher, the faster a notification is processed.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -60,25 +60,25 @@ public enum PushPriority {
     /**
      * The (default) "high" priority, which reduces the delays in buffers to a minimum.
      */
-    HIGH(1f),
+    HIGH(1),
     /**
      * The "medium" priority, which allows push notifications to be slightly delayed in buffering queues.
      */
-    MEDIUM(2f),
+    MEDIUM(2),
     /**
      * The "low" priority, which allows push notifications to be slightly more delayed in buffering queues.
      */
-    LOW(4f)
+    LOW(4)
     ;
 
-    private final float factor;
+    private final int factor;
 
     /**
      * Initializes a new {@link PushPriority}.
      *
      * @param factor The factor to apply to the default buffering delays
      */
-    private PushPriority(float factor) {
+    private PushPriority(int factor) {
         this.factor = factor;
     }
 
@@ -89,7 +89,7 @@ public enum PushPriority {
      * @return The (possibly adjusted) buffering delay
      */
     public long getDelay(long baseDelay) {
-        return (long) (factor * baseDelay);
+        return factor * baseDelay;
     }
 
 }

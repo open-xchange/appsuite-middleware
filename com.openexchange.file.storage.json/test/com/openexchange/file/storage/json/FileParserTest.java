@@ -71,15 +71,15 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
-
 /**
  * {@link FileParserTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileParserTest {
-         @Test
-     public void testParse() throws JSONException, OXException {
+
+    @Test
+    public void testParse() throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
@@ -111,7 +111,7 @@ public class FileParserTest {
         assertEquals("description", file.getDescription());
         assertEquals("12345", file.getFileMD5Sum());
         assertEquals("mime/type", file.getFileMIMEType());
-        assertEquals(1337l, file.getFileSize());
+        assertEquals(1337L, file.getFileSize());
         assertEquals("filename", file.getFileName());
         assertEquals("12", file.getFolderId());
         assertEquals("23", file.getId());
@@ -125,8 +125,8 @@ public class FileParserTest {
         assertEquals("This is the best version", file.getVersionComment());
     }
 
-         @Test
-     public void testFindFields() throws JSONException {
+    @Test
+    public void testFindFields() throws JSONException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
         object.put("color_label", 12);
@@ -140,8 +140,8 @@ public class FileParserTest {
 
         final List<File.Field> fields = FileMetadataParser.getInstance().getFields(object);
 
-        for(final File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
-            assertTrue("Missing field "+field, fields.contains(field));
+        for (final File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
+            assertTrue("Missing field " + field, fields.contains(field));
         }
     }
 }

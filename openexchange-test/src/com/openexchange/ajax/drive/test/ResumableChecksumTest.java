@@ -103,7 +103,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     private DriveApi driveApi;
     private String folderId;
     private String privateInfostoreFolder;
-    private List<String> folders = new ArrayList<>();
+    private final List<String> folders = new ArrayList<>();
 
     @Override
     public void setUp() throws Exception {
@@ -128,7 +128,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         try {
             if (!folders.isEmpty()) {
                 FoldersApi folderApi = new FoldersApi(getApiClient());
-                folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
+                folderApi.deleteFolders(folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
             }
         } finally {
             super.tearDown();
@@ -136,7 +136,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     }
 
     /**
-     * 
+     *
      * Uploads an empty byte array in three chunks, downloads the uploaded data,
      * and tests the total length and checksum of the data before and after the upload / download.
      *
@@ -167,7 +167,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), null, downloadBody);
         try (FileInputStream in = new FileInputStream(downloadFile)) {
             byte[] downloadArray = IOUtils.toByteArray(in);
             assertEquals(l(totalLength), downloadFile.length());
@@ -176,7 +176,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     }
 
     /**
-     * 
+     *
      * Uploads a byte array filled with random bytes in two chunks, downloads the uploaded data,
      * and tests the total length and checksum of the data before and after the upload/download.
      *
@@ -215,7 +215,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
          * downloading the file to assert that checksum and length are equal with the uploaded file
          */
         DriveDownloadBody downloadBody = new DriveDownloadBody();
-        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), downloadBody);
+        File downloadFile = driveApi.downloadFile(getApiClient().getSession(), folderId, "/", newName, newChecksum, null, L(0), L(-1), null, downloadBody);
         try (FileInputStream in = new FileInputStream(downloadFile)) {
             byte[] downloadArray = IOUtils.toByteArray(in);
             assertEquals(l(totalLength), downloadFile.length());
@@ -264,7 +264,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         folder.setSubscribed(Boolean.TRUE);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null, null, null);
+        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, body, "1", null, null, null);
         return checkResponse(folderUpdateResponse);
     }
 
@@ -275,7 +275,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     private String getPrivateInfostoreFolder() throws ApiException {
         if (null == privateInfostoreFolder) {
             ConfigApi configApi = new ConfigApi(getApiClient());
-            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
+            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath());
             Object data = checkResponse(configNode);
             if (data != null && !data.toString().equalsIgnoreCase("null")) {
                 privateInfostoreFolder = String.valueOf(data);

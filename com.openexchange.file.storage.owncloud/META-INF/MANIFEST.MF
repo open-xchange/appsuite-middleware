@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Owncloud
 Bundle-SymbolicName: com.openexchange.file.storage.owncloud
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.file.storage.nextcloud
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -35,6 +35,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tx,
  com.openexchange.webdav.client,
  com.openexchange.webdav.client.functions,
+ com.openexchange.xml.util,
  javax.xml.bind,
  javax.xml.namespace,
  javax.xml.parsers,

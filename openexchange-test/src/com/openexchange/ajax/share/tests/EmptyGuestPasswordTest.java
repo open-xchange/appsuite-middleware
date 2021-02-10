@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link EmptyGuestPasswordTest}
@@ -95,6 +96,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testEmptyPassword() throws Exception {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);

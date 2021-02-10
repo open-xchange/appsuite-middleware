@@ -46,10 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.group;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -89,7 +90,7 @@ public abstract class CreateCore extends GroupAbstraction {
 
             final String members = (String) parser.getOptionValue(this.addMemberOption);
             if (members != null) {
-                final Integer[] newMemberList = getMembers(parser, members);
+                final Integer[] newMemberList = getMembers(members);
                 if (newMemberList != null) {
                     grp.setMembers(newMemberList);
                 }
@@ -108,11 +109,11 @@ public abstract class CreateCore extends GroupAbstraction {
         }
     }
 
-    private Integer[] getMembers(final AdminParser parser, final String tmpmembers) {
+    private Integer[] getMembers(final String tmpmembers) {
         final String[] split = tmpmembers.split(",");
         final Integer[] memberList = new Integer[split.length];
         for (int i = 0; i < split.length; i++) {
-            memberList[i] = Integer.parseInt(split[i]);
+            memberList[i] = I(Integer.parseInt(split[i]));
         }
         return memberList;
     }

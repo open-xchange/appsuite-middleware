@@ -50,6 +50,7 @@
 package com.openexchange.version.internal;
 
 import java.util.Objects;
+import com.openexchange.version.ServerVersion;
 import com.openexchange.version.VersionService;
 
 /**
@@ -60,14 +61,19 @@ import com.openexchange.version.VersionService;
  */
 public class VersionServiceImpl implements VersionService {
 
-    private volatile Numbers numbers = null;
+    private volatile ServerVersion serverVersion = null;
     private volatile String buildDate = null;
-    private volatile String versionString = null;
 
-    public VersionServiceImpl(String buildDate, Numbers numbers) {
+    /**
+     * Initializes a new {@link VersionServiceImpl}.
+     * 
+     * @param buildDate The build date as {@link String}
+     * @param serverVersion The server version
+     */
+    public VersionServiceImpl(String buildDate, ServerVersion serverVersion) {
         Objects.requireNonNull(buildDate, "The buildDate must not be null");
-        Objects.requireNonNull(numbers, "The numbers must not be null");
-        this.numbers = numbers;
+        Objects.requireNonNull(serverVersion, "The numbers must not be null");
+        this.serverVersion = serverVersion;
         this.buildDate = buildDate;
     }
 
@@ -78,35 +84,22 @@ public class VersionServiceImpl implements VersionService {
 
     @Override
     public int getMajor() {
-        return numbers.getMajor();
+        return serverVersion.getMajor();
     }
 
     @Override
     public int getMinor() {
-        return numbers.getMinor();
+        return serverVersion.getMinor();
     }
 
     @Override
     public int getPatch() {
-        return numbers.getPatch();
+        return serverVersion.getPatch();
     }
 
     @Override
     public String getVersionString() {
-        String tmp = this.versionString;
-        if (null == tmp) {
-            // Acquire lock...
-            synchronized (this) {
-                // ... and try again
-                tmp = this.versionString;
-                if (null == tmp) {
-                    // Initialize version string
-                    tmp = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
-                    this.versionString = tmp;
-                }
-            }
-        }
-        return tmp;
+        return serverVersion.getVersionString();
     }
 
 }

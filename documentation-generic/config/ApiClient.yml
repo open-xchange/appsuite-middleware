@@ -1,0 +1,27 @@
+feature_name: HTTP API Client
+feature_description: |
+  Properties relating to the HTTP API client used within the server to access remote content
+  provided by another Open Xchange server.
+properties:
+    - key: com.openexchange.api.client.blacklistedHosts
+      description: |
+        Defines hosts that are blacklisted which means that they are not allowed to be accessed.
+      defaultValue: 127.0.0.1-127.255.255.255,localhost
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-core
+      tags: ["HTTP client", "API Client", "Black list"]
+    - key: com.openexchange.api.client.allowedPorts
+      description: |
+        Defines ports that are allowed to access.
+      defaultValue:
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: 
+      packageName: open-xchange-core
+      tags: ["HTTP client", "API Client"]

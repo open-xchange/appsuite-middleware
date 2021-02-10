@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link ParsedFolder} - A parsed folder.
@@ -135,6 +136,10 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
     UsedForSync usedForSync;
     
     protected boolean containsUsedForSync = false;
+
+    protected EntityInfo createdFrom;
+
+    protected EntityInfo modifiedFrom;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -529,6 +534,26 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
     @Override
     public boolean containsUsedForSync() {
         return containsUsedForSync;
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
     }
     
 }

@@ -98,7 +98,7 @@ public final class IMAPProtocol extends Protocol {
      *
      * @param maxCount The max. count
      */
-    public void setMaxCount(final int maxCount) {
+    public void setMaxCount(int maxCount) {
         this.maxCount = Integer.valueOf(maxCount);
     }
 
@@ -107,7 +107,7 @@ public final class IMAPProtocol extends Protocol {
      *
      * @param overallMaxCount The max. count
      */
-    public void setOverallExternalMaxCount(final int overallMaxCount) {
+    public void setOverallExternalMaxCount(int overallMaxCount) {
         map = null;
         this.overallExternalMaxCount = Integer.valueOf(overallMaxCount);
     }
@@ -127,7 +127,7 @@ public final class IMAPProtocol extends Protocol {
      * @param maxCount The max-count
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
      */
-    public boolean putIfAbsent(final String host, final int maxCount) {
+    public boolean putIfAbsent(String host, int maxCount) {
         final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
         if (null == concurrentMap) {
             return false;
@@ -145,7 +145,7 @@ public final class IMAPProtocol extends Protocol {
      *
      * @param host The mail system's host name
      */
-    public void remove(final String host) {
+    public void remove(String host) {
         final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
         if (null == concurrentMap) {
             return;
@@ -158,7 +158,7 @@ public final class IMAPProtocol extends Protocol {
     }
 
     @Override
-    public int getMaxCount(final String host, final boolean primary) throws OXException {
+    public int getMaxCount(String host, boolean primary) throws OXException {
         final Integer thisMaxCount = maxCount;
         if (primary) {
             return null == thisMaxCount ? -1 : thisMaxCount.intValue();
@@ -180,7 +180,7 @@ public final class IMAPProtocol extends Protocol {
         }
     }
 
-    private static int minOf(final int maxCount, final Integer thisMaxCount) {
+    private static int minOf(int maxCount, Integer thisMaxCount) {
         if (null == thisMaxCount) {
             return maxCount;
         }

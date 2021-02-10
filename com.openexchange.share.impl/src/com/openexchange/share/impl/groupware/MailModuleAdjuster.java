@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
@@ -93,7 +94,7 @@ public class MailModuleAdjuster implements ModuleAdjuster {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId, Connection connection) throws OXException {
         if (null != session && session.getUserId() == targetUserId) {
             return target; // same account
         }
@@ -137,7 +138,7 @@ public class MailModuleAdjuster implements ModuleAdjuster {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId, Connection connection) throws OXException {
         if (requestUserId == targetUserId) {
             return target; // same account
         }

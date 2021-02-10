@@ -64,36 +64,31 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
 
-    /** Error communicating with mbean in server: %s */
-    COMMUNICATION_PROBLEM(ConsistencyExceptionCodes.COMMUNICATION_PROBLEM_MSG, CATEGORY_ERROR, 1),
-
-    /** Registration of consistency MBean failed. */
-    REGISTRATION_FAILED(ConsistencyExceptionCodes.REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
-
-    /** Unregistration of consistency MBean failed. */
-    UNREGISTRATION_FAILED(ConsistencyExceptionCodes.UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
-
-    /** User entered malformed policy string. */
-    MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY),
-
-    /** Unknown/Unsupported policy */
-    UNKNOWN_POLICY(ConsistencyExceptionCodes.UNKNOWN_POLICY_MSG, CATEGORY_USER_INPUT, 5, UNKNOWN_POLICY_MSG_DISPLAY),
-
+    /**
+     * Error communicating with mbean in server: %s
+     */
+    COMMUNICATION_PROBLEM("Error communicating with mbean in server: %s", CATEGORY_ERROR, 1),
+    /**
+     * Registration of consistency MBean failed.
+     */
+    REGISTRATION_FAILED("Registration of consistency MBean failed.", CATEGORY_CONFIGURATION, 2),
+    /**
+     * Unregistration of consistency MBean failed.
+     */
+    UNREGISTRATION_FAILED("Unregistration of consistency MBean failed.", CATEGORY_CONFIGURATION, 3),
+    /**
+     * Incorrectly formatted policy. Policies are formatted like "condition:action"
+     */
+    MALFORMED_POLICY("Incorrectly formatted policy. Policies are formatted like \"condition:action\"", CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY),
+    /**
+     * Unknown/Unsupported policy
+     */
+    UNKNOWN_POLICY("Unknown policy %s.", CATEGORY_USER_INPUT, 5, UNKNOWN_POLICY_MSG_DISPLAY),
     /**
      * <li>An SQL error occurred: %1$s</li>
      */
     SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 5),
     ;
-
-    private static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
-
-    private static final String UNKNOWN_POLICY_MSG = "Unknown policy %s.";
-
-    private static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
-
-    private static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
-
-    private static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
 
     private final String message;
     private final Category category;
@@ -106,7 +101,7 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ConsistencyExceptionCodes}.
-     * 
+     *
      * @param message
      * @param category
      * @param number
@@ -117,7 +112,7 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link ConsistencyExceptionCodes}.
-     * 
+     *
      * @param message
      * @param category
      * @param number
@@ -166,7 +161,7 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

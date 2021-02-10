@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
@@ -71,10 +72,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
@@ -85,9 +88,11 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.OAuthMailErrorCodes;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailActionConstants;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -110,7 +115,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    protected static final String MODULE = "mail";
+    protected static final String MODULE = MailActionFactory.MODULE;
 
     private static final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
 
@@ -143,7 +148,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Initializes a new {@link AbstractMailAction}.
      */
-    protected AbstractMailAction(final ServiceLookup services) {
+    protected AbstractMailAction(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -159,7 +164,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
-    protected <S> S getService(final Class<? extends S> clazz) {
+    protected <S> S getService(Class<? extends S> clazz) {
         return services.getService(clazz);
     }
 
@@ -242,9 +247,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param mailRequest The mail request
      * @return The closeables or <code>null</code> if state is absent
-     * @throws OXException If closebales cannot be returned
      */
-    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) throws OXException {
+    protected Collection<Closeable> getCloseables(MailRequest mailRequest) {
         final AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
             return null;
@@ -261,7 +265,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
@@ -283,6 +287,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             //Bug 42565
             if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(I(404), e.getMessage());
+            }
+            if (OAuthMailErrorCodes.NO_ACCOUNT_ACCESS.equals(e)) {
+                Optional<Integer> optStatus = OAuthMailErrorCodes.getHttpStatus(e);
+                if (optStatus.isPresent()) {
+                    throw AjaxExceptionCodes.HTTP_ERROR.create(optStatus.get(), e.getMessage());
+                }
             }
             throw e;
         } finally {
@@ -314,7 +324,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param ignoreDeleted <code>true</code> to ignore \Deleted ones that are \Seen; otherwise <code>false</code>
      * @return <code>true</code> if mail should be discarded according to filter flags; otherwise <code>false</code>
      */
-    protected static boolean discardMail(final MailMessage m, final boolean ignoreSeen, final boolean ignoreDeleted) {
+    protected static boolean discardMail(MailMessage m, boolean ignoreSeen, boolean ignoreDeleted) {
         if (null == m) {
             return true;
         }
@@ -376,7 +386,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param usm The user mail settings
      * @return The display mode
      */
-    public static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usm) {
+    public static DisplayMode detectDisplayMode(boolean modifyable, String view, UserSettingMail usm) {
         final DisplayMode displayMode;
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
@@ -433,23 +443,15 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @return The account identifier
      * @throws OXException If address cannot be resolved
      */
-    protected static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
+    protected static int resolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport, boolean checkFrom) throws OXException {
         return MimeMessageFiller.resolveFrom2Account(session, from, checkTransportSupport, checkFrom);
     }
 
-    protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
+    protected static String getDefaultSendAddress(ServerSession session) {
         return session.getUserSettingMail().getSendAddr();
-        /*-
-         *
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
-        return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
-         *
-         */
     }
 
-    protected static boolean isEmpty(final String string) {
+    protected static boolean isEmpty(String string) {
         return com.openexchange.java.Strings.isEmpty(string);
     }
 
@@ -557,15 +559,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (false == antiVirusService.isEnabled(request.getSession())) {
             return;
         }
+        AntiVirusEncapsulatedContent content = encapsulateContent(request);
         if (sequenceIds == null) {
             for (MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
-                scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+                scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService, content);
             }
             return;
         }
         for (String sequenceId : sequenceIds) {
             MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-            scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+            scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService, content);
         }
     }
 
@@ -593,8 +596,18 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (false == antiVirusService.isEnabled(request.getSession())) {
             return;
         }
-        AntiVirusResult result = antiVirusService.scan(fileHolder, mailId);
+        AntiVirusResult result = antiVirusService.scan(fileHolder, mailId, encapsulateContent(request));
         services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
+    }
+    
+    /**
+     * Encapsulates the HTTP content from the specified request
+     *
+     * @param request The request
+     * @return The content
+     */
+    private AntiVirusEncapsulatedContent encapsulateContent(MailRequest request) {
+        return AntiVirusEncapsulationUtil.encapsulate(request.getRequest().optHttpServletRequest(), request.getRequest().optHttpServletResponse());
     }
 
     /**
@@ -604,11 +617,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param mailId The unique mail identifier
      * @param contentSize The content size of the mail part
      * @param antiVirusService The anti virus service
+     * @param content The encapsulated content
      * @throws OXException if the mail part is too large, or if the {@link AntiVirusService} is absent,
      *             or if the mail part is infected, or if a timeout or any other error is occurred
      */
-    private void scan(MailPart mailPart, String mailId, long contentSize, AntiVirusService antiVirusService) throws OXException {
-        AntiVirusResult result = antiVirusService.scan(() -> mailPart.getInputStream(), mailId, contentSize);
+    private void scan(MailPart mailPart, String mailId, long contentSize, AntiVirusService antiVirusService, AntiVirusEncapsulatedContent content) throws OXException {
+        AntiVirusResult result = antiVirusService.scan(() -> mailPart.getInputStream(), mailId, contentSize, content);
         String filename = mailPart.getFileName();
         if (Strings.isEmpty(filename)) {
             List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());

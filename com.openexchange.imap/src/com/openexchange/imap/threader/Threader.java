@@ -115,14 +115,14 @@ public class Threader {
      *
      * @param threadableRoot The start of the list.
      */
-    public Threadable thread(final Threadable threadableRoot) {
+    public Threadable thread(Threadable threadableRoot) {
         if (threadableRoot == null) {
             return null;
         }
 
         idMap = new HashMap<String, ThreadContainer>();
 
-        for (final Enumeration<Threadable> e = threadableRoot.allElements(); e.hasMoreElements();) {
+        for (Enumeration<Threadable> e = threadableRoot.allElements(); e.hasMoreElements();) {
             final Threadable t = e.nextElement();
             if (!t.isDummy()) {
                 buildContainer(t);
@@ -174,7 +174,7 @@ public class Threader {
      *
      * @param threadable The {@code Threadable} instance to build container for
      */
-    private void buildContainer(final Threadable threadable) {
+    private void buildContainer(Threadable threadable) {
         String id = threadable.messageID();
         ThreadContainer container = idMap.get(id);
 
@@ -296,7 +296,7 @@ public class Threader {
     private ThreadContainer findRootSet() {
         final ThreadContainer root = new ThreadContainer();
         // root.debug_id = "((root))";
-        for (final ThreadContainer c : idMap.values()) {
+        for (ThreadContainer c : idMap.values()) {
             if (c.parent == null) {
                 if (c.next != null) {
                     throw new RuntimeException("c.next is " + c.next.toString());
@@ -315,7 +315,7 @@ public class Threader {
      *
      * @param parent The parent container
      */
-    private void pruneEmptyContainers(final ThreadContainer parent) {
+    private void pruneEmptyContainers(ThreadContainer parent) {
         ThreadContainer container, prev, next;
         for (prev = null, container = parent.child, next = container.next; container != null; prev = container, container = next, next =
             (container == null ? null : container.next)) {
@@ -408,6 +408,7 @@ public class Threader {
      * <p>
      * This is so that messages which don't have <code>References</code> headers at all still get threaded (to the extent possible, at least.)
      */
+    @SuppressWarnings("null")
     private void gatherSubjects() {
         int count = 0;
         for (ThreadContainer c = rootNode.child; c != null; c = c.next) {

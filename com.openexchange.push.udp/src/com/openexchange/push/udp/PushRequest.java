@@ -333,10 +333,6 @@ public class PushRequest {
         return s[pos];
     }
 
-    private boolean parseBoolean(final String[] s, final int pos) {
-        return Boolean.parseBoolean(parseString(s, pos));
-    }
-
     private int[] convertString2UserIDArray(final String s) throws OXException {
         final String tmp[] = Strings.splitByComma(s);
         final int i[] = new int[tmp.length];

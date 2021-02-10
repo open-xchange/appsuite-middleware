@@ -109,7 +109,6 @@ public class UIDSet {
 	    return null;
 	List<UIDSet> v = new ArrayList<>();
 	StringTokenizer st = new StringTokenizer(uids, ",:", true);
-	long start = -1;
 	UIDSet cur = null;
 	try {
 	    while (st.hasMoreTokens()) {

@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
@@ -58,6 +59,7 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacades;
@@ -138,7 +140,7 @@ public final class EffectivePermission implements Permission {
     private Permission underlyingPerm;
 
     /**
-     * The entity identifier.
+     * The overridden entity identifier.
      */
     private int entityId;
 
@@ -186,7 +188,7 @@ public final class EffectivePermission implements Permission {
      * @return This effective permission with information applied
      */
     public EffectivePermission setEntityInfo(final int entityId, final Context context) {
-        setEntity(entityId);
+        this.entityId = entityId;
         this.context = context;
         return this;
     }
@@ -214,6 +216,9 @@ public final class EffectivePermission implements Permission {
             return false;
         }
         if (getDeletePermission() != other.getDeletePermission()) {
+            return false;
+        }
+        if (false == Objects.equals(getIdentifier(), other.getIdentifier())) {
             return false;
         }
         if (getEntity() != other.getEntity()) {
@@ -296,8 +301,18 @@ public final class EffectivePermission implements Permission {
     }
 
     @Override
+    public String getIdentifier() {
+        return entityId <= 0 ? underlyingPerm.getIdentifier() : String.valueOf(entityId);
+    }
+
+    @Override
     public int getEntity() {
         return entityId <= 0 ? underlyingPerm.getEntity() : entityId;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return entityId <= 0 ? underlyingPerm.getEntityInfo() : null;
     }
 
     @Override
@@ -396,8 +411,18 @@ public final class EffectivePermission implements Permission {
     }
 
     @Override
+    public void setIdentifier(String identifier) {
+        throw new UnsupportedOperationException("EffectivePermission.setIdentifier()");
+    }
+
+    @Override
     public void setEntity(final int entity) {
-        this.entityId = entity;
+        throw new UnsupportedOperationException("EffectivePermission.setEntity()");
+    }
+
+    @Override
+    public void setEntityInfo(EntityInfo entityInfo) {
+        throw new UnsupportedOperationException("EffectivePermission.setEntityInfo()");
     }
 
     @Override

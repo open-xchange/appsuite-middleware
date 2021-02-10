@@ -62,6 +62,8 @@ import com.openexchange.session.Session;
  */
 public class ComplexDisplayItem implements DisplayItem {
 
+    private static final long serialVersionUID = -1049783444161691882L;
+    
     private final String displayName;
     private final String detail;
     private Contact contact;

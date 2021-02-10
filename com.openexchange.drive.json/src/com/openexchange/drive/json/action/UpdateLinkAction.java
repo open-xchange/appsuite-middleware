@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.action;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,6 +91,9 @@ public class UpdateLinkAction extends AbstractDriveWriteAction {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
                 linkUpdate.setPassword(newPassword);
             }
+            if (json.has("includeSubfolders")) {
+                linkUpdate.setIncludeSubfolders(json.optBoolean("includeSubfolders"));
+            }
             shareLink = getDriveService().getUtility().updateLink(session, target, linkUpdate);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
@@ -106,6 +110,7 @@ public class UpdateLinkAction extends AbstractDriveWriteAction {
                 jsonResult.put("expiry_date", expiryDate.getTime());
             }
             jsonResult.putOpt("password", shareLink.getGuest().getPassword());
+            jsonResult.putOpt("includeSubfolders", B(shareLink.isIncludeSubfolders()));
             jsonResult.put("checksum", shareLink.getTarget().getChecksum());
             return new AJAXRequestResult(jsonResult, "json");
         } catch (JSONException e) {

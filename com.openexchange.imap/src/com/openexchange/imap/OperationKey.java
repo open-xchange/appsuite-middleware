@@ -104,7 +104,7 @@ public final class OperationKey implements Serializable {
     /**
      * Initializes a new {@link OperationKey}.
      */
-    public OperationKey(final Type type, final int accountId, final Object... objects) {
+    public OperationKey(Type type, int accountId, Object... objects) {
         super();
         this.type = type;
         this.accountId = accountId;
@@ -124,7 +124,7 @@ public final class OperationKey implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -170,7 +170,7 @@ public final class OperationKey implements Serializable {
 
             @SuppressWarnings("synthetic-access")
             @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
+            public void reloadConfiguration(ConfigurationService configService) {
                 synchronizeWriteAccesses = null;
             }
 
@@ -189,7 +189,7 @@ public final class OperationKey implements Serializable {
      * @param key The operation to unmark
      * @param session The associated session
      */
-    public static void unsetMarker(final OperationKey key, final Session session) {
+    public static void unsetMarker(OperationKey key, Session session) {
         @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
         if (null != map) {
             map.remove(key);
@@ -205,7 +205,7 @@ public final class OperationKey implements Serializable {
      *         not been releases in time
      */
     @SuppressWarnings("unchecked")
-    public static int setMarker(final OperationKey key, final Session session) {
+    public static int setMarker(OperationKey key, Session session) {
         if (!synchronizeWriteAccesses()) {
             return 0; // zero -- do not care
         }

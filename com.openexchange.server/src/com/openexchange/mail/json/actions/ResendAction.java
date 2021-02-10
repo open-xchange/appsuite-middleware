@@ -59,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -85,19 +85,17 @@ import com.openexchange.tools.session.ServerSession;
 @RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class ResendAction extends AbstractMailAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResendAction.class);
-
     /**
      * Initializes a new {@link ResendAction}.
      *
      * @param services
      */
-    public ResendAction(final ServiceLookup services) {
+    public ResendAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return new AJAXRequestResult(performBounce(req, req.checkParameter(AJAXServlet.PARAMETER_FOLDERID), req.checkParameter(AJAXServlet.PARAMETER_ID)), "mail");
@@ -111,7 +109,7 @@ public final class ResendAction extends AbstractMailAction {
         return new AJAXRequestResult(ret, "mail");
     }
 
-    private MailMessage performBounce(final MailRequest req, final String folderPath, final String uid) throws OXException {
+    private MailMessage performBounce(MailRequest req, String folderPath, String uid) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -162,7 +160,7 @@ public final class ResendAction extends AbstractMailAction {
                     try {
                         mm.setHeader("X-Ignore", "Ignore");
                         mm.removeHeader("X-Ignore");
-                    } catch (javax.mail.IllegalWriteException e) {
+                    } catch (@SuppressWarnings("unused") javax.mail.IllegalWriteException e) {
                         readOnly = true;
                     } catch (javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);

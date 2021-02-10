@@ -222,29 +222,45 @@ public final class JSONInputStream extends InputStream {
                 return str;
             }
 
-            if (0 == str.length() || isAscii(str)) {
-                return replaceSupplementaryCodePoints(str);
+            if (0 == str.length()) {
+                return str;
             }
 
             String s = replaceSupplementaryCodePoints(str);
             int length = s.length();
-            StringBuilder sa = new StringBuilder((length * 3) / 2 + 1);
+            StringBuilder sb = null;
             for (int i = 0; i < length; i++) {
                 char c = s.charAt(i);
-                if ((c > 127) || (c < 32) || ('"' == c)) {
+                if ((c > 127) || (c < 32)) {
+                    if (sb == null) {
+                        sb = new StringBuilder(length + (length >> 1));
+                        if (i > 0) {
+                            sb.append(s, 0, i);
+                        }
+                    }
                     if (Character.isSupplementaryCodePoint(c)) {
                         char[] chars = Character.toChars(c);
                         for (int j = 0; j < chars.length; j++) {
-                            appendAsJsonUnicode(chars[j], sa);
+                            appendAsJsonUnicode(chars[j], sb);
                         }
                     } else {
-                        appendAsJsonUnicode(c, sa);
+                        appendAsJsonUnicode(c, sb);
                     }
+                } else if ('\\' == c || '"' == c) {
+                    if (sb == null) {
+                        sb = new StringBuilder(length + (length >> 1));
+                        if (i > 0) {
+                            sb.append(s, 0, i);
+                        }
+                    }
+                    sb.append('\\').append(c);
                 } else {
-                    sa.append(c);
+                    if (sb != null) {
+                        sb.append(c);
+                    }
                 }
             }
-            return sa.toString();
+            return sb == null ? s : sb.toString();
         }
 
         private void appendAsJsonUnicode(final int ch, final StringBuilder sa) {
@@ -254,15 +270,6 @@ public final class JSONInputStream extends InputStream {
                 sa.append('0');
             }
             sa.append(hex);
-        }
-
-        private boolean isAscii(final String s) {
-            boolean isAscci = true;
-            for (int i = 0, length = s.length(); isAscci && (i < length); i++) {
-                final char c = s.charAt(i);
-                isAscci = (c < 128) && (c > 31) && (c != '"');
-            }
-            return isAscci;
         }
 
         private String replaceSupplementaryCodePoints(final String str) {

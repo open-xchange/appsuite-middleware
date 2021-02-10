@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CryptoUtility;
 import com.openexchange.mail.compose.Message;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;

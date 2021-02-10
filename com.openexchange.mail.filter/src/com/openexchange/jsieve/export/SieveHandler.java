@@ -99,7 +99,6 @@ import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
-import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -138,27 +137,16 @@ public class SieveHandler {
      * The SIEVE AUTHENTICATE.
      */
     private final static String SIEVE_AUTH = "AUTHENTICATE ";
-
     private final static String SIEVE_AUTH_FAILED = "NO \"Authentication Error\"";
-
     private final static String SIEVE_AUTH_LOGIN_USERNAME = "{12}" + CRLF + "VXNlcm5hbWU6";
-
     private final static String SIEVE_AUTH_LOGIN_PASSWORD = "{12}" + CRLF + "UGFzc3dvcmQ6";
-
     private final static String SIEVE_PUT = "PUTSCRIPT ";
-
     private final static String SIEVE_ACTIVE = "SETACTIVE ";
-
     private final static String SIEVE_DEACTIVE = "SETACTIVE \"\"" + CRLF;
-
     private final static String SIEVE_DELETE = "DELETESCRIPT ";
-
     private final static String SIEVE_LIST = "LISTSCRIPTS" + CRLF;
-
     private final static String SIEVE_CAPABILITY = "CAPABILITY" + CRLF;
-
     private final static String SIEVE_GET_SCRIPT = "GETSCRIPT ";
-
     private final static String SIEVE_LOGOUT = "LOGOUT" + CRLF;
 
     private static final int UNDEFINED = -1;
@@ -555,7 +543,7 @@ public class SieveHandler {
             } catch (CircuitBreakerOpenException e) {
                 // Circuit breaker is open
                 circuitBreakerInfo.incrementDenials();
-                throw new IOException("Denied connect attempt to SIEVE server since circuit breaker is open.");
+                throw new IOException("Denied connect attempt to SIEVE server since circuit breaker is open.", e);
             } catch (FailsafeException e) {
                 // Runnable failed with a checked exception
                 Throwable failure = e.getCause();
@@ -1042,7 +1030,7 @@ public class SieveHandler {
             // end if it occurs. We want a list of the script names only
             final String scriptname = temp.substring(temp.indexOf('\"') + 1, temp.lastIndexOf('\"'));
             if (list == null) {
-                list = new ArrayList<String>();
+                list = new ArrayList<>();
             }
             list.add(scriptname);
         }
@@ -1171,7 +1159,7 @@ public class SieveHandler {
 
             boolean active = temp.endsWith(" ACTIVE");
             if (scrips == null) {
-                scrips = new ArrayList<SieveScript>(4);
+                scrips = new ArrayList<>(4);
             }
             scrips.add(new SieveScript(scriptName, active));
         }
@@ -1342,7 +1330,7 @@ public class SieveHandler {
     private boolean authGSSAPI() throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String authname = getRightEncodedString(sieve_auth, "authname");
 
-        final HashMap<String, String> saslProps = new HashMap<String, String>();
+        final HashMap<String, String> saslProps = new HashMap<>();
 
         // Mutual authentication
         saslProps.put("javax.security.sasl.server.authentication", "true");
@@ -1546,7 +1534,7 @@ public class SieveHandler {
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
      *
-     * @param multiline TODO
+     * @param multiline The multiline response
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
@@ -1712,7 +1700,7 @@ public class SieveHandler {
         WelcomeKeyword keyword;
         try {
             keyword = WelcomeKeyword.valueOf(token);
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             log.debug("Unknown keyword '{}'", token);
             capa.addExtendedProperty(token, Strings.unquote(value));
             return;
@@ -1979,7 +1967,7 @@ public class SieveHandler {
                 try {
                     hostAddress = InetAddress.getByName(sieveHandler.sieve_host).getHostAddress();
                     host = hostAddress + ':' + sieveHandler.sieve_host_port;
-                } catch (UnknownHostException e) {
+                } catch (@SuppressWarnings("unused") UnknownHostException e) {
                     // ignore;
                 }
             }
@@ -1998,6 +1986,13 @@ public class SieveHandler {
             return !measureRead();
         }
 
+        /**
+         * Updates the request timer
+         *
+         * @param duration The duration
+         * @param timeUnit The time unit
+         * @param status The status
+         */
         public void updateRequestTimer(long duration, TimeUnit timeUnit, String status) {
             Timer.builder("appsuite.mailfilter.commands")
             .description("Mail filter commands per host")

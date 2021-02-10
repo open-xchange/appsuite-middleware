@@ -97,5 +97,7 @@ public interface FileFieldSwitcher {
     Object mediaMeta(Object... args);
     Object mediaStatus(Object[] args);
     Object mediaDate(Object[] args);
+    Object created_from(Object...args);
+    Object modified_from(Object...args);
 
 }

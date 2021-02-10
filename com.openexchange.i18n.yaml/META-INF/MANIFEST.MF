@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The i18n bundle for YAML files
 Bundle-SymbolicName: com.openexchange.i18n.yaml
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
@@ -32,3 +32,4 @@ Export-Package: com.openexchange.i18n.yaml,
 Bundle-Activator: com.openexchange.i18n.yaml.osgi.I18NYamlParserActivator
 Bundle-ClassPath: .,
  lib/jgettext-0.14.jar
+Automatic-Module-Name: com.openexchange.i18n.yaml

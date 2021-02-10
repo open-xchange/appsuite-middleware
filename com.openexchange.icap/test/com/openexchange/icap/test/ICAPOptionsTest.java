@@ -50,14 +50,12 @@
 package com.openexchange.icap.test;
 
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Date;
 import java.util.UUID;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
 import com.openexchange.icap.ICAPRequest;
 import com.openexchange.icap.ICAPResponse;
 import com.openexchange.icap.header.OptionsICAPResponseHeader;
@@ -83,7 +81,7 @@ public class ICAPOptionsTest extends AbstractICAPTest {
      * Tests the regular options response
      */
     @Test
-    public void testOptions() throws OXException, IOException {
+    public void testOptions() {
         ICAPResponse.Builder responseBuilder = new ICAPResponse.Builder();
         responseBuilder.withStatusLine("ICAP/1.0 200 OK");
         responseBuilder.withStatusCode(200);

@@ -93,7 +93,7 @@ public class AttachmentResource extends DAVResource {
         if (false == exists() || null == attachment || null == attachment.getCreationDate()) {
             return "";
         }
-        return "http://www.open-xchange.com/etags/" + attachment.getId() + "-" + attachment.getCreationDate().getTime();
+        return String.format("%d-%d-%d", Integer.valueOf(getFactory().getSession().getContextId()), Integer.valueOf(attachment.getId()), Long.valueOf(attachment.getCreationDate().getTime()));
     }
 
     @Override

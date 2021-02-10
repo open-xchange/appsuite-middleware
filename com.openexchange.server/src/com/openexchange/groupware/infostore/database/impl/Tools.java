@@ -286,30 +286,44 @@ public class Tools {
      * @return The effective permissions of all resulting folders, mapped to the corresponding folder identifiers
      */
     private static Map<Integer, EffectiveInfostoreFolderPermission> gatherVisibleFolders(InfostoreSecurity security, Connection connection, Context context, User user, UserPermissionBits userPermissions, int rootFolderID, boolean ignoreTrash, Collection<Integer> all, Collection<Integer> own) throws OXException {
-        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
         /*
-         * gather all visible folders below the root folder and check their permissions
+         * gather all visible infostore folders
          */
+        Map<Integer, FolderObject> foldersById = new HashMap<Integer, FolderObject>();
         SearchIterator<FolderObject> searchIterator = null;
         try {
-            searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(rootFolderID, user.getId(), user.getGroups(), context, userPermissions, null, connection);
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                user.getId(), user.getGroups(), userPermissions.getAccessibleModules(), FolderObject.INFOSTORE, context, connection);
             while (searchIterator.hasNext()) {
                 FolderObject folder = searchIterator.next();
                 if (ignoreTrash && FolderObject.TRASH == folder.getType()) {
                     continue;
                 }
-                EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userPermissions);
-                EffectiveInfostoreFolderPermission infostorePermission = new EffectiveInfostoreFolderPermission(permission, folder.getCreatedBy());
-                trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
-                /*
-                 * gather visible subfolders recursively
-                 */
-                permissionsByFolderID.putAll(gatherVisibleFolders(security, connection, context, user, userPermissions, folder.getObjectID(), ignoreTrash, all, own));
+                foldersById.put(I(folder.getObjectID()), folder);
             }
         } finally {
             SearchIterators.close(searchIterator);
         }
+        /*
+         * check & track effective permission of each visible folder if in subtree below parent
+         */
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
+        for (FolderObject folder : foldersById.values()) {
+            if (isBelow(rootFolderID, folder.getObjectID(), foldersById)) {
+                EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+                EffectiveInfostoreFolderPermission infostorePermission = new EffectiveInfostoreFolderPermission(permission, folder.getCreatedBy());
+                trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
+            }
+        }
         return permissionsByFolderID;
+    }
+
+    private static boolean isBelow(int parentFolderId, int folderId, Map<Integer, FolderObject> foldersById) {
+        FolderObject folder = foldersById.get(I(folderId));
+        if (null == folder || FolderObject.SYSTEM_ROOT_FOLDER_ID == folder.getObjectID()) {
+            return false;
+        }
+        return folder.getParentFolderID() == parentFolderId || isBelow(parentFolderId, folder.getParentFolderID(), foldersById);
     }
 
     /**
@@ -423,7 +437,7 @@ public class Tools {
             trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
             boolean ignoreTrash = FolderObject.TRASH != rootFolder.getType();
             /*
-             * gather permissions of subfolders recursively
+             * gather permissions of visible subfolders
              */
             permissionsByFolderID.putAll(gatherVisibleFolders(
                 security, connection, session.getContext(), session.getUser(), session.getUserPermissionBits(), rootFolderID, ignoreTrash, all, own));

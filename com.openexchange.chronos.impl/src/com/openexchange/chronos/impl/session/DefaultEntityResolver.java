@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.session;
 
-import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.optEMailAddress;
@@ -68,10 +67,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.EntityResolver;
@@ -166,7 +167,19 @@ public class DefaultEntityResolver implements EntityResolver {
         }
         return attendees;
     }
-    
+
+    @Override
+    public Attendee prepare(Attendee attendee, boolean resolveResourceIds) throws OXException {
+        if (null != attendee) {
+            /*
+             * copy attendee, then try and resolve external calendar user address to internal calendar user & enhance with static properties
+             */
+            Attendee attendeeCopy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+            return applyEntityData(resolveExternals(attendeeCopy, attendeeCopy.getCuType(), resolveResourceIds, null));
+        }
+        return attendee;
+    }
+
     @Override
     public List<Attendee> prepare(List<Attendee> attendees, int[] resolvableEntities) throws OXException {
         if (null != attendees) {
@@ -508,7 +521,7 @@ public class DefaultEntityResolver implements EntityResolver {
      *
      * @param id The identifier of the folder to get
      * @return The folder
-     * @throws OXException 
+     * @throws OXException
      */
     public FolderObject getFolder(int id) throws OXException {
         return getFolder(id, null);
@@ -520,7 +533,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param id The identifier of the folder to get
      * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
      * @return The folder
-     * @throws OXException 
+     * @throws OXException
      */
     public FolderObject getFolder(int id, Connection optConnection) throws OXException {
         Integer iD = I(id);
@@ -537,7 +550,7 @@ public class DefaultEntityResolver implements EntityResolver {
      *
      * @param id The identifier of the folder to get
      * @return The folder, or <code>null</code> it doesn't exist
-     * @throws OXException 
+     * @throws OXException
      */
     public FolderObject optFolder(int id) throws OXException {
         try {
@@ -556,7 +569,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param userId The identifier of the user to get the visible folders for
      * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
      * @return The folders, or an empty list if there are none
-     * @throws OXException 
+     * @throws OXException
      */
     public List<FolderObject> getVisibleFolders(int userId, Connection optConnection) throws OXException {
         List<FolderObject> folders = loadVisibleFolders(userId, optConnection);
@@ -673,14 +686,16 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * try lookup by e-mail address, otherwise, preferring the provided cu-type
          */
-        String mail = extractEMailAddress(uri);
-        if (CalendarUserType.INDIVIDUAL.matches(suggestedCuType)) {
-            resourceId = lookupUserByMail(mail, considerAliases);
-            if (null == resourceId) {
+        String mail = optEMailAddress(uri);
+        if (null != mail) {
+            if (CalendarUserType.INDIVIDUAL.matches(suggestedCuType)) {
+                resourceId = lookupUserByMail(mail, considerAliases);
+                if (null == resourceId) {
+                    resourceId = lookupResourceByMail(mail);
+                }
+            } else if (CalendarUserType.RESOURCE.matches(suggestedCuType) || CalendarUserType.ROOM.matches(suggestedCuType)) {
                 resourceId = lookupResourceByMail(mail);
             }
-        } else if (CalendarUserType.RESOURCE.matches(suggestedCuType) || CalendarUserType.ROOM.matches(suggestedCuType)) {
-            resourceId = lookupResourceByMail(mail);
         }
         return resourceId;
     }

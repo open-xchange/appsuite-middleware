@@ -93,7 +93,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -104,6 +104,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.concurrent.ParallelParameterized;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link ReadFoldersTest}
@@ -136,7 +137,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private static final Map<Scope, ContentType> S2CT = new HashMap<>();
     static {
-        S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactContentType.getInstance());
+        S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactsContentType.getInstance());
         S2CT.put(Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE), CalendarContentType.getInstance());
         S2CT.put(Scope.newInstance(TaskActionFactory.OAUTH_READ_SCOPE), TaskContentType.getInstance());
 
@@ -168,7 +169,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private int moduleId() {
-        if (contentType == ContactContentType.getInstance()) {
+        if (contentType == ContactsContentType.getInstance()) {
             return FolderObject.CONTACT;
         } else if (contentType == CalendarContentType.getInstance()) {
             return FolderObject.CALENDAR;
@@ -183,7 +184,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private int privateFolderId(AJAXClient client) throws OXException, IOException, JSONException {
-        if (contentType == ContactContentType.getInstance()) {
+        if (contentType == ContactsContentType.getInstance()) {
             return client.getValues().getPrivateContactFolder();
         } else if (contentType == CalendarContentType.getInstance()) {
             return client.getValues().getPrivateAppointmentFolder();
@@ -234,6 +235,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testFolderTreeNavigation() throws Exception {
         // expect root folders
         Set<Integer> expectedFolderIds = new HashSet<>();
@@ -251,9 +253,16 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         Assert.assertTrue("Missing expected root folder(s). Expected " + expectedFolderIds + " but got " + rootFolderIds, rootFolderIds.containsAll(expectedFolderIds));
         Assert.assertFalse("Infostore root folder was contained in response but must not", rootFolderIds.contains(I(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID)));
 
-        ListRequest listPrivateRequest = new ListRequest(api, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        listPrivateRequest.setAltNames(altNames);
-        List<FolderObject> privateFolders = listFolders(listPrivateRequest);
+        VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
+        request.setAltNames(altNames);
+        VisibleFoldersResponse response = oAuthClient.execute(request);
+        assertNoErrorsAndWarnings(response);
+        Iterator<FolderObject> privateFoldersIter = response.getPrivateFolders();
+        List<FolderObject> privateFolders = new ArrayList<FolderObject>(3);
+        while (privateFoldersIter.hasNext()) {
+            privateFolders.add(privateFoldersIter.next());
+
+        }
         assertContentTypeAndPermissions(privateFolders);
         Set<Integer> privateFolderIds = collectFolderIds(privateFolders);
         Assert.assertTrue("Missing expected private folder " + privateFolderId() + " in " + privateFolderIds, privateFolderIds.contains(I(privateFolderId())));
@@ -281,7 +290,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         FolderObject client2Folder = null;
         String sharedFolderId = "u:" + getClient2().getValues().getUserId();
         for (FolderObject folder : sharedFolders) {
-            if (folder.getFullName().equals(sharedFolderId)) {
+            if (sharedFolderId.equals(folder.getFullName())) {
                 client2Folder = folder;
                 break;
             }
@@ -294,6 +303,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testAllVisibleFolders() throws Exception {
         Set<Integer> expectedFolderIds = new HashSet<>();
         VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
@@ -325,6 +335,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testUpdates() throws Exception {
         UpdatesRequest request = new UpdatesRequest(api, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE);
         request.setAltNames(altNames);
@@ -341,6 +352,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testPath() throws Exception {
         PathRequest request = new PathRequest(api, Integer.toString(privateSubfolder.getObjectID()));
         request.setAltNames(altNames);
@@ -359,6 +371,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testGet() throws Exception {
         Set<Integer> folderIds = new HashSet<>();
         folderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
@@ -379,6 +392,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testInsufficientScopeOnAllVisibleFolders() throws Exception {
         HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);
@@ -392,6 +406,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     @Test
+    @TryAgain
     public void testInsufficientScopeOnGet() throws Exception {
         HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);

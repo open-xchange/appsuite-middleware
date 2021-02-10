@@ -84,7 +84,7 @@ public class DownloadLinkTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadLinkCalDAV() throws Exception {
         ClientonboardingApi api = getApi();
-        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile(getSessionId(), "caldav"));
+        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile("caldav"));
         assertNotNull(json);
         String link = json.getString("data");
         assertNotNull(link);
@@ -100,7 +100,7 @@ public class DownloadLinkTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadLinkCardDAV() throws Exception {
         ClientonboardingApi api = getApi();
-        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile(getSessionId(), "carddav"));
+        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile("carddav"));
         assertNotNull(json);
         String link = json.getString("data");
         assertNotNull(link);
@@ -116,7 +116,7 @@ public class DownloadLinkTest extends AbstractOnboardingTest {
     @Test
     public void testDownloadLinkDAV() throws Exception {
         ClientonboardingApi api = getApi();
-        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile(getSessionId(), "dav"));
+        JSONObject json = new JSONObject(api.generateDownloadLinkForClientOnboardingProfile("dav"));
         assertNotNull(json);
         String link = json.getString("data");
         assertNotNull(link);

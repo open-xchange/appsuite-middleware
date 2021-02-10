@@ -403,7 +403,7 @@ public class DriveStorage {
                 session.trace(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " +
                     combine(getPath(movedFile.getFolderId()), movedFile.getFileName()));
             }
-            getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields);
+            getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields, true, false);
         }
         return movedFile;
     }
@@ -483,8 +483,9 @@ public class DriveStorage {
             /*
              * perform move / rename
              */
-            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId()) :
-                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName);
+            boolean ignoreWarnings = true;
+            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId(), ignoreWarnings) :
+                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName, ignoreWarnings);
         } else if (false == oldName.equals(newName)) {
             /*
              * perform rename only

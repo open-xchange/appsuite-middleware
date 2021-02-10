@@ -172,7 +172,7 @@ public class ServerConfigImpl implements ServerConfig {
     @Override
     public NotificationMailConfig getNotificationMailConfig() {
         NotificationMailConfigImpl mailConfig = new NotificationMailConfigImpl();
-        mailConfig.setButtonBackgroundColor("#3c73aa");
+        mailConfig.setButtonBackgroundColor("#3c61aa");
         mailConfig.setButtonBorderColor("#356697");
         mailConfig.setButtonTextColor("#ffffff");
         Map<String, Object> mailsMap = (Map<String, Object>) mappings.get("notificationMails");

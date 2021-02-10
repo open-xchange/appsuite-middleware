@@ -48,6 +48,8 @@
  */
 package com.openexchange.oidc;
 
+import static com.openexchange.java.Autoboxing.I;
+
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.openexchange.authentication.NamePart;
 import com.openexchange.config.lean.Property;
@@ -123,20 +125,18 @@ public enum OIDCBackendProperty implements Property {
     /**
      * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
      * for all valid values.
-     * so far the following values are valid: {off, ox_direct, sso_redirect}.
+     * so far the following values are valid: {off, ox_direct}.
      * <br>
      *   off - no autologin<br>
      *   ox_direct - load user session from cookie and load Appsuite directly<br>
-     *   sso_redirect - check for a valid session on OPs side before login into<br>
-     *     a valid session loaded from a cookie
      */
-    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF.getValue()),
+    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OX_DIRECT.getValue()),
     /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
      * grant type must be registered for this client.
      */
-    oauthRefreshTime(OIDCProperty.PREFIX, 60000),
+    oauthRefreshTime(OIDCProperty.PREFIX, I(60000)),
     /**
      * uiWebPath - This backends UI path
      */
@@ -193,7 +193,7 @@ public enum OIDCBackendProperty implements Property {
      * of a timeout, this is logged as a temporary issue and the request continued
      * as usual.
      */
-    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, 5),
+    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, I(5)),
     /**
      * tryRecoverStoredTokens - Whether token refresh should try to recover valid tokens from
      * the session instance that is present in {@link SessionStorageService}.

@@ -135,6 +135,9 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %1$s is replaced with the context group name
     public static final String NO_GLOBALDB_CONFIG_FOR_GROUP_MSG = "No global database for context group \"%1$s\" found.";
 
+    // The counter managed for administrative entities became inconsistent and administrator should consider running the 'checkcountsconsistency' tool
+    public static final String COUNTS_INCONSISTENT_MSG = "Apparently administrative count tables became inconsistent. Consider running 'checkcountsconsistency' tool.";
+
     private DBPoolingExceptionStrings() {
         super();
     }

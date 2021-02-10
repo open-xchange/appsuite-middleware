@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.groupware;
 import java.util.Date;
 import java.util.Map;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link GroupwareCalendarFolder}
@@ -77,18 +78,18 @@ public interface GroupwareCalendarFolder extends CalendarFolder {
     String getParentId();
 
     /**
-     * Gets the entity which lastly modified this folder.
+     * Gets information about the entity which lastly modified this folder.
      *
-     * @return The entity which lastly modified this folder or <code>-1</code>
+     * @return The entity which lastly modified this folder, or <code>null</code> if not defined
      */
-    int getModifiedBy();
+    EntityInfo getModifiedFrom();
 
     /**
-     * Gets the entity which created this folder.
+     * Gets information about the entity which created this folder.
      *
-     * @return The entity which created this folder or <code>-1</code>
+     * @return The entity which created this folder, or <code>null</code> if not defined
      */
-    int getCreatedBy();
+    EntityInfo getCreatedFrom();
 
     /**
      * Gets the creation date as {@link Date}.

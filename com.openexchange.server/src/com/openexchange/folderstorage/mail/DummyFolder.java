@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.type.MailType;
+import com.openexchange.groupware.EntityInfo;
 
 
 /**
@@ -381,6 +382,24 @@ class DummyFolder implements Folder {
     @Override
     public Object clone() {
         return new DummyFolder(treeId, id, parentId, accountId, name, userId);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return null;
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return null;
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
     }
 
 }

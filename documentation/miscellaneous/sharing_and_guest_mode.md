@@ -18,7 +18,7 @@ The following chapters cover different topics regarding sharing and guest users 
 
 Basically, creating a share means adding an additional permission entity to the shared folder or item. Previously, this was only possible for &quot;internal&quot; entities, i.e. regular users or user groups. Now, the underlying permission system has been extended to support external entities, which can be either invited guest users, or special &quot;anonymous&quot; guest users who access a shared folder or item via a secret link. Anonymous and invited guest users are explained in more detail below.
 
-Sharing is available for the groupware modules Calendar, Contacts, Tasks and Drive (a.k.a. Infostore/Files). While the latter one also allows "writable" access for invited guest users, folders from the Calendar, Contacts and Tasks module may only be published in "read-only" mode to external guests.
+Sharing is available for the groupware modules Contacts, Tasks, Calendar and Drive (a.k.a. Infostore/Files). While the latter ones also allow "writable" access for invited guest users, folders from the Contacts and Tasks module may only be published in "read-only" mode to external guests.
 
 ## Invite Guests
 
@@ -169,6 +169,9 @@ In contrast to an &quot;anonymous&quot; guest user, a named guest user has acces
 * The timespan after which an unused named guest user should be removed from the system can be configured via <code>com.openexchange.share.cleanup.guestExpiry</code> in <code>share.properties</code> - this value may also be set to <code>0</code> to force an immediate removal
 * For the removal of no longer needed guest user accounts, a periodical cleanup task is scheduled based on the interval of <code>com.openexchange.share.cleanup.periodicCleanerInterval</code>
 * Whether a cross-context database is considered for guest users may be configured via <code>com.openexchange.share.crossContextGuests</code>
+* To handle user and contact data across contexts boundaries the feature has to be enabled before a guest receives the first share. Guests that receive shares before the activation cannot be considered within the alignment process. Only latter shares will be considered.
+* At the moment this feature does only sync user and contact related data (no shared content). If the user got two shares from different contexts he will only see shares related to the given link.
+
 
 # Guest Login & Session Handling<a name="Guest Login & Session Handling"></a>
 
@@ -412,12 +415,15 @@ Further information about the JSON structure is available at:
 
 # Consuming Shares<a name="consuming shares"></a>
 
-
 Depending on the shared contents and the requesting user agent, shares may be consumed in a couple of different ways. The concrete response to a request to the share URL is evaluated by the share servlet in the backend.
 
 ## App Suite
 
 The default handling for all shares is forwarding them to the App Suite web interface, where the shared contents are made available through the existing client. Based on the underlying guest account, the client is either forwarded to the login prompt, or taken directly to the share target if no credentials need to be provided. This process is described in more detail at [Guest Login & Session Handling](#guest-login-amp-session-handling).
+
+## Federated Sharing
+
+Starting with the version 7.10.5 of the Open Xchange Server the so called "Federated Sharing" feature is introduced. With this feature it is possible for users to integrate shares from foreign OX entities into the App Suite. Efficiently external shares will look and behave like shared internally. The feature is available for certain shares only, see [Federated-Sharing](https://documentation.open-xchange.com{{site.baseurl}}/middleware/miscellaneous/federated_sharing.html) for further details. 
 
 ## Direct Download
 
@@ -446,18 +452,6 @@ If accessing the item requires authentication, an unauthenticated request is res
 #### Administrator Notes:
 
 * The interval of task- and appointment data considered for conversion to iCal can be adjusted via <code>com.openexchange.share.handler.iCal.futureInterval</code> and <code>com.openexchange.share.handler.iCal.pastInterval</code> in configuration file <code>share.properties</code>
-
-# Cross-context functionality
-
-As already mentioned in previous sections the administrator is able to configure if guests should be handled per context (default) or server wide by using the configuration parameter <code>com.openexchange.share.crossContextGuests</code>.
-
-If set to <code>true</code> the guests email address is used to recognize if there is already a registered user with the given address and aligns the stored password to the already existing guest user. In addition to the password (which is the most important parameter this feature is about) even the users contact data gets synchronized.
-
-#### Administrator Notes:
-
-* To handle user and contact data across contexts boundaries the feature has to be enabled before a guest receives the first share. Guests that receive shares before the activation cannot be considered within the alignment process. Only latter shares will be considered.
-* At the moment this feature does only sync user and contact related data (no shared content). If the user got two shares from different contexts he will only see shares related to the given link.
-
 
 # Limit file accesses for named/anonymous guests
 

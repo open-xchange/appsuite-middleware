@@ -3,9 +3,10 @@
     operationId: getCurrentUser
     tags:
       - User/Me
-    summary: Gets information about current user.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Gets information about current user
+    security: 
+        - session: []
+        - oauth: []            
     responses:
       '200':
         description: >

@@ -58,13 +58,13 @@ import com.openexchange.oauth.scope.OXScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum DropboxOAuthScope implements OAuthScope {
-    drive("", OXScope.drive);
+    drive("account_info.read files.content.read files.content.write files.metadata.read files.metadata.write", OXScope.drive);
 
     private final String mapping;
     private final OXScope module;
 
     /**
-     * Initialises a new {@link DropboxOAuthScope}.
+     * Initializes a new {@link DropboxOAuthScope}.
      *
      * @param mapping The OAuth mapping
      * @param module The {@link OXScope}

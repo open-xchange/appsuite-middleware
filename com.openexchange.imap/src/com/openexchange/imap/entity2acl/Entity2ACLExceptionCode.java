@@ -108,7 +108,7 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Default constructor.
      */
-    private Entity2ACLExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
+    private Entity2ACLExceptionCode(String message, Category category, int detailNumber, String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = detailNumber;
@@ -150,7 +150,7 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -169,7 +169,7 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -180,7 +180,7 @@ public enum Entity2ACLExceptionCode implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

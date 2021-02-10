@@ -64,7 +64,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -73,6 +72,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.idn.IDNA;
@@ -85,9 +85,6 @@ import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -107,7 +104,6 @@ import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
 import com.openexchange.mail.json.compose.Utilities;
-import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
@@ -134,7 +130,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tx.TransactionAwares;
 import com.openexchange.user.User;
 
 /**
@@ -183,6 +178,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         return null;
+    }
+
+    /**
+     * Gets the identifier of the folder carrying shared attachments from given compose request.
+     *
+     * @param request The compose request
+     * @return The folder identifier or <code>null</code>
+     */
+    private String getFolderId(ComposeRequest request) {
+        JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
+        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("folder", null);
     }
 
     /**
@@ -305,9 +311,187 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
+        String folderId = getFolderId(composeRequest);
+        return folderId == null ? doCreateTransportResultWithoutFolder(composeRequest, context) : doCreateTransportResultWithFolder(folderId, composeRequest, context);
+    }
+
+    private ComposeTransportResult doCreateTransportResultWithFolder(String folderId, ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
+        // Get the basic source message
+        ServerSession session = composeRequest.getSession();
+        ComposedMailMessage source = context.getSourceMessage();
+
+        // Collect recipients
+        Set<Recipient> recipients;
+        {
+            Set<InternetAddress> addresses = new HashSet<>(Arrays.asList(source.getTo()));
+            addresses.addAll(Arrays.asList(source.getCc()));
+            addresses.addAll(Arrays.asList(source.getBcc()));
+
+            Context ctx = composeRequest.getContext();
+
+            recipients = new LinkedHashSet<>(addresses.size());
+            for (InternetAddress address : addresses) {
+                User user = resolveToUser(address, ctx);
+                String personal = address.getPersonal();
+                String sAddress = address.getAddress();
+                recipients.add(null == user ? Recipient.createExternalRecipient(personal, sAddress) : Recipient.createInternalRecipient(personal, sAddress, user));
+            }
+        }
+
+        // Optional password
+        String password = getPassword(composeRequest);
+
+        // Optional expiration date
+        Date expirationDate = getExpirationDate(composeRequest);
+        if (null == expirationDate && Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.requiredExpiration", false, session)) {
+            throw MailExceptionCode.EXPIRATION_DATE_MISSING.create(I(session.getUserId()), I(session.getContextId()));
+        }
+
+        // Optional auto-expiration of folder/files
+        boolean autoDelete;
+        if (null == expirationDate) {
+            autoDelete = false;
+        } else {
+            autoDelete = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.forceAutoDelete", false, session) || isAutoDelete(composeRequest);
+        }
+
+        // Determine attachment storage to use
+        AttachmentStorageRegistry storageRegistry = ServerServiceRegistry.getServize(AttachmentStorageRegistry.class);
+        if (null == storageRegistry) {
+            throw ServiceExceptionCode.absentService(AttachmentStorageRegistry.class);
+        }
+        AttachmentStorage attachmentStorage = storageRegistry.getAttachmentStorageFor(composeRequest);
+
+        boolean rollback = false;
+        Map<String, ThresholdFileHolder> previewImages = null;
+        try {
+            // Create the share target for an anonymous user
+            ShareTarget folderTarget = attachmentStorage.createShareTarget(folderId, password, expirationDate, autoDelete, session);
+            rollback = true;
+
+            ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+            if (null == shareService) {
+                throw ServiceExceptionCode.absentService(ShareService.class);
+            }
+            ShareLink folderLink = shareService.getLink(session, folderTarget);
+
+            // Create share compose reference
+            Item folderItem = new Item(folderId, null);
+            List<Item> attachmentItems = attachmentStorage.getAttachments(folderId, session);
+            ShareReference shareReference;
+            {
+                String shareToken = folderLink.getGuest().getBaseToken();
+                shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId()).expiration(expirationDate).password(password).folder(folderItem).items(attachmentItems).shareToken(shareToken).build();
+            }
+
+            // Create share link(s) for recipients
+            Map<ShareComposeLink, Set<Recipient>> links = new LinkedHashMap<>(recipients.size());
+            {
+                GuestInfo guest = folderLink.getGuest();
+                for (Recipient recipient : recipients) {
+                    ShareComposeLink linkedAttachment = ShareComposeLinkGenerator.getInstance().createShareLink(recipient, folderTarget, guest, null, composeRequest);
+                    Set<Recipient> associatedRecipients = links.get(linkedAttachment);
+                    if (null == associatedRecipients) {
+                        associatedRecipients = new LinkedHashSet<>(recipients.size());
+                        links.put(linkedAttachment, associatedRecipients);
+                    }
+                    associatedRecipients.add(recipient);
+                }
+            }
+
+            // Create personal share link
+            ShareComposeLink personalLink;
+            {
+                personalLink = ShareComposeLinkGenerator.getInstance().createPersonalShareLink(folderTarget, null, composeRequest);
+            }
+
+            // Generate preview images
+            previewImages = context.isPlainText() ? Collections.<String, ThresholdFileHolder> emptyMap() : generatePreviewImages(shareReference, attachmentStorage, session);
+            Map<String, String> cidMapping = getCidMapping(previewImages);
+            List<MailPart> imageParts = createPreviewPart(cidMapping, previewImages);
+
+            // Generate messages from links
+            List<ComposedMailMessage> transportMessages = new LinkedList<>();
+            ComposedMailMessage sentMessage;
+            {
+                MessageGeneratorRegistry generatorRegistry = ServerServiceRegistry.getServize(MessageGeneratorRegistry.class);
+                if (null == generatorRegistry) {
+                    throw ServiceExceptionCode.absentService(MessageGeneratorRegistry.class);
+                }
+                MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
+                for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
+                    ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<>(entry.getValue()), password, expirationDate, source, context, composeRequest);
+                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping, shareReference.getItems().size() - 6);
+                    for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
+                        generatedTransportMessage.setAppendToSentFolder(false);
+                        for (MailPart imagePart : imageParts) {
+                            generatedTransportMessage.addEnclosedPart(imagePart);
+                        }
+                        for (MailPart part : context.getAllParts()) {
+                            generatedTransportMessage.addEnclosedPart(part);
+                        }
+                        transportMessages.add(generatedTransportMessage);
+                    }
+                }
+
+                String sendAddr = session.getUserSettingMail().getSendAddr();
+                User user = composeRequest.getUser();
+                Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
+                sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping, shareReference.getItems().size() - 6);
+                for (MailPart imagePart : imageParts) {
+                    sentMessage.addEnclosedPart(imagePart);
+                }
+                for (MailPart part : context.getAllParts()) {
+                    sentMessage.addEnclosedPart(part);
+                }
+            }
+
+            // Everything went fine. Let 'StoredAttachmentsControl' instance be managed by transport result now.
+            DefaultComposeTransportResult transportResult = DefaultComposeTransportResult.builder()
+                .withTransportMessages(transportMessages, true)
+                .withSentMessage(sentMessage)
+                .withAttachmentsControl(new NoopStoredAttachmentsControl(attachmentItems, folderItem, folderTarget))
+                .build();
+            rollback = false;
+
+            return transportResult;
+        } finally {
+            if (rollback && null != previewImages) {
+                for (ThresholdFileHolder tfh : previewImages.values()) {
+                    tfh.close();
+                }
+            }
+        }
+    }
+
+    private ComposeTransportResult doCreateTransportResultWithoutFolder(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
         // Check if context collected any attachment at all
         if (false == context.hasAnyPart()) {
             // No attachments
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+            transportMessage.setAppendToSentFolder(false);
+            return DefaultComposeTransportResult.builder()
+                .withTransportMessages(Collections.<ComposedMailMessage> singletonList(transportMessage), true)
+                .withSentMessage(composeMessage)
+                .withTransportEqualToSent()
+                .build();
+        }
+
+        // Differentiate attachments to store and those to keep attached to mail (inline images)
+        List<MailPart> attachmentsToStore = null;
+        List<MailPart> attachmentsToKeep = null;
+        for (MailPart mailPart : context.getAllParts()) {
+            if (mailPart.containsContentDisposition() && Part.INLINE.equals(mailPart.getContentDisposition().getDisposition())) {
+                attachmentsToKeep = addMailPart(mailPart, attachmentsToKeep);
+            } else {
+                attachmentsToStore = addMailPart(mailPart, attachmentsToStore);
+            }
+        }
+
+        // Check if there are any attachments to store
+        if (attachmentsToStore == null) {
+            // No attachments to store
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
             transportMessage.setAppendToSentFolder(false);
@@ -369,8 +553,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         boolean rollback = false;
         Map<String, ThresholdFileHolder> previewImages = null;
         try {
+            // Compose context should only advertise attachments to store
+            ForwardingComposeContext contextToPass = new ForwardingComposeContext(context);
+            contextToPass.setAllParts(attachmentsToStore);
+
             // Store attachments associated with compose context
-            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
+            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, contextToPass);
             rollback = true;
 
             // The share target for an anonymous user
@@ -410,7 +598,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             }
 
             // Generate preview images
-            previewImages = context.isPlainText() ? Collections.<String, ThresholdFileHolder> emptyMap() : generatePreviewImages(session, shareReference);
+            previewImages = context.isPlainText() ? Collections.<String, ThresholdFileHolder> emptyMap() : generatePreviewImages(shareReference, attachmentStorage, session);
             Map<String, String> cidMapping = getCidMapping(previewImages);
             List<MailPart> imageParts = createPreviewPart(cidMapping, previewImages);
 
@@ -430,6 +618,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                         generatedTransportMessage.setAppendToSentFolder(false);
                         for (MailPart imagePart : imageParts) {
                             generatedTransportMessage.addEnclosedPart(imagePart);
+                        }
+                        if (attachmentsToKeep != null) {
+                            for (MailPart part : attachmentsToKeep) {
+                                generatedTransportMessage.addEnclosedPart(part);
+                            }
                         }
                         transportMessages.add(generatedTransportMessage);
                     }
@@ -470,9 +663,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     }
 
     private User resolveToUser(InternetAddress address, Context ctx) throws OXException {
-        User user = null;
         try {
-            user = UserStorage.getInstance().searchUser(IDNA.toIDN(address.getAddress()), ctx);
+            return UserStorage.getInstance().searchUser(IDNA.toIDN(address.getAddress()), ctx);
         } catch (OXException e) {
             /*
              * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
@@ -481,46 +673,50 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
                 throw e;
             }
-            user = null;
+            return null;
         }
-        return user;
     }
 
-    private Map<String, ThresholdFileHolder> generatePreviewImages(Session session, ShareReference reference) throws OXException {
-        List<Item> items = reference.getItems();
+    private Map<String, ThresholdFileHolder> generatePreviewImages(ShareReference reference, AttachmentStorage attachmentStorage, ServerSession session) throws OXException {
+        // Grab required services
         PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
         ImageTransformationService transformationService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class);
-        IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        boolean documentPreviewEnabled = false;
-        final int timeout;
-        String templatePath = null;
-        {
-            documentPreviewEnabled = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false, session);
-            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(1000), session).intValue();
-            templatePath = Utilities.getValueFromProperty("com.openexchange.templating.path", null, session);
-        }
-        if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
+
+        // Read in configuration settings
+        boolean documentPreviewEnabled = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false, session);
+        int timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(1000), session).intValue();
+        String templatePath = Utilities.getValueFromProperty("com.openexchange.templating.path", null, session);
+
+        // Check validity
+        Item folder = reference.getFolder();
+        List<Item> items = reference.getItems();
+        if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == threadPoolService) {
             return java.util.Collections.emptyMap();
         }
-        Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
+
+        // Schedule tasks for generating previews
         Map<String, Future<ThresholdFileHolder>> previewFutures = new HashMap<>(6);
         Map<String, String> mimeTypes = new HashMap<>(6);
-        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-        try {
-            for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
-                String id = items.get(i).getId();
-                InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
+        for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
+            String id = items.get(i).getId();
+            FileItem fileItem = attachmentStorage.getAttachment(id, folder.getId(), session);
+            String mimeType = fileItem.getMimeType();
+            InputStream document = fileItem.getData();
+            try {
                 PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
                 Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
                 previewFutures.put(id, future);
                 mimeTypes.put(id, mimeType);
+                document = null; // Null'ify to avoid premature closing
+            } finally {
+                Streams.close(document);
             }
-        } finally {
-            TransactionAwares.finishSafe(access);
         }
-        for (Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
+
+        // Fill mapping
+        Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
+        for (Map.Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
             String id = entry.getKey();
             try {
                 ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
@@ -767,6 +963,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             return previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
         }
 
+    }
+
+    private static List<MailPart> addMailPart(MailPart mailPart, List<MailPart> parts) {
+        List<MailPart> list = parts == null ? new LinkedList<>() : parts;
+        list.add(mailPart);
+        return list;
     }
 
 }

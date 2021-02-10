@@ -74,8 +74,9 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
 
     /**
      * Initialises a new {@link OAuthFileStorageAccountEventHandler}.
-     *
-     *
+     * 
+     * @param services The service lookup instance
+     * @param api the API
      */
     public OAuthFileStorageAccountEventHandler(ServiceLookup services, KnownApi api) {
         super();
@@ -86,22 +87,25 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(api.getServiceId());
-                        if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
-                            LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
+        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+            return;
+        }
+        try {
+            Integer contextId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID));
+            if (null == contextId) {
+                return;
             }
+            Integer userId = Integer.class.cast(event.getProperty(SessiondEventConstants.PROP_USER_ID));
+            if (null == userId) {
+                return;
+            }
+            OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry registry = registryService.get(api.getServiceId());
+            if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
+                LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
+            }
+        } catch (Exception e) {
+            LOG.error("Error while handling SessionD event '{}'", topic, e);
         }
     }
 }

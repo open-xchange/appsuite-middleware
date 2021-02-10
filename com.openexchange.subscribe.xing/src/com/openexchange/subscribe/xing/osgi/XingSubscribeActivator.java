@@ -52,6 +52,7 @@ package com.openexchange.subscribe.xing.osgi;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -117,8 +118,10 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     /**
      * Registers the subscribe service.
+     *
+     * @throws OXException
      */
-    public synchronized void registerSubscribeService() {
+    public synchronized void registerSubscribeService() throws OXException {
         if (null == serviceRegistration) {
             XingSubscribeService xingSubscribeService = new XingSubscribeService(getService(OAuthServiceMetaData.class), this);
             serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);

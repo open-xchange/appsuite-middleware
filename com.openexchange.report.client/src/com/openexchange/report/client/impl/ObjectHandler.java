@@ -62,7 +62,6 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
-import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -112,7 +111,7 @@ public class ObjectHandler {
         return configuration;
     }
 
-    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
+    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws MBeanException {
         return getClientLoginCount(mbsc, false);
     }
 

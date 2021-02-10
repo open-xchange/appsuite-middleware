@@ -72,7 +72,7 @@ public class TNEFBodyPart extends TNEFMimeBodyPart {
      *
      * @param size The size in bytes
      */
-    public void setSize(final int size) {
+    public void setSize(int size) {
         this.size = size;
     }
 

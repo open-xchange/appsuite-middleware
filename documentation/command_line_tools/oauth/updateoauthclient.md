@@ -19,9 +19,6 @@ This command line tool updates an existing OAuth client
 
 # OPTIONS
 
-**-x*, **--context-group-id** *cgid*
-: The id of the context group
- 
 **-n**, **--name** *name*
 : Define the name of the oauth client
 

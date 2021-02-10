@@ -49,8 +49,8 @@
 
 package com.openexchange.folderstorage.cache;
 
-import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +83,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -139,7 +140,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage, SearchableFileFolderNameFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -1654,6 +1655,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                         @Override
                         public java.util.List<SortableId> call() throws Exception {
                             StorageParameters newParameters = newStorageParameters(storageParameters);
+                            newParameters.setDecorator(storageParameters.getDecorator());
                             boolean started = neededStorage.startTransaction(newParameters, false);
                             try {
                                 java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
@@ -1740,6 +1742,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             UpdatePerformer updatePerformer = newUpdatePerformer(storageParameters);
             updatePerformer.setCheck4Duplicates(false);
             updatePerformer.setIncreaseObjectUseCount(false);
+            updatePerformer.setCollectFolderMoveWarnings(false);
             updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
             Set<OXException> warnings = updatePerformer.getWarnings();
@@ -1899,6 +1902,19 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
         RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
         return restoringFolderStorage.restoreFromTrash(treeId, folderIds, defaultDestFolderId, storageParameters);
+    }
+
+    @Override
+    public List<Folder> searchFileStorageFolders(String treeId, String rootFolderId, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorage(treeId, rootFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, rootFolderId);
+        }
+        if (false == SearchableFileFolderNameFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
+        }
+        SearchableFileFolderNameFolderStorage searchableFolderStorage = (SearchableFileFolderNameFolderStorage) folderStorage;
+        return searchableFolderStorage.searchFileStorageFolders(treeId, rootFolderId, query, date, includeSubfolders, start, end, storageParameters);
     }
 
     /*-
@@ -2190,7 +2206,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
     private FolderStorage[] getFolderStoragesForParent(String treeId, String parentId, StorageParameters storageParameters) {
         FolderStorage[] folderStorages = registry.getFolderStoragesForParent(treeId, parentId);
-        if (null == folderStorages || 0 == folderStorages.length || null == storageParameters.getDecorator()) {
+        if (null == folderStorages) {
+            return new FolderStorage[0];
+        }
+        if (0 == folderStorages.length || null == storageParameters.getDecorator()) {
             return folderStorages;
         }
         List<ContentType> allowedContentTypes = storageParameters.getDecorator().getAllowedContentTypes();

@@ -341,6 +341,7 @@ public class CSVContactImporter extends AbstractImporter {
         return CsvExceptionCodes.NESTED_ERROR.create(I(lineNumber), ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
+    @SuppressWarnings("deprecation")
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
         final Contact contactObj = new Contact();
         final Collection<OXException> warnings = new LinkedList<OXException>();
@@ -473,7 +474,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @param maxLines The maximum number of lines to parse, or -1 to read all available lines
      * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
      */
-    private List<List<String>> parse(InputStream input, Charset charset, int maxLines) throws OXException, IOException {
+    private List<List<String>> parse(InputStream input, Charset charset, int maxLines) throws OXException {
         ThresholdFileHolder fileHolder = null;
         try {
             fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));
@@ -506,7 +507,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @param maxLines The maximum number of lines to parse, or -1 to read all available lines
      * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
      */
-    protected List<List<String>> parse(InputStream input, int maxLines) throws OXException, IOException {
+    protected List<List<String>> parse(InputStream input, int maxLines) throws OXException {
         ThresholdFileHolder fileHolder = null;
         try {
             fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));
@@ -560,6 +561,9 @@ public class CSVContactImporter extends AbstractImporter {
                 if (null != parseException) {
                     throw parseException;
                 }
+                return null;
+            }
+            if (bestParser == null) {
                 return null;
             }
             return bestParser.parse(readLines(fileHolder.getStream(), bestCharset, false, maxLines));

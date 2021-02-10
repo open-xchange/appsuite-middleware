@@ -191,6 +191,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
+    @SuppressWarnings("dep-ann")
     public enum AccessCombinations implements CSVConstants {
         ACCESS_COMBI_NAME(0, OPT_ACCESSRIGHTS_COMBINATION_NAME, false),
         accessCalendar(1, OPT_ACCESS_CALENDAR, false),
@@ -601,7 +602,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
     protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
 
-    public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
+    public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<>();
 
     static {
         NO_RIGHTS_ACCESS.disableAll();
@@ -795,6 +796,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected HashMap<String, CSVConstants> constantsMap;
 
+    @SuppressWarnings("deprecation")
     protected static UserModuleAccess getUserModuleAccess(final String[] nextLine, final int[] idarray) {
         final UserModuleAccess moduleaccess = new UserModuleAccess();
         moduleaccess.disableAll();
@@ -961,7 +963,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return parseBool(string);
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("true", "1", "yes", "y", "on")));
 
     private static boolean parseBool(final String parameter) {
         return (null != parameter) && BOOL_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
@@ -992,7 +994,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     context.setId(Integer.valueOf(value));
-                } catch (NumberFormatException e) {
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
                 }
             }
@@ -1594,7 +1596,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimit(Integer.valueOf(value));
-                } catch (NumberFormatException e) {
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.UPLOADFILESIZELIMIT.getString() + " is no integer");
                 }
             }
@@ -1845,7 +1847,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (m2 >= 0) {
             String mailAlias = nextLine[m2];
             if (mailAlias.length() > 0) {
-                HashSet<String> aliases = new HashSet<String>(Arrays.asList(mailAlias.split(" *, *")));
+                HashSet<String> aliases = new HashSet<>(Arrays.asList(mailAlias.split(" *, *")));
                 String primaryEmail = user.getPrimaryEmail();
                 if (null != primaryEmail) {
                     aliases.add(primaryEmail);
@@ -2015,7 +2017,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      */
     protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final Map<String, String> notallowedOrReplace) {
         // Define the returntypes we search for
-        final HashSet<String> returntypes = new HashSet<String>();
+        final HashSet<String> returntypes = new HashSet<>();
         returntypes.add(JAVA_LANG_STRING);
         returntypes.add(JAVA_LANG_INTEGER);
         returntypes.add(JAVA_LANG_LONG);
@@ -2032,7 +2034,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     private final ArrayList<MethodAndNames> getGetterGeneral(final Method[] theMethods, final Map<String, String> notallowedOrReplace, final HashSet<String> returntypes) {
-        final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
+        final ArrayList<MethodAndNames> retlist = new ArrayList<>();
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
             // Getters shouldn't need parameters
@@ -2098,7 +2100,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         try {
             return Long.valueOf(object.toString().trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             throw new InvalidDataException("Quota value must be a number.");
         }
     }
@@ -2161,7 +2163,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         // Split
         final String[] arr = s.split(" *, *", 0);
-        final Set<String> set = new HashSet<String>(arr.length);
+        final Set<String> set = new HashSet<>(arr.length);
         for (String element : arr) {
             final String cap = element;
             if (!com.openexchange.java.Strings.isEmpty(cap)) {
@@ -2246,7 +2248,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void prepareConstantsMap() {
-        HashMap<String, CSVConstants> constantsMap = new HashMap<String, CSVConstants>();
+        HashMap<String, CSVConstants> constantsMap = new HashMap<>();
         this.constantsMap = constantsMap;
         for (final Constants value : Constants.values()) {
             constantsMap.put(value.getString(), value);
@@ -2262,6 +2264,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param parser The parser object
      * @param usr User object which will be changed
      */
+    @SuppressWarnings("deprecation")
     protected final void setModuleAccessOptionsinUserCreate(final AdminParser parser, final UserModuleAccess access) {
         access.setCalendar(accessOption2BooleanCreate(parser, this.accessCalendarOption));
         access.setContacts(accessOption2BooleanCreate(parser, this.accessContactOption));
@@ -2307,6 +2310,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param access
      * @return true if options have been specified, false if not
      */
+    @SuppressWarnings("deprecation")
     protected final boolean setModuleAccessOptions(final AdminParser parser, final UserModuleAccess access) {
         boolean changed = false;
         if ((String) parser.getOptionValue(this.accessCalendarOption) != null) {
@@ -2455,7 +2459,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         final String aliasOpt = (String) parser.getOptionValue(this.aliasesOption);
         if (null != aliasOpt) {
-            final HashSet<String> aliases = new HashSet<String>();
+            final HashSet<String> aliases = new HashSet<>();
             for (final String alias : aliasOpt.split(",")) {
                 aliases.add(alias.trim());
             }
@@ -2532,12 +2536,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void setExtendedOptions(final AdminParser parser) {
         setAddGuiSettingOption(parser);
 
+        setConfigOption(parser);
         if (this.getClass().getName().endsWith("Change")) {
+            setRemoveConfigOption(parser);
             setRemoveGuiSettingOption(parser);
         }
-
-        setConfigOption(parser);
-        setRemoveConfigOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);
@@ -2761,7 +2764,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                         usr.setAnniversary(sdf.parse(date));
                     }
                 }
-            } catch (ParseException e) {
+            } catch (@SuppressWarnings("unused") ParseException e) {
                 throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
             }
         }

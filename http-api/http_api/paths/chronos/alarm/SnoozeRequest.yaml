@@ -4,8 +4,9 @@
     tags:
       - Chronos
     summary: Snoozes an alarm by the given duration.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'

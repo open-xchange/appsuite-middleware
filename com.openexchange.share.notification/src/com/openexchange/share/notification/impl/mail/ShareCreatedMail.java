@@ -64,7 +64,6 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.MailData.Builder;
@@ -97,7 +96,7 @@ public class ShareCreatedMail extends ShareNotificationMail {
         super(services, data);
     }
 
-    private static class CollectVarsData {
+    static class CollectVarsData {
         ShareCreatedNotification<InternetAddress> notification;
         User sharingUser;
 
@@ -106,7 +105,7 @@ public class ShareCreatedMail extends ShareNotificationMail {
         HashMap<ShareTarget, TargetProxy> targetProxies;
     }
 
-    public static ShareCreatedMail init(ShareCreatedNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
+    public static ShareCreatedMail init(ShareCreatedNotification<InternetAddress> notification, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
@@ -175,9 +174,8 @@ public class ShareCreatedMail extends ShareNotificationMail {
      * @param user The {@link User} that created a new share
      * @param data.translator The {@link Translator} used for adapting the textual template values to the recipients locale
      * @return A mapping from template keywords to actual textual values
-     * @throws OXException
      */
-    private static Map<String, Object> prepareShareCreatedVars(CollectVarsData data) throws OXException {
+    private static Map<String, Object> prepareShareCreatedVars(CollectVarsData data) {
         Map<String, Object> vars = new HashMap<String, Object>();
         boolean hasMessage = Strings.isNotEmpty(data.notification.getMessage());
         String shareUrl = data.notification.getShareUrl();

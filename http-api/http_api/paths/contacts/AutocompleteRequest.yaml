@@ -4,11 +4,14 @@
     tags:
       - Contacts
     summary: Auto-complete contacts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     description: >-
       Finds contacts based on a prefix, usually used to auto-complete e-mail
       recipients while the user is typing.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: query
@@ -97,3 +100,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

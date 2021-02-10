@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spamhandler for Parallels integration
 Bundle-SymbolicName: com.openexchange.spamhandler.parallels
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.spamhandler.parallels.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -21,6 +21,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.spamhandler.spamassassin.api,
  com.openexchange.tools.session,
  com.openexchange.user,
+ com.openexchange.xml.util,
  javax.xml.parsers,
  org.apache.commons.logging,
  org.apache.http,
@@ -34,3 +35,4 @@ Import-Package: com.openexchange.config,
  org.slf4j,
  org.w3c.dom,
  org.xml.sax
+Automatic-Module-Name: com.openexchange.spamhandler.parallels

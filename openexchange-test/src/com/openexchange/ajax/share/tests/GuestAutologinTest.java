@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link GuestAutologinTest}
@@ -77,6 +78,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 public class GuestAutologinTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testGuestAutologin() throws Exception {
         /*
          * create folder shared to guest user

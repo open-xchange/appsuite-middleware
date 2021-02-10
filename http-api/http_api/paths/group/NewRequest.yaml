@@ -4,8 +4,8 @@
     tags:
       - Groups
     summary: Creates a group.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

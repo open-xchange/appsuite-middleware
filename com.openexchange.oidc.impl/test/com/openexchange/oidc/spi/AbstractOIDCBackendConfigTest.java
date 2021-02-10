@@ -51,6 +51,7 @@ package com.openexchange.oidc.spi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import com.openexchange.config.PropertyFilter;
@@ -216,6 +217,36 @@ public class AbstractOIDCBackendConfigTest {
         public Map<String, String> getProperties(PropertyFilter propertyFilter) {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public String getProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public int getIntProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public boolean getBooleanProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public float getFloatProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public long getLongProperty(int userId, int contextId, Property property, List<String> scopes, Map<String, String> optionals) {
+            // TODO Auto-generated method stub
+            return 0;
         }
 
     }

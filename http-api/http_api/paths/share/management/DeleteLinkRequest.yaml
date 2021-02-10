@@ -3,9 +3,10 @@
     operationId: deleteShareLink
     tags:
       - Share/Management
-    summary: Deletes a share link.
+    summary: Deletes a share link
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: >-

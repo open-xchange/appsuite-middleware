@@ -80,6 +80,7 @@ public class SimStateManagement implements StateManagement {
     public SimStateManagement() {
         super();
         timer.scheduleAtFixedRate(new TimerTask() {
+            @SuppressWarnings("synthetic-access")
             @Override
             public void run() {
                 timeOut(authnRequests);
@@ -138,7 +139,7 @@ public class SimStateManagement implements StateManagement {
         return id;
     }
 
-    public String addLogoutRequestInfo(String id, LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
+    public String addLogoutRequestInfo(String id, LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) {
         logoutRequests.put(id, new TimedEntry<LogoutRequestInfo>(requestInfo, ttl, timeUnit));
         return id;
     }

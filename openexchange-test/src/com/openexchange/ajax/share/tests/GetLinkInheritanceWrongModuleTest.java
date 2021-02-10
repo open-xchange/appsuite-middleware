@@ -86,6 +86,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         ApiClient client = getApiClient();
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
+        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
         infostoreRoot = "1";
 
@@ -112,7 +113,6 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         C = null;
         D = null;
         E = null;
-        folderManager.cleanUp();
         super.tearDown();
     }
 
@@ -229,7 +229,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
         data.setModule("calendar");
-        ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
+        ShareLinkResponse shareLink = shareManagementApi.getShareLink(data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();

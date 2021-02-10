@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.parser;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -195,7 +196,7 @@ public final class MailMessageParser {
     private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
 
         @Override
-        public boolean isInline(final String disposition, final String fileName) {
+        public boolean isInline(String disposition, String fileName) {
             return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
         }
     };
@@ -207,7 +208,7 @@ public final class MailMessageParser {
     private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
 
         @Override
-        public boolean isInline(final String disposition, final String fileName) {
+        public boolean isInline(String disposition, String fileName) {
             return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
         }
     };
@@ -262,7 +263,7 @@ public final class MailMessageParser {
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
-    public MailMessageParser setInlineDetectorBehavior(final boolean strict) {
+    public MailMessageParser setInlineDetectorBehavior(boolean strict) {
         inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
         return this;
     }
@@ -273,7 +274,7 @@ public final class MailMessageParser {
      * @param mimeFilter The MIME filter
      * @return This parser with MIME filter applied
      */
-    public MailMessageParser addMimeFilter(final MimeFilter mimeFilter) {
+    public MailMessageParser addMimeFilter(MimeFilter mimeFilter) {
         this.mimeFilter = mimeFilter;
         return this;
     }
@@ -318,7 +319,7 @@ public final class MailMessageParser {
      * @param handler The call-back handler
      * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler) throws OXException {
+    public void parseMailMessage(MailMessage mail, MailMessageHandler handler) throws OXException {
         parseMailMessage(mail, handler, null);
     }
 
@@ -331,7 +332,7 @@ public final class MailMessageParser {
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
      * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix) throws OXException {
+    public void parseMailMessage(MailMessage mail, MailMessageHandler handler, String prefix) throws OXException {
         if (null == mail) {
             throw MailExceptionCode.MISSING_PARAMETER.create("mail");
         }
@@ -358,7 +359,7 @@ public final class MailMessageParser {
                     final String mailId = mail.getMailId();
                     final String folder = mail.getFolder();
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, I(mail.getAccountId()), Strings.getLineSeparator(), mail.getSource());
                     }
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
@@ -388,7 +389,7 @@ public final class MailMessageParser {
                 final String mailId = mail.getMailId();
                 final String folder = mail.getFolder();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, I(mail.getAccountId()), Strings.getLineSeparator(), mail.getSource());
                 }
             }
             throw e;
@@ -397,7 +398,7 @@ public final class MailMessageParser {
         handler.handleMessageEnd(mail);
     }
 
-    private void parseMailContent(final MailPart mailPart, final MailMessageHandler handler, final String prefix, final int partCountArg) throws OXException, IOException {
+    private void parseMailContent(MailPart mailPart, MailMessageHandler handler, String prefix, int partCountArg) throws OXException, IOException {
         if (stop) {
             return;
         }
@@ -924,7 +925,7 @@ public final class MailMessageParser {
         }
     }
 
-    private String getFileNameFromTnefAttachment(final Attachment attachment) {
+    private String getFileNameFromTnefAttachment(Attachment attachment) {
         String filename = null;
         try {
             int codePage = 0;
@@ -1041,7 +1042,7 @@ public final class MailMessageParser {
         return smimeSigned == null ? null : MimeMessageConverter.convertPart(smimeSigned.getContent());
     }
 
-    private void parseEnvelope(final MailMessage mail, final MailMessageHandler handler) throws OXException {
+    private void parseEnvelope(MailMessage mail, MailMessageHandler handler) throws OXException {
         /*
          * FROM
          */
@@ -1123,7 +1124,7 @@ public final class MailMessageParser {
      * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
      * @return An appropriate filename
      */
-    public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
+    public static String getFileName(String rawFileName, String sequenceId, String baseMimeType) {
         return getFileName(rawFileName, null, sequenceId, baseMimeType);
     }
 
@@ -1164,7 +1165,7 @@ public final class MailMessageParser {
      * @param partCount The part count
      * @return The sequence ID
      */
-    public static String getSequenceId(final String prefix, final int partCount) {
+    public static String getSequenceId(String prefix, int partCount) {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
@@ -1210,13 +1211,13 @@ public final class MailMessageParser {
      * @param fileName
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
-    private static boolean isText(final String contentType, String name) {
+    private static boolean isText(String contentType, String name) {
         if (name != null && name.endsWith(".eml")) {
             return false;
         }
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_TEXT) {
+            for (String subtype : SUB_TEXT) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
@@ -1233,7 +1234,7 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>text/htm*</code>; otherwise <code>false</code>
      */
-    private static boolean isHtml(final String contentType) {
+    private static boolean isHtml(String contentType) {
         return contentType.startsWith(PRIMARY_HTML, 0);
     }
 
@@ -1245,7 +1246,7 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
      */
-    private static boolean isMultipart(final String contentType) {
+    private static boolean isMultipart(String contentType) {
         return contentType.startsWith(PRIMARY_MULTI, 0);
     }
 
@@ -1257,7 +1258,7 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>image/*</code>; otherwise <code>false</code>
      */
-    private static boolean isImage(final String contentType) {
+    private static boolean isImage(String contentType) {
         return contentType.startsWith(PRIMARY_IMAGE, 0);
     }
 
@@ -1269,7 +1270,7 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */
-    private static boolean isMessage(final String contentType, String name) {
+    private static boolean isMessage(String contentType, String name) {
         if (name != null && name.endsWith(".eml")) {
             return true;
         }
@@ -1297,17 +1298,17 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches special; otherwise <code>false</code>
      */
-    private static boolean isSpecial(final String contentType) {
+    private static boolean isSpecial(String contentType) {
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_SPECIAL2) {
+            for (String subtype : SUB_SPECIAL2) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
             }
         } else if (contentType.startsWith(PRIMARY_MESSAGE, 0)) {
             final int off = PRIMARY_MESSAGE.length();
-            for (final String subtype : SUB_SPECIAL1) {
+            for (String subtype : SUB_SPECIAL1) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
@@ -1374,7 +1375,7 @@ public final class MailMessageParser {
         }
     }
 
-    private static MimeMessage cloneMessage(MailMessage original, final Date optReceivedDate) throws OXException {
+    private static MimeMessage cloneMessage(MailMessage original, Date optReceivedDate) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {

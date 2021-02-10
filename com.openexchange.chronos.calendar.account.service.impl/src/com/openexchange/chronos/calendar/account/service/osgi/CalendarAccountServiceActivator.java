@@ -60,9 +60,14 @@ import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
+import com.openexchange.secret.recovery.SecretMigrator;
 
 /**
  * {@link CalendarAccountServiceActivator}
@@ -81,7 +86,8 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class };
+        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class, 
+            SecretEncryptionFactoryService.class, CryptoService.class };
     }
 
     @Override
@@ -96,6 +102,9 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
             CalendarAccountServiceImpl accountService = new CalendarAccountServiceImpl(this);
             registerService(CalendarAccountService.class, accountService);
             registerService(AdministrativeCalendarAccountService.class, accountService);
+            registerService(SecretMigrator.class, accountService);
+            registerService(EncryptedItemDetectorService.class, accountService);
+            registerService(EncryptedItemCleanUpService.class, accountService);
             registerService(DeleteListener.class, new CalendarAccountDeleteListener(this));
             openTrackers();
         } catch (Exception e) {

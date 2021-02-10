@@ -1,0 +1,21 @@
+OAuth_unauthorized:
+  description: In case the oauth token is missing or is invalid
+  headers:
+    WWW-Authenticate:
+      schema:
+        type: string
+      description: >-
+        Contains the required scheme ("Bearer") and in case the token is invalid also the error.
+
+        E.g.: Bearer,error="invalid token",error_description="The token has expired"
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/OAuthErrorResponse'
+OAuth_insufficient_scope:
+  description: In case the scope of the oauth token is insufficient
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/OAuthErrorResponse'        
+

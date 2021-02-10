@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange box.com OAuth Bundle
 Bundle-SymbolicName: com.openexchange.oauth.boxcom
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
@@ -34,3 +34,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Bundle-Activator: com.openexchange.oauth.boxcom.osgi.BoxComOAuthActivator
 Export-Package: com.openexchange.oauth.boxcom
+Automatic-Module-Name: com.openexchange.oauth.boxcom

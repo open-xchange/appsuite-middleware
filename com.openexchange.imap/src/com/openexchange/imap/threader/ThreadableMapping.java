@@ -117,7 +117,7 @@ public final class ThreadableMapping {
 
     } // End of class MessageKey
 
-    private static MessageKey keyFor(final MailMessage mailMessage) {
+    private static MessageKey keyFor(MailMessage mailMessage) {
         if (null == mailMessage) {
             return null;
         }
@@ -130,7 +130,7 @@ public final class ThreadableMapping {
     /**
      * Initializes a new {@link ThreadableMapping}.
      */
-    public ThreadableMapping(final int capacity) {
+    public ThreadableMapping(int capacity) {
         super();
         refsMap = new HashMap<String, List<MailMessage>>(capacity << 1, 0.9f);
         messageIdMap = new HashMap<String, List<MailMessage>>(capacity, 0.9f);
@@ -143,7 +143,7 @@ public final class ThreadableMapping {
      * @param thread The thread to add into
      * @return Whether <code>thread</code> has been changed as a result of this call
      */
-    public boolean checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
+    public boolean checkFor(Iterable<MailMessage> toCheck, List<MailMessage> thread) {
         boolean changed = false;
         // Set for existing Message-Ids
         final Set<String> existingMessageIds = new HashSet<String>(thread.size());
@@ -152,13 +152,13 @@ public final class ThreadableMapping {
         }
         // Set for already processed ones
         final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
-        for (final MailMessage mail : toCheck) {
+        for (MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
             if (null != messageId) {
                 // Those mails that refer to specified mail
                 final List<MailMessage> referencees = refsMap.get(messageId);
                 if (null != referencees) {
-                    for (final MailMessage candidate : referencees) {
+                    for (MailMessage candidate : referencees) {
                         if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                             thread.add(candidate);
                             changed = true;
@@ -172,7 +172,7 @@ public final class ThreadableMapping {
                 // Those mails that are referenced by specified mail
                 final List<MailMessage> references = messageIdMap.get(inReplyTo);
                 if (null != references) {
-                    for (final MailMessage candidate : references) {
+                    for (MailMessage candidate : references) {
                         if (processed.add(keyFor(candidate))) {
                             thread.add(candidate);
                             changed = true;
@@ -183,11 +183,11 @@ public final class ThreadableMapping {
             */
             final String[] sReferences = mail.getReferences();
             if (null != sReferences) {
-                for (final String sReference : sReferences) {
+                for (String sReference : sReferences) {
                     // Those mails that are referenced by specified mail
                     final List<MailMessage> references = messageIdMap.get(sReference);
                     if (null != references) {
-                        for (final MailMessage candidate : references) {
+                        for (MailMessage candidate : references) {
                             if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                                 thread.add(candidate);
                                 changed = true;
@@ -206,7 +206,7 @@ public final class ThreadableMapping {
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code MailMessage} instances
      */
-    public Set<MailMessage> getRefs(final String messageId) {
+    public Set<MailMessage> getRefs(String messageId) {
         final List<MailMessage> list = refsMap.get(messageId);
         return list == null ? Collections.<MailMessage> emptySet() : new LinkedHashSet<MailMessage>(list);
     }
@@ -217,7 +217,7 @@ public final class ThreadableMapping {
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code MailMessage} instances
      */
-    public Set<MailMessage> getMessageId(final String messageId) {
+    public Set<MailMessage> getMessageId(String messageId) {
         final List<MailMessage> list = messageIdMap.get(messageId);
         return list == null ? Collections.<MailMessage> emptySet() : new LinkedHashSet<MailMessage>(list);
     }
@@ -228,17 +228,17 @@ public final class ThreadableMapping {
      * @param mails The {@code MailMessage} instances
      * @return This mapping
      */
-    public ThreadableMapping initWith(final List<MailMessage> mails) {
+    public ThreadableMapping initWith(List<MailMessage> mails) {
         fill(mails, messageIdMap, refsMap);
         return this;
     }
 
-    private static void fill(final List<MailMessage> mails, final Map<String, List<MailMessage>> messageIdMap, final Map<String, List<MailMessage>> refsMap) {
+    private static void fill(List<MailMessage> mails, Map<String, List<MailMessage>> messageIdMap, Map<String, List<MailMessage>> refsMap) {
         final String hdrMessageId = MessageHeaders.HDR_MESSAGE_ID;
-        for (final MailMessage current : mails) {
+        for (MailMessage current : mails) {
             final String[] refs = current.getReferences();
             if (null != refs) {
-                for (final String reference : refs) {
+                for (String reference : refs) {
                     if (!com.openexchange.java.Strings.isEmpty(reference)) {
                         List<MailMessage> list = refsMap.get(reference);
                         if (null == list) {

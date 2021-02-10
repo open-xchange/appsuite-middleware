@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
@@ -66,11 +67,10 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public final class CreateSchemas extends DatabaseAbstraction {
 
-    public CreateSchemas(final String[] args2) {
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("createschemas");
         setOptions(parser);
 
-        String successtext = null;
         try {
             parser.ownparse(args2);
 
@@ -84,11 +84,11 @@ public final class CreateSchemas extends DatabaseAbstraction {
             parseAndSetDatabasename(parser, db);
             parseAndSetNumberOfSchemas(parser);
 
-            successtext = nameOrIdSet(this.dbid, this.dbname, "database");
+            nameOrIdSet(this.dbid, this.dbname, "database");
 
             // Trigger creation of schemas
             final AtomicReference<String[]> createdSchemas = new AtomicReference<>(null);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            final AtomicReference<Exception> errorRef = new AtomicReference<>();
             Runnable runnbable = new Runnable() {
 
                 @Override
@@ -100,7 +100,7 @@ public final class CreateSchemas extends DatabaseAbstraction {
                     }
                 }
             };
-            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            FutureTask<Void> ft = new FutureTask<>(runnbable, null);
             new Thread(ft, "Open-Xchange Database Schema Creator").start();
 
             // Await termination
@@ -112,7 +112,7 @@ public final class CreateSchemas extends DatabaseAbstraction {
                 if (1 == numSchemas) {
                     infoMessage = "Creating 1 schema in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
                 } else {
-                    infoMessage = "Creating "+numSchemas+" schemas in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
+                    infoMessage = "Creating " + numSchemas + " schemas in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
                 }
             }
             System.out.print(infoMessage);
@@ -151,7 +151,7 @@ public final class CreateSchemas extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new CreateSchemas(args);
+        new CreateSchemas().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {

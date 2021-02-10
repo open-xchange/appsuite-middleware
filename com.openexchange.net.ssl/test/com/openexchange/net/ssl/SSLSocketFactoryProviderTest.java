@@ -89,7 +89,7 @@ public class SSLSocketFactoryProviderTest {
     private UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(Services.class);

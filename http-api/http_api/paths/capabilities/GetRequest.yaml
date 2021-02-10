@@ -4,8 +4,9 @@
     tags:
       - Capabilities
     summary: Gets a capability.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier of the capability

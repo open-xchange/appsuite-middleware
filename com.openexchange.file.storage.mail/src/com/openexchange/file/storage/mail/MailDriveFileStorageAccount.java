@@ -52,6 +52,7 @@ package com.openexchange.file.storage.mail;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -114,5 +115,10 @@ public final class MailDriveFileStorageAccount implements FileStorageAccount {
     @Override
     public Map<String, Object> getConfiguration() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public JSONObject getMetadata() {
+        return new JSONObject();
     }
 }

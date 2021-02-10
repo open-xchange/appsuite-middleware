@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.s3.internal.config;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static junitx.framework.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -664,21 +666,21 @@ public class S3ClientConfigTest {
             }
             return value;
         });
-        Mockito.when(configService.getIntProperty(Mockito.any(Property.class))).thenAnswer((i) -> {
+        Mockito.when(I(configService.getIntProperty(Mockito.any(Property.class)))).thenAnswer((i) -> {
             Property p = i.getArgument(0);
             String value = config.get(p.getFQPropertyName());
             if (value == null) {
                 return p.getDefaultValue(Integer.class);
             }
-            return Integer.parseInt(value);
+            return I(Integer.parseInt(value));
         });
-        Mockito.when(configService.getBooleanProperty(Mockito.any(Property.class))).thenAnswer((i) -> {
+        Mockito.when(B(configService.getBooleanProperty(Mockito.any(Property.class)))).thenAnswer((i) -> {
             Property p = i.getArgument(0);
             String value = config.get(p.getFQPropertyName());
             if (value == null) {
                 return p.getDefaultValue(Boolean.class);
             }
-            return Boolean.parseBoolean(value);
+            return B(Boolean.parseBoolean(value));
         });
         Mockito.when(configService.getProperty(Mockito.any(Property.class), Mockito.anyMap())).thenAnswer((i) -> {
             Property p = i.getArgument(0);

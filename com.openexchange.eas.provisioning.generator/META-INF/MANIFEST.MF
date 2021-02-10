@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mobility Provisioning Configuration Generator
 Bundle-SymbolicName: com.openexchange.eas.provisioning.generator
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.mobile.configuration.generator.osgi.Activator
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.server,
  com.openexchange.templating,
  com.openexchange.threadpool,
@@ -22,3 +23,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.service.http,
  org.slf4j
+Automatic-Module-Name: com.openexchange.eas.provisioning.generator

@@ -112,13 +112,13 @@ public class LocalizedMessagesTest extends ShareTest {
          * re-redeeem token with different languages
          */
         RedeemResponse redeemResponse = guestClient.execute(new RedeemRequest(token, "de_DE", true));
-        assertTrue(null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("freigegeben"));
+        assertTrue("Wrong localization. Expected 'freigegeben' but was: '" + redeemResponse.getMessage() + "'", null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("freigegeben"));
         redeemResponse = guestClient.execute(new RedeemRequest(token, "fr_FR", true));
-        assertTrue(null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("partag\u00e9"));
+        assertTrue("Wrong localization. Expected 'partag\u00e9' but was: '" + redeemResponse.getMessage() + "'", null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("partag\u00e9"));
         redeemResponse = guestClient.execute(new RedeemRequest(token, "en_US", true));
-        assertTrue(null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("shared"));
+        assertTrue("Wrong localization. Expected 'shared' but was: '" + redeemResponse.getMessage() + "'", null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("shared"));
         redeemResponse = guestClient.execute(new RedeemRequest(token, "qx_YT", true));
-        assertTrue(null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("shared"));
+        assertTrue("Wrong localization. Expected 'shared' but was: '" + redeemResponse.getMessage() + "'", null != redeemResponse.getMessage() && redeemResponse.getMessage().contains("shared"));
     }
 
     @Test

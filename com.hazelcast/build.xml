@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.hazelcast overrides" basedir=".">
+
+    <description>
+        Special build for the com.hazelcast bundle.
+    </description>
+
+    <import file="build-project.xml"/>
+
+    <target name="rewriteBundleClassPath">
+        <!--
+        We have to avoid rewriting the bundle class path from '.' to com.hazelcast.jar.
+        That file doesn't exist and the classpath entry will not be part of the
+        org.eclipse.osgi.internal.loader.classpath.ClasspathManager. That triggers
+        https://bugs.eclipse.org/bugs/show_bug.cgi?id=565522
+        -->
+    </target>
+
+</project>

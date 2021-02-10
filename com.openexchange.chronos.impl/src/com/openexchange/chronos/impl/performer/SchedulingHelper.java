@@ -606,7 +606,7 @@ public class SchedulingHelper {
      * <li>a {@link ChangeAction#REPLY} notification to the calendar owner if the current user acts on behalf of him</li>
      * <li>a {@link ChangeAction#REPLY} notification to an internal organizer for an attendee scheduling resource</li>
      * <li>a {@link SchedulingMethod#REPLY} message to an external organizer for an attendee scheduling resource</li>
-     * <li>{@link ChangeAction#REPLY} notifications to other internal attendees for an attendee scheduling resource</li>
+     * <li>{@link ChangeAction#REPLY} notifications to other internal attendees</li>
      * </ul>
      *
      * @param attendee The attendee that replies
@@ -647,16 +647,14 @@ public class SchedulingHelper {
                     trackReplyMessage(updatedResource, attendeeEventUpdates, seriesMaster, originator, recipient);
                 }
             }
-            if (isAttendeeSchedulingResource(updatedResource, calendarUser.getEntity())) {
-                /*
-                 * prepare notifications for each individual internal attendee, if enabled
-                 */
-                for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, true).entrySet()) {
-                    Attendee recipient = entry.getKey();
-                    if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == matches(updatedResource.getOrganizer(), recipient) &&
-                        false == isActing(recipient) && false == isCalendarOwner(recipient) && isNotifyOnReplyAsAttendee(recipient)) {
-                        trackReplyNotification(updatedResource, attendeeEventUpdates, seriesMaster, originator, recipient, recipient.getCuType());
-                    }
+            /*
+             * prepare notifications for each individual internal attendee, if enabled
+             */
+            for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, true).entrySet()) {
+                Attendee recipient = entry.getKey();
+                if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == matches(updatedResource.getOrganizer(), recipient) &&
+                    false == isActing(recipient) && false == isCalendarOwner(recipient) && isNotifyOnReplyAsAttendee(recipient)) {
+                    trackReplyNotification(updatedResource, attendeeEventUpdates, seriesMaster, originator, recipient, recipient.getCuType());
                 }
             }
         } catch (OXException e) {
@@ -1063,6 +1061,8 @@ public class SchedulingHelper {
     /**
      * Constructs a calendar user representing the originator of the scheduling message, based on the calendar user in the scheduling
      * resource the action originates from, the underlying folder, and the current session's user.
+     * <p/>
+     * <i>External</i> calendar user's are used as-is.
      *
      * @param calendarUser The effective calendar user the action originates from, or <code>null</code> to fall back to the actual
      *            calendar user based on the parent folder
@@ -1070,7 +1070,7 @@ public class SchedulingHelper {
      */
     private CalendarUser getOriginator(CalendarUser calendarUser) throws OXException {
         CalendarUser originator = null != calendarUser ? new CalendarUser(calendarUser) : getCalendarUser(session, folder);
-        if (session.getUserId() != originator.getEntity()) {
+        if (isInternal(originator, CalendarUserType.INDIVIDUAL) && session.getUserId() != originator.getEntity()) {
             originator.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return originator;

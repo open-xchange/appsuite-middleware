@@ -125,7 +125,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         for (String name : MAIL_NAMES) {
             f = new File(testMailDir, name);
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getApiClient().getSession(), FOLDER, f, null, Boolean.TRUE);
+            MailImportResponse response = api.importMail(FOLDER, f, null, Boolean.TRUE);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
@@ -145,7 +145,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
                 mailListElement.setId(dest.getId());
                 body.add(mailListElement);
             }
-            MailsCleanUpResponse deleteMails = api.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
+            MailsCleanUpResponse deleteMails = api.deleteMails(body, timestamp, null, null);
             Assert.assertNull(deleteMails.getErrorDesc(), deleteMails.getError());
         } finally {
             super.tearDown();
@@ -157,7 +157,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pass all
          */
-        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
+        MailResponse resp = api.getMail(FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
         AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -186,7 +186,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pishing
          */
-        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
+        resp = api.getMail(FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         mail = checkResponse(resp);
         authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -217,7 +217,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test none
          */
-        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
+        resp = api.getMail(FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         mail = checkResponse(resp);
         authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -251,7 +251,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test trusted domain
          */
-        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
+        MailResponse resp = api.getMail(FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
         AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);

@@ -578,10 +578,14 @@ public final class OXFolderUtility {
 
     /**
      * Gets a list of permissions that have been either been added, removed, or modified based on the supplied new- and original permissions.
+     * <p/>
+     * Matching entries in the arrays are compared based on the sole permissions, i.e. the permission type and <i>legator</i> fields are
+     * ignored implicitly.
      *
      * @param newPermissions The new permissions, or <code>null</code> if not passed
      * @param originalPermissions The original permissions, or <code>null</code> if there are none
      * @return A list of permissions that have been added, modified or removed, or <code>null</code> or an empty list if there are none
+     * @see OCLPermission#equalsPermission(OCLPermission)
      */
     private static List<OCLPermission> getTouchedPermissions(OCLPermission[] newPermissions, OCLPermission[] originalPermissions) {
         if (null == newPermissions) {
@@ -593,7 +597,7 @@ public final class OXFolderUtility {
         List<OCLPermission> touchedPermissions = new ArrayList<OCLPermission>();
         for (OCLPermission permission : newPermissions) {
             OCLPermission originalPermission = getPermissionByEntity(originalPermissions, permission.getEntity());
-            if (null == originalPermission || false == originalPermission.equals(permission)) {
+            if (null == originalPermission || false == originalPermission.equalsPermission(permission)) {
                 touchedPermissions.add(permission);
             }
         }

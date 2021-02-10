@@ -76,12 +76,13 @@ import com.openexchange.sim.SimBuilder;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositingFileStorageTest {
+
     private Map<String, FileStorage> mapFor(String prefix, FileStorage fs) {
         return Collections.<String, FileStorage> singletonMap(prefix, fs);
     }
 
-         @Test
-     public void testLookupWithoutPrefix() throws Exception {
+    @Test
+    public void testLookupWithoutPrefix() throws Exception {
         SimBuilder builder = new SimBuilder();
         builder.expectCall("getFile", "ab/cd/ef/12345");
 
@@ -92,8 +93,8 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testLookupWithPrefix() throws Exception {
+    @Test
+    public void testLookupWithPrefix() throws Exception {
         SimBuilder builder = new SimBuilder();
         builder.expectCall("getFile", "ab/cd/ef/12345");
 
@@ -105,11 +106,10 @@ public class CompositingFileStorageTest {
 
     }
 
-         @Test
-     public void testSaveWithDefaultPrefix() throws Exception {
+    @Test
+    public void testSaveWithDefaultPrefix() throws Exception {
 
         InputStream is = new ByteArrayInputStream(new byte[] { 1 });
-
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("saveNewFile", is).andReturn("ab/cd/ef/12345");
@@ -124,8 +124,8 @@ public class CompositingFileStorageTest {
 
     }
 
-         @Test
-     public void testDeleteWithoutPrefix() throws Exception {
+    @Test
+    public void testDeleteWithoutPrefix() throws Exception {
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(Boolean.TRUE);
@@ -137,8 +137,8 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testDeleteWithPrefix() throws OXException {
+    @Test
+    public void testDeleteWithPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(Boolean.TRUE);
@@ -150,10 +150,12 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testBulkDeleteWithAndWithoutPrefix() throws OXException {
+    @SuppressWarnings("synthetic-access")
+    @Test
+    public void testBulkDeleteWithAndWithoutPrefix() throws OXException {
 
         SimFileStorage prefixedStorage = new SimFileStorage() {
+
             @Override
             public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
@@ -166,6 +168,7 @@ public class CompositingFileStorageTest {
         };
 
         SimFileStorage standardStorage = new SimFileStorage() {
+
             @Override
             public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
@@ -179,7 +182,7 @@ public class CompositingFileStorageTest {
 
         CompositingFileStorage cStore = new CompositingFileStorage(standardStorage, null, mapFor("hash", prefixedStorage));
 
-        Set<String> notDeleted = cStore.deleteFiles(new String[]{"ab/cd/ef/12345", "hash/ab/cd/ef/12345", "ab/cd/ef/54321", "hash/ab/cd/ef/54321"});
+        Set<String> notDeleted = cStore.deleteFiles(new String[] { "ab/cd/ef/12345", "hash/ab/cd/ef/12345", "ab/cd/ef/54321", "hash/ab/cd/ef/54321" });
 
         assertEquals(notDeleted.size(), 2);
         assertTrue(notDeleted.contains("hash/ab/cd/ef/12345"));
@@ -189,8 +192,8 @@ public class CompositingFileStorageTest {
         assertEquals(Boolean.TRUE, standardStorage.getMemory().get(0));
     }
 
-         @Test
-     public void testGetFileSizeWithoutPrefix() throws OXException {
+    @Test
+    public void testGetFileSizeWithoutPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(L(12L));
@@ -204,8 +207,8 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testGetFileSizeWithPrefix() throws OXException {
+    @Test
+    public void testGetFileSizeWithPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(L(12L));
@@ -219,8 +222,8 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testGetMimeTypeOnStandardFS() throws OXException {
+    @Test
+    public void testGetMimeTypeOnStandardFS() throws OXException {
 
         SimBuilder builder = new SimBuilder();
         builder.expectCall("getMimeType", "TestFile.odt").andReturn("text/odt");
@@ -233,8 +236,8 @@ public class CompositingFileStorageTest {
         builder.assertAllWereCalled();
     }
 
-         @Test
-     public void testCompositeFileList() throws OXException {
+    @Test
+    public void testCompositeFileList() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
         prefixedBuilder.expectCall("getFileList").andReturn(new TreeSet<String>(Arrays.asList("ab/cd/ef/12345")));
@@ -254,8 +257,8 @@ public class CompositingFileStorageTest {
         standardBuilder.assertAllWereCalled();
     }
 
-         @Test
-     public void testRemoveIsMultiplexed() throws OXException {
+    @Test
+    public void testRemoveIsMultiplexed() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
         prefixedBuilder.expectCall("remove");
@@ -271,8 +274,8 @@ public class CompositingFileStorageTest {
         standardBuilder.assertAllWereCalled();
     }
 
-         @Test
-     public void testIsStateFileCorrect() throws OXException {
+    @Test
+    public void testIsStateFileCorrect() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
         prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.FALSE);
@@ -291,8 +294,8 @@ public class CompositingFileStorageTest {
 
     }
 
-         @Test
-     public void testIsStateFileCorrect2() throws OXException {
+    @Test
+    public void testIsStateFileCorrect2() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
         prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.TRUE);
@@ -311,8 +314,8 @@ public class CompositingFileStorageTest {
 
     }
 
-         @Test
-     public void testRecreateStateFile() throws OXException {
+    @Test
+    public void testRecreateStateFile() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
         prefixedBuilder.expectCall("recreateStateFile");
@@ -391,7 +394,6 @@ public class CompositingFileStorageTest {
             remember.add(o);
         }
 
-
         public List<Object> getMemory() {
             return remember;
         }
@@ -402,8 +404,7 @@ public class CompositingFileStorageTest {
         }
 
         @Override
-        public void setFileLength(long length, String name) throws OXException {
-        }
+        public void setFileLength(long length, String name) throws OXException {}
 
         @Override
         public InputStream getFile(String name, long offset, long length) throws OXException {

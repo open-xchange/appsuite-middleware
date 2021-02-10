@@ -58,6 +58,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.OXException;
@@ -76,6 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class GetVersitAction extends AbstractMailAction {
 
     /**
@@ -83,12 +85,12 @@ public final class GetVersitAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetVersitAction(final ServiceLookup services) {
+    public GetVersitAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -130,7 +132,7 @@ public final class GetVersitAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             final JSONObject jo = new JSONObject();
-            for (final CommonObject current : insertedObjs) {
+            for (CommonObject current : insertedObjs) {
                 jo.reset();
                 jo.put(DataFields.ID, current.getObjectID());
                 jo.put(FolderChildFields.FOLDER_ID, current.getParentFolderID());

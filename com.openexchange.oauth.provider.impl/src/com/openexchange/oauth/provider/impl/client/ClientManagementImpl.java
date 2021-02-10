@@ -101,10 +101,7 @@ public class ClientManagementImpl implements ClientManagement {
 
     @Override
     public List<Client> getClients(String contextGroup) throws ClientManagementException {
-        if (Strings.isEmpty(contextGroup)) {
-            contextGroup = DEFAULT_GID;
-        }
-        return clientStorage.getClients(contextGroup);
+        return clientStorage.getClients(Strings.isEmpty(contextGroup) ? DEFAULT_GID : contextGroup);
     }
 
     @Override

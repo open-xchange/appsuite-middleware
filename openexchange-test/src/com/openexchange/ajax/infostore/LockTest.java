@@ -100,9 +100,10 @@ public class LockTest extends InfostoreAJAXTest {
          */
         File testFile = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
         file = itm.createFileOnServer(folder.getObjectID(), "test.bin", "application/octet-stream");
+        assertFalse(itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
         for (int i = 0; i < 5; i++) {
             itm.updateAction(file, testFile, new com.openexchange.file.storage.File.Field[] {}, itm.getLastResponse().getTimestamp());
-            assertFalse(itm.getLastResponse().hasError());
+            checkForError(itm);
         }
     }
 
@@ -112,11 +113,11 @@ public class LockTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File file = itm.getAction(id);
 
         itm.lock(id);
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
         Date clientTimestamp = itm.getLastResponse().getTimestamp();
 
         file = itm.getAction(id);
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
         assertLocked((JSONObject) itm.getLastResponse().getData());
 
         // BUG 4232
@@ -155,7 +156,7 @@ public class LockTest extends InfostoreAJAXTest {
         // Lock owner may update
         file.setTitle("Hallo");
         itm.updateAction(file, new Field[] { Field.ID, Field.TITLE }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
         com.openexchange.file.storage.File reload = itm.getAction(id);
         assertEquals("Hallo", reload.getTitle());
 
@@ -169,25 +170,25 @@ public class LockTest extends InfostoreAJAXTest {
     public void testUnlock() throws Exception {
         final String id = file.getId();
         itm.lock(id);
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
 
         com.openexchange.file.storage.File file = itm.getAction(id);
         assertLocked(file);
 
         // Lock owner may relock
         itm.lock(id);
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
 
         // Lock owner may unlock (duh!)
         itm.unlock(id);
-        assertFalse(itm.getLastResponse().hasError());
+        checkForError(itm);
         assertNotNull(itm.getLastResponse().getTimestamp());
         file = itm.getAction(id);
         assertUnlocked(file);
 
         // Object may be locked now
         itm2.lock(id);
-        assertFalse(itm2.getLastResponse().hasError());
+        checkForError(itm2);
 
         // Object may not be modified
         file.setTitle("Hallo");
@@ -196,7 +197,7 @@ public class LockTest extends InfostoreAJAXTest {
 
         // Owner may unlock
         itm2.unlock(id);
-        assertFalse(itm2.getLastResponse().hasError());
+        checkForError(itm2);
         file = itm.getAction(id);
         assertUnlocked(file);
     }
@@ -217,6 +218,13 @@ public class LockTest extends InfostoreAJAXTest {
 
     public static void assertUnlocked(final JSONObject o) throws JSONException {
         assertEquals(0, o.getInt(Metadata.LOCKED_UNTIL_LITERAL.getName()));
+    }
+
+    /**
+     * Checks that the last response of the given {@link InfostoreTestManager} doesn't have an error
+     */
+    private void checkForError(InfostoreTestManager itm) {
+        assertFalse("Unexpected error: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
     }
 
 }

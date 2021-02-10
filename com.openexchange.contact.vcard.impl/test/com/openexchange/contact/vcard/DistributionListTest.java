@@ -77,14 +77,14 @@ public class DistributionListTest extends VCardTest {
         super();
     }
 
-         @Test
-     public void testExportDistributionList() throws OXException {
+    @Test
+    public void testExportDistributionList() throws OXException {
         /*
          * create test contact
          */
         Contact contact = new Contact();
         contact.setDisplayName("Liste");
-        List<DistributionListEntryObject> distributionList = new ArrayList<DistributionListEntryObject>();
+        List<DistributionListEntryObject> distributionList = new ArrayList<>();
         distributionList.add(new DistributionListEntryObject("Otto", "otto@example.com", DistributionListEntryObject.INDEPENDENT));
         distributionList.add(new DistributionListEntryObject("Horst", "horst@example.com", DistributionListEntryObject.INDEPENDENT));
         DistributionListEntryObject herbert = new DistributionListEntryObject("Herbert", "herbert@example.com", DistributionListEntryObject.INDEPENDENT);
@@ -120,8 +120,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testImportDistributionList() throws OXException {
+    @Test
+    public void testImportDistributionList() {
         /*
          * import vCard
          */
@@ -159,8 +159,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testImportOldDistributionList() throws OXException {
+    @Test
+    public void testImportOldDistributionList() {
         /*
          * import vCard
          */
@@ -199,8 +199,8 @@ public class DistributionListTest extends VCardTest {
         }
     }
 
-         @Test
-     public void testMergeWithOldDistributionList() throws OXException {
+    @Test
+    public void testMergeWithOldDistributionList() {
         /*
          * import original vCard
          */

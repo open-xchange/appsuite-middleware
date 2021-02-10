@@ -138,12 +138,12 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException
      */
     @Override
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+    public MailMessage[] getAllMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
     @Override
-    public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
+    public MailPart getAttachment(String folder, String mailId, String sequenceId) throws OXException {
         final MailMessage mail = getMessage(folder, mailId, false);
         if (null == mail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
@@ -158,7 +158,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     }
 
     @Override
-    public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
+    public MailPart getImageAttachment(String folder, String mailId, String contentId) throws OXException {
         if (Strings.isEmpty(contentId)) {
             return null;
         }
@@ -186,7 +186,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If plain texts cannot be returned
      */
     @Override
-    public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
+    public String[] getPrimaryContents(String folder, String[] mailIds) throws OXException {
         final TextFinder textFinder = new TextFinder();
         final int length = mailIds.length;
         final String[] retval = new String[length];
@@ -222,7 +222,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If message could not be returned
      */
     @Override
-    public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
+    public MailMessage getMessage(String folder, String mailId, boolean markSeen) throws OXException {
         final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
@@ -241,7 +241,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException;
 
     @Override
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
+    public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
         return null;
     }
 
@@ -260,7 +260,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If unread messages cannot be returned.
      */
     @Override
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
+    public MailMessage[] getUnreadMessages(String folder, MailSortField sortField, OrderDirection order, MailField[] fields, int limit) throws OXException {
         if (limit == 0) {
             return EMPTY_RETVAL;
         }
@@ -283,7 +283,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If messages cannot be copied.
      */
     @Override
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
+    public String[] moveMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException {
         final String[] ids = copyMessages(sourceFolder, destFolder, mailIds, fast);
         deleteMessages(sourceFolder, mailIds, true);
         return ids;
@@ -293,7 +293,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public abstract void releaseResources() throws OXException;
 
     @Override
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+    public MailMessage saveDraft(String draftFullname, ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
             MailMessage filledMail = null;
@@ -351,7 +351,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
     @Override
-    public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
+    public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws OXException {
         // Empty body here
     }
 
@@ -372,7 +372,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If mails cannot be returned
      */
     @Override
-    public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
+    public MailMessage[] getNewAndModifiedMessages(String folder, MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
 
@@ -385,7 +385,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @throws OXException If mails cannot be returned
      */
     @Override
-    public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
+    public MailMessage[] getDeletedMessages(String folder, MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
 

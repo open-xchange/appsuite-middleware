@@ -63,7 +63,7 @@ public final class ListLsubRuntimeException extends RuntimeException {
      *
      * @param message The error message
      */
-    public ListLsubRuntimeException(final String message) {
+    public ListLsubRuntimeException(String message) {
         super(message);
     }
 

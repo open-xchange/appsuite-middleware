@@ -1,0 +1,17 @@
+type: object
+title: Attachment
+description: A compositon space info object.
+properties:
+  id:
+    type: string
+    description: The composition space id
+  mailPath:
+    type: object
+    description: The path to the draft message reflecting composition space
+    properties:
+      id:
+        type: string
+        description: The identifier of the draft message
+      folderId:
+        type: string
+        description: The identifier of the folder in which the draft message resides

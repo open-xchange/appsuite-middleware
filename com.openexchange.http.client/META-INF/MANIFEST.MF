@@ -2,11 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HTTP Client Helpers
 Bundle-SymbolicName: com.openexchange.http.client
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.http.client.osgi.HTTPClientActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.exception,
  com.openexchange.filemanagement,
  com.openexchange.groupware,
  com.openexchange.i18n,
@@ -34,3 +36,4 @@ Export-Package: com.openexchange.http.client,
  com.openexchange.http.client.apache,
  com.openexchange.http.client.builder,
  com.openexchange.http.client.exceptions
+Automatic-Module-Name: com.openexchange.http.client

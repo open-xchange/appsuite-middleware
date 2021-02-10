@@ -77,7 +77,7 @@ public class AllTest {
     private SimMessagingServiceRegistry registry;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         registry = new SimMessagingServiceRegistry();
 
         final SimMessagingService service1 = new SimMessagingService();
@@ -167,7 +167,7 @@ public class AllTest {
 
     // Error Cases
     @Test
-    public void testExceptionInMessagingRegistry() throws OXException {
+    public void testExceptionInMessagingRegistry() {
         registry.setException(new OXException(-1));
         final AllAction action = new AllAction(registry);
 

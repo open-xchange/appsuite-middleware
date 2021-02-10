@@ -51,12 +51,10 @@ package com.openexchange.icap.test;
 
 import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
 import com.openexchange.icap.ICAPMethod;
 import com.openexchange.icap.ICAPRequest;
 import com.openexchange.icap.ICAPResponse;
@@ -84,7 +82,7 @@ public class ICAPResponseModificationTest extends AbstractICAPTest {
      * Tests sending an infected file to the ICAP server
      */
     @Test
-    public void testSendInfected() throws OXException, IOException {
+    public void testSendInfected() {
         ICAPResponse expectedResponse = ICAPResponseFactory.buildInfectedFoundResponse();
         InputStream mockedResponse = ICAPResponseFactory.buildICAPResponseInputStream(expectedResponse);
 

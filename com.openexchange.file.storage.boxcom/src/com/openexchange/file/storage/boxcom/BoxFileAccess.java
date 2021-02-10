@@ -121,7 +121,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     /**
      * Initializes a new {@link BoxFileAccess}.
      */
-    public BoxFileAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess, BoxFolderAccess folderAccess) throws OXException {
+    public BoxFileAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess, BoxFolderAccess folderAccess) {
         super(boxAccess, account, session);
         this.accountAccess = accountAccess;
         this.folderAccess = folderAccess;
@@ -844,7 +844,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
      * @return a {@link List} of {@link File}s contained in the specified folder
      * @throws OXException if an error is occurred
      */
-    private List<File> getFiles(String folderId, List<Field> fields) throws OXException {
+    List<File> getFiles(String folderId, List<Field> fields) throws OXException {
         BoxAPIConnection apiConnection = getAPIConnection();
         com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
@@ -930,6 +930,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
          *
          * @return The field
          */
+        @SuppressWarnings("unused")
         public Field getField() {
             return field;
         }
@@ -964,7 +965,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 try {
                     BoxFileField bff = BoxFileField.valueOf(f.name());
                     parsedFields.add(bff.boxField);
-                } catch (IllegalArgumentException e) {
+                } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
                     LOGGER.debug("OX File Field '{}' is not mappable to a BoxField. Skipping.", f);
                 }
             }

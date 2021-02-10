@@ -1,0 +1,38 @@
+/infostore?action=backwardLink:
+  get:
+    operationId: getBackwardLink
+    tags:
+      - Infostore
+      - FederatedSharing
+    summary: >
+      Generates a <i>backward</i> link into the guest account of a subscribed share, pointing to a 
+      specific target, which can be used to open the regular, browser-based guest mode on the remote 
+      host. Only available if supported by the responsible provider.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
+      - in: query
+        name: id
+        description: Object ID of the requested infoitem.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: redirect
+        description: >
+          "true" if the redirect link should be returned in the Location header of a HTTP 302 Moved Temporarily 
+          response, "false" (default) to return the link in a plain API response.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '302':
+        description: The backward link will be put into the Location header of the response. Used if "redirect" URL parameter was true.
+      '200':
+        description: >
+          An JSON object holding the backward link in its "link" field if the call was successful. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackwardLinkResponse'

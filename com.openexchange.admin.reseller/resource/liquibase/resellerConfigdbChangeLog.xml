@@ -179,5 +179,68 @@
             <dropColumn tableName="subadmin" columnName="salt" />
         </rollback>
     </changeSet>
+    
+    <!-- ####################### 7.10.5 ###########################  -->
+    
+	<changeSet id="7.10.5:subadmin_config_properties:create" author="ioannis.chouklis@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="subadmin_config_properties" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'subadmin_config_properties' table</comment>
+		<sql>
+			CREATE TABLE subadmin_config_properties (
+				sid INT4 UNSIGNED NOT NULL,
+				propertyKey VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT '',
+				propertyValue VARCHAR(128) CHARACTER SET latin1 NOT NULL DEFAULT '',
+				PRIMARY KEY (sid, propertyKey)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="subadmin_config_properties" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.5:subadmin_capabilities:create" author="ioannis.chouklis@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="subadmin_capabilities" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'subadmin_capabilities' table</comment>
+		<sql>
+			CREATE TABLE subadmin_capabilities (
+				sid INT4 UNSIGNED NOT NULL,
+				capability VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT '',
+				PRIMARY KEY (sid, capability)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="subadmin_capabilities" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.5:subadmin_taxonomies:create" author="ioannis.chouklis@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="subadmin_taxonomies" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'subadmin_taxonomies' table</comment>
+		<sql>
+			CREATE TABLE subadmin_taxonomies (
+				sid INT4 UNSIGNED NOT NULL,
+				taxonomy VARCHAR(64) CHARACTER SET latin1 NOT NULL DEFAULT '',
+				PRIMARY KEY (sid, taxonomy)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="subadmin_taxonomies" />
+		</rollback>
+	</changeSet>
 
 </databaseChangeLog>

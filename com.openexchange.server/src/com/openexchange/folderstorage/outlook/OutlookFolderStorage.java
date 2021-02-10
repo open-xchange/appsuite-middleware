@@ -89,6 +89,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -100,6 +101,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.RestoringFolderStorage;
+import com.openexchange.folderstorage.SearchableFileFolderNameFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -111,7 +113,7 @@ import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionM
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -179,7 +181,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
+public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage, SearchableFileFolderNameFolderStorage {
 
     static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -877,7 +879,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 return FolderStorage.PUBLIC_ID;
             } else if (CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
-            } else if (ContactContentType.getInstance().equals(contentType)) {
+            } else if (ContactsContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
             }
         }
@@ -1566,6 +1568,19 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
     }
 
     @Override
+    public List<Folder> searchFileStorageFolders(String treeId, String rootFolderId, String query, long date, boolean includeSubfolders, int start, int end, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, rootFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, rootFolderId);
+        }
+        if (false == SearchableFileFolderNameFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_SEARCH_SUPPORT.create();
+        }
+        SearchableFileFolderNameFolderStorage searchableFolderStorage = (SearchableFileFolderNameFolderStorage) folderStorage;
+        return searchableFolderStorage.searchFileStorageFolders(realTreeId, rootFolderId, query, date, includeSubfolders, start, end, storageParameters);
+    }
+
+    @Override
     public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
         if (com.openexchange.folderstorage.internal.Tools.isGlobalId(parentId)) {
             return null;
@@ -1749,8 +1764,12 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                             CompletionService<Void> completionService = new CallerRunsCompletionService<Void>();
                             int taskCount = 0;
                             try {
+                                boolean separateFederatedShares = StorageParametersUtility.getBoolParameter("separateFederatedShares", storageParameters);
                                 final List<FileStorageService> allServices = fsr.getAllServices();
                                 for (final FileStorageService fsService : allServices) {
+                                    if (false == separateFederatedShares && SharingFileStorageService.class.isInstance(fsService)) {
+                                        continue; // federated shares will be mounted below folders 10 and 15
+                                    }
                                     Callable<Void> task = new Callable<Void>() {
 
                                         @Override

@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
 import com.openexchange.gdpr.dataexport.DayOfWeekTimeRanges;
@@ -73,11 +72,6 @@ public class DataExportConfigTest {
      */
     public DataExportConfigTest() {
         super();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-
     }
 
     @Test

@@ -1,2 +1,2 @@
-opt/open-xchange/etc/hazelcast/dovecotnotify.properties
-opt/open-xchange/etc/dovecot-push.properties
+/opt/open-xchange/etc/hazelcast/dovecotnotify.properties
+/opt/open-xchange/etc/dovecot-push.properties

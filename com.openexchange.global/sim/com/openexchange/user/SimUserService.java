@@ -49,6 +49,7 @@
 
 package com.openexchange.user;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,15 +72,15 @@ public class SimUserService implements UserService {
      * Adds a user, its ID must be set!
      */
     public void addUser(User user, int contextId) {
-        ConcurrentMap<Integer, User> users = contexts.get(contextId);
+        ConcurrentMap<Integer, User> users = contexts.get(I(contextId));
         if (users == null) {
             users = new ConcurrentHashMap<Integer, User>();
-            ConcurrentMap<Integer, User> existing = contexts.putIfAbsent(contextId, users);
+            ConcurrentMap<Integer, User> existing = contexts.putIfAbsent(I(contextId), users);
             if (existing != null) {
                 users = existing;
             }
         }
-        users.put(user.getId(), user);
+        users.put(I(user.getId()), user);
     }
 
     @Override
@@ -112,12 +113,12 @@ public class SimUserService implements UserService {
 
     @Override
     public User getUser(int uid, int contextId) throws OXException {
-        ConcurrentMap<Integer, User> users = contexts.get(contextId);
+        ConcurrentMap<Integer, User> users = contexts.get(I(contextId));
         if (users == null) {
             return null;
         }
 
-        return users.get(uid);
+        return users.get(I(uid));
     }
 
     @Override

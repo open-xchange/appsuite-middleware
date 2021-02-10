@@ -49,8 +49,10 @@
 
 package com.openexchange.folder.json.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,6 +91,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
@@ -95,6 +99,8 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
+import com.openexchange.user.UserService;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -273,8 +279,7 @@ public final class FolderWriter {
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-            FolderObject fo = turnIntoFolderObject(folder);
-            Object value = aff.getValue(fo, requestData.getSession());
+            Object value = aff.getValue(folder, requestData.getSession());
             jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
         }
     }
@@ -561,6 +566,7 @@ public final class FolderWriter {
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
 
+            @SuppressWarnings("deprecation")
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
                 final Type obj = folder.getType();
@@ -615,8 +621,11 @@ public final class FolderWriter {
                                 continue;
                             }
                             final JSONObject jo = new JSONObject(4);
+                            jo.put(FolderField.IDENTIFIER.getName(), null != permission.getIdentifier() ? permission.getIdentifier() : String.valueOf(permission.getEntity()));
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
-                            jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+                                jo.put(FolderField.ENTITY.getName(), permission.getEntity());
+                            }
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
                             ja.put(jo);
                         }
@@ -700,13 +709,23 @@ public final class FolderWriter {
         });
         m.put(FolderField.USED_FOR_SYNC.getColumn(), new FolderFieldWriter() {
 
+            private final JSONObject defaultJUsedForSync = ImmutableJSONObject.immutableFor(
+                new JSONObject(2)
+                .putSafe("value", String.valueOf(UsedForSync.DEFAULT.isUsedForSync()))
+                .putSafe("protected", String.valueOf(UsedForSync.DEFAULT.isProtected()))
+            );
+
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
-                JSONObject value = new JSONObject();
                 UsedForSync usedForSync = folder.getUsedForSync();
-                value.put("value", String.valueOf(usedForSync==null ? Boolean.TRUE : Boolean.valueOf(usedForSync.isUsedForSync())));
-                value.put("protected", String.valueOf(usedForSync==null ? Boolean.FALSE : Boolean.valueOf(usedForSync.isProtected())));
-                jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, value);
+                if (usedForSync == null) {
+                    jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, defaultJUsedForSync);
+                } else {
+                    JSONObject jUsedForSync = new JSONObject(2);
+                    jUsedForSync.put("value", String.valueOf(usedForSync.isUsedForSync()));
+                    jUsedForSync.put("protected", String.valueOf(usedForSync.isProtected()));
+                    jsonPutter.put(jsonPutter.withKey() ? FolderField.USED_FOR_SYNC.getName() : null, jUsedForSync);
+                }
             }
         });
         // Capabilities
@@ -737,6 +756,28 @@ public final class FolderWriter {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUPPORTED_CAPABILITIES.getName() : null, null == caps ? JSONObject.NULL : new JSONArray(caps));
             }
         });
+        m.put(FolderField.CREATED_FROM.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+                EntityInfo entityInfo = folder.getCreatedFrom();
+                if (null == entityInfo && 0 < folder.getCreatedBy()) {
+                    entityInfo = resolveEntityInfo(session, folder.getCreatedBy());
+                }
+                jsonValue.put(jsonValue.withKey() ? FolderField.CREATED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
+            }
+        });
+        m.put(FolderField.MODIFIED_FROM.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(JSONValuePutter jsonValue, UserizedFolder folder, Map<String, Object> state, ServerSession session) throws JSONException {
+                EntityInfo entityInfo = folder.getModifiedFrom();
+                if (null == entityInfo && 0 < folder.getModifiedBy()) {
+                    entityInfo = resolveEntityInfo(session, folder.getModifiedBy());
+                }
+                jsonValue.put(jsonValue.withKey() ? FolderField.MODIFIED_FROM.getName() : null, null == entityInfo ? JSONObject.NULL : entityInfo.toJSON());
+            }
+        });
         STATIC_WRITERS_MAP = m;
 
         final FolderField[] all = FolderField.values();
@@ -752,6 +793,25 @@ public final class FolderWriter {
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
     }
 
+    /**
+     * Resolve entity information for given user identifier
+     *
+     * @param session The calling user's session
+     * @param forUserId The user identifier to get the entity info for
+     * @return The entity information or <code>null</code> in case it cannot be resolved
+     */
+    static EntityInfo resolveEntityInfo(ServerSession session, int forUserId) {
+        try {
+            User user = ServiceRegistry.getInstance().getService(UserService.class, true).getUser(forUserId, session.getContext());
+            EntityInfo.Type type = user.isGuest() ? (user.isAnonymousGuest() ? EntityInfo.Type.ANONYMOUS : EntityInfo.Type.GUEST) : EntityInfo.Type.USER;
+            return new EntityInfo(String.valueOf(user.getId()), user.getDisplayName(), null, user.getGivenName(), user.getSurname(), user.getMail(), user.getId(), null, type);
+        } catch (OXException e) {
+            LOG.debug("Error resolving entity information for user {} in context {}.", I(forUserId), I(session.getContextId()), e);
+        }
+        return new EntityInfo(String.valueOf(forUserId), null, null, null, null, null, forUserId, null, EntityInfo.Type.USER);
+    }
+
+    @SuppressWarnings("deprecation")
     static FolderObject turnIntoFolderObject(UserizedFolder folder) {
         FolderObject fo = new FolderObject();
         final int numFolderId = Tools.getUnsignedInteger(folder.getID());
@@ -824,7 +884,7 @@ public final class FolderWriter {
                 AdditionalFolderField aff = additionalFolderFieldList.opt(curCol);
                 if (null != aff) {
                     aff = new BulkFolderField(aff, folders.length);
-                    aff.getValues(turnIntoFolderObjects(folders), requestData.getSession());
+                    aff.getValues(Arrays.asList(folders), requestData.getSession());
                     ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);

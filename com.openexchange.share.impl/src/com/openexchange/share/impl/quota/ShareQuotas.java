@@ -81,8 +81,8 @@ public class ShareQuotas {
      */
     public ShareQuotas(QuotaService quotaService, Session session) throws OXException {
         super();
-        this.shareLinksQuota = getAmountQuota(quotaService, session, "share_links", "0");
-        this.inviteGuestsQuota = getAmountQuota(quotaService, session, "invite_guests", "0");
+        this.shareLinksQuota = getAmountQuota(quotaService, session, "share_links");
+        this.inviteGuestsQuota = getAmountQuota(quotaService, session, "invite_guests");
     }
 
     /**
@@ -131,7 +131,7 @@ public class ShareQuotas {
         }
     }
 
-    private Quota getAmountQuota(QuotaService quotaService, Session session, String provider, String accountId) throws OXException {
+    private Quota getAmountQuota(QuotaService quotaService, Session session, String provider) throws OXException {
         QuotaProvider quotaProvider = quotaService.getProvider(provider);
         if (null != quotaProvider) {
             AccountQuota accountQuota = quotaProvider.getFor(session, "0");

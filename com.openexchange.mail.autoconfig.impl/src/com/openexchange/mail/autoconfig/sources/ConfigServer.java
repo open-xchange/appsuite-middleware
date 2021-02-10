@@ -105,12 +105,12 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             try {
                 url = new URL(sUrl);
             } catch (MalformedURLException e) {
-                LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
+                LOG.debug("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                 return null;
             }
 
             if (isInvalid(url)) {
-                LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
+                LOG.debug("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
                 return null;
             }
         }
@@ -134,12 +134,12 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     try {
                         url = new URL(sUrl);
                     } catch (MalformedURLException e) {
-                        LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
+                        LOG.debug("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                         return null;
                     }
 
                     if (isInvalid(url)) {
-                        LOG.warn("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
+                        LOG.debug("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
                         return null;
                     }
                 }
@@ -154,7 +154,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
             Header contentType = rsp.getFirstHeader("Content-Type");
             if (!contentType.getValue().contains("text/xml")) {
-                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of type 'text/xml'.");
+                LOG.info("Could not retrieve config XML from autoconfig server. The response's content type is not of type 'text/xml'.");
                 return null;
             }
 

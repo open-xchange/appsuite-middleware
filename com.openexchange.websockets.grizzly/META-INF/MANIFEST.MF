@@ -2,19 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Grizzly-backed Web Sockets implementation
 Bundle-SymbolicName: com.openexchange.websockets.grizzly
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
+ com.hazelcast.cluster,
  com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
  com.hazelcast.logging,
  com.hazelcast.map,
  com.hazelcast.map.listener,
+ com.hazelcast.multimap,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
@@ -66,3 +68,4 @@ Import-Package: com.google.common.annotations,
 Bundle-Activator: com.openexchange.websockets.grizzly.osgi.GrizzlyWebSocketActivator
 Export-Package: com.openexchange.websockets.grizzly,
  com.openexchange.websockets.grizzly.auth
+Automatic-Module-Name: com.openexchange.websockets.grizzly

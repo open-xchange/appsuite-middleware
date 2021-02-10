@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.net.MalformedURLException;
@@ -67,20 +68,35 @@ public class Change extends ChangeCore {
 
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
 
-    public Change(final String[] args2) {
-        final AdminParser parser = new AdminParser("changecontext");
-
-        commonfunctions(parser, args2);
+    /**
+     * Entry point
+     *
+     * @param args command line arguments
+     */
+    public static void main(final String args[]) {
+        new Change().execute(args);
     }
 
-    public static void main(final String args[]) {
-        new Change(args);
+    /**
+     * Initializes a new {@link Change}.
+     */
+    private Change() {
+        super();
+    }
+
+    /**
+     * Executes the command
+     *
+     * @param args the command line arguments
+     */
+    private void execute(String[] args) {
+        commonfunctions(new AdminParser("changecontext"), args);
     }
 
     @Override
     protected void maincall(final AdminParser parser, final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         // get rmi ref
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        OXContextInterface oxctx = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
 
         // add login mappings
         ctxabs.parseAndSetAddLoginMapping(parser);
@@ -93,24 +109,23 @@ public class Change extends ChangeCore {
         // do the change
         oxctx.change(ctx, auth);
 
-
         UserModuleAccess changed_access = oxctx.getModuleAccess(ctx, auth);
-        final boolean wantsChange = setModuleAccessOptions(parser, changed_access);
+        boolean wantsChange = setModuleAccessOptions(parser, changed_access);
 
-        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
+        String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
-        if ( wantsChange && accessCombinationName == null) {
+        if (wantsChange && accessCombinationName == null) {
             // user wants to change individual perms
             oxctx.changeModuleAccess(ctx, changed_access, auth);
         } else if (accessCombinationName != null && !wantsChange) {
             oxctx.changeModuleAccess(ctx, accessCombinationName, auth);
-        } else if ( accessCombinationName != null && wantsChange ) {
+        } else if (accessCombinationName != null && wantsChange) {
             throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
 
-        final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
-        final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
-        final Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
+        Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
+        Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
+        Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
         if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
             oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }

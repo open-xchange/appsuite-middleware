@@ -54,6 +54,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -73,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
@@ -452,9 +454,9 @@ public class CompositionSpaceDbStorage {
     private void insert(Connection connection, CompositionSpaceContainer compositionSpace, int maxSpacesPerUser) throws SQLException, OXException {
         MessageField[] mappedFields = MAPPER.getMappedFields();
 
-        StringBuilder sb = new StringBuilder().append("INSERT INTO compositionSpace (uuid,cid,user,lastModified,").append(MAPPER.getColumns(mappedFields)).append(") ");
+        StringBuilder sb = new StringBuilder().append("INSERT INTO compositionSpace (uuid,cid,user,lastModified,clientToken,").append(MAPPER.getColumns(mappedFields)).append(") ");
         if (maxSpacesPerUser > 0) {
-            sb.append("SELECT ?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append(" FROM DUAL ");
+            sb.append("SELECT ?,?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append(" FROM DUAL ");
             sb.append("WHERE ?>(SELECT COUNT(*) FROM compositionSpace WHERE cid=? AND user=?)");
         } else {
             sb.append(") VALUES (?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append(")");
@@ -466,6 +468,14 @@ public class CompositionSpaceDbStorage {
             stmt.setInt(parameterIndex++, contextId);
             stmt.setInt(parameterIndex++, userId);
             stmt.setLong(parameterIndex++, compositionSpace.getLastModified().getTime());
+            {
+                ClientToken clientToken = compositionSpace.getMessage() == null ? null : compositionSpace.getMessage().getClientToken();
+                if (clientToken == null || clientToken.isAbsent()) {
+                    stmt.setNull(parameterIndex++, Types.VARCHAR);
+                } else {
+                    stmt.setString(parameterIndex++, clientToken.getToken());
+                }
+            }
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, compositionSpace.getMessage(), mappedFields);
             if (maxSpacesPerUser > 0) {
                 stmt.setInt(parameterIndex++, maxSpacesPerUser);
@@ -515,7 +525,7 @@ public class CompositionSpaceDbStorage {
 
     private CompositionSpaceContainer select(Connection connection, UUID compositionSpaceId) throws SQLException, OXException {
         MessageField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder().append("SELECT lastModified, ").append(MAPPER.getColumns(mappedFields)).append(" FROM compositionSpace WHERE cid=? AND user=? AND uuid=?").toString();
+        String sql = new StringBuilder().append("SELECT lastModified, clientToken, ").append(MAPPER.getColumns(mappedFields)).append(" FROM compositionSpace WHERE cid=? AND user=? AND uuid=?").toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -528,6 +538,7 @@ public class CompositionSpaceDbStorage {
                 MessageDescription messageDescription = MAPPER.fromResultSet(rs, mappedFields);
                 CompositionSpaceContainer retval = new CompositionSpaceContainer();
                 retval.setLastModified(new Date(rs.getLong("lastModified")));
+                messageDescription.setClientToken(ClientToken.of(rs.getString("clientToken")));
                 retval.setMessage(messageDescription);
                 retval.setUuid(compositionSpaceId);
                 return retval;
@@ -550,9 +561,9 @@ public class CompositionSpaceDbStorage {
         boolean noFields = fields == null || fields.length == 0;
         String sql;
         if (noFields) {
-            sql = "SELECT uuid, lastModified FROM compositionSpace WHERE cid=? AND user=?";
+            sql = "SELECT uuid, lastModified, clientToken FROM compositionSpace WHERE cid=? AND user=?";
         } else {
-            sql = new StringBuilder().append("SELECT uuid, lastModified, ").append(MAPPER.getColumns(fields)).append(" FROM compositionSpace WHERE cid=? AND user=?").toString();
+            sql = new StringBuilder().append("SELECT uuid, lastModified, clientToken, ").append(MAPPER.getColumns(fields)).append(" FROM compositionSpace WHERE cid=? AND user=?").toString();
         }
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextId);
@@ -564,9 +575,10 @@ public class CompositionSpaceDbStorage {
 
                 List<CompositionSpaceContainer> list = new LinkedList<>();
                 do {
-                    MessageDescription messageDescription = noFields ? null : MAPPER.fromResultSet(rs, fields);
+                    MessageDescription messageDescription = noFields ? new MessageDescription() : MAPPER.fromResultSet(rs, fields);
                     CompositionSpaceContainer csc = new CompositionSpaceContainer();
                     csc.setLastModified(new Date(rs.getLong("lastModified")));
+                    messageDescription.setClientToken(ClientToken.of(rs.getString("clientToken")));
                     csc.setMessage(messageDescription);
                     csc.setUuid(UUIDs.toUUID(rs.getBytes("uuid")));
                     list.add(csc);
@@ -582,11 +594,20 @@ public class CompositionSpaceDbStorage {
             return 0;
         }
 
+        String token;
+        {
+            ClientToken clientToken = compositionSpace.getMessage() == null ? null : (compositionSpace.getMessage().containsValidClientToken() ? compositionSpace.getMessage().getClientToken() : null);
+            token = clientToken != null && clientToken.isPresent() ? clientToken.getToken() : null;
+        }
+
         String sql;
         {
             StringBuilder sb = new StringBuilder("UPDATE compositionSpace SET ");
             if (updateLastModified) {
                 sb.append("lastModified=?,");
+            }
+            if (token != null) {
+                sb.append("clientToken=?,");
             }
             sb.append(MAPPER.getAssignments(assignedfields));
             sb.append(" WHERE cid=? AND user=? AND uuid=?");
@@ -599,7 +620,12 @@ public class CompositionSpaceDbStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             long newLastModified = System.currentTimeMillis();
-            stmt.setLong(parameterIndex++, newLastModified);
+            if (updateLastModified) {
+                stmt.setLong(parameterIndex++, newLastModified);
+            }
+            if (token != null) {
+                stmt.setString(parameterIndex++, token);
+            }
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, compositionSpace.getMessage(), assignedfields);
             stmt.setInt(parameterIndex++, contextId);
             stmt.setInt(parameterIndex++, userId);

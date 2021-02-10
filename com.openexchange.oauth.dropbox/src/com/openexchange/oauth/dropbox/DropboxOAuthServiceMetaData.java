@@ -56,6 +56,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.model.Verb;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.api.DropboxApi2;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 

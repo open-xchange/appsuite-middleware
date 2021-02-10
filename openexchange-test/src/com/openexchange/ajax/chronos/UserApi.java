@@ -52,12 +52,10 @@ package com.openexchange.ajax.chronos;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FindApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.JSlobApi;
-import com.openexchange.testing.httpclient.modules.LoginApi;
 
 /**
  * {@link UserApi}
@@ -67,8 +65,6 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
  * @since v7.10.0
  */
 public class UserApi {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserApi.class);
 
     private String session;
     private Integer calUser;
@@ -91,10 +87,8 @@ public class UserApi {
      * @param enhancedApiClient The enhanced client
      * @param user The user
      * @param performLogin Whether to perform login for both clients
-     *
-     * @throws Exception
      */
-    public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user, boolean performLogin) throws Exception {
+    public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user) {
         this.client = client;
         this.client.setConnectTimeout(java.lang.Math.toIntExact(TimeUnit.MINUTES.toMillis(5)));
         this.enhancedApiClient = enhancedApiClient;
@@ -105,36 +99,11 @@ public class UserApi {
         foldersApi = new FoldersApi(client);
         setEnhancedChronosApi(new EnhancedChronosApi(enhancedApiClient));
 
-        if (performLogin) {
-            LoginResponse login = login(user.getLogin(), user.getPassword(), client);
-            this.calUser = login.getUserId();
-            this.session = login.getSession();
-            login = login(user.getLogin(), user.getPassword(), enhancedApiClient);
-            this.enhancedCalUser = login.getUserId().intValue();
-            this.enhancedSession = login.getSession();
-        } else {
-            this.calUser = client.getUserId();
-            this.session = client.getSession();
-            this.enhancedCalUser = enhancedApiClient.getUserId().intValue();
-            this.enhancedSession = enhancedApiClient.getSession();
-        }
-    }
-
-    /**
-     *
-     * @param login
-     * @param password
-     * @param client
-     * @return
-     * @throws Exception
-     */
-    protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null, null);
-        if (doLogin.getError() == null) {
-            LOG.info("Login succesfull for user " + login);
-            return doLogin;
-        }
-        throw new Exception("Error during login: " + doLogin.getError());
+        this.calUser = client.getUserId();
+        this.session = client.getSession();
+        this.enhancedCalUser = enhancedApiClient.getUserId().intValue();
+        this.enhancedSession = enhancedApiClient.getSession();
+        enhancedApiClient.setApiKey(enhancedSession);
     }
 
     /**

@@ -79,11 +79,13 @@ public class SingleStreamedUpload implements StreamedUpload {
     final String uuid;
     final String action;
     final Session session;
+    final long contentLength;
 
     /**
      * Initializes a new {@link SingleStreamedUpload}.
      */
-    public SingleStreamedUpload(InputStream in, String contentType, String fileName, String uuid, List<StreamedUploadFileListener> listeners, String action, Session session) {
+    public SingleStreamedUpload(InputStream in, String contentType, String fileName, String uuid, List<StreamedUploadFileListener> listeners,
+            String action, long contentLength, Session session) {
         super();
         this.in = in;
         this.contentType = contentType;
@@ -92,6 +94,7 @@ public class SingleStreamedUpload implements StreamedUpload {
         this.listeners = listeners;
         this.action = action;
         this.session = session;
+        this.contentLength = contentLength;
     }
 
     @Override
@@ -215,6 +218,11 @@ public class SingleStreamedUpload implements StreamedUpload {
             } catch (Exception e) {
                 throw MultipartStreamedUpload.handleException(streamedUpload.uuid, e, streamedUpload.action, streamedUpload.session, listeners);
             }
+        }
+
+        @Override
+        public long getRawTotalBytes() {
+            return streamedUpload.contentLength;
         }
 
     }

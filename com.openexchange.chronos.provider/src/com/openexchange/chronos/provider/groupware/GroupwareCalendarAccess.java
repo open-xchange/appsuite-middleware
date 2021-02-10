@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.groupware;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -57,25 +58,37 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.SchedulingControl;
+import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ImportResult;
-import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link GroupwareCalendarAccess}
+ * 
+ * Extends {@link FolderCalendarAccess} by certain groupware-specific functionality.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public interface GroupwareCalendarAccess extends FolderCalendarAccess, PermissionAware {
+
+    /**
+     * Default implementation delegating to {@link #getVisibleFolders(GroupwareFolderType)} for all types. Override if applicable.
+     */
+    @Override
+    default List<CalendarFolder> getVisibleFolders() throws OXException {
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        for (GroupwareFolderType type : GroupwareFolderType.values()) {
+            folders.addAll(getVisibleFolders(type));
+        }
+        return folders;
+    }
 
     /**
      * Gets a list of all visible calendar folders.
@@ -84,98 +97,6 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @return A list of all visible calendar folders of the type
      */
     List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
-
-    /**
-     * Gets the default calendar folder.
-     *
-     * @return The default folder
-     */
-    GroupwareCalendarFolder getDefaultFolder() throws OXException;
-
-    /**
-     * Gets all events of the session's user.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * </ul>
-     *
-     * @return The events
-     */
-    List<Event> getEventsOfUser() throws OXException;
-
-    /**
-     * Gets all events the session's user attends in and having the participation status NEEDS-ACTION in a <b>user prepared</b> way. This means only those events will be returned the user is required to change his status and technical exceptions (for
-     * instance based on participant status changes) are left out.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
-     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
-     * </ul>
-     * 
-     * @return The events
-     */
-    List<Event> getEventsNeedingAction() throws OXException;
-
-    /**
-     * Gets all events the session's user attends in, having a particular participation status.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
-     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
-     * </ul>
-     *
-     * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
-     *            attendee's participation status
-     * @param rsvp The reply expectation to include, or <code>null</code> to include all events independently of the user attendee's
-     *            rsvp status
-     * @return The events
-     */
-    List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
-
-    /**
-     * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
-     * appropriate parent folder identifier assigned.
-     *
-     * @param eventId The identifier of the event to resolve
-     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
-     * @return The resolved event from the user's point of view, or <code>null</code> if not found
-     */
-    Event resolveEvent(String eventId, Integer sequence) throws OXException;
-
-    /**
-     * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * </ul>
-     *
-     * @param updatedSince The timestamp since when the updates should be retrieved
-     * @return The updates result yielding lists of new/modified and deleted events
-     */
-    UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException;
 
     /**
      * Creates a new event.
@@ -236,28 +157,6 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
     CalendarResult updateAttendee(EventID eventID, Attendee attendee, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
-     * Updates the event's organizer to the new one.
-     * <p>
-     * Current restrictions are:
-     * 
-     * <li>The event has to be a group scheduled event</li>
-     * <li>All attendees of the event have to be internal</li>
-     * <li>The new organizer must be an internal user</li>
-     * <li>The change has to be performed for one of these:
-     * <ul> a single event</ul>
-     * <ul> a series master, efficiently updating for the complete series</ul>
-     * <ul> a specific recurrence of the series, efficiently performing a series split. Only allowed if {@link com.openexchange.chronos.RecurrenceRange#THISANDFUTURE} is set</ul>
-     * </li>
-     * 
-     * @param eventID The {@link EventID} of the event to change. Optional having a recurrence ID set to perform a series split.
-     * @param organizer The new organizer
-     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
-     * @return The updated event
-     * @throws OXException In case the organizer change is not allowed
-     */
-    CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException;
-
-    /**
      * Deletes an existing event.
      *
      * @param eventID The identifier of the event to delete
@@ -306,5 +205,27 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @throws OXException if an error is occurred
      */
     IFileHolder getAttachment(EventID eventID, int managedId) throws OXException;
+
+    /**
+     * Updates the event's organizer to the new one.
+     * <p>
+     * Current restrictions are:
+     * 
+     * <li>The event has to be a group scheduled event</li>
+     * <li>All attendees of the event have to be internal</li>
+     * <li>The new organizer must be an internal user</li>
+     * <li>The change has to be performed for one of these:
+     * <ul> a single event</ul>
+     * <ul> a series master, efficiently updating for the complete series</ul>
+     * <ul> a specific recurrence of the series, efficiently performing a series split. Only allowed if {@link com.openexchange.chronos.RecurrenceRange#THISANDFUTURE} is set</ul>
+     * </li>
+     * 
+     * @param eventID The {@link EventID} of the event to change. Optional having a recurrence ID set to perform a series split.
+     * @param organizer The new organizer
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The updated event
+     * @throws OXException In case the organizer change is not allowed
+     */
+    CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException;
 
 }

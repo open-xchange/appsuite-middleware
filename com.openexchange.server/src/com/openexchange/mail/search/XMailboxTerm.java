@@ -75,7 +75,7 @@ public final class XMailboxTerm extends SearchTerm<String> {
      *
      * @param fullName The mailbox's full name to search for
      */
-    public XMailboxTerm(final String fullName) {
+    public XMailboxTerm(String fullName) {
         super();
         this.fullName = fullName;
     }
@@ -91,12 +91,12 @@ public final class XMailboxTerm extends SearchTerm<String> {
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.ORIGINAL_FOLDER_ID);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         FullnameArgument originalFolder = mailMessage.getOriginalFolder();
         if (originalFolder == null) {
             return false;
@@ -107,7 +107,7 @@ public final class XMailboxTerm extends SearchTerm<String> {
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         try {
             if (!(msg instanceof IMAPMessage)) {
                 return false;

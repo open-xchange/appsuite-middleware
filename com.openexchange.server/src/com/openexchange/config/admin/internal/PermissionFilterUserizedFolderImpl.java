@@ -52,7 +52,7 @@ package com.openexchange.config.admin.internal;
 import java.util.Arrays;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.UserizedFolderImpl;
+import com.openexchange.folderstorage.UserizedFolderImpl;
 
 /**
  * {@link PermissionFilterUserizedFolderImpl} overrides {@link UserizedFolderImpl} to filter out administrators permission

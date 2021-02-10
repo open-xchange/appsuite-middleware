@@ -132,7 +132,7 @@ public final class MIMEStructure2ComposedMailParser {
      * @param hostName Thje server's host name
      * @throws OXException If initialization fails
      */
-    public MIMEStructure2ComposedMailParser(final int accountId, final ServerSession session, final String protocol, final String hostName) throws OXException {
+    public MIMEStructure2ComposedMailParser(int accountId, ServerSession session, String protocol, String hostName) throws OXException {
         super();
         this.session = session;
         managedFiles = new ArrayList<ManagedFile>(4);
@@ -158,7 +158,7 @@ public final class MIMEStructure2ComposedMailParser {
      * @return The resulting {@link ComposedMailMessage} instances.
      * @throws OXException If parsing fails
      */
-    public ComposedMailMessage[] parseMessage(final JSONObject jsonMessage, List<OXException> warnings) throws OXException {
+    public ComposedMailMessage[] parseMessage(JSONObject jsonMessage, List<OXException> warnings) throws OXException {
         parseFlags(jsonMessage);
         parsePart(jsonMessage);
         /*
@@ -168,7 +168,7 @@ public final class MIMEStructure2ComposedMailParser {
         return attachmentHandler.generateComposedMails(composedMail, warnings);
     }
 
-    private void parseFlags(final JSONObject jsonMessage) throws OXException {
+    private void parseFlags(JSONObject jsonMessage) throws OXException {
         try {
             /*
              * System flags
@@ -205,7 +205,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void parsePart(final JSONObject jsonPart) throws OXException {
+    private void parsePart(JSONObject jsonPart) throws OXException {
         try {
             /*
              * Parse headers
@@ -270,7 +270,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void parseMessageBody(final JSONObject jsonMessage) throws OXException {
+    private void parseMessageBody(JSONObject jsonMessage) throws OXException {
         final MailMessage mail = MIMEStructureParser.parseStructure(jsonMessage);
         if (mail.getSize() < 0) {
             final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(8192);
@@ -280,7 +280,7 @@ public final class MIMEStructure2ComposedMailParser {
         attachmentHandler.addAttachment(transportProvider.getNewReferencedMail(mail, session));
     }
 
-    private void parseMultipartBody(final JSONArray jsonMultiparts, final String subtype) throws OXException {
+    private void parseMultipartBody(JSONArray jsonMultiparts, String subtype) throws OXException {
         try {
             final int length = jsonMultiparts.length();
             level++;
@@ -300,7 +300,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void parseSimpleBodyText(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
+    private void parseSimpleBodyText(JSONObject jsonBody, ContentType contentType, Map<String, String> headers) throws OXException {
         try {
             if (isText(contentType.getBaseType())) {
                 if (contentType.startsWith("text/plain")) {
@@ -335,7 +335,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
+    private void parseSimpleBodyBinary(JSONObject jsonBody, ContentType contentType, Map<String, String> headers) throws OXException {
         try {
             addAsAttachment(Base64.decodeBase64(Charsets.toAsciiBytes(jsonBody.getString("data"))), contentType, headers);
         } catch (JSONException e) {
@@ -345,7 +345,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     private static final int IN_MEMORY_LIMIT = 1048576; // 1 MB
 
-    private void addAsAttachment(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws OXException {
+    private void addAsAttachment(byte[] rawBytes, ContentType contentType, Map<String, String> headers) throws OXException {
         if (rawBytes.length <= IN_MEMORY_LIMIT) {
             addInMemory(rawBytes, contentType, headers);
         } else {
@@ -363,7 +363,7 @@ public final class MIMEStructure2ComposedMailParser {
                     uf.setTmpFile(managedFile.getFile());
                     final UploadFileMailPart mailPart = transportProvider.getNewFilePart(uf);
                     if (!headers.isEmpty()) {
-                        for (final Entry<String, String> entry : headers.entrySet()) {
+                        for (Entry<String, String> entry : headers.entrySet()) {
                             mailPart.setHeader(entry.getKey(), entry.getValue());
                         }
                     }
@@ -378,7 +378,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private void addInMemory(final byte[] rawBytes, final ContentType contentType, final Map<String, String> headers) throws OXException {
+    private void addInMemory(byte[] rawBytes, ContentType contentType, Map<String, String> headers) throws OXException {
         try {
             final MimeBodyPart mimePart = new MimeBodyPart();
             mimePart.setDataHandler(new DataHandler(new MessageDataSource(rawBytes, contentType.getBaseType())));
@@ -387,7 +387,7 @@ public final class MIMEStructure2ComposedMailParser {
             mimePart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
             final MailPart mailPart = MimeMessageConverter.convertPart(mimePart, false);
             if (!headers.isEmpty()) {
-                for (final Entry<String, String> entry : headers.entrySet()) {
+                for (Entry<String, String> entry : headers.entrySet()) {
                     mailPart.setHeader(entry.getKey(), entry.getValue());
                 }
             }
@@ -414,10 +414,10 @@ public final class MIMEStructure2ComposedMailParser {
 
     private static final Set<String> HEADERS_DATE = ImmutableSet.of("date");
 
-    private static void parseHeaders(final JSONObject jsonHeaders, final MailMessage composedMail, final ContentType contentType) throws OXException {
+    private static void parseHeaders(JSONObject jsonHeaders, MailMessage composedMail, ContentType contentType) throws OXException {
         try {
             final StringBuilder headerNameBuilder = new StringBuilder(16);
-            for (final Entry<String, Object> entry : jsonHeaders.entrySet()) {
+            for (Entry<String, Object> entry : jsonHeaders.entrySet()) {
                 final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
                 if (HEADERS_ADDRESS.contains(name)) {
                     final JSONArray jsonAddresses = (JSONArray) entry.getValue();
@@ -448,7 +448,7 @@ public final class MIMEStructure2ComposedMailParser {
                     } else {
                         final StringBuilder builder = new StringBuilder(list.size() * 16);
                         final String delim = ", ";
-                        for (final InternetAddress addr : list) {
+                        for (InternetAddress addr : list) {
                             builder.insert(0, addr.toString()).insert(0, delim);
                         }
                         composedMail.setHeader(toHeaderCase(name, headerNameBuilder), builder.delete(0, delim.length()).toString());
@@ -494,7 +494,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private static void parseContentType(final JSONObject jsonHeaders, final ContentType contentType) throws OXException {
+    private static void parseContentType(JSONObject jsonHeaders, ContentType contentType) throws OXException {
         try {
             if (jsonHeaders.hasAndNotNull("content-type")) {
                 final JSONObject jsonContentType = jsonHeaders.getJSONObject("content-type");
@@ -507,7 +507,7 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private static String parseContentID(final JSONObject jsonHeaders) throws OXException {
+    private static String parseContentID(JSONObject jsonHeaders) throws OXException {
         try {
             if (jsonHeaders.hasAndNotNull("content-id")) {
                 return jsonHeaders.getString("content-id");
@@ -518,8 +518,8 @@ public final class MIMEStructure2ComposedMailParser {
         }
     }
 
-    private static void parseParameterList(final JSONObject jsonParameters, final ParameterizedHeader parameterizedHeader) throws JSONException {
-        for (final Entry<String, Object> entry : jsonParameters.entrySet()) {
+    private static void parseParameterList(JSONObject jsonParameters, ParameterizedHeader parameterizedHeader) throws JSONException {
+        for (Entry<String, Object> entry : jsonParameters.entrySet()) {
             final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
             if ("read-date".equals(name)) {
                 final JSONObject jsonDate = (JSONObject) entry.getValue();
@@ -544,10 +544,10 @@ public final class MIMEStructure2ComposedMailParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
-    private static boolean isText(final String contentType) {
+    private static boolean isText(String contentType) {
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_TEXT) {
+            for (String subtype : SUB_TEXT) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
@@ -556,7 +556,7 @@ public final class MIMEStructure2ComposedMailParser {
         return false;
     }
 
-    private static String toHeaderCase(final String name, final StringBuilder builder) {
+    private static String toHeaderCase(String name, StringBuilder builder) {
         if (null == name) {
             return null;
         }

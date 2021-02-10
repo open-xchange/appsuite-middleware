@@ -50,6 +50,7 @@
 package com.openexchange.oauth.impl.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -90,7 +91,8 @@ public class SQLStructure {
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId"),
         SCOPE("scope"),
-        IDENTITY("identity");
+        IDENTITY("identity"),
+        EXPIRY_DATE("expiryDate");
 
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
 
@@ -143,6 +145,8 @@ public class SQLStructure {
                     return Strings.concat(" ", scopes);
                 case IDENTITY:
                     return account.getUserIdentity();
+                case EXPIRY_DATE:
+                    return L(account.getExpiration());
                 default:
                     break;
             }

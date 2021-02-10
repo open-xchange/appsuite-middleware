@@ -436,6 +436,29 @@ public class Strings {
     }
 
     /**
+     * High speed test for hex character.
+     *
+     * @param c The character to check
+     * @return <code>true</code> if the indicated character is hex character; otherwise <code>false</code>
+     */
+    public static boolean isHex(char c) {
+        return isHex(c, true);
+    }
+
+    /**
+     * High speed test for hex character.
+     *
+     * @param c The character to check
+     * @return <code>true</code> if the indicated character is hex character; otherwise <code>false</code>
+     */
+    public static boolean isHex(char c, boolean considerUpperCase) {
+        if (considerUpperCase) {
+            return isDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        }
+        return isDigit(c) || (c >= 'a' && c <= 'f');
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param cs The string
@@ -1236,6 +1259,18 @@ public class Strings {
      */
     public static String quote(final String s) {
         return concat(Character.valueOf('"'), s, Character.valueOf('"'));
+    }
+
+    /**
+     * Puts double quotes around a string, optionally escaping quotes within the string.
+     *
+     * @param s The string to quote.
+     * @param escape <code>true</code> to escape quotes within the given string prior quoting, <code>false</code>, otherwise
+     * @return The quoted string.
+     */
+    public static String quote(final String s, boolean escape) {
+        String value = escape && null != s && s.contains("\"") ? s.replaceAll("\"", "\\\\\"") : s;
+        return concat(Character.valueOf('"'), value, Character.valueOf('"'));
     }
 
     /**

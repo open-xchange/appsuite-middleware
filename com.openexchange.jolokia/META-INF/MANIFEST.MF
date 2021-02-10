@@ -5,13 +5,14 @@ Bundle-Description: Jolokia agent exposing JMX via HTTP/JSON
 Bundle-ManifestVersion: 2
 Bundle-Name: Jolokia Agent custom
 Bundle-SymbolicName: com.openexchange.jolokia
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Import-Package: com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.server,
  javax.crypto,
  javax.crypto.spec,
@@ -42,3 +43,4 @@ Import-Package: com.openexchange.config,
  org.xml.sax
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.openexchange.global
+Automatic-Module-Name: com.openexchange.jolokia

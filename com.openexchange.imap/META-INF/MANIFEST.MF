@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
@@ -139,6 +139,7 @@ Import-Package: ch.qos.logback.classic,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.spamhandler,
+ com.openexchange.systemproperties,
  com.openexchange.textxtraction,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
@@ -235,3 +236,4 @@ Export-Package: com.openexchange.imap,
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.imap

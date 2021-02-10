@@ -69,6 +69,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
@@ -79,8 +80,7 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginExceptionMessages;
 import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -148,9 +148,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (!Tools.considerSecure(request)) {
-            response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-            response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        if (isNotSecureEndpoint(request, response)) {
             return;
         }
 
@@ -205,9 +203,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
-        if (!Tools.considerSecure(request)) {
-            response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
-            response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        if (isNotSecureEndpoint(request, response)) {
             return;
         }
 
@@ -324,7 +320,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         LoginServlet.addHeadersAndCookies(loginResult, response);
 
         // Add secret and public cookie
-        LoginServlet.writeSecretCookie(request, response, session, hash, true, serverName, loginConfig);
+        LoginServlet.writeSecretCookie(request, response, session, hash, Tools.considerSecure(request), serverName, loginConfig);
 
         return session;
     }
@@ -364,8 +360,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             User user = serverSession.getUser();
 
             // Check if OAuth is deactivated for this user
-            ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), context.getContextId());
-            if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue() || user.isGuest()) {
+            if (!services.getServiceSafe(LeanConfigurationService.class).getBooleanProperty(user.getId(), context.getContextId(), OAuthProviderProperties.ENABLED) || user.isGuest()) {
                 return URLHelper.getErrorRedirectLocation(
                     authRequest.getRedirectURI(),
                     "access_denied",
@@ -657,7 +652,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         try {
-            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI expectedReferer = new URI(URLHelper.getRequestLocation(request));
             URI actualReferer = new URI(referer);
             if (!stringsEqual(expectedReferer.getScheme(), actualReferer.getScheme())) {
                 return true;
@@ -674,7 +669,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             if (!stringsEqual(normalizePath(expectedReferer.getPath()), normalizePath(actualReferer.getPath()))) {
                 return true;
             }
-        } catch (URISyntaxException e) {
+        } catch (@SuppressWarnings("unused") URISyntaxException e) {
             return true;
         }
 
@@ -1181,6 +1176,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 int intCode = Integer.parseInt(code);
                 return errorsByCodes.get(I(intCode));
             } catch (NumberFormatException e) {
+                LoggerFactory.getLogger(LoginError.class).debug("Code {} cannot be parsed as integer", code, e);
                 return null;
             }
         }

@@ -180,7 +180,7 @@ public final class MIMEStructureHandler implements StructureHandler {
      *
      * @param maxSize The max. size of a mail part to let its content being inserted as base64 encoded or UTF-8 string.
      */
-    public MIMEStructureHandler(final long maxSize) {
+    public MIMEStructureHandler(long maxSize) {
         super();
         mailJsonObjectQueue = new LinkedList<JSONObject>();
         mailJsonObjectQueue.addLast((currentMailObject = new JSONObject()));
@@ -194,7 +194,7 @@ public final class MIMEStructureHandler implements StructureHandler {
      * @param forceJSONArray4Multipart <code>true</code> to enforce a JSON array; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
-    public MIMEStructureHandler setForceJSONArray4Multipart(final boolean forceJSONArray4Multipart) {
+    public MIMEStructureHandler setForceJSONArray4Multipart(boolean forceJSONArray4Multipart) {
         this.forceJSONArray4Multipart = forceJSONArray4Multipart;
         return this;
     }
@@ -202,7 +202,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final int MB = 1048576;
 
     @Override
-    public boolean handleEnd(final MailMessage mail) throws OXException {
+    public boolean handleEnd(MailMessage mail) throws OXException {
         final JSONObject mailJsonObject = mailJsonObjectQueue.getFirst();
         /*
          * Message identifier and folder full name
@@ -272,7 +272,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return userFlags;
     }
 
-    private void add2BodyJsonObject(final JSONObject bodyObject) throws JSONException {
+    private void add2BodyJsonObject(JSONObject bodyObject) throws JSONException {
         if (null == currentBodyObject) {
             /*
              * Nothing applied before
@@ -309,7 +309,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final int BUFLEN = 8192;
 
     @Override
-    public boolean handleAttachment(final MailPart part, final String id) throws OXException {
+    public boolean handleAttachment(MailPart part, String id) throws OXException {
         final ContentType contentType = part.getContentType();
         if (isVCalendar(contentType.getBaseType()) && !contentType.containsParameter("method")) {
             /*
@@ -338,7 +338,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final Set<String> REMAIN = ImmutableSet.of(KEY_HEADERS, MailJSONField.RECEIVED_DATE.getKey());
 
     @Override
-    public boolean handleSMIMEBodyText(final MailPart part) throws OXException {
+    public boolean handleSMIMEBodyText(MailPart part) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             final JSONObject headerObject = new JSONObject();
@@ -351,7 +351,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              * Add body object to parental structure object
              */
             final JSONObject jsonObject = currentMailObject;
-            for (final String name : new HashSet<String>(jsonObject.keySet())) {
+            for (String name : new HashSet<String>(jsonObject.keySet())) {
                 if (!REMAIN.contains(name)) {
                     jsonObject.remove(name);
                 }
@@ -364,7 +364,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleSMIMEBodyData(final byte[] data) throws OXException {
+    public boolean handleSMIMEBodyData(byte[] data) throws OXException {
         try {
             currentMailObject.put("smime_body_data", Charsets.toAsciiString(Base64.encodeBase64(data, false)));
             return true;
@@ -374,7 +374,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleColorLabel(final int colorLabel) throws OXException {
+    public boolean handleColorLabel(int colorLabel) throws OXException {
         try {
             /*-
              * TODO: Decide whether to add separate "color_label" field or add it to user flags:
@@ -391,13 +391,13 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws OXException {
+    public boolean handleHeaders(Iterator<Entry<String, String>> iter) throws OXException {
         generateHeadersObject(iter, currentMailObject);
         return true;
     }
 
     @Override
-    public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
+    public boolean handleInlineUUEncodedAttachment(UUEncodedPart part, String id) throws OXException {
         String filename = part.getFileName();
         String contentType = MimeTypes.MIME_APPL_OCTET;
         try {
@@ -449,7 +449,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineUUEncodedPlainText(String decodedTextContent, ContentType contentType, int size, String fileName, String id) throws OXException {
         /*
          * Dummy headers
          */
@@ -470,7 +470,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws OXException {
+    public boolean handleMultipartStart(ContentType contentType, int bodyPartCount, String id) throws OXException {
         try {
             // Increment
             if (++multipartCount > 1) { // Enqueue nested multipart
@@ -520,7 +520,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+    public boolean handleNestedMessage(MailPart mailPart, String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
             final MailMessage nestedMail;
@@ -576,7 +576,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleReceivedDate(final Date receivedDate) throws OXException {
+    public boolean handleReceivedDate(Date receivedDate) throws OXException {
         try {
             if (receivedDate == null) {
                 currentMailObject.put(MailJSONField.RECEIVED_DATE.getKey(), JSONObject.NULL);
@@ -595,7 +595,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleSystemFlags(final int flags) throws OXException {
+    public boolean handleSystemFlags(int flags) throws OXException {
         try {
             final String key = MailJSONField.FLAGS.getKey();
             if (currentMailObject.hasAndNotNull(key)) {
@@ -611,13 +611,13 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     @Override
-    public boolean handleUserFlags(final String[] userFlags) throws OXException {
+    public boolean handleUserFlags(String[] userFlags) throws OXException {
         if (null == userFlags || 0 == userFlags.length) {
             return true;
         }
         try {
             final JSONArray userFlagsArr = getUserFlags();
-            for (final String userFlag : userFlags) {
+            for (String userFlag : userFlags) {
                 userFlagsArr.put(userFlag);
             }
             return true;
@@ -626,7 +626,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void addBodyPart(final MailPart part, final String id) throws OXException {
+    private void addBodyPart(MailPart part, String id) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -647,7 +647,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String filename, final String id, final Iterator<Entry<String, String>> iter) throws OXException {
+    private void addBodyPart(long size, InputStreamProvider isp, ContentType contentType, String filename, String id, Iterator<Entry<String, String>> iter) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -676,7 +676,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws OXException {
+    private void fillBodyPart(JSONObject bodyObject, MailPart part, JSONObject headerObject, String id) throws OXException {
         try {
             if (null != id) {
                 bodyObject.put(KEY_ID, id);
@@ -742,7 +742,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final String filename, final JSONObject headerObject, final String id) throws OXException {
+    private void fillBodyPart(JSONObject bodyObject, long size, InputStreamProvider isp, ContentType contentType, String filename, JSONObject headerObject, String id) throws OXException {
         try {
             bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
@@ -788,7 +788,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws OXException {
+    private static void fillBase64JSONString(InputStream inputStream, JSONObject bodyObject, boolean streaming) throws OXException {
         try {
             if (streaming) {
                 bodyObject.put(DATA, new StructureJSONBinary(inputStream));
@@ -820,7 +820,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static TextResult isText(final ContentType contentType, final String fileName) {
+    private static TextResult isText(ContentType contentType, String fileName) {
         if (null == contentType) {
             return new TextResult(false);
         }
@@ -865,7 +865,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final Pattern P_DOUBLE_BACKSLASH = Pattern.compile(Pattern.quote("\\\\\\\""));
 
-    private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws OXException {
+    private JSONObject generateHeadersObject(Iterator<Entry<String, String>> iter, JSONObject parent) throws OXException {
         try {
             final JSONObject hdrObject = new JSONObject();
             while (iter.hasNext()) {
@@ -881,7 +881,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         ja = new JSONArray();
                         hdrObject.put(name, ja);
                     }
-                    for (final InternetAddress internetAddress : internetAddresses) {
+                    for (InternetAddress internetAddress : internetAddresses) {
                         final String address = IDNA.toIDN(internetAddress.getAddress());
                         if (!com.openexchange.java.Strings.isEmpty(address)) {
                             final JSONObject addressJsonObject = new JSONObject();
@@ -937,7 +937,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private JSONObject generateParameterizedHeader(final String value, final HeaderName headerName) throws OXException, JSONException {
+    private JSONObject generateParameterizedHeader(String value, HeaderName headerName) throws OXException, JSONException {
         if (HN_CONTENT_TYPE.equals(headerName)) {
             final ContentType ct = new ContentType(value);
             return generateParameterizedHeader(ct, com.openexchange.java.Strings.toLowerCase(ct.getBaseType()));
@@ -946,11 +946,11 @@ public final class MIMEStructureHandler implements StructureHandler {
         return generateParameterizedHeader(cd, com.openexchange.java.Strings.toLowerCase(cd.getDisposition()));
     }
 
-    private JSONObject generateParameterizedHeader(final ParameterizedHeader parameterizedHeader, final String type) throws JSONException {
+    private JSONObject generateParameterizedHeader(ParameterizedHeader parameterizedHeader, String type) throws JSONException {
         final JSONObject parameterJsonObject = new JSONObject();
         parameterJsonObject.put("type", type);
         final JSONObject paramListJsonObject = new JSONObject();
-        for (final Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
+        for (Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
             final String paramName = pi.next();
             if ("read-date".equalsIgnoreCase(paramName)) {
                 paramListJsonObject.put(com.openexchange.java.Strings.toLowerCase(paramName), generateDateObject(parameterizedHeader.getParameter(paramName)));
@@ -964,7 +964,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return parameterJsonObject;
     }
 
-    private Object generateDateObject(final String date) throws JSONException {
+    private Object generateDateObject(String date) throws JSONException {
         if (null == date) {
             return JSONObject.NULL;
         }
@@ -993,7 +993,7 @@ public final class MIMEStructureHandler implements StructureHandler {
      * @param message The message providing the address header
      * @return The parsed address headers as an array of {@link InternetAddress} instances
      */
-    private static InternetAddress[] getAddressHeader(final String addresses) {
+    private static InternetAddress[] getAddressHeader(String addresses) {
         if (null == addresses || 0 == addresses.length()) {
             return new InternetAddress[0];
         }
@@ -1004,11 +1004,11 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static InternetAddress[] getAddressHeaderNonStrict(final String addressStrings) {
+    private static InternetAddress[] getAddressHeaderNonStrict(String addressStrings) {
         try {
             final InternetAddress[] addresses = QuotedInternetAddress.parseHeader(addressStrings, false);
             final List<InternetAddress> addressList = new ArrayList<InternetAddress>(addresses.length);
-            for (final InternetAddress internetAddress : addresses) {
+            for (InternetAddress internetAddress : addresses) {
                 try {
                     addressList.add(new QuotedInternetAddress(internetAddress.toString()));
                 } catch (AddressException e) {
@@ -1022,11 +1022,11 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static InternetAddress[] getAddressesOnParseError(final String addr) {
+    private static InternetAddress[] getAddressesOnParseError(String addr) {
         return new InternetAddress[] { new PlainTextAddress(addr) };
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(MailPart mailPart, ContentType contentType) throws OXException, IOException {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
@@ -1038,7 +1038,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+    private static String getCharset(MailPart mailPart, ContentType contentType) throws OXException {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (null == cs) {
@@ -1066,7 +1066,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return contentType.startsWith(PRIMARY_TEXT) ? CharsetDetector.detectCharset(mailPart.getInputStream()) : MailProperties.getInstance().getDefaultMimeCharset();
     }
 
-    private static String readContent(final InputStreamProvider isp, final ContentType contentType) throws IOException {
+    private static String readContent(InputStreamProvider isp, ContentType contentType) throws IOException {
         final String charset = getCharset(isp, contentType);
         try {
             return MessageUtility.readStream(isp.getInputStream(), charset);
@@ -1078,7 +1078,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static String getCharset(final InputStreamProvider isp, final ContentType contentType) throws IOException {
+    private static String getCharset(InputStreamProvider isp, ContentType contentType) throws IOException {
         final String charset;
         if (contentType.startsWith(PRIMARY_TEXT)) {
             final String cs = contentType.getCharsetParameter();
@@ -1098,12 +1098,12 @@ public final class MIMEStructureHandler implements StructureHandler {
         InputStream getInputStream() throws IOException;
     }
 
-    private static boolean isVCalendar(final String baseContentType) {
+    private static boolean isVCalendar(String baseContentType) {
         return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
     }
 
     /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
+    private static String toUpperCase(CharSequence chars) {
         if (null == chars) {
             return null;
         }
@@ -1120,11 +1120,11 @@ public final class MIMEStructureHandler implements StructureHandler {
         final boolean text;
         final String typeByFileExtension;
 
-        TextResult(final boolean text) {
+        TextResult(boolean text) {
             this(text, null);
         }
 
-        TextResult(final boolean text, final String typeByFileExtension) {
+        TextResult(boolean text, String typeByFileExtension) {
             super();
             this.text = text;
             this.typeByFileExtension = typeByFileExtension;

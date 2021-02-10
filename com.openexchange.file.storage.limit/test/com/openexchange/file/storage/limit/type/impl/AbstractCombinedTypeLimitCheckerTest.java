@@ -80,7 +80,7 @@ public class AbstractCombinedTypeLimitCheckerTest {
     private LimitFile file = new LimitFile();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         file.setName("Good to know");
         file.setSize(1);
         files.add(file);

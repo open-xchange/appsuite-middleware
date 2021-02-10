@@ -56,6 +56,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link MimeDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
@@ -91,7 +92,7 @@ public final class MimeDefaultSession {
                      */
                     final Properties systemProperties = System.getProperties();
                     systemProperties.putAll(getDefaultMailProperties());
-                    instance = tmp = javax.mail.Session.getInstance(((Properties) (systemProperties.clone())), null);
+                    instance = tmp = javax.mail.Session.getInstance(SystemPropertiesUtils.cloneSystemProperties(), null);
                 }
             }
         }
@@ -140,8 +141,7 @@ public final class MimeDefaultSession {
                     } else {
                         p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
                     }
-                    final Properties systemProperties = System.getProperties();
-                    for (Map.Entry<Object, Object> systemProperty : systemProperties.entrySet()) {
+                    for (Map.Entry<Object, Object> systemProperty : SystemPropertiesUtils.getSystemProperties().entrySet()) {
                         String propName = systemProperty.getKey().toString();
                         if (propName.startsWith("mail.")) {
                             p.put(propName, systemProperty.getValue());

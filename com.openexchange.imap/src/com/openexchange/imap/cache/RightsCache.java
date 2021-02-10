@@ -135,11 +135,11 @@ public final class RightsCache {
         private volatile Rights rights;
         private volatile CacheKey key;
 
-        RightsCacheEntry(final String fullname) {
+        RightsCacheEntry(String fullname) {
             this(fullname, null);
         }
 
-        RightsCacheEntry(final String fullname, final Rights rights) {
+        RightsCacheEntry(String fullname, Rights rights) {
             super();
             this.fullname = fullname;
             this.rights = rights;
@@ -164,7 +164,7 @@ public final class RightsCache {
         }
 
         @Override
-        public void setValue(final Rights value) {
+        public void setValue(Rights value) {
             rights = value;
         }
 

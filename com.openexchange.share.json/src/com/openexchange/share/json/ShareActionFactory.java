@@ -55,11 +55,14 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.json.actions.AnalyzeAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
 import com.openexchange.share.json.actions.GetLinkAction;
+import com.openexchange.share.json.actions.ResubscribeShareAction;
 import com.openexchange.share.json.actions.SendLinkAction;
+import com.openexchange.share.json.actions.SubscribeShareAction;
+import com.openexchange.share.json.actions.UnsubscribeShareAction;
 import com.openexchange.share.json.actions.UpdateLinkAction;
-
 
 /**
  * {@link ShareActionFactory}
@@ -73,8 +76,8 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * 
+     * @param services The services
      */
     public ShareActionFactory(ServiceLookup services) {
         super();
@@ -83,6 +86,12 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
         actions.put("updateLink", new UpdateLinkAction(services));
         actions.put("deleteLink", new DeleteLinkAction(services));
         actions.put("sendLink", new SendLinkAction(services));
+
+        // Federated Sharing
+        actions.put("analyze", new AnalyzeAction(services));
+        actions.put("subscribe", new SubscribeShareAction(services));
+        actions.put("unsubscribe", new UnsubscribeShareAction(services));
+        actions.put("resubscribe", new ResubscribeShareAction(services));
     }
 
     @Override

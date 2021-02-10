@@ -4,8 +4,8 @@
     tags:
       - Capabilities
     summary: Gets all capabilities.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

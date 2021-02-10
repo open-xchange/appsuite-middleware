@@ -90,7 +90,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -647,7 +646,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback) {
                 rollback(con);
@@ -1327,7 +1326,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(ps);
         }
@@ -1548,9 +1547,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), userId);
         final Map<String, String> guiPreferences = user.getGuiPreferences();
         if (guiPreferences != null) {
-            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
+            for (Iterator<Map.Entry<String, String>> iter = guiPreferences.entrySet().iterator(); iter.hasNext();) {
+                final Map.Entry<String, String> entry = iter.next();
                 final String key = entry.getKey();
                 final String value = entry.getValue();
                 if (null != key && null != value) {
@@ -1641,7 +1639,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(sql.toString(), sql);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback > 0) {
                 if (rollback == 1) {
@@ -1693,7 +1691,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -1733,7 +1731,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -1791,7 +1789,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -1962,12 +1960,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         public String toString() {
                             StringBuilder stringBuilder = new StringBuilder("User: ");
                             stringBuilder.append(un);
-                            Iterator<Entry<String, String>> i = guiPrefs.entrySet().iterator();
-                            while (i.hasNext()) {
-                                Entry<String, String> entry = i.next();
-                                String key = entry.getKey();
-                                String value = entry.getValue();
-                                stringBuilder.append('\t').append(key).append('=').append(value).append('\n');
+                            for (Iterator<Map.Entry<String, String>> i = guiPrefs.entrySet().iterator(); i.hasNext();) {
+                                Map.Entry<String, String> entry = i.next();
+                                stringBuilder.append('\t').append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
                             }
                             return stringBuilder.toString();
                         }
@@ -2147,7 +2142,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } catch (OXException e) {
             LOG.error("GUI setting Error", e);
             throw new StorageException(e.toString());
@@ -2249,11 +2244,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             } while (rs.next());
                             groupCache.remove(keys);
                         }
-                        rs.close();
-                        rs = null;
-                        stmt.close();
                     } catch (OXException e) {
                         LOG.error("", e);
+                    } finally {
+                        if(rs != null) {
+                            rs.close();
+                            rs = null;
+                        }
+                        stmt.close();
                     }
                 }
                 // Delete from groups member
@@ -2398,7 +2396,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 LOG.error("SQL Error", sqle);
                 throw new StorageException(sqle.toString(), sqle);
             }
-            LOG.error("Delete contact yielded groupware API error");
+            LOG.error("Delete user yielded groupware API error", e);
             throw new StorageException(e.toString());
         } catch (IOException e) {
             LOG.error("", e);
@@ -2472,7 +2470,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                 } catch (RuntimeException e) {
                     LOG.error("", e);
-                    throw StorageException.storageExceotionFor(e);
+                    throw StorageException.storageExceptionFor(e);
                 } finally {
                     if (rollback > 0) {
                         if (rollback == 1) {
@@ -2541,7 +2539,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             if (rollback) {
                 rollback(con);
@@ -2555,6 +2553,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         changeModuleAccess(ctx, new int[] { userId }, moduleAccess);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException {
         int contextId = ctx.getId().intValue();
@@ -2772,8 +2771,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
-        checkForIllegalCombination(ctx.getId().intValue(), userId, access);
+        checkForIllegalCombination(ctx.getId().intValue(), access);
         try {
             final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
@@ -2817,7 +2817,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void checkForIllegalCombination(int contextId, int userId, final UserModuleAccess access) throws StorageException {
+    @SuppressWarnings("deprecation")
+    private void checkForIllegalCombination(int contextId, final UserModuleAccess access) throws StorageException {
         if (access.isGlobalAddressBookDisabled() && false == b(getConfigViewValue(contextId, "com.openexchange.admin.bypassAccessCombinationChecks", Boolean.FALSE))) {
 
             // At least Outlook does not work if global address book is not available. All other groupware functionality gets useless.
@@ -2904,7 +2905,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -2935,7 +2936,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw StorageException.storageExceotionFor(e);
+            throw StorageException.storageExceptionFor(e);
         } catch (OXException e) {
             LOG.error("Cache Error", e);
             throw new StorageException(e.getMessage());

@@ -69,22 +69,6 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface PermissionConfigurationChecker {
 
     /**
-     * The property name for the setting whether it is allowed to perform provisioning operation with illegal capabilities.
-     * <p>
-     * A capability is rated as illegal if it denotes a permission; e.g. <code>"com.openexchange.capability.infostore"</code>.
-     */
-    public static final String PROP_ALLOW_ILLEGAL_PROV = "com.openexchange.capabilities.allowIllegalPermissionProvisioning";
-
-    /**
-     * The property name for the setting whether it is allowed to apply illegal capabilities.
-     * <p>
-     * A capability is rated as illegal if it denotes a permission; e.g. <code>"com.openexchange.capability.infostore"</code>.
-     */
-    public static final String PROP_APPLY_ILLEGAL_PERMISSIONS = "com.openexchange.capabilities.applyIllegalPermissions";
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    /**
      * Checks the configuration if it contains any capability setting that denotes a permission; e.g. <code>"com.openexchange.capability.infostore"</code>.
      *
      * @param configService The service providing access to application's configuration

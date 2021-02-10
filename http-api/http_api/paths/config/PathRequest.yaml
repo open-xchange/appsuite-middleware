@@ -4,6 +4,9 @@
     tags:
       - Config
     summary: Gets data of a configuration node.
+    security: 
+        - session: []   
+        - oauth: [] 
     description: >
       The configuration is stored in a tree. Each node of the tree has a name
       and a value.
@@ -20,7 +23,6 @@
       node, respectively.
     parameters:
       - $ref: '#/components/parameters/gblPathParamConfigNode'
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-
@@ -36,6 +38,10 @@
     tags:
       - Config
     summary: Sets the value of a configuration node.
+    security: 
+        - session: []   
+        - oauth:
+          - write_userconfig  
     description: >
       The configuration is stored in a tree. Each node of the tree has a name
       and a value.
@@ -52,7 +58,6 @@
       node, respectively.
     parameters:
       - $ref: '#/components/parameters/gblPathParamConfigNode'
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

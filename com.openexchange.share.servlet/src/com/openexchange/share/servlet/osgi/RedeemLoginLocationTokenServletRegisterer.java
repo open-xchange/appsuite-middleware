@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.share.servlet.internal.RedeemLoginLocationTokenServlet;
 
 /**
@@ -137,7 +138,7 @@ public final class RedeemLoginLocationTokenServletRegisterer implements ServiceT
     }
 
     private void unregisterServlet(String alias, HttpService httpService) {
-        httpService.unregister(alias);
+        HttpServices.unregister(alias, httpService);
         LOG.info("{} successfully unregistered", RedeemLoginLocationTokenServlet.class.getSimpleName());
     }
 

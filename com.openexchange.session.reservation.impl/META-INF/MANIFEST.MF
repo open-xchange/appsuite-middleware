@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The session reservation implementation bundle
 Bundle-SymbolicName: com.openexchange.session.reservation.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -11,6 +11,7 @@ Import-Package: com.google.common.annotations,
  com.google.common.net,
  com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.map,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.openexchange.ajax,
@@ -51,11 +52,12 @@ Import-Package: com.google.common.annotations,
  gnu.trove.map.hash,
  gnu.trove.procedure,
  javax.management,
- javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0",
+ javax.servlet,
+ javax.servlet.http,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.session.reservation.impl.osgi.SessionReservationActivator
+Automatic-Module-Name: com.openexchange.session.reservation.impl

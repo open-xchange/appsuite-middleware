@@ -63,6 +63,7 @@ import net.jodah.failsafe.FailsafeException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
+@SuppressWarnings("synthetic-access")
 public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
 
     private final CircuitBreakerInfo circuitBreakerInfo;
@@ -109,11 +110,10 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
                     return Integer.valueOf(FailsafeCircuitBreakerBufferedReader.super.read());
                 }
             }).getCheckedResult().intValue();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE read access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {
@@ -136,11 +136,10 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
                     return Integer.valueOf(FailsafeCircuitBreakerBufferedReader.super.read(cbuf, off, len));
                 }
             }).getCheckedResult().intValue();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE read access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {
@@ -163,11 +162,10 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
                     return FailsafeCircuitBreakerBufferedReader.super.readLine();
                 }
             }).getCheckedResult();
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
+        } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e);
-            IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
-            throw ioe;
+            throw new IOException("Denied SIEVE read access since circuit breaker is open.");
         } catch (FailsafeException e) {
             Throwable failure = e.getCause();
             if (failure instanceof IOException) {

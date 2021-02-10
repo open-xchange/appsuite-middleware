@@ -4,8 +4,9 @@
     tags:
       - Attachments
     summary: Gets an attachment.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested infoitem.

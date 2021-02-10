@@ -80,7 +80,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @param size The initial size.
      * @exception IllegalArgumentException If size is negative.
      */
-    public HeaderOutputStream(final int size) {
+    public HeaderOutputStream(int size) {
         super(size);
         lfCount = 0;
         discard = false;
@@ -92,7 +92,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @param b The byte to be written.
      */
     @Override
-    public void write(final int b) {
+    public void write(int b) {
         if (discard) {
             return;
         }
@@ -122,7 +122,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @param len The number of bytes to write.
      */
     @Override
-    public void write(final byte b[], final int off, final int len) {
+    public void write(byte b[], int off, int len) {
         if (off < 0 || (off > b.length) || (len < 0)) {
             throw new IndexOutOfBoundsException();
         }
@@ -164,7 +164,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @exception IOException If an I/O error occurs.
      */
     @Override
-    public void writeTo(final OutputStream out) throws IOException {
+    public void writeTo(OutputStream out) throws IOException {
         if (null != out) {
             out.write(buf, 0, count);
         }
@@ -200,7 +200,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @param size The demanded size
      * @return The current contents of this output stream, as a byte array.
      */
-    public byte toByteArray(final int off, final int size)[] {
+    public byte toByteArray(int off, int size)[] {
         if ((off < 0) || (off > count) || (size < 0) || ((off + size) > count) || ((off + size) < 0)) {
             throw new IndexOutOfBoundsException();
         } else if (size == 0) {
@@ -240,7 +240,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      * @throws UnsupportedEncodingException If the named encoding is not supported.
      */
     @Override
-    public String toString(final String enc) throws UnsupportedEncodingException {
+    public String toString(String enc) throws UnsupportedEncodingException {
         return new String(buf, 0, count, enc);
     }
 
@@ -263,7 +263,7 @@ public final class HeaderOutputStream extends ByteArrayOutputStream {
      */
     @Override
     @Deprecated
-    public String toString(final int hibyte) {
+    public String toString(int hibyte) {
         return new String(buf, hibyte, 0, count);
     }
 

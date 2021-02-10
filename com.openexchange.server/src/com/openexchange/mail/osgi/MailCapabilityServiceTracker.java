@@ -79,7 +79,7 @@ public final class MailCapabilityServiceTracker implements ServiceTrackerCustomi
     /**
      * Initializes a new {@link MailCapabilityServiceTracker}.
      */
-    public MailCapabilityServiceTracker(final BundleContext context) {
+    public MailCapabilityServiceTracker(BundleContext context) {
         super();
         this.context = context;
     }

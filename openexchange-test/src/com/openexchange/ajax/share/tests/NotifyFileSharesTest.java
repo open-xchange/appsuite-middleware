@@ -64,6 +64,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link NotifyFileSharesTest}
@@ -73,18 +74,21 @@ import com.openexchange.share.recipient.RecipientType;
 public class NotifyFileSharesTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testNotifyGuest() throws Exception {
         testNotifyGuest(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGuest(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());
     }
 
     @Test
+    @TryAgain
     public void testNotifyGroup() throws Exception {
         testNotifyGroup(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyGroup(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());
     }
 
     @Test
+    @TryAgain
     public void testNotifyUser() throws Exception {
         testNotifyUser(getDefaultFolder(FolderObject.INFOSTORE));
         testNotifyUser(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());

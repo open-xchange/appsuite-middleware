@@ -67,7 +67,6 @@ public class MatchesJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public MatchesComparison parse(JSONObject jsonObject) throws JSONException {
         return new MatchesComparison();

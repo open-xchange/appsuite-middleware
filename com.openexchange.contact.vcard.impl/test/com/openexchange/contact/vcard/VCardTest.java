@@ -431,12 +431,12 @@ public abstract class VCardTest {
     }
 
     protected static int[] getMappedFields() {
-        Set<Integer> excludedFields = new HashSet<Integer>(Arrays.asList(Autoboxing.i2I(new int[] {
+        Set<Integer> excludedFields = new HashSet<>(Arrays.asList(Autoboxing.i2I(new int[] {
             Contact.OBJECT_ID, Contact.CONTEXTID, Contact.FOLDER_ID, Contact.CREATED_BY, Contact.MODIFIED_BY, Contact.IMAGE_LAST_MODIFIED,
             Contact.CREATION_DATE, Contact.NUMBER_OF_IMAGES, Contact.NUMBER_OF_ATTACHMENTS, Contact.NUMBER_OF_DISTRIBUTIONLIST,
             Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, Contact.LAST_MODIFIED_UTC,
         })));
-        List<Integer> fields = new ArrayList<Integer>();
+        List<Integer> fields = new ArrayList<>();
         for (int field : Contact.ALL_COLUMNS) {
             Integer value = Integer.valueOf(field);
             if (false == excludedFields.contains(value)) {
@@ -447,10 +447,10 @@ public abstract class VCardTest {
     }
 
     protected static int[] getMappedStringFields() {
-        Set<Integer> excludedFields = new HashSet<Integer>(Arrays.asList(Autoboxing.i2I(new int[] {
+        Set<Integer> excludedFields = new HashSet<>(Arrays.asList(Autoboxing.i2I(new int[] {
             Contact.BIRTHDAY, Contact.ANNIVERSARY, Contact.IMAGE1, Contact.DISTRIBUTIONLIST, Contact.IMAGE1_CONTENT_TYPE
         })));
-        List<Integer> fields = new ArrayList<Integer>();
+        List<Integer> fields = new ArrayList<>();
         for (int field : Contact.CONTENT_COLUMNS) {
             Integer value = Integer.valueOf(field);
             if (false == excludedFields.contains(value)) {
@@ -468,6 +468,10 @@ public abstract class VCardTest {
         return new int[] { Contact.BIRTHDAY, Contact.ANNIVERSARY };
     }
 
+    /**
+     * @param expected
+     * @param actual
+     */
     protected static void assertEquals(VCard expected, VCard actual) {
         //TODO
 //        Collection<VCardProperty> actualProperties = actual.getProperties();

@@ -50,6 +50,7 @@
 package com.openexchange.java.util;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -97,15 +98,12 @@ public final class UUIDs {
     }
 
     /**
-     * Gets the unformatted string representation from a random {@link UUID} instance.<br>
-     * Example:<br>
-     * <code>
-     * &nbsp;&nbsp;067e6162-3b6f-4ae2-a171-2470b63dff00
-     * </code><br>
-     * is converted to<br>
-     * <code>
-     * &nbsp;&nbsp;067e61623b6f4ae2a1712470b63dff00
-     * </code>
+     * Gets the unformatted string representation from a random {@link UUID} instance.
+     * <p>
+     * Example:
+     * <pre>067e6162-3b6f-4ae2-a171-2470b63dff00</pre>
+     * is converted to
+     * <pre>067e61623b6f4ae2a1712470b63dff00</pre>
      *
      * @param uuid The {@link UUID} instance
      * @return The unformatted string representation
@@ -115,20 +113,20 @@ public final class UUIDs {
     }
 
     /**
-     * Gets the unformatted string representation of specified {@link UUID} instance.<br>
-     * Example:<br>
-     * <code>
-     * &nbsp;&nbsp;067e6162-3b6f-4ae2-a171-2470b63dff00
-     * </code><br>
-     * is converted to<br>
-     * <code>
-     * &nbsp;&nbsp;067e61623b6f4ae2a1712470b63dff00
-     * </code>
+     * Gets the unformatted string representation of specified {@link UUID} instance.
+     * <p>
+     * Example:
+     * <pre>067e6162-3b6f-4ae2-a171-2470b63dff00</pre>
+     * is converted to
+     * <pre>067e61623b6f4ae2a1712470b63dff00</pre>
      *
      * @param uuid The {@link UUID} instance
      * @return The unformatted string representation
      */
     public static String getUnformattedString(final UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
         return new String(encodeHex(toByteArray(uuid)));
     }
 
@@ -154,15 +152,32 @@ public final class UUIDs {
      */
     public static UUID fromUnformattedString(final String unformattedString) {
         if (null == unformattedString) {
-            throw new IllegalArgumentException("string must nnot be null");
+            throw new IllegalArgumentException("Given string must not be null");
         }
         return toUUID(decodeHex(unformattedString));
+    }
+
+    /**
+     * Gets the optional UUID from specified unformatted string.
+     *
+     * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
+     * @return The UUID or empty if given string cannot be parsed
+     */
+    public static Optional<UUID> optionalFromUnformattedString(final String unformattedString) {
+        if (null == unformattedString) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(toUUID(decodeHex(unformattedString)));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     private static byte[] decodeHex(final String data) throws IllegalArgumentException {
         final int len = data.length();
         if ((len & 0x01) != 0) {
-            throw new IllegalArgumentException("Odd number of characters.");
+            throw new IllegalArgumentException("Odd number of characters");
         }
         final byte[] out = new byte[len >> 1];
         // two characters form the hex value.
@@ -180,7 +195,7 @@ public final class UUIDs {
     private static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         final int digit = Character.digit(ch, 16);
         if (digit == -1) {
-            throw new IllegalArgumentException("Illegal hexadecimal charcter " + ch + " at index " + index);
+            throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);
         }
         return digit;
     }
@@ -209,10 +224,10 @@ public final class UUIDs {
      */
     public static UUID toUUID(final byte[] bytes) {
         if (null == bytes) {
-            throw new IllegalArgumentException("Byte array is null.");
+            throw new IllegalArgumentException("Byte array is null");
         }
         if (bytes.length != UUID_BYTE_LENGTH) {
-            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array.");
+            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array");
         }
         return toUUID0(bytes);
     }

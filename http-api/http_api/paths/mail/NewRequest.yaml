@@ -4,6 +4,10 @@
     tags:
       - Mail
     summary: Sends a mail.
+    security: 
+        - session: []
+        - oauth:
+          - write_mail    
     description: >
       The request accepts file fields in upload form that denote referenced
       files that are going to be appended
@@ -18,7 +22,6 @@
 
       intact.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: lineWrapAfter
         description: >-
@@ -28,16 +31,6 @@
         required: false
         schema:
           type: integer
-    responses:
-      '200':
-        description: >
-          A HTML page containing the object ID of the newly created mail or in
-          case of errors an error object (see [File uploads](#file-uploads) as
-          an example).
-        content:
-          text/html:
-            schema:
-              type: string
     requestBody:
       content:
         multipart/form-data:
@@ -95,7 +88,21 @@
                   - 4 (draft transport)
                   - 6 (draft transport and delete)
             required:
-              - json_0
+              - json_0          
+    responses:
+      '200':
+        description: >
+          A HTML page containing the object ID of the newly created mail or in
+          case of errors an error object (see [File uploads](#file-uploads) as
+          an example).
+        content:
+          text/html:
+            schema:
+              type: string
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
   put:
     operationId: sendOrSaveMail
     tags:
@@ -103,8 +110,11 @@
     summary: >-
       Sends or saves a mail as MIME data block
       ([RFC822](https://tools.ietf.org/html/rfc822)).
+    security: 
+        - session: []
+        - oauth:
+          - write_mails      
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >
@@ -132,6 +142,14 @@
         required: false
         schema:
           type: string
+    requestBody:
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+      description: The mail as MIME data block
+      required: true          
     responses:
       '200':
         description: >
@@ -144,11 +162,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailDestinationResponse'
-    requestBody:
-      content:
-        application/octet-stream:
-          schema:
-            type: string
-            format: binary
-      description: The mail as MIME data block
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

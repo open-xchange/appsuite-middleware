@@ -57,7 +57,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
@@ -130,13 +131,13 @@ public final class ContactInsertDataHandler implements DataHandler {
              */
             JSONArray jsonArray = new JSONArray();
             VCardService vCardService = services.getService(VCardService.class);
-            ContactService contactService = services.getService(ContactService.class);
-
+            IDBasedContactsAccess access = services.getService(IDBasedContactsAccessFactory.class).createAccess(serverSession);
+            
             VCardStorageFactory vCardStorageFactory = services.getOptionalService(VCardStorageFactory.class);
 
             VCardStorageService vCardStorageService = null;
             if (vCardStorageFactory != null) {
-                vCardStorageService = contactService.supports(serverSession, folderID, ContactField.VCARD_ID) ?
+                vCardStorageService = access.supports(folderID, ContactField.VCARD_ID) ?
                     vCardStorageFactory.getVCardStorageService(services.getService(ConfigViewFactory.class), session.getContextId()) : null;
             }
 
@@ -162,7 +163,7 @@ public final class ContactInsertDataHandler implements DataHandler {
                         }
                     }
                     try {
-                        contactService.createContact(serverSession, folderID, contact);
+                        access.createContact(folderID, contact);
                         saved = true;
                     } catch (OXException e) {
                         org.slf4j.LoggerFactory.getLogger(ContactInsertDataHandler.class).debug("error storing contact", e);

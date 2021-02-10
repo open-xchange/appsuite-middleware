@@ -102,5 +102,12 @@ public class CompositionSpaceExceptionMessages implements LocalizableStrings {
     public static final String BCC_TOO_LONG_MSG = "The entered \"bcc\" addresses are too long.";
 
     // The user entered a very long Reply-To address, which cannot be stored due to data truncation
-    public static final String REPLY_TO_TOO_LONG_MSG = "The entered \"Reply-To\" address is too long.";;
+    public static final String REPLY_TO_TOO_LONG_MSG = "The entered \"Reply-To\" address is too long.";
+
+    // The user started a Drive Mail once and re-accesses the associated composition space. However, the folder containing the attachments to share (via a share link) does no more exist.
+    public static final String MISSING_SHARED_ATTACHMENTS_FOLDER_MSG = "The folder containing the attachments to share no longer exists.";
+
+    // The user started a Drive Mail once and re-accesses the associated composition space. However, there are either attachments not existing in composition space or there are references to attachments that do not exist
+    public static final String INCONSISTENT_SHARED_ATTACHMENTS_MSG = "Available attachments in the folder containing the attachments to share are inconsistent.";
+
 }

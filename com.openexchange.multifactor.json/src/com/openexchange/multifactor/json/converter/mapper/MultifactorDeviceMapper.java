@@ -191,7 +191,11 @@ public class MultifactorDeviceMapper extends DefaultJsonMapper<MultifactorDevice
 
             @Override
             public void set(MultifactorDevice object, Boolean value) {
-                object.setBackup(value.booleanValue());
+                if (value != null) {
+                    object.setBackup(value.booleanValue());
+                } else {
+                    remove(object);
+                }
             }
 
             @Override

@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.storecache;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import javax.mail.MessagingException;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
@@ -78,7 +80,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
      *
      * @return The limiter
      */
-    private Limiter getLimiter(final int max) {
+    private Limiter getLimiter(int max) {
         Limiter tmp = limiter;
         if (null == tmp) {
             synchronized (this) {
@@ -107,22 +109,40 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
         }
 
         // Await until permit is available
-        int count = maxRetryCount;
+        boolean acquired = false;
         synchronized (limiter) {
-            while (count-- > 0 && !limiter.acquire()) {
+            int retryCount = 0;
+            do {
                 LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): W A I T I N G -- {}", limiter);
-                limiter.wait(2000);
-            }
+                exponentialBackoffWait(++retryCount, 1000L); // Exponential back-off
+                acquired = limiter.acquire();
+            } while (retryCount < maxRetryCount && !acquired);
         }
-        if (count <= 0) {
+        
+        // Check if acquired
+        if (acquired) {
+            LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- {}", limiter);
+        } else {
             // Timed out -- So what...?
             LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): T I M E D   O U T -- {}", limiter);
             // /final String message = "Max. number of connections exceeded. Try again later.";
             // /throw new MessagingException(message, new com.sun.mail.iap.ConnectQuotaExceededException(message));
         }
-
-        LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- {}", limiter);
         return super.getStore(imapSession, login, pw, session);
+    }
+
+    /**
+     * Performs a wait according to exponential back-off strategy.
+     * <pre>
+     * (retry-count * base-millis) + random-millis
+     * </pre>
+     *
+     * @param retryCount The current number of retries
+     * @param baseMillis The base milliseconds
+     */
+    private static void exponentialBackoffWait(int retryCount, long baseMillis) {
+        long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
+        LockSupport.parkNanos(nanosToWait);
     }
 
     @Override

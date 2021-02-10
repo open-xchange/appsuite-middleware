@@ -38,6 +38,15 @@ This tool creates a sub-admin. sub-admins are oxadminmaster accounts with restri
 **-a**, **--addrestriction** *restrictionname*
 : Restriction to add (can be specified multiple times).
 
+**--capabilities-to-add** *capabilities-to-add*
+: The capabilities to add as a comma-separated string; e.g. "portal, -autologin".
+
+**--config**
+: Add reseller specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false --config/com.openexchange.oauth.google=true'
+
+**--taxonomy**
+: Add reseller specific taxonomies as a comma-separated list, e. g. '--taxonomy/types=some-taxonomy'
+
 Available default restrictions:
 
 ```Text

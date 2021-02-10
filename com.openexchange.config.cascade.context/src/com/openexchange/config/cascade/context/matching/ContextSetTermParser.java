@@ -141,6 +141,7 @@ public class ContextSetTermParser {
         TAG, OPERATOR, NEGATION, OPEN_BRACKET, CLOSE_BRACKET, EOF
     }
 
+    @SuppressWarnings("unused")
     private static class Lexer {
 
         private final String string;

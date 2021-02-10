@@ -63,11 +63,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -128,6 +130,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         /** The <code>"attached"</code> parameter */
         ATTACHED_ID("attached"),
         /** The <code>"module"</code> parameter */
+        @SuppressWarnings("hiding")
         MODULE("module"),
         /** The <code>"attachment"</code> parameter */
         ATTACHMENT("attachment"),
@@ -167,9 +170,8 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param file The file result
      * @param request The request
      * @return The AJAX result for a single file
-     * @throws OXException If result cannot be created
      */
-    protected AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
+    protected AJAXRequestResult result(final File file, final InfostoreRequest request) {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
@@ -208,7 +210,15 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         }
     }
 
-    public AJAXRequestResult result(final String[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
+    /**
+     * Compiles the result of the specified request
+     *
+     * @param versions An array with versions
+     * @param sequenceNumber The sequence number
+     * @param request The request
+     * @return The result
+     */
+    public AJAXRequestResult result(String[] versions, long sequenceNumber, InfostoreRequest request) {
         JSONArray array = new JSONArray(versions.length);
         for (String i : versions) {
             array.put(i);
@@ -279,6 +289,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param throwable The associated error
      * @throws OXException If call fails
      */
+    @SuppressWarnings("unused")
     protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException {
         // Nothing to do
     }
@@ -290,6 +301,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param result The associated result
      * @throws OXException If call fails
      */
+    @SuppressWarnings("unused")
     protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException {
         // Nothing to do
     }
@@ -300,6 +312,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param req The request
      * @throws OXException If the call fails
      */
+    @SuppressWarnings("unused")
     protected void before(final AJAXInfostoreRequest req) throws OXException {
         // Nothing to do
     }
@@ -333,13 +346,14 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @param request The {@link InfostoreRequest}
      * @throws OXException
      */
+    @SuppressWarnings("unused")
     protected Result isEnqueueable(InfostoreRequest request) throws OXException {
         return EnqueuableAJAXActionService.resultFor(false);
     }
 
     /**
      * Parses the folder/file pairs from the specified {@link JSONArray}
-     * 
+     *
      * @param jPairs The pairs to parse
      * @return A {@link List} with all the parsed pairs
      * @throws JSONException if a JSON error is occurred
@@ -347,7 +361,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      */
     protected List<IdVersionPair> parsePairs(JSONArray jPairs) throws JSONException, OXException {
         int len = jPairs.length();
-        List<IdVersionPair> idVersionPairs = new ArrayList<IdVersionPair>(len);
+        List<IdVersionPair> idVersionPairs = new ArrayList<>(len);
         for (int i = 0; i < len; i++) {
             JSONObject tuple = jPairs.getJSONObject(i);
 
@@ -371,7 +385,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
     /**
      * Performs a scan (if a scan is requested by the specified {@link InfostoreRequest}, i.e. via the <code>scan</code>
      * URL parameter) of the specified InputStreamClosure.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The stream
      * @param metadata The metadata of the stream
@@ -382,7 +396,8 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         if (false == mayScan(request)) {
             return false;
         }
-        AntiVirusResult result = getAntiVirusService().scan(fileHolder, getUniqueId(metadata, request.getSession().getContextId()));
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(request.getRequestData().optHttpServletRequest(), request.getRequestData().optHttpServletResponse());
+        AntiVirusResult result = getAntiVirusService().scan(fileHolder, getUniqueId(metadata, request.getSession().getContextId()), content);
         getAntiVirusResultEvaluatorService().evaluate(result, metadata.getFileName());
         return result.isStreamScanned();
     }
@@ -390,7 +405,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
     /**
      * Performs a scan (if a scan is requested by the specified {@link InfostoreRequest}, i.e. via the <code>scan</code>
      * URL parameter) of the specified InputStreamClosure.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The stream
      * @param metadata The attachment metadata of the stream
@@ -401,7 +416,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         if (false == mayScan(request)) {
             return;
         }
-        scan(isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
+        scan(request, isClosure, metadata.getFilename(), metadata.getFileId(), metadata.getFilesize());
     }
 
     /**
@@ -421,7 +436,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * {@link InfostoreRequest}, i.e. via the <code>scan</code> URL parameter). If the <code>recursive</code> flag
      * is enabled and one (or more) of the {@link IdVersionPair}s denote a folder, then the scan is performed recursively
      * for all sub-folders.
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param versionPairs The version pairs that denote files and/or folders
      * @param fileAccess The {@link IDBasedFileAccess}
@@ -448,7 +463,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * Checks whether to perform an Anti-Virus scan by examining:<br/>
      * a) the 'scan' URL parameter of the request (if absent defaults to <code>false</code>)<br/>
      * b) the capability 'antivirus' is enabled for the specified user<br/>
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @return <code>true</code> if scanning is enabled, <code>false</code> otherwise
      * @throws OXException if the 'antivirus' capability is disabled
@@ -469,7 +484,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Scans the folder with the specified identifier (recursively)
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param folderId The folder identifier
      * @param fileAccess The {@link IDBasedFileAccess}
@@ -493,7 +508,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Checks whether the {@link InputStream} in the specified closure should be scanned
-     * 
+     *
      * @param request The {@link InfostoreRequest}
      * @param isClosure The InputStreamClosure
      * @param metadata The metadata of the input stream
@@ -501,26 +516,28 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      *             or if the file is infected, or if a timeout or any other error is occurred
      */
     private void scanFile(InfostoreRequest request, InputStreamClosure isClosure, File metadata) throws OXException {
-        scan(isClosure, metadata.getFileName(), getUniqueId(metadata, request.getSession().getContextId()), metadata.getFileSize());
+        scan(request, isClosure, metadata.getFileName(), getUniqueId(metadata, request.getSession().getContextId()), metadata.getFileSize());
     }
 
     /**
      * Checks whether the {@link InputStream} in the specified closure should be scanned
-     * 
+     * @param request The {@link InfostoreRequest}
      * @param closure The InputStreamClosure
      * @param uniqueId the unique identifier of the stream
      * @param filesize The file size of the stream
+     *
      * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
      *             or if the file is infected, or if a timeout or any other error is occurred
      */
-    private void scan(InputStreamClosure closure, String filename, String uniqueId, long filesize) throws OXException {
-        AntiVirusResult result = getAntiVirusService().scan(closure, uniqueId, filesize);
+    private void scan(InfostoreRequest request, InputStreamClosure closure, String filename, String uniqueId, long filesize) throws OXException {
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(request.getRequestData().optHttpServletRequest(), request.getRequestData().optHttpServletResponse());
+        AntiVirusResult result = getAntiVirusService().scan(closure, uniqueId, filesize, content);
         getAntiVirusResultEvaluatorService().evaluate(result, filename);
     }
 
     /**
      * Retrieves the Anti-Virus service if available
-     * 
+     *
      * @return The anti-virus service
      * @throws OXException if the service is absent
      */
@@ -534,7 +551,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
 
     /**
      * Retrieves the Anti-Virus service if available
-     * 
+     *
      * @return The anti-virus service
      * @throws OXException if the service is absent
      */
@@ -550,7 +567,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * Gets the identifier that uniquely identifies the specified {@link File}, being
      * either the MD5 checksum, or the file identifier (in that order). If none is present
      * then the fall-back identifier is returned
-     * 
+     *
      * @param file The {@link File}
      * @param contextId The context identifier
      * @return The unique identifier, never <code>null</code>

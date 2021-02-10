@@ -56,6 +56,7 @@ public class Required {
 
     public static Required FALSE = new Required(Value.FALSE);
 
+    @SuppressWarnings("hiding")
     public enum Value {
         TRUE,
         FALSE,

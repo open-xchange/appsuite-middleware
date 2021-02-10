@@ -46,11 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.server;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
@@ -75,7 +77,7 @@ public abstract class ServerAbstraction extends UtilAbstraction {
     protected void parseAndSetServerID(final AdminParser parser, final Server sv) {
         serverid = (String) parser.getOptionValue(this.serverIdOption);
         if (null != serverid) {
-            sv.setId(Integer.parseInt(serverid));
+            sv.setId(I(Integer.parseInt(serverid)));
         }
     }
 

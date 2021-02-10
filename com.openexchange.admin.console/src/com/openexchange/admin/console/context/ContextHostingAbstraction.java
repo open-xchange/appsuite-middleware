@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.console.context;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import com.openexchange.admin.console.AdminParser;
@@ -104,13 +105,13 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
 
     public void parseAndSetDestinationStoreId(final AdminParser parser) {
         if (parser.getOptionValue(this.destinationStoreIdMappingOption) != null) {
-            this.storeid = Integer.parseInt((String)parser.getOptionValue(this.destinationStoreIdMappingOption));
+            this.storeid = I(Integer.parseInt((String) parser.getOptionValue(this.destinationStoreIdMappingOption)));
         }
     }
 
     public void parseAndSetDestinationDatabaseId(final AdminParser parser) {
         if (parser.getOptionValue(this.destinationDatabaseIdMappingOption) != null) {
-            this.databaseid = Integer.parseInt((String)parser.getOptionValue(this.destinationDatabaseIdMappingOption));
+            this.databaseid = I(Integer.parseInt((String) parser.getOptionValue(this.destinationDatabaseIdMappingOption)));
         }
     }
 

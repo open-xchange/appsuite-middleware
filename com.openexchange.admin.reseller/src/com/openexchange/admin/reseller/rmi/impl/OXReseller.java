@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
@@ -73,7 +74,6 @@ import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.AbstractAdminRmiException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -86,7 +86,10 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.exception.LogLevel;
 
 /**
+ * {@link OXReseller}
+ * 
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
@@ -97,6 +100,11 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     private final OXResellerStorageInterface oxresell;
     private final ResellerAuth resellerauth;
 
+    /**
+     * Initializes a new {@link OXReseller}.
+     * 
+     * @throws StorageException if an error is occurred
+     */
     public OXReseller() throws StorageException {
         super();
         log(LogLevel.DEBUG, LOGGER, null, null, "Class loaded: {}", this.getClass().getName());
@@ -108,22 +116,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (StorageException e) {
             log(LogLevel.ERROR, LOGGER, null, e, "");
             throw e;
-        }
-    }
-
-    private void logAndEnhanceException(Throwable t, final Credentials credentials) {
-        if (t instanceof AbstractAdminRmiException) {
-            logAndReturnException(LOGGER, ((AbstractAdminRmiException) t), credentials);
-        } else if (t instanceof RemoteException) {
-            RemoteException remoteException = (RemoteException) t;
-            String exceptionId = AbstractAdminRmiException.generateExceptionId();
-            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
-            logAndReturnException(LOGGER, remoteException, exceptionId, credentials);
-        } else if (t instanceof Exception) {
-            RemoteException remoteException = RemoteExceptionUtils.convertException((Exception) t);
-            String exceptionId = AbstractAdminRmiException.generateExceptionId();
-            RemoteExceptionUtils.enhanceRemoteException(remoteException, exceptionId);
-            logAndReturnException(LOGGER, remoteException, exceptionId, credentials);
         }
     }
 
@@ -235,7 +227,25 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
             }
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
+            throw e;
+        }
+    }
+
+    @Override
+    public void changeSelf(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
+        try {
+            doNullCheck(LOGGER, credentials, admin);
+            checkIdOrName(admin);
+            if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+            }
+
+            resellerauth.doAuthentication(credentials);
+            checkResellerChangeSelfData(admin);
+            oxresell.change(admin);
+        } catch (Throwable e) {
+            enhanceAndLogException(e, credentials);
             throw e;
         }
     }
@@ -290,7 +300,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             // Trigger plugin extensions
             {
-                final List<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
+                final List<OXResellerPluginInterface> interfacelist = new ArrayList<>();
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXResellerPluginInterface oxresellpi : pluginInterfaces.getResellerPlugins().getServiceList()) {
@@ -326,7 +336,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             logAndReturnException(LOGGER, remoteException, e.getExceptionId(), creds);
             throw remoteException;
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -374,9 +384,14 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.UNABLE_TO_DELETE, dbadm.getId().toString());
             }
 
+            ResellerAdmin[] list = oxresell.list("*", i(dbadm.getId()));
+            if (list.length != 0) {
+                throw new OXResellerException(Code.UNABLE_TO_DELETE_OWNS_SUBADMINS, dbadm.getId().toString());
+            }
+
             dbadm.setParentName(parent.isPresent() ? parent.get().getName() : null);
 
-            final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
+            final ArrayList<OXResellerPluginInterface> interfacelist = new ArrayList<>();
 
             // Trigger plugin extensions
             {
@@ -398,7 +413,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.delete(dbadm);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -421,13 +436,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.UNABLE_TO_LOAD_AVAILABLE_RESTRICTIONS_FROM_DATABASE);
             }
 
-            final HashSet<Restriction> ret = new HashSet<Restriction>();
+            final HashSet<Restriction> ret = new HashSet<>();
             for (final Entry<String, Restriction> entry : validRestrictions.entrySet()) {
                 ret.add(entry.getValue());
             }
             return ret.toArray(new Restriction[ret.size()]);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -461,13 +476,21 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             checkAdminIdOrName(admins);
             for (final ResellerAdmin admin : admins) {
                 if (!oxresell.existsAdmin(admin, pid)) {
-                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+                    String id;
+                    if (admin.isNameset()) {
+                        id = admin.getName();
+                    } else if (admin.isIdset()) {
+                        id = admin.getId().toString();
+                    } else {
+                        id = "";
+                    }
+                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, id);
                 }
             }
 
             return oxresell.getData(admins);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -495,7 +518,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getRestrictionsFromContext(ctx);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -510,7 +533,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             oxresell.initDatabaseRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -533,7 +556,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             int pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId().intValue();
             return oxresell.list(search_pattern, pid);
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -549,7 +572,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.removeDatabaseRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -566,7 +589,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateModuleAccessRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
@@ -598,7 +621,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      */
     private void checkIdOrName(final ResellerAdmin adm) throws InvalidDataException {
         if (adm.getId() == null && adm.getName() == null) {
-            throw new InvalidDataException("either ID or name must be specified");
+            throw new InvalidDataException("Either ID or name must be specified");
         }
     }
 
@@ -630,6 +653,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
     }
 
+    /**
+     * Checks if any contained reseller data besides ID, Capabilities, Properties, Taxonomies is set
+     * for a self-change.
+     *
+     * @param admin The admin that issued the self-change
+     * @throws InvalidDataException If invalid data is set
+     */
+    private void checkResellerChangeSelfData(ResellerAdmin admin) throws InvalidDataException {
+        // @formatter:off
+        if (admin.isNameset() || admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
+            || admin.isPasswordset() || admin.isRestrictionsset() || admin.isSaltSet()) {
+            throw new InvalidDataException("Invalid data sent by client!");
+        }
+        // @formatter:on
+    }
+
     @Override
     public void updateDatabaseRestrictions(Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
@@ -642,9 +681,70 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateRestrictions();
         } catch (Throwable e) {
-            logAndEnhanceException(e, creds);
+            enhanceAndLogException(e, creds);
             throw e;
         }
     }
 
+    @Override
+    public Set<String> getCapabilities(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
+        try {
+            doNullCheck(LOGGER, credentials, admin);
+
+            ResellerAdmin parent = null;
+            Credentials masterCredentials = cache.getMasterCredentials();
+            boolean isMaster = false;
+            if (null != masterCredentials && masterCredentials.getLogin().equals(credentials.getLogin())) {
+                basicauth.doAuthentication(credentials);
+                isMaster = true;
+            } else {
+                resellerauth.doAuthentication(credentials);
+                parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(credentials.getLogin(), credentials.getPassword()) })[0];
+                if (admin.getParentId() != null) {
+                    throw new OXResellerException(Code.SUBADMIN_IS_NOT_AUTHORIZED_TO_LIST_DATA);
+                }
+            }
+
+            checkIdOrName(admin);
+            if (admin.getId() != null && !oxresell.existsAdmin(admin)) {
+                throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
+            }
+
+            if (isMaster || null == parent || parent.getId().equals(admin.getId())) {
+                return getCapabilities(admin);
+            }
+
+            GenericChecks.checkChangeValidPasswordMech(admin);
+            ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
+            if (false == dbAdmin.getParentId().equals(parent.getId())) {
+                LOGGER.error("Unathorized access to {} by {}", dbAdmin.getName(), credentials.getLogin());
+                throw new InvalidCredentialsException("Authentication failed");
+            }
+            // if no password mech supplied, use the old one as set in db
+            if (admin.getPasswordMech() == null) {
+                admin.setPasswordMech(dbAdmin.getPasswordMech());
+            }
+
+            return getCapabilities(admin);
+        } catch (Throwable e) {
+            enhanceAndLogException(e, credentials);
+            throw e;
+        }
+    }
+
+    /**
+     * Returns the capabilities for the specified admin
+     *
+     * @param admin
+     * @return The capabilities
+     * @throws StorageException
+     */
+    private Set<String> getCapabilities(ResellerAdmin admin) throws StorageException {
+        ResellerAdmin[] data = oxresell.getData(new ResellerAdmin[] { admin });
+        Set<String> c = new HashSet<>();
+        for (ResellerAdmin d : data) {
+            c.addAll(d.getCapabilities());
+        }
+        return c;
+    }
 }

@@ -70,7 +70,7 @@ public final class GETResponse extends AbstractResponse {
         assertOK();
         assertNotNull(body);
         Map<String, String> hiddenFormFields = HttpTools.getHiddenFormFields(new String(body, Charsets.UTF_8));
-        POSTRequest postRequest = new POSTRequest().setHostname(request.hostname);
+        POSTRequest postRequest = new POSTRequest().setScheme(request.scheme).setHostname(request.hostname).setPort(request.port);
         for (String param : hiddenFormFields.keySet()) {
             String value = hiddenFormFields.get(param);
             if (param != null && value != null) {
@@ -78,8 +78,25 @@ public final class GETResponse extends AbstractResponse {
             }
         }
 
-        postRequest.setHeader(HttpHeaders.REFERER, "https://" + request.hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
+        String portPart = "";
+        if (!isDefaultPort()) {
+            portPart = ":" + Integer.toString(request.port);
+        }
+        postRequest.setHeader(HttpHeaders.REFERER, request.scheme + "://" + request.hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
         return postRequest;
     }
+
+    private boolean isDefaultPort() {
+        if (request.port <= 0) {
+            return true;
+        }
+
+        if (request.scheme.equalsIgnoreCase("https")) {
+            return request.port == 443;
+        }
+
+        return request.port == 80;
+    }
+
 
 }

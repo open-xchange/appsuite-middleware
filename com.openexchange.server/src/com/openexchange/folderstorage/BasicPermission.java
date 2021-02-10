@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Objects;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link BasicPermission}
@@ -63,7 +65,11 @@ public class BasicPermission implements Permission, Cloneable {
      */
     private static final long serialVersionUID = 7760512838927816558L;
 
+    protected String identifier;
+
     protected int entity = -1;
+
+    protected EntityInfo entityInfo;
 
     protected boolean group;
 
@@ -88,7 +94,7 @@ public class BasicPermission implements Permission, Cloneable {
      */
     public BasicPermission() {
         super();
-        setNoPermissions();
+        setNoPermissionInternal();
     }
 
     /**
@@ -101,6 +107,7 @@ public class BasicPermission implements Permission, Cloneable {
      */
     public BasicPermission(int entity, boolean isGroup, int permissionBits) {
         super();
+        this.identifier = String.valueOf(entity);
         this.entity = entity;
         this.group = isGroup;
         int[] permissions = Permissions.parsePermissionBits(permissionBits);
@@ -116,7 +123,9 @@ public class BasicPermission implements Permission, Cloneable {
      */
     public BasicPermission(Permission permission) {
         super();
+        identifier = permission.getIdentifier();
         entity = permission.getEntity();
+        entityInfo = permission.getEntityInfo();
         group = permission.isGroup();
         system = permission.getSystem();
         type = permission.getType();
@@ -139,8 +148,18 @@ public class BasicPermission implements Permission, Cloneable {
     }
 
     @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
     public int getEntity() {
         return entity;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
     }
 
     @Override
@@ -192,8 +211,18 @@ public class BasicPermission implements Permission, Cloneable {
     }
 
     @Override
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    @Override
     public void setEntity(final int entity) {
         this.entity = entity;
+    }
+
+    @Override
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
     }
 
     @Override
@@ -217,6 +246,13 @@ public class BasicPermission implements Permission, Cloneable {
 
     @Override
     public void setNoPermissions() {
+        setNoPermissionInternal();
+    }
+
+    /**
+     * Initializes the permissions with no permission
+     */
+    private final void setNoPermissionInternal() {
         folderPermission = Permission.NO_PERMISSIONS;
         readPermission = Permission.NO_PERMISSIONS;
         deletePermission = Permission.NO_PERMISSIONS;
@@ -243,7 +279,9 @@ public class BasicPermission implements Permission, Cloneable {
     public Object clone() {
         try {
             BasicPermission clone = (BasicPermission) super.clone();
+            clone.identifier = getIdentifier();
             clone.entity = getEntity();
+            clone.entityInfo = getEntityInfo();
             clone.group = isGroup();
             clone.system = getSystem();
             clone.type = getType();
@@ -265,6 +303,7 @@ public class BasicPermission implements Permission, Cloneable {
         int result = 1;
         result = prime * result + (admin ? 1231 : 1237);
         result = prime * result + deletePermission;
+        result = prime * result + (null != identifier ? identifier.hashCode() : 0);
         result = prime * result + entity;
         result = prime * result + folderPermission;
         result = prime * result + (group ? 1231 : 1237);
@@ -294,6 +333,9 @@ public class BasicPermission implements Permission, Cloneable {
             return false;
         }
         if (deletePermission != other.getDeletePermission()) {
+            return false;
+        }
+        if (false == Objects.equals(identifier, other.getIdentifier())) {
             return false;
         }
         if (entity != other.getEntity()) {
@@ -326,7 +368,7 @@ public class BasicPermission implements Permission, Cloneable {
 
     @Override
     public String toString() {
-        return "Permission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
+        return "Permission [identifier=" + identifier + ", entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
     }
 
     @Override

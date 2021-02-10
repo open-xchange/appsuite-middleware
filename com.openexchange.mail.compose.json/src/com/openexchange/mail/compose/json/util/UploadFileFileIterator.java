@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.json.util;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileInputStream;
@@ -68,6 +69,8 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
 
     private final Iterator<UploadFile> uploadFilesIter;
 
+    private final long totalSize;
+
     /**
      * Initializes a new {@link UploadFileFileIterator}.
      *
@@ -76,6 +79,13 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
     public UploadFileFileIterator(List<UploadFile> uploadFiles) {
         super();
         this.uploadFilesIter = uploadFiles.iterator();
+        if (uploadFiles.isEmpty()) {
+            this.totalSize = 0L;
+        } else if (uploadFiles.stream().allMatch(f -> f.getSize() >= 0)) {
+            this.totalSize = uploadFiles.stream().collect(Collectors.summingLong(f -> f.getSize()));
+        } else {
+            this.totalSize = -1L;
+        }
     }
 
     @Override
@@ -87,6 +97,11 @@ public class UploadFileFileIterator implements StreamedUploadFileIterator {
     public StreamedUploadFile next() throws OXException {
         UploadFile uploadFile = uploadFilesIter.next();
         return new StreamedUploadFileImpl(uploadFile);
+    }
+
+    @Override
+    public long getRawTotalBytes() {
+        return totalSize;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

@@ -290,21 +290,21 @@ public class Report implements Serializable {
             throw new IllegalArgumentException("Illegal type! Use only serializable types! " + value.getClass() + ": " + value);
         }
         if (value instanceof Map) {
-            Map map = (Map) value;
+            Map<?, ?> map = Map.class.cast(value);
             for (Object oEntry : map.entrySet()) {
-                Map.Entry entry = (Map.Entry) oEntry;
+                Map.Entry<?, ?> entry = Map.Entry.class.cast(oEntry);
                 checkValue(entry.getKey());
                 checkValue(entry.getValue());
             }
             return;
         } else if (value instanceof Collection) {
-            Collection col = (Collection) value;
+            Collection<?> col = Collection.class.cast(value);
             for (Object o : col) {
                 checkValue(o);
             }
             return;
         } else {
-            for (Class candidate : allowedTypes) {
+            for (Class<?> candidate : allowedTypes) {
                 if (candidate.isInstance(value)) {
                     return;
                 }

@@ -4,9 +4,9 @@
     tags:
       - Certificate
     summary: Deletes all fingerprint/hostname combinations for the user
+    security: 
+        - session: []    
     description: Deletes all fingerprint/hostname combinations for the user
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

@@ -50,6 +50,13 @@ The complete list of proxy properties:
 * mail.smtps.proxy.port
 * mail.smtp.proxy.nonProxyHosts
 
+## pop3 & pop3s
+* mail.pop3.proxy.host
+* mail.pop3.proxy.port
+* mail.pop3s.proxy.host
+* mail.pop3s.proxy.port
+* mail.pop3.proxy.nonProxyHosts  
+
 # Example
 
 For example to configure the http proxy one can add the properties to the `ox-scriptconf.sh` script:
@@ -64,4 +71,10 @@ It is recommended to whitelist internal systems by adding them to the nonProxyHo
 
 ```
 -Dhttp.nonProxyHosts=localhost|127.*|[::1]|my.internal.system
+```
+
+```
+-Dmail.imap.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
+-Dmail.smtp.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
+-Dmail.pop3.proxy.nonProxyHosts=localhost|127.0.0.0/8|[::1]|10.0.0.0/8|*.domain.com
 ```

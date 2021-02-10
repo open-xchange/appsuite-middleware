@@ -96,6 +96,11 @@ public final class MessagingPermissions {
                 throw new InternalError(e.getMessage());
             }
         }
+        
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
 
         @Override
         public boolean equals(final Object obj) {

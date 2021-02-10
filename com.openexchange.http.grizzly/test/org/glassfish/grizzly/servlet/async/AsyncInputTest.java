@@ -45,12 +45,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
 import javax.servlet.ReadListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -60,7 +57,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.glassfish.grizzly.Grizzly;
-import org.glassfish.grizzly.servlet.FilterRegistration;
 import org.glassfish.grizzly.servlet.HttpServerAbstractTest;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
@@ -80,6 +76,9 @@ public class AsyncInputTest extends HttpServerAbstractTest {
             WebappContext ctx = new WebappContext("Test", "/contextPath");
             addServlet(ctx, "foobar", "/servletPath/*", new HttpServlet() {
 
+                private static final long serialVersionUID = 2507248465509879778L;
+
+                @SuppressWarnings("synthetic-access")
                 @Override
                 protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
                     ServletOutputStream output = res.getOutputStream();
@@ -167,20 +166,6 @@ public class AsyncInputTest extends HttpServerAbstractTest {
         return reg;
     }
     
-    private FilterRegistration addFilter(final WebappContext ctx,
-            final String name,
-            final String alias,
-            final Filter filter
-            ) {
-        
-        final FilterRegistration reg = ctx.addFilter(name, filter);
-        reg.addMappingForUrlPatterns(
-                EnumSet.<DispatcherType>of(DispatcherType.REQUEST),
-                alias);
-
-        return reg;
-    }
-    
     private static class ReadListenerImpl implements ReadListener {
         private final AsyncContext asyncCtx;
         private final byte[] buffer;
@@ -209,7 +194,7 @@ public class AsyncInputTest extends HttpServerAbstractTest {
         @Override
         public void onAllDataRead() {
             try {
-                ServletInputStream input = asyncCtx.getRequest().getInputStream();
+                asyncCtx.getRequest().getInputStream();
                 ServletOutputStream output = asyncCtx.getResponse().getOutputStream();
 
                 output.println("-onAllDataRead");
@@ -220,6 +205,7 @@ public class AsyncInputTest extends HttpServerAbstractTest {
             }
         }
 
+        @SuppressWarnings("synthetic-access")
         @Override
         public void onError(Throwable t) {
             LOGGER.log(Level.WARNING, "Unexpected error", t);

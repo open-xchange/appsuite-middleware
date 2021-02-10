@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test.matrix_v2;
 
+import static com.openexchange.java.Autoboxing.B;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,7 +83,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCPass() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net; dmarc=pass (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.PASS, false, "example.net", DMARCResult.PASS, DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(3, MailAuthenticityStatus.PASS, B(false), "example.net", DMARCResult.PASS, DKIMResult.PASS, SPFResult.FAIL);
     }
 
     /**
@@ -92,7 +93,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCFailRejectPolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net; dmarc=fail (p=reject sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.FAIL, false, "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(3, MailAuthenticityStatus.FAIL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
     }
 
     /**
@@ -102,7 +103,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCFailQuarantinePolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net; dmarc=fail (p=quarantine sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, false, "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, B(false), "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
     }
 
     /**
@@ -112,7 +113,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCFailNonePolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, false, "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.PASS, SPFResult.FAIL);
     }
 
     /**
@@ -122,7 +123,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCMissingWithDomainMatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, false, "example.net", DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DKIMResult.PASS, SPFResult.FAIL);
     }
 
     /**
@@ -132,7 +133,7 @@ public class TestMailAuthenticityStatusMatrixF1 extends AbstractTestMailAuthenti
     public void testSPFFailDKIMPassDMARCMissingWithDomainMismatch() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.NEUTRAL, true, "example.net", DKIMResult.PASS, SPFResult.FAIL);
+        assertResults(2, MailAuthenticityStatus.NEUTRAL, B(true), "example.net", DKIMResult.PASS, SPFResult.FAIL);
     }
 
 }

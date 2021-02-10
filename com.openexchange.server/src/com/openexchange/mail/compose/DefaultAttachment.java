@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
@@ -80,20 +81,40 @@ public class DefaultAttachment implements RandomAccessAttachment {
      * @return The new builder
      */
     public static Builder builder(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Identifier must not be null");
+        }
         return new Builder(id);
+    }
+
+    /**
+     * Creates a new builder for an instance of <code>DefaultAttachment</code> taking over attributes from given
+     * <code>AttachmentDescription</code> instance.
+     * <p>
+     * Returned builder has no value set for {@link Builder#withDataProvider(DataProvider) data provider} and
+     * {@link Builder#withStorageReference(AttachmentStorageReference) storage reference}.
+     *
+     * @param attachmentDesc The attachment description to taker over from
+     * @return The new builder
+     */
+    public static Builder builder(AttachmentDescription attachmentDesc) {
+        if (attachmentDesc == null) {
+            throw new IllegalArgumentException("Attachment description must not be null");
+        }
+        return new Builder(attachmentDesc.getId()).applyFromAttachmentDescription(attachmentDesc);
     }
 
     /** The builder for an instance of <code>DefaultAttachment</code> */
     public static class Builder {
 
         private DataProvider dataProvider;
-        private final UUID id;
+        private UUID id;
         private UUID compositionSpaceId;
         private AttachmentStorageReference storageReference;
         private String name;
         private long size;
         private String mimeType;
-        private String contentId;
+        private ContentId contentId;
         private ContentDisposition disposition;
         private AttachmentOrigin origin;
 
@@ -104,6 +125,11 @@ public class DefaultAttachment implements RandomAccessAttachment {
             super();
             this.id = id;
             size = -1;
+        }
+
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
         }
 
         public Builder withDataProvider(DataProvider dataProvider) {
@@ -137,6 +163,11 @@ public class DefaultAttachment implements RandomAccessAttachment {
         }
 
         public Builder withContentId(String contentId) {
+            this.contentId = ContentId.valueOf(contentId);
+            return this;
+        }
+
+        public Builder withContentId(ContentId contentId) {
             this.contentId = contentId;
             return this;
         }
@@ -156,6 +187,17 @@ public class DefaultAttachment implements RandomAccessAttachment {
             return this;
         }
 
+        Builder applyFromAttachmentDescription(AttachmentDescription attachmentDesc) {
+            withCompositionSpaceId(attachmentDesc.getCompositionSpaceId());
+            withContentDisposition(attachmentDesc.getContentDisposition());
+            withContentId(attachmentDesc.getContentId());
+            withMimeType(attachmentDesc.getMimeType());
+            withName(attachmentDesc.getName());
+            withOrigin(attachmentDesc.getOrigin());
+            withSize(attachmentDesc.getSize());
+            return this;
+        }
+
         public DefaultAttachment build() {
             return new DefaultAttachment(dataProvider, id, compositionSpaceId, storageReference, name, size, mimeType, contentId, disposition, origin);
         }
@@ -170,11 +212,11 @@ public class DefaultAttachment implements RandomAccessAttachment {
     private final String name;
     private final long size;
     private final String mimeType;
-    private final String contentId;
+    private final ContentId contentId;
     private final ContentDisposition disposition;
     private final AttachmentOrigin origin;
 
-    DefaultAttachment(DataProvider dataProvider, UUID id, UUID compositionSpaceId, AttachmentStorageReference storageReference, String name, long size, String mimeType, String contentId, ContentDisposition disposition, AttachmentOrigin origin) {
+    DefaultAttachment(DataProvider dataProvider, UUID id, UUID compositionSpaceId, AttachmentStorageReference storageReference, String name, long size, String mimeType, ContentId contentId, ContentDisposition disposition, AttachmentOrigin origin) {
         super();
         this.dataProvider = dataProvider;
         this.id = id;
@@ -186,6 +228,17 @@ public class DefaultAttachment implements RandomAccessAttachment {
         this.contentId = contentId;
         this.disposition = disposition;
         this.origin = origin;
+    }
+
+    @Override
+    public void close() {
+        if (dataProvider instanceof Closeable) {
+            try {
+                ((Closeable) dataProvider).close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
     @Override
@@ -240,6 +293,11 @@ public class DefaultAttachment implements RandomAccessAttachment {
 
     @Override
     public String getContentId() {
+        return contentId == null ? null : contentId.getContentId();
+    }
+
+    @Override
+    public ContentId getContentIdAsObject() {
         return contentId;
     }
 

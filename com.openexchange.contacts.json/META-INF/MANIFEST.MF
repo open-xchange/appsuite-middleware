@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Contact JSON Bundle
 Bundle-SymbolicName: com.openexchange.contacts.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.contacts.json.osgi.ContactJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -25,16 +25,18 @@ Import-Package: com.davekoelle,
  com.openexchange.ajax.helper,
  com.openexchange.ajax.parser,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
- com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.contact,
+ com.openexchange.contact.common,
+ com.openexchange.contact.provider.composition,
  com.openexchange.contact.vcard,
  com.openexchange.contact.vcard.storage,
  com.openexchange.conversion,
@@ -82,7 +84,7 @@ Import-Package: com.davekoelle,
  gnu.trove.list.array,
  gnu.trove.map,
  gnu.trove.map.hash,
- javax.activation;version="1.1.0",
+ javax.activation,
  javax.imageio,
  javax.imageio.event,
  javax.imageio.metadata,
@@ -101,8 +103,11 @@ Import-Package: com.davekoelle,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
+ org.joda.time,
  org.json,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.contacts.json,
  com.openexchange.contacts.json.mapping
+Automatic-Module-Name: com.openexchange.contacts.json

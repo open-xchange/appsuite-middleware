@@ -80,6 +80,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction.Type;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -109,6 +111,9 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
@@ -122,6 +127,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @DispatcherNotes(allowPublicSession = true)
+@RestrictedAction(module = AbstractMailAction.MODULE, hasCustomOAuthScopeCheck = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);
@@ -181,6 +187,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return performPUT(req, bodyObject);
     }
 
+    private static final String READ_SCOPE = Type.READ.getScope(AbstractMailAction.MODULE);
+    private static final String WRITE_SCOPE = Type.WRITE.getScope(AbstractMailAction.MODULE);
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(AJAXRequestData request, @SuppressWarnings("unused") final ServerSession session, OAuthAccess access) throws OXException {
+        if (request.getData() != null) {
+
+            if (access.getScope().has(WRITE_SCOPE) == false) {
+                throw new OAuthInsufficientScopeException(WRITE_SCOPE);
+            }
+        } else if (access.getScope().has(READ_SCOPE) == false) {
+            throw new OAuthInsufficientScopeException(READ_SCOPE);
+        }
+        return true;
+    }
+
     private JSONObject optJSONObject(MailRequest req) throws OXException {
         Object data = req.getRequest().getData();
         if (null == data) {
@@ -205,7 +227,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      * @return The result
      * @throws OXException If something fails
      */
-    public AJAXRequestResult performGET(final MailRequest req) throws OXException {
+    public AJAXRequestResult performGET(MailRequest req) throws OXException {
         AJAXRequestData requestData = req.getRequest();
         IFileHolder fileHolder = null;
         try {
@@ -558,7 +580,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return new StringBuilder("file.").append(fileExtension).toString();
     }
 
-    private AJAXRequestResult performPUT(final MailRequest req, final JSONObject jsonFileObject) throws OXException {
+    private AJAXRequestResult performPUT(MailRequest req, JSONObject jsonFileObject) throws OXException {
         try {
             ServerSession session = req.getSession();
 

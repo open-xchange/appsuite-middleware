@@ -46,15 +46,15 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi.extensions;
 
+package com.openexchange.admin.rmi.extensions;
 
 /**
  * Extend all extensions from this class
  *
  * @author d7
- *
  */
+@SuppressWarnings("deprecation")
 public abstract class OXCommonExtension implements OXCommonExtensionInterface {
 
     private static final long serialVersionUID = -4307192636151887795L;
@@ -87,7 +87,15 @@ public abstract class OXCommonExtension implements OXCommonExtensionInterface {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((errortext == null) ? 0 : errortext.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
         return false;
     }
 }

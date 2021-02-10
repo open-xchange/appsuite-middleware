@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
@@ -66,6 +67,7 @@ import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderMoveWarningCollector;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -106,6 +108,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
     private boolean increaseObjectUseCount;
+    private boolean collectFolderMoveWarnings;
 
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
@@ -116,6 +119,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
         increaseObjectUseCount = true;
+        collectFolderMoveWarnings = true;
     }
 
     /**
@@ -160,6 +164,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public void setIncreaseObjectUseCount(boolean increaseObjectUseCount) {
         this.increaseObjectUseCount = increaseObjectUseCount;
+    }
+
+    /**
+     * Sets the collectFolderMoveWarnings flag
+     *
+     * @param collectFolderMoveWarnings The collectFolderMoveWarnings to set
+     */
+    public void setCollectFolderMoveWarnings(boolean collectFolderMoveWarnings) {
+        this.collectFolderMoveWarnings = collectFolderMoveWarnings;
     }
 
     /**
@@ -305,7 +318,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * restore inherited/legator permission type from original folder's permissions as needed
              */
-            if ((false == folder instanceof PermissionTypeAwareFolder) && 
+            if ((false == folder instanceof PermissionTypeAwareFolder) &&
                 (storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) ||
                 (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
                 restorePermissionType(folder, storageFolder);
@@ -455,14 +468,27 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
         }
         /*
-         * Perform move either in real or in virtual storage
+         * Checks if a warning is needed for the folder move
          */
-        MovePerformer movePerformer = newMovePerformer();
-        movePerformer.setStorageParameters(storageParameters);
-        if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-            movePerformer.doMoveReal(folder, storage);
+        Optional<OXException> warnings = Optional.empty();
+        if (collectFolderMoveWarnings) {
+            warnings = new FolderMoveWarningCollector(session, storageParameters, storageFolder, realStorage, newParentId, newRealParentStorage).collectWarnings();
+            warnings.ifPresent(warning -> addWarning(warning));
+        }
+        boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+        if (collectFolderMoveWarnings && warnings.isPresent() && ignoreWarnings == false) {
+            folder.setID(null);
         } else {
-            movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
+            /*
+             * Perform move either in real or in virtual storage
+             */
+            MovePerformer movePerformer = newMovePerformer();
+            movePerformer.setStorageParameters(storageParameters);
+            if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                movePerformer.doMoveReal(folder, storage);
+            } else {
+                movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
+            }
         }
     }
 
@@ -491,7 +517,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * Check permissions of anonymous guest users
          */
-        checkGuestPermissions(storageFolder, comparedPermissions);
+        checkGuestPermissions(storageFolder, comparedPermissions, transactionManager);
         /*
          * prepare new shares for added guest permissions
          */

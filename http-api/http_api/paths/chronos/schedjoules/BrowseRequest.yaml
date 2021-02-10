@@ -3,11 +3,13 @@
     operationId: browse
     tags:
       - Chronos
-    summary: >-
+    summary: Browses a specific page of the SchedJoules calendars catalog
+    security:
+      - session: []  
+    description: >-
       Browses a specific page of the SchedJoules calendars catalog. If no 'id'
       is provided, then the root page is returned.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The identifier of the page.

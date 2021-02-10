@@ -56,8 +56,11 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.UserizedFolderImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.generic.FolderUpdaterService;
@@ -88,10 +91,16 @@ public class SubscriptionExecutionServiceImplTest {
     private Subscription subscription;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws OXException {
         final SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
-        subscribeService = new SimSubscribeService();
+
+        // Mock folder service
+        FolderService mock = Mockito.mock(com.openexchange.folderstorage.FolderService.class);
+        UserizedFolderImpl folderMock = Mockito.mock(UserizedFolderImpl.class);
+        Mockito.when(mock.getFolder(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(folderMock);
+
+        subscribeService = SimSubscribeService.createSimSubscribeService(mock);
         subscription = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(12);
@@ -102,13 +111,13 @@ public class SubscriptionExecutionServiceImplTest {
         subscribeService.setSubscriptionSource(source);
         final SubscriptionSource source2 = new SubscriptionSource();
         source2.setId(SOURCE_NAME2);
-        source2.setSubscribeService(new SimSubscribeService() );
+        source2.setSubscribeService(SimSubscribeService.createSimSubscribeService(mock));
         discovery.addSource( source );
         discovery.addSource( source2 );
         discovery.setLookupIdentifier( source.getId() );
         simFolderUpdaterService = new SimFolderUpdaterService();
         simFolderUpdaterService.setHandles(true);
-        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(1);
+        final List<FolderUpdaterService<?>> list = new ArrayList<>(1);
         list.add(simFolderUpdaterService);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override
@@ -174,7 +183,7 @@ public class SubscriptionExecutionServiceImplTest {
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(false);
-        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(2);
+        final List<FolderUpdaterService<?>> list = new ArrayList<>(2);
         list.add(simFolderUpdaterService);
         list.add(simFolderUpdaterService2);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
@@ -192,14 +201,14 @@ public class SubscriptionExecutionServiceImplTest {
         subscription.setContext(new SimContext(2));
         subscription.setId(13);
         subscription.setFolderId("12");
-        final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+        final ArrayList<Subscription> subscriptions = new ArrayList<>();
         subscriptions.add(subscription);
         subscriptions.add(subscription2);
         subscribeService.setSubscriptions(subscriptions);
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(true);
-        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(2);
+        final List<FolderUpdaterService<?>> list = new ArrayList<>(2);
         list.add(simFolderUpdaterService);
         list.add(simFolderUpdaterService2);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
@@ -217,11 +226,11 @@ public class SubscriptionExecutionServiceImplTest {
         subscription.setContext(new SimContext(2));
         subscription.setId(13);
         subscription.setFolderId("12");
-        final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+        final ArrayList<Subscription> subscriptions = new ArrayList<>();
         subscriptions.add(subscription);
         subscriptions.add(subscription2);
         subscribeService.setSubscriptions(subscriptions);
-        final List<FolderUpdaterService<?>> list = new ArrayList<FolderUpdaterService<?>>(1);
+        final List<FolderUpdaterService<?>> list = new ArrayList<>(1);
         list.add(simFolderUpdaterService);
         executionService = new SubscriptionExecutionServiceImpl(discovery, list, new SimContextService()) {
             @Override

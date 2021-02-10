@@ -40,6 +40,12 @@
         schema:
           type: integer
           format: int64
+      - in: query
+        name: binary
+        description: Additional flag to prevent non-binary API responses during errors.
+        required: false
+        schema:
+          type: boolean
     responses:
       '200':
         description: The binary content of the requested file version.

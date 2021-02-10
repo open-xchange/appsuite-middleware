@@ -51,7 +51,6 @@ package com.openexchange.file.storage.onedrive;
 
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
@@ -67,17 +66,19 @@ import com.openexchange.session.Session;
 public abstract class AbstractOneDriveResourceAccess {
 
     private final OneDriveOAuthAccess oneDriveAccess;
-    private final Session session;
+    protected final Session session;
     protected final MicrosoftGraphDriveService driveService;
 
     /**
      * Initializes a new {@link AbstractOneDriveResourceAccess}.
+     * 
+     * @throws OXException if the {@link MicrosoftGraphDriveService} is absent
      */
-    protected AbstractOneDriveResourceAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session) {
+    protected AbstractOneDriveResourceAccess(OneDriveOAuthAccess oneDriveAccess, Session session) throws OXException {
         super();
         this.oneDriveAccess = oneDriveAccess;
         this.session = session;
-        this.driveService = Services.getService(MicrosoftGraphDriveService.class);
+        this.driveService = Services.getServiceSafe(MicrosoftGraphDriveService.class);
     }
 
     /**

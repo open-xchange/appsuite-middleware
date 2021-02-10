@@ -1,0 +1,27 @@
+/share/management?action=analyze:
+  put:
+    operationId: analyzeShareLink
+    tags:
+      - Share/Management
+      - FederatedSharing
+    summary: Analyzes a share link to gain knowlege about the operations that can be perfomed with the link.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing data of the analyzed share link. In
+          case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareLinkAnalyzeResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscribeShareBody'
+      description: >-
+        A JSON object containing the data for the update
+      required: true

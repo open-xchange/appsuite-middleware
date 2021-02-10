@@ -82,7 +82,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.internal.performers.InstanceStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.SessionStorageParametersProvider;
@@ -251,12 +251,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 /*
                  * Default contact folder
                  */
-                realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, ContactContentType.getInstance());
+                realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, ContactsContentType.getInstance());
                 if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, ContactContentType.getInstance());
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, ContactsContentType.getInstance());
                 }
                 checkOpenedStorage(realStorage, params, false, openedStorages);
-                folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, ContactContentType.getInstance(), PrivateType.getInstance(), params);
+                folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, ContactsContentType.getInstance(), PrivateType.getInstance(), params);
                 if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
                     folder.setTreeID(treeId);

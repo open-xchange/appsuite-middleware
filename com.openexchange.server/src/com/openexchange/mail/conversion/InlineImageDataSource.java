@@ -124,7 +124,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         super();
     }
 
-    private MailPart getImagePart(final int accountId, final String fullname, final String mailId, final String cid, final Session session, final String auth) throws OXException {
+    private MailPart getImagePart(int accountId, String fullname, String mailId, String cid, Session session, String auth) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
@@ -151,7 +151,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         }
     }
 
-    private MailPart loadImagePart(final String fullname, final String mailId, final String cid, final MailAccess<?, ?> mailAccess) throws OXException {
+    private MailPart loadImagePart(String fullname, String mailId, String cid, MailAccess<?, ?> mailAccess) throws OXException {
         final MailPart imagePart = mailAccess.getMessageStorage().getImageAttachment(fullname, mailId, cid);
         if (null == imagePart) {
             return null;
@@ -179,7 +179,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String generateUrl(final ImageLocation imageLocation, final Session session) {
+    public String generateUrl(ImageLocation imageLocation, Session session) {
         final StringBuilder sb = new StringBuilder(64);
 
         // Nothing special...
@@ -206,7 +206,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public DataArguments generateDataArgumentsFrom(final ImageLocation imageLocation) {
+    public DataArguments generateDataArgumentsFrom(ImageLocation imageLocation) {
         final DataArguments dataArguments = new DataArguments(3);
         dataArguments.put(ARGS[0], imageLocation.getFolder());
         dataArguments.put(ARGS[1], imageLocation.getId());
@@ -216,7 +216,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public ImageLocation parseUrl(final String url) {
+    public ImageLocation parseUrl(String url) {
         return ImageUtility.parseImageLocationFrom(url);
     }
 
@@ -231,7 +231,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String getETag(final ImageLocation imageLocation, final Session session) {
+    public String getETag(ImageLocation imageLocation, Session session) {
         final char delim = '#';
         final StringBuilder builder = new StringBuilder(128);
         builder.append(delim).append(imageLocation.getFolder());
@@ -262,7 +262,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
+    public <D> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
         }

@@ -69,7 +69,6 @@ public class DiscardParserImpl implements ActionParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Action<DiscardActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Discard();

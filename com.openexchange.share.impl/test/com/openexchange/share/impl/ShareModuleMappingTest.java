@@ -85,7 +85,7 @@ public class ShareModuleMappingTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         this.configService = PowerMockito.mock(ConfigurationService.class);
         PowerMockito.when(configService.getProperty(ArgumentMatchers.anyString())).thenReturn("");
@@ -94,7 +94,7 @@ public class ShareModuleMappingTest {
     }
 
      @Test
-     public void testShareModuleMappingToInteger() throws Exception {
+     public void testShareModuleMappingToInteger() {
         int test1 = ShareModuleMapping.moduleMapping2int("test1");
         int test2 = ShareModuleMapping.moduleMapping2int("test2");
         int test3 = ShareModuleMapping.moduleMapping2int("test3");
@@ -106,7 +106,7 @@ public class ShareModuleMappingTest {
     }
 
      @Test
-     public void testShareModuleMappingToString() throws Exception {
+     public void testShareModuleMappingToString() {
         String test1 = ShareModuleMapping.moduleMapping2String(100);
         String test2 = ShareModuleMapping.moduleMapping2String(101);
         String test3 = ShareModuleMapping.moduleMapping2String(999);

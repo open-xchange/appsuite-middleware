@@ -74,6 +74,7 @@ public class Constants {
     static {
         ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 maxHeight = null;

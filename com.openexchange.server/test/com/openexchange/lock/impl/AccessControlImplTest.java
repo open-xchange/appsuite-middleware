@@ -135,7 +135,7 @@ public class AccessControlImplTest {
         Thread other1 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(100), latch));
         other1.start();
 
-        Thread other2 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(49), latch));
+        Thread other2 = new Thread(new LockHolder(accessControl, TimeUnit.MILLISECONDS.toNanos(45), latch));
         other2.start();
 
         boolean acquired = false;

@@ -51,6 +51,8 @@ package com.openexchange.subscribe.google.oauth;
 
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
@@ -70,6 +72,8 @@ import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociation
  * @since v7.10.1
  */
 public class GoogleContactsOAuthAccountAssociation extends AbstractSubscribeOAuthAccountAssociation {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleContactsOAuthAccountAssociation.class);
 
     private final GoogleContactsSubscribeService service;
 
@@ -97,6 +101,7 @@ public class GoogleContactsOAuthAccountAssociation extends AbstractSubscribeOAut
             service.ping(session, GoogleApiClients.getGoogleAccount(getOAuthAccountId(), session));
             return Status.OK;
         } catch (OXException e) {
+            LOGGER.debug("", e);
             return Status.RECREATION_NEEDED;
         }
     }

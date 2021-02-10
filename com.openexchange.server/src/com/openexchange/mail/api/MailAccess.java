@@ -70,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -210,6 +211,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /** Whether this access is trackable by {@link MailAccessWatcher} */
     protected volatile boolean trackable;
 
+    /** Whether this access has debug logging enabled */
+    protected volatile boolean debug;
+
     /** Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}. */
     protected volatile boolean cached;
 
@@ -235,7 +239,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param session The session
      */
-    protected MailAccess(final Session session) {
+    protected MailAccess(Session session) {
         this(session, MailAccount.DEFAULT_ID);
     }
 
@@ -245,13 +249,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param session The session
      * @param accountId The account ID
      */
-    protected MailAccess(final Session session, final int accountId) {
+    protected MailAccess(Session session, int accountId) {
         super();
         warnings = new ArrayList<>(2);
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
         trackable = true;
+        debug = false;
     }
 
     @Override
@@ -274,7 +279,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param provider The mail provider
      * @return This instance with mail provider applied
      */
-    protected MailAccess<F, M> setProvider(final MailProvider provider) {
+    protected MailAccess<F, M> setProvider(MailProvider provider) {
         this.provider = provider;
         return this;
     }
@@ -293,7 +298,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param warnings The warnings to add
      */
-    public void addWarnings(final Collection<OXException> warnings) {
+    public void addWarnings(Collection<OXException> warnings) {
         if (null != warnings) {
             for (OXException warning : warnings) {
                 if (null != warning) {
@@ -328,7 +333,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of <tt>MailAccess</tt>
      * @throws OXException If implementation-specific startup fails
      */
-    protected static void startupImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    protected static void startupImpl(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         mailAccess.startup();
     }
 
@@ -338,7 +343,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of <tt>MailAccess</tt>
      * @throws OXException If implementation-specific shutdown fails
      */
-    protected static void shutdownImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    protected static void shutdownImpl(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         mailAccess.shutdown();
     }
 
@@ -445,7 +450,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
-    private static boolean toBool(final Object obj) {
+    private static boolean toBool(Object obj) {
         if (obj instanceof Boolean) {
             return ((Boolean) obj).booleanValue();
         }
@@ -460,7 +465,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The new, un-cached <tt>MailAccess</tt> instance
      * @throws OXException If a new, un-cached <tt>MailAccess</tt> instance cannot be returned
      */
-    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getNewInstance(final Session session, final int accountId) throws OXException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getNewInstance(Session session, int accountId) throws OXException {
         final String name = LOOKUP_MAIL_ACCESS_CACHE_PROPERTY;
         final boolean setParam;
         {
@@ -594,7 +599,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess The <tt>MailAccess</tt> instance to close
      * @since v7.6.0
      */
-    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+    public static void closeInstance(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         closeInstance(mailAccess, true);
     }
 
@@ -605,7 +610,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param put2Cache true to try to put this mail connection into cache; otherwise false
      * @since v7.6.0
      */
-    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean put2Cache) {
+    public static void closeInstance(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, boolean put2Cache) {
         if (null != mailAccess) {
             try {
                 mailAccess.close(put2Cache);
@@ -647,7 +652,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param mailProperties The properties
      */
-    public void setMailProperties(final Properties mailProperties) {
+    public void setMailProperties(Properties mailProperties) {
         this.mailProperties = mailProperties;
     }
 
@@ -659,7 +664,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If a necessary field is missing
      * @see #connect()
      */
-    protected void checkFieldsBeforeConnect(final MailConfig mailConfig) throws OXException {
+    protected void checkFieldsBeforeConnect(MailConfig mailConfig) throws OXException {
 
         /*
          * Properties are implementation specific and therefore are created within connectInternal()
@@ -688,7 +693,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             if (mailConfig.isRequireTls() && false == mailConfig.isSecure()) {
                 throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
             }
-            connect0(false);
+            connect0(false, false);
             close(false);
             return true;
         } catch (OXException e) {
@@ -702,7 +707,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If the connection could not be established for various reasons
      */
     public final void connect() throws OXException {
-        connect0(true);
+        connect0(true, false);
     }
 
     /**
@@ -711,8 +716,19 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
      * @throws OXException If the connection could not be established for various reasons
      */
-    public final void connect(final boolean checkDefaultFolders) throws OXException {
-        connect0(checkDefaultFolders);
+    public final void connect(boolean checkDefaultFolders) throws OXException {
+        connect0(checkDefaultFolders, false);
+    }
+
+    /**
+     * Opens this access. May be invoked on an already opened access.
+     *
+     * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
+     * @param enableDebug Whether to enabled debug logging
+     * @throws OXException If the connection could not be established for various reasons
+     */
+    public final void connect(boolean checkDefaultFolders, boolean enableDebug) throws OXException {
+        connect0(checkDefaultFolders, enableDebug);
     }
 
     /**
@@ -738,7 +754,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     public MailFolder getRootFolder() throws OXException {
         if (!isConnected()) {
-            connect0(false);
+            connect0(false, false);
         }
         return getFolderStorage().getRootFolder();
     }
@@ -764,20 +780,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @throws OXException If returning the unread count fails
      */
-    public int getUnreadMessagesCount(final String fullname) throws OXException {
+    public int getUnreadMessagesCount(String fullname) throws OXException {
         if (!isConnected()) {
-            connect0(false);
+            connect0(false, false);
         }
         return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
     }
 
-    private final void connect0(final boolean checkDefaultFolder) throws OXException {
+    private final void connect0(boolean checkDefaultFolder, boolean enableDebug) throws OXException {
         applyNewThread();
+
+        boolean connect = true;
         if (isConnected()) {
-            if (checkDefaultFolder) {
-                checkDefaultFolderOnConnect();
+            if (enableDebug == debug) {
+                // Current debug logging flag matches parameter. Re-use already connected instance as-is.
+                connect = false;
+            } else {
+                // Current debug logging flag does not match parameter. Enforce closing and re-connect.
+                close(false);
             }
-        } else {
+        }
+
+        if (connect) {
             MailConfig mailConfig = getMailConfig();
             checkFieldsBeforeConnect(mailConfig);
             if (!supports(mailConfig.getAuthType())) {
@@ -785,6 +809,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             checkIfDisabled(mailConfig);
             try {
+                debug = enableDebug;
                 connectInternal();
             } catch (OXException e) {
                 AuthenticationFailureHandlerResult result = handleConnectFailure(e, mailConfig);
@@ -799,13 +824,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         throw e;
                 }
             }
-            if (checkDefaultFolder) {
-                checkDefaultFolderOnConnect();
-            }
         }
+
+        if (checkDefaultFolder) {
+            checkDefaultFolderOnConnect();
+        }
+
         if ((MailAccount.DEFAULT_ID == accountId) && (session instanceof PutIfAbsent)) {
             ((PutIfAbsent) session).setParameterIfAbsent(PARAM_MAIL_ACCESS, this);
         }
+
         if (isTrackable() && !tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
@@ -1023,7 +1051,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param put2Cache <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
-    public final void close(final boolean put2Cache) {
+    public final void close(boolean put2Cache) {
         try {
             if (!isConnectedUnsafe()) {
                 return;
@@ -1048,6 +1076,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 }
             }
             // Close mail connection
+            debug = false;
             closeInternal();
         } finally {
             if (MailAccount.DEFAULT_ID == accountId) {
@@ -1074,7 +1103,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param mimeCleanUp The {@link MimeCleanUp} instance
      */
-    public static void rememberMimeCleanUp(final MimeCleanUp mimeCleanUp) {
+    public static void rememberMimeCleanUp(MimeCleanUp mimeCleanUp) {
         if (null == mimeCleanUp) {
             return;
         }
@@ -1094,7 +1123,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      */
     public void logTrace(StringBuilder sBuilder, org.slf4j.Logger log) {
-        String lineSeparator = System.getProperty("line.separator");
+        String lineSeparator = Strings.getLineSeparator();
         Thread usingThread = this.usingThread;
         if (null != usingThread) {
             Map<String, String> taskProps = usingThreadProperties;
@@ -1153,20 +1182,20 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        String lineSeparator = System.getProperty("line.separator");
+        String lineSeparator = Strings.getLineSeparator();
         StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, String> entry : taskProps.entrySet()) {
+                for (Entry<String, String> entry : taskProps.entrySet()) {
                     final String propertyName = entry.getKey();
                     final String value = entry.getValue();
                     if (null != value) {
                         sorted.put(propertyName, value);
                     }
                 }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                for (Map.Entry<String, String> entry : sorted.entrySet()) {
                     sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
                 }
                 sBuilder.append(lineSeparator);
@@ -1308,6 +1337,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Indicates if this mail access has debug logging enabled.
+     *
+     * @return <code>true</code> if debug loggingis  enabled; otherwise <code>false</code>
+     */
+    public boolean isDebug() {
+        return debug;
+    }
+
+    /**
+     * Sets whether this mail access has debug logging enabled.
+     *
+     * @param debug <code>true</code> if debug loggingis  enabled; otherwise <code>false</code>
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    /**
      * Indicates if this mail access is cacheable.
      *
      * @return <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
@@ -1321,7 +1368,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param cacheable <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
      */
-    public void setCacheable(final boolean cacheable) {
+    public void setCacheable(boolean cacheable) {
         this.cacheable = cacheable;
     }
 
@@ -1339,7 +1386,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param cacheable <code>true</code> if this mail access is cached; otherwise <code>false</code>
      */
-    public void setCached(final boolean cached) {
+    public void setCached(boolean cached) {
         this.cached = cached;
     }
 

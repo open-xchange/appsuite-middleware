@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -75,6 +76,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class ListAction extends AbstractMailAction {
 
     /**
@@ -82,15 +84,15 @@ public final class ListAction extends AbstractMailAction {
      *
      * @param services
      */
-    public ListAction(final ServiceLookup services) {
+    public ListAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // Read in parameters
-            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
             int[] columns = columnCollection.getFields();
             String[] headers = columnCollection.getHeaders();
             /*
@@ -135,7 +137,7 @@ public final class ListAction extends AbstractMailAction {
         }
     }
 
-    private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, OXException {
+    private static final Map<String, List<String>> fillMapByArray(JSONArray idArray) throws JSONException, OXException {
         if (null == idArray) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
@@ -174,14 +176,14 @@ public final class ListAction extends AbstractMailAction {
         return idMap;
     }
 
-    private static String ensureString(final String key, final JSONObject jo) throws OXException {
+    private static String ensureString(String key, JSONObject jo) throws OXException {
         if (!jo.hasAndNotNull(key)) {
             throw MailExceptionCode.MISSING_PARAMETER.create(key);
         }
         return jo.optString(key);
     }
 
-    private static String[] toArray(final Collection<String> c) {
+    private static String[] toArray(Collection<String> c) {
         return c.toArray(new String[c.size()]);
     }
 

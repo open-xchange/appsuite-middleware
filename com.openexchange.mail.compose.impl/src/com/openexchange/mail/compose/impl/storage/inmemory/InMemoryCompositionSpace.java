@@ -50,10 +50,15 @@
 package com.openexchange.mail.compose.impl.storage.inmemory;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.java.BufferingQueue;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.ClientToken;
 import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.CompositionSpaceId;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.MessageDescription;
 
 /**
@@ -64,23 +69,25 @@ import com.openexchange.mail.compose.MessageDescription;
  */
 public class InMemoryCompositionSpace implements CompositionSpace {
 
-    private final UUID id;
+    private final CompositionSpaceId id;
     private final AtomicLong lastModifiedStamp;
     private final InMemoryMessage message;
     private final int userId;
     private final int contextId;
+    private final ClientToken clientToken;
 
     /**
      * Initializes a new {@link InMemoryCompositionSpace}.
      */
-    public InMemoryCompositionSpace(UUID id, MessageDescription initialMessageDesc, BufferingQueue<InMemoryMessage> bufferingQueue, int userId, int contextId) {
+    public InMemoryCompositionSpace(UUID id, MessageDescription initialMessageDesc, BufferingQueue<InMemoryMessage> bufferingQueue, int userId, int contextId, ClientToken clientToken) {
         super();
-        this.id = id;
+        this.id = new CompositionSpaceId(CompositionSpaceServiceFactory.DEFAULT_SERVICE_ID, id);
         this.userId = userId;
         this.contextId = contextId;
 
         lastModifiedStamp = new AtomicLong(System.currentTimeMillis());
         message = new InMemoryMessage(id, initialMessageDesc, bufferingQueue, userId, contextId);
+        this.clientToken = clientToken;
     }
 
     /**
@@ -102,8 +109,13 @@ public class InMemoryCompositionSpace implements CompositionSpace {
     }
 
     @Override
-    public UUID getId() {
+    public CompositionSpaceId getId() {
         return id;
+    }
+
+    @Override
+    public Optional<MailPath> getMailPath() {
+        return Optional.empty();
     }
 
     @Override
@@ -114,6 +126,11 @@ public class InMemoryCompositionSpace implements CompositionSpace {
     @Override
     public InMemoryMessage getMessage() {
         return message;
+    }
+
+    @Override
+    public ClientToken getClientToken() {
+        return clientToken;
     }
 
     /**

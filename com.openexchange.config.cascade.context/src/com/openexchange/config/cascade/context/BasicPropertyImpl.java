@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -119,7 +120,7 @@ final class BasicPropertyImpl implements BasicProperty {
     public void set(String newValue) throws OXException {
         load();
         if (Boolean.parseBoolean(metadata.get("protected"))) {
-            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(propertyName, "context");
+            throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(propertyName, ConfigViewScope.CONTEXT.getScopeName());
         }
 
         newValue = ConvertUtils.saveConvert(newValue, false, true);
@@ -165,7 +166,7 @@ final class BasicPropertyImpl implements BasicProperty {
 
     @Override
     public void set(String metadataName, String value) throws OXException {
-        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "context");
+        throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, ConfigViewScope.CONTEXT.getScopeName());
     }
 
     @Override

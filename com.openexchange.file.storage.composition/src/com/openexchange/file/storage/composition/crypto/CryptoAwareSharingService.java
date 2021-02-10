@@ -72,6 +72,7 @@ public interface CryptoAwareSharingService {
      * @param permissions
      * @throws OXException
      */
+    @SuppressWarnings("rawtypes")
     public void updateSharing (Session session, File file, FileStorageFileAccess fileAccess, ComparedPermissions permissions, List<FileStorageObjectPermission> updatedPermissions) throws OXException;
 
     /**

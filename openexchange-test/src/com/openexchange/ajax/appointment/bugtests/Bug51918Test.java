@@ -64,6 +64,7 @@ import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug51918Test}
@@ -93,6 +94,7 @@ public class Bug51918Test extends AbstractAJAXSession {
 
     @SuppressWarnings("null")
     @Test
+    @TryAgain
     public void testEveryHour() throws Exception {
         Appointment app = new Appointment();
         app.setTitle("Bug 51918 Test: " + hourOfDay);

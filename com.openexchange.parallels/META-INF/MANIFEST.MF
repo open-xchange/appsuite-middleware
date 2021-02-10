@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Parallels Plugin
 Bundle-SymbolicName: com.openexchange.parallels
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.custom.parallels.osgi.SoapParallelsActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -102,4 +102,5 @@ Bundle-ClassPath: lib/ws-commons-util-1.0.2.jar,
  lib/xmlrpc-common-3.1.3.jar,
  lib/xmlrpc-server-3.1.3.jar,
  .
+Automatic-Module-Name: com.openexchange.parallels
 

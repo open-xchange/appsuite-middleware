@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -66,13 +67,13 @@ import com.openexchange.mail.dataobjects.MailFolderStatus;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExamineAction}
  *
  * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public class ExamineAction extends AbstractMailAction {
 
     /**
@@ -87,7 +88,6 @@ public class ExamineAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         String folder = req.checkParameter("folder");
-        ServerSession session = req.getSession();
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
 
         MailServletInterface mailInterface = getMailInterface(req);

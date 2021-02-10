@@ -60,7 +60,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -210,7 +209,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return new IteratorBackedHits(hitsList);
     }
 
-    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
+    private Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) {
         // Remember checked clients
         Map<WebSocketClient, Boolean> checkedOnes = new LinkedHashMap<>();
         Set<WebSocketClient> hasOpenWebSocket = new LinkedHashSet<>();
@@ -250,7 +249,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         List<Hits> hitsList = new ArrayList<Hits>();
         for (int userId : userIds) {
-            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId, topic) : getInterestedSubscriptions(userId, contextId, topic);
+            Hits hits = null != client ? getInterestedSubscriptions(client, userId, contextId) : getInterestedSubscriptions(userId, contextId, topic);
             if (null != hits && false == hits.isEmpty()) {
                 hitsList.add(hits);
             }
@@ -258,7 +257,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return new IteratorBackedHits(hitsList);
     }
 
-    private Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    private Hits getInterestedSubscriptions(String client, int userId, int contextId) {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
             Map<String, WebSocketClient> clients = resolver.getSupportedClients();
@@ -341,7 +340,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     @Override
     public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
         if (null != notifications && 0 < notifications.size()) {
-            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+            for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
                 transport(entry.getKey(), entry.getValue());
             }
         }
@@ -383,6 +382,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         String textMessage = message.getMessage().toString();
         int userId = uac.getUserId();
         int contextId = uac.getContextId();
+        LOG.debug("Going to send notification \"{}\" via transport '{}' for user {} in context {}", notification.getTopic(), ID, I(userId), I(contextId));
         webSocketService.sendMessage(textMessage, notification.getSourceToken(), clientAndPathFilter.getPathFilter(), userId, contextId);
     }
 

@@ -2,10 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share implementation bundle
 Bundle-SymbolicName: com.openexchange.share.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
+Automatic-Module-Name: com.openexchange.share.impl
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.caching,
+Import-Package: com.google.common.cache,
+ com.openexchange.ajax.login,
+ com.openexchange.authentication,
+ com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.capabilities,
  com.openexchange.cluster.timer,
@@ -46,6 +50,8 @@ Import-Package: com.openexchange.caching,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.login,
+ com.openexchange.login.internal,
  com.openexchange.mail,
  com.openexchange.mail.api,
  com.openexchange.mail.dataobjects.compose,
@@ -77,6 +83,7 @@ Import-Package: com.openexchange.caching,
  com.openexchange.share.groupware.spi,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.share.subscription,
  com.openexchange.templating,
  com.openexchange.threadpool,
  com.openexchange.timer,
@@ -85,6 +92,7 @@ Import-Package: com.openexchange.caching,
  com.openexchange.tools.encoding,
  com.openexchange.tools.iterator,
  com.openexchange.tools.oxfolder,
+ com.openexchange.tools.oxfolder.property,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.tools.strings,

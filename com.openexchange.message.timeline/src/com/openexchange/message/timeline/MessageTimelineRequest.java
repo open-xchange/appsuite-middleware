@@ -50,6 +50,7 @@
 package com.openexchange.message.timeline;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,7 +115,7 @@ public class MessageTimelineRequest {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
+    public <T> T getParameter(final String name, final @NonNull Class<T> coerceTo) throws OXException {
         return requestData.getParameter(name, coerceTo);
     }
 

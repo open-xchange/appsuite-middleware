@@ -50,9 +50,9 @@
 package com.openexchange.share.json.fields;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.slf4j.LoggerFactory.getLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -61,6 +61,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 
 /**
@@ -69,11 +70,6 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExtendedObjectPermission extends ExtendedPermission {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermission.class);
-    }
 
     private final File file;
     private final FileStorageObjectPermission permission;
@@ -99,35 +95,73 @@ public class ExtendedObjectPermission extends ExtendedPermission {
      */
     public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("identifier", null != permission.getIdentifier() ? permission.getIdentifier() : String.valueOf(permission.getEntity()));
+        if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+            jsonObject.put("entity", permission.getEntity());
+        }
         jsonObject.put("bits", permission.getPermissions());
         if (permission.isGroup()) {
             jsonObject.put("type", "group");
-            addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
-        } else {
-            User user = resolver.getUser(permission.getEntity());
-            if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
-            } else if (user.isGuest()) {
-                GuestInfo guest = resolver.getGuest(user.getId());
-                if (guest == null) {
-                    int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
-                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
-                        "It might have been deleted in the mean time or is in an inconsistent state.");
-                }
-
-                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
-                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
-                } else {
-                    addUserInfo(requestData, jsonObject, user);
-                }
+            if (null != permission.getEntityInfo()) {
+                addEntityInfo(requestData, jsonObject, permission.getEntityInfo());
             } else {
-                jsonObject.put("type", "user");
-                addUserInfo(requestData, jsonObject, user);
+                addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
             }
+            return jsonObject;
+        }
+        if (null != permission.getEntityInfo()) {
+            /*
+             * add extended information based on provided entity info object
+             */
+            addEntityInfo(requestData, jsonObject, permission.getEntityInfo());
+            return jsonObject;
+        }
+        if (0 >= permission.getEntity()) {
+            getLogger(ExtendedObjectPermission.class).debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
+            return jsonObject;
+        }
+        /*
+         * lookup and add extended information for internal user/guest
+         */
+        User user = resolver.getUser(permission.getEntity());
+        if (null == user) {
+            getLogger(ExtendedObjectPermission.class).debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
+            return jsonObject;
+        }
+        if (false == user.isGuest()) {
+            jsonObject.put("type", "user");
+            addUserInfo(requestData, jsonObject, user);
+            return jsonObject;
+        }
+        GuestInfo guest = resolver.getGuest(user.getId());
+        if (guest == null) {
+            // @formatter:off
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + 
+                    extractContextId(requestData) + ". " + "It might have been deleted in the mean time or is in an inconsistent state.");
+            // @formatter:on
+        }
+
+        jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+        if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+            addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
+        } else {
+            addUserInfo(requestData, jsonObject, user);
         }
         return jsonObject;
     }
 
+    /**
+     * Extracts the context identifier from the specified request data.
+     * If the session is non-existent, -1 will be returned
+     *
+     * @param requestData The request data
+     * @return The context identifier or -1 if the session is <code>null</code>
+     */
+    private int extractContextId(AJAXRequestData requestData) {
+        ServerSession session = requestData.getSession();
+        if (session == null) {
+            return -1;
+        }
+        return session.getContextId();
+    }
 }

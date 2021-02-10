@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static org.junit.Assert.assertNotNull;
+import static com.openexchange.ajax.folder.manager.FolderManager.INFOSTORE;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
@@ -62,7 +63,6 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderExtendedPermission;
-import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.ShareLinkResponse;
 import com.openexchange.testing.httpclient.models.ShareTargetData;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
@@ -78,7 +78,6 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     private FolderManager folderManager;
     private ShareManagementApi shareManagementApi;
     private String infostoreRoot;
-    private final String MODULE = "infostore";
 
     private String A, B, C, D, E;
 
@@ -88,9 +87,11 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         ApiClient client = getApiClient();
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
+        remember(folderManager);
         shareManagementApi = new ShareManagementApi(client);
-        infostoreRoot = findInfostoreRoot();
+        infostoreRoot = folderManager.findInfostoreRoot();
 
+        // @formatter:off
         /*
          * Create the following folder structure:
          * root
@@ -100,17 +101,13 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
          *  - D
          *    - E
          */
-        A = folderManager.createFolder(infostoreRoot, "A_" + UUID.randomUUID(), MODULE);
-        B = folderManager.createFolder(A, "B_" + UUID.randomUUID(), MODULE);
-        C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), MODULE);
-        D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), MODULE);
-        E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), MODULE);
-    }
+        // @formatter:on
+        A = folderManager.createFolder(infostoreRoot, "A_" + UUID.randomUUID(), INFOSTORE);
+        D = folderManager.createFolder(infostoreRoot, "D_" + UUID.randomUUID(), INFOSTORE);
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        folderManager.cleanUp();
+        B = folderManager.createFolder(A, "B_" + UUID.randomUUID(), INFOSTORE);
+        C = folderManager.createFolder(B, "C_" + UUID.randomUUID(), INFOSTORE);
+        E = folderManager.createFolder(D, "E_" + UUID.randomUUID(), INFOSTORE);
     }
 
     @Test
@@ -150,23 +147,23 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder to no-link folder
-        folderManager.moveFolder(B, D);
+        // Move sub-folder to no-link folder; Inherit permissions from D
+        folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
-        checkFolderPermissions(B, 2, 2);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId2);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
-        // Move sub-folder back to parent folder
-        folderManager.moveFolder(B, A);
+        // Move sub-folder back to parent folder; Inherit permissions from A
+        folderManager.moveFolder(B, A, Boolean.TRUE);
 
         // Check sub-folder
-        checkFolderPermissions(B, 2, 3, guestId);
+        checkFolderPermissions(B, 1, 2, guestId);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 3, guestId, guestId2);
+        checkFolderPermissions(C, 1, 2, guestId);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
@@ -184,7 +181,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         checkFolderPermissions(D, 1, 1);
 
         // Move sub-folder to no-link folder
-        folderManager.moveFolder(B, D);
+        folderManager.moveFolder(B, D, Boolean.TRUE);
 
         // Check sub-folder
         checkFolderPermissions(B, 1, 1);
@@ -235,8 +232,8 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
      */
     private void checkFolderPermissions(String folderId, int permSize, int extendedPermSize, Integer... optGuestIds) throws ApiException {
         FolderData folder = folderManager.getFolder(folderId);
-        assertTrue(folder.getPermissions().size() == permSize);
-        assertTrue(folder.getComOpenexchangeShareExtendedPermissions().size() == extendedPermSize);
+        assertEquals("Unexpected permission size", permSize, folder.getPermissions().size());
+        assertEquals("Unexpected extended permission size", extendedPermSize, folder.getComOpenexchangeShareExtendedPermissions().size());
         if (optGuestIds != null) {
             for (Integer guestId : optGuestIds) {
                 checkExtendedPermission(folder, guestId, true);
@@ -253,7 +250,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
      */
     private void checkExtendedPermission(FolderData folder, Integer entity, boolean isInherited) {
         for (FolderExtendedPermission perm : folder.getComOpenexchangeShareExtendedPermissions()) {
-            if (perm.getEntity() == entity) {
+            if (Objects.equals(perm.getEntity(), entity)) {
                 assertTrue("The extended permission does not have the expected inherited types", perm.getIsInherited().booleanValue() == isInherited);
                 return;
             }
@@ -271,34 +268,11 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     private Integer createShareLink(String folder) throws ApiException {
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
-        data.setModule("infostore");
-        ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
+        data.setModule(INFOSTORE);
+        ShareLinkResponse shareLink = shareManagementApi.getShareLink(data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
         return shareLink.getData().getEntity();
-    }
-
-    /**
-     * Finds the infostore root folder
-     *
-     * @return The folder id of the infostore root
-     * @throws ApiException
-     */
-    private String findInfostoreRoot() throws ApiException {
-        FoldersVisibilityData allFolders = folderManager.getAllFolders("infostore", "1,20,300,301,302", Boolean.TRUE);
-        Object folders = allFolders.getPublic();
-        assertNotNull(folders);
-        @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;
-        // find parent
-        String parent = null;
-        for (List<?> o : folderArray) {
-            if (o.get(1).equals("10")) {
-                parent = (String) o.get(0);
-                break;
-            }
-        }
-        assertNotNull("Unable to find parent folder!", parent);
-        return parent;
     }
 
 }

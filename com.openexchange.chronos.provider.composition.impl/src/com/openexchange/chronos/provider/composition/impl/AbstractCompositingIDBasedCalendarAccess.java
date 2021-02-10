@@ -83,6 +83,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.CalendarProviders;
+import com.openexchange.chronos.provider.FallbackAwareCalendarProvider;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
@@ -90,6 +91,7 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
+import com.openexchange.chronos.provider.groupware.InternalCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -224,6 +226,18 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the calendar access for a specific account. The account is connected implicitly and remembered to be closed during
+     * {@link #finish()} implicitly, if not already done.
+     *
+     * @param accountId The identifier to get the calendar access for
+     * @return The calendar access for the specified account
+     */
+    protected CalendarAccess getAccess(int accountId) throws OXException {
+        CalendarAccess access = connectedAccesses.get(I(accountId));
+        return null != access ? access : getAccess(getAccount(accountId));
+    }
+
+    /**
      * Gets the calendar access implementing a specific extension for a specific account. The account is connected implicitly and
      * remembered to be closed during {@link #finish()} implicitly, if not already done.
      * <p/>
@@ -250,18 +264,6 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected GroupwareCalendarAccess getGroupwareAccess(int accountId) throws OXException {
         return getAccess(accountId, GroupwareCalendarAccess.class);
-    }
-
-    /**
-     * Gets the calendar access for a specific account. The account is connected implicitly and remembered to be closed during
-     * {@link #finish()} implicitly, if not already done.
-     *
-     * @param accountId The identifier to get the calendar access for
-     * @return The calendar access for the specified account
-     */
-    protected CalendarAccess getAccess(int accountId) throws OXException {
-        CalendarAccess access = connectedAccesses.get(I(accountId));
-        return null != access ? access : getAccess(getAccount(accountId));
     }
 
     /**
@@ -307,21 +309,27 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the internal groupware calendar access for the default calendar account {@link CalendarAccount#DEFAULT_ACCOUNT}. The account
+     * is connected implicitly and remembered to be closed during {@link #finish()} implicitly, if not already done.
+     *
+     * @return The internal groupware calendar access for the default account
+     */
+    protected InternalCalendarAccess getInternalAccess() throws OXException {
+        return getAccess(CalendarAccount.DEFAULT_ACCOUNT, InternalCalendarAccess.class);
+    }
+
+    /**
      * Gets the calendar access for a specific account. The account is connected implicitly and remembered to be closed during
      * {@link #finish()} implicitly, if not already done.
      *
      * @param account The account to get the calendar access for
      * @return The calendar access for the specified account
      */
-    protected CalendarAccess getAccess(CalendarAccount account) throws OXException {
+    protected CalendarAccess getAccess(CalendarAccount account) {
         ConcurrentMap<Integer, CalendarAccess> connectedAccesses = this.connectedAccesses;
         CalendarAccess access = connectedAccesses.get(I(account.getAccountId()));
         if (null == access) {
-            CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
-            if (null == provider) {
-                throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId());
-            }
-            access = provider.connect(session, account, parameters);
+            access = initAccess(account);
             CalendarAccess existingAccess = connectedAccesses.put(I(account.getAccountId()), access);
             if (null != existingAccess) {
                 access.close();
@@ -329,6 +337,27 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             }
         }
         return access;
+    }
+
+    private CalendarAccess initAccess(CalendarAccount account) {
+        CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+        try {
+            if (null == provider) {
+                throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId());
+            }
+            if (false == hasCapability(provider.getId())) {
+                throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(provider.getId()));
+            }
+            return provider.connect(session, account, parameters);
+        } catch (OXException e) {
+            if (null != provider && FallbackAwareCalendarProvider.class.isInstance(provider)) {
+                return ((FallbackAwareCalendarProvider) provider).connectFallback(session, account, parameters, e);
+            }
+            if (null != provider && AutoProvisioningCalendarProvider.class.isInstance(provider)) {
+                return new FallbackEmptyCalendarAccess(account, e);
+            }
+            return new FallbackUnknownCalendarAccess(account, e);
+        }
     }
 
     /**
@@ -521,24 +550,9 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar account
      */
     protected CalendarAccount getAccount(int accountId) throws OXException {
-        return getAccount(accountId, false);
-    }
-
-    /**
-     * Gets a specific calendar account.
-     *
-     * @param accountId The identifier of the account to get
-     * @param checkCapbilities <code>true</code> to check the current session user's capabilities for the underlying calendar provider,
-     *            <code>false</code>, otherwise
-     * @return The calendar account
-     */
-    protected CalendarAccount getAccount(int accountId, boolean checkCapbilities) throws OXException {
         CalendarAccount account = optAccount(accountId);
         if (null == account) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
-        }
-        if (checkCapbilities) {
-            requireCapability(account.getProviderId());
         }
         return account;
     }
@@ -561,18 +575,6 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected CalendarAccount optAccount(int accountId) throws OXException {
         return requireService(CalendarAccountService.class, services).getAccount(session, accountId, this);
-    }
-
-    /**
-     * Checks that the current session's user has the required capability for a specific calendar provider.
-     *
-     * @param providerId The identifier of the calendar provider to check the capabilities for
-     * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
-     */
-    protected void requireCapability(String providerId) throws OXException {
-        if (false == hasCapability(providerId)) {
-            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(providerId));
-        }
     }
 
     /**
@@ -679,6 +681,16 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected boolean isFolderCalendarProvider(int accountId) throws OXException {
         CalendarProvider provider = providerRegistry.getCalendarProvider(getAccount(accountId).getProviderId());
         return FolderCalendarProvider.class.isInstance(provider);
+    }
+
+    /**
+     * Optionally gets the calendar provider responsible from the provider registry.
+     * 
+     * @param providerId The identifier of the provider to get
+     * @return The calendar provider, or <code>null</code> if not available
+     */
+    protected CalendarProvider optCalendarProvider(String providerId) {
+        return providerRegistry.getCalendarProvider(providerId);
     }
 
     @Override

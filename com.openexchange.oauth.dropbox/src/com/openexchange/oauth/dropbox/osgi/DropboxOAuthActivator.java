@@ -49,11 +49,14 @@
 
 package com.openexchange.oauth.dropbox.osgi;
 
-import com.openexchange.database.DatabaseService;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
 import com.openexchange.oauth.dropbox.DropboxOAuthScope;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
+import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropLongTermTokensTask;
+import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropTokensTask;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -64,7 +67,7 @@ import com.openexchange.oauth.scope.OAuthScope;
 public final class DropboxOAuthActivator extends AbstractOAuthActivator {
 
     /**
-     * Initialises a new {@link DropboxOAuthActivator}.
+     * Initializes a new {@link DropboxOAuthActivator}.
      */
     public DropboxOAuthActivator() {
         super();
@@ -73,8 +76,7 @@ public final class DropboxOAuthActivator extends AbstractOAuthActivator {
     @Override
     protected void startBundle() throws Exception {
         DropboxOAuthServices.setServices(this);
-        track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
-        openTrackers();
+        registerService(UpdateTaskProviderService.class, () -> ImmutableList.of(new OAuthDropboxDropTokensTask(), new OAuthDropboxDropLongTermTokensTask()));
         super.startBundle();
     }
 

@@ -3,9 +3,10 @@
     operationId: getRssFeed
     tags:
       - RSS
-    summary: Get the RSS Feed of a specific link.
+    summary: Get the RSS Feed of a specific link
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: feedUrl
         description: >-

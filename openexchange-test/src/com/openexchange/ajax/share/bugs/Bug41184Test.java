@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug41184Test}
@@ -97,6 +98,7 @@ public class Bug41184Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testAccessSharedFileInSharedFolder() throws Exception {
         /*
          * create folder shared to other user
@@ -113,7 +115,8 @@ public class Bug41184Test extends ShareTest {
         String fragmentParams = new URI(folderLink).getRawFragment();
         Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
         Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
-        Assert.assertEquals(String.valueOf(folder.getObjectID()), folderMatcher.group(1));
+        String folderID = String.valueOf(folder.getObjectID());
+        Assert.assertEquals(folderID, folderMatcher.group(1));
         /*
          * create file in this folder share it to the same user, too
          */
@@ -127,11 +130,11 @@ public class Bug41184Test extends ShareTest {
         fragmentParams = new URI(fileLink).getRawFragment();
         folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
         Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
-        Assert.assertEquals("10", folderMatcher.group(1));
+        Assert.assertEquals(folderID, folderMatcher.group(1));
         Matcher fileMatcher = Pattern.compile("id=([0-9]+/[0-9]+)").matcher(fragmentParams);
         Assert.assertTrue("ID param missing in fragment", fileMatcher.find());
         FileID fileID = new FileID(file.getId());
-        fileID.setFolderId("10");
+        fileID.setFolderId(folderID);
         Assert.assertEquals(fileID.toUniqueID(), fileMatcher.group(1));
         /*
          * try and access the file in shared files folder

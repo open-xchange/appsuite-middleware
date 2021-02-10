@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import gnu.trove.map.TIntObjectMap;
@@ -302,7 +303,7 @@ public class ContactWriter extends CommonWriter {
          *
          * @param contactObject The contact object
          * @param jsonArray The JSON array
-         * @param session TODO
+         * @param session The groupware session
          * @throws JSONException If writing to JSON array fails
          */
         public void write(Contact contactObject, JSONArray jsonArray, Session session) throws JSONException;
@@ -317,7 +318,7 @@ public class ContactWriter extends CommonWriter {
     private static final TIntObjectMap<ContactFieldWriter> WRITER_MAP;
 
     static {
-        final TIntObjectMap<ContactFieldWriter> m = new TIntObjectHashMap<ContactFieldWriter>(128);
+        final TIntObjectMap<ContactFieldWriter> m = new TIntObjectHashMap<>(128);
 
         m.put(DataObject.OBJECT_ID, new ContactFieldWriter() {
 
@@ -347,7 +348,11 @@ public class ContactWriter extends CommonWriter {
 
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
-                writeValue(contactObject.getParentFolderID(), jsonArray, contactObject.containsParentFolderID());
+                if (Strings.isNotEmpty(contactObject.getFolderId())) {
+                    writeValue(contactObject.getFolderId(), jsonArray, contactObject.containsFolderId());
+                } else {
+                    writeValue(contactObject.getParentFolderID(), jsonArray, contactObject.containsParentFolderID());
+                }
             }
         });
 

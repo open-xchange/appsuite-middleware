@@ -49,6 +49,9 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Objects;
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link DefaultFileStoragePermission} - The default file storage permission granting full access.
  *
@@ -66,6 +69,26 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         final DefaultFileStoragePermission retval = new DefaultFileStoragePermission();
         retval.setMaxPermissions();
         return retval;
+    }
+
+    /**
+     * Initializes a new {@link DefaultFileStoragePermission}, taking over all properties from another permission.
+     * 
+     * @param permission The permission to take over the property values from
+     * @return The new file storage permission
+     */
+    public static DefaultFileStoragePermission newInstance(FileStoragePermission permission) {
+        DefaultFileStoragePermission storagePermission = DefaultFileStoragePermission.newInstance();
+        storagePermission.setAllPermissions(permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission());
+        storagePermission.setGroup(permission.isGroup());
+        storagePermission.setAdmin(permission.isAdmin());
+        storagePermission.setSystem(permission.getSystem());
+        storagePermission.setType(permission.getType());
+        storagePermission.setPermissionLegator(permission.getPermissionLegator());
+        storagePermission.setIdentifier(permission.getIdentifier());
+        storagePermission.setEntity(permission.getEntity());
+        storagePermission.setEntityInfo(permission.getEntityInfo());
+        return storagePermission;
     }
 
     /*-
@@ -88,7 +111,11 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
 
     private boolean admin;
 
+    private String identifier;
+
     private int entity;
+
+    private EntityInfo entityInfo;
 
     private boolean group;
 
@@ -106,6 +133,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         result = prime * result + (admin ? 1231 : 1237);
         result = prime * result + deletePermission;
         result = prime * result + entity;
+        result = prime * result + (null != identifier ? identifier.hashCode() : 0);
         result = prime * result + folderPermission;
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
@@ -132,6 +160,9 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
             return false;
         }
         if (deletePermission != other.getDeletePermission()) {
+            return false;
+        }
+        if (false == Objects.equals(identifier, other.getIdentifier())) {
             return false;
         }
         if (entity != other.getEntity()) {
@@ -167,8 +198,18 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
     }
 
     @Override
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @Override
     public int getEntity() {
         return entity;
+    }
+
+    @Override
+    public EntityInfo getEntityInfo() {
+        return entityInfo;
     }
 
     @Override
@@ -219,9 +260,17 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         deletePermission = permission;
     }
 
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
     @Override
     public void setEntity(final int entity) {
         this.entity = entity;
+    }
+
+    public void setEntityInfo(EntityInfo entityInfo) {
+        this.entityInfo = entityInfo;
     }
 
     @Override

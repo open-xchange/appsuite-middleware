@@ -125,10 +125,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         // Polled an existing instance
         IMAPStore imapStore = imapStoreWrapper.imapStore;
 
-        if (checkConnectivityIfPolled && (false == imapStore.isConnected())) {
-            // IMAPStore instance is no more connected
-            final IMAPStore imapStore1 = imapStore;
-            IMAPAccess.closeSafely(imapStore1);
+        if ((checkConnectivityIfPolled && (false == imapStore.isConnected())) || (imapSession.getDebug() != imapStore.getDebug())) {
+            // IMAPStore instance is no more connected OR debug flag does not match
+            IMAPAccess.closeSafely(imapStore);
             imapStore = newStore(server, port, login, pw, imapSession, session);
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAP store instance. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
             return imapStore;
@@ -159,7 +158,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
+    public void backStore(IMAPStore imapStore) {
         // Try to put back given IMAP store w/o validity check
         boolean enqueued;
         lock.lock();
@@ -186,7 +185,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void closeElapsed(final long stamp) {
+    public void closeElapsed(long stamp) {
         LOG.debug("IMAPStoreContainer.closeElapsed(): Closing elapsed IMAP store instances from queue for {}:{}", server, I(port));
 
         List<IMAPStoreWrapper> wrappersToClose = new ArrayList<>();
@@ -284,12 +283,12 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
 
         @Override
-        public boolean add(final IMAPStoreWrapper e) {
+        public boolean add(IMAPStoreWrapper e) {
             return offer(e);
         }
 
         @Override
-        public boolean offer(final IMAPStoreWrapper e) {
+        public boolean offer(IMAPStoreWrapper e) {
             return q.offer(e);
         }
 
@@ -300,7 +299,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
          * @param minTimeStamp The minimum time stamp; any queued entry that has a last-accessed time stamp lower than given one is considered as elapsed
          * @return The elapsed head of this queue
          */
-        public IMAPStoreWrapper pollIfElapsed(final long minTimeStamp) {
+        public IMAPStoreWrapper pollIfElapsed(long minTimeStamp) {
             final IMAPStoreWrapper e = q.peek();
             if ((null != e) && (e.lastAccessed < minTimeStamp)) {
                 return q.poll();
@@ -324,12 +323,12 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
 
         @Override
-        public boolean remove(final Object o) {
+        public boolean remove(Object o) {
             return q.remove(o);
         }
 
         @Override
-        public boolean contains(final Object o) {
+        public boolean contains(Object o) {
             return q.contains(o);
         }
 
@@ -349,7 +348,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
 
         @Override
-        public <T> T[] toArray(final T[] a) {
+        public <T> T[] toArray(T[] a) {
             return q.toArray(a);
         }
 
@@ -369,7 +368,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
             int lastRet; // index of last element, or -1 if no such
 
-            Itr(final Object[] array) {
+            Itr(Object[] array) {
                 lastRet = -1;
                 this.array = array;
             }
@@ -397,7 +396,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                 lastRet = -1;
                 // Traverse underlying queue to find == element,
                 // not just a .equals element.
-                for (final Iterator<IMAPStoreWrapper> it = q.iterator(); it.hasNext();) {
+                for (Iterator<IMAPStoreWrapper> it = q.iterator(); it.hasNext();) {
                     if (it.next() == x) {
                         it.remove();
                         return;
@@ -406,7 +405,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
         }
 
-        private void writeObject(final java.io.ObjectOutputStream s) throws java.io.IOException {
+        private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
             s.defaultWriteObject();
         }
 

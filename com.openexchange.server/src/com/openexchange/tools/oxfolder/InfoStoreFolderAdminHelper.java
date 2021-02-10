@@ -56,6 +56,7 @@ import static com.openexchange.tools.oxfolder.OXFolderSQL.lookUpFolder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -87,16 +88,17 @@ public final class InfoStoreFolderAdminHelper {
      * @param connection A (writable) database connection
      * @param contextID The context identifier
      * @param userID The user identifier
+     * @param optionalDisplayName The display name to use or empty to determine display name by user's contact data
      * @return The identifier of the created folder
      */
-    public static void addDefaultFolders(Connection connection, int contextID, int userID) throws OXException {
-        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, null);
-        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, null);
-        int documentsFolderID = addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, null);
-        addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, null);
-        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, null);
-        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, null);
-        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, null);
+    public static void addDefaultFolders(Connection connection, int contextID, int userID, Optional<String> optionalDisplayName) throws OXException {
+        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, null, optionalDisplayName);
+        int documentsFolderID = addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, null, optionalDisplayName);
     }
 
     /**
@@ -106,17 +108,18 @@ public final class InfoStoreFolderAdminHelper {
      * @param connection A (writable) database connection
      * @param contextID The context identifier
      * @param userID The user identifier
-     * @param locale
+     * @param locale The locale
+     * @param optionalDisplayName The display name to use or empty to determine display name by user's contact data
      * @return The identifier of the created folder
      */
-    public static void addDefaultFoldersDeletable(Connection connection, int contextID, int userID, Locale locale) throws OXException {
-        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, locale);
-        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, locale);
-        int documentsFolderID = addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, locale);
-        addDeletableDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, locale);
-        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, locale);
-        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, locale);
-        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, locale);
+    public static void addDefaultFoldersDeletable(Connection connection, int contextID, int userID, Locale locale, Optional<String> optionalDisplayName) throws OXException {
+        int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, locale, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, locale, optionalDisplayName);
+        int documentsFolderID = addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, locale, optionalDisplayName);
+        addDeletableDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, locale, optionalDisplayName);
+        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, locale, optionalDisplayName);
+        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, locale, optionalDisplayName);
+        addDeletableDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, locale, optionalDisplayName);
     }
 
     /**
@@ -125,11 +128,12 @@ public final class InfoStoreFolderAdminHelper {
      * @param connection A (writable) database connection
      * @param contextID The context identifier
      * @param userID The user identifier
+     * @param optionalDisplayName The display name to use or empty to determine display name by user's contact data
      * @return The identifier of the created folder
      */
-    public static void addDefaultFoldersNone(Connection connection, int contextID, int userID) throws OXException {
-        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, null);
-        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, null);
+    public static void addDefaultFoldersNone(Connection connection, int contextID, int userID, Optional<String> optionalDisplayName) throws OXException {
+        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, null, optionalDisplayName);
+        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, null, optionalDisplayName);
     }
 
     /**
@@ -152,11 +156,12 @@ public final class InfoStoreFolderAdminHelper {
      * @param parentFolderID The parent folder identifier
      * @param type The folder type
      * @param locale The user's locale for also considering existing localized folder names, or <code>null</code> if not needed
+     * @param optionalDisplayName The display name to use or empty to determine display name by user's contact data
      * @return The identifier of the created folder
      */
-    public static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale) throws OXException {
+    public static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale, Optional<String> optionalDisplayName) throws OXException {
         try {
-            String folderName = getDefaultFolderName(connection, contextID, userID, type);
+            String folderName = getLocalizedDefaultFolderName(connection, locale, contextID, userID, type, optionalDisplayName);
             Context context = new ContextImpl(contextID);
             /*
              * insert new default folder
@@ -172,13 +177,13 @@ public final class InfoStoreFolderAdminHelper {
         }
     }
 
-    private static int addDeletableDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale) throws OXException {
+    private static int addDeletableDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale, Optional<String> optionalDisplayName) throws OXException {
         try {
             Context context = new ContextImpl(contextID);
             /*
              * insert new default folder
              */
-            String localizedFolderName = getLocalizedDefaultFolderName(connection, locale, contextID, userID, type);
+            String localizedFolderName = getLocalizedDefaultFolderName(connection, locale, contextID, userID, type, optionalDisplayName);
             FolderObject folder = prepareDefaultFolder(userID, parentFolderID, FolderObject.PUBLIC, localizedFolderName);
             int folderID = getNextSerialForAdmin(context, connection);
             insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), false, context, connection);
@@ -190,11 +195,11 @@ public final class InfoStoreFolderAdminHelper {
         }
     }
 
-    private static String getDefaultFolderName(Connection connection, int contextID, int userID, int type) throws OXException, SQLException {
+    private static String getDefaultFolderName(Connection connection, int contextID, int userID, int type, Optional<String> optionalDisplayName) throws OXException, SQLException {
         switch (type) {
             case FolderObject.PUBLIC:
                 Context context = new ContextImpl(contextID);
-                String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
+                String name = optionalDisplayName.isPresent() ? optionalDisplayName.get() : OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
                 if (null == name) {
                     throw LdapExceptionCode.USER_NOT_FOUND.create(I(userID), I(contextID)).setPrefix("USR");
                 }
@@ -221,11 +226,11 @@ public final class InfoStoreFolderAdminHelper {
         }
     }
 
-    private static String getLocalizedDefaultFolderName(Connection connection, Locale locale, int contextID, int userID, int type) throws OXException, SQLException {
+    private static String getLocalizedDefaultFolderName(Connection connection, Locale locale, int contextID, int userID, int type, Optional<String> optionalDisplayName) throws OXException, SQLException {
         switch (type) {
             case FolderObject.PUBLIC:
                 Context context = new ContextImpl(contextID);
-                String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
+                String name = optionalDisplayName.isPresent() ? optionalDisplayName.get() : OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
                 if (name == null) {
                     throw OXFolderExceptionCode.UNKNOWN_EXCEPTION.create("Couldn't retrieve the display name for user " + userID + " in context " + contextID);
                 }

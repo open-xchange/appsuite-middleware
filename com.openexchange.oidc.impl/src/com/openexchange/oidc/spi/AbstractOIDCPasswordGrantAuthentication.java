@@ -145,7 +145,7 @@ public abstract class AbstractOIDCPasswordGrantAuthentication implements Authent
 
         TokenResponse response = sendTokenRequest(backend, request);
         AuthenticationInfo authInfo = validateResponse(backend, loginInfo, response, loginInfo.getUsername());
-        return authenticate(backend, loginInfo, authInfo);
+        return authenticate(backend, authInfo);
     }
 
     @Override
@@ -233,7 +233,7 @@ public abstract class AbstractOIDCPasswordGrantAuthentication implements Authent
         return authInfo;
     }
 
-    protected EnhancedAuthenticated authenticate(final OIDCBackend backend, LoginInfo loginInfo, AuthenticationInfo authInfo) throws OXException {
+    protected EnhancedAuthenticated authenticate(final OIDCBackend backend, AuthenticationInfo authInfo) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         UserService userService = Services.getService(UserService.class);
         Context context = contextService.getContext(authInfo.getContextId());

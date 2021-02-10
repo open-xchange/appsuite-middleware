@@ -68,7 +68,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.OutOfMemoryHandler;
-import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
+import com.hazelcast.instance.impl.OutOfMemoryErrorDispatcher;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.hazelcast.HazelcastMBean;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
@@ -297,12 +297,29 @@ public class HazelcastActivator implements BundleActivator {
         {
             LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
             KnownNetworkJoin join = KnownNetworkJoin.networkJoinFor(config.getProperty("com.openexchange.hazelcast.network.join"));
-            if (join == KnownNetworkJoin.MULTICAST) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
-            } else if (join == KnownNetworkJoin.STATIC) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
-            } else if (join == KnownNetworkJoin.DNS) {
-                LOG.info("{}Hazelcast:{}    Using DNS-based network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+            if (join != null) {
+                switch (join) {
+                    case MULTICAST:
+                        LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
+                        break;
+                    case STATIC:
+                        LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+                        break;
+                    case DNS:
+                        LOG.info("{}Hazelcast:{}    Using DNS-based network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+                        break;
+                    case KUBERNETES:
+                        LOG.info("{}Hazelcast:{}    Using kubernetes network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getKubernetesConfig(), lf);
+                        break;
+                    case AWS:
+                        LOG.info("{}Hazelcast:{}    Using AWS network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getAwsConfig(), lf);
+                        break;
+                    case EMPTY:
+                        LOG.info("{}Hazelcast:{}    Using empty network join{}", lf, lf, lf);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -325,7 +342,7 @@ public class HazelcastActivator implements BundleActivator {
         OutOfMemoryErrorDispatcher.setServerHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
-        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, L(System.currentTimeMillis() - hzStart), lf);
+        LOG.info("{}Hazelcast:{}    New hazelcast instance (v{}) successfully created in {} msec.{}", lf, lf, hazelcast.getCluster().getClusterVersion(), L(System.currentTimeMillis() - hzStart), lf);
         this.hazelcastInstance = hazelcast;
         return hazelcast;
     }
@@ -336,7 +353,7 @@ public class HazelcastActivator implements BundleActivator {
             @Override
             public void run() {
                 // Graceful shut-down
-                hzInstance.getLifecycleService().shutdown();
+                hzInstance.shutdown();
             }
         };
         FutureTask<Void> ft = new FutureTask<Void>(r, null);

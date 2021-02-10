@@ -67,6 +67,7 @@ import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService.OAuthGrantType;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 
@@ -85,6 +86,9 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
 
     /**
      * Initializes a new {@link OAuthFailedAuthenticationHandler}.
+     *
+     * @param tokenService
+     * @param services
      */
     public OAuthFailedAuthenticationHandler(OAuthAccessTokenService tokenService, ServiceLookup services) {
         super();
@@ -143,7 +147,9 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
         // Unable to refresh access token -> logout
         LOG.debug("Unable to refresh access token for user {} in context {}. Session contains no refresh token.", I(session.getUserId()), I(session.getContextId()));
         sessiondService.removeSession(session.getSessionID());
-        return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+        OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+        oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.OAUTH_TOKEN_REFRESH_FAILED.getIdentifier());
+        return AuthenticationFailureHandlerResult.createErrorResult(oxe);
     }
 
     /**
@@ -167,7 +173,9 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
             if (accessToken == null) {
                 LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
                 sessiondService.removeSession(session.getSessionID());
-                return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID()));
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.OAUTH_TOKEN_REFRESH_FAILED.getIdentifier());
+                return AuthenticationFailureHandlerResult.createErrorResult(oxe);
             }
             session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken.getAccessToken());
             session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, accessToken.getRefreshToken());
@@ -179,7 +187,9 @@ public class OAuthFailedAuthenticationHandler implements AuthenticationFailedHan
             // Unable to refresh access token -> logout
             LOG.debug("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
             sessiondService.removeSession(session.getSessionID());
-            return AuthenticationFailureHandlerResult.createErrorResult(SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID()));
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(x, session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.OAUTH_TOKEN_REFRESH_FAILED.getIdentifier());
+            return AuthenticationFailureHandlerResult.createErrorResult(oxe);
         }
     }
 

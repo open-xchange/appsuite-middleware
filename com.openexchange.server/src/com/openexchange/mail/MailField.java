@@ -229,7 +229,7 @@ public enum MailField {
 
     static {
         final MailField[] fields = MailField.values();
-        for (final MailField mailField : fields) {
+        for (MailField mailField : fields) {
             final MailListField listField = mailField.getListField();
             if (listField != null) {
                 LIST_FIELDS_MAP.put(listField, mailField);
@@ -260,7 +260,7 @@ public enum MailField {
 
     private final MailListField listField;
 
-    private MailField(final MailListField listField) {
+    private MailField(MailListField listField) {
         this.listField = listField;
 
     }
@@ -282,12 +282,12 @@ public enum MailField {
      * @param fields The instances of {@link MailField}
      * @return The corresponding instances of {@link MailListField}
      */
-    public static final MailListField[] toListFields(final MailField[] fields) {
+    public static final MailListField[] toListFields(MailField[] fields) {
         if (null == fields) {
             return null;
         }
         final List<MailListField> listFields = new ArrayList<MailListField>(fields.length);
-        for (final MailField mailField : fields) {
+        for (MailField mailField : fields) {
             if (null != mailField.getListField()) {
                 listFields.add(mailField.getListField());
             }
@@ -303,7 +303,7 @@ public enum MailField {
      * @param fields The collection of {@link MailField}
      * @return The corresponding instances of {@link MailListField}
      */
-    public static final MailListField[] toListFields(final Collection<MailField> fields) {
+    public static final MailListField[] toListFields(Collection<MailField> fields) {
         return null == fields ? null : toListFields(fields.toArray(new MailField[fields.size()]));
     }
 
@@ -313,7 +313,7 @@ public enum MailField {
      * @param listFields The instances of {@link MailListField}
      * @return The corresponding instances of {@link MailField}
      */
-    public static final MailField[] toFields(final MailListField[] listFields) {
+    public static final MailField[] toFields(MailListField[] listFields) {
         if (null == listFields) {
             return null;
         }
@@ -330,7 +330,7 @@ public enum MailField {
      * @param listField The instance of {@link MailListField}
      * @return The corresponding instance of {@link MailField}
      */
-    public static final MailField toField(final MailListField listField) {
+    public static final MailField toField(MailListField listField) {
         return null == listField ? null : LIST_FIELDS_MAP.get(listField);
     }
 
@@ -345,7 +345,7 @@ public enum MailField {
      * @param fields The <code>int</code> values
      * @return The array of {@link MailField} corresponding to given <code>int</code> values
      */
-    public static final MailField[] getFields(final int[] fields) {
+    public static final MailField[] getFields(int[] fields) {
         if ((fields == null) || (fields.length == 0)) {
             return EMPTY_FIELDS;
         }
@@ -365,7 +365,7 @@ public enum MailField {
      * @param fields The <code>int</code> values
      * @return The array of {@link MailField} containing all fields that match a given <code>int</code> value.
      */
-    public static final MailField[] getMatchingFields(final int[] fields) {
+    public static final MailField[] getMatchingFields(int[] fields) {
         if ((fields == null) || (fields.length == 0)) {
             return EMPTY_FIELDS;
         }
@@ -390,7 +390,7 @@ public enum MailField {
      * @param field The <code>int</code> value
      * @return The mapped {@link MailField} or <code>null</code> if no corresponding mail field could be found
      */
-    public static MailField getField(final int field) {
+    public static MailField getField(int field) {
         return field < 0 ? MailField.BODY : FIELDS_MAP.get(field);
     }
 
@@ -400,10 +400,30 @@ public enum MailField {
      * @param searchTerm The search term
      * @return The addressed mail fields
      */
-    public static Set<MailField> getMailFieldsFromSearchTerm(final SearchTerm<?> searchTerm) {
+    public static Set<MailField> getMailFieldsFromSearchTerm(SearchTerm<?> searchTerm) {
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         searchTerm.addMailField(set);
         return set;
+    }
+
+    /**
+     * Checks if specified fields contains one of the given fields
+     *
+     * @param mailFields The fields
+     * @param fieldToCheck The field to check for
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean contains(MailField[] mailFields, MailField fieldToCheck) {
+        if (null == mailFields || fieldToCheck == null) {
+            return false;
+        }
+
+        for (MailField mailField : mailFields) {
+            if (mailField == fieldToCheck) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

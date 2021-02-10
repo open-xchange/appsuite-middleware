@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableMap;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -323,7 +322,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    public static PushMsObject parseString(String toParse) throws OXException {
+    public static PushMsObject parseString(String toParse) {
         final Pattern regex = Pattern.compile(
             "FOLDER_ID=(.*?),MODULE=(.*?),CONTEXT_ID=(.*?),USERS=(.*?),IS_REMOTE=(.*?),TIMESTAMP=(.*?),TOPIC=(.*?),HOSTNAME=(.*?)",
             Pattern.DOTALL);

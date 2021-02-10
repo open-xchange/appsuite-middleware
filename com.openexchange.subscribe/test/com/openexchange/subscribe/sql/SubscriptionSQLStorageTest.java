@@ -160,8 +160,8 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
         assertResult(new StatementBuilder().buildCommand(select));
     }
 
-         @Test
-     public void testIDCheckDuringRemember() throws Exception {
+    @Test
+    public void testIDCheckDuringRemember() {
         subscription.setId(123);
         try {
             storage.rememberSubscription(subscription);

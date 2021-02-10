@@ -49,6 +49,7 @@
 
 package com.openexchange.serverconfig.impl;
 
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -189,8 +190,8 @@ public class ServerConfigServiceImplTest {
         //values that come from config-as-default
         configMap.get("productNameMail");
         assertEquals("OX Mail", configMap.get("productNameMail"));
-        assertFalse((boolean)configMap.get("forgotPassword"));
-        assertTrue((boolean)configMap.get("staySignedIn"));
+        assertFalse(b(Boolean.class.cast(configMap.get("forgotPassword"))));
+        assertTrue(b(Boolean.class.cast(configMap.get("staySignedIn"))));
         assertEquals("(c) 2015 Open-Xchange.", configMap.get("copyright"));
 
         //values that come from config-as and are applied because the host1 matches
@@ -264,7 +265,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("nonconfiguredhost.com", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", "ox_logo_claim_blue_small.png", nmc.getFooterImage());
         assertEquals("Wrong footer text", "", nmc.getFooterText());
@@ -286,7 +287,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", null, nmc.getFooterText());
@@ -297,7 +298,7 @@ public class ServerConfigServiceImplTest {
         ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", -1, -1);
         NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
         assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
-        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button background color", "#3c61aa", nmc.getButtonBackgroundColor());
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());

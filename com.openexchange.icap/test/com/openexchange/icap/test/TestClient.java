@@ -69,6 +69,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
+@SuppressWarnings("unused")
 public class TestClient {
 
     /**
@@ -175,7 +176,7 @@ public class TestClient {
         if (preview > 0) {
             builder.withHeader(ICAPRequestHeader.PREVIEW, Long.toString(preview));
         }
-        builder.withBodyHeader(ICAPRequestHeader.CONTENT_LENGTH, Integer.toString(originalData.length));
+        builder.withOriginalRequestHeader(ICAPRequestHeader.CONTENT_LENGTH, Integer.toString(originalData.length));
         ICAPRequest.Builder rBuilder = builder.withServer(server);
         //builder.withHeader(ICAPRequestHeader.ALLOW, "204");
         ICAPRequest r = rBuilder.withMethod(ICAPMethod.RESPMOD).withBody(file).withService("avscan").build();

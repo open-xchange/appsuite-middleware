@@ -63,6 +63,8 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.InsertResponse;
@@ -136,6 +138,7 @@ public class GuestClient extends AJAXClient {
     private final String module;
     private final String item;
     private final String folder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GuestClient.class);
 
     /**
      * Initializes a new {@link GuestClient}.
@@ -286,6 +289,9 @@ public class GuestClient extends AJAXClient {
             module = shareResponse.getModule();
             folder = shareResponse.getFolder();
             item = shareResponse.getItem();
+        }
+        if (getSession().getId() == null) {
+            LOGGER.error("Guest client has no session id.");
         }
     }
 

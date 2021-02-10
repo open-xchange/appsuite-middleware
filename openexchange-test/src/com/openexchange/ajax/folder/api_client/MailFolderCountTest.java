@@ -105,7 +105,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null, null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, body, "1", null, null, null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 
@@ -114,7 +114,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         for (int x = 0; x < 2; x++) {
             File f = new File(testMailDir, "bug.eml");
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getApiClient().getSession(), folderId, f, null, Boolean.TRUE);
+            MailImportResponse response = api.importMail(folderId, f, null, Boolean.TRUE);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
@@ -125,12 +125,12 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         // Mark first mail as unread
         MailUpdateBody mailUpdateBody = new MailUpdateBody();
         mailUpdateBody.setClearFlags(I(32));
-        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(0)).getId(), null);
+        api.updateMail(folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(0)).getId(), null);
         // Mark second mail as deleted and unread
         mailUpdateBody = new MailUpdateBody();
         mailUpdateBody.setSetFlags(L(2));
         mailUpdateBody.setClearFlags(I(32));
-        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(1)).getId(), null);
+        api.updateMail(folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(1)).getId(), null);
 
     }
 
@@ -144,8 +144,8 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 mailListElement.setId(dest.getId());
                 body.add(mailListElement);
             }
-            api.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
-            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+            api.deleteMails(body, timestamp, null, null);
+            folderApi.deleteFolders(Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         } finally {
             super.tearDown();
         }
@@ -153,13 +153,13 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     @Test
     public void testFolderCount() throws Exception {
-        FolderResponse resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null, null);
+        FolderResponse resp = folderApi.getFolder(folderId, "1", null, null);
         FolderData folder = checkResponse(resp);
         Assert.assertEquals(2, folder.getUnread().intValue());
 
         CONFIG.put("com.openexchange.imap.ignoreDeleted", Boolean.TRUE.toString());
         super.setUpConfiguration();
-        resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null, null);
+        resp = folderApi.getFolder(folderId, "1", null, null);
         folder = checkResponse(resp);
         Assert.assertEquals(1, folder.getUnread().intValue());
     }

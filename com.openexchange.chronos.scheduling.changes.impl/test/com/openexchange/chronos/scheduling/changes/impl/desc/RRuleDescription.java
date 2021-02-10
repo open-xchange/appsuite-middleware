@@ -52,11 +52,13 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RRuleDescription}
@@ -70,12 +72,15 @@ public class RRuleDescription extends AbstractDescriptionTest {
     private static final String DAILY_COUNT = "FREQ=DAILY;COUNT=10";
     private static final String DAILY = "FREQ=DAILY";
 
+    @Mock
+    private static ServiceLookup services;
+
     /**
      * Initializes a new {@link RRuleDescription}.
      */
     public RRuleDescription() {
         super(EventField.RECURRENCE_RULE, "The appointment's recurrence rule has changed to", () -> {
-            return new RRuleDescriber();
+            return new RRuleDescriber(services);
         });
     }
 
@@ -83,8 +88,8 @@ public class RRuleDescription extends AbstractDescriptionTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        describer = new RRuleDescriber();
         PowerMockito.spy(CalendarUtils.class);
+        describer = new RRuleDescriber(services);
     }
 
     @Test

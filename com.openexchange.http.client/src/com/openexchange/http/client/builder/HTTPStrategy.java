@@ -49,6 +49,9 @@
 
 package com.openexchange.http.client.builder;
 
+/**
+ * @param <R>  
+ */
 public interface HTTPStrategy<R> {
 
 }

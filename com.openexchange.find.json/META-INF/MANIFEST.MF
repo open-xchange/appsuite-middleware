@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.json
 Bundle-SymbolicName: com.openexchange.find.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.find.json.osgi.FindJsonActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -21,6 +21,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.jobqueue,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.annotation,
  com.openexchange.capabilities,
  com.openexchange.contacts.json.mapping,
  com.openexchange.conversion,
@@ -59,3 +60,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.find.json

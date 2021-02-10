@@ -50,8 +50,13 @@
 package com.openexchange.carddav.mixins;
 
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -62,7 +67,8 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class MaxImageSize extends SingleXMLPropertyMixin {
 
-	protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MaxImageSize.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MaxImageSize.class);
+    private static final Property MAX_IMAGE_SIZE_PROPERTY = DefaultProperty.valueOf("max_image_size", L(4194304));
 
 	private final GroupwareCarddavFactory factory;
 
@@ -78,13 +84,12 @@ public class MaxImageSize extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        Long maxSize;
-        Long defaultValue = Long.valueOf(4194304);
+        long maxSize;
         try {
-            maxSize = factory.optConfigValue("max_image_size", Long.class, defaultValue);
+            maxSize = factory.getServiceSafe(LeanConfigurationService.class).getLongProperty(MAX_IMAGE_SIZE_PROPERTY);
         } catch (OXException e) {
-            LOG.warn("error reading value for \"max_image_size\", falling back to {}.", defaultValue, e);
-            maxSize = defaultValue;
+            maxSize = l(MAX_IMAGE_SIZE_PROPERTY.getDefaultValue(Long.class));
+            LOG.warn("error reading value for \"{}\", falling back to {}.", MAX_IMAGE_SIZE_PROPERTY, L(maxSize), e);
         }
         return String.valueOf(maxSize);
     }

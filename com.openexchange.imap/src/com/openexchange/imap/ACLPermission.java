@@ -93,55 +93,55 @@ public final class ACLPermission extends MailPermission {
     }
 
     @Override
-    public void setEntity(final int entity) {
+    public void setEntity(int entity) {
         super.setEntity(entity);
         acl = null;
     }
 
     @Override
-    public void setFolderAdmin(final boolean folderAdmin) {
+    public void setFolderAdmin(boolean folderAdmin) {
         super.setFolderAdmin(folderAdmin);
         acl = null;
     }
 
     @Override
-    public void setGroupPermission(final boolean groupPermission) {
+    public void setGroupPermission(boolean groupPermission) {
         super.setGroupPermission(groupPermission);
         acl = null;
     }
 
     @Override
-    public boolean setFolderPermission(final int p) {
+    public boolean setFolderPermission(int p) {
         acl = null;
         return super.setFolderPermission(p);
     }
 
     @Override
-    public boolean setReadObjectPermission(final int p) {
+    public boolean setReadObjectPermission(int p) {
         acl = null;
         return super.setReadObjectPermission(p);
     }
 
     @Override
-    public boolean setWriteObjectPermission(final int p) {
+    public boolean setWriteObjectPermission(int p) {
         acl = null;
         return super.setWriteObjectPermission(p);
     }
 
     @Override
-    public boolean setDeleteObjectPermission(final int p) {
+    public boolean setDeleteObjectPermission(int p) {
         acl = null;
         return super.setDeleteObjectPermission(p);
     }
 
     @Override
-    public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
+    public boolean setAllObjectPermission(int pr, int pw, int pd) {
         acl = null;
         return super.setAllObjectPermission(pr, pw, pd);
     }
 
     @Override
-    public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
+    public boolean setAllPermission(int fp, int opr, int opw, int opd) {
         acl = null;
         return super.setAllPermission(fp, opr, opw, opd);
     }
@@ -149,7 +149,7 @@ public final class ACLPermission extends MailPermission {
     private static final String ERR = "This method is not applicable to an ACL permission";
 
     @Override
-    public void setFuid(final int pid) {
+    public void setFuid(int pid) {
         LOG.warn(ERR);
     }
 
@@ -175,7 +175,7 @@ public final class ACLPermission extends MailPermission {
      *
      * @param canRename The rename flag
      */
-    public void setCanRename(final int canRename) {
+    public void setCanRename(int canRename) {
         this.canRename = canRename;
     }
 
@@ -207,7 +207,7 @@ public final class ACLPermission extends MailPermission {
      * @return An instance of {@link ACL} representing this permission's rights
      * @throws OXException If this permission cannot be mapped to an instance of {@link ACL}
      */
-    public ACL getPermissionACL(final Entity2ACLArgs args, final IMAPConfig imapConfig, final IMAPStore imapStore, final Context ctx) throws OXException {
+    public ACL getPermissionACL(Entity2ACLArgs args, IMAPConfig imapConfig, IMAPStore imapStore, Context ctx) throws OXException {
         if (acl != null) {
             /*
              * Return caches ACL
@@ -234,7 +234,7 @@ public final class ACLPermission extends MailPermission {
      * @param ctx The context
      * @throws OXException If given ACL cannot be applied to this permission
      */
-    public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPStore imapStore, final IMAPConfig imapConfig, final Context ctx) throws OXException {
+    public void parseACL(ACL acl, Entity2ACLArgs args, IMAPStore imapStore, IMAPConfig imapConfig, Context ctx) throws OXException {
         final UserGroupID res = Entity2ACL.getInstance(imapStore, imapConfig).getEntityID(acl.getName(), ctx, args);
         setEntity(res.getId());
         setGroupPermission(res.isGroup());
@@ -248,7 +248,7 @@ public final class ACLPermission extends MailPermission {
      * @param rights -The rights to parse
      * @param imapConfig The IMAP configuration
      */
-    public void parseRights(final Rights rights, final IMAPConfig imapConfig) {
+    public void parseRights(Rights rights, IMAPConfig imapConfig) {
         rights2Permission(rights, this, imapConfig);
         canRename = imapConfig.getACLExtension().canCreate(rights) ? 1 : 0;
         canStoreSeenFlag = imapConfig.getACLExtension().canKeepSeen(rights) ? 1 : 0;
@@ -261,7 +261,7 @@ public final class ACLPermission extends MailPermission {
      * @param imapConfig The IMAP configuration
      * @return Mapped rights
      */
-    public static Rights permission2Rights(final OCLPermission permission, final IMAPConfig imapConfig) {
+    public static Rights permission2Rights(OCLPermission permission, IMAPConfig imapConfig) {
         final Rights rights = new Rights();
         final ACLExtension aclExtension = imapConfig.getACLExtension();
         boolean hasAnyRights = false;
@@ -307,7 +307,7 @@ public final class ACLPermission extends MailPermission {
      * @param imapConfig The IMAP configuration
      * @return The corresponding permission
      */
-    public static OCLPermission rights2Permission(final Rights rights, final OCLPermission permission, final IMAPConfig imapConfig) {
+    public static OCLPermission rights2Permission(Rights rights, OCLPermission permission, IMAPConfig imapConfig) {
         final OCLPermission oclPermission = permission == null ? new OCLPermission() : permission;
         final ACLExtension aclExtension = imapConfig.getACLExtension();
         /*

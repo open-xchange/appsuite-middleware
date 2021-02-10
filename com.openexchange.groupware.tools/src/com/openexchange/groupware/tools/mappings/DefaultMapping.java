@@ -119,7 +119,7 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
      * comparison for {@link String}s properties and ignores the timezone.
      * Override if applicable for the mapped property.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes", "null" })
     @Override
     public int compare(O o1, O o2, Locale locale, TimeZone timeZone) {
         T value1 = this.get(o1);
@@ -131,9 +131,9 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
         } else if (null == value2) {
             return 1;
         } else if (null != locale && String.class.isInstance(value1)) {
-            return Collators.getDefaultInstance(locale).compare((String)value1, (String)value2);
+            return Collators.getDefaultInstance(locale).compare((String) value1, (String) value2);
         } else if (Comparable.class.isInstance(value1)) {
-            return ((Comparable)value1).compareTo(value2);
+            return ((Comparable) value1).compareTo(value2);
         } else {
             throw new UnsupportedOperationException("Don't know how to compare two values of class " + value1.getClass().getName());
         }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.util.reason;
 
 import java.rmi.Naming;
@@ -63,8 +64,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public class ListReason extends ReasonAbstraction {
 
-    public ListReason(final String[] args2) {
-
+    public void execute(final String[] args2) {
         final AdminParser parser = new AdminParser("listreason");
         setOptions(parser);
         setCSVOutputOption(parser);
@@ -74,7 +74,7 @@ public class ListReason extends ReasonAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             String pattern = "*";
             if (parser.getOptionValue(this.searchOption) != null) {
@@ -96,7 +96,7 @@ public class ListReason extends ReasonAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListReason(args);
+        new ListReason().execute(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -105,7 +105,7 @@ public class ListReason extends ReasonAbstraction {
     }
 
     private void sysoutOutput(final MaintenanceReason[] mrs) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final MaintenanceReason mr : mrs) {
             data.add(makeCSVData(mr));
         }
@@ -116,12 +116,12 @@ public class ListReason extends ReasonAbstraction {
 
     private void precsvinfos(final MaintenanceReason[] mrs) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("text");
 
         // Needed for csv output
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final MaintenanceReason mr : mrs) {
             data.add(makeCSVData(mr));
@@ -131,7 +131,7 @@ public class ListReason extends ReasonAbstraction {
     }
 
     private ArrayList<String> makeCSVData(final MaintenanceReason mr) {
-        final ArrayList<String> rea_data = new ArrayList<String>();
+        final ArrayList<String> rea_data = new ArrayList<>();
         rea_data.add(mr.getId().toString());
         rea_data.add(mr.getText());
 

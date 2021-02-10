@@ -4,8 +4,9 @@
     tags:
       - Multifactor
     summary: Gets all available multifactor providers
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: providers
         description: >

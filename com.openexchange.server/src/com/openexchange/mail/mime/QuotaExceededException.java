@@ -73,7 +73,7 @@ public class QuotaExceededException extends CommandFailedException {
      *
      * @param message The error message
      */
-    public QuotaExceededException(final String message) {
+    public QuotaExceededException(String message) {
         super(message);
     }
 
@@ -82,7 +82,7 @@ public class QuotaExceededException extends CommandFailedException {
      *
      * @param response The (NO) response; meaning {@link Response#isNO()} returns <code>true</code>
      */
-    public QuotaExceededException(final Response response) {
+    public QuotaExceededException(Response response) {
         super(response);
     }
 

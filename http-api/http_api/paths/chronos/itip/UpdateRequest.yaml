@@ -3,11 +3,13 @@
     operationId: update
     tags:
       - Chronos
-    summary: >-
+    summary: Updates an event based on an update
+    security: 
+        - session: []
+    description: >-
       Updates an event based on an update sent by the organizer or a reply sent
       to the organizer.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: dataSource
         description: >-

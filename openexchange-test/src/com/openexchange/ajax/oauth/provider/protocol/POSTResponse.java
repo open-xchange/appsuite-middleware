@@ -90,7 +90,7 @@ public final class POSTResponse extends AbstractResponse {
         try {
             URI location = getRedirectLocation();
             Map<String, String> params = HttpTools.extractQueryParams(location);
-            GETRequest getRequest = new GETRequest().setScheme(location.getScheme()).setHostname(location.getHost());
+            GETRequest getRequest = new GETRequest().setScheme(location.getScheme()).setHostname(location.getHost()).setPort(location.getPort());
             for (String param : params.keySet()) {
                 getRequest.setParameter(param, params.get(param));
             }

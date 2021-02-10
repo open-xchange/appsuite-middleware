@@ -53,10 +53,10 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPath;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
-import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -88,6 +88,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
+import com.openexchange.file.storage.FileStorageResult;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
@@ -95,10 +96,12 @@ import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.RootFolderPermissionsAware;
+import com.openexchange.file.storage.SearchableFolderNameFolderAccess;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder;
 import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
@@ -191,21 +194,6 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         return withUniqueID(folders, folderID.getService(), folderID.getAccountId());
     }
 
-    private FolderID[] getPathIds(String folderId, String accountId, String serviceId, FileStorageFolderAccess folderAccess) throws OXException {
-        if (folderAccess instanceof PathKnowingFileStorageFolderAccess) {
-            PathKnowingFileStorageFolderAccess pathKnowing = (PathKnowingFileStorageFolderAccess) folderAccess;
-            String[] pathIds = pathKnowing.getPathIds2DefaultFolder(folderId);
-            FolderID[] path = new FolderID[pathIds.length];
-            for (int i = 0; i < pathIds.length; i++) {
-                path[i] = new FolderID(serviceId, accountId, pathIds[i]);
-            }
-            return path;
-        }
-
-        FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
-        return getPath(pathFolders, serviceId, accountId);
-    }
-
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
 
@@ -233,22 +221,39 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        return updateFolder(identifier, toUpdate, cascadePermissions, true);
+    }
+
+    @Override
+    public String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions, boolean ignoreWarnings) throws OXException {
         FolderID folderID = new FolderID(identifier);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
         }
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
-        String newID;
+        FileStorageResult<String> result = null;
         if (cascadePermissions) {
             if (false == PermissionAware.class.isInstance(folderAccess)) {
                 throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, Integer.valueOf(session.getContextId()));
             }
-            newID = ((PermissionAware) folderAccess).updateFolder(folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
+            result = ((PermissionAware) folderAccess).updateFolder(ignoreWarnings, folderID.getFolderId(), withRelativeID(toUpdate), cascadePermissions);
         } else {
-            newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
+            result = folderAccess.updateFolder(folderID.getFolderId(), ignoreWarnings, withRelativeID(toUpdate));
         }
-        FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
+
+        Collection<OXException> warnings = result.getWarnings();
+        if(0 < warnings.size()) {
+            addWarnings(warnings);
+            if(ignoreWarnings == false) {
+                return null;
+            }
+        }
+        if(result.getResponse() == null) {
+            return null;
+        }
+
+        FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), result.getResponse());
         fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
@@ -256,6 +261,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, boolean ignoreWarnings) throws OXException {
+        return moveFolder(folderId, newParentId, null, ignoreWarnings);
     }
 
     @Override
@@ -273,7 +283,22 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
              */
             FileStorageFolderAccess folderAccess = getFolderAccess(sourceFolderID);
             FolderID[] sourcePath = getPathIds(sourceFolderID.getFolderId(), sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
-            String newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+            String newID;
+
+            if (folderAccess instanceof PermissionAware) {
+                FileStorageResult<String> response = ((PermissionAware) folderAccess).moveFolder(ignoreWarnings, sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+                newID = response.getResponse();
+                Collection<OXException> warnings = response.getWarnings();
+                if (0 < warnings.size()) {
+                    addWarnings(warnings);
+                    if (ignoreWarnings == false) {
+                        return null;
+                    }
+                }
+            } else {
+                newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
+            }
+
             FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
             FolderID[] newPath = getPathIds(newID, sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
             fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, sourceFolderID, sourcePath)));
@@ -324,8 +349,15 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
-            String rootId = folderAccess.getRootFolder().getId();
-            if (rootId.equals(folderID.getFolderId())) {
+            String rootId = null;
+            try {
+                rootId = folderAccess.getRootFolder().getId();
+            } catch (OXException e) {
+                if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                    throw e;
+                }
+            }
+            if (null != rootId && rootId.equals(folderID.getFolderId())) {
                 // rename of root folder -> rename account
                 FileStorageAccountManagerLookupService service = Services.getService(FileStorageAccountManagerLookupService.class);
                 if (service == null) {
@@ -386,9 +418,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
         }
 
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
 
-        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
         fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));
@@ -599,6 +631,30 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         return Collections.emptyMap();
     }
 
+    private FolderID[] getPathIds(String folderId, String accountId, String serviceId, FileStorageFolderAccess folderAccess) throws OXException {
+        if (folderAccess instanceof PathKnowingFileStorageFolderAccess) {
+            PathKnowingFileStorageFolderAccess pathKnowing = (PathKnowingFileStorageFolderAccess) folderAccess;
+            String[] pathIds = pathKnowing.getPathIds2DefaultFolder(folderId);
+            FolderID[] path = new FolderID[pathIds.length];
+            for (int i = 0; i < pathIds.length; i++) {
+                path[i] = new FolderID(serviceId, accountId, pathIds[i]);
+            }
+            return path;
+        }
+
+        FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
+        return getPath(pathFolders, serviceId, accountId);
+    }
+
+    @Override
+    public FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException {
+        FileStorageFolderAccess folderAccess = getFolderAccess(new FolderID(folderId));
+        if (SearchableFolderNameFolderAccess.class.isInstance(folderAccess)) {
+            return ((SearchableFolderNameFolderAccess) folderAccess).searchFolderByName(query, folderId, date, includeSubfolders, all, start, end);
+        }
+        return new FileStorageFolder[0];
+    }
+
     private Map<String,FolderID[]> getFolderPaths(List<String> folderIds, FileStorageFolderAccess folderAccess) throws OXException {
         Map<String,FolderID[]> folderPaths = new HashMap<>();
         for (String folder : folderIds) {
@@ -643,6 +699,41 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
         FileStorageAccount account = service.getAccountManager().getAccount(accountID, session);
         return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName(), rootFolderPermissions);
+    }
+
+    /**
+     * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
+     * representations of the folder's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     *
+     * @param delegate The folder delegate
+     * @param serviceId The service ID
+     * @param accountId The account ID
+     * @return A folder with unique IDs
+     */
+    protected FileStorageFolder withUniqueID(FileStorageFolder delegate, String serviceId, String accountId) {
+        String id = null != delegate.getId() ? getUniqueFolderId(delegate.getId(), serviceId, accountId) : null;
+        String parentId = null != delegate.getParentId() ? getUniqueFolderId(delegate.getParentId(), serviceId, accountId) : null;
+        return new IDManglingFolder(delegate, id, parentId);
+    }
+
+    /**
+     * Creates {@link FileStorageFolder} instances delegating all regular calls to the supplied folders, but returning the unique ID
+     * representations of the folder's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     *
+     * @param delegates The folder delegates
+     * @param serviceId The service ID
+     * @param accountId The account ID
+     * @return An array of folders with unique IDs
+     */
+    protected FileStorageFolder[] withUniqueID(FileStorageFolder[] delegates, String serviceId, String accountId) {
+        if (null == delegates) {
+            return null;
+        }
+        FileStorageFolder[] idManglingFolders = new IDManglingFolder[delegates.length];
+        for (int i = 0; i < idManglingFolders.length; i++) {
+            idManglingFolders[i] = withUniqueID(delegates[i], serviceId, accountId);
+        }
+        return idManglingFolders;
     }
 
     /**

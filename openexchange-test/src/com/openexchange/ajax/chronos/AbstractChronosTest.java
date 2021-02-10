@@ -51,7 +51,6 @@ package com.openexchange.ajax.chronos;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
@@ -127,14 +126,14 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         rememberClient(client);
         EnhancedApiClient enhancedClient = getEnhancedApiClient();
         rememberClient(enhancedClient);
-        defaultUserApi = new UserApi(client, enhancedClient, testUser, false);
+        defaultUserApi = new UserApi(client, enhancedClient, testUser);
         chronosApi = defaultUserApi.getChronosApi();
         foldersApi = defaultUserApi.getFoldersApi();
         defaultFolderId = getDefaultFolder();
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, defaultFolderId);
         folderManager = new CalendarFolderManager(defaultUserApi, foldersApi);
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
+        folderId = createAndRememberNewFolder(defaultUserApi, getDefaultFolder(), defaultUserApi.getCalUser().intValue());
     }
 
     @Override
@@ -145,7 +144,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             if (eventIds != null) {
                 DeleteEventBody body = new DeleteEventBody();
                 body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
+                defaultUserApi.getChronosApi().deleteEvent(Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();
@@ -153,7 +152,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
             try {
                 if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+                    defaultUserApi.getFoldersApi().deleteFolders(new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
                 }
             } catch (Exception e) {
                 exception = e;
@@ -195,13 +194,12 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * Creates a new folder and remembers it.
      *
      * @param api The {@link UserApi}
-     * @param session The user's session
      * @param parent The parent folder
      * @param entity The user id
      * @return The result of the operation
      * @throws ApiException if an API error is occurred
      */
-    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
+    protected String createAndRememberNewFolder(UserApi api, String parent, int entity) throws ApiException {
         FolderPermission perm = new FolderPermission();
         perm.setEntity(I(entity));
         perm.setGroup(Boolean.FALSE);
@@ -209,21 +207,20 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
-        return createAndRememberNewFolder(api, session, parent, entity, permissions);
+        return createAndRememberNewFolder(api, parent, entity, permissions);
     }
 
     /**
      * Creates a new folder and remembers it.
      *
      * @param api The {@link UserApi}
-     * @param session The user's session
      * @param parent The parent folder
      * @param entity The user id
      * @param permissions The permissions to set
      * @return The result of the operation
      * @throws ApiException if an API error is occurred
      */
-    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity, List<FolderPermission> permissions) throws ApiException {
+    protected String createAndRememberNewFolder(UserApi api, String parent, int entity, List<FolderPermission> permissions) throws ApiException {
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);
@@ -234,7 +231,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null, null);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, body, "0", CALENDAR_MODULE, null, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -250,67 +247,71 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the default calendar folder cannot be found
      */
     protected String getDefaultFolder() throws Exception {
-        return getDefaultFolder(defaultUserApi.getSession(), defaultUserApi.getFoldersApi());
+        return getDefaultFolder(defaultUserApi.getFoldersApi());
     }
 
     /**
      * Retrieves the default calendar folder of the user with the specified session
      *
-     * @param session The session of the user
      * @param client The {@link ApiClient}
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    protected String getDefaultFolder(String session, ApiClient client) throws Exception {
-        return getDefaultFolder(session, new FoldersApi(client));
+    protected String getDefaultFolder(ApiClient client) throws Exception {
+        return getDefaultFolder(new FoldersApi(client));
     }
 
     /**
+     * Gets the birthday calendar folder
+     *
      * @return String The identifier of the birthday calendar folder
      * @throws Exception if the birthday calendar folder cannot be found
      */
     protected String getBirthdayCalendarFolder() throws Exception {
-        return getPrivateFolder(defaultUserApi.getFoldersApi(), defaultUserApi.getSession(), EVENT_MODULE, BIRTHDAY_FOLDER);
+        return getPrivateFolder(defaultUserApi.getFoldersApi(), EVENT_MODULE, BIRTHDAY_FOLDER);
     }
 
     /**
-     * @param session The session of the user
+     * Gets the birthday calendar folder
+     *
      * @param client The {@link ApiClient}
      * @return String The identifier of the birthday calendar folder
      * @throws Exception if the birthday calendar folder cannot be found
      */
-    protected String getBirthdayCalendarFolder(String session, ApiClient client) throws Exception {
-        return getPrivateFolder(new FoldersApi(client), session, EVENT_MODULE, BIRTHDAY_FOLDER);
+    protected String getBirthdayCalendarFolder(ApiClient client) throws Exception {
+        return getPrivateFolder(new FoldersApi(client), EVENT_MODULE, BIRTHDAY_FOLDER);
     }
 
     /**
+     * Gets the default contact folder
+     *
      * @return String The identifier of the default contact folder
      * @throws Exception if the default contact folder cannot be found
      */
     protected String getDefaultContactFolder() throws Exception {
-        return getPrivateFolder(defaultUserApi.getFoldersApi(), defaultUserApi.getSession(), CONTACT_MODULE, CONTACT_FOLDER);
+        return getPrivateFolder(defaultUserApi.getFoldersApi(), CONTACT_MODULE, CONTACT_FOLDER);
     }
 
     /**
-     * @param session The session of the user
+     * Gets the default contact folder
+     *
      * @param client client The {@link ApiClient}
      * @return String The identifier of the default contact folder
      * @throws Exception if the default contact folder cannot be found
      */
-    protected String getDefaultContactFolder(String session, ApiClient client) throws Exception {
-        return getPrivateFolder(new FoldersApi(client), session, "contacts", "Contacts");
+    protected String getDefaultContactFolder(ApiClient client) throws Exception {
+        return getPrivateFolder(new FoldersApi(client), "contacts", "Contacts");
     }
 
     /**
      * Retrieves the default calendar folder of the user with the specified session
      *
-     * @param session The session of the user
      * @param foldersApi The {@link FoldersApi}
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    protected String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
+    protected String getDefaultFolder(FoldersApi foldersApi) throws Exception {
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         }
@@ -323,14 +324,16 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
-     * @param session The session of the user
+     * Gets the private folder with the given name
+     *
+     * @param foldersApi the {@link FoldersApi} to use
      * @param module The folder module
      * @param folder The name of the folder
      * @return folderId The folderId as string
      * @throws Exception if the folder cannot be found
      */
-    private String getPrivateFolder(FoldersApi foldersApi, String session, String module, String folder) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, module, "1,300,308", "1");
+    private String getPrivateFolder(FoldersApi foldersApi, String module, String folder) throws Exception {
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, module, "1,300,308", "1");
         for (ArrayList<?> folderName : privateList) {
             if (folderName.get(1).equals(folder)) {
                 return folderName.get(0).toString();
@@ -341,7 +344,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
     /**
      * @param api The {@link FoldersApi} to use
-     * @param session The session of the user
      * @param module The folder module
      * @param columns The columns identifier
      * @param tree The folder tree identifier
@@ -349,8 +351,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the api call fails
      */
     @SuppressWarnings({ "unchecked" })
-    protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null, Boolean.TRUE);
+    protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String module, String columns, String tree) throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(module, columns, tree, null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
@@ -384,23 +386,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected void changeTimezone(TimeZone tz) throws ApiException {
         String body = "{timezone: \"" + tz.getID() + "\"}";
-        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob(defaultUserApi.getSession(), body, "io.ox/core", null);
+        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob("io.ox/core", body, null);
         assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
-    }
-
-    /**
-     * Checks if a response doesn't contain any errors
-     *
-     * @param error The error element of the response
-     * @param errorDesc The error description element of the response
-     * @param data The data element of the response
-     * @return The data
-     */
-    @Override
-    protected <T> T checkResponse(String error, String errorDesc, T data) {
-        assertNull(errorDesc, error);
-        assertNotNull(data);
-        return data;
     }
 
     /**

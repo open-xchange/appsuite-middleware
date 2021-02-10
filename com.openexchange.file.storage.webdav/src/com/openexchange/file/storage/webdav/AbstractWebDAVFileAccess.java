@@ -198,7 +198,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
             return saveDocument(file, null, sequenceNumber, modifiedFields);
         }
         WebDAVPath path = getWebDAVPath(file.getFolderId(), file.getId());
-        List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
+        List<Field> fieldsToUpdate = new ArrayList<>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
         /*
          * check for rename through update, first
          */
@@ -225,8 +225,8 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
              */
             return newFileId;
         }
-        Map<QName, Object> propsToSet = new HashMap<QName, Object>();
-        Set<QName> propsToRemove = new HashSet<QName>();
+        Map<QName, Object> propsToSet = new HashMap<>();
+        Set<QName> propsToRemove = new HashSet<>();
         for (Entry<QName, Object> entry : props.entrySet()) {
             if (null == entry.getValue()) {
                 propsToRemove.add(entry.getKey());
@@ -336,7 +336,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
+        List<Field> fieldsToUpdate = new ArrayList<>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
         WebDAVPath path = null;
         if (NEW == file.getId()) {
             /*
@@ -438,7 +438,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
 
     public void removeDocument(String folderId, long sequenceNumber, boolean hardDelete) throws OXException {
         SearchIterator<File> iterator = getDocuments(folderId).results();
-        List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>();
+        List<IDTuple> ids = new ArrayList<>();
         try {
             while (iterator.hasNext()) {
                 File document = iterator.next();
@@ -457,7 +457,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
-        List<IDTuple> notDeleted = new ArrayList<IDTuple>();
+        List<IDTuple> notDeleted = new ArrayList<>();
         for (IDTuple id : ids) {
             try {
                 //Check for a conflict by comparing the sequence number (last_modified time stamp) with the sequence number given
@@ -470,7 +470,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
                     //Conflict
                     notDeleted.add(id);
                 }
-            } catch (OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 notDeleted.add(id);
             }
         }
@@ -505,7 +505,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
             }
             throw asOXException(e);
         }
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         for (WebDAVResource resource : resources) {
             if (false == resource.isCollection()) {
                 files.add(getWebDAVFile(resource));
@@ -522,8 +522,10 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
      *
      * @param resource The WebDAV resource to create the file storage file from
      * @return The file storage file
-     * @throws OXException
+     * @throws UnsupportedOperationException if the specified resource is a collection
+     * @throws OXException if any other error is occurred
      */
+    @SuppressWarnings("unused")
     protected WebDAVFile getWebDAVFile(WebDAVResource resource) throws OXException {
         if (resource.isCollection()) {
             throw new UnsupportedOperationException();
@@ -604,7 +606,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         Set<QName> props = Collections.singleton(PropertyName.DAV_GETETAG);
         for (String folderId : folderIds) {
             WebDAVPath path = getWebDAVPath(folderId);
@@ -651,7 +653,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
             throw asOXException(e);
         }
 
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         for (WebDAVResource resource : resources) {
             if (false == resource.isCollection()) {
                 files.add(getWebDAVFile(resource));
@@ -819,7 +821,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
         if (null != requestedSortBy) {
             fields.add(requestedSortBy);
         }
-        HashSet<QName> props = new HashSet<QName>(fields.size() + 1);
+        HashSet<QName> props = new HashSet<>(fields.size() + 1);
         props.add(DAV_GETETAG);
         for (Field field : fields) {
             switch (field) {
@@ -850,7 +852,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
     }
 
     protected Map<QName, Object> getPropertiesToSet(File file, Collection<Field> indicatedFields) {
-        Map<QName, Object> props = new HashMap<QName, Object>();
+        Map<QName, Object> props = new HashMap<>();
         Set<Field> fields = null == indicatedFields ? EnumSet.allOf(Field.class) : indicatedFields.isEmpty() ? EnumSet.noneOf(Field.class) : EnumSet.copyOf(indicatedFields);
         for (Field field : fields) {
             switch (field) {
@@ -897,7 +899,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
     private String optName(String folderId, String fileId) {
         try {
             return getWebDAVPath(folderId, fileId).getName();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return fileId;
         }
     }

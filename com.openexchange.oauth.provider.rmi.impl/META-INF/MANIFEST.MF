@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OAuth Provider RMI Implementation
 Bundle-SymbolicName: com.openexchange.oauth.provider.rmi.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.oauth.provider.rmi.impl.osgi.OAuthProviderRMIActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -17,3 +17,4 @@ Import-Package: com.google.common.io,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.openexchange.oauth.provider.rmi.impl

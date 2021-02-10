@@ -141,19 +141,15 @@ public class GuestCleaner {
      *
      * @param contextID The context ID
      */
-    public void scheduleContextCleanup(final int contextID) throws OXException {
+    public void scheduleContextCleanup(final int contextID) {
         LOG.debug("Scheduling context cleanup task for context {}.", I(contextID));
-        services.getService(ExecutorService.class).submit(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID, guestExpiry);
-                    List<GuestCleanupTask> tasks = contextCleanupTask.call();
-                    cleanupTasks.offerIfAbsentElseReset(tasks);
-                } catch (Exception e) {
-                    LOG.warn("error enqueuing cleanup tasks.", e);
-                }
+        services.getService(ExecutorService.class).submit(() -> {
+            try {
+                ContextCleanupTask contextCleanupTask = new ContextCleanupTask(services, contextID, guestExpiry);
+                List<GuestCleanupTask> tasks = contextCleanupTask.call();
+                cleanupTasks.offerIfAbsentElseReset(tasks);
+            } catch (Exception e) {
+                LOG.warn("error enqueuing cleanup tasks.", e);
             }
         });
     }
@@ -164,7 +160,7 @@ public class GuestCleaner {
      * @param contextID The context ID
      * @param guestIDs The identifiers of the guest users to consider for cleanup
      */
-    public void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
+    public void scheduleGuestCleanup(int contextID, int[] guestIDs) {
         LOG.debug("Scheduling guest cleanup tasks for guest users {} in context {}.", Arrays.toString(guestIDs), I(contextID));
         cleanupTasks.offerIfAbsentElseReset(GuestCleanupTask.create(services, contextID, guestIDs, guestExpiry));
     }

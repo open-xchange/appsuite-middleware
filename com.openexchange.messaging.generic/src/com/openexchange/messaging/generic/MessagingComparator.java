@@ -116,8 +116,6 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
 
     private final boolean descending;
 
-    private final Locale locale;
-
     private final Collator collator;
 
     /**
@@ -144,7 +142,6 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         this.field = field;
         this.descending = descending;
         Locale localeToUse = null == locale ? Locale.US : locale;
-        this.locale = localeToUse;
         collator = Collators.getSecondaryInstance(localeToUse);
         get = new MessagingMessageGetSwitch();
     }

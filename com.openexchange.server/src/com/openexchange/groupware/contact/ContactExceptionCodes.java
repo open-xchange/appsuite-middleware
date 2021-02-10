@@ -315,6 +315,11 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
 
     /** The operation is not allowed in a folder which has a subscription. */
     WRITE_IN_SUBSCRIPTION_NOT_ALLOWED("This operation is not allowed in folder %1$s because it has a subscription.", ContactExceptionMessages.SUBSCRIPTION_NOT_ALLOWED, Category.CATEGORY_PERMISSION_DENIED, 1003),
+    /**
+     * <li>The operation could not be completed due to insufficient capabilities.</li>
+     * <li>Missing capability [%1$s]</li>
+     */
+    MISSING_CAPABILITY("Missing capability [%1$s]", ContactExceptionMessages.MISSING_CAPABILITY_MSG, Category.CATEGORY_PERMISSION_DENIED, 1004),
     ;
 
     public static final String PREFIX = "CON".intern();

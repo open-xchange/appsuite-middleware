@@ -1,0 +1,11 @@
+$ref: ../common/CommonResponseExceptionData.yaml
+timestamp:
+  type: integer
+  format: int64
+  description: The latest timestamp of the returned data (see [Updates](#updates)).
+warnings:
+  type: object
+  description: >
+          Present in case of one or more warnings.
+          In case one warning occurs the object contains a JSONObject with error data.
+          If more warnings occur, the object contains a JSONArray that holds JSONObjects with error data.

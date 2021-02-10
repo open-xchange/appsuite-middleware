@@ -60,6 +60,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
@@ -86,15 +88,28 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
 
-    public static final AtomicReference<SubscriptionStorage> STORAGE = new AtomicReference<SubscriptionStorage>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSubscribeService.class);
 
-    public static final AtomicReference<SecretEncryptionFactoryService> ENCRYPTION_FACTORY = new AtomicReference<SecretEncryptionFactoryService>();
+    private static final String PASSWORD = "password";
 
-    public static final AtomicReference<CryptoService> CRYPTO_SERVICE = new AtomicReference<CryptoService>();
+    // Services
+    public static final AtomicReference<SubscriptionStorage> STORAGE = new AtomicReference<>();
+    public static final AtomicReference<SecretEncryptionFactoryService> ENCRYPTION_FACTORY = new AtomicReference<>();
+    public static final AtomicReference<CryptoService> CRYPTO_SERVICE = new AtomicReference<>();
+    public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<>();
+    public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<>();
 
-    public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<FolderService>();
+    private final SubscriptionErrorMarker marker;
 
-    public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<UserPermissionService>();
+    /**
+     * Initializes a new {@link AbstractSubscribeService}.
+     *
+     * @param folderService The {@link com.openexchange.folderstorage.FolderService} to use
+     */
+    public AbstractSubscribeService(com.openexchange.folderstorage.FolderService folderService) {
+        super();
+        marker = new SubscriptionErrorMarker(this, folderService);
+    }
 
     /**
      * Enabled by default - override as needed.
@@ -105,32 +120,31 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @Override
-    public Collection<Subscription> loadSubscriptions(final Context ctx, final String folderId, final String secret) throws OXException {
-        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptions(ctx, folderId);
+    public Collection<Subscription> loadSubscriptions(Context ctx, String folderId, String secret) throws OXException {
+        List<Subscription> allSubscriptions = STORAGE.get().getSubscriptions(ctx, folderId);
         return prepareSubscriptions(allSubscriptions, secret, ctx, -1);
     }
 
     @Override
-    public Collection<Subscription> loadSubscriptions(final Context context, final int userId, final String secret) throws OXException {
-        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(context, userId);
+    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException {
+        List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(context, userId);
         return prepareSubscriptions(allSubscriptions, secret, context, userId);
     }
 
-    private Collection<Subscription> prepareSubscriptions(final List<Subscription> allSubscriptions, final String secret, final Context context, final int userId) throws OXException {
-        final List<Subscription> subscriptions = new ArrayList<Subscription>();
-        final Map<String, Boolean> canSee = new HashMap<String, Boolean>();
+    private Collection<Subscription> prepareSubscriptions(List<Subscription> allSubscriptions, String secret, Context context, int userId) throws OXException {
+        List<Subscription> subscriptions = new ArrayList<>();
+        Map<String, Boolean> canSee = new HashMap<>();
 
-        for (final Subscription subscription : allSubscriptions) {
-            if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
-                getSubscriptionSource().getId())) {
+        for (Subscription subscription : allSubscriptions) {
+            if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
 
                 if (userId == -1) {
                     subscriptions.add(subscription);
                 } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId()).booleanValue()) {
                     subscriptions.add(subscription);
                 } else {
-                    final EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
-                    final boolean visible = folderPermission.isFolderVisible() ;
+                    EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
+                    boolean visible = folderPermission.isFolderVisible();
                     canSee.put(subscription.getFolderId(), B(visible));
                     if (visible) {
                         subscriptions.add(subscription);
@@ -140,44 +154,47 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
             }
         }
-        for (final Subscription subscription : subscriptions) {
+        for (Subscription subscription : subscriptions) {
             subscription.setSecret(secret);
+            decrypt(subscription, subscription.getSession(), subscription.getConfiguration(), PASSWORD);
             modifyOutgoing(subscription);
         }
 
         return subscriptions;
     }
 
-
     @Override
-    public Subscription loadSubscription(final Context ctx, final int subscriptionId, final String secret) throws OXException {
-        final Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
+    public Subscription loadSubscription(Context ctx, int subscriptionId, String secret) throws OXException {
+        Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
         if (null == subscription) {
             return null;
         }
         subscription.setSecret(secret);
+        decrypt(subscription, subscription.getSession(), subscription.getConfiguration(), PASSWORD);
         modifyOutgoing(subscription);
         return subscription;
     }
 
     @Override
-    public void subscribe(final Subscription subscription) throws OXException {
+    public void subscribe(Subscription subscription) throws OXException {
         checkCreate(subscription);
         modifyIncoming(subscription);
         if (checkForDuplicate()) {
             doCheckForDuplicate(subscription);
         }
+        encrypt(subscription.getSession(), subscription.getConfiguration(), PASSWORD);
         STORAGE.get().rememberSubscription(subscription);
         modifyOutgoing(subscription);
     }
 
     @Override
-    public void unsubscribe(final Subscription subscription) throws OXException {
-        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+    public void unsubscribe(Subscription subscription) throws OXException {
+        Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
         if (null == loadedSubscription) {
             throw SubscriptionErrorMessage.SubscriptionNotFound.create();
         }
         if (loadedSubscription.getSession() == null) {
+            // FIXME Implementation of getSession() will create a session. Thus this code will never be reached
             loadedSubscription.setSession(subscription.getSession());
         }
         checkDelete(loadedSubscription);
@@ -185,18 +202,15 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @Override
-    public void update(final Subscription subscription) throws OXException {
-        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+    public void update(Subscription subscription) throws OXException {
+        Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
         if (null == loadedSubscription) {
             throw SubscriptionErrorMessage.SubscriptionNotFound.create();
         }
-        checkUpdate(loadedSubscription);
-        modifyIncoming(subscription);
-        STORAGE.get().updateSubscription(subscription);
-        modifyOutgoing(subscription);
+        doUpdate(subscription, loadedSubscription);
     }
 
-    public void modifyIncoming(final Subscription subscription) throws OXException {
+    public void modifyIncoming(Subscription subscription) throws OXException {
         Object accountIDObject = subscription.getConfiguration().get("account");
         if (JSONObject.NULL == accountIDObject) {
             throw SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN.create();
@@ -204,13 +218,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @SuppressWarnings("unused")
-    public void modifyOutgoing(final Subscription subscription) throws OXException {
+    public void modifyOutgoing(Subscription subscription) throws OXException {
         // Empty body
     }
 
     @Override
-    public boolean knows(final Context ctx, final int subscriptionId) throws OXException {
-        final Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
+    public boolean knows(Context ctx, int subscriptionId) throws OXException {
+        Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
         if (subscription == null || subscription.getSource() == null) {
             return false;
         }
@@ -225,54 +239,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         STORAGE.get().touch(ctx, subscriptionId, System.currentTimeMillis());
     }
 
-    public static void encrypt(final Session session, final Map<String, Object> map, final String... keys) throws OXException {
-        final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
-        if (encryptionFactoryService == null) {
-            return;
-        }
-        if (session == null) {
-            return;
-        }
-        final SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
-        for (final String key : keys) {
-            if (map.containsKey(key)) {
-                final String toEncrypt = (String) map.get(key);
-                final String encrypted = encryptionService.encrypt(session, toEncrypt);
-                map.put(key, encrypted);
-            }
-        }
-    }
-
-    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) {
-        final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
-        if (encryptionFactoryService == null) {
-            return;
-        }
-        if (session == null) {
-            return;
-        }
-
-        SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
-        for (String key : keys) {
-            if (map.containsKey(key)) {
-                EncryptedField encryptedField = new EncryptedField(subscription, key);
-
-                String toDecrypt = (String) map.get(key);
-                String decrypted;
-                try {
-                    decrypted = encryptionService.decrypt(session, toDecrypt, encryptedField);
-                } catch (Exception e) {
-                    // Fail silently
-                    decrypted = null;
-                }
-                map.put(key, decrypted);
-            }
-        }
-    }
-
     @Override
-    public boolean hasAccounts(final Context ctx, final User user) throws OXException {
-        final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
+    public boolean hasAccounts(Context ctx, User user) throws OXException {
+        Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {
             return false;
         }
@@ -280,31 +249,31 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @Override
-    public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
-        final SubscriptionSource subscriptionSource = getSubscriptionSource();
-        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+    public void migrateSecret(Session session, String oldSecret, String newSecret) throws OXException {
+        SubscriptionSource subscriptionSource = getSubscriptionSource();
+        Set<String> passwordFields = subscriptionSource.getPasswordFields();
         if (passwordFields.isEmpty()) {
             return;
         }
-        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
-        final String id = subscriptionSource.getId();
-        final CryptoService cryptoService = CRYPTO_SERVICE.get();
-        final Map<String, Object> update = new HashMap<String, Object>();
-        for (final Subscription subscription : allSubscriptions) {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        String id = subscriptionSource.getId();
+        CryptoService cryptoService = CRYPTO_SERVICE.get();
+        Map<String, Object> update = new HashMap<>();
+        for (Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
-                final Map<String, Object> configuration = subscription.getConfiguration();
+                Map<String, Object> configuration = subscription.getConfiguration();
                 update.clear();
                 boolean save = false;
-                for (final String passwordField : passwordFields) {
-                    final String password = (String) configuration.get(passwordField);
+                for (String passwordField : passwordFields) {
+                    String password = (String) configuration.get(passwordField);
                     if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
                         } catch (OXException x) {
                             // This one needs migration
-                            final String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
+                            String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
                             update.put(passwordField, transcriptedPassword);
                             save = true;
                         }
@@ -320,23 +289,23 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void cleanUp(String secret, Session session) throws OXException {
-        final SubscriptionSource subscriptionSource = getSubscriptionSource();
-        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+        SubscriptionSource subscriptionSource = getSubscriptionSource();
+        Set<String> passwordFields = subscriptionSource.getPasswordFields();
         if (passwordFields.isEmpty()) {
             return;
         }
-        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
-        final String id = subscriptionSource.getId();
-        final CryptoService cryptoService = CRYPTO_SERVICE.get();
-        final Map<String, Object> update = new HashMap<String, Object>();
-        for (final Subscription subscription : allSubscriptions) {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        String id = subscriptionSource.getId();
+        CryptoService cryptoService = CRYPTO_SERVICE.get();
+        Map<String, Object> update = new HashMap<>();
+        for (Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
-                final Map<String, Object> configuration = subscription.getConfiguration();
+                Map<String, Object> configuration = subscription.getConfiguration();
                 update.clear();
                 boolean save = false;
-                for (final String passwordField : passwordFields) {
-                    final String password = (String) configuration.get(passwordField);
+                for (String passwordField : passwordFields) {
+                    String password = (String) configuration.get(passwordField);
                     if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
@@ -358,29 +327,30 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
-        final SubscriptionSource subscriptionSource = getSubscriptionSource();
-        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+        SubscriptionSource subscriptionSource = getSubscriptionSource();
+        Set<String> passwordFields = subscriptionSource.getPasswordFields();
         if (passwordFields.isEmpty()) {
             return;
         }
-        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
-        final String id = subscriptionSource.getId();
-        final CryptoService cryptoService = CRYPTO_SERVICE.get();
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        String id = subscriptionSource.getId();
+        CryptoService cryptoService = CRYPTO_SERVICE.get();
 
-        List<Subscription> subscriptionsToDelete = new ArrayList<Subscription>(allSubscriptions.size());
+        List<Subscription> subscriptionsToDelete = new ArrayList<>(allSubscriptions.size());
 
-        for (final Subscription subscription : allSubscriptions) {
+        for (Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
-                final Map<String, Object> configuration = subscription.getConfiguration();
-                for (final String passwordField : passwordFields) {
-                    final String password = (String) configuration.get(passwordField);
+                Map<String, Object> configuration = subscription.getConfiguration();
+                for (String passwordField : passwordFields) {
+                    String password = (String) configuration.get(passwordField);
                     if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
-                        } catch (OXException x) {
+                        } catch (OXException e) {
                             // This one needs clean-up
+                            LOGGER.trace("Unable to decrypt password. Removing subscription.", e);
                             if (!subscriptionsToDelete.contains(subscription)) {
                                 subscriptionsToDelete.add(subscription);
                             }
@@ -392,6 +362,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
         for (Subscription subscription : subscriptionsToDelete) {
             if (null == subscription.getSession()) {
+                // FIXME Implementation of getSession() will create a session. Thus this code will never be reached
                 subscription.setSession(serverSession);
             }
             unsubscribe(subscription);
@@ -400,23 +371,42 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     /**
      * Override if possible to allow pipelined processing of the subscription's content.
+     *
+     * @param subscription The subscription for which to load the content
+     * @return The {@link SearchIterator} with the content, or an empty iterator if no content was loaded
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
-        Collection<?> collection = getContent(subscription);
-        return null == collection ? SearchIterators.emptyIterator() : new SearchIteratorDelegator(collection);
+        try {
+            Collection collection = getContent(subscription);
+            marker.unmark(subscription);
+            return null == collection ? SearchIterators.emptyIterator() : new SearchIteratorDelegator(collection);
+        } catch (OXException e) {
+            marker.mark(subscription);
+            throw e;
+        }
     }
 
-    private static String getSubscriptionSourceId(final Subscription subscription) {
+    ///////////////////////////////////////// HELPERS /////////////////////////////////////////////
+
+    void doUpdate(Subscription subscription, Subscription loadedSubscription) throws OXException {
+        checkUpdate(loadedSubscription);
+        modifyIncoming(subscription);
+        encrypt(subscription.getSession(), subscription.getConfiguration(), PASSWORD);
+        STORAGE.get().updateSubscription(subscription);
+        modifyOutgoing(subscription);
+    }
+
+    private String getSubscriptionSourceId(Subscription subscription) {
         if (null == subscription) {
             return null;
         }
-        final SubscriptionSource source = subscription.getSource();
+        SubscriptionSource source = subscription.getSource();
         return null == source ? null : source.getId();
     }
 
-    protected void removeWhereConfigMatches(final Context context, final Map<String, Object> query) throws OXException {
+    protected void removeWhereConfigMatches(Context context, Map<String, Object> query) throws OXException {
         STORAGE.get().deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
     }
 
@@ -472,9 +462,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                     }
                 }
             }
-        } catch (ClassCastException unused) {
+        } catch (ClassCastException e) {
+            LOGGER.trace("", e);
             return false;
-        } catch (NullPointerException unused) {
+        } catch (NullPointerException e) {
+            LOGGER.trace("", e);
             return false;
         }
 
@@ -483,13 +475,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     // Permission Checks
 
-    public void checkCreate(final Subscription subscription) throws OXException {
+    public void checkCreate(Subscription subscription) throws OXException {
         if (canWrite(subscription)) {
             return;
         }
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
-    public void checkUpdate(final Subscription subscription) throws OXException {
+
+    public void checkUpdate(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
         if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
@@ -497,7 +490,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
-    public void checkDelete(final Subscription subscription) throws OXException {
+    public void checkDelete(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
         if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
@@ -505,22 +498,89 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
-    private boolean canWrite(final Subscription subscription) throws OXException {
-        final OCLPermission permission = loadFolderPermission(subscription);
-        return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
+    private boolean canWrite(Subscription subscription) throws OXException {
+        OCLPermission permission = loadFolderPermission(subscription);
+        return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION || (permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
     }
 
-    private boolean isFolderAdmin(final Subscription subscription) throws OXException {
-        final OCLPermission permission = loadFolderPermission(subscription);
-        return  permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
+    private boolean isFolderAdmin(Subscription subscription) throws OXException {
+        OCLPermission permission = loadFolderPermission(subscription);
+        return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
     }
 
-    private OCLPermission loadFolderPermission(final Subscription subscription) throws OXException {
-        final int folderId = Integer.parseInt(subscription.getFolderId());
-        final int userId = subscription.getSession().getUserId();
-        final Context ctx = subscription.getContext();
-        final UserPermissionBits userPerm = USER_PERMISSIONS.get().getUserPermissionBits(userId, ctx);
+    private OCLPermission loadFolderPermission(Subscription subscription) throws OXException {
+        int folderId = Integer.parseInt(subscription.getFolderId());
+        int userId = subscription.getSession().getUserId();
+        Context ctx = subscription.getContext();
+        UserPermissionBits userPerm = USER_PERMISSIONS.get().getUserPermissionBits(userId, ctx);
 
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userPerm);
+    }
+
+    ///////////////////////////////// ENCRYPTION //////////////////////////////
+
+    /**
+     * Encrypts the values of the specified keys
+     *
+     * @param session The session
+     * @param map The map
+     * @param keys The keys for which their values shall be encrypted
+     * @throws OXException if encryption fails
+     */
+    void encrypt(Session session, Map<String, Object> map, String... keys) throws OXException {
+        SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
+        if (encryptionFactoryService == null) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        }
+        if (session == null) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Session is missing");
+        }
+        SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
+        for (String key : keys) {
+            if (false == map.containsKey(key)) {
+                continue;
+            }
+            String toEncrypt = (String) map.get(key);
+            String encrypted = encryptionService.encrypt(session, toEncrypt);
+            map.put(key, encrypted);
+        }
+    }
+
+    /**
+     * Decrypts the values of the specified keys for the specified subscription
+     *
+     * @param subscription The subscription
+     * @param session The session
+     * @param map The map
+     * @param keys The keys for which their values shall be encrypted
+     * @throws OXException if service is missing
+     */
+    private void decrypt(Subscription subscription, Session session, Map<String, Object> map, String... keys) throws OXException {
+        SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
+        if (encryptionFactoryService == null) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
+        }
+        if (session == null) {
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create("Session is missing");
+        }
+
+        SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
+        for (String key : keys) {
+            if (false == map.containsKey(key)) {
+                continue;
+            }
+            EncryptedField encryptedField = new EncryptedField(subscription, key);
+
+            /*
+             * Decrypt value or remove it on failure
+             */
+            String toDecrypt = (String) map.get(key);
+            try {
+                map.put(key, encryptionService.decrypt(session, toDecrypt, encryptedField));
+            } catch (Exception e) {
+                LOGGER.info("Unable to decrypt field \"{}\" in subscription.", key, e);
+                map.remove(key);
+            }
+        }
     }
 }

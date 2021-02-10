@@ -118,11 +118,11 @@ public final class IMAPNumArgSplitter {
      * @param arr - <code>int</code> array of message sequence numbers
      * @return an appropriate array of command arguments
      */
-    public static String[] split(final int[] arr) {
+    public static String[] split(int[] arr) {
         return split(new Tokenizer() {
 
             @Override
-            public String getNext(final int index) {
+            public String getNext(int index) {
                 return String.valueOf(arr[index]);
             }
         }, arr.length);
@@ -135,11 +135,11 @@ public final class IMAPNumArgSplitter {
      * @param arr - <code>long</code> array of message UIDs
      * @return an appropriate array of command arguments
      */
-    public static String[] split(final long[] arr) {
+    public static String[] split(long[] arr) {
         return split(new Tokenizer() {
 
             @Override
-            public String getNext(final int index) {
+            public String getNext(int index) {
                 return Long.toString(arr[index]);
             }
         }, arr.length);
@@ -152,11 +152,11 @@ public final class IMAPNumArgSplitter {
      * @param arr - <code>Message</code> array
      * @return an appropriate array of command arguments
      */
-    public static String[] split(final Message[] arr) {
+    public static String[] split(Message[] arr) {
         return split(new Tokenizer() {
 
             @Override
-            public String getNext(final int index) {
+            public String getNext(int index) {
                 return String.valueOf(arr[index].getMessageNumber());
             }
         }, arr.length);
@@ -173,7 +173,7 @@ public final class IMAPNumArgSplitter {
      * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder, final int consumed) {
+    public static String[] splitSeqNumArg(int[] arr, boolean keepOrder, int consumed) {
         return getSeqNumArg(arr, keepOrder, true, consumed);
     }
 
@@ -189,7 +189,7 @@ public final class IMAPNumArgSplitter {
      * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
+    public static String[] getSeqNumArg(int[] arr, boolean keepOrder, boolean split, int consumed) {
         final TIntList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
             final int seqNum = arr[i];
@@ -220,7 +220,7 @@ public final class IMAPNumArgSplitter {
      * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
+    public static String[] splitMessageArg(Message[] arr, boolean keepOrder, int consumed) {
         final TIntList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
             final int messageNumber = arr[i].getMessageNumber();
@@ -248,7 +248,7 @@ public final class IMAPNumArgSplitter {
      * @param consumed The number of bytes already consumed or <code>-1</code> for default (512)
      * @return an appropriate array of command arguments
      */
-    public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
+    public static String[] splitUIDArg(long[] arr, boolean keepOrder, int consumed) {
         final TLongArrayList l = new TLongArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
             final long uid = arr[i];
@@ -278,7 +278,7 @@ public final class IMAPNumArgSplitter {
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */
-    public static String getNumArg(final TIntList numbers) {
+    public static String getNumArg(TIntList numbers) {
         int size = numbers.size();
         if (0 == size) {
             return "";
@@ -322,7 +322,7 @@ public final class IMAPNumArgSplitter {
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */
-    public static String getNumArg(final TLongArrayList numbers) {
+    public static String getNumArg(TLongArrayList numbers) {
         final int size = numbers.size();
         if (0 == size) {
             return "";
@@ -354,7 +354,7 @@ public final class IMAPNumArgSplitter {
         return sb.toString();
     }
 
-    private static String[] split(final Tokenizer tokenizer, final int length) {
+    private static String[] split(Tokenizer tokenizer, int length) {
         final int initCap = (length / MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
         final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
         final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED);
@@ -373,7 +373,7 @@ public final class IMAPNumArgSplitter {
         return tmp.toArray(new String[tmp.size()]);
     }
 
-    private static String[] split(final String numArg, final int maxLen) {
+    private static String[] split(String numArg, int maxLen) {
         final int len = numArg.length();
         if (len <= maxLen) {
             if (len == 0) {

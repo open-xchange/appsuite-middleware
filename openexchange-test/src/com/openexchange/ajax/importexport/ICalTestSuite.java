@@ -92,6 +92,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug8654Test_TaskImport.class,
     Bug63867Test.class,
     MWB161Test.class,
+    MWB464Test.class,
     MWB805Test.class,
 }) // @formatter:on
 public final class ICalTestSuite {

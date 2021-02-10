@@ -68,6 +68,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
@@ -183,7 +184,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         Map<String, List<Attendee>> attendees = exchangeAttendeesIds(folderMapping, eventAttendeeMapping, dstEventMapping, dstUsrId, srcUsrId);
         insertDestinationAttendees(attendees);
         //Alarms
-        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, srcUsrId, dstUsrId);
+        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, dstUsrId);
         insertDestinationAlarms(new ArrayList<>(dstEventMapping.values()), alarmByEventByUser, attendees);
         //AlarmTrigger
         insertDestinationAlarmTriggers(alarmByEventByUser, new ArrayList<>(dstEventMapping.values()));
@@ -284,9 +285,12 @@ public class ChronosCopyTask implements CopyUserTaskService {
                     if (organizer.getEntity() == srcUsrId) {
                         organizer.setEntity(dstUsrId);
                         organizer.setUri(calendarUser.getUri());
-                    } else {
-                        organizer.setUri(organizer.getEMail());
+                        organizer.setEMail(calendarUser.getEMail());
+                    } else if (CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
                         organizer.setEntity(0);
+                        if (null == CalendarUtils.optEMailAddress(organizer.getUri()) && Strings.isNotEmpty(organizer.getEMail())) {
+                            organizer.setUri(CalendarUtils.getURI(organizer.getEMail()));
+                        }
                     }
                 }
                 srcEvent.setId(dstEventId);
@@ -318,12 +322,20 @@ public class ChronosCopyTask implements CopyUserTaskService {
             String srcEventId = entry.getKey();
             List<Attendee> attendees = new ArrayList<>(entry.getValue().size());
             for (Attendee attendee : entry.getValue()) {
-                //setters for attendee values
-                if (attendee.getEntity() == srcUsrId) {
-                    attendee.setFolderId(getDestinationFolder(folderMapping, Integer.parseInt(attendee.getFolderId())));
-                    attendee.setEntity(dstUsrId);
-                } else if (CalendarUtils.isExternalUser(attendee)) {
-                    attendee.setFolderId(null);
+                if (CalendarUtils.isInternal(attendee)) {
+                    if (false == CalendarUserType.INDIVIDUAL.matches(attendee.getCuType())) {
+                        continue; // skip internal group- and resource attendees
+                    }
+                    if (srcUsrId == attendee.getEntity()) {
+                        // exchange with destination user
+                        attendee.setFolderId(getDestinationFolder(folderMapping, Integer.parseInt(attendee.getFolderId())));
+                        attendee.setEntity(dstUsrId);
+                    } else {
+                        // turn into external calendar user
+                        attendee.setFolderId(null);
+                        attendee.setEntity(0);
+                    }
+                    attendee.setMember(null);
                 }
                 attendees.add(attendee);
             }
@@ -333,22 +345,27 @@ public class ChronosCopyTask implements CopyUserTaskService {
         return dstAttendees;
     }
 
-    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, List<Alarm>> alarmByEvent, Map<String, Event> dstEventMapping, int srcUsrId, int dstUsrId) throws OXException {
+    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, List<Alarm>> alarmByEvent, Map<String, Event> dstEventMapping, int dstUsrId) throws OXException {
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<>(alarmByEvent.size());
         Map<Integer, List<Alarm>> alarmsByUser = null;
         List<Alarm> alarmList;
         for (Entry<String,  List<Alarm>> alarmsPerEvent : alarmByEvent.entrySet()) {
-                alarmsByUser = new HashMap<>(1);
-                alarmList = new ArrayList<>(alarmsPerEvent.getValue().size());
-                for (Alarm alarm : alarmsPerEvent.getValue()) {
-                    alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
-                    alarm.setTimestamp(System.currentTimeMillis());
-                    //add to list
-                    alarmList.add(alarm);
-                }
-                //add to inner map
-                alarmsByUser.put(I(dstUsrId), alarmList);
-                alarmsByUserByEventId.put(dstEventMapping.get(alarmsPerEvent.getKey()).getId(), alarmsByUser);
+            Event dstEvent = dstEventMapping.get(alarmsPerEvent.getKey());
+            if (null == dstEvent) {
+                continue; // skip alarms of events that weren't copied
+            }
+
+            alarmsByUser = new HashMap<>(1);
+            alarmList = new ArrayList<>(alarmsPerEvent.getValue().size());
+            for (Alarm alarm : alarmsPerEvent.getValue()) {
+                alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
+                alarm.setTimestamp(System.currentTimeMillis());
+                //add to list
+                alarmList.add(alarm);
+            }
+            //add to inner map
+            alarmsByUser.put(I(dstUsrId), alarmList);
+            alarmsByUserByEventId.put(dstEvent.getId(), alarmsByUser);
         }
         return alarmsByUserByEventId;
     }

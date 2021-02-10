@@ -58,7 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -92,7 +92,7 @@ public class ChangeOrganizerAction extends ChronosAction {
 
     /**
      * Initializes a new {@link ChangeOrganizerAction}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public ChangeOrganizerAction(ServiceLookup services) {

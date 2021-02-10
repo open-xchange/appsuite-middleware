@@ -4,6 +4,8 @@
     tags:
       - Mailfilter
     summary: Gets the configuration of the mail filter backend.
+    security: 
+        - session: []    
     description: >
       A mail filter can have different rules each containing one command. A
       command has a test condition and actions
@@ -22,7 +24,6 @@
 
       to the client.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: username
         description: >-

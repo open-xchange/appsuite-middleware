@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
@@ -520,6 +521,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         newRequest.setNotifyPermissionEntities(Transport.MAIL);
         NewInfostoreResponse newResponse = client.execute(newRequest);
+        assertFalse(newResponse.getErrorMessage(), newResponse.hasError());
         String id = newResponse.getID();
         metadata.setId(id);
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
@@ -871,7 +873,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @return The message, or <code>null</code> if not found
      */
     protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
-        return discoverInvitationMessage(client, emailAddress, 5000L);
+        return discoverInvitationMessage(client, emailAddress, 10000L);
     }
 
     /**
@@ -955,6 +957,12 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      */
     protected String discoverInvitationLink(AJAXClient client, String emailAddress) throws Exception {
         Message message = discoverInvitationMessage(client, emailAddress);
+        if (null != message) {
+            return message.getHeaders().get("X-Open-Xchange-Share-URL");
+        }
+        // Wait another 5 seconds for the mail to arrive
+        Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        message = discoverInvitationMessage(client, emailAddress);
         if (null != message) {
             return message.getHeaders().get("X-Open-Xchange-Share-URL");
         }

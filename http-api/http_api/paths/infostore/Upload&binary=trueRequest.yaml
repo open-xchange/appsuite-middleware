@@ -4,10 +4,11 @@
     tags:
       - Infostore
     summary: Creates or updates an infoitem.
+    security: 
+        - session: []    
     description: |
       Creates or updates an infoitem with a file.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder_id
         description: The folder id.

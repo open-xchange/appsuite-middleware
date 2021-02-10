@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenID Connect implementation
 Bundle-SymbolicName: com.openexchange.oidc.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -10,6 +10,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.google.common.base,
  com.google.common.collect,
  com.hazelcast.core,
+ com.hazelcast.map,
  com.hazelcast.nio.serialization,
  com.nimbusds.jose,
  com.nimbusds.jose.proc,
@@ -52,8 +53,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.nimbusds.oauth2.sdk.http.send,
  com.openexchange.oidc,
  com.openexchange.oidc.state,
- com.openexchange.oidc.tools,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
  com.openexchange.server.services,
@@ -133,3 +134,4 @@ Import-Package: com.fasterxml.jackson.core,
 Export-Package: com.openexchange.oidc.spi,
  com.openexchange.oidc.tools
 Bundle-Activator: com.openexchange.oidc.osgi.OIDCActivator
+Automatic-Module-Name: com.openexchange.oidc.impl

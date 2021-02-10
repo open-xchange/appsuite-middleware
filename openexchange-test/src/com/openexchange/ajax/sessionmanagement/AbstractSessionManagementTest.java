@@ -62,6 +62,7 @@ import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
  */
 public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
+    @SuppressWarnings("hiding")
     protected ApiClient apiClient2;
 
     private SessionmanagementApi api;
@@ -72,10 +73,10 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
         // Remove all other sessions to make sure tests run independently
         api = new SessionmanagementApi(apiClient);
-        AllSessionsResponse all = api.all(apiClient.getSession());
+        AllSessionsResponse all = api.all();
         int size = all.getData().size();
-        api.clear(apiClient.getSession());
-        all = api.all(apiClient.getSession());
+        api.clear();
+        all = api.all();
         System.out.println("Cleared " + all.getData().size() + " out of " + size + " sessions for the " + this.getClass().getSimpleName() + " test.");
 
         // For the same user

@@ -60,12 +60,29 @@ import com.openexchange.admin.rmi.dataobjects.UserProperty;
  */
 public class OXUserPropertySorter implements Comparator<UserProperty> {
 
+    private static final OXUserPropertySorter INSTANCE = new OXUserPropertySorter();
+
     /**
+     * Gets the comparator instance.
      *
-     * {@inheritDoc}
+     * @return The instance
      */
+    public static OXUserPropertySorter getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link OXUserPropertySorter}.
+     */
+    private OXUserPropertySorter() {
+        super();
+    }
+
     @Override
     public int compare(UserProperty userProperty1, UserProperty userProperty2) {
         return userProperty1.getName().compareToIgnoreCase(userProperty2.getName());
     }
+
 }

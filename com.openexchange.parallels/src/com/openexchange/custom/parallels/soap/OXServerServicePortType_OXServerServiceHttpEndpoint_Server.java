@@ -12,13 +12,14 @@ import javax.xml.ws.Endpoint;
  
 public class OXServerServicePortType_OXServerServiceHttpEndpoint_Server{
 
-    protected OXServerServicePortType_OXServerServiceHttpEndpoint_Server() throws java.lang.Exception {
+    protected OXServerServicePortType_OXServerServiceHttpEndpoint_Server() {
         System.out.println("Starting Server");
         Object implementor = new OXServerServicePortTypeImpl();
         String address = "http://46.137.100.169/servlet/axis2/services/OXServerService.OXServerServiceHttpEndpoint/";
         Endpoint.publish(address, implementor);
     }
     
+    @SuppressWarnings("unused")
     public static void main(String args[]) throws java.lang.Exception { 
         new OXServerServicePortType_OXServerServiceHttpEndpoint_Server();
         System.out.println("Server ready..."); 

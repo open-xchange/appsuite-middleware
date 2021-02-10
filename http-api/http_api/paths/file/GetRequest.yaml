@@ -4,8 +4,9 @@
     tags:
       - File
     summary: Requests a formerly uploaded file.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the uploaded file.

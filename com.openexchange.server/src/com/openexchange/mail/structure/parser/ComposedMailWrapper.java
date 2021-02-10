@@ -90,13 +90,13 @@ final class ComposedMailWrapper extends ComposedMailMessage {
      * @param session The session
      * @param ctx The context
      */
-    public ComposedMailWrapper(final MailMessage mail, final Session session, final Context ctx) {
+    public ComposedMailWrapper(MailMessage mail, Session session, Context ctx) {
         super(session, ctx);
         this.mail = mail;
     }
 
     @Override
-    public void setHeader(final String name, final String value) {
+    public void setHeader(String name, String value) {
         mail.setHeader(name, value);
     }
 
@@ -116,7 +116,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setMessageId(final String messageId) {
+    public void setMessageId(String messageId) {
         mail.setMessageId(messageId);
     }
 
@@ -141,12 +141,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setReferences(final String sReferences) {
+    public void setReferences(String sReferences) {
         mail.setReferences(sReferences);
     }
 
     @Override
-    public void setReferences(final String[] references) {
+    public void setReferences(String[] references) {
         mail.setReferences(references);
     }
 
@@ -156,7 +156,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         return mail.equals(obj);
     }
 
@@ -176,12 +176,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         mail.setContentType(contentType);
     }
 
     @Override
-    public void setContentType(final String contentType) throws OXException {
+    public void setContentType(String contentType) throws OXException {
         mail.setContentType(contentType);
     }
 
@@ -201,7 +201,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentDisposition(final String disposition) throws OXException {
+    public void setContentDisposition(String disposition) throws OXException {
         mail.setContentDisposition(disposition);
     }
 
@@ -211,7 +211,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentDisposition(final ContentDisposition disposition) {
+    public void setContentDisposition(ContentDisposition disposition) {
         mail.setContentDisposition(disposition);
     }
 
@@ -231,17 +231,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         mail.setFileName(fileName);
     }
 
     @Override
-    public void addHeader(final String name, final String value) {
+    public void addHeader(String name, String value) {
         mail.addHeader(name, value);
     }
 
     @Override
-    public void addHeaders(final HeaderCollection headers) {
+    public void addHeaders(HeaderCollection headers) {
         mail.addHeaders(headers);
     }
 
@@ -266,32 +266,32 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public boolean containsHeader(final String name) {
+    public boolean containsHeader(String name) {
         return mail.containsHeader(name);
     }
 
     @Override
-    public String[] getHeader(final String name) {
+    public String[] getHeader(String name) {
         return mail.getHeader(name);
     }
 
     @Override
-    public void addFrom(final InternetAddress addr) {
+    public void addFrom(InternetAddress addr) {
         mail.addFrom(addr);
     }
 
     @Override
-    public String getFirstHeader(final String name) {
+    public String getFirstHeader(String name) {
         return mail.getFirstHeader(name);
     }
 
     @Override
-    public void addFrom(final InternetAddress[] addrs) {
+    public void addFrom(InternetAddress[] addrs) {
         mail.addFrom(addrs);
     }
 
     @Override
-    public String getHeader(final String name, final String delimiter) {
+    public String getHeader(String name, String delimiter) {
         return mail.getHeader(name, delimiter);
     }
 
@@ -306,7 +306,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public String getHeader(final String name, final char delimiter) {
+    public String getHeader(String name, char delimiter) {
         return mail.getHeader(name, delimiter);
     }
 
@@ -321,17 +321,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void addTo(final InternetAddress addr) {
+    public void addTo(InternetAddress addr) {
         mail.addTo(addr);
     }
 
     @Override
-    public Iterator<Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+    public Iterator<Entry<String, String>> getNonMatchingHeaders(String[] nonMatchingHeaders) {
         return mail.getNonMatchingHeaders(nonMatchingHeaders);
     }
 
     @Override
-    public void addTo(final InternetAddress[] addrs) {
+    public void addTo(InternetAddress[] addrs) {
         mail.addTo(addrs);
     }
 
@@ -341,7 +341,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public Iterator<Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+    public Iterator<Entry<String, String>> getMatchingHeaders(String[] matchingHeaders) {
         return mail.getMatchingHeaders(matchingHeaders);
     }
 
@@ -356,17 +356,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void removeHeader(final String name) {
+    public void removeHeader(String name) {
         mail.removeHeader(name);
     }
 
     @Override
-    public boolean hasHeaders(final String... names) {
+    public boolean hasHeaders(String... names) {
         return mail.hasHeaders(names);
     }
 
     @Override
-    public void addCc(final InternetAddress addr) {
+    public void addCc(InternetAddress addr) {
         mail.addCc(addr);
     }
 
@@ -381,7 +381,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void addCc(final InternetAddress[] addrs) {
+    public void addCc(InternetAddress[] addrs) {
         mail.addCc(addrs);
     }
 
@@ -391,17 +391,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setSize(final long size) {
+    public void setSize(long size) {
         mail.setSize(size);
     }
 
     @Override
-    public void addReplyTo(final InternetAddress addr) {
+    public void addReplyTo(InternetAddress addr) {
         mail.addReplyTo(addr);
     }
 
     @Override
-    public void addReplyTo(final InternetAddress[] addrs) {
+    public void addReplyTo(InternetAddress[] addrs) {
         mail.addReplyTo(addrs);
     }
 
@@ -456,12 +456,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setContentId(final String contentId) {
+    public void setContentId(String contentId) {
         mail.setContentId(contentId);
     }
 
     @Override
-    public void addBcc(final InternetAddress addr) {
+    public void addBcc(InternetAddress addr) {
         mail.addBcc(addr);
     }
 
@@ -481,12 +481,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void addBcc(final InternetAddress[] addrs) {
+    public void addBcc(InternetAddress[] addrs) {
         mail.addBcc(addrs);
     }
 
     @Override
-    public void setSequenceId(final String sequenceId) {
+    public void setSequenceId(String sequenceId) {
         mail.setSequenceId(sequenceId);
     }
 
@@ -526,7 +526,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setMsgref(final MailPath msgref) {
+    public void setMsgref(MailPath msgref) {
         mail.setMsgref(msgref);
     }
 
@@ -611,7 +611,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setFlags(final int flags) {
+    public void setFlags(int flags) {
         mail.setFlags(flags);
     }
 
@@ -621,12 +621,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setFlag(final int flag, final boolean enable) throws OXException {
+    public void setFlag(int flag, boolean enable) throws OXException {
         mail.setFlag(flag, enable);
     }
 
     @Override
-    public MailPart getEnclosedMailPart(final int index) throws OXException {
+    public MailPart getEnclosedMailPart(int index) throws OXException {
         return mail.getEnclosedMailPart(index);
     }
 
@@ -651,12 +651,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setPrevSeen(final boolean prevSeen) {
+    public void setPrevSeen(boolean prevSeen) {
         mail.setPrevSeen(prevSeen);
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws OXException {
+    public void writeTo(OutputStream out) throws OXException {
         mail.writeTo(out);
     }
 
@@ -676,7 +676,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setThreadLevel(final int threadLevel) {
+    public void setThreadLevel(int threadLevel) {
         mail.setThreadLevel(threadLevel);
     }
 
@@ -706,7 +706,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         mail.setSubject(subject);
     }
 
@@ -736,7 +736,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setSentDate(final Date sentDate) {
+    public void setSentDate(Date sentDate) {
         mail.setSentDate(sentDate);
     }
 
@@ -761,17 +761,17 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         mail.setReceivedDate(receivedDate);
     }
 
     @Override
-    public void addUserFlag(final String userFlag) {
+    public void addUserFlag(String userFlag) {
         mail.addUserFlag(userFlag);
     }
 
     @Override
-    public void addUserFlags(final String[] userFlags) {
+    public void addUserFlags(String[] userFlags) {
         mail.addUserFlags(userFlags);
     }
 
@@ -806,7 +806,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setColorLabel(final int colorLabel) {
+    public void setColorLabel(int colorLabel) {
         mail.setColorLabel(colorLabel);
     }
 
@@ -826,7 +826,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setPriority(final int priority) {
+    public void setPriority(int priority) {
         mail.setPriority(priority);
     }
 
@@ -846,7 +846,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setDispositionNotification(final InternetAddress dispositionNotification) {
+    public void setDispositionNotification(InternetAddress dispositionNotification) {
         mail.setDispositionNotification(dispositionNotification);
     }
 
@@ -866,7 +866,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setFolder(final String folder) {
+    public void setFolder(String folder) {
         mail.setFolder(folder);
     }
 
@@ -886,7 +886,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setAccountId(final int accountId) {
+    public void setAccountId(int accountId) {
         mail.setAccountId(accountId);
     }
 
@@ -906,7 +906,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setAccountName(final String accountName) {
+    public void setAccountName(String accountName) {
         mail.setAccountName(accountName);
     }
 
@@ -931,7 +931,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setHasAttachment(final boolean hasAttachment) {
+    public void setHasAttachment(boolean hasAttachment) {
         mail.setHasAttachment(hasAttachment);
     }
 
@@ -976,7 +976,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setAppendVCard(final boolean appendVCard) {
+    public void setAppendVCard(boolean appendVCard) {
         mail.setAppendVCard(appendVCard);
     }
 
@@ -996,7 +996,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setRecentCount(final int recentCount) {
+    public void setRecentCount(int recentCount) {
         mail.setRecentCount(recentCount);
     }
 
@@ -1011,7 +1011,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setMailId(final String id) {
+    public void setMailId(String id) {
         mail.setMailId(id);
     }
 
@@ -1021,7 +1021,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setUnreadMessages(final int unreadMessages) {
+    public void setUnreadMessages(int unreadMessages) {
         mail.setUnreadMessages(unreadMessages);
     }
 
@@ -1221,7 +1221,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public void setBodyPart(final TextBodyMailPart mailPart) {
+    public void setBodyPart(TextBodyMailPart mailPart) {
         throw new UnsupportedOperationException();
     }
 
@@ -1231,12 +1231,12 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
-    public MailPart removeEnclosedPart(final int index) {
+    public MailPart removeEnclosedPart(int index) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addEnclosedPart(final MailPart part) {
+    public void addEnclosedPart(MailPart part) {
         throw new UnsupportedOperationException();
     }
 

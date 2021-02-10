@@ -54,7 +54,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
@@ -100,12 +99,12 @@ public class OAuthMailNotificationService {
             ComposedMailMessage mail = buildNewExternalApplicationMail(serverSession, client, request);
             MailTransport transport = transportProvider.createNewNoReplyTransport(serverSession.getContextId());
             transport.sendMailMessage(mail, ComposeType.NEW, mail.getTo());
-        } catch (UnsupportedEncodingException | MessagingException | URISyntaxException e) {
+        } catch (UnsupportedEncodingException | URISyntaxException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
 
-    private ComposedMailMessage buildNewExternalApplicationMail(ServerSession session, Client client, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, URISyntaxException {
+    private ComposedMailMessage buildNewExternalApplicationMail(ServerSession session, Client client, HttpServletRequest request) throws OXException, UnsupportedEncodingException, URISyntaxException {
         User user = session.getUser();
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
@@ -121,7 +120,7 @@ public class OAuthMailNotificationService {
         appConnected = String.format(appConnected, getLogin(session, user), client.getName());
 
         // text substitutions
-        Map<String, Object> vars = new HashMap<String, Object>();
+        Map<String, Object> vars = new HashMap<>();
         vars.put("salutation", salutation);
         vars.put("appConnected", appConnected);
         vars.put("revokeAccess", translator.translate(NotificationStrings.REVOKE_ACCESS));

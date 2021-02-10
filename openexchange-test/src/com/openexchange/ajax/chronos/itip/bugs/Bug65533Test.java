@@ -55,10 +55,16 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.parseICalAttachment;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -152,7 +158,7 @@ public class Bug65533Test extends AbstractITipTest {
         tmpFile = File.createTempFile("test", ".tmp");
         writer = new FileWriter(tmpFile);
         writer.write(iMip);
-        MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(apiClientC2.getSession(), tmpFile, null, null);
+        MailDestinationResponse response = new MailApi(apiClientC2).sendOrSaveMail(tmpFile, null, null);
         assertNull(response.getError(), response.getError());
 
         /*
@@ -173,7 +179,7 @@ public class Bug65533Test extends AbstractITipTest {
         /*
          * check event in calendar
          */
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(eventData.getId(), eventData.getFolder(), eventData.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         eventData = eventResponse.getData();
         rememberForCleanup(eventData);
@@ -187,10 +193,9 @@ public class Bug65533Test extends AbstractITipTest {
         ChronosAttachment attachment = attachments.get(0);
         assertEquals("homer.jpg", attachment.getFilename());
         assertEquals("image/jpeg", attachment.getFmtType());
-        assertTrue(null != attachment.getSize());
-        assertTrue(attachment.getSize().longValue() >= 177103);
-        assertTrue(attachment.getSize().longValue() <= 177115);
-        byte[] attachmentData = chronosApi.getEventAttachment(apiClient.getSession(), eventData.getId(), eventData.getFolder(), attachment.getManagedId());
+        assertNotNull(attachment.getSize());
+        assertThat("Invalid attachment size", attachment.getSize(), is(both(greaterThanOrEqualTo(L(177103l))).and(lessThanOrEqualTo(L(177115l)))));
+        byte[] attachmentData = chronosApi.getEventAttachment(eventData.getId(), eventData.getFolder(), attachment.getManagedId());
         assertNotNull(attachmentData);
         /*
          * receive & analyze iMIP reply as user b, too

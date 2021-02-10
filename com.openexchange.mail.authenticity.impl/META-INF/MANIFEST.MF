@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Authentication Defaul Implementation Bundle
 Bundle-SymbolicName: com.openexchange.mail.authenticity.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.mail.authenticity.impl.osgi.MailAuthenticityActivator
@@ -67,3 +67,4 @@ Import-Package: ch.qos.logback.classic,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.mail.authenticity.impl

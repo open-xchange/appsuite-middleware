@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Monitoring
 Bundle-SymbolicName: com.openexchange.monitoring
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.annotation,
@@ -22,3 +22,4 @@ Export-Package: com.openexchange.monitoring,
  com.openexchange.monitoring.sockets,
  com.openexchange.monitoring.sockets.exceptions,
  com.openexchange.monitoring.sockets.failure
+Automatic-Module-Name: com.openexchange.monitoring

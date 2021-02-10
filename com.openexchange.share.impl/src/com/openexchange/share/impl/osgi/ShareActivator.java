@@ -56,6 +56,8 @@ import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.cluster.timer.ClusterTimerService;
@@ -81,6 +83,7 @@ import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.ModuleAdjuster;
@@ -98,9 +101,16 @@ import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
+import com.openexchange.share.impl.subscription.ContextInternalSubscriptionProvider;
+import com.openexchange.share.impl.subscription.ShareSubscriptionRegistryImpl;
+import com.openexchange.share.impl.xctx.XctxSessionCache;
+import com.openexchange.share.subscription.ShareSubscriptionProvider;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
+import com.openexchange.share.subscription.XctxSessionManager;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -123,12 +133,13 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class,
-            DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
-            ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
+        return new Class<?>[] { //@formatter:off
+            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class,
+            HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, 
+            ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, 
+            FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, 
+            CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class,
+            FolderSubscriptionHelper.class }; //@formatter:on
     }
 
     @Override
@@ -199,6 +210,18 @@ public class ShareActivator extends HousekeepingActivator {
             serviceProperties.put("RMI_NAME", ShareRMIServiceImpl.RMI_NAME);
             registerService(Remote.class, new ShareRMIServiceImpl(shareService), serviceProperties);
         }
+
+        ShareSubscriptionRegistryImpl linkService = new ShareSubscriptionRegistryImpl(context);
+        rememberTracker(linkService);
+        registerService(ShareSubscriptionRegistry.class, linkService);
+        ShareSubscriptionRegistryImpl shareSubscriptionRegistry = new ShareSubscriptionRegistryImpl(context);
+        rememberTracker(shareSubscriptionRegistry);
+        registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
+        registerService(ShareSubscriptionProvider.class, new ContextInternalSubscriptionProvider(this));
+        XctxSessionCache xctxSessionCache = new XctxSessionCache(this);
+        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
+            SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
+        registerService(XctxSessionManager.class, xctxSessionCache);
 
         trackService(ModuleSupport.class);
         trackService(IDBasedFileAccessFactory.class);

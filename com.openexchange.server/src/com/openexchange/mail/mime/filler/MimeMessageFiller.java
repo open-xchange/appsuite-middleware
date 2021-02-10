@@ -101,6 +101,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCodeSet;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
@@ -148,10 +149,12 @@ import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
@@ -207,7 +210,7 @@ public class MimeMessageFiller {
 
     protected final CompositionParameters compositionParameters;
 
-    public MimeMessageFiller(final CompositionParameters compositionParameters) {
+    public MimeMessageFiller(CompositionParameters compositionParameters) {
         super();
         discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -220,7 +223,7 @@ public class MimeMessageFiller {
      * @param session The session providing user data
      * @param ctx The context
      */
-    public MimeMessageFiller(final Session session, final Context ctx) {
+    public MimeMessageFiller(Session session, Context ctx) {
         this(session, ctx, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx));
     }
 
@@ -231,7 +234,7 @@ public class MimeMessageFiller {
      * @param ctx The context
      * @param usm The user's mail settings
      */
-    public MimeMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
+    public MimeMessageFiller(Session session, Context ctx, UserSettingMail usm) {
         super();
         discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -255,7 +258,7 @@ public class MimeMessageFiller {
      * @param accountId The account identifier to set
      * @return This filler with account identifier set
      */
-    public MimeMessageFiller setAccountId(final int accountId) {
+    public MimeMessageFiller setAccountId(int accountId) {
         this.accountId = accountId;
         if (compositionParameters instanceof SessionCompositionParameters) {
             ((SessionCompositionParameters) compositionParameters).setAccountId(accountId);
@@ -304,7 +307,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
      */
-    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException, OXException {
+    public void setCommonHeaders(MimeMessage mimeMessage) throws MessagingException, OXException {
         /*
          * Set mailer
          */
@@ -378,7 +381,7 @@ public class MimeMessageFiller {
      * @param session The session
      * @throws MessagingException If an error occurs
      */
-    public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+    public static void addClientIPAddress(MimeMessage mimeMessage, Session session) throws MessagingException {
         IpAddressRenderer renderer = MailProperties.getInstance().getIpAddressRenderer();
         /*
          * Get IP from session
@@ -397,14 +400,15 @@ public class MimeMessageFiller {
 
     private static final Set<String> LOCAL_ADDRS = ImmutableSet.of("127.0.0.1", "localhost", "::1");
 
-    static boolean isLocalhost(final String localIp) {
+    static boolean isLocalhost(String localIp) {
         return LOCAL_ADDRS.contains(localIp);
     }
 
     private static final String[] SUPPRESS_HEADERS = {
         MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION,
         MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, HDR_X_MAILER, MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS,
-        MessageHeaders.HDR_X_OX_SECURITY, MessageHeaders.HDR_X_OX_META };
+        MessageHeaders.HDR_X_OX_SECURITY, MessageHeaders.HDR_X_OX_META, MessageHeaders.HDR_X_OX_CONTENT_TYPE,
+        MessageHeaders.HDR_X_OX_READ_RECEIPT, MessageHeaders.HDR_X_OX_COMPOSITION_SPACE_ID, MessageHeaders.HDR_X_OX_SHARED_FOLDER_REFERENCE };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -415,7 +419,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If headers cannot be set
      * @throws OXException If a mail error occurs
      */
-    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException, OXException {
+    public void setMessageHeaders(ComposedMailMessage mail, MimeMessage mimeMessage) throws MessagingException, OXException {
         /*
          * Set from/sender
          */
@@ -512,7 +516,7 @@ public class MimeMessageFiller {
         {
             final String[] userFlags = mail.getUserFlags();
             if (null != userFlags && userFlags.length > 0) {
-                for (final String userFlag : userFlags) {
+                for (String userFlag : userFlags) {
                     msgFlags.add(userFlag);
                 }
             }
@@ -546,7 +550,7 @@ public class MimeMessageFiller {
         /*
          * Headers
          */
-        for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
+        for (Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
             if (isCustomOrReplyHeader(name)) {
@@ -555,7 +559,7 @@ public class MimeMessageFiller {
         }
     }
 
-    private void setReplyTo(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException, MessagingException {
+    private void setReplyTo(ComposedMailMessage mail, MimeMessage mimeMessage) throws OXException, MessagingException {
         if (compositionParameters.setReplyTo()) {
             /*
              * Reply-To
@@ -592,7 +596,7 @@ public class MimeMessageFiller {
      * @param headerName The header name to check
      * @return <code>true</code> if specified header name is a custom OR reply-relevant header; otherwise <code>false</code>
      */
-    public static boolean isCustomOrReplyHeader(final String headerName) {
+    public static boolean isCustomOrReplyHeader(String headerName) {
         if (isEmpty(headerName)) {
             return false;
         }
@@ -619,7 +623,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If setting the reply headers fails
      */
-    public static void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage) throws MessagingException {
+    public static void setReplyHeaders(MailMessage referencedMail, MimeMessage mimeMessage) throws MessagingException {
         if (null == referencedMail) {
             /*
              * Obviously referenced mail does no more exist; cancel setting reply headers Message-Id, In-Reply-To, and References.
@@ -679,7 +683,7 @@ public class MimeMessageFiller {
      * @return The account identifier
      * @throws OXException If address cannot be resolved
      */
-    public static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
+    public static int resolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport, boolean checkFrom) throws OXException {
         // Resolve "From" to proper mail account to select right transport server
         int accountId = doResolveFrom2Account(session, from, checkTransportSupport);
 
@@ -690,7 +694,7 @@ public class MimeMessageFiller {
                     final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                     final User user = session.getUser();
                     final String[] aliases = user.getAliases();
-                    for (final String alias : aliases) {
+                    for (String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
                     if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
@@ -761,7 +765,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws OXException If a mail error occurs
      */
-    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws OXException {
+    public void setSendHeaders(ComposedMailMessage mail, MimeMessage mimeMessage) throws OXException {
         try {
             /*
              * Set the Reply-To header for future replies to this new message
@@ -803,7 +807,7 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, ComposeType type) throws MessagingException, OXException, IOException {
+    public void fillMailBody(ComposedMailMessage mail, MimeMessage mimeMessage, ComposeType type) throws MessagingException, OXException, IOException {
         /*
          * Adopt Content-Type to ComposeType if necessary
          */
@@ -1205,7 +1209,7 @@ public class MimeMessageFiller {
         return primaryMultipart;
     }
 
-    private boolean isMessage(final MailPart enclosedMailPart) {
+    private boolean isMessage(MailPart enclosedMailPart) {
         ContentType contentType = enclosedMailPart.getContentType();
         if (contentType.startsWith("message/rfc822")) {
             return true;
@@ -1227,7 +1231,7 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart) throws OXException, MessagingException {
+    protected final Multipart createMultipartAlternative(ComposedMailMessage mail, String mailBody, boolean embeddedImages, Map<String, SourcedImage> images, TextBodyMailPart textBodyPart) throws OXException, MessagingException {
         return createMultipartAlternative(mail, mailBody, embeddedImages, images, textBodyPart, null);
     }
 
@@ -1245,7 +1249,7 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages, final Map<String, SourcedImage> images, final TextBodyMailPart textBodyPart, final ComposeType type) throws OXException, MessagingException {
+    protected final Multipart createMultipartAlternative(ComposedMailMessage mail, String mailBody, boolean embeddedImages, Map<String, SourcedImage> images, TextBodyMailPart textBodyPart, ComposeType type) throws OXException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1308,7 +1312,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a mail error occurs
      */
-    protected Multipart createMultipartRelated(final ComposedMailMessage mail, final String mailBody, final Map<String, SourcedImage> images, final String[] htmlContent) throws OXException, MessagingException {
+    protected Multipart createMultipartRelated(ComposedMailMessage mail, String mailBody, Map<String, SourcedImage> images, String[] htmlContent) throws OXException, MessagingException {
         /*
          * Create "related" multipart
          */
@@ -1331,7 +1335,7 @@ public class MimeMessageFiller {
          */
         final List<String> cidList = MimeMessageUtility.getContentIDs(wellFormedHTMLContent);
         final StringBuilder tmp = new StringBuilder(32);
-        NextImg: for (final String cid : cidList) {
+        NextImg: for (String cid : cidList) {
             final MimeBodyPart relatedImageBodyPart;
             final SourcedImage image = images.get(cid);
             if (null == image) {
@@ -1548,7 +1552,7 @@ public class MimeMessageFiller {
         return false;
     }
 
-    protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
+    protected void addNestedMessage(MailPart mailPart, Boolean inline, Multipart primaryMultipart, StringBuilder sb) throws OXException, MessagingException {
         ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
         try {
             String encoding = mailPart.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
@@ -1597,7 +1601,7 @@ public class MimeMessageFiller {
         }
     }
 
-    private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException, OXException {
+    private final void addNestedMessage(Multipart mp, DataHandler dataHandler, String filename, boolean inline) throws MessagingException, OXException {
         /*
          * Create a body part for original message
          */
@@ -1647,7 +1651,7 @@ public class MimeMessageFiller {
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
      */
-    // protected final BodyPart createTextBodyPart(final String content, final String charset, final boolean appendHref, final boolean
+    // protected final BodyPart createTextBodyPart(String content, String charset, boolean appendHref, boolean
     // isHtml) throws MessagingException {
     // return createTextBodyPart(content, charset, appendHref, isHtml, null);
     // }
@@ -1665,7 +1669,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
+    protected final BodyPart createTextBodyPart(String[] contents, String charset, boolean appendHref, boolean isHtml, ComposeType type) throws MessagingException {
         /*
          * Convert HTML content to regular text. First: Create a body part for text content
          */
@@ -1721,7 +1725,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
+    protected final BodyPart createHtmlBodyPart(String wellFormedHTMLContent, String charset) throws MessagingException, OXException {
         try {
             final String contentType = new StringBuilder("text/html; charset=").append(MimeUtility.quote(charset, HeaderTokenizer.MIME)).toString();
             final MimeBodyPart html = new MimeBodyPart();
@@ -1751,7 +1755,7 @@ public class MimeMessageFiller {
      * @param considerAlt Whether the <code>"alt"</code> attribute of look-up &lt;img&gt; tag shall be maintained if present
      * @return the replaced HTML content
      */
-    protected final static String dropImages(final String htmlContent, final boolean considerAlt) {
+    protected final static String dropImages(String htmlContent, boolean considerAlt) {
         final Matcher m = PATTERN_IMG.matcher(htmlContent);
         if (!m.find()) {
             return htmlContent;
@@ -1779,7 +1783,7 @@ public class MimeMessageFiller {
 
     private static final Pattern PATTERN_SRC = MimeMessageUtility.PATTERN_SRC;
 
-    private static String blankSrc(final String imageTag) {
+    private static String blankSrc(String imageTag) {
         return MimeMessageUtility.blankSrc(imageTag);
     }
 
@@ -1973,11 +1977,18 @@ public class MimeMessageFiller {
         return sb.toString();
     }
 
+    private static final OXExceptionCodeSet IGNORABLE_CODES = new OXExceptionCodeSet(
+        MimeMailExceptionCode.IMAGE_ATTACHMENTS_UNSUPPORTED,
+        MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND,
+        DataExceptionCodes.ERROR,
+        MailExceptionCode.MAIL_NOT_FOUND,
+        MailExceptionCode.ATTACHMENT_NOT_FOUND,
+        SnippetExceptionCodes.SNIPPET_NOT_FOUND,
+        SnippetExceptionCodes.ATTACHMENT_NOT_FOUND,
+        MailAccountExceptionCodes.NOT_FOUND);
+
     private static boolean isIgnorableException(OXException e) {
-        if (MimeMailExceptionCode.IMAGE_ATTACHMENTS_UNSUPPORTED.equals(e) || MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || DataExceptionCodes.ERROR.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
-            return true;
-        }
-        return false;
+        return IGNORABLE_CODES.contains(e) || isFolderNotFound(e);
     }
 
     private static String urlDecode(String s) {
@@ -1998,7 +2009,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
-    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final Multipart mp) throws MessagingException, OXException {
+    private final static String processLocalImage(ImageProvider imageProvider, String id, boolean appendBodyPart, Multipart mp) throws MessagingException, OXException {
         /*
          * Determine filename
          */
@@ -2075,7 +2086,7 @@ public class MimeMessageFiller {
      * @return The removed image attachment
      * @throws OXException If a mail error occurs
      */
-    protected final static MailPart getAndRemoveImageAttachment(final String cid, final ComposedMailMessage mail) throws OXException {
+    protected final static MailPart getAndRemoveImageAttachment(String cid, ComposedMailMessage mail) throws OXException {
         final int size = mail.getEnclosedCount();
         for (int i = 0; i < size; i++) {
             final MailPart enclosedPart = mail.getEnclosedMailPart(i);
@@ -2086,7 +2097,7 @@ public class MimeMessageFiller {
         return null;
     }
 
-    private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size) throws OXException {
+    private static final boolean hasOnlyReferencedMailAttachments(ComposedMailMessage mail, int size) throws OXException {
         for (int i = 0; i < size; i++) {
             final MailPart part = mail.getEnclosedMailPart(i);
             if (part instanceof ComposedMailPart) {
@@ -2098,7 +2109,7 @@ public class MimeMessageFiller {
         return true;
     }
 
-    private static String[] toArray(final String... contents) {
+    private static String[] toArray(String... contents) {
         if (null == contents) {
             return new String[0];
         }
@@ -2244,7 +2255,7 @@ public class MimeMessageFiller {
         }
     } // End of ImageDataImageProvider
 
-    private static boolean isFolderNotFound(final OXException e) {
+    private static boolean isFolderNotFound(OXException e) {
         if (null == e) {
             return false;
         }

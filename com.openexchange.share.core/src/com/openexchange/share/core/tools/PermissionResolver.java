@@ -66,6 +66,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -75,7 +77,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
@@ -144,8 +145,11 @@ public class PermissionResolver {
      * @param guestID The guest entity to get the share for
      * @return The share, or <code>null</code> if not found
      */
-    public ShareInfo getShare(FolderObject folder, int guestID) {
-        return getLink(folder.getModule(), String.valueOf(folder.getObjectID()), null, guestID);
+    public ShareInfo getShare(Folder folder, int guestID) {
+        if (null == folder.getContentType()) {
+            throw new UnsupportedOperationException("no content type available");
+        }
+        return getLink(folder.getContentType().getModule(), folder.getID(), null, guestID);
     }
 
     /**
@@ -332,21 +336,21 @@ public class PermissionResolver {
      *
      * @param folders The folders to cache the permission entities for
      */
-    public void cacheFolderPermissionEntities(List<FolderObject> folders) {
+    public void cacheFolderPermissionEntities(List<Folder> folders) {
         /*
          * collect user- and group identifiers
          */
         Set<Integer> userIDs = new HashSet<Integer>();
         Set<Integer> groupIDs = new HashSet<Integer>();
-        for (FolderObject folder : folders) {
-            List<OCLPermission> oclPermissions = folder.getPermissions();
+        for (Folder folder : folders) {
+            Permission[] oclPermissions = folder.getPermissions();
             if (null == oclPermissions ) {
                 continue;
             }
-            for (OCLPermission oclPermission : oclPermissions) {
+            for (Permission oclPermission : oclPermissions) {
                 if (0 > oclPermission.getEntity()) {
-                    LOGGER.debug("Skipping invalid entity {} in permissions of folder {}.", I(oclPermission.getEntity()), I(folder.getObjectID()));
-                } else if (oclPermission.isGroupPermission()) {
+                    LOGGER.debug("Skipping invalid entity {} in permissions of folder {}.", I(oclPermission.getEntity()), folder.getID());
+                } else if (oclPermission.isGroup()) {
                     groupIDs.add(I(oclPermission.getEntity()));
                 } else {
                     userIDs.add(I(oclPermission.getEntity()));
@@ -356,10 +360,10 @@ public class PermissionResolver {
         boolean allEntitiesFound = cachePermissionEntities(userIDs, groupIDs);
         if (false == allEntitiesFound) {
             // Invalidate cache
-            for (FolderObject folder : folders) {
+            for (Folder folder : folders) {
                 try {
-                    FolderCacheManager.getInstance().removeFolderObject(folder.getObjectID(), session.getContext());
-                } catch (OXException e) {
+                    FolderCacheManager.getInstance().removeFolderObject(Integer.parseInt(folder.getID()), session.getContext());
+                } catch (NumberFormatException | OXException e) {
                     LOGGER.debug("Failed to drop folder cache entry", e);
                 }
             }

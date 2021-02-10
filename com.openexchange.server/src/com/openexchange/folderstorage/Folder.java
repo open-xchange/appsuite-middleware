@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link Folder} - A folder.
@@ -494,6 +495,14 @@ public interface Folder extends Serializable, Cloneable {
      * @param originPath The origin path to set
      */
     void setOriginPath(FolderPath originPath);
+
+    EntityInfo getCreatedFrom();
+
+    void setCreatedFrom(EntityInfo createdFrom);
+
+    EntityInfo getModifiedFrom();
+
+    void setModifiedFrom(EntityInfo modifiedFrom);
 
     /**
      * Creates and returns a copy of this object.

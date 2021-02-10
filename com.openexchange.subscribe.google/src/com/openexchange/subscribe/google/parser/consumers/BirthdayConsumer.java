@@ -59,7 +59,6 @@ import com.google.gdata.data.contacts.Birthday;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 
 /**
  * {@link BirthdayConsumer} - Parses the birthday of the contact
@@ -69,11 +68,15 @@ import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
  */
 public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+
+        static final Logger LOG = LoggerFactory.getLogger(BirthdayConsumer.class);
+    }
 
     /**
      * The birthday {@link Date} format
-     * 
+     *
      * @see <a href="https://developers.google.com/contacts/v3/reference#gcBirthday">gContact:birthday</a>
      */
     private final static String dateFormatPattern = "yyyy-MM-dd";
@@ -106,8 +109,8 @@ public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
         Birthday birthday = t.getBirthday();
         try {
             u.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday.getValue()));
-        } catch (ParseException e) {
-            LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
+        } catch (@SuppressWarnings("unused") ParseException e) {
+            LoggerHolder.LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
         }
     }
 }

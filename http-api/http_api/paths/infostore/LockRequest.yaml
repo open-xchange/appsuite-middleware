@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Locks an infoitem.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the infoitem that shall be locked.

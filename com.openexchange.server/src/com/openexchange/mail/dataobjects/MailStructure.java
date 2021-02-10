@@ -80,7 +80,7 @@ public final class MailStructure {
      *
      * @param contentType The content type
      */
-    public MailStructure(final ContentType contentType) {
+    public MailStructure(ContentType contentType) {
         super();
         this.contentType = new ContentType();
         this.contentType.setContentType(contentType);
@@ -101,7 +101,7 @@ public final class MailStructure {
      *
      * @param contentType The content type
      */
-    public void setContentType(final ContentType contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType.setContentType(contentType);
     }
 
@@ -110,7 +110,7 @@ public final class MailStructure {
      *
      * @param mailStructure The sub-structure to add
      */
-    public void addSubStructure(final MailStructure mailStructure) {
+    public void addSubStructure(MailStructure mailStructure) {
         subStructures.add(mailStructure);
     }
 
@@ -130,7 +130,7 @@ public final class MailStructure {
      * @return The corresponding mail structure
      * @throws OXException If a mail error occurs
      */
-    public static MailStructure getMailStructure(final MailMessage mail) throws OXException {
+    public static MailStructure getMailStructure(MailMessage mail) throws OXException {
         return getMailStructure0(mail);
     }
 
@@ -149,7 +149,7 @@ public final class MailStructure {
         return sb.toString();
     }
 
-    private static MailStructure getMailStructure0(final MailPart part) throws OXException {
+    private static MailStructure getMailStructure0(MailPart part) throws OXException {
         final MailStructure retval;
         final ContentType ct = part.getContentType();
         if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {

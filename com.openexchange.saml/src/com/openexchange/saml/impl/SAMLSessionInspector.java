@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.impl;
 
+import static com.openexchange.sessiond.ExpirationReason.TIMED_OUT;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -88,7 +89,9 @@ public class SAMLSessionInspector implements SessionInspectorService {
                 long notOnOrAfter = Long.parseLong((String) parameter);
                 if (System.currentTimeMillis() >= notOnOrAfter) {
                     sessiondService.removeSession(session.getSessionID());
-                    throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                    OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                    oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, TIMED_OUT.getIdentifier());
+                    throw oxe;
                 }
             } catch (NumberFormatException e) {
                 LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, parameter, e);

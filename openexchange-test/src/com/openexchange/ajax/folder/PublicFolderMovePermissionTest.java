@@ -50,6 +50,8 @@
 package com.openexchange.ajax.folder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -137,7 +139,9 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
         updateReq.setIgnorePermission(true);
-        client.execute(updateReq);
+        InsertResponse response = client.execute(updateReq);
+        assertNotNull("No folder id in update response", response.getData());
+        assertNull("Update request ended with exception", response.getException());
 
         GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
         GetResponse parentResp = client.execute(parentGet);
@@ -170,7 +174,9 @@ public class PublicFolderMovePermissionTest extends AbstractAJAXSession {
         toMove.setParentFolderID(folder.getObjectID());
         UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toMove);
         updateReq.setIgnorePermission(true);
-        client.execute(updateReq);
+        InsertResponse response = client.execute(updateReq);
+        assertNotNull("No folder id in update response", response.getData());
+        assertNull("Update request ended with exception", response.getException());
 
         GetRequest parentGet = new GetRequest(EnumAPI.OX_NEW, folder.getObjectID());
         GetResponse parentResp = client.execute(parentGet);

@@ -70,8 +70,8 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentPostResponse;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
-import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeResponseMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
@@ -100,31 +100,18 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     protected File attachment;
     protected File attachment2;
     protected String testMailDir;
-    protected File mailWithAttachmentFile;
     protected final List<MailDestinationData> IMPORTED_EMAILS = new ArrayList<>();
-    protected Long timestamp;
     protected FoldersApi foldersApi;
-    protected String folderId;
-    protected MailDestinationData mailWithAttachment;
 
-    private final String fileName;
-    
+    private String testFolderId = null;
+
     private static final String FOLDER = "default0%2FINBOX";
+
     /**
      * Initializes a new {@link AbstractMailComposeTest}.
      */
     public AbstractMailComposeTest() {
-        this(null);
-    }
-
-    /**
-     * Initializes a new {@link AbstractMailComposeTest}.
-     * 
-     * @param fileName The file name of the mail to upload
-     */
-    public AbstractMailComposeTest(String fileName) {
         super();
-        this.fileName = fileName;
     }
 
     @Override
@@ -135,29 +122,13 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         mailApi = new MailApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
         testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
-        mailWithAttachmentFile = new File(testMailDir, null == fileName ? "bug29865.eml" : fileName);
-
-        NewFolderBody body = new NewFolderBody();
-        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
-        folder.setModule("mail");
-        folder.setPermissions(null);
-        body.setFolder(folder);
-        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null, null);
-        folderId = createFolder.getData();
-
-        MailImportResponse response = mailApi.importMail(getApiClient().getSession(), folderId, mailWithAttachmentFile, null, Boolean.TRUE);
-        List<MailDestinationData> data = response.getData();
-        mailWithAttachment = data.get(0);
-        IMPORTED_EMAILS.add(mailWithAttachment);
-        timestamp = response.getTimestamp();
 
         attachment = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
 
-        MailComposeGetResponse allSpaces = api.getMailCompose(getSessionId(), null);
-        for (MailComposeMessageModel model : allSpaces.getData()) {
-            api.deleteMailComposeById(getSessionId(), model.getId());
+        MailComposeGetResponse allSpaces = api.getMailCompose(null);
+        for (MailComposeResponseMessageModel model : allSpaces.getData()) {
+            api.deleteMailComposeById(model.getId(), null);
         }
     }
 
@@ -166,7 +137,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         if (null != compositionSpaceIds && compositionSpaceIds.size() > 0) {
             for (String id : compositionSpaceIds) {
                 try {
-                    api.deleteMailComposeById(getSessionId(), id);
+                    api.deleteMailComposeById(id, null);
                 } catch (ApiException e) {
                     // Space was already deleted, ignore...
                 }
@@ -180,22 +151,57 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             mailListElement.setId(dest.getId());
             body.add(mailListElement);
         }
-        mailApi.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
-        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        mailApi.deleteMails(body, null, null, null);
+
+        if (testFolderId != null) {
+            foldersApi.deleteFolders(Collections.singletonList(testFolderId), "0", null, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        }
         super.tearDown();
     }
 
-    protected MailComposeMessageModel createNewCompositionSpace() throws Exception {
-        MailComposeResponse response = api.postMailCompose(getSessionId(), null, null, null);
+    protected MailDestinationData importTestMailWithAttachment() throws ApiException {
+        return importTestMail("mailcompose_mail-with-pdf-attachment.eml");
+    }
+
+    /**
+     *
+     * importTestMail
+     *
+     * @param fileName The file name of the mail to upload
+     * @return
+     * @throws ApiException
+     */
+    protected MailDestinationData importTestMail(String fileName) throws ApiException {
+        if (testFolderId == null) {
+            NewFolderBody body = new NewFolderBody();
+            NewFolderBodyFolder folder = new NewFolderBodyFolder();
+            folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
+            folder.setModule("mail");
+            folder.setPermissions(null);
+            body.setFolder(folder);
+            FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, body, "0", null, null, null);
+            testFolderId = createFolder.getData();
+        }
+
+        File emlFile = new File(testMailDir, fileName);
+        MailImportResponse response = mailApi.importMail(testFolderId, emlFile, null, Boolean.TRUE);
+        List<MailDestinationData> data = response.getData();
+        MailDestinationData mailWithAttachment = data.get(0);
+        IMPORTED_EMAILS.add(mailWithAttachment);
+        return mailWithAttachment;
+    }
+
+    protected MailComposeResponseMessageModel createNewCompositionSpace() throws Exception {
+        MailComposeResponse response = api.postMailCompose(null, null, null, null);
         assertTrue(response.getErrorDesc(), Strings.isEmpty(response.getError()));
-        MailComposeMessageModel data = response.getData();
+        MailComposeResponseMessageModel data = response.getData();
         compositionSpaceIds.add(data.getId());
         return data;
     }
 
     protected String getMailAddress() throws Exception {
         ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(getSessionId(), apiClient.getUserId()).getData();
+        ContactData data = contactsApi.getContactByUser(apiClient.getUserId()).getData();
         assertNotNull("No contact data for user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for user.", Strings.isEmpty(mailAddress));
@@ -204,7 +210,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     protected String getOtherMailAddress() throws Exception {
         ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(getSessionId(), I(getClient2().getValues().getUserId())).getData();
+        ContactData data = contactsApi.getContactByUser(I(getClient2().getValues().getUserId())).getData();
         assertNotNull("No contact data for other user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for other user.", Strings.isEmpty(mailAddress));

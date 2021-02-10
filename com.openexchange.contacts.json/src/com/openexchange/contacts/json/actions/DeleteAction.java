@@ -50,57 +50,78 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.contact.ContactID;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
-@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
-public class DeleteAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.WRITE)
+public class DeleteAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
-     * @param serviceLookup
+     *
+     * @param serviceLookup The service lookup to use
      */
     public DeleteAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        ServerSession session = request.getSession();
-        Date lastRead = new Date(request.getTimestamp());
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         if (request.getData() instanceof JSONObject) {
-            int[] deleteRequestData = request.getDeleteRequestData();
-            getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), lastRead);
+            deleteSingle(access, request);
         } else {
-            Map<String, List<String>> objectIDsPerFolder = request.getObjectIDsPerFolder();
-            if (null != objectIDsPerFolder && !objectIDsPerFolder.isEmpty()) {
-                ContactService contactService = getContactService();
-                for (Entry<String, List<String>> entry : objectIDsPerFolder.entrySet()) {
-                    String[] objectIDs = entry.getValue().toArray(new String[entry.getValue().size()]);
-                    contactService.deleteContacts(session, entry.getKey(), objectIDs, lastRead);
-                }
-            }
+            deleteMultiple(access, request);
         }
-        return new AJAXRequestResult(new JSONObject(0), lastRead, "json");
+        return new AJAXRequestResult(new JSONObject(0), new Date(request.getTimestamp()), "json");
     }
 
+    /**
+     * Deletes a single contact
+     *
+     * @param access The {@link IDBasedContactsAccess}
+     * @param request The {@link ContactRequest}
+     * @throws OXException if an error is occurred
+     */
+    private void deleteSingle(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        access.deleteContact(request.getContactID(), request.getTimestamp());
+    }
+
+    /**
+     * Deletes multiple contacts
+     *
+     * @param access The {@link IDBasedContactsAccess}
+     * @param request The {@link ContactRequest}
+     * @throws OXException if an error is occurred
+     */
+    private void deleteMultiple(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        Map<String, List<String>> objectIDsPerFolder = request.getObjectIDsPerFolder();
+        if (null == objectIDsPerFolder || objectIDsPerFolder.isEmpty()) {
+            return;
+        }
+
+        List<ContactID> ids = new LinkedList<>();
+        for (Entry<String, List<String>> entry : objectIDsPerFolder.entrySet()) {
+            for (String objectId : entry.getValue()) {
+                ids.add(getContactID(entry.getKey(), objectId));
+            }
+        }
+        access.deleteContacts(ids, request.getTimestamp());
+    }
 }

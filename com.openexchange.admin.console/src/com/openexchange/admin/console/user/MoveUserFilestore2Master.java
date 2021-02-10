@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.user;
 
 import com.openexchange.admin.console.AdminParser;
@@ -58,12 +59,12 @@ import com.openexchange.admin.rmi.dataobjects.User;
 public class MoveUserFilestore2Master extends UserFilestoreAbstraction {
 
     public static void main(String args[]) {
-        new MoveUserFilestore2Master(args);
+        new MoveUserFilestore2Master().execute(args);
     }
 
     // -----------------------------------------------------------------------------------------------
 
-    public MoveUserFilestore2Master(String[] args) {
+    public void execute(String[] args) {
 
         final AdminParser parser = new AdminParser("moveuserfilestore2master");
         setOptions(parser);

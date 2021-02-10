@@ -57,6 +57,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionScopedContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.event.SessiondEventListener;
+import com.openexchange.sessiond.impl.container.RandomTokenContainerImpl;
 
 /**
  * {@link SessiondSessionSpecificRetrievalService}
@@ -76,7 +77,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         if (lifecycle == null) {
             lifecycle = DEFAULT_LIFECYCLE;
         }
-        SessionScopedContainerImpl<T> newValue = new SessionScopedContainerImpl<T>(name, lifecycle, initial, cleanUp, this);
+        SessionScopedContainerImpl<T> newValue = new SessionScopedContainerImpl<T>(name, lifecycle, initial, cleanUp);
         SessionScopedContainerImpl<?> other = containers.putIfAbsent(name, newValue);
         if (other != null) {
             return (SessionScopedContainer<T>) other;

@@ -70,6 +70,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.TargetFolderSession;
@@ -177,16 +178,12 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-        if (session instanceof Map<?,?>) {
-            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
-            Session ses = (Session) userInfo.get(I(SESSION));
-            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
-        }
+        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
     }
 
     @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<>();
         Object sqlInterface = getFromSession(CONTACT_SERVICE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
         if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
@@ -250,7 +247,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public Object startSession(final TargetFolderDefinition target) {
-        final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
+        final Map<Integer, Object> userInfo = new HashMap<>();
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
         userInfo.put(I(CONTACT_SERVICE), contactService);
         userInfo.put(I(TARGET), target);
@@ -261,7 +258,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (session == null) {
             session = new TargetFolderSession(target);
         }
-        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
         userInfo.put(I(SESSION), session);
         return userInfo;
     }
@@ -290,6 +287,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
      * @param errors The optional errors
      * @return <code>true</code> if problematic data was corrected and the operation may be tried again, <code>false</code>, otherwise
      */
+    @SuppressWarnings("unused")
     private boolean handle(OXException e, Contact contact, Collection<OXException> errors) {
         if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
             try {

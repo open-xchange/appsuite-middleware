@@ -67,7 +67,7 @@ public abstract class FileActionTest extends FileTest {
     protected CollectingFileWriter writer = new CollectingFileWriter();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         action = createAction();
     }
 

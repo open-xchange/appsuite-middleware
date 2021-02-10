@@ -298,13 +298,11 @@ public class MobileConfigServlet extends HttpServlet {
         final String parameter = req.getHeader("Accept-Language");
         if (null == parameter) {
             return Locale.ENGLISH;
-        } else {
-            if (parameter.startsWith("de")) {
-                return Locale.GERMAN;
-            } else {
-                return Locale.ENGLISH;
-            }
         }
+        if (parameter.startsWith("de")) {
+            return Locale.GERMAN;
+        }
+        return Locale.ENGLISH;
     }
 
     private void errorOutput(final HttpServletRequest req, final HttpServletResponse resp, final String string) {
@@ -424,6 +422,13 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Prints the error
+     * 
+     * @param req The request
+     * @param resp The response
+     * @param string The error message to print
+     */
     private void printError(final HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
         resp.sendRedirect(Activator.ALIAS + "?error=" + Integer.toString(string.ordinal()));
     }

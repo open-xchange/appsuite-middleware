@@ -64,6 +64,7 @@ import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40369Test}
@@ -77,6 +78,7 @@ public class Bug40369Test extends ShareTest {
     private static final int NUM_THREADS = 20;
 
     @Test
+    @TryAgain
     public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {
         testCreateFolderLinkConcurrently(randomFolderAPI(), randomModule());
     }

@@ -343,7 +343,7 @@ public final class IMAPException extends OXException {
          */
         THREAD_SORT_PARSING_ERROR(IMAPCode.THREAD_SORT_PARSING_ERROR),
         /**
-         * A SQL error occurred: %1$s
+         * An SQL error occurred: %1$s
          */
         SQL_ERROR(IMAPCode.SQL_ERROR),
         /**
@@ -370,12 +370,16 @@ public final class IMAPException extends OXException {
          * Update of folder %1$s failed. Owner is required to keep administrative rights.
          */
         OWNER_MUST_BE_ADMIN(IMAPCode.OWNER_MUST_BE_ADMIN),
+        /**
+         * Too many messages requested (limit is %1$s). Please query a smaller range.
+         */
+        MAX_NUMBER_OF_MESSAGES_EXCEEDED(IMAPCode.MAX_NUMBER_OF_MESSAGES_EXCEEDED),
 
         ;
 
         private final IMAPCode imapCode;
 
-        private Code(final IMAPCode imapCode) {
+        private Code(IMAPCode imapCode) {
             this.imapCode = imapCode;
         }
 
@@ -404,7 +408,7 @@ public final class IMAPException extends OXException {
         }
 
         @Override
-        public boolean equals(final OXException e) {
+        public boolean equals(OXException e) {
             return OXExceptionFactory.getInstance().equals(this, e);
         }
 
@@ -423,7 +427,7 @@ public final class IMAPException extends OXException {
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
-        public OXException create(final Object... args) {
+        public OXException create(Object... args) {
             return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
         }
 
@@ -434,7 +438,7 @@ public final class IMAPException extends OXException {
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
-        public OXException create(final Throwable cause, final Object... args) {
+        public OXException create(Throwable cause, Object... args) {
             return OXExceptionFactory.getInstance().create(this, cause, args);
         }
 
@@ -1098,6 +1102,10 @@ public final class IMAPException extends OXException {
          * Unexpected error: %1$s
          */
         UNEXPECTED_ERROR("Unexpected error: %1$s", Category.CATEGORY_ERROR, 11, MESSAGE),
+        /**
+         * Too many messages requested (limit is %1$s). Please query a smaller range.
+         */
+        MAX_NUMBER_OF_MESSAGES_EXCEEDED("Too many messages requested (limit is %1$s). Please query a smaller range.", Category.CATEGORY_USER_INPUT, 2060, IMAPExceptionMessages.MAX_NUMBER_OF_MESSAGES_EXCEEDED_MSG),
         ;
 
         private final String message;
@@ -1117,7 +1125,7 @@ public final class IMAPException extends OXException {
             return PREFIX;
         }
 
-        private IMAPCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
+        private IMAPCode(String message, Category category, int detailNumber, String displayMessage) {
             this.message = message;
             this.displayMessage = displayMessage;
             extend = null;
@@ -1125,7 +1133,7 @@ public final class IMAPException extends OXException {
             this.category = category;
         }
 
-        private IMAPCode(final String message, final IMAPCode extend) {
+        private IMAPCode(String message, IMAPCode extend) {
             this.message = message;
             this.displayMessage = extend.getDisplayMessage();
             this.extend = extend;
@@ -1133,7 +1141,7 @@ public final class IMAPException extends OXException {
             category = extend.category;
         }
 
-        private IMAPCode(final MailExceptionCode code, final IMAPCode extend) {
+        private IMAPCode(MailExceptionCode code, IMAPCode extend) {
             message = code.getMessage();
             displayMessage = code.getDisplayMessage();
             this.extend = extend;
@@ -1141,7 +1149,7 @@ public final class IMAPException extends OXException {
             category = code.getCategory();
         }
 
-        private IMAPCode(final MimeMailExceptionCode code, final IMAPCode extend) {
+        private IMAPCode(MimeMailExceptionCode code, IMAPCode extend) {
             message = code.getMessage();
             displayMessage = code.getDisplayMessage();
             this.extend = extend;
@@ -1190,7 +1198,7 @@ public final class IMAPException extends OXException {
          * @param code The code whose extended version shall be returned
          * @return The extended code for specified code or <code>null</code>
          */
-        static IMAPCode getExtendedCode(final IMAPCode code) {
+        static IMAPCode getExtendedCode(IMAPCode code) {
             return EXT_MAP.get(code);
         }
 
@@ -1209,7 +1217,7 @@ public final class IMAPException extends OXException {
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
-        public OXException create(final Object... args) {
+        public OXException create(Object... args) {
             return create((Throwable) null, args);
         }
 
@@ -1224,7 +1232,7 @@ public final class IMAPException extends OXException {
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
-        public OXException create(final Throwable cause, final Object... args) {
+        public OXException create(Throwable cause, Object... args) {
             final OXException ret;
             String displayMessage = this.displayMessage;
             if (null != displayMessage) {
@@ -1253,7 +1261,7 @@ public final class IMAPException extends OXException {
      * @param messageArgs The message arguments
      * @return The new OXException
      */
-    public static OXException create(final Code code, final Object... messageArgs) {
+    public static OXException create(Code code, Object... messageArgs) {
         return create(code, null, null, null, messageArgs);
     }
 
@@ -1265,7 +1273,7 @@ public final class IMAPException extends OXException {
      * @param messageArgs The message arguments
      * @return The new OXException
      */
-    public static OXException create(final Code code, final Throwable cause, final Object... messageArgs) {
+    public static OXException create(Code code, Throwable cause, Object... messageArgs) {
         return create(code, null, null, cause, messageArgs);
     }
 
@@ -1278,7 +1286,7 @@ public final class IMAPException extends OXException {
      * @param messageArgs The message arguments
      * @return The new OXException
      */
-    public static OXException create(final Code code, final IMAPConfig imapConfig, final Session session, final Object... messageArgs) {
+    public static OXException create(Code code, IMAPConfig imapConfig, Session session, Object... messageArgs) {
         return create(code, imapConfig, session, null, messageArgs);
     }
 
@@ -1294,7 +1302,7 @@ public final class IMAPException extends OXException {
      * @param messageArgs The message arguments
      * @return The new OXException
      */
-    public static OXException create(final Code code, final IMAPConfig imapConfig, final Session session, final Throwable cause, final Object... messageArgs) {
+    public static OXException create(Code code, IMAPConfig imapConfig, Session session, Throwable cause, Object... messageArgs) {
         if (IMAPException.Code.NO_ACCESS.equals(code) && messageArgs[0] != null) {
             final String fullName = messageArgs[0].toString();
             if (!MailFolder.ROOT_FOLDER_ID.equals(fullName)) {
@@ -1337,7 +1345,7 @@ public final class IMAPException extends OXException {
      * @param msgArgs The message arguments
      * @return The message corresponding to specified error code with given message arguments applied
      */
-    public static String getFormattedMessage(final Code code, final Object... msgArgs) {
+    public static String getFormattedMessage(Code code, Object... msgArgs) {
         final IMAPCode imapCode = code.getImapCode();
         return String.format(imapCode.getMessage(), msgArgs);
     }
@@ -1353,7 +1361,7 @@ public final class IMAPException extends OXException {
      * @param optProps The optional properties
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final int accountId, final Map<String, Object> optProps) {
+    public static OXException handleMessagingException(MessagingException e, MailConfig mailConfig, Session session, int accountId, Map<String, Object> optProps) {
         return handleMessagingException(e, mailConfig, session, null, accountId, optProps);
     }
 
@@ -1369,7 +1377,7 @@ public final class IMAPException extends OXException {
      * @param optProps The optional properties
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder, final int accountId, final Map<String, Object> optProps) {
+    public static OXException handleMessagingException(MessagingException e, MailConfig mailConfig, Session session, Folder folder, int accountId, Map<String, Object> optProps) {
         // Check for com.sun.mail.iap.ConnectQuotaExceededException
         if (e.getNextException() instanceof ConnectQuotaExceededException) {
             final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
@@ -1414,7 +1422,7 @@ public final class IMAPException extends OXException {
         return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
     }
 
-    private static <V> V getProperty(final String name, final Map<String, Object> props) {
+    private static <V> V getProperty(String name, Map<String, Object> props) {
         if (Strings.isEmpty(name) || null == props) {
             return null;
         }

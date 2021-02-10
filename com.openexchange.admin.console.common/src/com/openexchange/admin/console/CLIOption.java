@@ -155,6 +155,7 @@ public abstract class CLIOption {
      * @return The parsed option's value
      * @throws CLIIllegalOptionValueException If an illegal or missing value is experienced
      */
+    @SuppressWarnings("unused")
     protected Object parseValueInternal(final String value, final Locale locale) throws CLIIllegalOptionValueException {
         return null;
     }

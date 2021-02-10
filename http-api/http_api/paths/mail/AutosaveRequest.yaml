@@ -4,25 +4,17 @@
     tags:
       - Mail
     summary: Auto saves an e-mail as draft.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: csid
         description: The "csid" parameter providing the composition space identifier.
         required: false
         schema:
           type: string
-    responses:
-      '200':
-        description: >
-          'A JSON object containing the identifier of the saved draft e-mail. In
-          case of errors the responsible fields in the
-
-          response are filled (see [Error handling](#error-handling)).'
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MailsResponse'
     requestBody:
       content:
         application/x-www-form-urlencoded:
@@ -70,4 +62,19 @@
         transport). The `csid` field, if it is missing
 
         from the URL it must then be present in the body.' 
-      required: true
+      required: true          
+    responses:
+      '200':
+        description: >
+          'A JSON object containing the identifier of the saved draft e-mail. In
+          case of errors the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

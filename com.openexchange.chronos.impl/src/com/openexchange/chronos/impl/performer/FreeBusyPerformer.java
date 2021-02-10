@@ -92,6 +92,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.SearchOptions;
@@ -137,12 +138,20 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         }
         Map<Attendee, FreeBusyResult> results = new HashMap<Attendee, FreeBusyResult>(attendees.size());
         /*
-         * get intersecting events per attendee & derive (merged) free/busy times
+         * resolve passed attendees prior lookup & get intersecting events per resolved attendee
          */
-        Map<Attendee, List<Event>> eventsPerAttendee = getOverlappingEvents(attendees, from, until);
+        Map<Attendee, Attendee> resolvedAttendees = resolveAttendees(session.getEntityResolver(), attendees);
+        Map<Attendee, List<Event>> eventsPerAttendee = getOverlappingEvents(new ArrayList<Attendee>(resolvedAttendees.keySet()), from, until);
+        /*
+         * derive (merged) free/busy times for found events, mapped back to the requested attendees
+         */
         Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee = new HashMap<Attendee, List<FreeBusyTime>>(eventsPerAttendee.size());
         for (Map.Entry<Attendee, List<Event>> entry : eventsPerAttendee.entrySet()) {
-            Attendee attendee = entry.getKey();
+            Attendee attendee = resolvedAttendees.get(entry.getKey());
+            if (null == attendee) {
+                session.addWarning(CalendarExceptionCodes.UNEXPECTED_ERROR.create("Skipping free/busy times from unexpected attendee " + entry.getKey()));
+                continue;
+            }
             List<Event> events = entry.getValue();
             if (null == events || events.isEmpty()) {
                 freeBusyPerAttendee.put(attendee, Collections.emptyList());
@@ -233,7 +242,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
          * prepare & filter internal attendees for lookup
          */
         Check.hasFreeBusy(ServerSessionAdapter.valueOf(session.getSession()));
-        attendees = session.getEntityResolver().prepare(attendees, true);
         attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
         if (0 == attendees.size()) {
             return Collections.emptyMap();
@@ -649,6 +657,24 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             return anonymizeIfNeeded(session, resultingEvent);
         }
         return EventMapper.getInstance().copy(event, new Event(), FreeBusyPerformerUtil.RESTRICTED_FREEBUSY_FIELDS);
+    }
+
+    /**
+     * Resolves the supplied list of attendees using the supplied entity resolver, and associates them in a map to the passed ones.
+     *
+     * @param entityResolver The entity resolver to use
+     * @param requestedAttendees The attendees as requested from the client
+     * @return The resolved attendees in a map as keys, associated with their supplied variants as values
+     */
+    private static Map<Attendee, Attendee> resolveAttendees(EntityResolver entityResolver, List<Attendee> requestedAttendees) throws OXException {
+        if (null == requestedAttendees || requestedAttendees.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Attendee, Attendee> resolvedAttendees = new HashMap<Attendee, Attendee>(requestedAttendees.size());
+        for (Attendee requestedAttendee : requestedAttendees) {
+            resolvedAttendees.put(entityResolver.prepare(requestedAttendee, true), requestedAttendee);
+        }
+        return resolvedAttendees;
     }
 
 }

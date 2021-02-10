@@ -343,7 +343,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     protected boolean b_subfolderFlag;
 
-    protected ArrayList<Integer> subfolderIds = new ArrayList<Integer>();
+    protected List<Integer> subfolderIds = new ArrayList<Integer>();
 
     protected boolean b_subfolderIds;
 
@@ -1026,7 +1026,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 /*
                  * Flag indicates no present subfolders
                  */
-                return new ArrayList<Integer>(0);
+                return Collections.emptyList();
             }
             if (!enforce) {
                 throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", Integer.toString(getObjectID()), "");
@@ -1041,8 +1041,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return b_subfolderIds;
     }
 
-    public void setSubfolderIds(final ArrayList<Integer> subfolderIds) {
-        this.subfolderIds = new ArrayList<Integer>(subfolderIds);
+    public void setSubfolderIds(List<Integer> subfolderIds) {
+        this.subfolderIds = subfolderIds == null || subfolderIds.isEmpty() ? subfolderIds : new ArrayList<Integer>(subfolderIds);
         b_subfolderIds = true;
     }
 
@@ -1164,7 +1164,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         }
         if (other.containsSubfolderIds() && (overwrite || !containsSubfolderIds())) {
             try {
-                setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
+                setSubfolderIds(other.getSubfolderIds());
             } catch (OXException e) {
                 LOG.error("", e);
             }
@@ -1623,13 +1623,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         }
     }
 
-    private static final ArrayList<Integer> copyIntArrayList(final ArrayList<Integer> original) {
-        final int size = original.size();
-        final ArrayList<Integer> copy = new ArrayList<Integer>(original.size());
-        for (int i = 0; i < size; i++) {
-            copy.add(original.get(i));
-        }
-        return copy;
+    private static final List<Integer> copyIntArrayList(final List<Integer> original) {
+        return new ArrayList<>(original);
     }
 
     public static FolderObject loadFolderObjectFromDB(final int folderId, final Context ctx) throws OXException {
@@ -1711,7 +1706,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static final List<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, OXException {
         return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg);
     }
 
@@ -1726,7 +1721,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @throws SQLException If a SQL error occurs
      * @throws OXException If a pooling error occurs
      */
-    public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
+    public static final List<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, OXException {
         return OXFolderLoader.getSubfolderIds(folderId, ctx, readConArg, table);
     }
 

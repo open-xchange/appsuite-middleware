@@ -105,7 +105,7 @@ public class RestoreAction extends AbstractFolderAction {
             }
         }
 
-        FolderServiceDecorator decorator = new FolderServiceDecorator();
+        FolderServiceDecorator decorator = getDecorator(request);
         UserizedFolder defaultFolder = folderService.getDefaultFolder(session.getUser(), treeId, InfostoreContentType.getInstance(), session, decorator);
         FolderResponse<Map<String, List<UserizedFolder>>> result = ((RestoringFolderService) folderService).restoreFolderFromTrash(treeId, folderIds, defaultFolder, session, decorator);
         Map<String, List<UserizedFolder>> restoreResult = result.getResponse();

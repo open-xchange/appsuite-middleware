@@ -88,6 +88,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.rest.client.httpclient.HttpClientService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
@@ -119,8 +120,10 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
 
     /**
      * Initializes a new {@link AbstractCardDAVSubscribeService}.
+     *
+     * @throws OXException
      */
-    protected AbstractCardDAVSubscribeService(ServiceLookup services) {
+    protected AbstractCardDAVSubscribeService(ServiceLookup services) throws OXException {
         super(services);
     }
 
@@ -194,11 +197,14 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
 
                         @Override
                         public Void call() {
+                            LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
                             try {
                                 List<Contact> contacts = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
                                 updaterToUse.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
                             } catch (Exception e) {
                                 LOG.error("Failed process vcard chunk", e);
+                            } finally {
+                                LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
                             }
                             return null;
                         }

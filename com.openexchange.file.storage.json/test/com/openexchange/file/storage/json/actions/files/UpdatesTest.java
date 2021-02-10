@@ -85,7 +85,7 @@ public class UpdatesTest extends FileActionTest {
         request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
             .param("timestamp", "" + D("Yesterday at 12:00").getTime()).param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
-        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
         fileAccess().expectCall("getDelta", "12", L(D("Yesterday at 12:00").getTime()), columns, File.Field.TITLE, SortDirection.DESC, Boolean.TRUE).andReturn(Results.emptyDelta());
 
         perform();
@@ -99,7 +99,7 @@ public class UpdatesTest extends FileActionTest {
         request().param("folder", "12").param("columns", "1,700,702") // id, title and filename
             .param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
-        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
+        List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
         fileAccess().expectCall("getDelta", "12", L(FileStorageFileAccess.DISTANT_PAST), columns, File.Field.TITLE, SortDirection.DESC, Boolean.TRUE).andReturn(Results.emptyDelta());
 
         perform();

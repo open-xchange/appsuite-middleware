@@ -3,9 +3,10 @@
     operationId: getResource
     tags:
       - Resources
-    summary: Gets a resource.
+    summary: Gets a resource
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the resource.

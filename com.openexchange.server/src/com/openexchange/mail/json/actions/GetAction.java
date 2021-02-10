@@ -81,6 +81,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.capabilities.CapabilityService;
@@ -102,7 +103,6 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.preferences.ServerUserSetting;
@@ -123,6 +123,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetAction extends AbstractMailAction {
 
     /** The logger constant */
@@ -137,12 +138,12 @@ public final class GetAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetAction(final ServiceLookup services) {
+    public GetAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         Object data = req.getRequest().getData();
         if (null == data) {
             return performGet(req);
@@ -153,7 +154,7 @@ public final class GetAction extends AbstractMailAction {
         return performPut(req, (JSONArray) data);
     }
 
-    private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
+    private AJAXRequestResult performPut(MailRequest req, JSONArray paths) throws OXException {
         try {
             final int length = paths.length();
             if (length != 1) {
@@ -429,7 +430,7 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Check whether preview should be pre-generated
                  */
-                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS)) && hasPreviewEnabled(req)) {                        
+                if (AJAXRequestDataTools.parseBoolParameter(req.getParameter(PARAMETER_PREGENERATE_PREVIEWS)) && hasPreviewEnabled(req)) {
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
                     ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
                     if (null != previewService && null != threadPool) {
@@ -510,7 +511,7 @@ public final class GetAction extends AbstractMailAction {
         return null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("document_preview");
     }
 
-    private ThresholdFileHolder getMimeSource(final MailMessage mail, final MimeFilter mimeFilter) throws OXException, MessagingException, IOException {
+    private ThresholdFileHolder getMimeSource(MailMessage mail, MimeFilter mimeFilter) throws OXException, MessagingException, IOException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
             try {
@@ -552,7 +553,7 @@ public final class GetAction extends AbstractMailAction {
         }
     }
 
-    private static final String formatMessageHeaders(final Iterator<Map.Entry<String, String>> iter) {
+    private static final String formatMessageHeaders(Iterator<Map.Entry<String, String>> iter) {
         final StringBuilder sb = new StringBuilder(1024);
         final String delim = ": ";
         final String crlf = "\r\n";
@@ -563,7 +564,7 @@ public final class GetAction extends AbstractMailAction {
         return sb.toString();
     }
 
-    private static String saneForFileName(final String fileName) {
+    private static String saneForFileName(String fileName) {
         if (isEmpty(fileName)) {
             return fileName;
         }
@@ -674,7 +675,7 @@ public final class GetAction extends AbstractMailAction {
             return null;
         }
 
-        private void triggerFor(final MailPart mailPart) {
+        private void triggerFor(MailPart mailPart) {
             RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, mailPart.getFileName(), PreviewOutput.IMAGE, session);
             if (null != candidate) {
                 // Create appropriate IFileHolder instance

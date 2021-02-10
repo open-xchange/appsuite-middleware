@@ -123,6 +123,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.Reloadables;
 import com.openexchange.database.Assignment;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
@@ -225,21 +226,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
         }
 
+        // Get pool and schema for given context
         AdminCacheExtended adminCache = cache;
+        int poolId;
+        String scheme;
+        try {
+            SchemaInfo schemaInfo = adminCache.getSchemaInfoForContextId(ctx.getId().intValue());
+            poolId = schemaInfo.getPoolId();
+            scheme = schemaInfo.getSchema();
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
 
         // Delete context data from context-associated schema
         try {
-            // Get connection and schema for given context
-            int poolId;
-            String scheme;
-            try {
-                SchemaInfo schemaInfo = adminCache.getSchemaInfoForContextId(ctx.getId().intValue());
-                poolId = schemaInfo.getPoolId();
-                scheme = schemaInfo.getSchema();
-            } catch (PoolException e) {
-                throw new StorageException(e);
-            }
-
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 SubmittingRunnable<Void> pendingInvocation = null;
@@ -279,6 +279,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Delete context from ConfigDB
         try {
+            Boolean indicatesCountsInconsistency = null;
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 Connection conForConfigDB = null;
@@ -292,6 +293,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     Databases.startTransaction(conForConfigDB);
                     rollbackConfigDB = true;
 
+                    // Check if counters need to be updated
+                    if (indicatesCountsInconsistency != null && indicatesCountsInconsistency.booleanValue()) {
+                        indicatesCountsInconsistency = Boolean.FALSE;
+                        OXAdminPoolInterface pool = adminCache.getPool();
+                        try {
+                            pool.lock(conForConfigDB, poolId);
+                        } catch (PoolException e) {
+                            LOG.error("Pool Error", e);
+                            throw new StorageException(e);
+                        }
+                        OXUtilStorageInterface utils = OXUtilStorageInterface.getInstance();
+                        utils.checkCountsConsistency(conForConfigDB, true, false);
+                    }
+
                     // Execute to delete context on Configdb AND to drop associated database if this context is the last one
                     contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
 
@@ -300,15 +315,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     rollbackConfigDB = false;
 
                     LOG.info("Context {} deleted.", ctx.getId());
-                } catch (PoolException e) {
-                    LOG.error("Pool Error", e);
-                    throw new StorageException(e);
+                } catch (PoolException pe) {
+                    if (!condition.isFailedTransactionRollback(DBUtils.extractSqlException(pe))) {
+                        if (indicatesCountsInconsistency != null || !indicatesCountsInconsistency(pe)) {
+                            LOG.error("Pool Error", pe);
+                            throw new StorageException(pe);
+                        }
+                        // Counters weren't checked before and exception indicates counters inconsistency
+                        indicatesCountsInconsistency = Boolean.TRUE;
+                    }
                 } catch (StorageException st) {
                     // Examine cause
                     SQLException sqle = DBUtils.extractSqlException(st);
                     if (!condition.isFailedTransactionRollback(sqle)) {
-                        LOG.error("Storage Error", st);
-                        throw st;
+                        if (indicatesCountsInconsistency != null || !indicatesCountsInconsistency(st)) {
+                            LOG.error("Storage Error", st);
+                            throw st;
+                        }
+                        // Counters weren't checked before and exception indicates counters inconsistency
+                        indicatesCountsInconsistency = Boolean.TRUE;
                     }
                 } catch (SQLException sql) {
                     if (!condition.isFailedTransactionRollback(sql)) {
@@ -328,7 +353,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         }
                     }
                 }
-            } while (retryDelete(condition, ctx));
+            } while ((indicatesCountsInconsistency != null && indicatesCountsInconsistency.booleanValue()) || retryDelete(condition, ctx));
         } catch (SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
@@ -519,6 +544,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    private static boolean indicatesCountsInconsistency(final Exception exception) {
+        if (null == exception) {
+            return false;
+        }
+        if (exception instanceof OXException) {
+            return DBPoolingExceptionCodes.COUNTS_INCONSISTENT.equals((OXException) exception);
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return indicatesCountsInconsistency((Exception) cause);
     }
 
     /**
@@ -1842,7 +1881,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     throw new StorageException(e);
                 } catch (RuntimeException e) {
                     LOG.error("Internal Error", e);
-                    throw StorageException.storageExceotionFor(e);
+                    throw StorageException.storageExceptionFor(e);
                 } finally {
                     if (rollback > 0) {
                         if (rollback == 1) {
@@ -3167,6 +3206,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = null;
             }
 
+        } catch (DataTruncation e) {
+            OXException oxe = DBPoolingExceptionCodes.COUNTS_INCONSISTENT.create(e, new Object[0]);
+            throw new StorageException(oxe.getMessage(), oxe);
         } finally {
             closeSQLStuff(prep);
         }

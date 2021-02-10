@@ -85,7 +85,9 @@ public final class ImmutableTypePermission extends BasicPermission {
     public Object clone() {
         // Clones are not immutable and therefore a new BasicPermission is returned
         BasicPermission clone = new BasicPermission();
+        clone.identifier = getIdentifier();
         clone.entity = getEntity();
+        clone.entityInfo = getEntityInfo();
         clone.group = isGroup();
         clone.system = getSystem();
         clone.type = getType();

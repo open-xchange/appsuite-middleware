@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging Bundle
 Bundle-SymbolicName: com.openexchange.messaging
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
@@ -11,6 +11,7 @@ Import-Package: com.google.common.collect,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
@@ -23,3 +24,4 @@ Import-Package: com.google.common.collect,
 Export-Package: com.openexchange.messaging,
  com.openexchange.messaging.registry
 Bundle-Activator: com.openexchange.messaging.osgi.MessagingActivator
+Automatic-Module-Name: com.openexchange.messaging

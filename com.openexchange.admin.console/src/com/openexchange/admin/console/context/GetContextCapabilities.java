@@ -65,7 +65,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-
 /**
  * {@link GetContextCapabilities} - Determines the capabilities for a context.
  *
@@ -75,11 +74,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class GetContextCapabilities extends ContextAbstraction {
 
     /**
-     * Initializes a new {@link GetContextCapabilities}.
+     * Executes the command
      *
      * @param args The CLI arguments
      */
-    public GetContextCapabilities(String[] args) {
+    public void execute(String[] args) {
         final AdminParser parser = new AdminParser("getcontextcapabilities");
         commonfunctions(parser, args);
     }
@@ -111,6 +110,7 @@ public class GetContextCapabilities extends ContextAbstraction {
             } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
+                return;
             }
             Set<String> caps = maincall(ctx, auth);
 
@@ -122,7 +122,7 @@ public class GetContextCapabilities extends ContextAbstraction {
                 final StringBuilder sb = new StringBuilder(2048);
                 sb.append("Capabilities for context ").append(ctx.getId()).append(":").append(lf);
 
-                for (final String cap : new TreeSet<String>(caps)) {
+                for (final String cap : new TreeSet<>(caps)) {
                     sb.append(cap).append(lf);
                 }
 
@@ -141,6 +141,6 @@ public class GetContextCapabilities extends ContextAbstraction {
     }
 
     public static void main(String[] args) {
-        new GetContextCapabilities(args);
+        new GetContextCapabilities().execute(args);
     }
 }

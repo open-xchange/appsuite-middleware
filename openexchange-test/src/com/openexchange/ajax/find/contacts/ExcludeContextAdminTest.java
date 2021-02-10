@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -87,23 +88,28 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
      */
     @Test
     public void testAdminIsExcluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(admin);
-        int adminId = adminClient.getValues().getUserId();
-        adminClient.logout();
+        JSONObject oldConfig = setShowAdmin(Boolean.FALSE);
+        try {
+            AJAXClient adminClient = new AJAXClient(admin);
+            int adminId = adminClient.getValues().getUserId();
+            adminClient.logout();
 
-        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
-        assertNotNull("admin contact was null", adminContact);
+            Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+            assertNotNull("admin contact was null", adminContact);
 
-        String prefix = adminContact.getDisplayName().substring(0, 3);
-        List<Facet> facets = autocomplete(prefix, false);
-        FacetValue found = findByDisplayName(facets, adminContact.getDisplayName());
-        assertNull("admin contact was included in autocomplete response", found);
+            String prefix = adminContact.getDisplayName().substring(0, 3);
+            List<Facet> facets = autocomplete(prefix);
+            FacetValue found = findByDisplayName(facets, adminContact.getDisplayName());
+            assertNull("admin contact was included in autocomplete response", found);
 
-        List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
-        activeFacets.add(createQuery(adminContact.getDisplayName()));
-        List<PropDocument> documents = query(activeFacets, false);
-        PropDocument adminDoc = findByProperty(documents, "display_name", DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
-        assertNull("admin contact was included in query response", adminDoc);
+            List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
+            activeFacets.add(createQuery(adminContact.getDisplayName()));
+            List<PropDocument> documents = query(activeFacets);
+            PropDocument adminDoc = findByProperty(documents, "display_name", DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
+            assertNull("admin contact was included in query response", adminDoc);
+        } finally {
+            restoreOldConfig(oldConfig);
+        }
     }
 
     /*
@@ -112,28 +118,32 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
      */
     @Test
     public void testAdminIsIncluded() throws Exception {
-        AJAXClient adminClient = new AJAXClient(admin);
-        int adminId = adminClient.getValues().getUserId();
-        adminClient.logout();
+        JSONObject oldConfig = setShowAdmin(Boolean.TRUE);
+        try {
+            AJAXClient adminClient = new AJAXClient(admin);
+            int adminId = adminClient.getValues().getUserId();
+            adminClient.logout();
 
-        Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
-        assertNotNull("admin contact was null", adminContact);
+            Contact adminContact = getClient().execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
+            assertNotNull("admin contact was null", adminContact);
 
-        String prefix = adminContact.getDisplayName().substring(0, 3);
-        List<Facet> facets = autocomplete(prefix, true);
-        FacetValue found = findByDisplayName(facets, DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
-        assertNotNull("admin contact was not included in autocomplete response", found);
+            String prefix = adminContact.getDisplayName().substring(0, 3);
+            List<Facet> facets = autocomplete(prefix);
+            FacetValue found = findByDisplayName(facets, DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
+            assertNotNull("admin contact was not included in autocomplete response", found);
 
-        List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
-        activeFacets.add(createQuery(adminContact.getDisplayName()));
-        List<PropDocument> documents = query(activeFacets, true);
-        PropDocument adminDoc = findByProperty(documents, "display_name", adminContact.getDisplayName());
-        assertNotNull("admin contact was not included in query response", adminDoc);
+            List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
+            activeFacets.add(createQuery(adminContact.getDisplayName()));
+            List<PropDocument> documents = query(activeFacets);
+            PropDocument adminDoc = findByProperty(documents, "display_name", adminContact.getDisplayName());
+            assertNotNull("admin contact was not included in query response", adminDoc);
+        } finally {
+            restoreOldConfig(oldConfig);
+        }
     }
 
-    protected List<PropDocument> query(List<ActiveFacet> facets, boolean showAdmin) throws Exception {
+    protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
         Map<String, String> options = new HashMap<String, String>();
-        options.put("admin", Boolean.toString(showAdmin));
         QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, Module.CONTACTS.getIdentifier(), null);
         QueryResponse queryResponse = getClient().execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
@@ -145,9 +155,8 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         return propDocuments;
     }
 
-    private List<Facet> autocomplete(String prefix, boolean showAdmin) throws Exception {
+    private List<Facet> autocomplete(String prefix) throws Exception {
         Map<String, String> options = new HashMap<String, String>();
-        options.put("admin", Boolean.toString(showAdmin));
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
         AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
         return autocompleteResponse.getFacets();

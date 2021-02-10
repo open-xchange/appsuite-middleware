@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Search for contacts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: sort
@@ -38,6 +41,13 @@
           enum:
             - gbk
             - gb2312
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactSearchBody'
+      description: A JSON object containing search parameters.
+      required: true            
     responses:
       '200':
         description: >
@@ -53,10 +63,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContactSearchBody'
-      description: A JSON object containing search parameters.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'

@@ -54,7 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllParser;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.ListIDInt;
+import com.openexchange.ajax.framework.ListIDString;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Contact;
 
@@ -76,14 +76,14 @@ public class AllParser extends CommonAllParser {
 
     @Override
     protected CommonAllResponse createResponse(final Response response) throws JSONException {
-        final CommonAllResponse retval = super.createResponse(response);
-        final Iterator<Object[]> iter = retval.iterator();
-        final ListIDs list = new ListIDs();
-        final int folderPos = retval.getColumnPos(Contact.FOLDER_ID);
-        final int identifierPos = retval.getColumnPos(Contact.OBJECT_ID);
+        CommonAllResponse retval = super.createResponse(response);
+        Iterator<Object[]> iter = retval.iterator();
+        ListIDs list = new ListIDs();
+        int folderPos = retval.getColumnPos(Contact.FOLDER_ID);
+        int identifierPos = retval.getColumnPos(Contact.OBJECT_ID);
         while (iter.hasNext()) {
-            final Object[] row = iter.next();
-            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(), ((Integer) row[identifierPos]).intValue()));
+            Object[] row = iter.next();
+            list.add(new ListIDString(String.class.cast(row[folderPos]), String.class.cast(row[identifierPos])));
         }
         retval.setListIDs(list);
         return retval;

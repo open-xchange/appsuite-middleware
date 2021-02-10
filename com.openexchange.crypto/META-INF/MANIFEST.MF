@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cryptography Plug-in
 Bundle-SymbolicName: com.openexchange.crypto
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.crypto.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -22,3 +22,4 @@ Import-Package: com.openexchange.exception,
 Export-Package: com.openexchange.crypto
 Bundle-ClassPath: .,
  lib/PBKDF2-1.0.4.jar
+Automatic-Module-Name: com.openexchange.crypto

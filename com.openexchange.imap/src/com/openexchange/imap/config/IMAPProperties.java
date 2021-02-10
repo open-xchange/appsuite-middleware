@@ -192,7 +192,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         CACHE_PRIMARY_PROPS.invalidateAll();
     }
 
-    private static PrimaryIMAPProperties getPrimaryIMAPProps(final int userId, final int contextId) throws OXException {
+    private static PrimaryIMAPProperties getPrimaryIMAPProps(int userId, int contextId) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         PrimaryIMAPProperties primaryMailProps = CACHE_PRIMARY_PROPS.getIfPresent(key);
         if (null != primaryMailProps) {
@@ -702,7 +702,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             imapProtocol.initExtMaxCountMap();
                             logBuilder.append("    Max. Number of External Connections: ");
                             boolean first = true;
-                            for (final String desc : sa) {
+                            for (String desc : sa) {
                                 final int pos = desc.indexOf(':');
                                 if (pos > 0) {
                                     try {

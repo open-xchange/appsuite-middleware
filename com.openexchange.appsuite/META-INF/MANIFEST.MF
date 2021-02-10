@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequireJS servlet bundle
 Bundle-SymbolicName: com.openexchange.appsuite
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
@@ -28,6 +28,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail.mime,
  com.openexchange.mailaccount,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.threadpool,
@@ -44,3 +45,4 @@ Import-Package: com.fasterxml.jackson.core,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.appsuite.osgi.AppsuiteActivator
 Export-Package: com.openexchange.appsuite
+Automatic-Module-Name: com.openexchange.appsuite

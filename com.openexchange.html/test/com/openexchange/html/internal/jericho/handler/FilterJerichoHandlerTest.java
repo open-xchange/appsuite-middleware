@@ -91,7 +91,7 @@ public class FilterJerichoHandlerTest {
     private FilterJerichoHandler spyOnHandler;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         filterJerichoHandler = new FilterJerichoHandler(100000, htmlServiceImpl);
         spyOnHandler = PowerMockito.spy(filterJerichoHandler);

@@ -58,6 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -87,6 +88,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:joshua.wirtz@open-xchange.com">Joshua Wirtz</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public class ThreadReferencesAction extends AbstractMailAction {
 
     /**
@@ -102,7 +104,7 @@ public class ThreadReferencesAction extends AbstractMailAction {
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         // Read parameters
         String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-        ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+        ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
         int[] columns = columnCollection.getFields();
         String[] headers = columnCollection.getHeaders();
         String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);

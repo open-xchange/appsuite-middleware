@@ -1,4 +1,5 @@
 type: object
+description: Information if mail is encrypted or signed.  Requires Guard
 properties:
   encrypted:
     type: boolean

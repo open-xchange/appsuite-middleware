@@ -63,16 +63,13 @@ import com.openexchange.filestore.s3.internal.config.S3EncryptionConfig;
  */
 public class S3FileStorageClient {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(S3FileStorageClient.class);
+
     private final String key;
-
     private final AmazonS3Client client;
-
     private final S3EncryptionConfig encryptionConfig;
-
     private final long chunkSize;
-
     private final S3ClientScope scope;
-
     private final int configFingerprint;
 
     /**
@@ -147,6 +144,12 @@ public class S3FileStorageClient {
      */
     int getConfigFingerprint() {
         return configFingerprint;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        LOGGER.info("Going to destroy S3 file storage client having key {} with scope {}", key, scope);
+        super.finalize();
     }
 
 }

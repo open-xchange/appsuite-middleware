@@ -51,6 +51,7 @@ package com.openexchange.admin.diff;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
@@ -123,7 +124,7 @@ public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
             System.out.println(diffResult.toString());
         } else {
             File output = new File(file);
-            FileUtils.write(output, diffResult.toString());
+            FileUtils.write(output, diffResult.toString(), StandardCharsets.UTF_8);
         }
 
         if (diffResult.getProcessingErrors().size() > 0) {

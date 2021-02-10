@@ -274,7 +274,7 @@ public enum MailJSONField {
 
     private final String key;
 
-    private MailJSONField(final String jsonKey) {
+    private MailJSONField(String jsonKey) {
         key = jsonKey;
     }
 

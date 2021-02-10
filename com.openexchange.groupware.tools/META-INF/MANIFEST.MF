@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Groupware Tools
 Bundle-SymbolicName: com.openexchange.groupware.tools
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.groupware.tools.alias,
@@ -52,3 +52,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.jdom2,
  org.json,
  org.slf4j
+Automatic-Module-Name: com.openexchange.groupware.tools

@@ -67,7 +67,6 @@ public class RegexJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    @SuppressWarnings("unused")
     @Override
     public RegexComparison parse(JSONObject jsonObject) throws JSONException {
         return new RegexComparison();

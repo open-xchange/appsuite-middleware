@@ -504,7 +504,7 @@ public class AJAXRequestDataTools {
 
         module = null != prefix ? pathInfo.substring(prefix.length()) : pathInfo;
         final int mlen = module.length() - 1;
-        if ('/' == module.charAt(mlen)) {
+        if (mlen >= 0 && '/' == module.charAt(mlen)) {
             module = module.substring(0, mlen);
         }
         req.setAttribute("__module", module);

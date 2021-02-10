@@ -53,6 +53,7 @@ import java.util.Properties;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.ldap.LDAPAuthentication;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.Reloadable;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -64,14 +65,14 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AuthLDAPActivator extends HousekeepingActivator {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
 
-	/**
-	 * Initializes a new {@link AuthLDAPActivator}.
-	 */
-	public AuthLDAPActivator() {
-	    super();
-	}
+    /**
+     * Initializes a new {@link AuthLDAPActivator}.
+     */
+    public AuthLDAPActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -80,6 +81,7 @@ public class AuthLDAPActivator extends HousekeepingActivator {
 
     /**
      * {@inheritDoc}
+     * 
      * @throws Exception if the authentication class can not be initialized.
      */
     @Override
@@ -87,7 +89,7 @@ public class AuthLDAPActivator extends HousekeepingActivator {
         LOG.info("Starting ldap authentication service.");
 
         final ConfigurationService config = getService(ConfigurationService.class);
-        final Properties props = config.getFile("ldapauth.properties");
+        final Properties props = ConfigurationServices.loadPropertiesFrom(config.getFileByName("ldapauth.properties"));
 
         LDAPAuthentication impl = new LDAPAuthentication(props, this);
         registerService(AuthenticationService.class, impl, null);

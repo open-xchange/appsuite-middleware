@@ -393,6 +393,41 @@ properties:
       file: AdminUser.properties
       packageName: open-xchange-admin
       tags: ["Admin", "User"]
+    - key: com.openexchange.admin.additionalEmailCheckRegex
+      description: |
+        Regex that can be specified by the administration to apply additional e-mail address checking (after the regular check is performed and passed) 
+        when a regular or admin user is being created or updated.
+        
+        This property is config-cascade-aware, meaning that different configurations can be applied on different scopes. In particular:
+        
+        a) When a user is created on an existing context, the config cascade traversal is being applied up to the 'context' scope.
+        b) When a user is changed on an existing context, the config cascade traversal is being applied up to the 'user' scope.
+        c) When a new context is created, the config cascade traversal is being applied up to the 'server' scope.
+        
+        The 'contextSets' scope is NOT considered in any case.
+        
+      defaultValue:
+      version: 7.10.5
+      reloadable: false
+      configcascadeAware: true
+      related: 
+      file: AdminUser.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "User"]
+    - key: com.openexchange.admin.additionalConfigCheckRegex
+      description: |
+        Regex that can be specified by the administration to specify a regular expression that is additionally applied when checking for
+        sane property when calling c.o.admin.rmi.OXUserInterface.getUserConfigurationSource(); e.g. via "getuserconfigurationsource"
+        command-line tool.
+        
+      defaultValue:
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: AdminUser.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "User"]
     - key: DEFAULT_PASSWORD_MECHANISM
       description: |
         Defines the hash algorithm that will be used to hash the user password.

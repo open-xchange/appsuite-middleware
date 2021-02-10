@@ -64,7 +64,7 @@ public enum ComparisonType {
 
     private final int ct;
 
-    private ComparisonType(final int ct) {
+    private ComparisonType(int ct) {
         this.ct = ct;
     }
 

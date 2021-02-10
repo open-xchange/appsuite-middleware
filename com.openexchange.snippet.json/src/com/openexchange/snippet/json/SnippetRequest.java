@@ -50,6 +50,7 @@
 package com.openexchange.snippet.json;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -115,7 +116,7 @@ public class SnippetRequest {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo, final boolean optional) throws OXException {
+    public <T> T getParameter(final String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         return requestData.getParameter(name, coerceTo, optional);
     }
 

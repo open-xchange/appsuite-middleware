@@ -125,7 +125,7 @@ public class Bug13960Test extends AbstractAJAXSession {
             ContactUpdatesResponse response = getClient().execute(request);
             int row = 0;
             while (row < response.size()) {
-                if (response.getValue(row, Contact.OBJECT_ID).equals(I(contact.getObjectID()))) {
+                if (response.getValue(row, Contact.OBJECT_ID).equals(Integer.toString(contact.getObjectID()))) {
                     break;
                 }
                 row++;

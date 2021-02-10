@@ -63,7 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.appsuite.DefaultFileCache.Filter;
+import com.openexchange.appsuite.FileCache.Filter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;

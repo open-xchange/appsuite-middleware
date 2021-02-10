@@ -116,23 +116,19 @@ public class UploadHelper {
         super();
         this.session = session;
     }
-    
+
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
         final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
         /*
          * Try to save directly if applicable or required
          */
         if (false == useSeparateUpload(path, originalVersion, newVersion, offset, totalLength)) {
-            Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
-
-                @Override
-                public Entry<File, String> call() throws OXException {
-                    if (null != originalVersion) {
-                        File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
-                        return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
-                    }
-                    return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
+            Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(() -> {
+                if (null != originalVersion) {
+                    File originalFile = ServerFileVersion.valueOf(originalVersion, path, session).getFile();
+                    return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified, originalFile.getId(), originalFile.getSequenceNumber());
                 }
+                return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
             });
             /*
              * validate checksum
@@ -265,7 +261,7 @@ public class UploadHelper {
                     file.setFileName(alternativeName);
                     file.setTitle(alternativeName);
                     fields.add(Field.TITLE);
-                    session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields);
+                    session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields, true, false);
                     return file;
                 }
                 /*
@@ -276,7 +272,7 @@ public class UploadHelper {
                 fields.add(Field.FOLDER_ID);
                 file.setTitle(newVersion.getName());
                 fields.add(Field.TITLE);
-                session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields);
+                session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields, true, false);
                 return file;
             }
         });
@@ -506,7 +502,7 @@ public class UploadHelper {
             meta.put(KEY_CHECKSUM_STATE, checksumStateBinary);
         }
         updateFile.setMeta(meta);
-        fileAccess.saveFileMetadata(updateFile, file.getSequenceNumber(), modifiedColumns);
+        fileAccess.saveFileMetadata(updateFile, file.getSequenceNumber(), modifiedColumns, true, false);
         return true;
 
     }
@@ -571,7 +567,7 @@ public class UploadHelper {
             session.trace("Using existing upload file at " + DriveUtils.combine(uploadPath, uploadFileName) +
                 " [" + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
                 ", last modified: " + (null != uploadFile.getLastModified() ?
-                    DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)") + 
+                    DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)") +
                 ", checksum state: " + (null != checksumState ? Arrays.toString(checksumState) : "(unknown)"));
 
         }
@@ -654,21 +650,16 @@ public class UploadHelper {
         final List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
-
-                @Override
-                public SearchIterator<File> call() throws OXException {
-                    if (session.getStorage().supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
-                        return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
-                            getSearchTermForUploadFiles(fileVersions), fields, null,
-                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                    } else {
-                        String pattern = 1 == fileVersions.size() ?
-                            getUploadFilename(fileVersions.get(0).getChecksum()) : "*" + DriveConstants.FILEPART_EXTENSION;
-                        return session.getStorage().getFileAccess().search(pattern, fields, folderID, null,
-                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                    }
+            searchIterator = session.getStorage().wrapInTransaction(() -> {
+                if (session.getStorage().supports(new FolderID(folderID), FileStorageCapability.SEARCH_BY_TERM)) {
+                    return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
+                        getSearchTermForUploadFiles(fileVersions), fields, null,
+                        SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                 }
+                String pattern = 1 == fileVersions.size() ?
+                    getUploadFilename(fileVersions.get(0).getChecksum()) : "*" + DriveConstants.FILEPART_EXTENSION;
+                return session.getStorage().getFileAccess().search(pattern, fields, folderID, null,
+                    SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
             });
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();
@@ -689,8 +680,8 @@ public class UploadHelper {
     }
 
     /**
-     * Gets a value indicating whether the upload should be stored in a separate temporary upload file or not, depending on the target 
-     * folder and indicated file. 
+     * Gets a value indicating whether the upload should be stored in a separate temporary upload file or not, depending on the target
+     * folder and indicated file.
      *
      * @param path The path of the destination directory
      * @param originalVersion The original file version being replaced, or <code>null</code> for new file versions
@@ -707,11 +698,11 @@ public class UploadHelper {
             return true;
         }
         /*
-         * do save directly, if no permissions in folder and no alternative upload location available          
+         * do save directly, if no permissions in folder and no alternative upload location available
          */
         FileStoragePermission permission = session.getStorage().getFolder(path, true).getOwnPermission();
         if ((FileStoragePermission.CREATE_OBJECTS_IN_FOLDER > permission.getFolderPermission() ||
-            FileStoragePermission.WRITE_OWN_OBJECTS > permission.getWritePermission()) && 
+            FileStoragePermission.WRITE_OWN_OBJECTS > permission.getWritePermission()) &&
             false == session.getTemp().supported()) {
             return false;
         }

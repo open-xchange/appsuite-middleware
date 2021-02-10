@@ -50,19 +50,10 @@
 package com.openexchange.groupware.userconfiguration;
 
 import static org.junit.Assert.fail;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.internal.PermissionConfigurationCheckerImpl;
 
@@ -70,35 +61,19 @@ import com.openexchange.groupware.userconfiguration.internal.PermissionConfigura
  * {@link PermissionConfigurationCheckerTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.4
  */
-@RunWith(Parameterized.class)
 public class PermissionConfigurationCheckerTest {
 
-    @Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {{ Boolean.TRUE }, { Boolean.FALSE}});
-    }
-
     private PermissionConfigurationChecker checker;
-    private boolean config;
-
 
     /**
      * Initializes a new {@link PermissionConfigurationCheckerTest}.
      */
-    public PermissionConfigurationCheckerTest(Boolean config) {
+    public PermissionConfigurationCheckerTest() {
         super();
-        ConfigurationService mock = Mockito.mock(ConfigurationService.class, new Answer<Boolean>() {
-
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                return config;
-            }
-        });
-        this.config = config.booleanValue();
-        checker = new PermissionConfigurationCheckerImpl(mock);
-
+        checker = new PermissionConfigurationCheckerImpl();
     }
 
     @Test
@@ -109,13 +84,9 @@ public class PermissionConfigurationCheckerTest {
         map.put("com.openexchange.capability.contacts", "true");
         try {
             checker.checkAttributes(map);
-            if (!config) {
-                fail();
-            }
+            fail();
         } catch (@SuppressWarnings("unused") OXException e) {
-            if (config) {
-                fail();
-            }
+            // expected
         }
 
         map = new HashMap<>();
@@ -129,13 +100,9 @@ public class PermissionConfigurationCheckerTest {
 
         try {
             checker.checkCapabilities(Collections.singleton("infostore"));
-            if (!config) {
-                fail();
-            }
+            fail();
         } catch (@SuppressWarnings("unused") OXException e) {
-            if (config) {
-                fail();
-            }
+            // expected
         }
     }
 

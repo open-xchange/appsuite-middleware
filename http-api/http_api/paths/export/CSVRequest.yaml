@@ -4,8 +4,9 @@
     tags:
       - Export
     summary: Exports contact data to a CSV file.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
         description: >-
@@ -45,9 +46,9 @@
     tags:
       - Export
     summary: Exports a batch of contact data to a CSV file.
+    security: 
+        - session: []    
     description: Exports a batch of contact data to a CSV file.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >-

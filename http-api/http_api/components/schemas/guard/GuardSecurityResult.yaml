@@ -1,4 +1,7 @@
 type: object
+description: >-
+    Information regarding signature verification or decryption type after
+    processed by Guard
 properties:
   decrypted:
     type: boolean

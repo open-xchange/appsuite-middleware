@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -84,6 +85,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class UserImageDataSource implements ImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserImageDataSource.class);
+
     private static final String REGISTRATION_NAME = "com.openexchange.user.image";
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";
@@ -92,8 +94,8 @@ public final class UserImageDataSource implements ImageDataSource {
 
     /**
      * Initializes a new {@link UserImageDataSource}.
-     * 
-     * @param services The {@link ServiceLookup} 
+     *
+     * @param services The {@link ServiceLookup}
      */
     public UserImageDataSource(ServiceLookup services) {
         this.services = services;
@@ -119,29 +121,40 @@ public final class UserImageDataSource implements ImageDataSource {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ID_ARGUMENT, argument);
         }
 
-        PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null, null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
         IFileHolder fileHolder = picture.getFileHolder();
+        try {
+            /*
+             * Return contact image
+             */
+            final DataProperties properties = new DataProperties(8);
+            properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+            properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
 
-        /*
-         * Return contact image
-         */
-        final DataProperties properties = new DataProperties(8);
-        properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
+            if (fileHolder == null) {
+                LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", I(userID), I(session.getContextId()), I(session.getUserId()));
+                properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+                properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+                properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
+                return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+            }
 
-        if (fileHolder == null) {
-            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", I(userID), I(session.getContextId()), I(session.getUserId()));
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+            properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            InputStream stream = fileHolder.getStream();
+            try {
+                SimpleData<D> retval = new SimpleData<D>((D) stream, properties);
+                stream = null;
+                fileHolder = null;
+                return retval;
+            } finally {
+                Streams.close(stream);
+            }
+        } finally {
+            Streams.close(fileHolder);
         }
-
-        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
-        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-        properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-        return new SimpleData<D>((D) (fileHolder.getStream()), properties);
     }
 
     @Override
@@ -196,7 +209,7 @@ public final class UserImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(ImageLocation imageLocation, Session session) throws OXException {
-        PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null, null);
         return services.getServiceSafe(ContactPictureService.class).getETag(session, contactPictureRequestData);
     }
 
@@ -211,12 +224,10 @@ public final class UserImageDataSource implements ImageDataSource {
 
     private Contact optUser(Session session, int userID, ContactField... fields) throws OXException {
         ContactService contactService = services.getServiceSafe(ContactService.class);
-        if (null != contactService) {
-            try {
-                return contactService.getUser(session, userID, fields);
-            } catch (OXException e) {
-                LOG.debug("error getting user contact", e);
-            }
+        try {
+            return contactService.getUser(session, userID, fields);
+        } catch (OXException e) {
+            LOG.debug("error getting user contact", e);
         }
         return null;
     }

@@ -144,7 +144,7 @@ public class HeaderCollection implements Serializable {
      * @param name The header name to check
      * @return The case-sensitive header name
      */
-    public static String caseSensitiveHeaderNameFor(final String name) {
+    public static String caseSensitiveHeaderNameFor(String name) {
         final String cshn = CASE_SENSITIVE_LOOKUP.get(name.toLowerCase(ENGLISH));
         return null == cshn ? name : cshn;
     }
@@ -169,7 +169,7 @@ public class HeaderCollection implements Serializable {
      *
      * @param initialCapacity The collection's initial capacity
      */
-    public HeaderCollection(final int initialCapacity) {
+    public HeaderCollection(int initialCapacity) {
         super();
         map = new HashMap<HeaderName, List<String>>(initialCapacity);
     }
@@ -179,7 +179,7 @@ public class HeaderCollection implements Serializable {
      *
      * @param headers The source headers
      */
-    public HeaderCollection(final HeaderCollection headers) {
+    public HeaderCollection(HeaderCollection headers) {
         super();
         map = new LinkedHashMap<HeaderName, List<String>>(headers.map.size());
         addHeaders(headers);
@@ -191,7 +191,7 @@ public class HeaderCollection implements Serializable {
      *
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
-    public HeaderCollection(final String headerSrc) {
+    public HeaderCollection(String headerSrc) {
         super();
         map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(headerSrc);
@@ -204,7 +204,7 @@ public class HeaderCollection implements Serializable {
      * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
      * @throws OXException If parsing the header input stream fails
      */
-    public HeaderCollection(final InputStream inputStream) throws OXException {
+    public HeaderCollection(InputStream inputStream) throws OXException {
         super();
         map = new LinkedHashMap<HeaderName, List<String>>(40);
         load(inputStream);
@@ -232,7 +232,7 @@ public class HeaderCollection implements Serializable {
      * @throws OXException If reading from headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input
      *             stream fails
      */
-    public void load(final InputStream inputStream) throws OXException {
+    public void load(InputStream inputStream) throws OXException {
         /*
          * Gather bytes until empty line or EOF
          */
@@ -273,7 +273,7 @@ public class HeaderCollection implements Serializable {
      *
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
-    public void load(final String headerSrc) {
+    public void load(String headerSrc) {
         if ((null == headerSrc) || (0 == headerSrc.length())) {
             // Nothing to load
             return;
@@ -330,11 +330,11 @@ public class HeaderCollection implements Serializable {
         }
     }
 
-    private static boolean isSpaceOrTab(final char c) {
+    private static boolean isSpaceOrTab(char c) {
         return (c == ' ' || c == '\t');
     }
 
-    private final void addHeaderLine(final String headerLine) {
+    private final void addHeaderLine(String headerLine) {
         int pos = headerLine.indexOf(':');
         if (pos == -1) {
             throw new IllegalStateException("Invalid header line: " + headerLine);
@@ -384,7 +384,7 @@ public class HeaderCollection implements Serializable {
      *
      * @param headers The header collection to add
      */
-    public void addHeaders(final HeaderCollection headers) {
+    public void addHeaders(HeaderCollection headers) {
         final int size = headers.map.size();
         final Iterator<Map.Entry<HeaderName, List<String>>> iter = headers.map.entrySet().iterator();
         for (int i = 0; i < size; i++) {
@@ -414,7 +414,7 @@ public class HeaderCollection implements Serializable {
      * @return This header collection with specified header added
      * @throws IllegalArgumentException If name or value is invalid
      */
-    public HeaderCollection addHeader(final String name, final String value) {
+    public HeaderCollection addHeader(String name, String value) {
         putHeader(name, value, false);
         return this;
     }
@@ -431,12 +431,12 @@ public class HeaderCollection implements Serializable {
      * @return This header collection with specified header set
      * @throws IllegalArgumentException If name or value is invalid
      */
-    public HeaderCollection setHeader(final String name, final String value) {
+    public HeaderCollection setHeader(String name, String value) {
         putHeader(name, value, true);
         return this;
     }
 
-    private final void putHeader(final String name, final String value, final boolean clear) {
+    private final void putHeader(String name, String value, boolean clear) {
         if (isInvalid(name, true)) {
             LOG.debug("{}: {}", ERR_HEADER_NAME_IS_INVALID, name, new IllegalArgumentException());
             // Do nothing...
@@ -476,7 +476,7 @@ public class HeaderCollection implements Serializable {
      * @param name The header name
      * @return <code>true</code> if this header collection contains a header entry for specified header; otherwise <code>false</code>
      */
-    public boolean containsHeader(final String name) {
+    public boolean containsHeader(String name) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -490,7 +490,7 @@ public class HeaderCollection implements Serializable {
      * @return An array of header values, or <code>null</code> if none exists
      * @throws IllegalArgumentException If name is invalid
      */
-    public String[] getHeader(final String name) {
+    public String[] getHeader(String name) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -509,7 +509,7 @@ public class HeaderCollection implements Serializable {
      * @param delimiter The delimiter
      * @return The value fields for all headers with this name, or <code>null</code> if none
      */
-    public String getHeader(final String name, final String delimiter) {
+    public String getHeader(String name, String delimiter) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -536,7 +536,7 @@ public class HeaderCollection implements Serializable {
      * @param delimiter The delimiter character
      * @return The value fields for all headers with this name, or <code>null</code> if none
      */
-    public String getHeader(final String name, final char delimiter) {
+    public String getHeader(String name, char delimiter) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -561,7 +561,7 @@ public class HeaderCollection implements Serializable {
      * @param name The header name
      * @return This header collection with specified header removed
      */
-    public HeaderCollection removeHeader(final String name) {
+    public HeaderCollection removeHeader(String name) {
         if (isInvalid(name, true)) {
             throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
@@ -579,7 +579,7 @@ public class HeaderCollection implements Serializable {
      */
     public Iterator<String> getHeaderNames() {
         final List<String> tmp = new ArrayList<String>(map.size());
-        for (final HeaderName headerName : map.keySet()) {
+        for (HeaderName headerName : map.keySet()) {
             tmp.add(headerName.toString());
         }
         return tmp.iterator();
@@ -603,7 +603,7 @@ public class HeaderCollection implements Serializable {
      * @param matchingHeaders The matching headers
      * @return The matching headers
      */
-    public Iterator<Map.Entry<String, String>> getMatchingHeaders(final String[] matchingHeaders) {
+    public Iterator<Map.Entry<String, String>> getMatchingHeaders(String[] matchingHeaders) {
         final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
         for (String matchingHeader : matchingHeaders) {
             set.add(HeaderName.valueOf(matchingHeader));
@@ -617,7 +617,7 @@ public class HeaderCollection implements Serializable {
      * @param nonMatchingHeaders The non-matching headers
      * @return The non-matching headers
      */
-    public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+    public Iterator<Map.Entry<String, String>> getNonMatchingHeaders(String[] nonMatchingHeaders) {
         final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
         for (String nonMatchingHeader : nonMatchingHeaders) {
             set.add(HeaderName.valueOf(nonMatchingHeader));
@@ -628,7 +628,7 @@ public class HeaderCollection implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(4096);
-        for (final Iterator<Map.Entry<String, String>> iter = getAllHeaders(); iter.hasNext();) {
+        for (Iterator<Map.Entry<String, String>> iter = getAllHeaders(); iter.hasNext();) {
             final Map.Entry<String, String> e = iter.next();
             sb.append(e.getKey()).append(": ").append(e.getValue()).append(CRLF);
         }
@@ -644,7 +644,7 @@ public class HeaderCollection implements Serializable {
      * @return <code>true</code> if this object is the same as the object argument; <code>false</code> otherwise.
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -738,14 +738,14 @@ public class HeaderCollection implements Serializable {
 
         private Map.Entry<HeaderName, List<String>> entry;
 
-        public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter) {
+        public HeaderIterator(Iterator<Map.Entry<HeaderName, List<String>>> iter) {
             super();
             this.iter = iter;
             matches = false;
             headers = null;
         }
 
-        public HeaderIterator(final Iterator<Map.Entry<HeaderName, List<String>>> iter, final Set<HeaderName> headers, final boolean matches) {
+        public HeaderIterator(Iterator<Map.Entry<HeaderName, List<String>>> iter, Set<HeaderName> headers, boolean matches) {
             super();
             this.iter = iter;
             this.matches = matches;
@@ -808,7 +808,7 @@ public class HeaderCollection implements Serializable {
 
         private final int index;
 
-        public HeaderEntry(final Map.Entry<HeaderName, List<String>> entry, final int index) {
+        public HeaderEntry(Map.Entry<HeaderName, List<String>> entry, int index) {
             super();
             this.entry = entry;
             this.index = index;
@@ -825,7 +825,7 @@ public class HeaderCollection implements Serializable {
         }
 
         @Override
-        public String setValue(final String value) {
+        public String setValue(String value) {
             return entry.getValue().set(index, value);
         }
 
@@ -835,32 +835,32 @@ public class HeaderCollection implements Serializable {
 
         private static final long serialVersionUID = 3272885948579962027L;
 
-        public ReadOnlyHeaderCollection(final HeaderCollection headers) {
+        public ReadOnlyHeaderCollection(HeaderCollection headers) {
             super(headers);
         }
 
         @Override
-        public HeaderCollection addHeader(final String name, final String value) {
+        public HeaderCollection addHeader(String name, String value) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.addHeader() is not supported");
         }
 
         @Override
-        public HeaderCollection setHeader(final String name, final String value) {
+        public HeaderCollection setHeader(String name, String value) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.setHeader() is not supported");
         }
 
         @Override
-        public void load(final String headersSrc) {
+        public void load(String headersSrc) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.load() is not supported");
         }
 
         @Override
-        public void load(final InputStream inputStream) {
+        public void load(InputStream inputStream) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.load() is not supported");
         }
 
         @Override
-        public HeaderCollection removeHeader(final String name) {
+        public HeaderCollection removeHeader(String name) {
             throw new UnsupportedOperationException("ReadOnlyHeaderCollection.removeHeader() is not supported");
         }
 
@@ -874,7 +874,7 @@ public class HeaderCollection implements Serializable {
      * @param isName <code>true</code> to check a header name; otherwise <code>false</code> to check a header value
      * @return <code>true</code> if string is invalid; otherwise <code>false</code>
      */
-    public static final boolean isInvalid(final String str, final boolean isName) {
+    public static final boolean isInvalid(String str, boolean isName) {
         if (str == null) {
             return true;
         }
@@ -909,7 +909,7 @@ public class HeaderCollection implements Serializable {
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
-    private static final boolean isAscii(final String s) {
+    private static final boolean isAscii(String s) {
         final int length = s.length();
         boolean isAscci = true;
         for (int i = 0; (i < length) && isAscci; i++) {
@@ -918,7 +918,7 @@ public class HeaderCollection implements Serializable {
         return isAscci;
     }
 
-    private static String checkValue(final String value) {
+    private static String checkValue(String value) {
         if (isAscii(value)) {
             return value;
         }

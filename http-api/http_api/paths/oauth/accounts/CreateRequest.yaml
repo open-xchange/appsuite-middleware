@@ -4,6 +4,8 @@
     tags:
       - OAuth
     summary: Creates an OAuth account.
+    security: 
+        - session: []    
     description: >
       This action is typically called by provided call-back URL and is only
       intended for manual invocation if
@@ -12,7 +14,6 @@
       [/oauth/account?action=init](#operation--oauth-accounts-action-init-get)
       step.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: oauth_token
         description: The request token from preceeding OAuth interaction.

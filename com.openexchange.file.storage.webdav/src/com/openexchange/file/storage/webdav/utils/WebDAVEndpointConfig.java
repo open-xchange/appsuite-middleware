@@ -67,7 +67,7 @@ public class WebDAVEndpointConfig {
 
     private final String url;
 
-    private WebDAVEndpointConfig(String url) {
+    WebDAVEndpointConfig(String url) {
         super();
         this.url = url;
     }

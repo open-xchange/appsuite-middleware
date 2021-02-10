@@ -101,7 +101,7 @@ public abstract class AbstractOwnerCapableEntity2ACL extends Entity2ACL {
      * @param otherUserNamespaces The paths of known shared folders
      * @return The identifier or <code>null</code>
      */
-    protected final String getSharedFolderOwner(final String sharedFolderName, final char delim, String[] otherUserNamespaces) {
+    protected final String getSharedFolderOwner(String sharedFolderName, char delim, String[] otherUserNamespaces) {
         if (null == otherUserNamespaces) {
             return null;
         }
@@ -154,7 +154,7 @@ public abstract class AbstractOwnerCapableEntity2ACL extends Entity2ACL {
         return false;
     }
 
-    protected static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final String serverUrl) throws OXException {
+    protected static final String getACLNameInternal(int userId, Context ctx, int accountId, String serverUrl) throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         if (null == storageService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( MailAccountStorageService.class.getName());
@@ -177,7 +177,7 @@ public abstract class AbstractOwnerCapableEntity2ACL extends Entity2ACL {
         }
     }
 
-    protected static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
+    protected static int getUserIDInternal(String pattern, Context ctx, int accountId, String serverUrl, int sessionUser) throws OXException {
         final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, sessionUser, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Calendar JSON Bundle
 Bundle-SymbolicName: com.openexchange.calendar.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -19,9 +19,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.parser,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
- com.openexchange.authentication.application.ajax,
  com.openexchange.capabilities,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
@@ -76,3 +76,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.calendar.json.osgi.AppointmentJSONActivator
 Export-Package: com.openexchange.calendar.json
+Automatic-Module-Name: com.openexchange.calendar.json

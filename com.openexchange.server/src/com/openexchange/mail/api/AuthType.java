@@ -65,21 +65,23 @@ public enum AuthType {
     /**
      * The login authentication type.
      */
-    LOGIN("login"),
+    LOGIN("login", false),
     /**
      * The XOAUTH2 authentication type; see <a href="https://developers.google.com/gmail/xoauth2_protocol">https://developers.google.com/gmail/xoauth2_protocol</a>
      */
-    OAUTH("XOAUTH2"),
+    OAUTH("XOAUTH2", true),
     /**
      * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
      */
-    OAUTHBEARER("OAUTHBEARER"),
+    OAUTHBEARER("OAUTHBEARER", true),
     ;
 
     private final String name;
+    private final boolean oauth;
 
-    private AuthType(String name) {
+    private AuthType(String name, boolean oauth) {
         this.name = name;
+        this.oauth = oauth;
     }
 
     /**
@@ -89,6 +91,15 @@ public enum AuthType {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Checks whether this authentication type implies OAuth.
+     *
+     * @return <code>true</code> if OAuth is implied; otherwise <code>false</code>
+     */
+    public boolean isOAuth() {
+        return oauth;
     }
 
     private static final Map<String, AuthType> MAP;
@@ -108,7 +119,7 @@ public enum AuthType {
      * @param authTypeStr The string to parse to an AuthType
      * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
      */
-    public static final AuthType parse(final String authTypeStr) {
+    public static final AuthType parse(String authTypeStr) {
         return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
     }
 

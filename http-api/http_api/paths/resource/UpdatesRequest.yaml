@@ -3,9 +3,10 @@
     operationId: getResourceUpdates
     tags:
       - Resources
-    summary: 'Gets the new, modified and deleted resources.'
+    summary: Gets the new, modified and deleted resources
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the requested resources.

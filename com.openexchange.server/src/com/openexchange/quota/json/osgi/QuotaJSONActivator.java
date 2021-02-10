@@ -50,6 +50,8 @@
 package com.openexchange.quota.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.json.QuotaActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -77,8 +79,13 @@ public final class QuotaJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         trackService(QuotaService.class);
+
+        RankingAwareNearRegistryServiceTracker<UnifiedQuotaService> unifiedQuotaServices = new RankingAwareNearRegistryServiceTracker<>(context, UnifiedQuotaService.class);
+        rememberTracker(unifiedQuotaServices);
+
         openTrackers();
-        registerModule(new QuotaActionFactory(new ExceptionOnAbsenceServiceLookup(this), context), "quota");
+
+        registerModule(new QuotaActionFactory(unifiedQuotaServices, new ExceptionOnAbsenceServiceLookup(this)), "quota");
     }
 
 }

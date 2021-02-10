@@ -180,7 +180,7 @@ public class InMemoryMessage implements Message {
     public Address getSender() {
         return sender;
     }
-    
+
     @Override
     public Address getReplyTo() {
         return replyTo;
@@ -318,7 +318,7 @@ public class InMemoryMessage implements Message {
             lock.unlock();
         }
     }
-    
+
     /**
      * Sets the reply-to address
      *

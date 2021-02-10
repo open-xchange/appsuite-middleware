@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Gets a task.
+    security: 
+        - session: []
+        - oauth:
+          - read_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Object ID of the requested task.
@@ -24,3 +27,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TaskResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

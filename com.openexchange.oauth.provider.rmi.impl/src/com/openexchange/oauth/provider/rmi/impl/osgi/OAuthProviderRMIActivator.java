@@ -61,7 +61,6 @@ import com.openexchange.oauth.provider.authorizationserver.client.ClientManageme
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 
-
 /**
  * {@link OAuthProviderRMIActivator}
  *
@@ -71,14 +70,22 @@ import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 public class OAuthProviderRMIActivator implements BundleActivator {
 
     private ServiceRegistration<Remote> serviceRegistration;
-
     private ServiceTracker<ClientManagement, ClientManagement> tracker;
 
+    /**
+     * Initializes a new {@link OAuthProviderRMIActivator}.
+     */
+    public OAuthProviderRMIActivator() {
+        super();
+    }
+
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("starting bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
 
         tracker = new ServiceTracker<ClientManagement, ClientManagement>(context, ClientManagement.class, null) {
+
+            @SuppressWarnings("synthetic-access")
             @Override
             public ClientManagement addingService(ServiceReference<ClientManagement> reference) {
                 ClientManagement service = super.addingService(reference);
@@ -89,6 +96,7 @@ public class OAuthProviderRMIActivator implements BundleActivator {
                 return service;
             }
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void remove(ServiceReference<ClientManagement> reference) {
                 unregister();
@@ -100,7 +108,7 @@ public class OAuthProviderRMIActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("stopping bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
 
         unregister();
@@ -110,16 +118,17 @@ public class OAuthProviderRMIActivator implements BundleActivator {
 
     private synchronized void register(BundleContext context, ClientManagement clientManagement) {
         if (serviceRegistration == null) {
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            Dictionary<String, Object> props = new Hashtable<>(2);
             props.put("RMIName", RemoteClientManagement.RMI_NAME);
             serviceRegistration = context.registerService(Remote.class, new RemoteClientManagementImpl(clientManagement), props);
         }
     }
 
     private synchronized void unregister() {
+        ServiceRegistration<Remote> serviceRegistration = this.serviceRegistration;
         if (serviceRegistration != null) {
+            this.serviceRegistration = null;
             serviceRegistration.unregister();
-            serviceRegistration = null;
         }
     }
 

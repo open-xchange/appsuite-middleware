@@ -130,7 +130,7 @@ public enum MailAuthenticityExceptionCodes implements DisplayableOXExceptionCode
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -149,7 +149,7 @@ public enum MailAuthenticityExceptionCodes implements DisplayableOXExceptionCode
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 

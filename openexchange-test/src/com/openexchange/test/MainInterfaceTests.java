@@ -77,6 +77,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.importexport.ImportExportServerSuite.class,
     com.openexchange.ajax.infostore.InfostoreAJAXSuite.class,
     com.openexchange.ajax.infostore.thirdparty.webdav.WebDAVTestSuite.class,
+    com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingTestSuite.class,
     com.openexchange.ajax.infostore.apiclient.InfostoreApiClientSuite.class,
     com.openexchange.ajax.mail.MailTestSuite.class,
     com.openexchange.ajax.mail.filter.MailFilterTestSuite.class,
@@ -121,7 +122,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.sessionmanagement.SessionManagementSuite.class,
     com.openexchange.ajax.chronos.ChronosTestSuite.class,
     com.openexchange.ajax.multifactor.MultifactorTestSuite.class,
-    com.openexchange.ajax.mailcompose.MailComposeTestSuite.class
+    com.openexchange.ajax.mailcompose.MailComposeTestSuite.class,
 })
 public final class MainInterfaceTests {
 

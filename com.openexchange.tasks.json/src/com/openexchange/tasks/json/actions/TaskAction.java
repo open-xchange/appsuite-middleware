@@ -59,7 +59,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
@@ -72,6 +72,7 @@ import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -89,7 +90,7 @@ import gnu.trove.list.array.TIntArrayList;
 @RestrictedAction(module = TaskAction.MODULE, type = RestrictedAction.Type.READ)
 public abstract class TaskAction implements AJAXActionService {
 
-    protected static final String MODULE = "tasks";
+    protected static final String MODULE = TaskActionFactory.MODULE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAction.class);
 
@@ -188,7 +189,7 @@ public abstract class TaskAction implements AJAXActionService {
         return RESULT_JSON_NULL;
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log) {
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx) {
         final Participant[] participants = appointmentObj.getParticipants();
         if (participants == null) {
             return;

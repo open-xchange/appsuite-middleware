@@ -65,11 +65,13 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaceDescription;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.CompositionSpaceId;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
+import com.openexchange.mail.compose.ImmutableCompositionSpace;
+import com.openexchange.mail.compose.ImmutableMessage;
 import com.openexchange.mail.compose.MessageDescription;
 import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.NonCryptoCompositionSpaceStorageService;
-import com.openexchange.mail.compose.impl.storage.ImmutableCompositionSpace;
-import com.openexchange.mail.compose.impl.storage.ImmutableMessage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.session.Session;
 
@@ -86,6 +88,8 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     private static class LoggerHolder {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InMemoryCompositionSpaceStorageService.class);
     }
+
+    private static final String SERVICE_ID = CompositionSpaceServiceFactory.DEFAULT_SERVICE_ID;
 
     /** The special poison object */
     private static final InMemoryMessage POISON = new InMemoryMessage(new UUID(0, 0), null, null, 0, 0);
@@ -183,6 +187,12 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
     }
 
     @Override
+    public boolean existsCompositionSpace(Session session, UUID id) throws OXException {
+        InMemoryCompositionSpace compositionSpace = spacesById.get(id);
+        return !isInvalid(compositionSpace, session);
+    }
+
+    @Override
     public CompositionSpace getCompositionSpace(Session session, UUID id) throws OXException {
         InMemoryCompositionSpace compositionSpace = spacesById.get(id);
         if (isInvalid(compositionSpace, session)) {
@@ -190,7 +200,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         }
 
         ImmutableMessage message = ImmutableMessage.builder().fromMessage(compositionSpace.getMessage()).build();
-        return new ImmutableCompositionSpace(id, message, compositionSpace.getLastModified());
+        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified(), compositionSpace.getClientToken());
     }
 
     @Override
@@ -211,8 +221,8 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         CompositionSpace persistentCompositionSpace = persistentStorage.openCompositionSpace(session, compositionSpaceDesc, optionalEncrypt);
 
         MessageDescription messageDesc = compositionSpaceDesc.getMessage();
-        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId());
-        spacesById.put(persistentCompositionSpace.getId(), compositionSpace);
+        InMemoryCompositionSpace compositionSpace = new InMemoryCompositionSpace(persistentCompositionSpace.getId().getId(), messageDesc, bufferingQueue, session.getUserId(), session.getContextId(), persistentCompositionSpace.getClientToken());
+        spacesById.put(persistentCompositionSpace.getId().getId(), compositionSpace);
 
         return compositionSpace;
     }
@@ -241,7 +251,7 @@ public class InMemoryCompositionSpaceStorageService implements NonCryptoComposit
         compositionSpace.getMessage().applyFromMessageDescription(messageDesc);
 
         ImmutableMessage message = ImmutableMessage.builder().fromMessage(compositionSpace.getMessage()).build();
-        return new ImmutableCompositionSpace(id, message, compositionSpace.getLastModified());
+        return new ImmutableCompositionSpace(new CompositionSpaceId(SERVICE_ID, id), null, message, compositionSpace.getLastModified(), compositionSpace.getClientToken());
     }
 
     @Override

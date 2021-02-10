@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: 'Gets the new, modified and deleted infoitems.'
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
       - $ref: '#/components/parameters/gblQueryParamInfostoreColumns'
       - in: query

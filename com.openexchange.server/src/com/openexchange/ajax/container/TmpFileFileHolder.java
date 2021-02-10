@@ -352,14 +352,32 @@ public final class TmpFileFileHolder implements IFileHolder {
      * machine.
      * </ol>
      *
-     * @param prefix The prefix to use for generated file
+     * @param prefix The prefix to use for generated file; if <code>null</code> then <code>"open-xchange-tmpfile-"</code> is used
      * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing thread terminates); otherwise <code>false</code> to let the caller control file's life-cycle
      * @return An abstract pathname denoting a newly-created empty file
      * @throws OXException If a file could not be created
      */
     public static File newTempFile(String prefix, boolean autoManaged) throws OXException {
+        return newTempFile(prefix, autoManaged, null);
+    }
+
+    /**
+     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.
+     * </ol>
+     *
+     * @param prefix The prefix to use for generated file; if <code>null</code> then <code>"open-xchange-tmpfile-"</code> is used
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing thread terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     * @param directory The directory in which the file is to be created, or <code>null</code> if {@link ServerConfig#getTmpDir() the default temporary-file directory} is to be used
+     * @return An abstract pathname denoting a newly-created empty file
+     * @throws OXException If a file could not be created
+     */
+    public static File newTempFile(String prefix, boolean autoManaged, File directory) throws OXException {
         try {
-            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-tmpfile-" : prefix, ".tmp", ServerConfig.getTmpDir());
+            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-tmpfile-" : prefix, ".tmp", directory == null ? ServerConfig.getTmpDir() : directory);
             tmpFile.deleteOnExit();
             if (autoManaged) {
                 LogProperties.addTempFile(tmpFile);

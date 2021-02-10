@@ -99,6 +99,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class TikaDocumentHandler {
 
     protected final Map<String, ManagedFile> extractedFiles;
@@ -284,6 +285,7 @@ public final class TikaDocumentHandler {
             }
         }
 
+        @SuppressWarnings("unused")
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             throw new UnsupportedOperationException();
         }

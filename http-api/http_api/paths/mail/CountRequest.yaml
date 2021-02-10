@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Gets the mail count.
+    security:
+        - session: []     
+        - oauth:
+          - read_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamMailFolder'
     responses:
       '200':
@@ -19,3 +22,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailCountResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

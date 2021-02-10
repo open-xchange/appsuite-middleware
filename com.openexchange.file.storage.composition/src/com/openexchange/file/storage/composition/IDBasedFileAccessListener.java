@@ -77,8 +77,9 @@ public interface IDBasedFileAccessListener {
      * @param modifiedColumns The modified columns
      * @param fileAccess The file access which is supposed to be used
      * @param session The associated session
+     * @return FileStorageFileAcess
      */
-    void onBeforeNewFile(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, FileStorageFileAccess fileAccess, Session session) throws OXException;
+    FileStorageFileAccess onBeforeNewFile(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, FileStorageFileAccess fileAccess, Session session) throws OXException;
 
     /**
      * Invoked before an existing file is modified.
@@ -90,8 +91,9 @@ public interface IDBasedFileAccessListener {
      * @param isMove <code>true</code> if update implies a move; otherwise <code>false</code>
      * @param fileAccess The file access which is supposed to be used
      * @param session The associated session
+     * @return FileStorageFileAcess
      */
-    void onBeforeUpdateFile(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean isMove, FileStorageFileAccess fileAccess, Session session) throws OXException;
+    FileStorageFileAccess onBeforeUpdateFile(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean isMove, FileStorageFileAccess fileAccess, Session session) throws OXException;
 
     /**
      * Invoked before multiple files are moved.
@@ -101,8 +103,9 @@ public interface IDBasedFileAccessListener {
      * @param destFolderId The identifier of the destination folder
      * @param fileAccess The file access which is supposed to be used
      * @param session The associated session
+     * @return FileStorageFileAcess
      */
-    void onBeforeMoveFiles(List<String> sourceIds, long sequenceNumber, String destFolderId, FileStorageFileAccess fileAccess, Session session) throws OXException;
+    FileStorageFileAccess onBeforeMoveFiles(List<String> sourceIds, long sequenceNumber, String destFolderId, FileStorageFileAccess fileAccess, Session session) throws OXException;
 
     /**
      * Invoked before an existent file is copied.
@@ -115,8 +118,9 @@ public interface IDBasedFileAccessListener {
      * @param fields The modified fields
      * @param fileAccess The file access which is supposed to be used
      * @param session The associated session
+     * @return FileStorageFileAcess
      */
-    void onBeforeCopyFile(String sourceId, String version, String destFolderId, File update, InputStream newData, List<Field> fields, FileStorageFileAccess fileAccess, Session session) throws OXException;
+    FileStorageFileAccess onBeforeCopyFile(String sourceId, String version, String destFolderId, File update, InputStream newData, List<Field> fields, FileStorageFileAccess fileAccess, Session session) throws OXException;
 
     /**
      * Invoked before multiple files are deleted.

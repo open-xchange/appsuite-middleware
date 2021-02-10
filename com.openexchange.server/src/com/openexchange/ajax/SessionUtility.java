@@ -54,6 +54,7 @@ import static com.openexchange.ajax.LoginServlet.SHARD_COOKIE_NAME;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.sessiond.ExpirationReason.IP_CHECK_FAILED;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -93,6 +94,7 @@ import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
+import com.openexchange.sessiond.ExpirationReason;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
@@ -242,7 +244,9 @@ public final class SessionUtility {
                 session = result.getSession();
                 if (null == session) {
                     // Should not occur
-                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+                    throw oxe;
                 }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
@@ -400,7 +404,7 @@ public final class SessionUtility {
      * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
      */
     public static boolean isIpCheckError(final OXException e) {
-        return (isSessionExpiredError(e) && "true".equals(e.getProperty(com.openexchange.ajax.ipcheck.IPCheckers.OXEXCEPTION_PROPERTY_IP_CHECK)));
+        return (isSessionExpiredError(e) && IP_CHECK_FAILED.getIdentifier().equals(e.getProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON)));
     }
 
     /**
@@ -474,21 +478,21 @@ public final class SessionUtility {
             /*
              * Throw an error...
              */
-            {
-                final StringBuilder sb = new StringBuilder(32);
-                sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found");
-                if (LOG.isDebugEnabled()) {
-                    sb.append(": ");
-                    final Enumeration<?> enm = req.getParameterNames();
-                    while (enm.hasMoreElements()) {
-                        sb.append(enm.nextElement());
-                        sb.append(',');
-                    }
-                    if (sb.length() > 0) {
-                        sb.setCharAt(sb.length() - 1, '.');
-                    }
+            if (LOG.isDebugEnabled()) {
+                Enumeration<?> enm = req.getParameterNames();
+                if (enm.hasMoreElements()) {
+                    StringBuilder sb = new StringBuilder(32);
+                    sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found: ");
+                    do {
+                        sb.append(enm.nextElement()).append(',');
+                    } while (enm.hasMoreElements());
+                    sb.setCharAt(sb.length() - 1, '.');
+                    LOG.info(sb.toString());
+                } else {
+                    LOG.info("Parameter \"{}\" not found.", PARAMETER_SESSION);
                 }
-                LOG.info(sb.toString());
+            } else {
+                LOG.info("Parameter \"{}\" not found.", PARAMETER_SESSION);
             }
             throw SessionExceptionCodes.SESSION_PARAMETER_MISSING.create();
         }
@@ -575,7 +579,9 @@ public final class SessionUtility {
             }
 
             // Otherwise throw appropriate error
-            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_SUCH_SESSION.getIdentifier());
+            throw oxe;
         }
         /*
          * Session HIT -- Consult session inspector
@@ -595,7 +601,9 @@ public final class SessionUtility {
             User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
             if (!user.isMailEnabled()) {
                 LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.USER_DISABLED.getIdentifier());
+                throw oxe;
             }
             rewriteShardCookieIfNeeded(req, resp, session);
             return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
@@ -604,7 +612,9 @@ public final class SessionUtility {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
                 LOG.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.CONTEXT_NONEXISTENT.getIdentifier());
+                throw oxe;
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
                 int code = e.getCode();
@@ -612,7 +622,9 @@ public final class SessionUtility {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
                     LOG.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                    oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.USER_DISABLED.getIdentifier());
+                    throw oxe;
                 }
             }
             throw e;
@@ -683,12 +695,18 @@ public final class SessionUtility {
             additionalsForHash = null;
         }
         final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"), additionalsForHash);
-        if (secret == null || !session.getSecret().equals(secret)) {
-            if (logInfo && null != secret) {
+        if (secret == null) {
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), "null");
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.NO_EXPECTED_SECRET_COOKIE.getIdentifier());
+            throw oxe;
+        } else if (!session.getSecret().equals(secret)) {
+            if (logInfo) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
-            final OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
-            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), null == secret ? "null" : secret);
+            OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), secret);
+            oxe.setProperty(SessionExceptionCodes.OXEXCEPTION_PROPERTY_SESSION_EXPIRATION_REASON, ExpirationReason.SECRET_MISMATCH.getIdentifier());
             throw oxe;
         }
     }

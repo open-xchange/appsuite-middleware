@@ -4,8 +4,11 @@
     tags:
       - Mail
     summary: Clears the content of mail folders.
+    security: 
+        - session: []      
+        - oauth:
+          - write_mail    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: 'Not IMAP: timestamp of the last update of the deleted mails.'
@@ -13,6 +16,15 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+      description: A JSON array with object IDs of the mail folders that shall be cleared.
+      required: true          
     responses:
       '200':
         description: >
@@ -27,12 +39,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailsCleanUpResponse'
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              type: string
-      description: A JSON array with object IDs of the mail folders that shall be cleared.
-      required: true
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

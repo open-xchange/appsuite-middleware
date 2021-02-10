@@ -82,8 +82,8 @@ import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.ComposeBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventResponse;
-import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeResponseMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.modules.MailComposeApi;
@@ -177,13 +177,13 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         ComposeBody composeBody = new ComposeBody();
         composeBody.setId(receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST).getId());
         composeBody.setFolderId(ITipUtil.FOLDER_HUMAN_READABLE);
-        MailComposeResponse mailCompose = mailComposeApi.postMailCompose(apiClientC2.getSession(), "forward", Boolean.FALSE, Collections.singletonList(composeBody));
+        MailComposeResponse mailCompose = mailComposeApi.postMailCompose("forward", Boolean.FALSE, null, Collections.singletonList(composeBody));
         assertNull(mailCompose.getError());
 
         /*
          * Set to new recipient
          */
-        MailComposeMessageModel data = mailCompose.getData();
+        MailComposeResponseMessageModel data = mailCompose.getData();
         ArrayList<String> toList = new ArrayList<>(2);
         toList.add(partyCrasher.getUser());
         toList.add(crashersMail);
@@ -192,7 +192,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         fromList.add(userResponseC2.getData().getEmail1());
         data.setTo(Collections.singletonList(toList));
         data.setFrom(fromList);
-        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(apiClientC2.getSession(), data.getId(), data.toJson(), null);
+        MailComposeSendResponse forwardedMail = mailComposeApi.postMailComposeSend(data.getId(), data.toJson(), null, null);
         assertNull(forwardedMail.getErrorDesc());
 
         /*
@@ -269,7 +269,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
          * Apply change as organizer via iTIP API
          */
         assertSingleEvent(update(constructBody(reply)), createdEvent.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(apiClient.getSession(), createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
+        EventResponse eventResponse = chronosApi.getEvent(createdEvent.getId(), createdEvent.getFolder(), createdEvent.getRecurrenceId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         createdEvent = eventResponse.getData();
         for (Attendee attendee : createdEvent.getAttendees()) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Folder HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.folder.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.folder.json.osgi.FolderJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -21,13 +21,13 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.customizer,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.jobqueue,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
  com.openexchange.ajax.writer,
  com.openexchange.authentication,
- com.openexchange.authentication.application.ajax,
  com.openexchange.calendar.json,
  com.openexchange.chronos.json.oauth,
  com.openexchange.config,
@@ -36,15 +36,20 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.json.actions.files,
  com.openexchange.file.storage.limit,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.calendar.contentType,
+ com.openexchange.folderstorage.contact,
  com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.filestorage.contentType,
+ com.openexchange.folderstorage.mail.contentType,
+ com.openexchange.folderstorage.oauth,
  com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.infostore,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.settings,
@@ -54,6 +59,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.login,
+ com.openexchange.mail.json,
  com.openexchange.multiple,
  com.openexchange.oauth.provider.exceptions,
  com.openexchange.oauth.provider.resourceserver,
@@ -89,3 +95,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
+Automatic-Module-Name: com.openexchange.folder.json

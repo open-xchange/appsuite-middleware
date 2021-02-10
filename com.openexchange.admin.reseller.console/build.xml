@@ -12,7 +12,7 @@
     </target>
 
     <target name="createLinks">
-        <property name="resellerLinks" value="deleteadmin,changeadmin,listadmin,listrestrictions,initrestrictions,removerestrictions,updatemoduleaccessrestrictions,updaterestrictions"/>
+        <property name="resellerLinks" value="deleteadmin,changeadmin,listadmin,listrestrictions,initrestrictions,removerestrictions,updatemoduleaccessrestrictions,updaterestrictions,getresellercapabilities"/>
         <foreach list="${resellerLinks}" target="createResellerLink" param="linkName"/>
     </target>
 

@@ -49,14 +49,14 @@
 
 package com.openexchange.folderstorage.filestorage.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderStorage;
+import com.openexchange.folderstorage.filestorage.impl.AccountErrorField;
+import com.openexchange.folderstorage.filestorage.impl.FileStorageFolderStorage;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -84,9 +84,10 @@ public final class FileStorageFolderStorageActivator extends HousekeepingActivat
         try {
             Services.setServiceLookup(this);
             // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
-            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            registerService(FolderStorage.class, new FileStorageFolderStorage(this), dictionary);
+            registerService(FolderStorage.class, new FileStorageFolderStorage(this), singletonDictionary("tree", FolderStorage.REAL_TREE_ID));
+
+            //register custom folder fields
+            registerService(FolderField.class, AccountErrorField.getInstance());
         } catch (Exception e) {
             logger.error("", e);
             throw e;

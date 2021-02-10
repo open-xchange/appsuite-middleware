@@ -100,7 +100,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final boolean IGNORE_BOGUS_GROUP_NAME = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
 
-    private static boolean getBooleanSystemProperty(final String name, final boolean def) {
+    private static boolean getBooleanSystemProperty(String name, boolean def) {
         return Boolean.parseBoolean(System.getProperty(name, def ? "true" : "false"));
     }
 
@@ -171,7 +171,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return The quoted addresses
      * @throws AddressException If conversion fails
      */
-    public static InternetAddress[] toQuotedAddresses(final InternetAddress[] addrs) throws AddressException {
+    public static InternetAddress[] toQuotedAddresses(InternetAddress[] addrs) throws AddressException {
         if (null == addrs) {
             return null;
         }
@@ -189,7 +189,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return An array of {@link InternetAddress} objects
      * @exception AddressException If the parse failed
      */
-    public static InternetAddress[] parse(final String addresslist) throws AddressException {
+    public static InternetAddress[] parse(String addresslist) throws AddressException {
         return parse(addresslist, true);
     }
 
@@ -207,7 +207,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return An array of {@link InternetAddress} objects
      * @exception AddressException If the parse failed
      */
-    public static InternetAddress[] parse(final String addresslist, final boolean strict) throws AddressException {
+    public static InternetAddress[] parse(String addresslist, boolean strict) throws AddressException {
         if (preferSimpleAddressParsing()) {
             return parseSimple(addresslist, strict);
         }
@@ -238,7 +238,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return An array of {@link InternetAddress} objects
      * @exception AddressException If the parse failed
      */
-    public static InternetAddress[] parseHeader(final String addresslist, final boolean strict) throws AddressException {
+    public static InternetAddress[] parseHeader(String addresslist, boolean strict) throws AddressException {
         if (preferSimpleAddressParsing()) {
             return parseSimple(addresslist, strict);
         }
@@ -880,7 +880,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Check that the address is a valid "mailbox" per RFC822. (We also allow simple names.) XXX - much more to check XXX - doesn't handle
      * domain-literals properly (but no one uses them)
      */
-    private static void checkAddress(final String addr, final boolean routeAddr, final boolean validate) throws AddressException {
+    private static void checkAddress(String addr, boolean routeAddr, boolean validate) throws AddressException {
         int i, start = 0;
 
         final int len = addr.length();
@@ -1063,7 +1063,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return The ASCII-encoded (punycode) of given internet address
      * @throws AddressException If ASCII representation of given internet address cannot be created
      */
-    public static String toACE(final String idnAddress) throws AddressException {
+    public static String toACE(String idnAddress) throws AddressException {
         return IDNA.toACE(idnAddress);
     }
 
@@ -1080,7 +1080,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return The unicode representation of given internet address
      * @see #getIDNAddress()
      */
-    public static String toIDN(final String aceAddress) {
+    public static String toIDN(String aceAddress) {
         return IDNA.toIDN(aceAddress);
     }
 
@@ -1097,7 +1097,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Copy constructor.
      */
-    private QuotedInternetAddress(final InternetAddress src) throws AddressException {
+    private QuotedInternetAddress(InternetAddress src) throws AddressException {
         this();
         address = toACE(src.getAddress());
         try {
@@ -1118,7 +1118,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
-    public QuotedInternetAddress(final String address) throws AddressException {
+    public QuotedInternetAddress(String address) throws AddressException {
         super();
         parseAddress0(address);
         jcharset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1134,7 +1134,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
      * @throws AddressException If parsing the address fails
      */
-    public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
+    public QuotedInternetAddress(String address, boolean strict) throws AddressException {
         this(address);
         if (strict) {
             if (isGroup()) {
@@ -1179,7 +1179,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      * @throws UnsupportedEncodingException If encoding is not supported
      */
-    public QuotedInternetAddress(final String address, final String personal) throws AddressException, UnsupportedEncodingException {
+    public QuotedInternetAddress(String address, String personal) throws AddressException, UnsupportedEncodingException {
         this(address, personal, null);
     }
 
@@ -1192,7 +1192,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      * @throws UnsupportedEncodingException If encoding is not supported
      */
-    public QuotedInternetAddress(final String address, final String personal, final String charset) throws AddressException, UnsupportedEncodingException {
+    public QuotedInternetAddress(String address, String personal, String charset) throws AddressException, UnsupportedEncodingException {
         super();
         this.address = toACE(init(address));
         if (charset == null) {
@@ -1215,7 +1215,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
-    public void parseAddress(final String address) throws AddressException {
+    public void parseAddress(String address) throws AddressException {
         parseAddress0(address);
     }
 
@@ -1225,7 +1225,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
-    private void parseAddress0(final String address) throws AddressException {
+    private void parseAddress0(String address) throws AddressException {
         if (Strings.isEmpty(address)) {
             throw new AddressException("Empty address");
         }
@@ -1302,7 +1302,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param address The email address
      */
     @Override
-    public void setAddress(final String address) {
+    public void setAddress(String address) {
         String a = init(address);
         try {
             this.address = toACE(a);
@@ -1469,7 +1469,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     // @Override
-    // public boolean equals(final Object a) {
+    // public boolean equals(Object a) {
     // if (this == a) {
     // return true;
     // }
@@ -1497,11 +1497,11 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Return the first index of any of the characters in "any" in "s", or -1 if none are found. This should be a method on String.
      */
-    private static int indexOfAny(final CharSequence s, final String any) {
+    private static int indexOfAny(CharSequence s, String any) {
         return indexOfAny(s, any, 0);
     }
 
-    private static int indexOfAny(final CharSequence s, final String any, final int start) {
+    private static int indexOfAny(CharSequence s, String any, int start) {
         try {
             final int len = s.length();
             for (int i = start; i < len; i++) {
@@ -1521,7 +1521,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
-    private static String quotePhrase(final String phrase, final boolean allowNonAscii) {
+    private static String quotePhrase(String phrase, boolean allowNonAscii) {
         int len = phrase.length();
         boolean needQuoting = false;
 
@@ -1556,7 +1556,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return needQuoting ? new StringBuilder(len + 2).append('"').append(phrase).append('"').toString() : phrase;
     }
 
-    private static boolean needQuoting(final String phrase, final boolean allowNonAscii) {
+    private static boolean needQuoting(String phrase, boolean allowNonAscii) {
         final int len = phrase.length();
         boolean needQuoting = false;
 
@@ -1573,7 +1573,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return needQuoting;
     }
 
-    private static boolean quoted(final String s) {
+    private static boolean quoted(String s) {
         final int length = s.length();
         if (length <= 0) {
             return false;
@@ -1581,7 +1581,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return ('"' == s.charAt(0) && length > 1 && '"' == s.charAt(length - 1));
     }
 
-    private static boolean checkQuotedPersonal(final String p) {
+    private static boolean checkQuotedPersonal(String p) {
         // Every '"' and '\' needs a heading '\' character
         final String phrase = p.substring(1, p.length() - 1);
         final int len = phrase.length();
@@ -1606,7 +1606,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return valid;
     }
 
-    private static String unquote(final String str) {
+    private static String unquote(String str) {
         if (isEmpty(str)) {
             return str;
         }
@@ -1634,7 +1634,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         return s;
     }
 
-    private static boolean isEmpty(final String str) {
+    private static boolean isEmpty(String str) {
         if (null == str || 0 == str.length()) {
             return true;
         }
@@ -1649,7 +1649,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Determines whether a String is purely ASCII, meaning its characters' code points are all less than 128.
      */
-    private static boolean isAscii(final String str) {
+    private static boolean isAscii(String str) {
         if (null == str || 0 == str.length()) {
             return true;
         }

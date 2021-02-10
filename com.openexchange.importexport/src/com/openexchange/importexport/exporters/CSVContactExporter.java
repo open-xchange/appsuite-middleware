@@ -357,6 +357,7 @@ public class CSVContactExporter implements Exporter {
         }
     }
 
+    @SuppressWarnings("deprecation")
     protected List<String> convertToList(final Contact conObj, final ContactField[] fields) {
         final List<String> l = new LinkedList<>();
         final ContactStringGetter getter = new ContactStringGetter();

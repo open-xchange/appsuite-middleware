@@ -3,9 +3,9 @@
     operationId: getShareLink
     tags:
       - Share/Management
-    summary: Creates or gets a share link.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Creates or gets a share link
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

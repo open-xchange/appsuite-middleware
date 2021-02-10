@@ -57,8 +57,6 @@ import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -87,6 +85,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
         " displayName VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        " metaData BLOB," +
         " PRIMARY KEY (cid, user, serviceId, account)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
@@ -150,13 +149,4 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         }
         return retval;
     }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (IllegalStateException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
 }

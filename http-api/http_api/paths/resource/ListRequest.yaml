@@ -3,9 +3,9 @@
     operationId: getResourceList
     tags:
       - Resources
-    summary: Gets a list of resources.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    summary: Gets a list of resources
+    security: 
+        - session: []    
     responses:
       '200':
         description: >

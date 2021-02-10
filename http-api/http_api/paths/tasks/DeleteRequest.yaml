@@ -4,8 +4,11 @@
     tags:
       - Tasks
     summary: Deletes tasks.
+    security: 
+        - session: []
+        - oauth:
+          - write_tasks    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the deleted tasks.
@@ -13,6 +16,8 @@
         schema:
           type: integer
           format: int64
+    requestBody:
+      $ref: '#/components/requestBodies/TaskListElementArray'          
     responses:
       '200':
         description: >
@@ -25,5 +30,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/TaskDeletionsResponse'
-    requestBody:
-      $ref: '#/components/requestBodies/TaskListElementArray'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

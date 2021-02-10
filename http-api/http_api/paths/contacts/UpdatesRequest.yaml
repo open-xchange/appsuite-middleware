@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Gets updated contacts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts     
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
@@ -67,3 +70,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactUpdatesResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'               

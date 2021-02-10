@@ -97,7 +97,7 @@ public enum OXScope {
             try {
                 list.add(valueOf(s));
             } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
+                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(e, s, modules);
             }
         }
 

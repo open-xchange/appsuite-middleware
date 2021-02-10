@@ -72,13 +72,11 @@ public class IsComparison extends AbstractComparison implements Comparison<IsCom
         return MatchType.is;
     }
 
-    @SuppressWarnings("unused")
     @Override
     public void setArgument(IsComparisonArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + MatchType.is + "' comparison type can not have any arguments");
     }
 
-    @SuppressWarnings("unused")
     @Override
     public Object getArgument(IsComparisonArgument argument) {
         throw new UnsupportedOperationException("The '" + MatchType.is + "' comparison type can not have any arguments");

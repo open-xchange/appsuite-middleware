@@ -56,6 +56,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
@@ -70,6 +71,7 @@ import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.json.fields.ExtendedFolderPermissionsField;
 import com.openexchange.share.json.fields.ExtendedObjectPermissionsField;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.subscription.ShareSubscriptionRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -91,7 +93,8 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, GroupService.class, ContactService.class,
-            CapabilityService.class, SessiondService.class, ShareNotificationService.class, ModuleSupport.class, QuotaService.class, ContactUserStorage.class };
+            CapabilityService.class, SessiondService.class, ShareNotificationService.class, ModuleSupport.class, QuotaService.class, 
+            ContactUserStorage.class, ShareSubscriptionRegistry.class, ConversionService.class };
     }
 
     @Override

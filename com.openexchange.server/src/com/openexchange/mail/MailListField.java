@@ -253,7 +253,7 @@ public enum MailListField {
     private final int field;
     private final String key;
 
-    private MailListField(final int field, final String jsonKey) {
+    private MailListField(int field, String jsonKey) {
         this.field = field;
         key = jsonKey;
     }
@@ -278,7 +278,7 @@ public enum MailListField {
 
     static {
         final MailListField[] fields = MailListField.values();
-        for (final MailListField listField : fields) {
+        for (MailListField listField : fields) {
             FIELDS_MAP.put(listField.field, listField);
         }
     }
@@ -289,7 +289,7 @@ public enum MailListField {
      * @param fields The <code>int</code> values
      * @return The array of {@link MailListField} corresponding to given <code>int</code> values
      */
-    public static final MailListField[] getFields(final int[] fields) {
+    public static final MailListField[] getFields(int[] fields) {
         if ((fields == null) || (fields.length == 0)) {
             return EMPTY_FIELDS;
         }
@@ -306,7 +306,7 @@ public enum MailListField {
      * @param field The <code>int</code> value
      * @return The corresponding {@link MailListField} constant
      */
-    public static final MailListField getField(final int field) {
+    public static final MailListField getField(int field) {
         return FIELDS_MAP.get(field);
     }
 
@@ -330,9 +330,9 @@ public enum MailListField {
      * @param jsonName identifier
      * @return MailListField identified by jsonName, null if not found
      */
-    public static final MailListField getBy(final String jsonName) {
+    public static final MailListField getBy(String jsonName) {
         final MailListField[] values = values();
-        for (final MailListField field : values) {
+        for (MailListField field : values) {
             if (jsonName.equals(field.getKey())) {
                 return field;
             }

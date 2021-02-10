@@ -101,6 +101,10 @@ public abstract class AbstractOXResellerTest extends AbstractRMITest {
     protected static Restriction MaxOverallUserRestriction(int count) {
         return new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN, new Integer(count).toString());
     }
+    
+    protected static Restriction CanCreateSubAdmin() {
+        return new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "true");
+    }
 
     protected static Context createContext(final Credentials auth) throws Exception {
         User oxadmin = UserFactory.createContextAdmin();

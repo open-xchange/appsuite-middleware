@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage JSON Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.json
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -26,6 +26,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.helper,
  com.openexchange.ajax.parser,
  com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.annotation.restricted,
  com.openexchange.ajax.requesthandler.converters.preview,
  com.openexchange.ajax.requesthandler.crypto,
  com.openexchange.ajax.requesthandler.jobqueue,
@@ -37,7 +38,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.annotation,
  com.openexchange.antivirus,
  com.openexchange.antivirus.exceptions,
- com.openexchange.authentication.application.ajax,
  com.openexchange.caching,
  com.openexchange.capabilities,
  com.openexchange.config,
@@ -128,3 +128,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.file.storage.json.osgi.FileStorageJSONActivator
+Automatic-Module-Name: com.openexchange.file.storage.json
+Export-Package: com.openexchange.file.storage.json.actions.files

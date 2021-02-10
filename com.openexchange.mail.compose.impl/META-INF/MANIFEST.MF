@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange Mail Compose Implementation Bundle
 Bundle-SymbolicName: com.openexchange.mail.compose.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.mail.compose
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -25,6 +25,7 @@ Import-Package: ch.qos.logback.classic,
  com.google.gson.reflect,
  com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.map,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
@@ -127,6 +128,7 @@ Import-Package: ch.qos.logback.classic,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.codec.digest,
+ org.cliffc.high_scale_lib,
  org.json,
  org.osgi.framework,
  org.osgi.service.event;version="1.4.0",

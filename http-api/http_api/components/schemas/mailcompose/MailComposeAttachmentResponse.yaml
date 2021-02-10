@@ -2,4 +2,4 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    $ref: '#/components/schemas/MailComposeAttachment'
+    $ref: '#/components/schemas/MailComposeAttachmentResult'

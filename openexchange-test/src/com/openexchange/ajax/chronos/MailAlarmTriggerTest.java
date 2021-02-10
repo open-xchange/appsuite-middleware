@@ -63,6 +63,7 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.data.conversion.ical.Assert;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -103,6 +104,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
         String summary = "mailAlarmTest_" + new UID().toString();
@@ -133,6 +135,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testMoveOut() throws ApiException, ChronosApiException, InterruptedException {
 
         // Create event
@@ -161,7 +164,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         checkMail(summary, time, getDates(expectedSentDate), 0);
     }
-    
+
     List<Long> getDates(long expectedSentDate){
         return Collections.singletonList(L(expectedSentDate));
     }
@@ -174,6 +177,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws InterruptedException
      */
     @Test
+    @TryAgain
     public void testMoveIn() throws ApiException, ChronosApiException, InterruptedException {
 
         // Create event
@@ -203,7 +207,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     private TimeZone getUserTimeZone() throws ApiException {
-        UserResponse userResponse = userApi.getUser(getSessionId(), null);
+        UserResponse userResponse = userApi.getUser(null);
         Assert.assertNull(userResponse.getErrorDesc(), userResponse.getError());
         Assert.assertNotNull(userResponse.getData());
         UserData data = userResponse.getData();
@@ -212,7 +216,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     private void checkMail(String summary, Calendar time, List<Long> expectedSentDates, int mails) throws ApiException {
-        MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, Boolean.FALSE, Boolean.FALSE, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, Integer.valueOf(100), null);
+        MailsResponse mailResponse = mailApi.getAllMails("default0/INBOX", getColumns(), null, Boolean.FALSE, Boolean.FALSE, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, Integer.valueOf(100), null);
         Assert.assertNull(mailResponse.getError());
         Assert.assertNotNull(mailResponse.getData());
         int found = 0;
@@ -220,7 +224,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long delta = TimeUnit.SECONDS.toMillis(5);
         for (List<String> mail : mailResponse.getData()) {
             String subject = mail.get(2);
-            if ( subject != null && subject.contains(summary)) {
+            if (subject != null && subject.contains(summary)) {
                 if (mails == 0) {
                     Assert.fail("Mail found even though no mail should be sent out.");
                 }
@@ -229,12 +233,12 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                 MailListElement element = new MailListElement();
                 element.setFolder("default0/INBOX");
                 element.setId(mail.get(0));
-                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), L(Long.MAX_VALUE), null, null);
+                mailApi.deleteMails(Collections.singletonList(element), L(Long.MAX_VALUE), null, null);
                 found++;
                 boolean matchAnySentDate = false;
                 long closest = 0;
-                for(Long expectedSentDate : expectedSentDates) {
-                    if (Math.abs(sentDate - expectedSentDate.longValue()) <= delta){
+                for (Long expectedSentDate : expectedSentDates) {
+                    if (Math.abs(sentDate - expectedSentDate.longValue()) <= delta) {
                         matchAnySentDate = true;
                         break;
                     }
@@ -242,7 +246,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                         closest = Math.abs(sentDate - expectedSentDate.longValue());
                     }
                 }
-                Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+closest, matchAnySentDate);
+                Assert.assertTrue("Wrong sent date. Expected a maximal difference of " + delta + " but was " + closest, matchAnySentDate);
             }
         }
         if (mails == 0) {

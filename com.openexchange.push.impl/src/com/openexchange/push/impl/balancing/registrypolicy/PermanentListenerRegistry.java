@@ -50,6 +50,7 @@
 package com.openexchange.push.impl.balancing.registrypolicy;
 
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,13 +58,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.hazelcast.core.Cluster;
+import com.hazelcast.cluster.Cluster;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
-import com.hazelcast.core.MemberAttributeEvent;
-import com.hazelcast.core.MembershipEvent;
-import com.hazelcast.core.MembershipListener;
+import com.hazelcast.map.IMap;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.push.PushUser;
@@ -84,7 +84,7 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
 
     private final BundleContext context;
     private final ConcurrentMap<PushUser, Owner> localRegistry;
-    private final AtomicReference<String> registrationIdRef;
+    private final AtomicReference<UUID> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
     private final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler;
     private final Blocker blocker;
@@ -101,7 +101,7 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
         this.notActiveExceptionHandler = notActiveExceptionHandler;
         blocker = new ConcurrentBlocker();
         hzInstancerRef = new AtomicReference<HazelcastInstance>();
-        registrationIdRef = new AtomicReference<String>();
+        registrationIdRef = new AtomicReference<UUID>();
     }
 
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
@@ -240,20 +240,12 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
     // ----------------------------------- ServiceTrackerCustomizer methods -------------------------------------------------------
@@ -263,7 +255,7 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
         HazelcastInstance hzInstance = context.getService(reference);
         try {
             Cluster cluster = hzInstance.getCluster();
-            String registrationId = cluster.addMembershipListener(this);
+            UUID registrationId = cluster.addMembershipListener(this);
             registrationIdRef.set(registrationId);
             hzInstancerRef.set(hzInstance);
             return hzInstance;
@@ -284,7 +276,7 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
     public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
         changeBackingMapToLocalMap();
 
-        String registrationId = registrationIdRef.get();
+        UUID registrationId = registrationIdRef.get();
         if (null != registrationId) {
             hzInstance.getCluster().removeMembershipListener(registrationId);
             registrationIdRef.set(null);

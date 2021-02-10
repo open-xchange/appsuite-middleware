@@ -105,6 +105,10 @@ import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.AuthType;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageDelegator;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
@@ -123,6 +127,7 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -217,6 +222,59 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return b.booleanValue();
     }
 
+    /**
+     * Gets the IMAP folder storage from given connected mail access if IMAP-backed.
+     *
+     * @param mailAccess The connected mail access
+     * @return The IMAP folder storage
+     * @throws OXException If IMAP folder storage cannot be returned
+     */
+    public static IMAPFolderStorage getIMAPFolderStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        IMailFolderStorage fstore = mailAccess.getFolderStorage();
+        if (!(fstore instanceof IMAPFolderStorage)) {
+            if (!(fstore instanceof IMailFolderStorageDelegator)) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+            }
+            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
+            if (!(fstore instanceof IMAPFolderStorage)) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+            }
+        }
+        return (IMAPFolderStorage) fstore;
+    }
+
+    /**
+     * Gets the IMAP store from given connected mail access if IMAP-backed.
+     *
+     * @param mailAccess The connected mail access
+     * @return The IMAP store
+     * @throws OXException If IMAP store cannot be returned
+     */
+    public static IMAPStore getIMAPStoreFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return getIMAPFolderStorageFrom(mailAccess).getImapStore();
+    }
+
+    /**
+     * Gets the connected {@link IMAPMessageStorage} instance associated with specified mail access
+     *
+     * @param mailAccess The connected mail access
+     * @return The connected {@code IMAPMessageStorage} instance
+     * @throws OXException If connected {@code IMAPMessageStorage} instance cannot be returned
+     */
+    public static IMAPMessageStorage getImapMessageStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        IMailMessageStorage mstore = mailAccess.getMessageStorage();
+        if (!(mstore instanceof IMAPMessageStorage)) {
+            if (!(mstore instanceof IMailMessageStorageDelegator)) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+            }
+            mstore = ((IMailMessageStorageDelegator) mstore).getDelegateMessageStorage();
+            if (!(mstore instanceof IMAPMessageStorage)) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("Unknown MAL implementation");
+            }
+        }
+        return (IMAPMessageStorage) mstore;
+    }
+
     /*-
      * Member section
      */
@@ -291,9 +349,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @param session The session providing needed user data
      */
-    protected IMAPAccess(final Session session) {
+    protected IMAPAccess(Session session) {
         super(session);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     /**
@@ -302,9 +360,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
-    protected IMAPAccess(final Session session, final int accountId) {
+    protected IMAPAccess(Session session, int accountId) {
         super(session, accountId);
-        setMailProperties((Properties) System.getProperties().clone());
+        setMailProperties(SystemPropertiesUtils.cloneSystemProperties());
     }
 
     @Override
@@ -426,6 +484,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 this.imapStore = null;
             }
         } finally {
+            LogProperties.remove(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS);
             reset();
         }
     }
@@ -494,7 +553,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     @Override
-    public int getUnreadMessagesCount(final String fullname) throws OXException {
+    public int getUnreadMessagesCount(String fullname) throws OXException {
         if (!isConnected()) {
             connect(false);
         }
@@ -517,7 +576,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             final Set<String> attrs = listEntry.getAttributes();
             if (null != attrs) {
-                for (final String attribute : attrs) {
+                for (String attribute : attrs) {
                     if ("\\NonExistent".equalsIgnoreCase(attribute)) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                     }
@@ -557,7 +616,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Try to connect to IMAP server
              */
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-            String tmpPass = getMailConfig().getPassword();
+            String tmpPass = config.getPassword();
             String login = config.getLogin();
             /*
              * Get properties
@@ -579,7 +638,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             String server = IDNA.toASCII(config.getServer());
             int port = config.getPort();
-            if (Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (debug || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+                // imapSession.setDebugOut(DevNullPrintStream.getInstance()); // Swallow superfluous JavaMail debug logging: "setDebug: JavaMail version x.y.z"
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.err);
             } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
@@ -712,6 +772,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
                 }
             }
+
             /*
              * Get parameterized IMAP session
              */
@@ -741,7 +802,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Check if debug should be enabled
              */
             final boolean certainUser = false;
-            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+            if (certainUser || debug || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+                // imapSession.setDebugOut(DevNullPrintStream.getInstance()); // Swallow superfluous JavaMail debug logging: "setDebug: JavaMail version x.y.z"
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
             } else if (PropUtil.getBooleanProperty(imapSession.getProperties(), "mail.imap.debugLog.enabled", false)) {
@@ -880,7 +942,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws OXException {
+    private boolean isPropagateAccount(IIMAPProperties imapConfProps) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             return true;
         }
@@ -901,13 +963,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If another error occurs
      */
-    public IMAPStore connectIMAPStore(final int maxCount) throws MessagingException, OXException {
+    public IMAPStore connectIMAPStore(int maxCount) throws MessagingException, OXException {
         return connectIMAPStore(maxCount, imapSession, server, port, login, password, clientIp);
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
-    private IMAPStore connectIMAPStore(final int maxCount, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
+    private IMAPStore connectIMAPStore(int maxCount, javax.mail.Session imapSession, String server, int port, String login, String pw, String clientIp) throws MessagingException, OXException {
         /*
          * Propagate client IP address
          */
@@ -1043,6 +1105,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapStore.connect(server, port, login, pw);
                 }
             }
+            //new Throwable("New IMAP connection").printStackTrace(System.out);
             AuditLogService auditLogService = Services.optService(AuditLogService.class);
             if (null != auditLogService) {
                 String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
@@ -1218,13 +1281,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         /*
                          * Clean-up temporary-down map
                          */
-                        for (final Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
+                        for (Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
                             final Entry<HostAndPort, Long> entry = iter.next();
                             if (System.currentTimeMillis() - entry.getValue().longValue() > MAX_TEMP_DOWN) {
                                 iter.remove();
                             }
                         }
-                        for (final Iterator<Entry<HostAndPortAndCredentials, StampAndOXException>> iter = map2.entrySet().iterator(); iter.hasNext();) {
+                        for (Iterator<Entry<HostAndPortAndCredentials, StampAndOXException>> iter = map2.entrySet().iterator(); iter.hasNext();) {
                             final Entry<HostAndPortAndCredentials, StampAndOXException> entry = iter.next();
                             if (System.currentTimeMillis() - entry.getValue().getStamp() > MAX_TEMP_DOWN) {
                                 iter.remove();
@@ -1526,7 +1589,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @param imapStore The IMAP store to close
      */
-    public static void closeSafely(final IMAPStore imapStore) {
+    public static void closeSafely(IMAPStore imapStore) {
         if (null != imapStore) {
             try {
                 imapStore.close();

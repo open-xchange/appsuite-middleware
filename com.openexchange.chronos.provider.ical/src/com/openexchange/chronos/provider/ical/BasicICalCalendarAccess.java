@@ -60,7 +60,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
@@ -105,15 +104,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
-    }
-
-    @Override
-    public CalendarSettings getSettings() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        CalendarSettings settings = getCalendarSettings(getExtendedProperties());
-        settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
-        return settings;
     }
 
     @Override
@@ -200,7 +190,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
                     iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, L(refreshIntervalFromFeed));
                 }
             } catch (IllegalArgumentException e) {
-                LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
+                LOG.debug("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
             }
         } else if (persistedInterval != 0) { // maybe deleted from ics in the meantime
             iCalConfig.remove(ICalCalendarConstants.REFRESH_INTERVAL);

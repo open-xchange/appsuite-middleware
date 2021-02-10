@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Freecharset
 Bundle-SymbolicName: com.openexchange.jcharset
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.commons.logging,
@@ -12,3 +12,4 @@ Bundle-Activator: com.openexchange.jcharset.JCharsetActivator
 Bundle-ClassPath: lib/jcharset-2.0.jar,
  .
 Export-Package: net.freeutils.charset
+Automatic-Module-Name: com.openexchange.jcharset

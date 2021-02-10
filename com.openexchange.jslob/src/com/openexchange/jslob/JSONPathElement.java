@@ -82,6 +82,9 @@ public final class JSONPathElement {
             StringBuilder composite = null;
             for (int i = 0; i < fields.length; i++) {
                 String field = fields[i];
+                if (field.isEmpty()) {
+                    continue;
+                }
                 if (field.endsWith("\\")) {
                     if (composite == null) {
                         composite = new StringBuilder();

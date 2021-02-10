@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -114,34 +115,34 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
     }
 
     @Override
-    public ServerProperty get(final String property, final int contextId, final int userId) throws OXException {
-        if (null == property) {
+    public ServerProperty get(final String propertyName, final int contextId, final int userId) throws OXException {
+        if (null == propertyName) {
             return null;
         }
-        ServerProperty serverProperty = properties.get(property);
+        ServerProperty serverProperty = properties.get(propertyName);
         if (null != serverProperty) {
             return serverProperty;
         }
         /*
          * no server property available yet, create if defined
          */
-        String value = configService.getProperty(property);
+        String value = configService.getProperty(propertyName);
         if (null == value) {
-            if (property.startsWith("com.openexchange.capability.")) {
-                Exception e = new Exception("No value for property \"" + property+ "\"");
+            if (propertyName.startsWith("com.openexchange.capability.")) {
+                Exception e = new Exception("No value for property \"" + propertyName+ "\"");
                 LOG.debug("Requested undefined server property as 'capability' through \"get({}, {}, {})\"",
-                    property, Integer.valueOf(contextId), Integer.valueOf(userId), e);
+                    propertyName, Integer.valueOf(contextId), Integer.valueOf(userId), e);
             }
             return EMPTY_PROPERTY;
         }
         serverProperty = new ServerProperty(value, METADATA_PROTECTED);
-        ServerProperty existingProperty = properties.putIfAbsent(property, serverProperty);
+        ServerProperty existingProperty = properties.putIfAbsent(propertyName, serverProperty);
         return null != existingProperty ? existingProperty : serverProperty;
     }
 
     @Override
     public String getScope() {
-    	return "server";
+    	return ConfigViewScope.SERVER.getScopeName();
     }
 
     @Override

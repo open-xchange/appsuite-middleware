@@ -171,7 +171,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
         try {
             return builder.build().toString();
         } catch (URISyntaxException e) {
-            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to build URI for contact.");
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to build URI for contact.", e);
         }
     }
 }

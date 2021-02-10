@@ -6,7 +6,6 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -17,7 +16,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -32,7 +30,6 @@ import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
-import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
@@ -57,7 +54,7 @@ import com.openexchange.user.UserService;
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DovecotPushRESTService {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
 
     private final ServiceLookup services;
 
@@ -92,7 +89,7 @@ public class DovecotPushRESTService {
          *   "imap-uidvalidity":123412341,
          *   "imap-uid":2345,
          *   "folder":"INBOX",
-         *   "event":"MessageNew",
+         *   "event":"messageNew",
          *   "from":"alice@barfoo.org",
          *   "subject":"Test",
          *   "snippet":"Hey guys\nThis is only a test..."
@@ -183,18 +180,6 @@ public class DovecotPushRESTService {
         }
     }
 
-    private OXException handleExecutionError(ExecutionException e) {
-        Throwable cause = e.getCause();
-        if (cause != null) {
-            if (cause instanceof RuntimeException || cause instanceof Error) {
-                return PushExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-            }
-            String message = cause.getMessage();
-            return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", cause), message == null ? "Not unchecked" : message);
-        }
-        return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", e), e.getMessage());
-    }
-
     private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {
         Map<String, Object> messageData = new LinkedHashMap<>(6);
         messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, folder));
@@ -241,6 +226,7 @@ public class DovecotPushRESTService {
             .messageData(messageData)
             .build();
         pushNotificationService.handle(notification);
+        LOGGER.info("Successfully submitted '{}' notification for user {} in context {} to notification service", KnownTopic.MAIL_NEW.getName(), I(userId), I(contextId));
     }
 
     private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {

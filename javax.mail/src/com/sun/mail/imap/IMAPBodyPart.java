@@ -362,6 +362,12 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return super.getHeader(name);
     }
 
+    @Override
+    public String getHeader(String name, String delimiter) throws MessagingException {
+    loadHeaders();
+    return super.getHeader(name, delimiter);
+    }
+
     public void setHeader(String name, String value)
 		throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");

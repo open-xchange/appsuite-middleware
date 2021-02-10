@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Change Servlet
 Bundle-SymbolicName: com.openexchange.passwordchange.servlet
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -28,6 +28,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.log,
  com.openexchange.login.multifactor,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.passwordchange,
  com.openexchange.server,
  com.openexchange.session,
@@ -43,3 +44,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.passwordchange.servlet.osgi.PasswordChangeServletActivator
+Automatic-Module-Name: com.openexchange.passwordchange.servlet

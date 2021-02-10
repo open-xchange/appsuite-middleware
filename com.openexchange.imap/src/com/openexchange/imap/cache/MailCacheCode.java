@@ -89,7 +89,7 @@ public enum MailCacheCode {
 
 	private final int code;
 
-	private MailCacheCode(final int code) {
+	private MailCacheCode(int code) {
 		this.code = code;
 	}
 

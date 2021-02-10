@@ -69,18 +69,18 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
     public void testRateLimit() throws InterruptedException, ApiException {
         String jsonString = "{\"sms\":\"+49276183850\"}";
 
-        CommonResponse response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+        CommonResponse response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
         checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
 
-        response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+        response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
         // Expecting an SENT_QUOTA_EXCEEDED exeption
         checkException(response.getCode(), OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED);
 
         // Wait until user should be able to send sms again
         Thread.sleep(11000);
 
-        response = onboardingApi.executeClientOnboarding(getSessionId(), "apple.iphone/mailsync", "sms", jsonString);
+        response = onboardingApi.executeClientOnboarding("apple.iphone/mailsync", "sms", jsonString);
         // Expecting an sipgate authorization exception
         checkException(response.getCode(), SipgateSMSExceptionCode.NOT_CONFIGURED);
     }

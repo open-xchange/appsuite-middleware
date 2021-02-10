@@ -5,7 +5,7 @@
       - Halo
     summary: Gets a contact picture.
     description: >
-      <b>Important:</b>
+      #### Important:
 
       This endpoint is deprecated and will be removed in the future. Use the new
       /contacts/picture endpoint instead.

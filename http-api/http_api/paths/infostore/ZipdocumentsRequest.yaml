@@ -4,8 +4,9 @@
     tags:
       - Infostore
     summary: Gets multiple documents as a ZIP archive.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: scan
         description: >

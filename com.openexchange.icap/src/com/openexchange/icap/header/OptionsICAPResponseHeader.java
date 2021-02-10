@@ -72,8 +72,6 @@ public class OptionsICAPResponseHeader extends ICAPResponseHeader {
      */
     public static final String SERVICE = "Service";
 
-    public static final String ENCAPSULATED = "Encapsulated";
-
     /**
      * A token identifying the format of the opt-body.
      */

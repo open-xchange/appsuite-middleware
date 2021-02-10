@@ -4,9 +4,12 @@
     tags:
       - Contacts
     summary: Search for contacts by birthday.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     description: Finds contacts whose birthday falls into a specified time range.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
         name: start
@@ -76,3 +79,8 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              
+

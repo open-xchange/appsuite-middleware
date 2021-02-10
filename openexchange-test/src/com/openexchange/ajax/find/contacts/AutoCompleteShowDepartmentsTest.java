@@ -67,10 +67,12 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.FindActiveFacet;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteBody;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteData;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteResponse;
@@ -168,7 +170,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     private void prepareUser(TestUser testUser, String department) throws ApiException {
         ApiClient client = clients.get(testUser.getUser());
         UserApi userApi = new UserApi(client);
-        CommonResponse response = userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
+        CommonResponse response = userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
         assertNull(response.getErrorDesc(), response.getError());
     }
 
@@ -181,7 +183,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         for (String key : randomUsers) {
             ApiClient client = clients.get(key);
             UserApi userApi = new UserApi(client);
-            userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
+            userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
         }
         super.tearDown();
     }
@@ -203,7 +205,12 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         body.setPrefix("*"); // Check all users
         body.setOptions(options);
 
-        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, RESULTS_LIMIT);
+        // only check users in the global address book
+        FindActiveFacet facet = new FindActiveFacet();
+        facet.facet("folder").value(FolderStorage.GLOBAL_ADDRESS_BOOK_ID);
+        body.addFacetsItem(facet);
+
+        FindAutoCompleteResponse response = findApi.doAutoComplete(CONTACTS_MODULE, body, RESULTS_LIMIT);
         FindAutoCompleteData data = response.getData();
         List<FindFacetValue> values = null;
         for (FindFacetData findFacetData : data.getFacets()) {
@@ -231,7 +238,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     public void testJslob() throws ApiException, JSONException {
         JSlobApi slobApi = new JSlobApi(apiClient);
 
-        JSlobsResponse response = slobApi.getJSlobList(apiClient.getSession(), Collections.singletonList(CONTACTS_JSLOB), null);
+        JSlobsResponse response = slobApi.getJSlobList(Collections.singletonList(CONTACTS_JSLOB), null);
         List<JSlobData> data = response.getData();
         assertEquals("Expected 1 jslob data object for '" + CONTACTS_JSLOB + "'", 1, data.size());
 

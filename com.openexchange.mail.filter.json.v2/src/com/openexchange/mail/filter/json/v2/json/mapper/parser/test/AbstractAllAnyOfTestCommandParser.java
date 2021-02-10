@@ -84,30 +84,40 @@ abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandPars
     }
 
     TestCommand parse(JSONObject jsonObject, Commands command, ServerSession session) throws OXException, JSONException, SieveException {
-        final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
+        JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
         int length = jarray.length();
 
-        final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(length);
+        ArrayList<TestCommand> commandlist = new ArrayList<>(length);
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
 
         for (int i = 0; i < length; i++) {
-            final JSONObject object = jarray.getJSONObject(i);
+            JSONObject object = jarray.getJSONObject(i);
             String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandName());
             CommandParser<TestCommand> parser = parserRegistry.get(commandName);
             commandlist.add(parser.parse(object, session));
         }
-        return new TestCommand(command, new ArrayList<Object>(), commandlist);
+        return new TestCommand(command, new ArrayList<>(), commandlist);
     }
 
+    /**
+     * Parses the specified {@link TestCommand} to a {@link JSONObject}.
+     *
+     * @param jsonObject The {@link JSONException}
+     * @param testCommand The {@link TestCommand}
+     * @param command The command
+     * @param transformToNotMatcher Whether to negate the test command
+     * @throws JSONException if a JSON error is occurred
+     * @throws OXException if an error is occurred
+     */
     void parse(JSONObject jsonObject, TestCommand testCommand, Commands command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommandName());
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         List<TestCommand> testCommands = testCommand.getTestCommands();
 
-        final JSONArray array = new JSONArray(testCommands.size());
-        for (final TestCommand testCommand2 : testCommands) {
+        JSONArray array = new JSONArray(testCommands.size());
+        for (TestCommand testCommand2 : testCommands) {
             CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandName());
-            final JSONObject object = new JSONObject();
+            JSONObject object = new JSONObject();
             parser.parse(object, testCommand2);
             array.put(object);
         }

@@ -74,7 +74,6 @@ import com.openexchange.timer.TimerService;
  */
 public class EndpointManagerImpl implements EndpointManager {
 
-    private final HttpClientService httpClientService;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final List<Endpoint> available;
     private final List<Endpoint> blacklist;
@@ -89,7 +88,6 @@ public class EndpointManagerImpl implements EndpointManager {
      */
     public EndpointManagerImpl(List<URI> endpointUris, String httpClientId, EndpointAvailableStrategy availableStrategy, long heartbeatIntervalMillis, TimerService timerService, HttpClientService httpClientService) {
         super();
-        this.httpClientService = httpClientService;
         if (null == endpointUris) {
             throw new IllegalArgumentException("End-points must not be null");
         }
@@ -100,11 +98,11 @@ public class EndpointManagerImpl implements EndpointManager {
         }
 
         total = size;
-        available = new ArrayList<Endpoint>(size);
+        available = new ArrayList<>(size);
         for (URI uri : endpointUris) {
             available.add(new EndpointImpl(uri));
         }
-        blacklist = new ArrayList<Endpoint>(size);
+        blacklist = new ArrayList<>(size);
         counter = new AtomicInteger(size);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClientService.getHttpClient(httpClientId), availableStrategy), heartbeatIntervalMillis, heartbeatIntervalMillis);
     }
@@ -189,7 +187,7 @@ public class EndpointManagerImpl implements EndpointManager {
     public List<Endpoint> getBlacklist() {
         lock.readLock().lock();
         try {
-            return new ArrayList<Endpoint>(blacklist);
+            return new ArrayList<>(blacklist);
         } finally {
             lock.readLock().unlock();
         }

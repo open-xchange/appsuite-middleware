@@ -1,0 +1,28 @@
+/share/management?action=unsubscribe:
+  put:
+    operationId: unsubscribeShare
+    tags:
+      - Share/Management
+      - FederatedSharing
+    summary: |
+             Unsubscribes from a certain share. However undelying accounts will not be deleted.
+             To delete the underlying account use the account API.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          An empty json object in case of success. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscribeShareBody'
+      description: >-
+        A JSON object containing the data for the update
+      required: true

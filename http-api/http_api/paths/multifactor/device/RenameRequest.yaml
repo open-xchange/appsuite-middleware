@@ -4,8 +4,9 @@
     tags:
       - Multifactor
     summary: Renames an existing multifactor device
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamMultifactorProviderName'
     responses:
       '200':

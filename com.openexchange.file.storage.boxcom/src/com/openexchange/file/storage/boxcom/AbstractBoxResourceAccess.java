@@ -87,8 +87,12 @@ public abstract class AbstractBoxResourceAccess {
 
     /**
      * Initializes a new {@link AbstractBoxResourceAccess}.
+     * 
+     * @param boxAccess The box access
+     * @param account The {@link FileStorageAccount}
+     * @param session The groupware session
      */
-    protected AbstractBoxResourceAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session) throws OXException {
+    protected AbstractBoxResourceAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session) {
         super();
         this.boxAccess = boxAccess;
         this.account = account;
@@ -204,7 +208,7 @@ public abstract class AbstractBoxResourceAccess {
                     }
                 }
             } catch (JSONException e1) {
-                return FileStorageExceptionCodes.JSON_ERROR.create(e.getMessage());
+                return FileStorageExceptionCodes.JSON_ERROR.create(e1, e.getMessage());
             }
         }
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());

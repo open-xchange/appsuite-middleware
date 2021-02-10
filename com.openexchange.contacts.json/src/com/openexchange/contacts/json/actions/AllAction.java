@@ -49,31 +49,32 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-
 
 /**
  * {@link AllAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class AllAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
+public class AllAction extends IDBasedContactAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
 
     /**
      * Initializes a new {@link AllAction}.
+     *
      * @param serviceLookup
      */
     public AllAction(ServiceLookup serviceLookup) {
@@ -81,28 +82,13 @@ public class AllAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-        SearchIterator<Contact> searchIterator;
-        if (null == request.optFolderID()) {
-            searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions(true));
-        } else {
-            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields, request.getSortOptions(true));
-        }
-        List<Contact> contacts = new LinkedList<Contact>();
-        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        } else if (excludeAdmin) {
-            int limit = request.getLimit();
-            if (limit >= 0 && contacts.size() > limit) {
-                contacts = contacts.subList(0, limit);
-            }
-        }
-
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        List<Contact> contacts = (null == request.optFolderID()) ? access.getContacts() : access.getContacts(request.getFolderID());
+        return new AJAXRequestResult(sortIfNeeded(request, contacts), getLatestTimestamp(contacts), "contact");
     }
 
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 }

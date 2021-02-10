@@ -64,8 +64,20 @@ public class StorageException extends AbstractAdminRmiException {
      *
      * @param cause The {@code RuntimeException} instance
      * @return The {@code StorageException} carrying given cause's message and stack trace
+     * @deprecated Use {@link #storageExceptionFor(RuntimeException)}
      */
+    @Deprecated
     public static StorageException storageExceotionFor(RuntimeException cause) {
+        return storageExceptionFor(cause);
+    }
+
+    /**
+     * Compiles a {@code StorageException} for given {@code RuntimeException} instance.
+     *
+     * @param cause The {@code RuntimeException} instance
+     * @return The {@code StorageException} carrying given cause's message and stack trace
+     */
+    public static StorageException storageExceptionFor(RuntimeException cause) {
         return wrapForRMI(cause);
     }
 
@@ -101,7 +113,7 @@ public class StorageException extends AbstractAdminRmiException {
      * @return The wrapping instance of <code>StorageException</code>
      */
     public static StorageException wrapForRMI(String message, Throwable t) {
-        Stack<Throwable> causeHierarchy = new Stack<Throwable>();
+        Stack<Throwable> causeHierarchy = new Stack<>();
         Throwable cause = t.getCause();
         while (cause != null) {
             causeHierarchy.push(cause);

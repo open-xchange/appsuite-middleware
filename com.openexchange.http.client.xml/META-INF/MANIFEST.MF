@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: XML Processors for OX HttpClient Framework
 Bundle-SymbolicName: com.openexchange.http.client.xml
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.http.client.xml.osgi.HTTPXMLActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -13,6 +13,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.http.client.exceptions,
  com.openexchange.osgi,
  com.openexchange.xml.jdom,
+ com.openexchange.xml.util,
  javax.xml.parsers,
  org.jdom2,
  org.jdom2.input,
@@ -21,3 +22,4 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.w3c.dom,
  org.xml.sax
+Automatic-Module-Name: com.openexchange.http.client.xml

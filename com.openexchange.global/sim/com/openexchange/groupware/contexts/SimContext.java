@@ -63,6 +63,8 @@ import java.util.Map;
  */
 public class SimContext implements Context {
 
+    private static final long serialVersionUID = -7118977669491491275L;
+    
     private final int id;
     private final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 

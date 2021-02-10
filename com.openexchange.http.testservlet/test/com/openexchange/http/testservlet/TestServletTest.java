@@ -49,6 +49,7 @@
 
 package com.openexchange.http.testservlet;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.io.IOException;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
@@ -88,17 +89,16 @@ public class TestServletTest {
     private Enumeration<String> parameters;
 
     /**
-     * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         // MEMBERS
         this.httpServletRequest = PowerMockito.mock(HttpServletRequest.class);
         this.httpServletResponse = PowerMockito.mock(HttpServletResponse.class);
         this.parameters = PowerMockito.mock(Enumeration.class);
 
         // MEMBER BEHAVIOUR
-        PowerMockito.when(this.parameters.hasMoreElements()).thenReturn(false);
+        PowerMockito.when(B(this.parameters.hasMoreElements())).thenReturn(B(false));
         PowerMockito.when(this.httpServletRequest.getHeaderNames()).thenReturn(this.parameters);
         try {
             ServletOutputStream servletOutputStream = PowerMockito.mock(ServletOutputStream.class);

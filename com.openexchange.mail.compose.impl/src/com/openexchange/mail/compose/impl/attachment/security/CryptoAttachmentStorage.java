@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.compose.impl.attachment.security;
 
-import static com.openexchange.mail.compose.impl.CryptoUtility.encrypt;
+import static com.openexchange.mail.compose.CryptoUtility.encrypt;
 import java.io.InputStream;
 import java.security.Key;
 import java.util.ArrayList;
@@ -67,11 +67,11 @@ import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
+import com.openexchange.mail.compose.CryptoUtility;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SizeProvider;
 import com.openexchange.mail.compose.SizeReturner;
 import com.openexchange.mail.compose.impl.AbstractCryptoAware;
-import com.openexchange.mail.compose.impl.CryptoUtility;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -170,12 +170,24 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
             return existent;
         }
 
-        boolean encrypted = optionalEncrypt.isPresent() ? optionalEncrypt.get().booleanValue() : hasEncryptedContent(attachment.getCompositionSpaceId(), session);
+        boolean exists = compositionSpaceStorage.existsCompositionSpace(session, attachment.getCompositionSpaceId());
+
+        boolean encrypted;
+        if (optionalEncrypt.isPresent()) {
+            encrypted = optionalEncrypt.get().booleanValue();
+        } else {
+            if (exists) {
+                encrypted = hasEncryptedContent(attachment.getCompositionSpaceId(), session);
+            } else {
+                // Composition space does not yet exist. Thus encryption is determined by configuration/capabilities.
+                encrypted = needsEncryption(session);
+            }
+        }
         if (encrypted == false) {
             return new FlagAndKey(false, null);
         }
 
-        Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), false, session);
+        Optional<Key> optionalKey = getKeyFor(attachment.getCompositionSpaceId(), !exists, session);
         if (!optionalKey.isPresent()) {
             throw CompositionSpaceErrorCode.MISSING_KEY.create(UUIDs.getUnformattedString(attachment.getCompositionSpaceId()));
         }

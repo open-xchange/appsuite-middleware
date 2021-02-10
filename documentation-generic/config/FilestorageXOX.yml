@@ -1,0 +1,49 @@
+feature_name: Filestore XOX
+feature_description: |
+  These properties configure access to file storages located on other OX App Suite installations.
+properties:
+    - key: com.openexchange.file.storage.xox.retryAfterErrorInterval
+      description: |
+        The time interval, in seconds, after which access to an error afflicted account should be retried.
+      defaultValue:  3600
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XOX"]
+    - key: com.openexchange.capability.filestorage_xox
+      description: |
+        Allows the user to integrate a share link from a different OX App Suite installation as filestorage.
+      defaultValue:  false
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XOX"]
+    - key: com.openexchange.file.storage.xox.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts for a user within the xox provider. A value of 0 disables the limit. 
+      defaultValue:  20
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XOX"]
+    - key: com.openexchange.file.storage.xox.autoRemoveUnknownShares
+      description: |
+        Enables or disables the automatic removal of accounts in the <i>cross-ox</i> file storage provider that refer to a no longer 
+        existing guest user in the remote context. 
+      defaultValue: true
+      version: 7.10.5
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: filestorage.properties
+      packageName: open-xchange-subscribe
+      tags: ["Federated Sharing", "XOX"]

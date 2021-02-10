@@ -180,16 +180,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
     @Override
     public boolean isAutologinEnabled() {
-        boolean result = false;
-        String autologinCookieMode = this.autologinCookieMode();
-        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(autologinCookieMode);
-
-        if (autologinMode == null) {
-            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: {}", autologinCookieMode);
-        } else {
-            result = (autologinMode == AutologinMode.OX_DIRECT || autologinMode == AutologinMode.SSO_REDIRECT);
-        }
-        return result;
+        return true;
     }
 
     @Override

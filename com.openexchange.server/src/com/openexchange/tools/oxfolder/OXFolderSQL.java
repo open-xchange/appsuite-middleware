@@ -97,6 +97,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
@@ -1545,7 +1546,7 @@ public final class OXFolderSQL {
         RetryingTransactionClosure.execute(updateSubfolderFlagClosure, folderId, writeCon);
     }
 
-    private static final String SQL_NUMSUB = "SELECT COUNT(ot.fuid) FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op" + " ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?" + " WHERE op.permission_id IN #IDS# AND op.admin_flag > 0 AND ot.parent = ?";
+    private static final String SQL_NUMSUB = "SELECT ot.fuid FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id IN #IDS# AND op.admin_flag > 0 AND ot.parent = ?";
 
     /**
      * @return the number of subfolders of given folder which can be moved according to user's permissions
@@ -1565,18 +1566,23 @@ public final class OXFolderSQL {
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
             rs = executeQuery(stmt);
-            if (rs.next()) {
-                return rs.getInt(1);
+            if (!rs.next()) {
+                return 0;
             }
+
+            int count = 1;
+            while (rs.next()) {
+                count++;
+            }
+            return count;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-        return 0;
     }
 
-    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
+    private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
     static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         insertFolderSQL(newFolderID, userId, folder, creatingTime, false, ctx, writeConArg);
@@ -3326,6 +3332,131 @@ public final class OXFolderSQL {
     private static String appendIndex(String name, int index) {
         StringBuilder sb = new StringBuilder(name).append(" (").append(index).append(")");
         return sb.toString();
+    }
+
+    /**
+     * Searches folders by given name.
+     *
+     * @param query The folder name to search for
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param module The module
+     * @param date The time stamp to filter for results that are newer
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param context The context
+     * @return Matching folder identifier as array
+     * @throws SQLException On SQL error
+     * @throws OXException On server error
+     */
+    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context) throws SQLException, OXException {
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        Connection readCon = DBPool.pickup(context);
+        try {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+        } finally {
+            DBPool.closeReaderSilent(readCon);
+        }
+    }
+
+    /**
+     * Searches folders by given name.
+     *
+     * @param query The folder name to search for
+     * @param folderIds The previous build list of visible folder identifiers to check
+     * @param date The time stamp to filter for results that are newer
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @param context The context
+     * @param readCon The connection
+     * @return Matching folder identifier as array
+     * @throws SQLException On SQL error
+     * @throws OXException On server error
+     */
+    public static int[] searchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
+        }
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        if (folderIds.length <= Databases.IN_LIMIT) {
+            return doSearchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+        }
+
+        TIntList result = null;
+        for (int[] partition : Arrays.partition(folderIds, Databases.IN_LIMIT)) {
+            int[] searchResult = doSearchInfostoreFoldersByName(query, partition, date, start, end, context, readCon);
+            if (searchResult.length > 0) {
+                if (result == null) {
+                    result = new TIntArrayList();
+                }
+                result.add(searchResult);
+            }
+        }
+        return result == null ? new int[0] : result.toArray();
+    }
+
+    private static int[] doSearchInfostoreFoldersByName(String query, int[] folderIds, long date, int start, int end, Context context, Connection readCon) throws SQLException, OXException {
+        if (null == readCon) {
+            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context);
+        }
+        if (null == folderIds || folderIds.length == 0) {
+            return new int[0];
+        }
+
+        // Compile SQL query
+        StringBuilder sb = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND module = ?");
+        sb.append(" AND fuid IN (?");
+        for (int i = folderIds.length - 1; i-- > 0;) {
+            sb.append(",?");
+        }
+        sb.append(")");
+        sb.append(" AND UPPER(fname) LIKE UPPER(?) ");
+        if (date >= 0) {
+            sb.append("AND creating_date > ? ");
+        }
+        if (0 < end) {
+            sb.append("ORDER BY fname ASC LIMIT ?,?");
+        } else {
+            sb.append("ORDER BY fname ASC LIMIT ?");
+        }
+
+        // Execute statement
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = readCon.prepareStatement(sb.toString());
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, FolderObject.INFOSTORE);
+            for (int folderId : folderIds) {
+                stmt.setInt(pos++, folderId);
+            }
+            stmt.setString(pos++, StringCollection.prepareForSearch(query.trim(), true, true));
+            if (date > -1) {
+                stmt.setLong(pos++, date);
+            }
+            stmt.setInt(pos++, start);
+            if (0 < end) {
+                stmt.setInt(pos++, end);
+            }
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return new int[0];
+            }
+
+            TIntList result = new TIntArrayList();
+            do {
+                result.add(rs.getInt(1));
+            } while (rs.next());
+            return result.toArray();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

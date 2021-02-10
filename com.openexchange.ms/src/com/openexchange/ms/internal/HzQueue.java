@@ -58,10 +58,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import com.hazelcast.collection.IQueue;
+import com.hazelcast.collection.ItemEvent;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IQueue;
-import com.hazelcast.core.ItemEvent;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
@@ -84,7 +84,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
     private final IQueue<Map<String, Object>> hzQueue;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, String> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, UUID> registeredListeners;
 
     /**
      * Initializes a new {@link HzQueue}.
@@ -94,7 +94,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzQueue = hz.getQueue(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, UUID>(8);
     }
 
     @Override
@@ -119,7 +119,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        String regID = registeredListeners.remove(listener);
+        UUID regID = registeredListeners.remove(listener);
         if (null != regID) {
             try {
                 hzQueue.removeItemListener(regID);
@@ -426,7 +426,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
 
     // ------------------------------------------------------------------------ //
 
-    private static final class HzMessageListener<E> implements com.hazelcast.core.ItemListener<Map<String, Object>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.collection.ItemListener<Map<String, Object>> {
 
         private final MessageListener<E> listener;
         private final String senderId;

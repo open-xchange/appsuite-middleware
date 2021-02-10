@@ -76,7 +76,7 @@ import com.openexchange.ajax.oauth.provider.EndpointTest;
 public class Protocol {
 
     public static String login(HttpClient client, OAuthParams params, String login, String password) throws IOException {
-        GETRequest getLoginForm = new GETRequest().setHostname(params.getHostname()).setClientId(params.getClientId()).setRedirectURI(params.getRedirectURI()).setState(params.getState()).setScope(params.getScope());
+        GETRequest getLoginForm = new GETRequest().setScheme(params.getScheme()).setHostname(params.getHostname()).setPort(params.getPort()).setClientId(params.getClientId()).setRedirectURI(params.getRedirectURI()).setState(params.getState()).setScope(params.getScope());
         GETResponse loginFormResponse = getLoginForm.execute(client);
         POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(login).setPassword(password);
         POSTResponse loginResponse = loginRequest.submit(client);
@@ -88,7 +88,7 @@ public class Protocol {
     }
 
     public static String authorize(HttpClient client, OAuthParams params, String sessionId) throws IOException {
-        GETRequest getAuthForm = new GETRequest().setHostname(params.getHostname()).setClientId(params.getClientId()).setRedirectURI(params.getRedirectURI()).setState(params.getState()).setScope(params.getScope()).setSessionId(sessionId);
+        GETRequest getAuthForm = new GETRequest().setScheme(params.getScheme()).setHostname(params.getHostname()).setPort(params.getPort()).setClientId(params.getClientId()).setRedirectURI(params.getRedirectURI()).setState(params.getState()).setScope(params.getScope()).setSessionId(sessionId);
         POSTRequest authRequest = getAuthForm.execute(client).preparePOSTRequest();
         POSTResponse authResponse = authRequest.submit(client);
         assertEquals(302, authResponse.getStatusCode());
@@ -110,7 +110,12 @@ public class Protocol {
         redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", params.getRedirectURI()));
         redeemAuthCodeParams.add(new BasicNameValuePair("code", authCode));
 
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder().setScheme("https").setHost(params.getHostname()).setPath(EndpointTest.TOKEN_ENDPOINT).build());
+        HttpPost redeemAuthCode = new HttpPost(
+            new URIBuilder()
+                .setScheme(params.getScheme())
+                .setHost(params.getHostname())
+                .setPort(params.getPort())
+                .setPath(EndpointTest.TOKEN_ENDPOINT).build());
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
 
         HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
@@ -135,5 +140,4 @@ public class Protocol {
         String authCode = Protocol.authorize(client, params, sessionId);
         return Protocol.redeemAuthCode(client, params, authCode);
     }
-
 }

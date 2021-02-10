@@ -294,6 +294,7 @@ public class TransportHandler {
         }
     }
 
+    @SuppressWarnings("null")
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
         final JSONObject retval = new JSONObject();
         final JSONObject total = new JSONObject();
@@ -329,7 +330,7 @@ public class TransportHandler {
         }
 
         if (wantsdetails) {
-            for (final ContextDetail tmp : contextDetails) {
+            for (final ContextDetail tmp : contextDetails) { // Guarded by 'wantsdetails'
                 final JSONObject contextDetailObjectJSON = new JSONObject();
                 contextDetailObjectJSON.put("id", tmp.getId());
                 contextDetailObjectJSON.put("age", tmp.getAge());

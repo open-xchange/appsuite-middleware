@@ -93,6 +93,7 @@ import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePrefer
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
+import com.openexchange.groupware.settings.tree.modules.mail.MaxMailSize;
 import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -114,7 +115,7 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.MailOAuthConstants;
+import com.openexchange.mail.json.OAuthScopeDescription;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
@@ -261,7 +262,15 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));
 
-        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailOAuthConstants.OAUTH_SEND_DATA, OAuthScopeDescription.SEND_DATA) {
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.OAUTH_READ_SCOPE) {
+
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
+            }
+        });
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.OAUTH_WRITE_SCOPE) {
 
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {
@@ -295,6 +304,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
+
+        MaxMailSize maxMailSize = new MaxMailSize(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, maxMailSize);
     }
 
     @Override
@@ -335,7 +347,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         }
 
         @Override
-        public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        public void decorate(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException {
             Object resultObject = result.getResultObject();
             if (null == resultObject) {
                 LOG.warn("Result object is null.");
@@ -390,7 +402,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
          * @param contact The contact to generate the image URL for
          * @return The image URL, or <code>null</code> if not available or something went wrong
          */
-        private String getImageURL(final ServerSession session, final Contact contact) {
+        private String getImageURL(ServerSession session, Contact contact) {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                 try {
                     return ContactUtil.generateImageUrl(session, contact);
@@ -401,7 +413,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             return null;
         }
 
-        private ContactSearchObject createContactSearchObject(final InternetAddress from) {
+        private ContactSearchObject createContactSearchObject(InternetAddress from) {
             final ContactSearchObject searchObject = new ContactSearchObject();
             // searchObject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID); // Global address book
             searchObject.setOrSearch(true);

@@ -107,12 +107,12 @@ public final class MailReloadable implements Reloadable {
      *
      * @param reloadable The instance to add
      */
-    public void addReloadable(final Reloadable reloadable) {
+    public void addReloadable(Reloadable reloadable) {
         reloadables.add(reloadable);
     }
 
     @Override
-    public void reloadConfiguration(final ConfigurationService configService) {
+    public void reloadConfiguration(ConfigurationService configService) {
         try {
             final MailProperties mailProperties = MailProperties.getInstance();
             if (null != mailProperties) {
@@ -134,7 +134,7 @@ public final class MailReloadable implements Reloadable {
             LOGGER.warn("Failed to reload mail properties", e);
         }
 
-        for (final Reloadable reloadable : reloadables) {
+        for (Reloadable reloadable : reloadables) {
             reloadable.reloadConfiguration(configService);
         }
     }

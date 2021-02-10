@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.console.context;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,7 +170,10 @@ public abstract class ContextAbstraction extends UserAbstraction {
     private final static char OPT_QUOTA_SHORT = 'q';
 
     private final static String OPT_QUOTA_LONG = "quota";
+
+    @SuppressWarnings("hiding")
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "master Admin password";
+    @SuppressWarnings("hiding")
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "master Admin user name";
 
     private final static String OPT_GAB_MODE = "gabMode";
@@ -213,7 +218,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected void parseAndSetContextQuota(final AdminParser parser, final Context ctx) {
         final String contextQuota = (String) parser.getOptionValue(this.contextQuotaOption);
         if (null != contextQuota) {
-            ctx.setMaxQuota(Long.parseLong(contextQuota));
+            ctx.setMaxQuota(L(Long.parseLong(contextQuota)));
         }
     }
 
@@ -285,7 +290,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void sysoutOutput(Context[] ctxs, boolean continuation, AdminParser parser) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final Context ctx : ctxs) {
             data.add(makeData(ctx, new ClosureInterface() {
 
@@ -297,7 +302,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
 
         final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(parser);
-        final ArrayList<String> alignment = new ArrayList<String>();
+        final ArrayList<String> alignment = new ArrayList<>();
         alignment.add("r");
         alignment.add("r");
         alignment.add("l");
@@ -309,7 +314,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         for (int i = 0; i < humanReadableColumnsOfAllExtensions.size(); i++) {
             alignment.add("l");
         }
-        final ArrayList<String> columnnames = new ArrayList<String>();
+        final ArrayList<String> columnnames = new ArrayList<>();
         columnnames.add("cid");
         columnnames.add("fid");
         columnnames.add("fname");
@@ -324,9 +329,9 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void sysoutOutput(Quota[] quotas) throws InvalidDataException {
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (Quota quota : quotas) {
-            ArrayList<String> curData = new ArrayList<String>(2);
+            ArrayList<String> curData = new ArrayList<>(2);
 
             {
                 String module = quota.getModule();
@@ -345,11 +350,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
             data.add(curData);
         }
 
-        ArrayList<String> alignment = new ArrayList<String>();
+        ArrayList<String> alignment = new ArrayList<>();
         alignment.add("r");
         alignment.add("l");
 
-        ArrayList<String> columnnames = new ArrayList<String>();
+        ArrayList<String> columnnames = new ArrayList<>();
         columnnames.add("module");
         columnnames.add("qlimit");
 
@@ -362,7 +367,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected void precsvinfos(Context[] ctxs, boolean continuation, AdminParser parser) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("filestore_id");
         columns.add("filestore_name");
@@ -373,7 +378,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("lmappings");
         columns.add("attributes");
         columns.addAll(getCSVColumnsOfAllExtensions(parser));
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final Context ctx_tmp : ctxs) {
             data.add(makeData(ctx_tmp, new ClosureInterface() {
@@ -390,13 +395,13 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void precsvinfos(Quota[] quotas) throws InvalidDataException {
-        ArrayList<String> columns = new ArrayList<String>();
+        ArrayList<String> columns = new ArrayList<>();
         columns.add("module");
         columns.add("limit");
 
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (Quota quota : quotas) {
-            ArrayList<String> curData = new ArrayList<String>(2);
+            ArrayList<String> curData = new ArrayList<>(2);
 
             {
                 String module = quota.getModule();
@@ -489,7 +494,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         final String optionvalue = (String) parser.getOptionValue(this.databaseIdOption);
         if (null != optionvalue) {
-            dbid = Integer.parseInt(optionvalue);
+            dbid = I(Integer.parseInt(optionvalue));
             db.setId(dbid);
         }
     }
@@ -511,7 +516,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
-        filestoreid = Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption));
+        filestoreid = I(Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption)));
         final Filestore fs = new Filestore(filestoreid);
         return fs;
     }
@@ -606,24 +611,50 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return filestoreid;
     }
 
+    /**
+     * Returns all human readable columns of all extensions
+     * 
+     * @param parser The admin parser
+     * @return A list with all human readable columns
+     */
     protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
+    /**
+     * Returns all human readable data of all extensions
+     * 
+     * @param ctx The context
+     * @param parser The admin parser
+     * @return A list with all human readable data
+     */
     protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
+    /**
+     * Returns all CSV columns of all extensions
+     * 
+     * @param parser The admin parser
+     * @return A list with all CSV columns
+     */
     protected Collection<? extends String> getCSVColumnsOfAllExtensions(final AdminParser parser) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
-    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx_tmp, final AdminParser parser) {
-        return new ArrayList<String>();
+    /**
+     * Returns all CSV data of all extensions
+     * 
+     * @param ctx The context
+     * @param parser The admin parser
+     * @return A list with all CSV data
+     */
+    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, final AdminParser parser) {
+        return new ArrayList<>();
     }
 
     private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface, final boolean csv) {
-        final ArrayList<String> srv_data = new ArrayList<String>();
+        final ArrayList<String> srv_data = new ArrayList<>();
         srv_data.add(String.valueOf(ctx.getId()));
 
         final Integer filestoreId = ctx.getFilestoreId();

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
@@ -95,7 +95,7 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         try {
             return hzInstance.getMap(mapName_tmp);
         } catch (HazelcastInstanceNotActiveException e) {
-            handleNotActiveException(e);
+            handleNotActiveException();
             // Obviously Hazelcast is absent
             return null;
         } catch (HazelcastException e) {
@@ -105,7 +105,7 @@ public class HzDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         }
     }
 
-    private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+    private void handleNotActiveException() {
         notActive.set(true);
     }
 

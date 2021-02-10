@@ -72,6 +72,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -1495,7 +1496,7 @@ public class CalendarUtils {
          */
         RecurrenceIterator<RecurrenceId> iterator;
         try {
-            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
+            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, asDate(recurrenceIds.first().getValue()), null);
         } catch (OXException e) {
             getLogger(CalendarUtils.class).info("Error getting iterator for \"{}\", assuming all recurrence ids as invalid.", recurrenceData, e);
             return validRecurrenceIds;
@@ -2342,6 +2343,23 @@ public class CalendarUtils {
         return removed;
     }
 
+    /**
+     * Optionally gets the value of (the first) extended property with a specific name.
+     * 
+     * @param <T> The value's type
+     * @param extendedProperties The extended properties to get the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property to get
+     * @param clazz The class to cast the value to
+     * @return
+     */
+    public static <T> T optExtendedPropertyValue(ExtendedProperties extendedProperties, String name, Class<T> clazz) {
+        ExtendedProperty extendedProperty = optExtendedProperty(extendedProperties, name);
+        if (null != extendedProperty) {
+            return clazz.cast(extendedProperty.getValue());
+        }
+        return null;
+    }
+
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
     }
@@ -2374,6 +2392,53 @@ public class CalendarUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Sets the value of (the first) extended property parameter with a specific name. If no such parameter exists, a new one is added
+     * implicitly. If the passed parameter list is <code>null</code>, a new list is prepared implicitly.
+     * 
+     * @param parameters The parameters to set the value of the matching one from, or <code>null</code> to initialize a new list
+     * @param name The name of the extended property parameter to set
+     * @param value The value of the extended property parameter to set
+     * @return The modified or possibly newly created list of extended property parameters
+     */
+    public static List<ExtendedPropertyParameter> setExtendedParameter(List<ExtendedPropertyParameter> parameters, String name, String value) {
+        ExtendedPropertyParameter parameter = new ExtendedPropertyParameter(name, value);
+        if (null == parameters) {
+            List<ExtendedPropertyParameter> propertyParameters = new ArrayList<ExtendedPropertyParameter>();
+            propertyParameters.add(parameter);
+            return propertyParameters;
+        }
+        for (ListIterator<ExtendedPropertyParameter> iterator = parameters.listIterator(); iterator.hasNext();) {
+            if (name.equals(iterator.next().getName())) {
+                iterator.set(parameter);
+                return parameters;
+            }
+        }
+        parameters.add(parameter);
+        return parameters;
+    }
+
+    /**
+     * Removes the (first) extended property parameter with a specific name. If no such parameter exists, or the passed parameter list
+     * reference is <code>null</code>, nothing happens and the list is returned as-is.
+     * 
+     * @param parameters The parameters to remove the matching one from, or <code>null</code> if not set
+     * @param name The name of the extended property parameter to remove
+     * @return The possibly modified list of extended property parameters
+     */
+    public static List<ExtendedPropertyParameter> removeExtendedParameter(List<ExtendedPropertyParameter> parameters, String name) {
+        if (null == parameters || parameters.isEmpty()) {
+            return parameters;
+        }
+        for (Iterator<ExtendedPropertyParameter> iterator = parameters.iterator(); iterator.hasNext();) {
+            if (name.equals(iterator.next().getName())) {
+                iterator.remove();
+                break;
+            }
+        }
+        return parameters;
     }
 
     /**

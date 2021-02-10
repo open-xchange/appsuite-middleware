@@ -250,7 +250,7 @@ public final class IDGenerator {
         @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
-            if (type <= -1) {
+            if (type < 0) {
                 retval = getInternal(type, con);
             } else {
                 retval = getInternal(contextId, type, con);
@@ -376,7 +376,7 @@ public final class IDGenerator {
         @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
-            if (type <= -1) {
+            if (type < 0) {
                 retval = getInternal(type, con);
             } else {
                 retval = getInternal(contextId, type, con);

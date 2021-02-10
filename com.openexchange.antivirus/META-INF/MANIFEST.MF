@@ -2,19 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Antivirus Bundle
 Bundle-SymbolicName: com.openexchange.antivirus
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Automatic-Module-Name: com.openexchange.antivirus
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.antivirus,
  com.openexchange.antivirus.exceptions
-Import-Package: com.openexchange.ajax.fileholder,
+Import-Package: com.google.common.collect,
+ com.openexchange.ajax.fileholder,
  com.openexchange.capabilities,
  com.openexchange.config.lean,
  com.openexchange.exception,
  com.openexchange.filemanagement,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
+ com.openexchange.servlet,
  com.openexchange.session,
+ javax.servlet.http,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker

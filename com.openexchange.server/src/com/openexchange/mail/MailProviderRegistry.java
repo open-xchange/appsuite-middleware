@@ -117,7 +117,7 @@ public final class MailProviderRegistry {
      * @return The appropriate mail provider
      * @throws OXException If no supporting mail provider can be found
      */
-    public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws OXException {
+    public static MailProvider getMailProviderBySession(Session session, int accountId) throws OXException {
         final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
         final String key = MailSessionParameterNames.getParamMailProvider();
         MailProvider provider;
@@ -162,7 +162,7 @@ public final class MailProviderRegistry {
      * @param serverUrl The mail server URL
      * @return The appropriate mail provider
      */
-    public static MailProvider getMailProviderByURL(final String serverUrl) {
+    public static MailProvider getMailProviderByURL(String serverUrl) {
         /*
          * Get appropriate provider
          */
@@ -175,7 +175,7 @@ public final class MailProviderRegistry {
      * @param protocolName The mail protocol; e.g. <code>"imap"</code>
      * @return The appropriate mail provider or <code>null</code>
      */
-    public static MailProvider getMailProvider(final String protocolName) {
+    public static MailProvider getMailProvider(String protocolName) {
         if (null == protocolName) {
             return null;
         }
@@ -196,7 +196,7 @@ public final class MailProviderRegistry {
      * @param protocolName The protocol name
      * @return The mail provider or <code>null</code>
      */
-    public static MailProvider getRealMailProvider(final String protocolName) {
+    public static MailProvider getRealMailProvider(String protocolName) {
         if (null == protocolName) {
             return null;
         }
@@ -220,7 +220,7 @@ public final class MailProviderRegistry {
      *         otherwise <code>false</code>
      * @throws OXException If provider's start-up fails
      */
-    public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws OXException {
+    public static boolean registerMailProvider(String protocol, MailProvider provider) throws OXException {
         try {
             final Protocol p = Protocol.parseProtocol(protocol);
             if (Protocol.PROTOCOL_ALL.equals(p)) {
@@ -261,7 +261,7 @@ public final class MailProviderRegistry {
      * Unregisters all mail providers
      */
     public static void unregisterAll() {
-        for (final Iterator<MailProvider> iter = PROVIDERS.values().iterator(); iter.hasNext();) {
+        for (Iterator<MailProvider> iter = PROVIDERS.values().iterator(); iter.hasNext();) {
             final MailProvider provider = iter.next();
             /*
              * Perform shutdown
@@ -303,7 +303,7 @@ public final class MailProviderRegistry {
      * @return The unregistered mail provider, or <code>null</code>
      * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProvider(final MailProvider provider) throws OXException {
+    public static MailProvider unregisterMailProvider(MailProvider provider) throws OXException {
         final Protocol protocol = provider.getProtocol();
         if (Protocol.PROTOCOL_ALL.equals(protocol)) {
             AllMailProvider all;
@@ -356,7 +356,7 @@ public final class MailProviderRegistry {
      *         protocol
      * @throws OXException If provider's shut-down fails
      */
-    public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws OXException {
+    public static MailProvider unregisterMailProviderByProtocol(String protocol) throws OXException {
         if (Protocol.ALL.equals(protocol)) {
             AllMailProvider all;
             do {
@@ -381,7 +381,7 @@ public final class MailProviderRegistry {
         /*
          * Non-all
          */
-        for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = PROVIDERS.entrySet().iterator(); iter.hasNext();) {
+        for (Iterator<Map.Entry<Protocol, MailProvider>> iter = PROVIDERS.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
                 iter.remove();

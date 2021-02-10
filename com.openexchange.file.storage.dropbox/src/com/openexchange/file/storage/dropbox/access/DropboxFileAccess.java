@@ -76,8 +76,9 @@ import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.files.SearchErrorException;
-import com.dropbox.core.v2.files.SearchMatch;
-import com.dropbox.core.v2.files.SearchResult;
+import com.dropbox.core.v2.files.SearchMatchV2;
+import com.dropbox.core.v2.files.SearchOptions;
+import com.dropbox.core.v2.files.SearchV2Result;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
@@ -187,7 +188,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
             //      maybe we can introduce something like "-1" for "unknown number of versions"
             String path = toPath(folderId, id);
-            ListRevisionsResult revisions = client.files().listRevisions(path, 100);
+            ListRevisionsResult revisions = client.files().listRevisionsBuilder(path).withLimit(Long.valueOf(100)).start();
             if (revisions != null) {
                 dropboxFile.setNumberOfVersions(revisions.getEntries().size());
             }
@@ -233,12 +234,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 try {
                     if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
                         String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
-                        Metadata metadata = client.files().move(path, filePath);
+                        Metadata metadata = client.files().moveV2(path, filePath).getMetadata();
                         path = metadata.getPathDisplay();
                     }
 
-                    Metadata metadata = client.files().move(path, toPath);
-                    DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                    Metadata metadata = client.files().moveV2(path, toPath).getMetadata();
+                    DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
                     file.copyFrom(dbxFile, copyFields);
                     return dbxFile.getIDTuple();
                 } catch (RelocationErrorException e) {
@@ -271,11 +272,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             String destPath = toPath(destFolder, destName.toString());
 
             // Copy
-            Metadata metadata = client.files().copy(path, destPath);
+            Metadata metadata = client.files().copyV2(path, destPath).getMetadata();
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, destPath);
             }
-            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+            DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
             if (update != null) {
                 update.copyFrom(dbxFile, copyFields);
             }
@@ -295,11 +296,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         String destPath = toPath(destFolder, destName);
 
         try {
-            Metadata metadata = client.files().move(path, destPath);
+            Metadata metadata = client.files().moveV2(path, destPath).getMetadata();
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, destPath);
             }
-            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+            DropboxFile dbxFile = new DropboxFile(FileMetadata.class.cast(metadata), userId);
             if (update != null) {
                 update.copyFrom(dbxFile, copyFields);
             }
@@ -342,7 +343,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             for (Metadata entry : entries) {
                 if (entry instanceof FileMetadata) {
                     try {
-                        client.files().delete(entry.getPathDisplay());
+                        client.files().deleteV2(entry.getPathDisplay());
                     } catch (DeleteErrorException e) {
                         LOG.debug("The file '{}' could not be deleted. Skipping.", entry.getPathDisplay(), e);
                     }
@@ -367,7 +368,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             for (IDTuple id : ids) {
                 String path = toPath(id.getFolder(), id.getId());
                 try {
-                    client.files().delete(path);
+                    client.files().deleteV2(path);
                 } catch (DeleteErrorException e) {
                     LOG.debug("The file '{}' could not be deleted. Skipping.", path, e);
                     ret.add(id);
@@ -746,7 +747,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = length - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), true, null, false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -846,23 +847,23 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws DbxException if a generic Dropbox error is occurred
      */
     private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
-        SearchResult searchResult = client.files().searchBuilder(folderId, pattern).start();
+        SearchV2Result searchResult = client.files().searchV2Builder(pattern).withOptions(SearchOptions.newBuilder().withPath(folderId).build()).start();
 
         List<File> results = new ArrayList<>();
         boolean hasMore = false;
         do {
-            hasMore = searchResult.getMore();
-            List<SearchMatch> matches = searchResult.getMatches();
-            for (SearchMatch match : matches) {
-                Metadata metadata = match.getMetadata();
+            hasMore = searchResult.getHasMore();
+            List<SearchMatchV2> matches = searchResult.getMatches();
+            for (SearchMatchV2 match : matches) {
+                Metadata metadata = match.getMetadata().getMetadataValue();
                 String parent = getParent(metadata.getPathDisplay());
                 if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
-                    results.add(new DropboxFile((FileMetadata) metadata, userId));
+                    results.add(new DropboxFile(FileMetadata.class.cast(metadata), userId));
                 }
             }
             if (hasMore) {
-                long start = searchResult.getStart();
-                searchResult = client.files().searchBuilder(folderId, pattern).withStart(L(start)).start();
+                String cursor = searchResult.getCursor();
+                searchResult = client.files().searchContinueV2(cursor);
             }
         } while (hasMore);
 

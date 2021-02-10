@@ -95,7 +95,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeAlarmsChanges() throws Exception {
         // attendee should be able to adjust his alarms
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testAddSingleAlarm", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testAddSingleAlarm", folderId), true);
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
@@ -116,7 +116,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeRemoveFromEvent() throws Exception {
         // attendee should be able to remove himself from an event
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testAttendeeRemoveSingle", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testAttendeeRemoveSingle", folderId), true);
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
@@ -156,7 +156,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeParticipationStatus() throws Exception {
         // attendee should be able to change his participation status
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testParticipationSingle", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testParticipationSingle", folderId), true);
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
@@ -180,7 +180,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeePermissionRestrictions() throws Exception {
         // attendee should not be able to do anything else
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testPermissionSingle", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testPermissionSingle", folderId), true);
         String expectedEventId = expectedEventData.getId();
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
         EventData updatedEvent = eventManager.updateEvent(expectedEventData);

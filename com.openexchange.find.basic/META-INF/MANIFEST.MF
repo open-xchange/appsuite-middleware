@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.davekoelle,
- com.google.common.collect;version="23.0.0",
+ com.google.common.collect,
+ com.openexchange.annotation,
  com.openexchange.api2,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
@@ -19,6 +20,8 @@ Import-Package: com.davekoelle,
  com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.contact,
+ com.openexchange.contact.common,
+ com.openexchange.contact.provider.composition,
  com.openexchange.contacts.json.mapping,
  com.openexchange.conversion,
  com.openexchange.exception,
@@ -102,3 +105,4 @@ Import-Package: com.davekoelle,
 Export-Package: com.openexchange.find.basic.common,
  com.openexchange.find.basic.drive
 Bundle-ClassPath: .
+Automatic-Module-Name: com.openexchange.find.basic

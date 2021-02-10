@@ -50,12 +50,36 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
-import static com.openexchange.oauth.OAuthConstants.*;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ACCESS_DENIED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_NONCE_USED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_ABSENT;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_UNKNOWN;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_INVALID;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TIMESTAMP_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_EXPIRED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REVOKED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_USED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_USER_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERIFIER_INVALID;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERSION_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_ABSENT;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_REJECTED;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
@@ -88,6 +112,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOAuthTokenAction.class);
 
     /**
      * Initializes a new {@link AbstractOAuthTokenAction}.
@@ -148,7 +174,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         /*
          * Invoke
          */
-        final Map<String, Object> arguments = new HashMap<String, Object>(3);
+        final Map<String, Object> arguments = new HashMap<>(3);
         {
             final String displayName = request.getParameter(AccountField.DISPLAY_NAME.getName());
             if (Strings.isEmpty(displayName)) {
@@ -187,6 +213,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         try {
             return Integer.parseInt(id);
         } catch (NumberFormatException e) {
+            LOGGER.debug("Cannot parse account id from {}", id, e);
             return -1;
         }
     }

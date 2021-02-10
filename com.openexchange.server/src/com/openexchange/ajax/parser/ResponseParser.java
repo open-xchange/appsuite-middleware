@@ -120,6 +120,21 @@ public final class ResponseParser {
                 response.setException(exception);
             }
         }
+        if (json.has(ResponseFields.WARNINGS)) {
+            JSONObject warningObject = json.optJSONObject(ResponseFields.WARNINGS);
+            JSONArray warningArray = json.optJSONArray(ResponseFields.WARNINGS);
+            if (warningObject != null) {
+                OXException warning = parseException(warningObject);
+                if (warning != null)
+                    response.addWarning(warning);
+            } else if (warningArray != null) {
+                for (Object item : warningArray) {
+                    OXException warning = parseException((JSONObject) item);
+                    if (warning != null)
+                        response.addWarning(warning);
+                }
+            }
+        }
     }
 
     /**
@@ -274,14 +289,16 @@ public final class ResponseParser {
      *            the error message arguments will be stored in this exception.
      */
     private static Object[] parseErrorMessageArgs(final JSONArray jArgs) {
-        if (null != jArgs) {
-            final Object[] args = new Object[jArgs.length()];
-            for (int i = 0; i < jArgs.length(); i++) {
-                args[i] = jArgs.opt(i);
-            }
-            return args;
+        if (null == jArgs) {
+            return new Object[0];
         }
-        return new Object[0];
+
+        int length = jArgs.length();
+        Object[] args = new Object[length];
+        for (int i = length; i-- > 0;) {
+            args[i] = jArgs.opt(i);
+        }
+        return args;
     }
 
     private static void parseProblematics(final JSONArray probs, final OXException exc) throws JSONException {

@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -153,7 +153,8 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
 
     SCR=SCR-322.admin
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       prop_file=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
       orig_line='# publication (Permission to publish content of folders)'
       new_line='# publication (Permission to publish content of folders, Deprecated with v7.10.2, will have no impact) [DEPRECATED]'
@@ -161,10 +162,11 @@ if [ ${1:-0} -eq 2 ]; then
         sed -i -e "s/${orig_line}/${new_line}/" ${prop_file}
       }
       ox_scr_done ${SCR}
-    }
+    fi
 
     SCR=SCR-338
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       pfile=/opt/open-xchange/etc/plugin/hosting.properties
       prop_key=CONTEXT_STORAGE
       old_default=com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
@@ -175,10 +177,11 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property ${prop_key} ${new_default} ${pfile}
       fi
       ox_scr_done ${SCR}
-    }
+    fi
 
     SCR=SCR-466
-    ox_scr_todo ${SCR} && {
+    if ox_scr_todo ${SCR}
+    then
       pfile=/opt/open-xchange/etc/AdminUser.properties
       p_key=DEFAULT_PASSWORD_MECHANISM
       old_default=SHA
@@ -189,7 +192,7 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property ${p_key} ${new_default} ${pfile}
       fi
       ox_scr_done ${SCR}
-    }
+    fi
 
     # SCR-704
     ox_add_property ALLOW_CREATING_NEW_SCHEMA_IF_ALL_LOCKED_OR_NEED_UPDATE true /opt/open-xchange/etc/plugin/hosting.properties
@@ -218,28 +221,18 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
-* Tue Feb 02 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-02-08 (5945)
-* Tue Jan 19 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-25 (5937)
-* Tue Jan 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-11 (5930)
-* Wed Dec 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-12-14 (5924)
-* Mon Nov 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-23 (5905)
-* Wed Nov 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-09 (5891)
-* Tue Oct 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-26 (5888)
+* Fri Feb 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.5 release
+* Mon Feb 01 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.5 release
+* Fri Jan 15 2021 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.5 release
+* Thu Dec 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.10.5 release
+* Fri Nov 27 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-12 (5879)
-* Wed Sep 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-29 (5869)
-* Fri Sep 11 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-14 (5857)
-* Mon Aug 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-08-24 (5842)
+prepare for 7.10.5 release
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>

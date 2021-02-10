@@ -58,7 +58,7 @@ import java.util.Date;
  */
 public class GenericMethodSupport {
 
-    protected <T> T get(final int i, final Class<T> klass, final Object... args) {
+    protected <T> T get(final int i, @SuppressWarnings("unused") final Class<T> klass, final Object... args) {
         if (i >= args.length) {
             return null;
         }
@@ -141,12 +141,4 @@ public class GenericMethodSupport {
         }
         return coerceToLong(args[i]);
     }
-
-    private double coerceToDouble(final Object o) {
-        if (o instanceof Number) {
-            return ((Number) o).doubleValue();
-        }
-        return Double.parseDouble(o.toString());
-    }
-
 }

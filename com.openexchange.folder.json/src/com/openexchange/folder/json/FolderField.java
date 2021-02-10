@@ -173,6 +173,10 @@ public enum FolderField {
      */
     BITS(-1, "bits"),
     /**
+     * The permission's identifier
+     */
+    IDENTIFIER(-1, "identifier"),
+    /**
      * The permission's entity
      */
     ENTITY(-1, "entity"),
@@ -211,7 +215,16 @@ public enum FolderField {
     /**
      * The meta field
      */
-    META(23, "meta");
+    META(23, "meta"),
+    /**
+     * The created_from field
+     */
+    CREATED_FROM(51, "created_from"),
+    /**
+     * The modified_from field
+     */
+    MODIFIED_FROM(52, "modified_from"),
+    ;
 
     private final int column;
 

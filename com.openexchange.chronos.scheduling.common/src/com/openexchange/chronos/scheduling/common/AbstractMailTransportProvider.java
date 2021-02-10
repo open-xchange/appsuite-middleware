@@ -65,6 +65,7 @@ import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.TransportProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -124,9 +125,13 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
      */
     protected boolean preferNoReplyAccount(Session session) throws OXException {
         /*
-         * use no-reply if user has no mail module permission
+         * use no-reply if user has no mail module permission or is a guest
          */
-        if (null == session || false == ServerSessionAdapter.valueOf(session).getUserConfiguration().hasWebMail()) {
+        if (null == session) {
+            return true;
+        }
+        UserConfiguration userConfiguration = ServerSessionAdapter.valueOf(session).getUserConfiguration();
+        if (userConfiguration.isGuest() || false == userConfiguration.hasWebMail()) {
             return true;
         }
         /*

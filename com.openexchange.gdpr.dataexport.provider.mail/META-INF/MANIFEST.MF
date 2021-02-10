@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The data export provider bundle for mail
 Bundle-SymbolicName: com.openexchange.gdpr.dataexport.provider.mail
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
@@ -67,3 +67,4 @@ Import-Package: com.google.common.collect,
 Bundle-Activator: com.openexchange.gdpr.dataexport.provider.mail.osgi.MailDataExportProviderActivator
 Export-Package: com.openexchange.gdpr.dataexport.provider.mail,
  com.openexchange.gdpr.dataexport.provider.mail.generator
+Automatic-Module-Name: com.openexchange.gdpr.dataexport.provider.mail

@@ -59,19 +59,22 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class AppPasswordStrings implements LocalizableStrings {
 
-    // The display name in context of the maximum allowed number of app-specific passwords a user may create. 
+    // The display name in context of the maximum allowed number of app-specific passwords a user may create.
     public static final String QUOTA_MODULE_NAME = "App-specific passwords";
 
-    // The display name used for a Drive Sync App / id "drive" 
+    // The display name used for a Drive Sync App / id "drive"
     public static final String DISPLAY_NAME_DRIVE = "Drive Sync App";
 
-    // The display name used for a Calendar Client (CalDAV) / id "caldav" 
+    // The display name used for a Calendar Client (CalDAV) / id "caldav"
     public static final String DISPLAY_NAME_CALDAV = "Calendar Client (CalDAV)";
 
-    // The display name used for a Addressbook Client (CardDAV) / id "carddav" 
+    // The display name used for a Addressbook Client (CardDAV) / id "carddav"
     public static final String DISPLAY_NAME_CARDDAV = "Addressbook Client (CardDAV)";
 
-    // The display name used for a WebDAV Client / id "webdav" 
+    // The display name used for a Calendar and Addressbook Client (CalDAV/CardDAV) / id "calcarddav"
+    public static final String DISPLAY_NAME_CALCARDDAV = "Calendar and Addressbook Client (CalDAV/CardDAV)";
+
+    // The display name used for a WebDAV Client / id "webdav"
     public static final String DISPLAY_NAME_WEBDAV = "WebDAV Client";
 
     /**

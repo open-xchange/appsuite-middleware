@@ -141,14 +141,14 @@ public class AuthorizationEndpointTest extends EndpointTest {
      */
     @Test
     public void testXFrameOptions() throws Exception {
-        GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
+        GETRequest getLoginForm = new GETRequest().setScheme(scheme).setHostname(hostname).setPort(port).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
         GETResponse loginFormResponse = getLoginForm.execute(client);
         String frameOptions = loginFormResponse.getHeader("X-Frame-Options");
         assertEquals("SAMEORIGIN", frameOptions);
     }
 
     private void testPOSTWithMissingOrInvalidReferer() throws Exception {
-        GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
+        GETRequest getLoginForm = new GETRequest().setScheme(scheme).setHostname(hostname).setPort(port).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
         GETResponse loginFormResponse = getLoginForm.execute(client);
         POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword()).setHeader(HttpHeaders.REFERER, null);
         POSTResponse loginResponse = loginRequest.submit(client);
@@ -229,7 +229,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
      * @throws Exception
      */
     private void testPOSTWithInvalidParameter(String param, ResponseType responseType, boolean omitParam, String errorCode) throws Exception {
-        GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
+        GETRequest getLoginForm = new GETRequest().setScheme(scheme).setHostname(hostname).setPort(port).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState);
         GETResponse loginFormResponse = getLoginForm.execute(client);
         POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword());
 
@@ -280,7 +280,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         params.put("scope", getScope().toString());
         params.put("state", csrfState);
 
-        URI baseUri = new URIBuilder().setScheme("https").setHost(hostname).setPath(AUTHORIZATION_ENDPOINT).build();
+        URI baseUri = new URIBuilder().setScheme(scheme).setHost(hostname).setPath(AUTHORIZATION_ENDPOINT).build();
 
         URIBuilder uriBuilder = new URIBuilder(baseUri);
         for (Entry<String, String> p : params.entrySet()) {
@@ -308,7 +308,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         params.put("scope", getScope().toString());
         params.put("state", csrfState);
 
-        URI baseUri = new URIBuilder().setScheme("https").setHost(hostname).setPath(AUTHORIZATION_ENDPOINT).build();
+        URI baseUri = new URIBuilder().setScheme(scheme).setHost(hostname).setPath(AUTHORIZATION_ENDPOINT).build();
 
         URIBuilder uriBuilder = new URIBuilder(baseUri);
         for (Entry<String, String> p : params.entrySet()) {

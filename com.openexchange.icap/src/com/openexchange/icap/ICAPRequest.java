@@ -50,9 +50,10 @@
 package com.openexchange.icap;
 
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.icap.header.ICAPRequestHeader;
 import com.openexchange.java.Strings;
 
@@ -65,20 +66,52 @@ import com.openexchange.java.Strings;
 public class ICAPRequest {
 
     private Map<String, String> headers;
-    private Map<String, String> bodyHeaders;
+    private Map<String, String> originalRequestHeaders;
+    private Map<String, String> originalResponseHeaders;
     private ICAPMethod method;
     private OperationMode clientMode;
     private String service;
     private String server;
+    private String originalRequest;
+    private String originalStatus;
     private int port;
     private InputStream body;
 
     /**
-     * Initialises a new {@link ICAPRequest}.
+     * Initializes a new {@link ICAPRequest}.
+     * 
+     * @param builder The builder instance
      */
-    public ICAPRequest() {
-        super();
-        headers = new HashMap<>(4);
+    ICAPRequest(Builder builder) {
+        if (Strings.isEmpty(builder.server)) {
+            throw new IllegalArgumentException("Cannot build ICAP request: 'server' is missing");
+        }
+        this.server = builder.server;
+        this.method = builder.method;
+        this.port = builder.port < 0 ? ICAPCommons.DEFAULT_PORT : builder.port;
+        this.service = builder.service;
+        this.originalRequest = builder.originalRequest;
+        this.originalStatus = builder.originalStatus;
+
+        if (builder.body != null) {
+            this.body = builder.body;
+        }
+        builder.headers.put(ICAPRequestHeader.HOST, builder.server);
+        this.clientMode = builder.headers.containsKey(ICAPRequestHeader.ALLOW) ? OperationMode.DOUBLE_FETCH : OperationMode.STREAMING;
+        if (this.clientMode.equals(OperationMode.STREAMING)) {
+            builder.headers.remove(ICAPRequestHeader.PREVIEW);
+        }
+        if (builder.headers.containsKey(ICAPRequestHeader.PREVIEW)) {
+            long previewSize = Long.parseLong(builder.headers.get(ICAPRequestHeader.PREVIEW));
+            String cts = builder.originalRequestHeaders.get(ICAPRequestHeader.CONTENT_LENGTH);
+            long contentLength = Long.parseLong(cts == null ? "-1" : cts);
+            if (contentLength > previewSize || contentLength < 0 || previewSize < 0) {
+                builder.headers.remove(ICAPRequestHeader.PREVIEW);
+            }
+        }
+        this.headers = ImmutableMap.copyOf(builder.headers);
+        this.originalRequestHeaders = ImmutableMap.copyOf(builder.originalRequestHeaders);
+        this.originalResponseHeaders = ImmutableMap.copyOf(builder.originalResponseHeaders);
     }
 
     /**
@@ -109,12 +142,12 @@ public class ICAPRequest {
     }
 
     /**
-     * Gets the body headers
+     * Gets the original request headers
      *
-     * @return an unmodifiable {@link Map} with the body headers
+     * @return an unmodifiable {@link Map} with the original request headers
      */
-    public Map<String, String> getBodyHeaders() {
-        return bodyHeaders;
+    public Map<String, String> getOriginalRequestHeaders() {
+        return originalRequestHeaders;
     }
 
     /**
@@ -133,6 +166,33 @@ public class ICAPRequest {
      */
     public String getServer() {
         return server;
+    }
+
+    /**
+     * Gets the original request
+     *
+     * @return The request
+     */
+    public String getOriginalRequest() {
+        return originalRequest;
+    }
+
+    /**
+     * Gets the original status
+     *
+     * @return The status
+     */
+    public String getOriginalStatus() {
+        return originalStatus;
+    }
+
+    /**
+     * Gets the original response headers
+     *
+     * @return The original response headers
+     */
+    public Map<String, String> getOriginalResponseHeaders() {
+        return originalResponseHeaders;
     }
 
     /**
@@ -162,84 +222,19 @@ public class ICAPRequest {
         return clientMode;
     }
 
-    ////////////////// PRIVATE SETTERS //////////////////
-
     /**
-     * Sets the method
-     *
-     * @param method The method to set
-     */
-    private void setMethod(ICAPMethod method) {
-        this.method = method;
-    }
-
-    /**
-     * Sets the headers
+     * Creates builder to build {@link ICAPRequest}.
      * 
-     * @param headers The headers to set
+     * @return created builder
      */
-    private void setHeaders(Map<String, String> headers) {
-        this.headers = Collections.unmodifiableMap(headers);
-    }
-
-    /**
-     * Sets the bodyHeaders
-     *
-     * @param bodyHeaders The bodyHeaders to set
-     */
-    private void setBodyHeaders(Map<String, String> bodyHeaders) {
-        this.bodyHeaders = Collections.unmodifiableMap(bodyHeaders);
-    }
-
-    /**
-     * Sets the service
-     *
-     * @param service The service to set
-     */
-    private void setService(String service) {
-        this.service = service;
-    }
-
-    /**
-     * Sets the server
-     *
-     * @param server The serverIP to set
-     */
-    private void setServer(String server) {
-        this.server = server;
-    }
-
-    /**
-     * Sets the port
-     *
-     * @param port The port to set
-     */
-    private void setPort(int port) {
-        this.port = port;
-    }
-
-    /**
-     * Sets the body
-     *
-     * @param body The body to set
-     */
-    private void setBody(InputStream body) {
-        this.body = body;
-    }
-
-    /**
-     * Sets the {@link OperationMode}
-     * 
-     * @param mode The mode to set
-     */
-    private void setOperationMode(OperationMode mode) {
-        this.clientMode = mode;
+    public static Builder builder() {
+        return new Builder();
     }
 
     ///////////////////// BUILDER //////////////////////
 
     /**
-     * {@link Builder} for the {@link ICAPRequest}s
+     * Builder to build {@link ICAPRequest}.
      */
     public static final class Builder {
 
@@ -249,20 +244,24 @@ public class ICAPRequest {
          * 
          * @see <a href="https://tools.ietf.org/html/rfc3507#section-4.3.2">RFC-3507, Section 4.3.2</a>
          */
-        private ICAPMethod method = ICAPMethod.OPTIONS;
-        private final Map<String, String> headers;
-        private final Map<String, String> bodyHeaders;
-        private String server;
-        private int port = -1;
-        private String service;
-        private InputStream body;
+        ICAPMethod method = ICAPMethod.OPTIONS;
+        String service;
+        String server;
+        String originalRequest;
+        String originalStatus;
+        int port = -1;
+        InputStream body;
+        Map<String, String> headers = ImmutableMap.of();
+        Map<String, String> originalRequestHeaders;
+        Map<String, String> originalResponseHeaders;
 
         /**
          * Initialises a new {@link ICAPRequest.Builder}.
          */
         public Builder() {
             super();
-            bodyHeaders = new HashMap<>(4);
+            originalRequestHeaders = new LinkedHashMap<>(4);
+            originalResponseHeaders = new LinkedHashMap<>(4);
             headers = new HashMap<>(4);
             headers.put(ICAPRequestHeader.USER_AGENT, ICAPCommons.USER_AGENT);
         }
@@ -334,14 +333,40 @@ public class ICAPRequest {
         }
 
         /**
-         * Adds a header to the request's body.
+         * Adds the original request's header.
          * 
          * @param headerName The header's name
          * @param headerValue The header's value
          * @return this instance for chained calls
          */
-        public Builder withBodyHeader(String headerName, String headerValue) {
-            bodyHeaders.put(headerName, headerValue);
+        public Builder withOriginalRequestHeader(String headerName, String headerValue) {
+            originalRequestHeaders.put(headerName, headerValue);
+            return this;
+        }
+
+        public Builder withOriginalRequestHeaders(Map<String, String> headers) {
+            originalRequestHeaders = headers;
+            return this;
+        }
+
+        public Builder withOriginalResponseHeaders(Map<String, String> headers) {
+            originalResponseHeaders = headers;
+            return this;
+        }
+
+        /**
+         * Adds the original request
+         *
+         * @param request The request
+         * @return this instance for chained calls
+         */
+        public Builder withOriginalRequest(String request) {
+            this.originalRequest = request;
+            return this;
+        }
+
+        public Builder withOriginalStatus(String status) {
+            this.originalStatus = status;
             return this;
         }
 
@@ -360,41 +385,8 @@ public class ICAPRequest {
             return this;
         }
 
-        /**
-         * Builds and returns the {@link ICAPRequest}
-         * 
-         * @return The {@link ICAPRequest}
-         * @throws IllegalArgumentException if the server address is not defined.
-         */
         public ICAPRequest build() {
-            if (Strings.isEmpty(server)) {
-                throw new IllegalArgumentException("Cannot build ICAP request: 'server' is missing");
-            }
-            ICAPRequest request = new ICAPRequest();
-            request.setMethod(method);
-            request.setPort(port < 0 ? ICAPCommons.DEFAULT_PORT : port);
-            request.setServer(server);
-            request.setService(service);
-
-            if (body != null) {
-                request.setBody(body);
-            }
-            headers.put(ICAPRequestHeader.HOST, server);
-            request.setOperationMode(headers.containsKey(ICAPRequestHeader.ALLOW) ? OperationMode.DOUBLE_FETCH : OperationMode.STREAMING);
-            if (request.getOperationMode().equals(OperationMode.STREAMING)) {
-                headers.remove(ICAPRequestHeader.PREVIEW);
-            }
-            if (headers.containsKey(ICAPRequestHeader.PREVIEW)) {
-                long previewSize = Long.parseLong(headers.get(ICAPRequestHeader.PREVIEW));
-                String cts = bodyHeaders.get(ICAPRequestHeader.CONTENT_LENGTH);
-                long contentLength = Long.parseLong(cts == null ? "-1" : cts);
-                if (contentLength > previewSize || contentLength < 0 || previewSize < 0) {
-                    headers.remove(ICAPRequestHeader.PREVIEW);
-                }
-            }
-            request.setHeaders(headers);
-            request.setBodyHeaders(bodyHeaders);
-            return request;
+            return new ICAPRequest(this);
         }
     }
 }

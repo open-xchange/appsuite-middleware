@@ -1,7 +1,7 @@
 @Library('pipeline-library') _
 
 import com.openexchange.jenkins.Trigger
-
+ 
 String workspace // pwd()
 
 pipeline {
@@ -20,27 +20,66 @@ spec:
     - cat
     tty: true
   - name: coverity
-    image: gitlab.open-xchange.com:4567/jenkins/slave-coverity:latest
+    image: gitlab.open-xchange.com:4567/jenkins/slave-coverity:2020.06-jdk8
     command:
     - cat
     tty: true
-  - name: java-gettext
-    image: gitlab.open-xchange.com:4567/jenkins/slave-gettext:latest
+  - name: gettext
+    image: gitlab.open-xchange.com:4567/docker/gettext:2.0
     command:
-    - cat
+    - /toox/server
+    - msgcat
+    - xgettext
+    env:
+    - name: TOOX_TOOLS
+      value: ant
     tty: true
-    securityContext:
-      runAsUser: 1000
-      allowPrivilegeEscalation: false
+    volumeMounts:
+    - mountPath: /toox
+      name: toox
+  - name: ant
+    image: frekele/ant:1.9.11-jdk8
+    command:
+    - /toox/server
+    - ant
+    env:
+    - name: TOOX_TOOLS
+      value: msgcat,xgettext
+    tty: true
+    volumeMounts:
+    - mountPath: /toox
+      name: toox
+  - name: toox-proxy
+    image: gitlab.open-xchange.com:4567/engineering/tools/toox:0.15.1
+    command:
+    - /toox/proxy
+    env:
+    - name: TOOX_TOOLS
+      value: ant,msgcat,xgettext
+    tty: true
+    volumeMounts:
+    - mountPath: /toox
+      name: toox
   imagePullSecrets:
   - name: gitlab
+  initContainers:
+  - name: toox-init
+    image: gitlab.open-xchange.com:4567/engineering/tools/toox:0.15.1
+    command:
+    - /toox/init
+    volumeMounts:
+    - mountPath: /init
+      name: toox
+    workingDir: /init
+  volumes:
+  - name: toox
+    emptyDir: {}
 """
         }
     }
     options {
         buildDiscarder(logRotator(daysToKeepStr: '30'))
         checkoutToSubdirectory('backend')
-        timestamps()
     }
     triggers {
         cron('develop' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
@@ -48,11 +87,7 @@ spec:
     stages {
         stage('POT') {
             when {
-                // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.BRANCH_INDEXING) }
-            }
-            tools {
-                ant 'ant'
+                triggeredBy 'BranchIndexingCause'
             }
             steps {
                 dir('automation') {
@@ -68,8 +103,9 @@ spec:
                     ])
                 }
                 dir('automation/backendI18N') {
-                    container('java-gettext') {
+                    container('toox-proxy') {
                         sh "ant -file backendPot.xml -DcheckoutDir=${env.WORKSPACE}/backend -DproductToGenerate=backend -DpotDir=${env.WORKSPACE}/backend/l10n create-server-pot"
+                        sh 'rm -rv tmp build'
                     }
                 }
                 dir('backend') {
@@ -99,11 +135,7 @@ spec:
         }
         stage('Configuration documentation') {
             when {
-                allOf {
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4Documentation(env.BRANCH_NAME) }
-                }
+                expression { null != version4Documentation(env.BRANCH_NAME) }
             }
             steps {
                 script {
@@ -185,13 +217,7 @@ spec:
         }
         stage('HTTP API documentation') {
             when {
-                allOf {
-                    expression { null != version4Documentation(env.BRANCH_NAME) }
-                    anyOf {
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
-                    }
-                }
+                expression { null != version4Documentation(env.BRANCH_NAME) }
             }
             steps {
                 script {

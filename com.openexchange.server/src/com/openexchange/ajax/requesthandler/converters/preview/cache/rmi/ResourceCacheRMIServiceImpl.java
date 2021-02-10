@@ -194,7 +194,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
                 return "No contexts found";
             }
 
-            String sep = System.getProperty("line.separator");
+            String sep = Strings.getLineSeparator();
             StringBuilder responseBuilder = new StringBuilder(65536);
             AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
             contextIds.forEach(cid -> {

@@ -49,6 +49,8 @@
 
 package com.openexchange.user.json.filter;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.beans.BeanInfo;
@@ -58,37 +60,38 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.junit.Test;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.user.User;
 import com.openexchange.user.json.field.UserField;
-
 
 /**
  * {@link NoGlobalAddressBookUserCensorshipTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NoGlobalAddressBookUserCensorshipTest {         @Test
-     public void testCensorsData() throws Exception {
+public class NoGlobalAddressBookUserCensorshipTest {
+
+    @Test
+    public void testCensorsData() throws Exception {
         User user = getFilledUser();
 
         final UserCensorship censorship = new NoGlobalAdressBookUserCensorship();
 
         user = censorship.censor(user);
 
-        for(final UserField field : UserField.ALL_FIELDS) {
-            if (!UserField.isUserOnlyField(field.getColumn())){
+        for (final UserField field : UserField.ALL_FIELDS) {
+            if (!UserField.isUserOnlyField(field.getColumn())) {
                 continue;
             }
             final Object value = get(field, user);
             if (UserField.UNPROTECTED_FIELDS.contains(field)) {
-                assertFalse("Should have remained untouched: "+field, value != null);
+                assertFalse("Should have remained untouched: " + field, value != null);
             } else {
-                assertTrue("Should have been hidden: "+field, value == null || -1 == ((Integer) value).intValue());
+                assertTrue("Should have been hidden: " + field, value == null || -1 == ((Integer) value).intValue());
             }
         }
 
@@ -96,14 +99,21 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
 
     private Object get(final UserField field, final User user) {
         switch (field) {
-        case ALIASES: return user.getAliases();
-        case TIME_ZONE: return user.getTimeZone();
-        case LOCALE: return user.getLocale();
-        case GROUPS: return user.getGroups();
-        case CONTACT_ID: return user.getContactId();
-        case LOGIN_INFO: return user.getLoginInfo();
+            case ALIASES:
+                return user.getAliases();
+            case TIME_ZONE:
+                return user.getTimeZone();
+            case LOCALE:
+                return user.getLocale();
+            case GROUPS:
+                return user.getGroups();
+            case CONTACT_ID:
+                return I(user.getContactId());
+            case LOGIN_INFO:
+                return user.getLoginInfo();
+            default:
+                return null;
         }
-        return null;
     }
 
     private User getFilledUser() throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -118,7 +128,7 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
                 if (value != null) {
                     writeMethod.invoke(user, value);
                 } else {
-                    System.err.println("No value found for setter: "+writeMethod);
+                    System.err.println("No value found for setter: " + writeMethod);
                 }
             }
         }
@@ -126,17 +136,15 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
         return user;
     }
 
-
-    private static final Map <Class, Object> DEFAULT_VALUES = new HashMap<Class, Object>() {{
-        put(String.class, "Some String");
-        put(Date.class, new Date());
-        put(Integer.class, 12);
-        put(int.class, 12);
-        put(byte[].class, new byte[0]);
-        put(Boolean.class, true);
-        put(boolean.class, true);
-        put(Locale.class, Locale.getDefault());
-        put(String[].class, new String[0]);
-    }};
+    private static final Map <Class<?>, Object> DEFAULT_VALUES = ImmutableMap.<Class<?>, Object>builder().
+        put(String.class, "Some String").
+        put(Date.class, new Date()).
+        put(Integer.class, I(12)).
+        put(int.class, I(12)).
+        put(byte[].class, new byte[0]).
+        put(Boolean.class, B(true)).
+        put(boolean.class, B(true)).
+        put(Locale.class, Locale.getDefault()).
+        put(String[].class, new String[0]).build();
 
 }

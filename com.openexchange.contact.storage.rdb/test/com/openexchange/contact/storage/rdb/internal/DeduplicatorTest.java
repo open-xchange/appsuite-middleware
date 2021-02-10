@@ -185,14 +185,14 @@ public class DeduplicatorTest {
     private Random random;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         random = new Random();
         contentFields = getContentFields();
         distListContentFields = getDistListContentFields();
     }
 
      @Test
-     public void testDetectEmptyDuplicates() throws Exception {
+     public void testDetectEmptyDuplicates() {
         assertSameHash(contact1(), contact2());
     }
 

@@ -80,6 +80,14 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	E getMappedField(int columnID);
 
+	/**
+	 * Gets the fields whose mapping denotes one of the the supplied column IDs
+	 *
+	 * @param columnIDs The column IDs
+	 * @return The fields, or <code>null</code> if no such fileds were found
+	 */
+    E[] getMappedFields(int...columnIDs);
+
     /**
      * Gets the field whose mapping denotes the supplied ajax name.
      *
@@ -87,6 +95,14 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
      * @return the field, or <code>null</code> if no such field was found
      */
     E getMappedField(String ajaxName);
+
+    /**
+     * Gets the fields whose mappings denotes the supplied ajax names.
+     *
+     * @param ajaxNames the ajax names
+     * @return the fields, or <code>null</null> if no such fields were found
+     */
+    E[] getMappedFields(String...ajaxNames);
 
 	/**
 	 * Gets the fields whose mappings denotes the supplied column IDs. The
@@ -125,6 +141,15 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
     E[] getFields(int[] columnIDs, EnumSet<E> illegalFields, E... mandatoryFields) throws OXException;
 
+    /**
+     * Gets the column identifiers associated with the supplied fields.
+     * 
+     * @param fields The fields to get the column ids for
+     * @return The column ids
+     * @throws OXException if there is no mapping for a field
+     */
+    int[] getColumnIDs(E[] fields) throws OXException;
+
 	/**
 	 * Deserializes an object from JSON.
 	 *
@@ -159,6 +184,41 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
      * @throws JSONException
      */
     O deserialize(JSONObject jsonObject, E[] fields, String timeZoneID) throws OXException, JSONException;
+
+    /**
+     * Deserializes an object from a JSONArray
+     *
+     * @param jsonArray The JSONArray to deserialize
+     * @param fields An array of fields representing the Object, where each field in the
+     * @return The objects deserialized from the given JSONArray
+     * @throws OXException
+     * @throws JSONException
+     */
+    List<O> deserialize(JSONArray jsonArray, E[] fields) throws OXException, JSONException;
+
+    /**
+     * Deserializes an object from a JSONArray
+     *
+     * @param jsonArray The JSONArray to deserialize
+     * @param fields An array of fields representing the Object, where each field in the
+     * @return The objects deserialized from the given JSONArray
+     * @param timeZoneID the client time zone identifier to consider, or <code>null</code> if not relevant
+     * @throws OXException
+     * @throws JSONException
+     */
+    List<O> deserialize(JSONArray jsonArray, E[] fields, String timeZoneID) throws OXException, JSONException;
+
+    /**
+     * Deserializes an object from a JSONArray
+     *
+     * @param jsonArray The JSONArray to deserialize
+     * @param fields An array of fields representing the Object, where each field in the
+     * @return The objects deserialized from the given JSONArray
+     * @param timeZoneID the client time zone identifier to consider, or <code>null</code> if not relevant
+     * @throws OXException
+     * @throws JSONException
+     */
+    List<O> deserialize(JSONArray jsonArray, E[] fields, TimeZone timeZone) throws OXException, JSONException;
 
 	/**
 	 * Serializes the supplied object to JSON.

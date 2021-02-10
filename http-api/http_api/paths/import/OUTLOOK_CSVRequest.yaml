@@ -4,6 +4,8 @@
     tags:
       - Import
     summary: Imports contact data from an Outlook CSV file.
+    security: 
+        - session: []    
     description: >
       #### Example: exported Outlook CSV
 
@@ -20,7 +22,6 @@
       The column titles in the first line of the CSV file may be those used by
       the English, French or German version of Outlook.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/glbQueryParamsAllowEnqueue'
       - in: query
         name: folder

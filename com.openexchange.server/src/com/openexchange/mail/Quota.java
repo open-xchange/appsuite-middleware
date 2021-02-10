@@ -75,7 +75,7 @@ public final class Quota {
 
         private final String typeStr;
 
-        private Type(final String typeStr) {
+        private Type(String typeStr) {
             this.typeStr = typeStr;
         }
 
@@ -102,7 +102,7 @@ public final class Quota {
      * @param type The resource type
      * @return The constant for unlimited quota for specified resource type
      */
-    public static Quota getUnlimitedQuota(final Type type) {
+    public static Quota getUnlimitedQuota(Type type) {
         return type.getUnlimited();
     }
 
@@ -114,7 +114,7 @@ public final class Quota {
      * @param types The resource types
      * @return The constants for unlimited quota for specified resource types
      */
-    public static Quota[] getUnlimitedQuotas(final Type[] types) {
+    public static Quota[] getUnlimitedQuotas(Type[] types) {
         final Quota[] quotas = new Quota[types.length];
         for (int i = 0; i < quotas.length; i++) {
             quotas[i] = types[i].getUnlimited();
@@ -147,11 +147,11 @@ public final class Quota {
     /**
      * Initializes a new {@link Quota}
      *
-     * @param limit The quota's limit
-     * @param usage The quota's usage
+     * @param limit The quota's limit. Storage value is expected to be kilobytes.
+     * @param usage The quota's usage. Storage value is expected to be kilobytes.
      * @param type The quota's resource type to which this quota limitation applies
      */
-    public Quota(final long limit, final long usage, final Type type) {
+    public Quota(long limit, long usage, Type type) {
         super();
         this.limit = limit;
         this.usage = usage;
@@ -169,7 +169,7 @@ public final class Quota {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -196,7 +196,7 @@ public final class Quota {
     /**
      * Gets the limit
      *
-     * @return the limit
+     * @return The limit. Storage value is returned as kilobytes.
      */
     public long getLimit() {
         return limit;
@@ -205,10 +205,46 @@ public final class Quota {
     /**
      * Gets the usage
      *
-     * @return the usage
+     * @return The usage. Storage value is returned as kilobytes.
      */
     public long getUsage() {
         return usage;
+    }
+
+    /**
+     * Gets the storage limit in bytes
+     *
+     * @return the limit
+     * @throws IllegalStateException if type is {@link Type#MESSAGE}
+     */
+    public long getLimitBytes() {
+        if (type == Type.MESSAGE) {
+            throw new IllegalStateException("Quota.getLimitBytes() must only be called for quota type " + Type.STORAGE.name());
+        }
+
+        if (limit <= 0) {
+            return limit;
+        }
+
+        return limit << 10;
+    }
+
+    /**
+     * Gets the storage usage in bytes
+     *
+     * @return the usage
+     * @throws IllegalStateException if type is {@link Type#MESSAGE}
+     */
+    public long getUsageBytes() {
+        if (type == Type.MESSAGE) {
+            throw new IllegalStateException("Quota.getUsageBytes() must only be called for quota type " + Type.STORAGE.name());
+        }
+
+        if (usage <= 0) {
+            return usage;
+        }
+
+        return usage << 10;
     }
 
     /**
@@ -222,7 +258,7 @@ public final class Quota {
 
     /**
      * Returns a newly created array of <code>long</code> from this quota's limit and usage values. Quota's limit is at index <code>0</code>
-     * and its usage is located at index <code>1</code>.
+     * and its usage is located at index <code>1</code>. Storage values are in kilobytes.
      *
      * @return An array of <code>long</code> from this quota's limit and usage.
      */
@@ -232,6 +268,7 @@ public final class Quota {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("Quota limit=").append(limit).append(" usage=").append(usage).toString();
+        String unit = type == Type.STORAGE ? " kB" : "";
+        return String.format("Quota type=%s, limit=%d%s, usage=%d%s", type.name(), limit, unit, usage, unit);
     }
 }

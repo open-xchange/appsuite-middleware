@@ -53,9 +53,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.ITopic;
+import com.hazelcast.topic.ITopic;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 
@@ -80,7 +81,7 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
     }
 
     @Override
-    protected String registerListener(MessageListener<E> listener, String senderID) {
+    protected UUID registerListener(MessageListener<E> listener, String senderID) {
         try {
             return hzTopic.addMessageListener(new HzMessageListener<E>(listener, senderID));
         } catch (HazelcastInstanceNotActiveException e) {
@@ -89,7 +90,7 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
     }
 
     @Override
-    protected boolean unregisterListener(String registrationID) {
+    protected boolean unregisterListener(UUID registrationID) {
         try {
             return hzTopic.removeMessageListener(registrationID);
         } catch (HazelcastInstanceNotActiveException e) {
@@ -127,7 +128,7 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
 
     // ------------------------------------------------------------------------ //
 
-    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<Map<String, Object>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.topic.MessageListener<Map<String, Object>> {
 
         private final MessageListener<E> listener;
         private final String senderId;
@@ -142,7 +143,7 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
         }
 
         @Override
-        public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
+        public void onMessage(final com.hazelcast.topic.Message<Map<String, Object>> message) {
             final Map<String, Object> messageData = message.getMessageObject();
             if (null == messageData) {
                 return;

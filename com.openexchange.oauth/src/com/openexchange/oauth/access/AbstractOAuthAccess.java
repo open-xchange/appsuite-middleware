@@ -75,7 +75,10 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /** The re-check threshold in milliseconds (45 minutes) */
     private static final long RECHECK_THRESHOLD_MILLIS = 2700000;
 
-    /** The {@link OAuthAccount} */
+    /** The time-to-live before considering a token as expired (2 minutes before actual expiration time). */
+    private static final long TTL_BEFORE_RENEWAL = 120000;
+
+    /** The OAuth account */
     private volatile OAuthAccount oauthAccount;
 
     /** The associated OAuth client */
@@ -84,18 +87,18 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /** The last-accessed time stamp milliseconds */
     private volatile long lastAccessedMillis;
 
-    /** The associated Groupware {@link Session} */
+    /** The associated Open-Xchange session */
     private final Session session;
 
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
      *
-     * @param session The groupware {@link Session}
+     * @param session The Open-Xchange session
      */
     protected AbstractOAuthAccess(Session session) {
         super();
         this.session = session;
-        oauthClientRef = new AtomicReference<OAuthClient<?>>();
+        oauthClientRef = new AtomicReference<>();
     }
 
     @Override
@@ -109,15 +112,15 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     }
 
     /**
-     * Verifies the specified {@link OAuthAccount} over validity:
+     * Verifies the specified OAuth account over validity:
      * <ul>
      * <li>accessToken exists?</li>
      * <li>specified scopes are both available and enabled?</li>
      * <li>the user identity is set? (lazy update)</li>
      * </ul>
      *
-     * @param account The {@link OAuthAccount} to check for validity
-     * @param oauthService The {@link OAuthService}
+     * @param account The OAuth account to check for validity
+     * @param oauthService The OAuth service
      * @param scopes The scopes that are required to be available and enabled as well
      * @throws OXException if the account is not valid
      */
@@ -134,13 +137,14 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         // Verify if the account has the user identity set, lazy update
         if (Strings.isEmpty(account.getUserIdentity())) {
             String userIdentity = account.getMetaData().getUserIdentity(session, account.getId(), account.getToken(), account.getSecret());
-            ((DefaultOAuthAccount) account).setUserIdentity(userIdentity);
+            DefaultOAuthAccount.class.cast(account).setUserIdentity(userIdentity);
             oauthService.updateAccount(session, account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity));
         }
 
         // Other checks?
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> OAuthClient<T> getClient() throws OXException {
         OAuthClient<?> client = oauthClientRef.get();
@@ -158,14 +162,19 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     }
 
     /**
-     * Verifies whether the OAuth token and the associated {@link OAuthClient} are expired.
+     * Verifies whether the OAuth token and the associated OAuth client are expired.
      *
      * @return <code>true</code> if expired; <code>false</code> otherwise
      */
     protected boolean isExpired() {
         long now = System.currentTimeMillis();
-        // FIXME: Should use the TTL returned when acquiring the token
-        //        instead of a static value like RECHECK_THRESHOLD_MILLIS
+        OAuthAccount oauthAccount = this.oauthAccount;
+        if (oauthAccount != null) {
+            long expiration = oauthAccount.getExpiration();
+            if (expiration > 0) {
+                return (expiration - now) <= TTL_BEFORE_RENEWAL;
+            }
+        }
         return (now - lastAccessedMillis) > RECHECK_THRESHOLD_MILLIS;
     }
 
@@ -180,18 +189,19 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     }
 
     /**
-     * Gets the {@link OAuthClient} reference w/o any initializations before-hand.
+     * Gets the OAuth client reference w/o any initializations before-hand.
      *
-     * @return The {@link OAuthClient} instance or <code>null</code>
+     * @return The OAuth client instance or <code>null</code>
      */
-    protected <T> OAuthClient<T> getOAuthClient() {
+    @SuppressWarnings("unchecked")
+    public <T> OAuthClient<T> getOAuthClient() {
         return (OAuthClient<T>) oauthClientRef.get();
     }
 
     /**
-     * Sets the {@link OAuthAccount}
+     * Sets the OAuth account.
      *
-     * @param oauthAccount The {@link OAuthAccount} to set
+     * @param oauthAccount The OAuth account to set
      */
     protected void setOAuthAccount(OAuthAccount oauthAccount) {
         this.oauthAccount = oauthAccount;

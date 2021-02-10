@@ -49,11 +49,12 @@
 
 package com.openexchange.ajax.folder.manager;
 
-import java.util.HashMap;
+import org.json.JSONObject;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.testing.httpclient.modules.JSlobApi;
 import com.openexchange.testing.httpclient.modules.LoginApi;
 
 /**
@@ -66,29 +67,21 @@ public class FolderApi {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderApi.class);
 
-    private String session;
     private FoldersApi foldersApi;
     private final ApiClient client;
     private final TestUser user;
-    private final HashMap<String, Object> rampup;
     private Integer infostoreFolder = null;
 
-    @SuppressWarnings("unchecked")
     public FolderApi(ApiClient client, TestUser user) throws Exception {
         this.client = client;
         this.user = user;
         foldersApi = new FoldersApi(client);
-
-        LoginResponse login = login(user.getLogin(), user.getPassword(), client);
-        this.session = login.getSession();
-        rampup = (HashMap<String, Object>) login.getRampup();
+        JSlobApi jslobApi = new JSlobApi(client);
+        JSONObject result = new JSONObject(jslobApi.getJSlob("io.ox/core", "folder/infostore", null));
+        infostoreFolder = (Integer) result.get("data");
     }
 
-    @SuppressWarnings("unchecked")
     public Integer getInfostoreFolder() {
-        if (infostoreFolder == null) {
-            infostoreFolder = (Integer) ((HashMap<String, Object>) ((HashMap<String, Object>) ((HashMap<String, Object>) ((HashMap<String, Object>) rampup.get("jslobs")).get("io.ox/core")).get("tree")).get("folder")).get("infostore");
-        }
         return infostoreFolder;
     }
 
@@ -101,30 +94,12 @@ public class FolderApi {
      * @throws Exception
      */
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, "true", null, null, null, null, null, null);
+        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, "true", null, null, null, null, null, null, null);
         if (doLogin.getError() == null) {
             LOG.info("Login succesfull for user " + login);
             return doLogin;
         }
         throw new Exception("Error during login: " + doLogin.getError());
-    }
-
-    /**
-     * Gets the session
-     *
-     * @return The session
-     */
-    public String getSession() {
-        return session;
-    }
-
-    /**
-     * Sets the session
-     *
-     * @param session The session to set
-     */
-    public void setSession(String session) {
-        this.session = session;
     }
 
     /**

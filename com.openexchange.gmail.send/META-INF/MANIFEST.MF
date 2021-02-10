@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Gmail Transport
 Bundle-SymbolicName: com.openexchange.gmail.send
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.oauth2,
@@ -67,6 +67,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.regional,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.systemproperties,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.tools,
@@ -107,3 +108,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.gmail.send,
  com.openexchange.gmail.send.config,
  com.openexchange.gmail.send.dataobjects
+Automatic-Module-Name: com.openexchange.gmail.send

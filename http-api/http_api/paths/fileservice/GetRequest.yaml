@@ -4,8 +4,11 @@
     tags:
       - Filestorage
     summary: Gets a file storage service.
+    security: 
+        - session: []  
+        - oauth:
+          - read_files     
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: The ID of the file storage service to load.

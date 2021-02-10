@@ -297,7 +297,7 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         EventField.SERIES_ID, EventField.RECURRENCE_ID
     };
 
-    private EventResource getEventResource(List<Event> resolvedEvents) throws OXException {
+    private EventResource getEventResource(List<Event> resolvedEvents) {
         Event event = resolvedEvents.get(0);
         if (CalendarUtils.isSeriesException(event)) {
             event = new PhantomMaster(resolvedEvents);

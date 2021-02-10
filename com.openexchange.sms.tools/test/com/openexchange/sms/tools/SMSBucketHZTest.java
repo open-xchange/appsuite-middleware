@@ -68,7 +68,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableFactory;
 import com.openexchange.config.cascade.ConfigView;
@@ -105,7 +105,7 @@ public class SMSBucketHZTest {
     private static Session fake;
 
     @BeforeClass
-    public static void initHazelcast() throws Exception {
+    public static void initHazelcast() {
         Config config = new Config();
         config.getSerializationConfig().addPortableFactory(CustomPortable.FACTORY_ID, new PortableFactory() {
 
@@ -140,7 +140,7 @@ public class SMSBucketHZTest {
 
         Services.setServiceLookup(new ServiceLookup() {
 
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "unchecked", "synthetic-access" })
             @Override
             public <S> S getService(Class<? extends S> clazz) {
                 return (S) factory;

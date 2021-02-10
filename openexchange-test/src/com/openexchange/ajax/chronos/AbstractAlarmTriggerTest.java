@@ -49,13 +49,17 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.junit.Assert;
@@ -92,9 +96,9 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
 
-        user2 = new UserApi(client, enhancedClient, testUser2, false);
-        folderId2 = getDefaultFolder(user2.getSession(), client);
-        eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
+        user2 = new UserApi(client, enhancedClient, testUser2);
+        folderId2 = getDefaultFolder(client);
+        eventManager2 = new EventManager(user2, getDefaultFolder(client));
     }
 
     /**
@@ -121,6 +125,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
                 }
             }
         }
+        assertNotNull(result);
         assertEquals(expected, result.size());
         return result;
     }
@@ -135,7 +140,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      */
     List<AlarmTrigger> getAndCheckAlarmTrigger(long until, int min) throws ApiException {
     	List<AlarmTrigger> triggers = eventManager.getAlarmTrigger(until);
-        assertTrue(min <= triggers.size());
+        assertTrue(String.format("Missing some triggers. Expected at least %s triggers but only found %s", I(min), I(triggers.size())), min <= triggers.size());
         return triggers;
     }
 
@@ -188,13 +193,12 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     }
 
     protected AlarmTrigger findTrigger(String eventId, List<AlarmTrigger> triggers) {
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getEventId().equals(eventId)) {
-                return trigger;
-            }
+        Optional<AlarmTrigger> result = triggers.stream().filter(t -> t.getEventId().equals(eventId)).findFirst();
+        if (result.isPresent() == false) {
+            Assert.fail(String.format("Alarm trigger not found. Search for '%s', but only found the following ids: %s", eventId, triggers.stream().map(t -> t.getEventId()).collect(Collectors.joining(", "))));
+            return null;
         }
-        Assert.fail("Alarm trigger not found.");
-        return null;
+        return result.get();
     }
 
     protected AlarmTrigger findTriggerByAlarm(Integer alarmId, List<AlarmTrigger> triggers) {
@@ -203,7 +207,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
                 return trigger;
             }
         }
-        Assert.fail("Alarm trigger not found.");
+        Assert.fail(String.format("Alarm trigger not found. Search for alarm id '%s', but only found the following alarm ids: %s", alarmId, triggers.stream().map(t -> t.getAlarmId()).collect(Collectors.joining(", "))));
         return null;
     }
 

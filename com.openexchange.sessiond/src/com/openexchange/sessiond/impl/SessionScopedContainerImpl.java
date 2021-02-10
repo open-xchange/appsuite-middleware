@@ -71,20 +71,14 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
     protected final ConcurrentHashMap<SessionKey, T> delegate = new ConcurrentHashMap<SessionKey, T>();
 
     protected final InitialValueFactory<T> initial;
-
     protected final CleanUp<T> cleanUp;
-
-    private final SessiondSessionSpecificRetrievalService manager;
-
     private final String name;
-
     private final Lifecycle lifecycle;
 
-    public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp, SessiondSessionSpecificRetrievalService manager) {
+    public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp) {
         super();
         this.initial = initial;
         this.cleanUp = cleanUp;
-        this.manager = manager;
         this.name = name;
         this.lifecycle = lifecycle;
     }
@@ -134,10 +128,10 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     @Override
     public T get(Object key) {
-        key = ID(key);
-        if (!delegate.containsKey(key) && initial != null) {
+        SessionKey sessionKey = ID(key);
+        if (!delegate.containsKey(sessionKey) && initial != null) {
             T created = initial.create();
-            T other = delegate.putIfAbsent((SessionKey) key, created);
+            T other = delegate.putIfAbsent(sessionKey, created);
             if (other != null) {
                 cleanUp(created);
                 return other;
@@ -145,7 +139,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
             return created;
         }
-        return delegate.get(key);
+        return delegate.get(sessionKey);
     }
 
     @Override

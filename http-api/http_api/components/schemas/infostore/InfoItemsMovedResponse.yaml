@@ -1,9 +1,8 @@
 type: object
 properties:
-  $ref: ../common/CommonResponseData.yaml
+  $ref: ../common/CommonResponseDataWithWarnings.yaml
   data:
     type: array
-    description: Array of infoitem identifiers that could not be moved (due to a conflict).
+    description: Array of infoitems that could not be moved (due to a conflict).
     items:
-      type: string
-      description: The infoitem identifier
+      $ref: '#/components/schemas/InfoItemListElement'

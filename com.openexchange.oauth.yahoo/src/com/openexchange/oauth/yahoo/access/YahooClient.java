@@ -74,8 +74,8 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.api.YahooApi2;
 import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.yahoo.internal.YahooApi2;
 import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
 import com.openexchange.session.Session;
 

@@ -4,8 +4,9 @@
     tags:
       - Attachments
     summary: Gets the new and deleted attachments.
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamAttached'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsFolder'
       - $ref: '#/components/parameters/gblQueryParamAttachmentsColumns'

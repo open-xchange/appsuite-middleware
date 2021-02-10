@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.compose.json.action;
 
-import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.compose.Attachment;
+import com.openexchange.mail.compose.AttachmentResult;
+import com.openexchange.mail.compose.CompositionSpaceId;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -70,7 +70,8 @@ public class AddVCardMailComposeAction extends AbstractMailComposeAction {
 
     /**
      * Initializes a new {@link AddVCardMailComposeAction}.
-     * @param services
+     *
+     * @param services The service look-up
      */
     public AddVCardMailComposeAction(ServiceLookup services) {
         super(services);
@@ -80,13 +81,13 @@ public class AddVCardMailComposeAction extends AbstractMailComposeAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         // Require composition space identifier
         String sId = requestData.requireParameter("id");
-        UUID uuid = parseCompositionSpaceId(sId);
+        CompositionSpaceId compositionSpaceId = parseCompositionSpaceId(sId);
 
         // Get needed service & add vCard as attachment
-        CompositionSpaceService compositionSpaceService = getCompositionSpaceService();
-        Attachment vcardAttachment = compositionSpaceService.addVCardToCompositionSpace(uuid, session);
+        CompositionSpaceService compositionSpaceService = getCompositionSpaceService(compositionSpaceId.getServiceId(), session);
+        AttachmentResult attachmentResult = compositionSpaceService.addVCardToCompositionSpace(compositionSpaceId.getId(), getClientToken(requestData));
 
-        return new AJAXRequestResult(vcardAttachment, "compositionSpaceAttachment");
+        return new AJAXRequestResult(attachmentResult, "compositionSpaceAttachment").addWarnings(compositionSpaceService.getWarnings());
     }
 
 }

@@ -49,11 +49,11 @@
 
 package com.openexchange.webdav.client.jackrabbit;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.slf4j.Logger;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.tools.stream.CountingOnlyInputStream;
 
@@ -65,9 +65,20 @@ import com.openexchange.tools.stream.CountingOnlyInputStream;
  */
 public class HttpResponseStream extends CountingOnlyInputStream {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpResponseStream.class);
+    }
+
     private final HttpResponse response;
     private final long contentLength;
 
+    /**
+     * Initializes a new {@link HttpResponseStream}.
+     *
+     * @param response The HTTP response whose entity stream shall be read from
+     * @throws IOException If initialization fails
+     */
     public HttpResponseStream(HttpResponse response) throws IOException {
         super(getEntityStream(response.getEntity()));
         this.response = response;
@@ -81,7 +92,7 @@ public class HttpResponseStream extends CountingOnlyInputStream {
          */
         try {
             if (0 < contentLength && contentLength > getCount()) {
-                getLogger(HttpResponseStream.class).warn("Closing not entirely consumed response {}", response);
+                LoggerHolder.LOG.warn("Closing not entirely consumed response {}", response);
                 HttpClients.close(response, true);
             }
         } finally {

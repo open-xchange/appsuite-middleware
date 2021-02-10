@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container;
 
 import java.util.Date;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link DataObject} - The root-level data object.
@@ -75,6 +76,10 @@ public abstract class DataObject extends SystemObject {
 
     public static final int META = 23;
 
+    public static final int CREATED_FROM = 51;
+
+    public static final int MODIFIED_FROM = 52;
+
     protected int objectId;
 
     protected int createdBy;
@@ -88,6 +93,10 @@ public abstract class DataObject extends SystemObject {
     /** The data object's contribution topic */
     protected String topic;
 
+    protected EntityInfo createdFrom;
+
+    protected EntityInfo modifiedFrom;
+
     protected boolean b_objectId;
 
     protected boolean b_createdBy;
@@ -99,6 +108,10 @@ public abstract class DataObject extends SystemObject {
     protected boolean b_lastModified;
 
     protected boolean b_topic;
+
+    protected boolean b_createdFrom;
+
+    protected boolean b_modifiedFrom;
 
     // GET METHODS
     public int getObjectID() {
@@ -128,6 +141,14 @@ public abstract class DataObject extends SystemObject {
      */
     public String getTopic() {
         return topic;
+    }
+
+    public EntityInfo getCreatedFrom() {
+        return createdFrom;
+    }
+
+    public EntityInfo getModifiedFrom() {
+        return modifiedFrom;
     }
 
     // SET METHODS
@@ -165,6 +186,16 @@ public abstract class DataObject extends SystemObject {
         this.topic = topic;
     }
 
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        this.createdFrom = createdFrom;
+        b_createdFrom = null != createdFrom;
+    }
+
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        this.modifiedFrom = modifiedFrom;
+        b_modifiedFrom = null != modifiedFrom;
+    }
+
     // REMOVE METHODS
     public void removeObjectID() {
         objectId = 0;
@@ -196,6 +227,16 @@ public abstract class DataObject extends SystemObject {
         b_topic = false;
     }
 
+    public void removeCreatedFrom() {
+        createdFrom = null;
+        b_createdFrom = false;
+    }
+
+    public void removeModifiedFrom() {
+        modifiedFrom = null;
+        b_modifiedFrom = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsObjectID() {
         return b_objectId;
@@ -221,6 +262,14 @@ public abstract class DataObject extends SystemObject {
         return b_topic;
     }
 
+    public boolean containsCreatedFrom() {
+        return b_createdFrom;
+    }
+
+    public boolean containsModifiedFrom() {
+        return b_modifiedFrom;
+    }
+
     public void reset() {
         objectId = 0;
         createdBy = 0;
@@ -228,12 +277,16 @@ public abstract class DataObject extends SystemObject {
         creationDate = null;
         lastModified = null;
         topic = null;
+        createdFrom = null;
+        modifiedFrom = null;
         b_objectId = false;
         b_createdBy = false;
         b_modifiedBy = false;
         b_creationDate = false;
         b_lastModified = false;
         b_topic = false;
+        b_createdFrom = false;
+        b_modifiedFrom = false;
     }
 
     public void set(int field, Object value) {
@@ -243,7 +296,15 @@ public abstract class DataObject extends SystemObject {
             setLastModified((Date) value);
             break;
         case OBJECT_ID:
-            setObjectID(null == value ? 0 : ((Integer) value).intValue());
+            if (null == value) {
+                setObjectID(0);
+                break;
+            }
+            if (value instanceof Integer) {
+                setObjectID(Integer.class.cast(value).intValue());
+            } else if (value instanceof String) {
+                setObjectID(Integer.parseInt(String.class.cast(value)));
+            }
             break;
         case MODIFIED_BY:
             setModifiedBy(null == value ? 0 : ((Integer) value).intValue());
@@ -253,6 +314,12 @@ public abstract class DataObject extends SystemObject {
             break;
         case CREATED_BY:
             setCreatedBy(null == value ? 0 : ((Integer) value).intValue());
+            break;
+        case CREATED_FROM:
+            setCreatedFrom(EntityInfo.class.isInstance(value) ? (EntityInfo) value : null);
+            break;
+        case MODIFIED_FROM:
+            setModifiedFrom(EntityInfo.class.isInstance(value) ? (EntityInfo) value : null);
             break;
         default:
             throw new IllegalArgumentException("I don't know how to set " + field);
@@ -272,6 +339,10 @@ public abstract class DataObject extends SystemObject {
             return getCreationDate();
         case CREATED_BY:
             return Integer.valueOf(getCreatedBy());
+        case CREATED_FROM:
+            return getCreatedFrom();
+        case MODIFIED_FROM:
+            return getModifiedFrom();
         default:
             throw new IllegalArgumentException("I don't know how to get " + field);
         }
@@ -290,6 +361,10 @@ public abstract class DataObject extends SystemObject {
             return containsCreationDate();
         case CREATED_BY:
             return containsCreatedBy();
+        case CREATED_FROM:
+            return containsCreatedFrom();
+        case MODIFIED_FROM:
+            return containsModifiedFrom();
         default:
             throw new IllegalArgumentException("I don't know about field " + field);
         }
@@ -314,6 +389,12 @@ public abstract class DataObject extends SystemObject {
             break;
         case LAST_MODIFIED_UTC:
             removeLastModified();
+            break;
+        case CREATED_FROM:
+            removeCreatedFrom();
+            break;
+        case MODIFIED_FROM:
+            removeModifiedFrom();
             break;
         default:
             throw new IllegalArgumentException("I don't know how to remove field " + field);

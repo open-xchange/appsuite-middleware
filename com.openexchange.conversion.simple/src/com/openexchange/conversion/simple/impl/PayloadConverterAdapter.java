@@ -65,39 +65,40 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadConverterAdapter implements ResultConverter{
+public class PayloadConverterAdapter implements ResultConverter {
 
-	private final SimplePayloadConverter converter;
-	private final SimpleConverter rtConverter;
+    private final SimplePayloadConverter converter;
+    private final SimpleConverter rtConverter;
 
-	public PayloadConverterAdapter(SimplePayloadConverter converter, SimpleConverter rtConverter) {
-		this.converter = converter;
-		this.rtConverter = rtConverter;
-	}
+    public PayloadConverterAdapter(SimplePayloadConverter converter, SimpleConverter rtConverter) {
+        this.converter = converter;
+        this.rtConverter = rtConverter;
+    }
 
-	public String getInputFormat() {
-		return converter.getInputFormat();
-	}
+    @Override
+    public String getInputFormat() {
+        return converter.getInputFormat();
+    }
 
-	public String getOutputFormat() {
-		return converter.getOutputFormat();
-	}
+    @Override
+    public String getOutputFormat() {
+        return converter.getOutputFormat();
+    }
 
-	public ResultConverter.Quality getQuality() {
-		switch(converter.getQuality()) {
-		case GOOD: return ResultConverter.Quality.GOOD;
-		case BAD: return ResultConverter.Quality.BAD;
-		}
-		return ResultConverter.Quality.BAD;
-	}
+    @Override
+    public ResultConverter.Quality getQuality() {
+        switch (converter.getQuality()) {
+            case GOOD:
+                return ResultConverter.Quality.GOOD;
+            case BAD:
+                return ResultConverter.Quality.BAD;
+        }
+        return ResultConverter.Quality.BAD;
+    }
 
-	public void convert(AJAXRequestData requestData, AJAXRequestResult result,
-			ServerSession session, Converter converter) throws OXException {
-
-		Object converted = this.converter.convert(result.getResultObject(), session, this.rtConverter);
-
-		result.setResultObject(converted,  getOutputFormat());
-
-	}
-
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object converted = this.converter.convert(result.getResultObject(), session, this.rtConverter);
+        result.setResultObject(converted, getOutputFormat());
+    }
 }

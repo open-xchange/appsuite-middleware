@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -307,7 +308,7 @@ public class TaskSearchObjectBuilder {
             if (s > 5 || s < 1) {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "status");
             }
-            sf.add(s);
+            sf.add(I(s));
         }
         searchObject.setStateFilters(sf);
     }
@@ -376,7 +377,7 @@ public class TaskSearchObjectBuilder {
         }
     }
 
-    private void addParticipantFilters(List<String> filters) throws OXException {
+    private void addParticipantFilters(List<String> filters) {
         Set<Integer> intP = searchObject.getUserIDs();
         Set<String> extP = searchObject.getExternalParticipants();
 

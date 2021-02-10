@@ -1,0 +1,10 @@
+type: object
+title: Attachment result
+description: An attachment object.
+properties:
+  attachments:
+    type: array
+    items:
+      $ref: '#/components/schemas/MailComposeAttachment'
+  compositionSpace:
+    $ref: '#/components/schemas/MailComposeInfo'

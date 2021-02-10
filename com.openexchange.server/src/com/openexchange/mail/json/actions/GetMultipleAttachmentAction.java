@@ -66,6 +66,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.ajax.zip.Buffer;
 import com.openexchange.ajax.zip.ZipArchiveOutputStreamProvider;
 import com.openexchange.ajax.zip.ZipEntryAdder;
@@ -91,6 +92,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
     /**
@@ -98,12 +100,12 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
      *
      * @param services
      */
-    public GetMultipleAttachmentAction(final ServiceLookup services) {
+    public GetMultipleAttachmentAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         try {
             // final ServerSession session = req.getSession();
             /*
@@ -198,7 +200,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
      * @param userLocale - Locale of the user to get correct subject translation in case subject is not set
      * @return String - file name
      */
-    protected String getFileName(final Locale userLocale, final MailMessage message) {
+    protected String getFileName(Locale userLocale, MailMessage message) {
         String fileName = message.getSubject();
         if (fileName == null) { // in case no subject was set
             fileName = StringHelper.valueOf(userLocale).getString(MailStrings.DEFAULT_SUBJECT);
@@ -207,7 +209,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         return new StringBuilder(fileName).append(".zip").toString();
     }
 
-    private long createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {
+    private long createZipArchive(String folderPath, String uid, String[] sequenceIds, MailServletInterface mailInterface, OutputStream out) throws OXException {
         ZipEntryAdder adder = new MailPartZipEntryAdder(uid, folderPath, sequenceIds, mailInterface);
         return ZipUtility.writeZipArchive(adder, out, 0);
     }

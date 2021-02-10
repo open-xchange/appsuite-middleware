@@ -66,14 +66,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -86,9 +87,6 @@ import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -107,6 +105,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.data.ResellerCapability;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
@@ -122,7 +122,7 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCapabilityService implements CapabilityService, Reloadable {
+public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCapabilityService.class);
 
@@ -254,38 +254,24 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
     }
 
     private Cache optContextCache() {
-        final CacheService service = services.getOptionalService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-        try {
-            return service.getCache(REGION_NAME_CONTEXT);
-        } catch (OXException e) {
-            LOG.error("", e);
-            return null;
-        }
+        return optCache(REGION_NAME_CONTEXT);
     }
 
     private Cache optUserCache() {
-        final CacheService service = services.getOptionalService(CacheService.class);
-        if (null == service) {
-            return null;
-        }
-        try {
-            return service.getCache(REGION_NAME_USER);
-        } catch (OXException e) {
-            LOG.error("", e);
-            return null;
-        }
+        return optCache(REGION_NAME_USER);
     }
 
     private Cache optCache() {
-        final CacheService service = services.getOptionalService(CacheService.class);
+        return optCache(REGION_NAME);
+    }
+
+    private Cache optCache(String cacheRegion) {
+        CacheService service = services.getOptionalService(CacheService.class);
         if (null == service) {
             return null;
         }
         try {
-            return service.getCache(REGION_NAME);
+            return service.getCache(cacheRegion);
         } catch (OXException e) {
             LOG.error("", e);
             return null;
@@ -328,8 +314,8 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param contextId The context ID or <code>-1</code>
      * @param session The session; must either belong to the user and context ID or be <code>null</code>
      * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
-     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
-     *                         set, but no PasswordChangeService is available).
+     *            which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *            set, but no PasswordChangeService is available).
      * @param allowCache Whether the capabilities may be looked up from cache
      * @return
      * @throws OXException
@@ -338,7 +324,6 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         return getCapabilities(userId, contextId, session, alignPermissions, getCacheOptionsFor(allowCache, true));
     }
 
-
     /**
      * Gets the capabilities.
      *
@@ -346,8 +331,8 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param contextId The context ID or <code>-1</code>
      * @param session The session; must either belong to the user and context ID or be <code>null</code>
      * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
-     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
-     *                         set, but no PasswordChangeService is available).
+     *            which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *            set, but no PasswordChangeService is available).
      * @param cacheOptions The cache options
      * @return
      * @throws OXException
@@ -522,17 +507,18 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * Adds all capabilities that have been specified via any mechanism of configuration to the passed set. Such capabilities are:
      *
      * <ul>
-     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config cascade</li>
-     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config cascade</li>
-     *  <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
-     *  <li>context-specific capabilities contained in the context_capabilities database table</li>
-     *  <li>user-specific capabilities contained in the user_capabilities database table</li>
+     * <li>capabilities specified via the <code>permissions</code> property - looked up via config cascade</li>
+     * <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config cascade</li>
+     * <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
+     * <li>reseller-specific capabilities contained in the subadmin_capabilities database table</li>
+     * <li>context-specific capabilities contained in the context_capabilities database table</li>
+     * <li>user-specific capabilities contained in the user_capabilities database table</li>
      * </ul>
      *
      * @param capabilities The capability set
      * @param forcedCapabilities The forcibly configured capabilities
      * @param user The user; if <code>null</code>, all config cascade lookups are performed with user ID <code>-1</code>;
-     *             if the user is a guest, the configure guest capability mode is considered.
+     *            if the user is a guest, the configure guest capability mode is considered.
      * @param context The context; if <code>null</code>, all config cascade lookups are performed with context ID <code>-1</code>
      * @param allowCache Whether caching of loaded capabilities is allowed
      * @throws OXException
@@ -546,6 +532,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                 GuestCapabilityMode capMode = getGuestCapabilityMode(user, context);
                 if (capMode == GuestCapabilityMode.INHERIT) {
                     applyConfigCascade(filteredCaps, user.getCreatedBy(), contextId);
+                    applyResellerCapabilities(filteredCaps, contextId);
                     applyContextCapabilities(filteredCaps, contextId, allowCache);
                     applyUserCapabilities(filteredCaps, user.getCreatedBy(), contextId, allowCache);
                     applyUserCapabilities(filteredCaps, userId, contextId, allowCache);
@@ -557,11 +544,13 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                 }
             } else {
                 applyConfigCascade(filteredCaps, userId, contextId);
+                applyResellerCapabilities(filteredCaps, contextId);
                 applyContextCapabilities(filteredCaps, contextId, allowCache);
                 applyUserCapabilities(filteredCaps, userId, contextId, allowCache);
             }
         } else {
             applyConfigCascade(filteredCaps, userId, contextId);
+            applyResellerCapabilities(filteredCaps, contextId);
             applyContextCapabilities(filteredCaps, contextId, allowCache);
         }
     }
@@ -587,9 +576,9 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * Adds all capabilities that have been specified via config-cascade properties to the passed set.
      *
      * <ul>
-     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config-cascade</li>
-     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config-cascade</li>
-     *  <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
+     * <li>capabilities specified via the <code>permissions</code> property - looked up via config-cascade</li>
+     * <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config-cascade</li>
+     * <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
      * </ul>
      *
      * @param capabilities The {@link FilteringCapabilities}
@@ -599,82 +588,106 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     private void applyConfigCascade(FilteringCapabilities capabilities, int userId, int contextId) throws OXException {
         // Permission properties
-        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            final ConfigView view = configViews.getView(userId, contextId);
-            final String property = PERMISSION_PROPERTY;
-            for (final String scope : configViews.getSearchPath()) {
-                final String permissions = view.property(property, String.class).precedence(scope).get();
-                if (permissions != null) {
-                    for (String permissionModifier : Strings.splitByComma(permissions)) {
-                        if (!isEmpty(permissionModifier)) {
-                            char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                capabilities.remove(permissionModifier.substring(1), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
-                            } else {
-                                if ('+' == firstChar) {
-                                    String name = permissionModifier.substring(1);
-                                    capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
-                                } else {
-                                    String name = permissionModifier;
-                                    capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
-                                }
-                            }
-                        }
-                    }
-                }
+        ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews == null) {
+            return;
+        }
+        ConfigView view = configViews.getView(userId, contextId);
+        String property = PERMISSION_PROPERTY;
+        for (String scope : configViews.getSearchPath()) {
+            String permissions = view.property(property, String.class).precedence(scope).get();
+            if (permissions == null) {
+                continue;
             }
-
-            final Map<String, ComposedConfigProperty<String>> all = view.all();
-            for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                final String propName = entry.getKey();
-                if (propName.startsWith("com.openexchange.capability.", 0)) {
-                    ComposedConfigProperty<String> configProperty = entry.getValue();
-                    /*
-                     * don't apply undefined capabilities
-                     */
-                    if (false == configProperty.isDefined()) {
-                        LOG.debug("Ignoring undefined capability property for user {} in context {}: {}",
-                            Integer.valueOf(userId), Integer.valueOf(contextId), propName);
-                        continue;
-                    }
-                    /*
-                     * apply capability
-                     */
-                    String name = toLowerCase(propName.substring(28));
-                    String scope = configProperty.getScope();
-                    String value = configProperty.get();
-                    if (name.startsWith("forced.", 0)) {
-                        name = name.substring(7);
-                        final String capName = name;
-                        capabilities.addForced(name, () -> getCapability(capName), new ValueAndScope(Boolean.valueOf(value), scope));
+            for (String permissionModifier : Strings.splitByComma(permissions)) {
+                if (Strings.isEmpty(permissionModifier)) {
+                    continue;
+                }
+                char firstChar = permissionModifier.charAt(0);
+                if ('-' == firstChar) {
+                    capabilities.remove(permissionModifier.substring(1), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
+                } else {
+                    if ('+' == firstChar) {
+                        String name = permissionModifier.substring(1);
+                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
                     } else {
-                        final String capName = name;
-                        if (Boolean.parseBoolean(value)) {
-                            capabilities.add(name, () -> getCapability(capName), CapabilitySource.CONFIGURATION, "Final scope: " + scope);
-                        } else {
-                            capabilities.remove(name, CapabilitySource.CONFIGURATION, "Final scope: " + scope);
-                        }
+                        String name = permissionModifier;
+                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
                     }
-                    /*
-                     * additionally check for discouraged use of module permissions
-                     */
-                    Permission matchingModulePermission = Permission.get(name);
-                    if (null != matchingModulePermission) {
-                        LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.",
-                            matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
-                    }
-                }
-            }
-
-            // Check for a property handler
-            for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
-                final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
-                if (null != composedConfigProperty) {
-                    entry.getValue().handleProperty(composedConfigProperty.get(), capabilities.getCapabilitySet());
                 }
             }
         }
+
+        Map<String, ComposedConfigProperty<String>> all = view.all();
+        for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            String propName = entry.getKey();
+            if (false == propName.startsWith("com.openexchange.capability.", 0)) {
+                continue;
+            }
+            ComposedConfigProperty<String> configProperty = entry.getValue();
+            /*
+             * don't apply undefined capabilities
+             */
+            if (false == configProperty.isDefined()) {
+                LOG.debug("Ignoring undefined capability property for user {} in context {}: {}", Integer.valueOf(userId), Integer.valueOf(contextId), propName);
+                continue;
+            }
+            /*
+             * apply capability
+             */
+            String name = toLowerCase(propName.substring(28));
+            String scope = configProperty.getScope();
+            String value = configProperty.get();
+            if (name.startsWith("forced.", 0)) {
+                name = name.substring(7);
+                String capName = name;
+                capabilities.addForced(name, () -> getCapability(capName), new ValueAndScope(Boolean.valueOf(value), scope));
+            } else {
+                String capName = name;
+                if (Boolean.parseBoolean(value)) {
+                    capabilities.add(name, () -> getCapability(capName), CapabilitySource.CONFIGURATION, "scope: " + scope);
+                } else {
+                    capabilities.remove(name, CapabilitySource.CONFIGURATION, "scope: " + scope);
+                }
+            }
+            /*
+             * additionally check for discouraged use of module permissions
+             */
+            Permission matchingModulePermission = Permission.get(name);
+            if (null != matchingModulePermission) {
+                LOG.debug("Overriding module permission {} with 'capability' property {}={} for user {} in context {}.", matchingModulePermission, propName, value, Integer.valueOf(userId), Integer.valueOf(contextId));
+            }
+        }
+
+        // Check for a property handler
+        for (Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
+            ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
+            if (null != composedConfigProperty) {
+                entry.getValue().handleProperty(composedConfigProperty.get(), capabilities.getCapabilitySet());
+            }
+        }
+    }
+
+    /**
+     * Adds all capabilities that are specified as <code>reseller_capabilities</code> DB entries to the passed set.
+     *
+     * @param capabilities The {@link FilteringCapabilities}
+     * @param contextId The context ID; if negative calling this method is a no-op
+     * @param allowCache Whether caching of loaded capabilities is allowed
+     * @throws OXException
+     */
+    private void applyResellerCapabilities(FilteringCapabilities capabilities, int contextId) throws OXException {
+        if (contextId <= 0) {
+            return;
+        }
+        ResellerService resellerService = services.getOptionalService(ResellerService.class);
+        if (resellerService == null) {
+            return;
+        }
+        if (false == resellerService.isEnabled()) {
+            return;
+        }
+        applySet(capabilities, getResellerCaps(contextId).stream().map(r -> r.getId()).collect(Collectors.toSet()), CapabilitySource.RESELLER);
     }
 
     /**
@@ -717,22 +730,23 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         Set<String> set = new HashSet<String>();
         Set<String> removees = new HashSet<String>();
         for (String sCap : capabilitiesToApply) {
-            if (!isEmpty(sCap)) {
-                char firstChar = sCap.charAt(0);
-                if ('-' == firstChar) {
-                    String val = toLowerCase(sCap.substring(1));
-                    set.remove(val);
-                    removees.add(val);
+            if (Strings.isEmpty(sCap)) {
+                continue;
+            }
+            char firstChar = sCap.charAt(0);
+            if ('-' == firstChar) {
+                String val = toLowerCase(sCap.substring(1));
+                set.remove(val);
+                removees.add(val);
+            } else {
+                if ('+' == firstChar) {
+                    String cap = toLowerCase(sCap.substring(1));
+                    set.add(cap);
+                    removees.remove(cap);
                 } else {
-                    if ('+' == firstChar) {
-                        String cap = toLowerCase(sCap.substring(1));
-                        set.add(cap);
-                        removees.remove(cap);
-                    } else {
-                        String cap = toLowerCase(sCap);
-                        set.add(cap);
-                        removees.remove(cap);
-                    }
+                    String cap = toLowerCase(sCap);
+                    set.add(cap);
+                    removees.remove(cap);
                 }
             }
         }
@@ -798,16 +812,16 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      * @param capabilities The capability set
      */
     protected void alignPermissions(CapabilitySet capabilities) {
-        final PermissionAvailabilityServiceRegistry registry = this.registry;
-        if (registry != null) {
-            final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
-            for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
-                if (!serviceList.containsKey(p)) {
-                    capabilities.remove(p.getCapabilityName());
-                }
-            }
-        } else {
+        PermissionAvailabilityServiceRegistry registry = this.registry;
+        if (registry == null) {
             LOG.warn("Registry not initialized. Cannot check permissions for JSON requests");
+            return;
+        }
+        Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
+        for (Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
+            if (!serviceList.containsKey(p)) {
+                capabilities.remove(p.getCapabilityName());
+            }
         }
     }
 
@@ -821,15 +835,17 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     private void applyStaticGuestCapabilities(CapabilitySetImpl capabilities, User user, Context context) throws OXException {
         ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            ConfigView view = configViews.getView(user.getId(), context.getContextId());
-            String value = view.opt("com.openexchange.share.staticGuestCapabilities", String.class, "");
-            if (Strings.isNotEmpty(value)) {
-                List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
-                for (String cap : staticCapabilities) {
-                    capabilities.add(getCapability(cap), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.share.staticGuestCapabilities\"");
-                }
-            }
+        if (configViews == null) {
+            return;
+        }
+        ConfigView view = configViews.getView(user.getId(), context.getContextId());
+        String value = view.opt("com.openexchange.share.staticGuestCapabilities", String.class, "");
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
+        for (String cap : staticCapabilities) {
+            capabilities.add(getCapability(cap), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.share.staticGuestCapabilities\"");
         }
     }
 
@@ -843,13 +859,14 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     private GuestCapabilityMode getGuestCapabilityMode(User user, Context context) throws OXException {
         ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            ConfigView view = configViews.getView(user.getId(), context.getContextId());
-            String value = view.opt("com.openexchange.share.guestCapabilityMode", String.class, "static");
-            for (GuestCapabilityMode mode : GuestCapabilityMode.values()) {
-                if (mode.name().toLowerCase().equals(value)) {
-                    return mode;
-                }
+        if (configViews == null) {
+            return GuestCapabilityMode.STATIC;
+        }
+        ConfigView view = configViews.getView(user.getId(), context.getContextId());
+        String value = view.opt("com.openexchange.share.guestCapabilityMode", String.class, "static");
+        for (GuestCapabilityMode mode : GuestCapabilityMode.values()) {
+            if (mode.name().toLowerCase().equals(value)) {
+                return mode;
             }
         }
 
@@ -861,7 +878,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
     }
 
     private boolean check(String cap, Session session, CapabilitySet allCapabilities, BoolReference putIntoCache) {
-        final Map<String, List<CapabilityChecker>> checkers = getCheckers();
+        Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
         List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
         if (null != list && !list.isEmpty()) {
@@ -963,26 +980,36 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
      */
     @Override
     public List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException {
-        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>();
+        ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews == null) {
+            return Collections.emptyList();
+        }
 
-        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            final ConfigView view = configViews.getView(userId, contextId);
+        ConfigView view = configViews.getView(userId, contextId);
+        if (view == null) {
+            return Collections.emptyList();
+        }
 
-            if (view != null) {
-                Map<String, ComposedConfigProperty<String>> all = view.all();
-
-                for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                    String key = entry.getKey();
-
-                    if (!StringUtils.containsIgnoreCase(key, searchPattern)) {
-                        continue;
+        Map<String, ComposedConfigProperty<String>> all = view.all();
+        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>(all.size());
+        for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            String key = entry.getKey();
+            if (StringUtils.containsIgnoreCase(key, searchPattern)) {
+                ComposedConfigProperty<String> property = entry.getValue();
+                String value = property.get();
+                if ((property.getScope() == null) && (value == null)) {
+                    LOG.info("Scope and value for property '{}' are null. Going to ignore it", key);
+                } else {
+                    List<String> metadataNames = property.getMetadataNames();
+                    if (metadataNames.isEmpty()) {
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, ImmutableMap.of()));
+                    } else {
+                        ImmutableMap.Builder<String, String> metadata = ImmutableMap.builderWithExpectedSize(metadataNames.size());
+                        for (String metadataName : property.getMetadataNames()) {
+                            metadata.put(metadataName, property.get(metadataName));
+                        }
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, metadata.build()));
                     }
-                    if ((entry.getValue().getScope() == null) && (entry.getValue().get() == null)) {
-                        LOG.info("Scope and value for property {} null. Going to ignore it", key);
-                        continue;
-                    }
-                    properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));
                 }
             }
         }
@@ -1089,8 +1116,7 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
                     if (propName.startsWith("com.openexchange.capability.")) {
                         ComposedConfigProperty<String> configProperty = entry.getValue();
                         if (false == configProperty.isDefined()) {
-                            LOG.debug("Ignoring undefined capability property for user {} in context {}: {}",
-                                Integer.valueOf(userId), Integer.valueOf(contextId), propName);
+                            LOG.debug("Ignoring undefined capability property for user {} in context {}: {}", Integer.valueOf(userId), Integer.valueOf(contextId), propName);
                             continue;
                         }
                         boolean value = Boolean.parseBoolean(configProperty.get());
@@ -1135,8 +1161,35 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
 
         {
             if (contextId > 0) {
-                final Set<String> set = new HashSet<String>();
-                final Set<String> removees = new HashSet<String>();
+                Set<String> set = new HashSet<String>();
+                Set<String> removees = new HashSet<String>();
+
+                // Reseller-sensitive
+                for (ResellerCapability resellerCapability : getResellerCaps(contextId)) {
+                    if (null == resellerCapability) {
+                        continue;
+                    }
+                    String sCap = resellerCapability.getId();
+                    if (isEmpty(sCap)) {
+                        continue;
+                    }
+                    char firstChar = sCap.charAt(0);
+                    if ('-' == firstChar) {
+                        String name = toLowerCase(sCap.substring(1));
+                        if (isLegal(name, userId, contextId) == false) {
+                            continue;
+                        }
+                        set.remove(name);
+                        removees.add(concatResellerId(name, resellerCapability.getResellerId()));
+                    } else {
+                        String name = ('+' == firstChar) ? sCap.substring(1) : sCap;
+                        if (isLegal(name, userId, contextId) == false) {
+                            continue;
+                        }
+                        set.add(concatResellerId(name, resellerCapability.getResellerId()));
+                    }
+                }
+
                 // Context-sensitive
                 for (final String sCap : getContextCaps(contextId, false)) {
                     if (!isEmpty(sCap)) {
@@ -1213,6 +1266,17 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         }
 
         return sets;
+    }
+
+    /**
+     * Concatenates the reseller id
+     *
+     * @param name The cap/prop/tax name
+     * @param resellerId The reseller id
+     * @return The concatenated string
+     */
+    private String concatResellerId(String name, int resellerId) {
+        return name + " (ResellerId:" + resellerId + ")";
     }
 
     /**
@@ -1321,23 +1385,22 @@ public abstract class AbstractCapabilityService implements CapabilityService, Re
         }
     }
 
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PermissionConfigurationChecker.PROP_APPLY_ILLEGAL_PERMISSIONS).build();
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        Cache optCache = optCache();
-        if (optCache == null) {
-            return;
+    /**
+     * Loads the reseller capabilities for the specified context.
+     *
+     * @param contextId The context identifier
+     * @return A Set with all reseller capabilities.
+     * @throws OXException
+     */
+    private Set<ResellerCapability> getResellerCaps(int contextId) throws OXException {
+        if (contextId <= 0) {
+            return ImmutableSet.of();
         }
-
-        try {
-            optCache.clear();
-        } catch (OXException e) {
-            LOG.error("Unable to clear capability cache: {}",e.getMessage(), e);
+        ResellerService resellerService = services.getOptionalService(ResellerService.class);
+        if (resellerService == null) {
+            return ImmutableSet.of();
         }
+        return resellerService.getCapabilitiesByContext(contextId);
     }
 
     // ------------------------------------------------------------------------------------------------------------------------- //

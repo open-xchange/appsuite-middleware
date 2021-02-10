@@ -71,9 +71,7 @@ public class WhoAmITest extends AbstractSystemTest {
     @Test
     public void testSystemWhoAmI_normalTest_ResponseAvailable() throws ApiException, OXException, IOException, JSONException {
         String sessionId = apiClient.getSession();
-
-        WhoAmIResponse response = api.whoami(sessionId);
-
+        WhoAmIResponse response = api.whoami();
         assertNull(response.getData().getRandom());
         assertEquals(sessionId, response.getData().getSession());
         assertEquals(apiClient.getUser(), response.getData().getUser());
@@ -86,11 +84,15 @@ public class WhoAmITest extends AbstractSystemTest {
 
     @Test
     public void testSystemWhoAmI_WrongSessionId_ResponseNull() throws ApiException {
-        WhoAmIResponse response = api.whoami("abcdefghijklmnopqrxtuvwxyz");
-
-        assertNull(response.getData());
-        assertTrue(response.getError().contains("session expired"));
-
+        String old = api.getApiClient().getSession();
+        try {
+            api.getApiClient().setApiKey("abcdefghijklmnopqrxtuvwxyz");
+            WhoAmIResponse response = api.whoami();
+            assertNull(response.getData());
+            assertTrue(response.getError().contains("session expired"));
+        } finally {
+            api.getApiClient().setApiKey(old);
+        }
     }
 
 }

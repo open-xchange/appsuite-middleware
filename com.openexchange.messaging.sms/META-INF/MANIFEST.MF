@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: General Messaging SMS Backend Bundle
 Bundle-SymbolicName: com.openexchange.messaging.sms
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.messaging.sms.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -29,6 +29,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.messaging,
  com.openexchange.messaging.generic.internet,
  com.openexchange.osgi,
+ com.openexchange.osgi.service.http,
  com.openexchange.session,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
@@ -41,4 +42,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.slf4j
 Export-Package: com.openexchange.messaging.sms.service
+Automatic-Module-Name: com.openexchange.messaging.sms
 

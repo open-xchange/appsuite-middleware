@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The data export provider bundle for infostore
 Bundle-SymbolicName: com.openexchange.gdpr.dataexport.provider.infostore
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
@@ -49,3 +49,4 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.gdpr.dataexport.provider.infostore.osgi.InfostoreDataExportProviderActivator
+Automatic-Module-Name: com.openexchange.gdpr.dataexport.provider.infostore

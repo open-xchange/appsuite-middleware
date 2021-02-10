@@ -92,12 +92,12 @@ public class ConfFolderFileProviderTest {
     @Rule
     private final TemporaryFolder folder = new TemporaryFolder();
 
-    List<File> configurationFiles = new ArrayList<File>();
+    List<File> configurationFiles = new ArrayList<>();
 
     private File rootFolder;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(FileUtils.class);
@@ -128,7 +128,7 @@ public class ConfFolderFileProviderTest {
     }
 
     @Test
-    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
+    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
         PowerMockito.verifyStatic(ConfFileHandler.class, Mockito.never());
@@ -139,7 +139,7 @@ public class ConfFolderFileProviderTest {
     public void testAddFilesToDiffQueue_filesNotInConfFolder_noFileAddedToQueue() throws IOException {
         File newFile = folder.newFile("file1.properties");
         File newFile2 = folder.newFile("file2.properties");
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         files.add(newFile);
         files.add(newFile2);
 

@@ -102,7 +102,8 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         /*
          * Set proper name
          */
-        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+        boolean isUnifiedInbox = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol());
+        if (isUnifiedInbox) {
             name = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.UNIFIED_MAIL);
         } else {
             name = mailAccount.getName();
@@ -110,7 +111,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         parent = FolderStorage.PRIVATE_ID;
         final MailPermissionImpl mp = new MailPermissionImpl();
         mp.setEntity(userId);
-        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+        if (isUnifiedInbox) {
             mp.setAllPermissions(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         } else {
             mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);

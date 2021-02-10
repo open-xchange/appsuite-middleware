@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.mail;
 
-import static com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess.getIMAPStore;
-import static com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess.getImapMessageStorageFrom;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
@@ -116,11 +114,11 @@ public abstract class MailDriveClosure<R> {
         try {
             mailAccess = MailAccess.getInstance(session);
             mailAccess.connect();
-            return doPerform(getIMAPStore(mailAccess), mailAccess);
+            return doPerform(com.openexchange.imap.IMAPAccess.getIMAPStoreFrom(mailAccess), mailAccess);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
-            throw getImapMessageStorageFrom(mailAccess).handleMessagingException(e);
+            throw com.openexchange.imap.IMAPAccess.getImapMessageStorageFrom(mailAccess).handleMessagingException(e);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

@@ -70,7 +70,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -361,7 +360,7 @@ public final class Tools {
         resp.setHeader(NAME_CACHE_CONTROL, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
-    
+
     /**
      * The magic spell to disable caching... Sets <code>"Expires"</code>, <code>"Cache-Control"</code>, and <code>"Pragma"</code> headers to
      * disable caching:
@@ -387,7 +386,7 @@ public final class Tools {
     /**
      * Removes <tt>Pragma</tt> and other caching response header values if we are going to write directly into servlet's output stream,
      * because then some browsers do not allow this header.
-     * 
+     *
      * @param resp the servlet response.
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
@@ -405,7 +404,7 @@ public final class Tools {
     public static boolean isRemoveCachingHeader(final HttpServletRequest req) {
         return null != req && null != req.getHeader(PARAM_REMOVE_CACHING_HEADERS) && Boolean.valueOf(req.getHeader(PARAM_REMOVE_CACHING_HEADERS)).booleanValue();
     }
-    
+
     /**
      * Updates the caching headers
      *
@@ -494,7 +493,7 @@ public final class Tools {
      */
     public static String logHeaderForError(final HttpServletRequest req) {
         final StringBuilder message = new StringBuilder();
-        final String sep = System.getProperty("line.separator");
+        final String sep = Strings.getLineSeparator();
         message.append("|").append(sep);
         message.append(HEADER_AGENT);
         message.append(": ");
@@ -805,7 +804,7 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
-        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+        for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }
 
@@ -839,7 +838,7 @@ public final class Tools {
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
         httpResponse.setContentType(null);
-        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+        for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }
 
@@ -961,7 +960,7 @@ public final class Tools {
         String msg0 = null == msg ? EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, null) : msg;
 
         StringBuilder sb = new StringBuilder(512);
-        String lineSep = System.getProperty("line.separator");
+        String lineSep = Strings.getLineSeparator();
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
         {
@@ -998,7 +997,7 @@ public final class Tools {
      */
     public static String getEmptyPage() {
         StringBuilder sb = new StringBuilder(128);
-        String lineSep = System.getProperty("line.separator");
+        String lineSep = Strings.getLineSeparator();
         sb.append("<!DOCTYPE html>").append(lineSep);
         sb.append("<html><head>").append(lineSep);
         sb.append("<title>A blank HTML page</title>").append(lineSep);

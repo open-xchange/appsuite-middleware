@@ -87,7 +87,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.database.Databases;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
@@ -102,7 +104,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class AdminCache {
 
-    private static final AtomicReference<BundleContext> BUNDLE_CONTEXT = new AtomicReference<BundleContext>();
+    private static final AtomicReference<BundleContext> BUNDLE_CONTEXT = new AtomicReference<>();
 
     /**
      * Gets the <tt>BundleContext</tt>.
@@ -133,7 +135,8 @@ public class AdminCache {
         BUNDLE_CONTEXT.set(service);
     }
 
-    private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
+    private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<>();
+    private static final AtomicReference<CacheService> CACHE_SERVICE = new AtomicReference<>();
 
     /**
      * Gets the <tt>ConfigurationService</tt>.
@@ -162,6 +165,35 @@ public class AdminCache {
      */
     public static void setConfigurationService(ConfigurationService service) {
         CONF_SERVICE.set(service);
+    }
+
+    /**
+     * Gets the <tt>CacheService</tt>.
+     *
+     * @return The <tt>CacheService</tt> or <code>null</code>
+     */
+    public static CacheService getCacheService() {
+        return CACHE_SERVICE.get();
+    }
+
+    /**
+     * Atomically sets the <tt>CacheService</tt> to the given updated <tt>CacheService</tt> reference if the current value <tt>==</tt> the expected value.
+     *
+     * @param expect the expected <tt>CacheService</tt>
+     * @param update the new <tt>CacheService</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>CacheService</tt> was not equal to the expected <tt>CacheService</tt>.
+     */
+    public static boolean compareAndSetCacheService(CacheService expect, CacheService update) {
+        return CACHE_SERVICE.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>CacheService</tt>.
+     *
+     * @param service The <tt>CacheService</tt> to set
+     */
+    public static void setCacheService(CacheService service) {
+        CACHE_SERVICE.set(service);
     }
 
     public final static String DATA_TRUNCATION_ERROR_MSG = "Data too long for column(s)";
@@ -219,8 +251,8 @@ public class AdminCache {
         readAndSetMasterCredentials(service);
         log.info("Init Cache");
         initPool();
-        this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
-        this.adminAuthMechCache = new Hashtable<Integer, String>();
+        this.adminCredentialsCache = new Hashtable<>();
+        this.adminAuthMechCache = new Hashtable<>();
     }
 
     /**
@@ -309,7 +341,7 @@ public class AdminCache {
     }
 
     private HashMap<String, UserModuleAccess> getAccessCombinations(HashMap<String, Method> module_method_mapping, Properties access_props) throws OXGenericException {
-        HashMap<String, UserModuleAccess> combis = new HashMap<String, UserModuleAccess>();
+        HashMap<String, UserModuleAccess> combis = new HashMap<>();
         // Now check if predefined combinations are valid
         Enumeration<Object> predefined_access_combinations = access_props.keys();
         while (predefined_access_combinations.hasMoreElements()) {
@@ -354,7 +386,7 @@ public class AdminCache {
     private HashMap<String, Method> loadValidAccessModules() throws ClassNotFoundException {
 
         // If we wanna blacklist some still unused modules, add them here!
-        HashSet<String> BLACKLIST = new HashSet<String>();
+        HashSet<String> BLACKLIST = new HashSet<>();
         // BLACKLIST.add("");
 
         try {
@@ -363,7 +395,7 @@ public class AdminCache {
             // usermoduleaccess object
             Class<?> tmp = Class.forName(UserModuleAccess.class.getCanonicalName());
             Method methlist[] = tmp.getDeclaredMethods();
-            HashMap<String, Method> module_method_mapping = new HashMap<String, Method>();
+            HashMap<String, Method> module_method_mapping = new HashMap<>();
 
             log.debug("Listing available modules for use in access combinations...");
             for (Method method : methlist) {
@@ -385,13 +417,17 @@ public class AdminCache {
         }
     }
 
-    private static Properties loadAccessCombinations() {
+    private static Properties loadAccessCombinations() throws OXGenericException {
         // Load properties from file , if does not exists use fall-back properties!
         ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == service) {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
-        return service.getFile("ModuleAccessDefinitions.properties");
+        try {
+            return ConfigurationServices.loadPropertiesFrom(service.getFileByName("ModuleAccessDefinitions.properties"));
+        } catch (IOException e) {
+            throw new OXGenericException("ModuleAccessDefinitions.properties file cannot be opened for reading!", e);
+        }
     }
 
     protected void initPool() {
@@ -869,7 +905,17 @@ public class AdminCache {
     }
 
     public boolean isMasterAdmin(Credentials auth) {
-        return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
+        return isMasterAdmin(auth, true);
+    }
+
+    public boolean isMasterAdmin(Credentials auth, boolean considerMasterAuthenticationDisabled) {
+        if (considerMasterAuthenticationDisabled && masterAuthenticationDisabled) {
+            // Considered as master since master authentication is disabled.
+            return true;
+        }
+
+        Credentials masterCredentials = getMasterCredentials();
+        return masterCredentials != null && masterCredentials.getLogin().equals(auth.getLogin());
     }
 
     /**
@@ -899,23 +945,4 @@ public class AdminCache {
     public boolean isAllowMasterOverride() {
         return allowMasterOverride;
     }
-
-//    /**
-//     * {@link Encrypter} - Password encrypter interface
-//     *
-//     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-//     * @since v7.10.0
-//     */
-//    private interface Encrypter {
-//
-//        /**
-//         * Encrypts the specified password and returns it
-//         *
-//         * @param password The password to encrypt
-//         * @return The encrypted password
-//         * @throws UnsupportedEncodingException
-//         * @throws NoSuchAlgorithmException
-//         */
-//        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
-//    }
 }

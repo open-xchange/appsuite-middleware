@@ -148,6 +148,7 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
      * @param packet The packet to convert.
      * @return The session object
      */
+    @SuppressWarnings("synthetic-access")
     private EncryptedSession toEncryptedSession(PublicKeyEncSessionPacket packet) {
         return new EncryptedSession(
             packet.getVersion(),

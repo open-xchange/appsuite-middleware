@@ -50,12 +50,17 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.marker.OXThreadMarkers.unrememberCloseable;
+import static org.slf4j.LoggerFactory.getLogger;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
@@ -67,7 +72,9 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.SharingFileStorageService;
 import com.openexchange.file.storage.WarningsAware;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
@@ -79,7 +86,13 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware {
+public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware, Closeable {
+
+    /** The identifier of the shared infostore root folder */
+    static final String SHARED_INFOSTORE_ID = "10"; // com.openexchange.groupware.container.FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID
+
+    /** The identifier of the public infostore root folder */
+    static final String PUBLIC_INFOSTORE_ID = "15"; // com.openexchange.groupware.container.FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
@@ -99,6 +112,19 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
     }
+
+    // --------------------------------------------------- Closeable stuff -----------------------------------------------------------------
+
+    @Override
+    public void close() throws IOException {
+        try {
+            this.finish0(false);
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    // --------------------------------------------------- IDBasedAccess stuff -------------------------------------------------------------
 
     @Override
     public List<OXException> getWarnings() {
@@ -160,6 +186,10 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     @Override
     public void finish() throws TransactionException {
+        finish0(true);
+    }
+
+    private void finish0(boolean unremember) throws TransactionException {
         connectedAccounts.get().clear();
         List<FileStorageAccountAccess> accesses = accessesToClose.get();
         for (FileStorageAccountAccess access : accesses) {
@@ -169,6 +199,9 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             access.close();
         }
         accesses.clear();
+        if (unremember) {
+            unrememberCloseable(this);
+        }
         super.finish();
     }
 
@@ -259,10 +292,48 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     }
 
     /**
-     * Gets the file access.
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
+     *
+     * @param <T> The required interface for the targeted file storage file access implementation
+     * @param serviceId The identifier of the service to get the file access for
+     * @param accountId The identifier of the account to get the file access for
+     * @param extensionClass The interface to cast the file access reference
+     * @return The file storage file access for the specified account
+     */
+    protected <T extends FileStorageFileAccess> T getFileAccess(String serviceId, String accountId, Class<T> extensionClass) throws OXException {
+        FileStorageFileAccess access = getFileAccess(serviceId, accountId);
+        try {
+            return extensionClass.cast(access);
+        } catch (ClassCastException e) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(serviceId);
+        }
+    }
+
+    /**
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
      *
      * @param folderID The folder identifier to get the file access for
-     * @return The file access
+     * @param extensionClass The interface to cast the file access reference
+     * @return The file storage file access for the specified account
+     */
+    protected <T extends FileStorageFileAccess> T getFileAccess(FolderID folderID, Class<T> extensionClass) throws OXException {
+        return getFileAccess(folderID.getService(), folderID.getAccountId(), extensionClass);
+    }
+
+    /**
+     * Gets the file access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's file access, an appropriate exception is thrown.
+     *
+     * @param folderID The folder identifier to get the file access for
+     * @return The file storage file access for the specified account
      */
     protected FileStorageFileAccess getFileAccess(FolderID folderID) throws OXException {
         return getFileAccess(folderID.getService(), folderID.getAccountId());
@@ -312,12 +383,28 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     /**
      * Gets a list of all file storage account accesses.
      *
-     * @return The account accesses.
+     * @return The connected account accesses.
      */
     protected List<FileStorageFileAccess> getAllFileStorageAccesses() throws OXException {
+        return getAllFileStorageAccesses(null);
+    }
+
+    /**
+     * Gets a list of all file storage account accesses.
+     *
+     * @param filter A predicate which defines the {@link FileStorageService}s which should only be returned, or <code>null</code> to return all services.
+     * @return The account accesses.
+     */
+    protected List<FileStorageFileAccess> getAllFileStorageAccesses(Predicate<FileStorageService> filter) throws OXException {
         List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
         List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (FileStorageService fsService : getFileStorageServiceRegistry().getAllServices()) {
+
+            if (filter != null && false == filter.test(fsService)) {
+                //ignore not matching service
+                continue;
+            }
+
             List<FileStorageAccount> accounts = null;
             if (fsService instanceof AccountAware) {
                 accounts = ((AccountAware) fsService).getAccounts(session);
@@ -331,6 +418,40 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             }
         }
         return retval;
+    }
+
+    /**
+     * Constructs the unique folder identifier for the supplied storage-relative folder identifier in a specific file storage account.
+     *
+     * @param relativeId The relative folder identifier to get the unique composite identifier for
+     * @param serviceId The file storage service identifier the referenced folder originates in
+     * @param accountId The identifier of the account the referenced folder originates in
+     * @return The unique folder identifier
+     */
+    protected String getUniqueFolderId(String relativeId, String serviceId, String accountId) {
+        if (null == relativeId || FileID.INFOSTORE_SERVICE_ID.equals(serviceId) && FileID.INFOSTORE_ACCOUNT_ID.equals(accountId)) {
+            return relativeId;
+        }
+        /*
+         * check if special handling of shared root folders for federated shares applies
+         */
+        if ((SHARED_INFOSTORE_ID.equals(relativeId) || PUBLIC_INFOSTORE_ID.equals(relativeId)) && false == isSeparateFederatedShares()) {
+            FileStorageService fileStorageService = null;
+            try {
+                FileStorageAccountAccess accountAccess = optAccountAccess(serviceId, accountId);
+                fileStorageService = null == accountAccess ? getFileStorageServiceRegistry().getFileStorageService(serviceId) : accountAccess.getService();
+            } catch (OXException e) {
+                getLogger(AbstractCompositingIDBasedAccess.class).warn(
+                    "Unexpected error determining file storage service for {} / {}, falling back to static ID mangling", serviceId, accountId, e);
+            }
+            if (null != fileStorageService && SharingFileStorageService.class.isInstance(fileStorageService)) {
+                /*
+                 * do not mangle shared/public root folders of integrated federated shares
+                 */
+                return relativeId;
+            }
+        }
+        return new FolderID(serviceId, accountId, relativeId).toUniqueID();
     }
 
     /**
@@ -368,6 +489,16 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         accounts.put(id, accountAccess);
         accessesToClose.get().add(accountAccess);
         return accountAccess;
+    }
+
+    /**
+     * Gets a value indicating whether <i>federated</i> shares from other servers/contexts are mounted at a separate location in the
+     * folder tree, or if they're integrated into the common system folders "Shared Files" / "Public Files".
+     *
+     * @return <code>true</code> if federated shares appear as separate account, <code>false</code> if they're integrated into the default folders
+     */
+    protected boolean isSeparateFederatedShares() {
+        return false; // not separated for now
     }
 
 }

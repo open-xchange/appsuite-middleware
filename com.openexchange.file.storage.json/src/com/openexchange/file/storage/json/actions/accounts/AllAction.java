@@ -51,23 +51,21 @@ package com.openexchange.file.storage.json.actions.accounts;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
-import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
@@ -113,7 +111,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
             // Get the accounts associated with current file storage service
             List<FileStorageAccount> userAccounts = null;
             if (fsService instanceof AccountAware) {
-                userAccounts = ((AccountAware) fsService).getAccounts(session);
+                userAccounts = AccountAware.class.cast(fsService).getAccounts(session);
             }
             if (null == userAccounts) {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
@@ -124,18 +122,14 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 FileStorageAccountAccess access = null;
                 try {
                     access = fsService.getAccountAccess(account.getId(), session);
-                    FileStorageFolder rootFolder = access.getRootFolder();
+                    FileStorageFolder rootFolder = optRootFolder(access);
 
                     //Extended connection check if requested by the client and supported by the FileStorage
                     if (Boolean.TRUE.equals(connectionCheck) && account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-                        ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+                        LoginAwareFileStorageServiceExtension.class.cast(account.getFileStorageService()).testConnection(account, session);
                     }
 
-                    if (null != rootFolder) {
-                        // Check file storage capabilities
-                        Set<String> caps = determineCapabilities(access);
-                        result.put(writer.write(account, rootFolder, caps));
-                    }
+                    result.put(writer.write(account, rootFolder, determineCapabilities(access), optMetadata(session, account)));
 
                 } catch (OXException e) {
                     LOG.debug(e.getMessage(), e);
@@ -148,9 +142,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         }
                     } else {
                         // Add account with error
-                        Set<String> caps = determineCapabilities(access);
                         boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
-                        result.put(writer.write(account, null, caps, e, session, includeStackTraceOnError));
+                        JSONObject accountJSON = writer.write(account, null, determineCapabilities(access), null);
+                        accountJSON.put("hasError", true);
+                        ResponseWriter.addException(accountJSON, e, localeFrom(session), includeStackTraceOnError);
+                        result.put(accountJSON);
                     }
                 }
             }
@@ -158,76 +154,4 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
         return requestResult;
     }
-
-    private Set<String> determineCapabilities(FileStorageAccountAccess access) {
-        if (!(access instanceof CapabilityAware)) {
-            return null;
-        }
-
-        CapabilityAware capabilityAware = (CapabilityAware) access;
-        Set<String> caps = new HashSet<String>();
-
-        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.FILE_VERSIONS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.LOCKS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.READ_ONLY.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.COUNT_TOTAL);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.COUNT_TOTAL.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.CASE_INSENSITIVE);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.AUTO_RENAME_FOLDERS);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
-        }
-
-        supported = capabilityAware.supports(FileStorageCapability.RESTORE);
-        if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.RESTORE.name());
-        }
-
-        return caps;
-    }
-
 }

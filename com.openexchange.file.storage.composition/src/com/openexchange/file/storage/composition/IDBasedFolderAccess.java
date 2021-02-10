@@ -242,6 +242,28 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
     String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException;
 
     /**
+     * Updates an existing file storage folder identified through given identifier. All attributes set in given file storage folder instance are
+     * applied.
+     * <p>
+     * The currently known attributes that make sense being updated are:
+     * <ul>
+     * <li>permissions</li>
+     * <li>subscription</li>
+     * </ul>
+     * Of course more folder attributes may be checked by implementation to enhance update operations.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update fails with an exception.
+     *
+     * @param identifier The identifier of the file storage folder to update
+     * @param toUpdate The file storage folder to update containing only the modified fields
+     * @param cascadePermissions <code>true</code> to apply permission changes to all subfolders, <code>false</code>, otherwise
+     * @param ignoreWarnings indicates whether warnings should be ignored or not
+     * @return The identifier of the updated file storage folder
+     * @throws OXException If either folder does not exist or cannot be updated
+     */
+    String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions, boolean ignoreWarnings) throws OXException;
+
+    /**
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
      * <p>
      * E.g.:
@@ -256,6 +278,24 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * @throws OXException If either folder does not exist or cannot be moved
      */
     String moveFolder(String folderId, String newParentId) throws OXException;
+
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
+     * it to the supplied new name.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.newName
+     * </pre>
+     *
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param ignoreWarnings <code>true</code> to force the folder move even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    String moveFolder(String folderId, String newParentId, boolean ignoreWarnings) throws OXException;
 
     /**
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
@@ -434,6 +474,22 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * @return The restored paths mapped by folder id
      * @throws OXException If restore fails
      */
-     Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException;
+    Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException;
+
+    /**
+     * Searches a folder below given folder identifier by folder name
+     *
+     * @param query The query to search
+     * @param folderId The 'root' folder for search operation
+     * @param date Timestamp to limit search result to folders that are newer
+     * @param includeSubfolders Include all subfolders below given folder identifier
+     * @param all Whether all or only subscribed subfolders shall be returned. If underlying file storage system does not support folder
+     *            subscription, this argument should always be treated as <code>true</code>
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return Array of {@link FileStorageFolder} sorted by name
+     * @throws OXException If search fails
+     */
+    FileStorageFolder[] searchFolderByName(String query, String folderId, long date, boolean includeSubfolders, boolean all, int start, int end) throws OXException;
 
 }

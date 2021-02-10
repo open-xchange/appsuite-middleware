@@ -54,7 +54,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import com.openexchange.multifactor.MultifactorRequest;
 import com.openexchange.multifactor.MultifactorToken;
 import com.openexchange.multifactor.storage.MultifactorTokenStorage;

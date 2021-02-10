@@ -123,7 +123,7 @@ public class AdminAuthRESTService {
             return new JSONObject(2).put("result", true);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             return new JSONObject(2).putSafe("result", Boolean.FALSE);
         }
     }

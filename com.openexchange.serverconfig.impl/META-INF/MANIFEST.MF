@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.serverconfig.impl
 Bundle-SymbolicName: com.openexchange.serverconfig.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.serverconfig.impl.osgi.ServerConfigActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -44,3 +44,4 @@ Import-Package: com.google.common.annotations,
  org.yaml.snakeyaml.serializer,
  org.yaml.snakeyaml.tokens,
  org.yaml.snakeyaml.util
+Automatic-Module-Name: com.openexchange.serverconfig.impl

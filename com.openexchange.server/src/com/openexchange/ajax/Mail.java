@@ -225,7 +225,7 @@ public class Mail extends PermissionServlet {
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
-        final String lineSeparator = System.getProperty("line.separator");
+        final String lineSeparator = Strings.getLineSeparator();
         LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.{}{}", lineSeparator, lineSeparator, (null == message ? "[Not available]" : message), cause);
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }

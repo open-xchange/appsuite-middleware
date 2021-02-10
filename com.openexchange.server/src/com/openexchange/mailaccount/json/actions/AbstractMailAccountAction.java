@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.actions;
 
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
+import static com.openexchange.session.Sessions.isGuest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -90,7 +91,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.SpamSuppressingMailAccount;
@@ -116,11 +116,13 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAccountAction.class);
 
+    protected static final String MODULE = "mailaccount";
+
     /** The service identifier for JSlob */
     public static final String JSLOB_SERVICE_ID = "com.openexchange.mailaccount";
 
     /** The reference to JSlobStorageRegistry */
-    private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<JSlobStorageRegistry>();
+    private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<>();
 
     /** The detector for (other) active provider */
     private final ActiveProviderDetector activeProviderDetector;
@@ -343,14 +345,14 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * Checks if specified {@link MailAccount} is considered as default aka primary account.
      *
      * @param mailAccount The mail account to examine
-     * @return <code>true</code> if specified {@link MailAccount} is considered as defaul account; otherwise <code>false</code>
+     * @return <code>true</code> if specified {@link MailAccount} is considered as default account; otherwise <code>false</code>
      */
     protected static boolean isDefaultMailAccount(final MailAccount mailAccount) {
         return mailAccount.isDefaultAccount() || MailAccount.DEFAULT_ID == mailAccount.getId();
     }
 
     /**
-     * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
+     * Checks if specified {@link MailAccountDescription} is considered as default aka. primary account.
      *
      * @param mailAccount The mail account description to examine
      * @return <code>true</code> if specified {@link MailAccountDescription} is considered as default account; otherwise <code>false</code>
@@ -450,7 +452,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         boolean isDefault;
         {
             isDefault = accountDescription.getId() == MailAccount.DEFAULT_ID;
-            if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
+            if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), isGuest(session)))) {
                 ConfiguredServer mailServer = MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId());
                 if (mailServer == null) {
                     throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + session.getUserId() + " in context " + session.getContextId());
@@ -491,7 +493,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             }
 
             // Set server and port
-            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
+            if (!isDefault || !ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), isGuest(session)))) {
                 URI uri = parseUri(mailServerURL);
                 if (null != uri) {
                     mailConfig.setServer(uri.getHost());

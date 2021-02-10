@@ -85,7 +85,7 @@ public class UniversalCache<K, V> {
     /**
      * Initializes a new {@link UniversalCache}.
      */
-    public UniversalCache(final ValueYielder<K, V> yielder) {
+    public UniversalCache(ValueYielder<K, V> yielder) {
         super();
         map = new ConcurrentHashMap<K, Future<V>>();
         this.yielder = yielder;
@@ -98,7 +98,7 @@ public class UniversalCache<K, V> {
      * @return The (cached) result.
      * @throws InterruptedException If current thread is interrupted while waiting for result being yielded.
      */
-    public V get(final K k) throws InterruptedException {
+    public V get(K k) throws InterruptedException {
         while (true) {
             Future<V> f = map.get(k);
             if (f == null) {
@@ -127,7 +127,7 @@ public class UniversalCache<K, V> {
         map.clear();
     }
 
-    private static RuntimeException launderThrowable(final Throwable t) {
+    private static RuntimeException launderThrowable(Throwable t) {
         if (t instanceof RuntimeException) {
             return (RuntimeException) t;
         } else if (t instanceof Error) {
@@ -143,7 +143,7 @@ public class UniversalCache<K, V> {
 
         private final K input;
 
-        public UCCallable(final K input, final ValueYielder<K, V> yielder) {
+        public UCCallable(K input, ValueYielder<K, V> yielder) {
             super();
             this.input = input;
             this.yielder = yielder;

@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link ParallelGuestSessionsTest}
@@ -71,12 +72,14 @@ import com.openexchange.share.recipient.RecipientType;
 public class ParallelGuestSessionsTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testParallelInvitedGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.GUEST, module));
     }
 
     @Test
+    @TryAgain
     public void testParallelAnonymousGuestSessions() throws Exception {
         int module = randomModule();
         testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.ANONYMOUS, module));
@@ -100,7 +103,6 @@ public class ParallelGuestSessionsTest extends ShareTest {
             }
         });
         /*
-         * /*
          * check permissions
          */
         OCLPermission matchingPermission = null;

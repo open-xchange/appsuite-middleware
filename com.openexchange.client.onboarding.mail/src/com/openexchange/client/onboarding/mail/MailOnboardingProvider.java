@@ -88,6 +88,8 @@ import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
 import com.openexchange.session.UserAndContext;
@@ -202,7 +204,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             case LINK:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case MANUAL:
-                return doExecuteManual(request, previousResult, session);
+                return doExecuteManual(previousResult, session);
             case PLIST:
                 return doExecutePlist(request, previousResult, session);
             default:
@@ -424,8 +426,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         return plistResult(request, previousResult, session);
     }
 
-    private Result doExecuteManual(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        return displayResult(request, previousResult, session);
+    private Result doExecuteManual(Result previousResult, Session session) throws OXException {
+        return displayResult(previousResult, session);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -439,7 +441,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private final static String SMTP_PORT_FIELD = "smtpPort";
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
-    private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+    private Result displayResult(Result previousResult, Session session) throws OXException {
         Configurations configurations;
         {
             MailConfig mailConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
@@ -504,15 +506,24 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
+        ServerConfigService serverConfigService = services.getOptionalService(ServerConfigService.class);
+        String scenarioProductName = null;
+        if (null != serverConfigService) {
+            ServerConfig config = serverConfigService.getServerConfig(hostName, userId, contextId);
+            scenarioProductName = config.getProductName();
+        } else {
+            scenarioProductName = scenario.getDisplayName(userId, contextId);
+        }
+
         // Get the PListDict to contribute to
         PListDict pListDict;
         if (null == optPrevPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
-            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), userId, contextId).toString());
+            pListDict.setPayloadUUID(OnboardingUtility.craftScenarioUUIDFrom(scenario.getId(), userId, contextId).toString());
             pListDict.setPayloadVersion(1);
-            pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
+            pListDict.setPayloadDisplayName(scenarioProductName);
         } else {
             pListDict = optPrevPListDict;
         }
@@ -520,9 +531,10 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         // Generate content
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.mail.managed");
-        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
+        payloadContent.setPayloadUUID(OnboardingUtility.craftProviderUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.mail");
         payloadContent.setPayloadVersion(1);
+        payloadContent.setPayloadDisplayName(scenarioProductName + " Mail");
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
         payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " Mail");

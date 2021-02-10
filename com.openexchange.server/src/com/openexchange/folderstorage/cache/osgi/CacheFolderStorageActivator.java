@@ -259,14 +259,14 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         if (null != contextId) {
                             Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                             if (null != userId) {
-                                FolderMapManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
+                                FolderMapManagement.getInstance().dropFor(userId.intValue(), contextId.intValue(), false);
                                 UserLockManagement.getInstance().dropFor(userId, contextId);
                             }
                         }
                     } else if (SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT.equals(topic)) {
                         Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
                         if (null != contextId) {
-                            FolderMapManagement.getInstance().dropFor(contextId.intValue());
+                            FolderMapManagement.getInstance().dropFor(contextId.intValue(), false);
                             UserLockManagement.getInstance().dropFor(contextId.intValue());
                         }
                     }

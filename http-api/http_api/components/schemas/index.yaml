@@ -1,8 +1,18 @@
+# Common response Excception containing the error fields
+CommonResponseException:
+  type: object
+  properties:
+    $ref: ./common/CommonResponseExceptionData.yaml
 # Common response containing the error fields and a timestamp
 CommonResponse:
   type: object
   properties:
     $ref: ./common/CommonResponseData.yaml
+# Common response containing the error fields, a timestamp and warnings
+CommonResponseWithWarnings:
+  type: object
+  properties:
+    $ref: ./common/CommonResponseDataWithWarnings.yaml    
 # Module: login
 LoginResponse:
   $ref: ./login/LoginResponse.yaml
@@ -76,6 +86,8 @@ FolderCheckLimitsResponseData:
   $ref: ./folders/FolderCheckLimitsResponseData.yaml
 FolderCheckLimitsResponseErrorData:
   $ref: ./folders/FolderCheckLimitsResponseErrorData.yaml
+FolderSearchBody:
+  $ref: ./folders/FolderSearchBody.yaml
 # Module: tasks
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml
@@ -115,9 +127,11 @@ DistributionListMember:
 ContactData:
   allOf:
   - type: object
+    title: CommonObjectData
     properties:
       $ref: ./common/CommonObjectData.yaml
   - type: object
+    title: RawContactData
     properties:
       $ref: ./contacts/RawContactData.yaml
 ContactDataWithInternalId:
@@ -381,6 +395,8 @@ InfoItemZipElement:
   $ref: ./infostore/InfoItemZipElement.yaml
 InfoItemsMovedResponse:
   $ref: ./infostore/InfoItemsMovedResponse.yaml
+InfoItemMovedResponse:
+  $ref: ./infostore/InfoItemMovedResponse.yaml
 InfoItemBody:
   $ref: ./infostore/InfoItemBody.yaml
 InfoItemBodyNotification:
@@ -399,6 +415,8 @@ InfoItemsRestoreResponseData:
   $ref: ./infostore/InfoItemsRestoreResponseData.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
+BackwardLinkResponse:
+  $ref: ./infostore/BackwardLinkResponse.yaml
 # Module: attachments
 AttachmentsResponse:
   $ref: ./attachments/AttachmentsResponse.yaml
@@ -542,8 +560,12 @@ MailComposeResponse:
   $ref: ./mailcompose/MailComposeResponse.yaml
 MailComposeGetResponse:
   $ref: ./mailcompose/MailComposeGetResponse.yaml
-MailComposeMessageModel:
-  $ref: ./mailcompose/MessageModel.yaml
+MailComposeRequestMessageModel:
+  $ref: ./mailcompose/RequestMessageModel.yaml
+MailComposeResponseMessageModel:
+  $ref: ./mailcompose/ResponseMessageModel.yaml
+MailComposeMailPathModel:
+  $ref: ./mailcompose/MailComposeMailPathModel.yaml
 MailComposeAttachmentResponse:
   $ref: ./mailcompose/MailComposeAttachmentResponse.yaml
 MailComposeAttachmentPostResponse:
@@ -551,9 +573,13 @@ MailComposeAttachmentPostResponse:
 MailComposeAttachment:
   $ref: ./mailcompose/Attachment.yaml
 MailComposeSendResponse:
-  $ref: ./mailcompose/SendResponse.yaml
+  $ref: ./mailcompose/MailComposeSendResponse.yaml
 MailComposeSaveResponse:
-  $ref: ./mailcompose/SaveResponse.yaml
+  $ref: ./mailcompose/MailComposeSaveResponse.yaml
+MailComposeAttachmentResult:
+  $ref: ./mailcompose/MailComposeAttachmentResult.yaml
+MailComposeInfo:
+  $ref: ./mailcompose/MailComposeInfo.yaml
 # Module: dataexport
 DataExportTask:
   $ref: ./dataexport/DataExportTask.yaml
@@ -619,6 +645,8 @@ OAuthClientData:
   $ref: ./oauth/grants/OAuthClientData.yaml
 OAuthGrantsResponse:
   $ref: ./oauth/grants/OAuthGrantsResponse.yaml
+OAuthErrorResponse:
+  $ref: ./oauth/errors/OAuthErrorResponse.yaml
 # Module: JSlob
 JSlobData:
   $ref: ./jslob/JSlobData.yaml
@@ -725,6 +753,14 @@ ShareLinkSendBody:
   $ref: ./sharemanagement/ShareLinkSendBody.yaml
 ShareLinkSendResponse:
   $ref: ./sharemanagement/ShareLinkSendResponse.yaml
+ShareLinkAnalyzeResponse:
+  $ref: ./sharemanagement/ShareLinkAnalyzeResponse.yaml
+SubscribeShareResponse:
+  $ref: ./sharemanagement/SubscribeShareResponse.yaml
+SubscribeShareBody:
+  $ref: ./sharemanagement/SubscribeShareBody.yaml
+ExtendedSubscribeShareBody:
+  $ref: ./sharemanagement/ExtendedSubscribeShareBody.yaml
 # Module: passwordchange
 PasswordChangeBody:
   $ref: ./passwordchange/PasswordChangeBody.yaml

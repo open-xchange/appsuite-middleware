@@ -57,6 +57,7 @@ import javax.net.ssl.SSLSocket;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import com.openexchange.management.services.ManagementServiceRegistry;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.systemproperties.SystemPropertiesUtils;
 
 /**
  * {@link CustomSslRMIClientSocketFactory}
@@ -92,7 +93,7 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
         final SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, port);
         // Set the SSLSocket Enabled Cipher Suites
         //
-        final String enabledCipherSuites = System.getProperty("javax.rmi.ssl.client.enabledCipherSuites");
+        final String enabledCipherSuites = SystemPropertiesUtils.getProperty("javax.rmi.ssl.client.enabledCipherSuites");
         if (enabledCipherSuites != null) {
             final StringTokenizer st = new StringTokenizer(enabledCipherSuites, ",");
             final int tokens = st.countTokens();
@@ -108,7 +109,7 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
         }
         // Set the SSLSocket Enabled Protocols
         //
-        final String enabledProtocols = System.getProperty("javax.rmi.ssl.client.enabledProtocols");
+        final String enabledProtocols = SystemPropertiesUtils.getProperty("javax.rmi.ssl.client.enabledProtocols");
         if (enabledProtocols != null) {
             final StringTokenizer st = new StringTokenizer(enabledProtocols, ",");
             final int tokens = st.countTokens();

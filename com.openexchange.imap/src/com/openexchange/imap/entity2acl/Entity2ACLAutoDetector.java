@@ -116,7 +116,7 @@ public final class Entity2ACLAutoDetector {
      * @throws IOException - if an I/O error occurs
      * @throws OXException - if a server greeting could not be mapped to a supported IMAP server
      */
-    public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, OXException {
+    public static Entity2ACL getEntity2ACLImpl(IMAPConfig imapConfig) throws IOException, OXException {
         final String key = new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
@@ -158,7 +158,7 @@ public final class Entity2ACLAutoDetector {
         private final String serverUrl;
         private final IMAPConfig imapConfig;
 
-        public Entity2ACLCallable(final String serverUrl, final IMAPConfig imapConfig) {
+        public Entity2ACLCallable(String serverUrl, IMAPConfig imapConfig) {
             super();
             this.imapConfig = imapConfig;
             this.serverUrl = serverUrl;
@@ -181,7 +181,7 @@ public final class Entity2ACLAutoDetector {
      * @return The appropriate {@link Entity2ACL} implementation
      * @throws OXException If an error occurs
      */
-    protected static Entity2ACL implFor(final String greeting, final IMAPConfig imapConfig) throws OXException {
+    protected static Entity2ACL implFor(String greeting, IMAPConfig imapConfig) throws OXException {
         /*
          * Map greeting to a known IMAP server
          */
@@ -201,8 +201,8 @@ public final class Entity2ACLAutoDetector {
      * @return The associated {@link IMAPServer} instance
      * @throws OXException If mapping fails
      */
-    private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws OXException {
-        for (final IMAPServer imapServer : IMAPServer.getIMAPServers()) {
+    private static IMAPServer mapInfo2IMAPServer(String info, IMAPConfig imapConfig) throws OXException {
+        for (IMAPServer imapServer : IMAPServer.getIMAPServers()) {
             if (imapServer.matches(info)) {
                 return imapServer;
             }

@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -62,7 +63,10 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
+ * {@link OXResellerInterface}
+ * 
  * @author choeger
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OXResellerInterface extends Remote {
 
@@ -73,14 +77,16 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Creates a ResellerAdmin subadmin account in the database.
-     *  Example:
-     *  final ResellerAdmin ra = new ResellerAdmin("reselleradm");
-     *  ra.setDisplayname("Reseller Admin");
-     *  ra.setPassword("secret");
-     *  HashSet<Restriction> rss = new HashSet<Restriction>();
-     *  rss.add(new Restriction(Restriction.MAX_CONTEXT_PER_SUBADMIN, "100"));
-     *  rss.add(new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,"1000"));
-     *
+     * Example:
+     * <pre>
+     * final ResellerAdmin ra = new ResellerAdmin("reselleradm");
+     * ra.setDisplayname("Reseller Admin");
+     * ra.setPassword("secret");
+     * HashSet<Restriction> rss = new HashSet<Restriction>();
+     * rss.add(new Restriction(Restriction.MAX_CONTEXT_PER_SUBADMIN, "100"));
+     * rss.add(new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,"1000"));
+     * </pre>
+     * 
      * @param adm {@link ResellerAdmin} object
      * @param creds {@link Credentials} of the master admin
      * @return {@link ResellerAdmin} object
@@ -90,7 +96,7 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException
      * @throws OXResellerException
      */
-    public ResellerAdmin create(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException;
+    ResellerAdmin create(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException;
 
     /**
      * Delete ResellerAdmin from database If any objects still belong to this subadmin, the deletion will fail
@@ -103,7 +109,7 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      * @throws InvalidCredentialsException
      */
-    public void delete(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
+    void delete(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
 
     /**
      * Change ResellerAdmin parameters
@@ -116,7 +122,20 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      * @throws InvalidCredentialsException
      */
-    public void change(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
+    void change(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
+
+    /**
+     * Allows a reseller admin to change his own capabilities, properties and taxonomies
+     *
+     * @param admin The {@link ResellerAdmin} object
+     * @param credentials {@link Credentials} of the reseller admin
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws OXResellerException
+     * @throws InvalidCredentialsException
+     */
+    void changeSelf(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException;
 
     /**
      * Search for specific or all subadmins in the database
@@ -129,7 +148,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
-    public ResellerAdmin[] list(final String search_pattern, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
+    ResellerAdmin[] list(final String search_pattern, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException;
 
     /**
      * Get complete data from all subadmin objects contained in array. It is required to
@@ -144,7 +163,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws OXResellerException
      */
-    public ResellerAdmin[] getMultipleData(final ResellerAdmin[] admins, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
+    ResellerAdmin[] getMultipleData(final ResellerAdmin[] admins, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * Get complete data from subadmin object. It is required to either specify subadmin objects name or id.
@@ -158,7 +177,7 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
      */
-    public ResellerAdmin getData(final ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
+    ResellerAdmin getData(final ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * Retrieve a list of all currently available {@link Restriction} objects
@@ -170,7 +189,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws OXResellerException
      */
-    public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
+    Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * Retrieve a list of all restrictions applied to given {@link Context}
@@ -184,7 +203,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
-    public Restriction[] getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
+    Restriction[] getRestrictionsFromContext(final Context ctx, final Credentials creds) throws RemoteException, InvalidDataException, OXResellerException, StorageException, InvalidCredentialsException;
 
     /**
      * Initialize the database with all currently possible restrictions.
@@ -197,7 +216,7 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException
      * @throws OXResellerException
      */
-    public void initDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    void initDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
 
     /**
      * Remove all restrictions from database
@@ -208,7 +227,7 @@ public interface OXResellerInterface extends Remote {
      * @throws StorageException
      * @throws OXResellerException
      */
-    public void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
+    void removeDatabaseRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
      * Update all restrictions based on module access combinations in case of changes to
@@ -220,7 +239,7 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException
      * @throws OXResellerException
      */
-    public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
 
     /**
      * Update list of restrictions. This is going to add new restrictions that might ship with
@@ -232,5 +251,19 @@ public interface OXResellerInterface extends Remote {
      * @throws InvalidCredentialsException
      * @throws OXResellerException
      */
-    public void updateDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    void updateDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
+    
+    /**
+     * Retrieves all capabilities for the reseller with the specified identifier
+     * 
+     * @param admin the reseller admin
+     * @param credentials {@link Credentials} of the reseller admin
+     * @return The capabilities
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws OXResellerException
+     * @throws InvalidDataException
+     */
+    Set<String> getCapabilities(ResellerAdmin admin, Credentials credentials) throws RemoteException, StorageException, InvalidDataException, InvalidCredentialsException, OXResellerException;
 }

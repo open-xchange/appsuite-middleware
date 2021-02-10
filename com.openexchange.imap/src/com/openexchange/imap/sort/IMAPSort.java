@@ -251,7 +251,7 @@ public final class IMAPSort {
      * @param descendingDirection The order direction
      * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command or <code>null</code> if sort field is not supported by IMAP
      */
-    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) {
+    public static String getSortCritForIMAPCommand(MailSortField sortField, boolean descendingDirection) {
         final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
         switch (sortField) {
         case SENT_DATE:
@@ -475,7 +475,7 @@ public final class IMAPSort {
      * @return The partial result
      * @throws MessagingException If ESORT fails
      */
-    public static SortPartialResult sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
+    public static SortPartialResult sortReturnPartial(SortTerm[] sortTerms, javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
         try {
             final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
             return (SortPartialResult) imapFolder.doCommand(new ProtocolCommand() {
@@ -595,7 +595,7 @@ public final class IMAPSort {
         }
     }
 
-    private static int[] sort(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IMAPFolder imapFolder, boolean fallbackOnCommandFailed) throws MessagingException, OXException {
+    private static int[] sort(SortTerm[] sortTerms, javax.mail.search.SearchTerm jmsSearchTerm, IMAPFolder imapFolder, boolean fallbackOnCommandFailed) throws MessagingException, OXException {
         try {
             return (int[]) imapFolder.doCommand(new ProtocolCommand() {
 
@@ -702,7 +702,7 @@ public final class IMAPSort {
      * @return The sorted UIDs or <code>null</code> if needed capabilities aren't supported
      * @throws MessagingException If a messaging error occurs
      */
-    public static long[] allUIDs(final IMAPFolder imapFolder, final boolean descending, final IMAPConfig imapConfig) throws MessagingException {
+    public static long[] allUIDs(IMAPFolder imapFolder, boolean descending, IMAPConfig imapConfig) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
@@ -727,13 +727,13 @@ public final class IMAPSort {
         private final boolean descending;
         private final IMAPFolder imapFolder;
 
-        public SORTProtocolCommand(final boolean descending, IMAPFolder imapFolder) {
+        public SORTProtocolCommand(boolean descending, IMAPFolder imapFolder) {
             this.descending = descending;
             this.imapFolder = imapFolder;
         }
 
         @Override
-        public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+        public Object doCommand(IMAPProtocol p) throws ProtocolException {
             final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
             final Response[] r = IMAPCommandsCollection.performCommand(p, command);
             final Response response = r[r.length - 1];

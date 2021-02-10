@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link RemoveAfterAccessFolderWrapper} - Simple wrapper for {@link Folder} to enhance with {@link RemoveAfterAccessFolder} behavior.
@@ -415,6 +416,26 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     @Override
     public void setOriginPath(FolderPath originPath) {
         folder.setOriginPath(originPath);
+    }
+
+    @Override
+    public EntityInfo getCreatedFrom() {
+        return folder.getCreatedFrom();
+    }
+
+    @Override
+    public void setCreatedFrom(EntityInfo createdFrom) {
+        folder.setCreatedFrom(createdFrom);
+    }
+
+    @Override
+    public EntityInfo getModifiedFrom() {
+        return folder.getModifiedFrom();
+    }
+
+    @Override
+    public void setModifiedFrom(EntityInfo modifiedFrom) {
+        folder.setModifiedFrom(modifiedFrom);
     }
 
 }

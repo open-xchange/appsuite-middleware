@@ -53,12 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.b;
@@ -90,10 +84,8 @@ import com.openexchange.chronos.Conference;
 import com.openexchange.chronos.ConferenceField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.ResourceId;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
@@ -111,14 +103,12 @@ import com.openexchange.chronos.common.mapping.ConferenceMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.UsedForSync;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
+import com.openexchange.chronos.provider.caching.AccountConfigHelper;
 import com.openexchange.chronos.provider.caching.AlarmHelper;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.exception.BasicCachingCalendarExceptionCodes;
@@ -185,11 +175,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicCachingCalendarAccess.class);
 
-    /**
-     * The default calendar name if none supplied by the user
-     */
-    private static final String DEFAULT_CALENDAR_NAME = "calendar";
-
     protected CalendarParameters parameters;
     protected CalendarAccount account;
     protected Session session;
@@ -197,7 +182,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private final List<OXException> warnings = new ArrayList<>();
 
     /**
-     * Initializes a new {@link BirthdaysCalendarAccess}.
+     * Initializes a new {@link BasicCachingCalendarAccess}.
      *
      * @param session The session
      * @param account The underlying calendar account
@@ -316,7 +301,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public CalendarSettings getSettings() {
-        return getCalendarSettings(getExtendedProperties());
+        return getConfigHelper().getCalendarSettings();
     }
 
     /**
@@ -325,37 +310,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @throws OXException
      */
     private void throwAccountErrorIfSet() throws OXException {
-        OXException accountError = optAccountError();
+        OXException accountError = getConfigHelper().optAccountError();
         if (null != accountError) {
             throw accountError;
         }
-    }
-
-    /**
-     * Optionally gets a persisted account error that occurred during previous cache update operations from the underlying configuration.
-     * <p/>
-     * If there is an account error, this error should be added when constructing the account's settings object for
-     * {@link BasicCalendarAccess#getSettings()}.
-     *
-     * @return The account error, or <code>null</code> if there is none
-     * @see {@link CalendarSettings#setError(OXException)}
-     */
-    protected OXException optAccountError() {
-        if (null != account.getInternalConfiguration()) {
-            JSONObject jsonObject = account.getInternalConfiguration().optJSONObject("lastError");
-            if (null != jsonObject) {
-                DataHandler dataHandler = Services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-                try {
-                    ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
-                    if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
-                        return (OXException) result.getData();
-                    }
-                } catch (OXException e) {
-                    LOG.error("Unable to process data.", e);
-                }
-            }
-        }
-        return null;
     }
 
     protected void updateCacheIfNeeded() throws OXException {
@@ -915,6 +873,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
                 JSONObject errorJson = (JSONObject) result.getData();
                 errorJson.remove("error_stack");
+                errorJson.putSafe("error", exception.getDisplayMessageUnformatted());
                 internalConfig.putSafe("lastError", errorJson);
             }
         } catch (OXException e1) {
@@ -1141,7 +1100,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             try {
                 eventGroup = sortEventGroup(eventGroup);
             } catch (OXException e) {
-                e.printStackTrace();
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", eventGroup.get(0).getUid(), e.getMessage());
                 iterator.remove();
             }
@@ -1246,64 +1204,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return getAlarmHelper().getAlarmTriggers(rangeFrom, rangeUntil, actions);
     }
 
-    /**
-     * Creates and returns a new {@link CalendarSettings} instance. The following properties are
-     * read from the {@link CalendarAccount#getInternalConfiguration()}:
-     * <ul>
-     * <li>{@link CommonCalendarConfigurationFields#NAME}</li>
-     * <li>{@link CommonCalendarConfigurationFields#SUBSCRIBED} (default: <code>true</code></li>
-     * <li>{@link CommonCalendarConfigurationFields#USED_FOR_SYNC} (default: <code>true</code></li>
-     * </ul>
-     *
-     * It also sets the user configuration, the last modified timestamp, the specified {@link ExtendedProperties}
-     * and whether there was an error while previously persisting the account configuration.
-     *
-     * @param extendedProperties The {@link ExtendedProperties} to set
-     * @return The {@link CalendarSettings}
-     */
-    protected CalendarSettings getCalendarSettings(ExtendedProperties extendedProperties) {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        CalendarSettings settings = new CalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        settings.setName(internalConfig.optString(CommonCalendarConfigurationFields.NAME, DEFAULT_CALENDAR_NAME));
-        settings.setExtendedProperties(extendedProperties);
-        settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
-        if (CachingCalendarUtils.canBeUsedForSync(account.getProviderId(), session)) {
-            settings.setUsedForSync(UsedForSync.of(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, true)));
-        } else {
-            settings.setUsedForSync(UsedForSync.DEACTIVATED);
-        }
-        settings.setError(optAccountError());
-
-        return settings;
-
-    }
 
     /**
-     * Creates and returns a new instance of the {@link ExtendedProperties}. The following properties are
-     * read from the {@link CalendarAccount#getInternalConfiguration()}:
-     * <ul>
-     * <li>{@link CommonCalendarConfigurationFields#DESCRIPTION}</li>
-     * <li>{@link CommonCalendarConfigurationFields#USED_FOR_SYNC}</li>
-     * <li>{@link CommonCalendarConfigurationFields#COLOR}</li>
-     * <li>{@link CachingCalendarAccessConstants#LAST_UPDATE}</li>
-     * </ul>
+     * Gets the account config helper providing access to configuration data stored in the underyling calendar account.
      *
-     * @return The {@link ExtendedProperties}
+     * @return The account configuration helper
      */
-    protected ExtendedProperties getExtendedProperties() {
-        JSONObject internalConfig = account.getInternalConfiguration();
-
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString(CommonCalendarConfigurationFields.DESCRIPTION, null)));
-        extendedProperties.add(COLOR(internalConfig.optString(CommonCalendarConfigurationFields.COLOR, null), false));
-        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-        extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean(CommonCalendarConfigurationFields.USED_FOR_SYNC, false)), false));
-
-        return extendedProperties;
+    protected AccountConfigHelper getConfigHelper() {
+        return new AccountConfigHelper(account, session);
     }
 
     /**

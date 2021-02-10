@@ -67,11 +67,13 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.antivirus.AntiVirusEncapsulatedContent;
+import com.openexchange.antivirus.AntiVirusEncapsulationUtil;
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
 import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
@@ -80,6 +82,7 @@ import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.EventID;
@@ -109,7 +112,8 @@ import com.openexchange.tools.session.ServerSession;
 @RestrictedAction(type = RestrictedAction.Type.READ, module = ChronosAction.MODULE)
 public abstract class ChronosAction extends AbstractChronosAction {
 
-    public static final String MODULE = "calendar";
+    public static final String MODULE = ChronosOAuthScope.MODULE;
+
     protected static final String EVENT = "event";
 
     protected static final String EVENTS = "events";
@@ -459,7 +463,8 @@ public abstract class ChronosAction extends AbstractChronosAction {
         if (false == antiVirusService.isEnabled(requestData.getSession())) {
             return false;
         }
-        AntiVirusResult result = antiVirusService.scan(fileHolder, uniqueId);
+        AntiVirusEncapsulatedContent content = AntiVirusEncapsulationUtil.encapsulate(requestData.optHttpServletRequest(), requestData.optHttpServletResponse());
+        AntiVirusResult result = antiVirusService.scan(fileHolder, uniqueId, content);
         services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
         return result.isStreamScanned();
     }

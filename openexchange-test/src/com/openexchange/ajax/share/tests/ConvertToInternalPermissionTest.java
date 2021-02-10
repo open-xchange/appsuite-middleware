@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link ConvertToInternalPermissionTest}
@@ -73,6 +74,7 @@ import com.openexchange.test.pool.TestUser;
 public class ConvertToInternalPermissionTest extends ShareTest {
 
     @Test
+    @TryAgain
     public void testConvertToInternalPermissionRandomly() throws Exception {
         testConvertToInternalPermission(randomFolderAPI(), randomModule(), testContext.acquireUser());
     }
@@ -86,6 +88,7 @@ public class ConvertToInternalPermissionTest extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testConvertToInternalObjectPermissionRandomly() throws Exception {
         testConvertToInternalObjectPermission(randomFolderAPI(), testContext.acquireUser());
     }

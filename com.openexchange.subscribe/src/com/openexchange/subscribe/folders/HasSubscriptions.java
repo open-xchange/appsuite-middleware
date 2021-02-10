@@ -59,6 +59,8 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -96,12 +98,12 @@ public class HasSubscriptions implements AdditionalFolderField {
     }
 
     @Override
-    public Object getValue(final FolderObject folder, final ServerSession session) {
+    public Object getValue(final Folder folder, final ServerSession session) {
         return getValues(Arrays.asList(folder), session).get(0);
      }
 
      @Override
-    public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
+     public List<Object> getValues(final List<Folder> folder, final ServerSession session) {
          UserPermissionBits permissionBits = session.getUserPermissionBits();
          if (null == permissionBits || !permissionBits.isPublication()) {
              return allFalse(folder.size());
@@ -110,13 +112,11 @@ public class HasSubscriptions implements AdditionalFolderField {
          final List<String> folderIds= new ArrayList<String>(folder.size());
 
          final Map<String, Boolean> hasSubscriptions = new HashMap<String, Boolean>();
-         for (final FolderObject f : folder) {
-             String fn = f.getFullName();
-             if (fn == null) {
-                 fn = String.valueOf(f.getObjectID());
-             }
+         for (final Folder f : folder) {
+             String fn = f.getID();
              folderIds.add(fn);
-             if (f.getModule() != FolderObject.MAIL && ! ID_BLACKLIST.contains(fn)) {
+             ContentType contentType = f.getContentType();
+             if (null != contentType && FolderObject.MAIL != contentType.getModule() && !ID_BLACKLIST.contains(fn)) {
                  folderIdsToQuery.add(fn);
              } else {
                  hasSubscriptions.put(fn, Boolean.FALSE);

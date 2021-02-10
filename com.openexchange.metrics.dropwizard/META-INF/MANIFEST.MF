@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Metrics Dropwizard Implementation
 Bundle-SymbolicName: com.openexchange.metrics.dropwizard
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
@@ -18,3 +18,4 @@ Bundle-Activator: com.openexchange.metrics.dropwizard.osgi.MetricActivator
 Bundle-ClassPath: lib/metrics-core-4.0.3-SNAPSHOT.jar,
  lib/metrics-jmx-4.0.3-SNAPSHOT.jar,
  .
+Automatic-Module-Name: com.openexchange.metrics.dropwizard

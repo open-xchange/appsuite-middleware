@@ -103,7 +103,7 @@ public class PhotoResource extends DAVResource {
         if (false == exists() || null == contact || null == contact.getImageLastModified()) {
             return "";
         }
-        return "http://www.open-xchange.com/etags/" + contact.getObjectID() + "-" + contact.getImageLastModified().getTime();
+        return String.format("%d-%d-%d", Integer.valueOf(getFactory().getSession().getContextId()), Integer.valueOf(contact.getObjectID()), Long.valueOf(contact.getImageLastModified().getTime()));
     }
 
     @Override

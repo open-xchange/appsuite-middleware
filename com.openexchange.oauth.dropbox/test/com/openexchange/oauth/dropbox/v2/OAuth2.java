@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.dropbox.v2;
 
-import java.io.IOException;
 import java.util.Scanner;
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;
@@ -70,7 +69,7 @@ public class OAuth2 {
     /**
      * Simple OAuth 2.0 test with V2 API
      */
-    public static void main(String[] args) throws IOException, DbxException {
+    public static void main(String[] args) throws DbxException {
         if (args.length == 0) {
             System.err.println("You must specify the API key and API secret");
             System.exit(-1);

@@ -54,12 +54,16 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
+import com.openexchange.groupware.EntityInfo;
+import com.openexchange.groupware.LinkEntityInfo;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.SubfolderAwareShareInfo;
@@ -74,6 +78,8 @@ import com.openexchange.user.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ExtendedPermission {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedPermission.class);
 
     protected final PermissionResolver resolver;
 
@@ -101,6 +107,26 @@ public abstract class ExtendedPermission {
         }
     }
 
+    protected void addEntityInfo(AJAXRequestData requestData, JSONObject jsonObject, EntityInfo entityInfo) throws JSONException {
+        if (LinkEntityInfo.class.isInstance(entityInfo)) {
+            jsonObject.put("type", "anonymous");
+            LinkEntityInfo linkEntityInfo = (LinkEntityInfo) entityInfo;
+            jsonObject.putOpt("share_url", linkEntityInfo.getShareUrl());
+            Date expiryDate = linkEntityInfo.getExpiryDate();
+            if (null != expiryDate) {
+                long time = null != requestData ? addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData)) : expiryDate.getTime();
+                jsonObject.put("expiry_date", time);
+            }
+            jsonObject.putOpt("password", linkEntityInfo.getPassword());
+            if (linkEntityInfo.isIncludeSubfolders()) {
+                jsonObject.put("includeSubfolders", true);
+            }
+        } else {
+            jsonObject.putOpt("type", null != entityInfo.getType() ? String.valueOf(entityInfo.getType()).toLowerCase() : null);
+            addContactInfo(jsonObject, entityInfo);
+        }
+    }
+
     protected void addUserInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException, OXException {
         if (null != user) {
             Contact userContact = resolver.getUserContact(user.getId());
@@ -119,6 +145,10 @@ public abstract class ExtendedPermission {
              */
             Contact toAdd = userContact;
             ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return;
+            }
             if (Anonymizers.isGuest(session)) {
                 if (session.getUserId() != toAdd.getInternalUserId()) {
                     Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
@@ -142,6 +172,10 @@ public abstract class ExtendedPermission {
              */
             User toAdd = user;
             ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return;
+            }
             if (Anonymizers.isGuest(session)) {
                 if (session.getUserId() != toAdd.getId()) {
                     Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
@@ -171,7 +205,7 @@ public abstract class ExtendedPermission {
             jsonObject.putOpt("password", share.getGuest().getPassword());
             if (share.getTarget().isFolder()) {
                 boolean includeSubfolders = SubfolderAwareShareInfo.class.isInstance(share) ? ((SubfolderAwareShareInfo) share).isIncludeSubfolders() : false;
-                jsonObject.putOpt("includeSubfolders", includeSubfolders);
+                jsonObject.putOpt("includeSubfolders", Boolean.valueOf(includeSubfolders));
             }
         }
     }
@@ -197,6 +231,17 @@ public abstract class ExtendedPermission {
         jsonObject.put("contact", jsonContact);
     }
 
+    private void addContactInfo(JSONObject jsonObject, EntityInfo entityInfo) throws JSONException {
+        jsonObject.putOpt(ContactFields.DISPLAY_NAME, entityInfo.getDisplayName());
+        JSONObject jsonContact = new JSONObject();
+        jsonContact.putOpt(ContactFields.EMAIL1, entityInfo.getEmail1());
+        jsonContact.putOpt(ContactFields.TITLE, entityInfo.getTitle());
+        jsonContact.putOpt(ContactFields.LAST_NAME, entityInfo.getLastName());
+        jsonContact.putOpt(ContactFields.FIRST_NAME, entityInfo.getFirstName());
+        jsonContact.putOpt(ContactFields.IMAGE1_URL, entityInfo.getImageUrl());
+        jsonObject.put("contact", jsonContact);
+    }
+
     private void addGroupInfo(JSONObject jsonObject, Group group) throws JSONException {
         jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());
     }
@@ -208,9 +253,13 @@ public abstract class ExtendedPermission {
     private static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timeZoneID = requestData.getParameter("timezone");
         if (null == timeZoneID) {
-            timeZoneID = requestData.getSession().getUser().getTimeZone();
+            ServerSession session = requestData.getSession();
+            if (null == session) {
+                LOGGER.debug("No session");
+                return null;
+            }
+            timeZoneID = session.getUser().getTimeZone();
         }
         return TimeZoneUtils.getTimeZone(timeZoneID);
     }
-
 }

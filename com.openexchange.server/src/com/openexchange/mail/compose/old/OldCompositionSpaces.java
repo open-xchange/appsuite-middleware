@@ -307,7 +307,7 @@ public final class OldCompositionSpaces {
             {
                 Queue<MailPath> forwardsFor = space.getForwardsFor();
                 if ((null != forwardsFor && !forwardsFor.isEmpty()) && updateMailFlags) {
-                    for (final MailPath mailPath : forwardsFor) {
+                    for (MailPath mailPath : forwardsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
                             new SafeAction<Void>() {
 
@@ -340,7 +340,7 @@ public final class OldCompositionSpaces {
             {
                 Queue<MailPath> draftEditsFor = space.getDraftEditsFor();
                 if (null != draftEditsFor && !draftEditsFor.isEmpty()) {
-                    for (final MailPath mailPath : draftEditsFor) {
+                    for (MailPath mailPath : draftEditsFor) {
                         // Only delete draft-edit if not already referenced by either replyFor or forwardsFor.
                         if (!space.isMarkedAsReplyOrForward(mailPath)) {
                             if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {

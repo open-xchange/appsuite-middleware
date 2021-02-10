@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
- * {@link CompositionSpaceErrorCode}
+ * {@link CompositionSpaceErrorCode} - Error codes for composition space module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.10.1
@@ -148,15 +148,31 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * The entered "Reply-To" address is too long. Please use a shorter one.
      */
     REPLY_TO_TOO_LONG("The entered \"Reply-To\" address is too long.", CompositionSpaceExceptionMessages.REPLY_TO_TOO_LONG_MSG, CATEGORY_USER_INPUT, 21),
+    /**
+     * The folder "%1$s" containing the attachments to share does no more exist for composition space %2$s.
+     */
+    MISSING_SHARED_ATTACHMENTS_FOLDER("The folder \"%1$s\" containing the attachments to share does no more exist for composition space %2$s.", CompositionSpaceExceptionMessages.MISSING_SHARED_ATTACHMENTS_FOLDER_MSG, CATEGORY_WARNING, 22),
+    /**
+     * Available attachments in shared attachments folder "%1$s" are inconsistent with the ones held by composition space %2$s.
+     */
+    INCONSISTENT_SHARED_ATTACHMENTS("Available attachments in shared attachments folder \"%1$s\" are inconsistent with the ones held by composition space %2$s.", CompositionSpaceExceptionMessages.INCONSISTENT_SHARED_ATTACHMENTS_MSG, CATEGORY_WARNING, 23),
+    /**
+     * Failed to retrieve resource from attachment storage with identifier: %1$s
+     */
+    FAILED_RETRIEVAL_ATTACHMENT_RESOURCE("Found no such resource in attachment storage for identifier: %1$s", null, CATEGORY_ERROR, 24),
+    /**
+     * Failed to retrieve key for composition space with identifier: %1$s
+     */
+    FAILED_RETRIEVAL_KEY("Failed to retrieve key for composition space with identifier: %1$s", null, CATEGORY_ERROR, 25),
 
     ;
 
     private static final String PREFIX = "MSGCS";
 
-    private String message;
-    private String displayMessage;
-    private Category category;
-    private int number;
+    private final String message;
+    private final String displayMessage;
+    private final Category category;
+    private final int number;
 
     private CompositionSpaceErrorCode(String message, String displayMessage, Category category, int number) {
         this.message = message;
@@ -210,7 +226,7 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -221,7 +237,7 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 

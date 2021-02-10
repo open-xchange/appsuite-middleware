@@ -49,19 +49,17 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.authentication.application.ajax.RestrictedAction;
-import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -72,13 +70,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
-@RestrictedAction(module = ContactAction.MODULE, type = RestrictedAction.Type.WRITE)
-public class UpdateAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.WRITE)
+public class UpdateAction extends IDBasedContactAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param serviceLookup
      */
     public UpdateAction(ServiceLookup serviceLookup) {
@@ -86,7 +83,7 @@ public class UpdateAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         boolean containsImage = request.containsImage();
         JSONObject json = request.getContactJSON(containsImage);
 
@@ -105,7 +102,7 @@ public class UpdateAction extends ContactAction {
 
         Contact contact;
         try {
-            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
+            contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(IDBasedContactAction.VIRTUAL_FIELDS));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
         }
@@ -126,7 +123,7 @@ public class UpdateAction extends ContactAction {
             }
         }
 
-        getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact, new Date(request.getTimestamp()));
+        access.updateContact(getContactID(request.getFolderID(), request.getObjectID()), contact, request.getTimestamp());
         return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
     }
 }

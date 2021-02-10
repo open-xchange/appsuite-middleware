@@ -3,12 +3,16 @@
     operationId: resolveEvent
     tags:
       - Chronos
-    summary: >-
+    summary: Resolves an event identifier to an event
+    description: >-
       Resolves an event identifier to an event, and returns it in the
       perspective of the current session's user, i.e. having an appropriate
       parent folder identifier assigned.
+    security: 
+      - session: []      
+      - oauth:
+        - read_calendar      
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
@@ -30,3 +34,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/EventResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

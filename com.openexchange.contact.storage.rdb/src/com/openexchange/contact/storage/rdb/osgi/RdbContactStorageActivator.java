@@ -56,17 +56,24 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.storage.ContactUserStorage;
+import com.openexchange.contact.storage.ContactsStorageFactory;
 import com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask;
+import com.openexchange.contact.storage.rdb.groupware.ContactsAccountCreateTableService;
+import com.openexchange.contact.storage.rdb.groupware.ContactsAccountCreateTableTask;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
+import com.openexchange.contact.storage.rdb.internal.RdbContactStorageFactory;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIServiceImpl;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
@@ -103,12 +110,18 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             RdbContactStorage service = new RdbContactStorage();
             registerService(ContactStorage.class, service);
             registerService(ContactUserStorage.class, service);
+            registerService(ContactTombstoneStorage.class, service);
+
+            registerService(CreateTableService.class, new ContactsAccountCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ContactsAccountCreateTableTask()));
 
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.contact.fulltextAutocomplete", false)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFulltextIndexTask()));
             }
 
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(), new CorrectNumberOfImagesTask()));
+
+            registerService(ContactsStorageFactory.class, new RdbContactStorageFactory(new DatabaseServiceDBProvider(getService(DatabaseService.class)), service));
 
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);

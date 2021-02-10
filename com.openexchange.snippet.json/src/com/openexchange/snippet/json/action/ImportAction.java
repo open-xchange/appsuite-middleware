@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
@@ -89,6 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = SnippetAction.MODULE, type = RestrictedAction.Type.WRITE)
 public final class ImportAction extends SnippetAction {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ImportAction.class);

@@ -62,8 +62,8 @@ import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
  */
+@SuppressWarnings("deprecation")
 public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
@@ -215,7 +215,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         this.members = members;
     }
 
-
+    @SuppressWarnings("unused")
     @Override
     public final String toString() {
         StringBuilder ret = new StringBuilder();
@@ -231,7 +231,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (IllegalArgumentException e) {
+            } catch ( IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
             } catch (IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");

@@ -111,15 +111,15 @@ public final class MimeStorageUtility {
      * @param toClone The fetch profile to clone
      * @return The clone fetch profile
      */
-    public static FetchProfile cloneFetchProfile(final FetchProfile toClone) {
+    public static FetchProfile cloneFetchProfile(FetchProfile toClone) {
         if (null == toClone) {
             return null;
         }
         final FetchProfile clone = new FetchProfile();
-        for (final Item item : toClone.getItems()) {
+        for (Item item : toClone.getItems()) {
             clone.add(item);
         }
-        for (final String headerName : toClone.getHeaderNames()) {
+        for (String headerName : toClone.getHeaderNames()) {
             clone.add(headerName);
         }
         return clone;
@@ -213,7 +213,7 @@ public final class MimeStorageUtility {
             if (fetchProfile.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW)) {
                 set.add(MailField.TEXT_PREVIEW);
             }
-        } else {            
+        } else {
             if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
                 set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
             }
@@ -409,23 +409,14 @@ public final class MimeStorageUtility {
      * @return The appropriate IMAP fetch profile
      */
     public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, boolean previewSupported) {
-        MailField[] arr;
-        {
-            List<MailField> list = Arrays.asList(fields);
-            EnumSet<MailField> fieldSet = list.isEmpty() ? EnumSet.noneOf(MailField.class) : EnumSet.copyOf(list);
-            if (fieldSet.contains(MailField.FULL)) {
-                arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
-            } else {
-                arr = fields;
-            }
-        }
         /*
          * Use a set to avoid duplicate entries
          */
-        EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
-        if (arr != null) {
-            set.addAll(Arrays.asList(arr));
-            arr = null;
+        EnumSet<MailField> set;
+        if (fields == null) {
+            set = EnumSet.noneOf(MailField.class);
+        } else {
+            set = MailField.contains(fields, MailField.FULL) ? EnumSet.copyOf(ENUM_SET_FULL) : EnumSet.of(fields[0], fields);
         }
         if (searchFields != null) {
             set.addAll(Arrays.asList(searchFields));
@@ -583,7 +574,7 @@ public final class MimeStorageUtility {
             fp.add(FetchProfile.Item.FLAGS);
             return;
         }
-        
+
         if (previewSupported) {
             if (MailField.TEXT_PREVIEW_IF_AVAILABLE == field) {
                 fp.add(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY);
@@ -603,7 +594,7 @@ public final class MimeStorageUtility {
 
         List<String> headerNames = FIELD2HEADERNAMES.get(field);
         if (null != headerNames) {
-            for (final String headerName : headerNames) {
+            for (String headerName : headerNames) {
                 fp.add(headerName);
             }
         }

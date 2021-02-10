@@ -103,6 +103,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_METHOD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.WRONG_CANCELATION_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -458,6 +459,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The method %1$s is unsupported for the provider %2$s.</li>
      */
     UNSUPPORTED_METHOD("The method %1$s is unsupported for the provider %2$s.", UNSUPPORTED_METHOD_MSG, Category.CATEGORY_TRUNCATED, 1992),
+    
+    /**
+     * <li>The event %1$s was not canceled for the user %2$s.</li>
+     * <li>The event %1$s was not canceled for the user %2$s and won't be deleted.</li>
+     */
+    WRONG_CANCELLATION("The event %1$s was not canceled for the user %2$s.", WRONG_CANCELATION_MSG, Category.CATEGORY_TRUNCATED, 4013),
 
     ;
 

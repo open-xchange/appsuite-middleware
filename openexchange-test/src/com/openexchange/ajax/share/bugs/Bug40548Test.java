@@ -51,7 +51,12 @@ package com.openexchange.ajax.share.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,6 +71,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug40548Test}
@@ -86,6 +92,7 @@ public class Bug40548Test extends ShareTest {
     }
 
     @Test
+    @TryAgain
     public void testFilePreviewWithParallelGuestSessions() throws Exception {
         /*
          * create folder and a shared image inside
@@ -142,8 +149,14 @@ public class Bug40548Test extends ShareTest {
          * download preview using the sharing user's session
          */
         getPreviewResponse = getPreview(getClient(), file.getFolderId(), file.getId());
-        assertEquals(HttpServletResponse.SC_OK, getPreviewResponse.getStatusCode());
+        if (getPreviewResponse.getStatusCode() != HttpServletResponse.SC_OK) {
+            fail("Invalid response code: " + streamToString(getPreviewResponse.getContent(), Charset.forName("UTF-8")));
+        }
         assertNotNull(getPreviewResponse.getContentAsByteArray());
+    }
+
+    private static String streamToString(InputStream stream, Charset charset) throws IOException {
+        return IOUtils.toString(stream, charset);
     }
 
     private static GetDocumentResponse getPreview(AJAXClient client, String folderID, String fileID) throws Exception {
@@ -153,7 +166,6 @@ public class Bug40548Test extends ShareTest {
         try {
             client.getSession().setId(null);
             return client.execute(getPreviewRequest);
-
         } finally {
             client.getSession().setId(oldSessionID);
         }

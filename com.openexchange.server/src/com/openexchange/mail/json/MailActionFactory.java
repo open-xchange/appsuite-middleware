@@ -113,6 +113,20 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     private static final AtomicReference<MailActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailActionFactory>();
 
+    public static final String MODULE = "mail";
+
+    /**
+     * The read-only scope for OAuth requests
+     */
+    @Deprecated
+    public static final String OAUTH_READ_SCOPE = "read_mail";
+
+    /**
+     * The writable scope for OAuth requests
+     */
+    @Deprecated
+    public static final String OAUTH_WRITE_SCOPE = "write_mail";
+
     /**
      * Gets the action factory
      *
@@ -150,7 +164,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      *
      * @param services The service look-up
      */
-    private MailActionFactory(final ServiceLookup services) {
+    private MailActionFactory(ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AbstractMailAction> builder = ImmutableMap.builder();
         builder.put("all", new AllAction(services));
@@ -199,17 +213,17 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
+    public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);
     }
 
     @Override
-    public void initialize(final AJAXState state) throws OXException {
+    public void initialize(AJAXState state) throws OXException {
         // Nope
     }
 
     @Override
-    public void cleanUp(final AJAXState state) throws OXException {
+    public void cleanUp(AJAXState state) throws OXException {
         /*
          * Drop possibly opened mail access instances
          */

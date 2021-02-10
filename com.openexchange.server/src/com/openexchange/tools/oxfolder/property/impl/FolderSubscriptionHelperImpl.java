@@ -58,7 +58,8 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UsedForSync;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.ContactsContentType;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
@@ -80,7 +81,8 @@ public class FolderSubscriptionHelperImpl implements FolderSubscriptionHelper {
     private static final Map<Integer, String> SUBSCRIPTION_AWARE_MODULES = ImmutableMap.<Integer, String> builder()
         .put(I(TaskContentType.getInstance().getModule()), "tsk/")
         .put(I(CalendarContentType.getInstance().getModule()), "cal/")
-        .put(I(ContactContentType.getInstance().getModule()), "con/")
+        .put(I(ContactsContentType.getInstance().getModule()), "con/")
+        .put(I(InfostoreContentType.getInstance().getModule()), "inf/")
     .build();
 
     private final FolderUserPropertyStorage storage;
@@ -168,6 +170,24 @@ public class FolderSubscriptionHelperImpl implements FolderSubscriptionHelper {
     @Override
     public boolean isSubscribableModule(final int module) {
         return SUBSCRIPTION_AWARE_MODULES.containsKey(I(module));
+    }
+
+    @Override
+    public void clearSubscribed(Optional<Connection> optCon, int contextId, int[] userIds, int folderId, int module) throws OXException {
+        clearProperty(optCon, contextId, userIds, folderId, getSubscribeKey(module));
+    }
+
+    @Override
+    public void clearUsedForSync(Optional<Connection> optCon, int contextId, int[] userIds, int folderId, int module) throws OXException {
+        clearProperty(optCon, contextId, userIds, folderId, getUsedForSyncKey(module));
+    }
+
+    private void clearProperty(Optional<Connection> optCon, int contextId, int[] userIds, int folderId, String property) throws OXException {
+        if (optCon.isPresent()) {
+            storage.deleteFolderProperties(contextId, folderId, userIds, Collections.singleton(property), optCon.get());
+        } else {
+            storage.deleteFolderProperties(contextId, folderId, userIds, Collections.singleton(property));
+        }
     }
 
 }

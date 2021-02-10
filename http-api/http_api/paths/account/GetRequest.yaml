@@ -4,8 +4,11 @@
     tags:
       - Mailaccount
     summary: Gets a mail account.
+    security: 
+        - session: []      
+        - oauth:
+          - read_mailaccount    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
         description: Account ID of the requested account.
@@ -24,3 +27,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/MailAccountResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

@@ -81,6 +81,7 @@ import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
@@ -215,8 +216,8 @@ import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
+import com.openexchange.version.ServerVersion;
 import com.openexchange.version.VersionService;
-import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -540,10 +541,10 @@ public final class Init {
 
     private static void startAndInjectConfigViewFactory() {
         ConfigCascade cascade = new ConfigCascade();
-        cascade.setProvider("server", new InMemoryConfigProvider());
-        cascade.setProvider("context", new InMemoryConfigProvider());
-        cascade.setProvider("user", new InMemoryConfigProvider());
-        cascade.setSearchPath("user", "context", "server");
+        cascade.setProvider(ConfigViewScope.SERVER.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.CONTEXT.getScopeName(), new InMemoryConfigProvider());
+        cascade.setProvider(ConfigViewScope.USER.getScopeName(), new InMemoryConfigProvider());
+        cascade.setSearchPath(ConfigViewScope.USER.getScopeName(), ConfigViewScope.CONTEXT.getScopeName(), ConfigViewScope.SERVER.getScopeName());
         cascade.setStringParser(new BasicTypesStringParser());
         services.put(ConfigViewFactory.class, cascade);
         TestServiceRegistry.getInstance().addService(ConfigViewFactory.class, cascade);
@@ -551,7 +552,7 @@ public final class Init {
 
     private static void startVersionBundle() throws Exception {
         // Using some static version because access to c.o.version bundle manifest is not possible currently.
-        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new Numbers("0.0.0", "0"));
+        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new ServerVersion("0.0.0", "0"));
         TestServiceRegistry.getInstance().addService(VersionService.class, versionService);
         services.put(VersionService.class, versionService);
     }

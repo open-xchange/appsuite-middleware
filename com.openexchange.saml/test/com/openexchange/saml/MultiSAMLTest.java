@@ -1,31 +1,3 @@
-
-package com.openexchange.saml;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.opensaml.core.config.InitializationService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.java.Strings;
-import com.openexchange.saml.osgi.SAMLBackendRegistry;
-import com.openexchange.saml.spi.CredentialProvider;
-import com.openexchange.saml.spi.SAMLBackend;
-import com.openexchange.server.SimpleServiceLookup;
-import com.openexchange.session.reservation.SessionReservationService;
-import com.openexchange.session.reservation.SimSessionReservationService;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -74,6 +46,33 @@ import com.openexchange.session.reservation.SimSessionReservationService;
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
+package com.openexchange.saml;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.opensaml.core.config.InitializationService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.java.Strings;
+import com.openexchange.saml.osgi.SAMLBackendRegistry;
+import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.server.SimpleServiceLookup;
+import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.session.reservation.SimSessionReservationService;
 
 /**
  * {@link MultiSAMLTest}
@@ -135,7 +134,7 @@ public class MultiSAMLTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testSamlRegistration() throws Exception {
+    public void testSamlRegistration() {
         TestSAMLBackend samlBackend = new TestSAMLBackend(credentialProvider, config) {
 
             @Override
@@ -248,7 +247,7 @@ public class MultiSAMLTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testSamlRegistrationShouldFailForbiddenPath() throws Exception {
+    public void testSamlRegistrationShouldFailForbiddenPath() {
         TestSAMLBackend samlBackend = new TestSAMLBackend(credentialProvider, config) {
 
             @Override

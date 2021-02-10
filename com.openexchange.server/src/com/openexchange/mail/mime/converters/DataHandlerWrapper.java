@@ -77,14 +77,14 @@ public final class DataHandlerWrapper extends DataHandler {
      * @param dataHandler The delegatee data handler
      * @param contentType The (optional) content type
      */
-    public DataHandlerWrapper(final DataHandler dataHandler, final String contentType) {
+    public DataHandlerWrapper(DataHandler dataHandler, String contentType) {
         super(dataHandler.getDataSource());
         delegatee = dataHandler;
         this.contentType = contentType;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         return delegatee.equals(obj);
     }
 
@@ -94,12 +94,12 @@ public final class DataHandlerWrapper extends DataHandler {
     }
 
     @Override
-    public Object getBean(final CommandInfo cmdinfo) {
+    public Object getBean(CommandInfo cmdinfo) {
         return delegatee.getBean(cmdinfo);
     }
 
     @Override
-    public CommandInfo getCommand(final String cmdName) {
+    public CommandInfo getCommand(String cmdName) {
         return delegatee.getCommand(cmdName);
     }
 
@@ -139,7 +139,7 @@ public final class DataHandlerWrapper extends DataHandler {
     }
 
     @Override
-    public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         return delegatee.getTransferData(flavor);
     }
 
@@ -154,12 +154,12 @@ public final class DataHandlerWrapper extends DataHandler {
     }
 
     @Override
-    public boolean isDataFlavorSupported(final DataFlavor flavor) {
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
         return delegatee.isDataFlavorSupported(flavor);
     }
 
     @Override
-    public void setCommandMap(final CommandMap commandMap) {
+    public void setCommandMap(CommandMap commandMap) {
         delegatee.setCommandMap(commandMap);
     }
 
@@ -169,7 +169,7 @@ public final class DataHandlerWrapper extends DataHandler {
     }
 
     @Override
-    public void writeTo(final OutputStream os) throws IOException {
+    public void writeTo(OutputStream os) throws IOException {
         delegatee.writeTo(os);
     }
 

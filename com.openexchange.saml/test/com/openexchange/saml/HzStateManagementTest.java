@@ -86,7 +86,7 @@ public class HzStateManagementTest {
     private HzStateManagement stateManagement;
 
     @BeforeClass
-    public static void initHazelcast() throws Exception {
+    public static void initHazelcast() {
         Config config = new Config();
         config.getSerializationConfig().addPortableFactory(CustomPortable.FACTORY_ID, new PortableFactory() {
             @Override

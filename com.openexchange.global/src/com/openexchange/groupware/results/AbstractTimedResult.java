@@ -82,6 +82,7 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
     private class LastModifiedExtractorIterator implements SearchIterator<T> {
 
+        @SuppressWarnings("hiding")
         private SearchIterator<T> results;
 
         private OXException oxexception;
@@ -112,6 +113,9 @@ public abstract class AbstractTimedResult<T> implements TimedResult<T> {
 
         @Override
         public boolean hasNext() throws OXException {
+            if (oxexception != null) {
+                throw oxexception;
+            }
             return results.hasNext();
         }
 

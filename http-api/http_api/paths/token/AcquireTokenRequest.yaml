@@ -3,15 +3,15 @@
     operationId: acquireToken
     tags:
       - Token
-    summary: Gets a login token.
+    summary: Gets a login token
+    security: 
+        - session: []    
     description: >
       With a valid session it is possible to acquire a secret. Using this secret
       another system is able to
 
       generate a valid session (see
       [login?action=redeemToken](#operation--login-action-redeemToken-post)).
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
       '200':
         description: >

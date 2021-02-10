@@ -93,7 +93,7 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         if (retVal == null) {
             retVal = Integer.valueOf(1);
         }
-        System.exit(retVal);
+        System.exit(retVal.intValue());
     }
 
     /**

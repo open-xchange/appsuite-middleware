@@ -3,7 +3,9 @@
     operationId: performMessagingAction
     tags:
       - Messaging
-    summary: Performs a certain messaging action on a message.
+    summary: Performs a certain messaging action on a message
+    security: 
+        - session: []    
     description: >
       On actions of type "message" the body should contain the JSON
       representation of the message the action should be applied to.
@@ -13,7 +15,6 @@
 
       Messaging actions of type "none" need a messaging message and account.
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: messageAction
         description: The message action to invoke.

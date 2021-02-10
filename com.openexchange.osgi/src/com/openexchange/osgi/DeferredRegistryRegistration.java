@@ -68,7 +68,7 @@ import com.openexchange.java.Autoboxing;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
+public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker<R, P> {
 
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeferredRegistryRegistration.class);
@@ -123,16 +123,16 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        Object service = remember(reference);
+    public P addingService(final ServiceReference<R> reference) {
+        P service = remember(reference);
         if (isComplete()) {
             register(registry, item);
         }
         return service;
     }
 
-    private Object remember(ServiceReference reference) {
-        Object service = super.addingService(reference);
+    private P remember(ServiceReference<R> reference) {
+        P service = super.addingService(reference);
         for (Class<?> klass : expectedServices) {
             if (klass.isInstance(service)) {
                 PriorityQueue<ServiceEntry> priorityQueue = serviceMap.get(klass);
@@ -151,9 +151,9 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
         }
         return service;
     }
-
+    
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<R> reference, final P service) {
         forget(service);
         if (!isComplete()) {
             unregister(registry, item);
@@ -200,11 +200,10 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
 
     private final class ServiceEntry implements Comparable<ServiceEntry> {
 
-        public ServiceReference ref;
+        public ServiceReference<R> ref;
+        public P service;
 
-        public Object service;
-
-        public ServiceEntry(ServiceReference ref, Object service) {
+        public ServiceEntry(ServiceReference<R> ref, P service) {
             this.ref = ref;
             this.service = service;
         }
@@ -221,6 +220,5 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
             }
             return Autoboxing.a2i(property);
         }
-
     }
 }

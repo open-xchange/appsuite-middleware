@@ -67,8 +67,8 @@ public class RoundtripTest extends VCardTest {
         super();
     }
 
-         @Test
-     public void testExportImport() throws Exception {
+    @Test
+    public void testExportImport() {
         /*
          * export full contact
          */
@@ -84,8 +84,8 @@ public class RoundtripTest extends VCardTest {
         assertEquals(originalContact, importedContact);
     }
 
-         @Test
-     public void testImportExport() throws Exception {
+    @Test
+    public void testImportExport() throws Exception {
         /*
          * import vCard
          */

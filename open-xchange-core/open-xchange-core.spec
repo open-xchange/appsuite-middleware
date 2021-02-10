@@ -11,7 +11,7 @@ BuildRequires: open-xchange-hazelcast
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -805,6 +805,87 @@ EOF
         fi
         ox_scr_done ${SCR}
     fi
+
+    if ox_scr_todo SCR-713
+    then
+        ox_remove_property ui/portal/customUWA /opt/open-xchange/etc/settings/ui.properties
+        ox_scr_done SCR-713
+    fi
+
+    if ox_scr_todo SCR-676-mw
+    then
+        # rename all appenders, converters, encoders and policies classes
+        logconfig=/opt/open-xchange/etc/logback.xml
+        tmp=${logconfig}.tmp
+        cp -a --remove-destination $logconfig $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.LogstashSocketAppender/com.openexchange.logback.extensions.appenders.logstash.LogstashAppender/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.encoder/com.openexchange.logback.extensions.appenders.logstash.encoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.queueSize/com.openexchange.logback.extensions.appenders.logstash.queueSize/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.alwaysPersistEvents/com.openexchange.logback.extensions.appenders.logstash.alwaysPersistEvents/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.loadFactor/com.openexchange.logback.extensions.appenders.logstash.loadFactor/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.connectionTimeout/com.openexchange.logback.extensions.appenders.logstash.connectionTimeout/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.mbeanEnabled/com.openexchange.logback.extensions.appenders.logstash.mbeanEnabled/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomFieldsAction/com.openexchange.logback.extensions.encoders.CustomFieldAction/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.logstash\.CustomField/com.openexchange.logback.extensions.encoders.CustomField/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedPatternLayoutEncoder/com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.JSONEncoder/com.openexchange.logback.extensions.encoders.JSONEncoder/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.SyslogPatternLayoutActivator/com.openexchange.logback.extensions.encoders.SyslogPatternLayoutActivator/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ExtendedReplacingCompositeConverter/com.openexchange.logback.extensions.converters.ExtendedReplacingCompositeConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.LineMDCConverter/com.openexchange.logback.extensions.converters.LineMDCConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.LogSanitisingConverter/com.openexchange.logback.extensions.converters.LogSanitisingConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.ThreadIdConverter/com.openexchange.logback.extensions.converters.ThreadIdConverter/g' $tmp
+        sed -i 's/com\.openexchange\.logback\.extensions\.FixedWindowRollingPolicy/com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy/g' $tmp
+        if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
+            cat $tmp >$logconfig
+        fi
+        rm $tmp
+        ox_scr_done SCR-676-mw
+    fi
+
+    SCR=SCR-740
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/system.properties
+      prop_key=com.openexchange.config.cascade.scopes
+      old_default_value="user, context, contextSets, server"
+      new_default_value="user, context, reseller, contextSets, server"
+      if ox_exists_property ${prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${prop_key} ${prop_file})
+        if [ "${old_default_value}" = "${prop_val}" ]
+        then
+          ox_set_property ${prop_key} "${new_default_value}" ${prop_file}
+        fi
+      fi
+      ox_scr_done ${SCR}
+    fi
+
+    SCR=SCR-758
+    if ox_scr_todo ${SCR}
+    then
+      unset GLOBIGNORE
+      props="com.openexchange.capabilities.allowIllegalPermissionProvisioning com.openexchange.capabilities.applyIllegalPermissions"
+      for prop in ${props}
+      do
+        matches="$(grep -Hs "^\s*$prop" /opt/open-xchange/etc/*.properties)"
+        if [ $? -eq 0 ]
+        then
+          IFS=$'\n'
+          for match in ${matches}
+          do
+            unset IFS
+            file=${match%%:*}
+            if [ -f "${file}" ]
+            then
+              ox_remove_property ${prop} "${file}"
+            fi
+          done
+        fi
+      done
+      ox_scr_done ${SCR}
+    fi
+    GLOBIGNORE='*'
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -858,28 +939,18 @@ exit 0
 %doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
-* Tue Feb 02 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-02-08 (5945)
-* Tue Jan 19 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-25 (5937)
-* Tue Jan 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2021-01-11 (5930)
-* Wed Dec 09 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-12-14 (5924)
-* Mon Nov 16 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-23 (5905)
-* Wed Nov 04 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-11-09 (5891)
-* Tue Oct 20 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-26 (5888)
+* Fri Feb 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.5 release
+* Mon Feb 01 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.5 release
+* Fri Jan 15 2021 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.5 release
+* Thu Dec 17 2020 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview of 7.10.5 release
+* Fri Nov 27 2020 Marcus Klein <marcus.klein@open-xchange.com>
+First preview of 7.10.5 release
 * Tue Oct 06 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-10-12 (5879)
-* Wed Sep 23 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-29 (5869)
-* Fri Sep 11 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-09-14 (5857)
-* Mon Aug 24 2020 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2020-08-24 (5842)
+prepare for 7.10.5 release
 * Wed Aug 05 2020 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.10.4 release
 * Tue Aug 04 2020 Marcus Klein <marcus.klein@open-xchange.com>

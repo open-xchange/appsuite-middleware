@@ -50,6 +50,7 @@
 package com.openexchange.jslob.json;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -111,11 +112,11 @@ public class JSlobRequest {
      *
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
-     * @param optional TODO
+     * @param optional Whether the parameter is optional
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo, boolean optional) throws OXException {
+    public <T> T getParameter(final String name, @NonNull Class<T> coerceTo, boolean optional) throws OXException {
         return requestData.getParameter(name, coerceTo, optional);
     }
     

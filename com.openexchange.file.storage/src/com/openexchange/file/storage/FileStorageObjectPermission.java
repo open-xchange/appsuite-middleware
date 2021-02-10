@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import com.openexchange.groupware.EntityInfo;
+
 /**
  * {@link FileStorageObjectPermission}
  *
@@ -78,12 +80,26 @@ public interface FileStorageObjectPermission {
     static final int DELETE = 4;
 
     /**
+     * Gets the qualified identifier of the entity associated with this permission.
+     * 
+     * @return The identifier
+     */
+    String getIdentifier();
+
+    /**
      * Gets the entity associated with this permission, i.e. either the user ID in case this permission is mapped to a user, or the group
      * ID if it is mapped to a group.
      *
      * @return The permission entity
      */
     int getEntity();
+
+    /**
+     * Gets additional information about the entity associated with this permission.
+     * 
+     * @return The entity info, or <code>null</code> if not available
+     */
+    EntityInfo getEntityInfo();
 
     /**
      * Gets a value indicating whether this permission entity represents a group or not.

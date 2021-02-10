@@ -3,9 +3,10 @@
     operationId: deleteResources
     tags:
       - Resources
-    summary: Deletes resources.
+    summary: Deletes resources
+    security: 
+        - session: []    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
         description: Timestamp of the last update of the group to delete.

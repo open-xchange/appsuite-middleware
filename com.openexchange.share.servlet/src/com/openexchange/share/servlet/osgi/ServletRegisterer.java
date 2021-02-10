@@ -60,6 +60,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareServlet;
@@ -162,7 +163,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer<Object,
     }
 
     private void unregisterServlet(String alias, HttpService httpService) {
-        httpService.unregister(alias);
+        HttpServices.unregister(alias, httpService);
         this.servlet = null;
         LOG.info("Share servlet successfully unregistered");
     }

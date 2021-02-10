@@ -238,8 +238,8 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
-            } catch (Exception e2) {
-                LOG.error("Cookies could not be removed.", e2);
+            } catch (Exception x) {
+                LOG.error("Cookies could not be removed.", x);
             } finally {
                 LogProperties.removeSessionProperties();
             }
@@ -359,7 +359,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Check expected output format
-        if (isJsonResponseExpected(req, true) || Dispatchers.isApiOutputExpectedFor(req)) {
+        if (isJsonResponseExpected(req, false) || Dispatchers.isApiOutputExpectedFor(req)) {
             // First, try to obtain the writer
             PrintWriter writer = getWriterFrom(resp, false);
 
@@ -498,7 +498,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return SessionUtility.getSessionObject(req, mayUseFallbackSession);
     }
 
-    // --------------------------------------------------------------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static volatile Integer maxConcurrentRequests;
     private static int getMaxConcurrentRequests(final ServerSession session) {

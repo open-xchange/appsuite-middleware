@@ -109,7 +109,7 @@ public enum SAMLProperties implements Property {
     /**
      * Whether SAML-specific auto-login is enabled.
      */
-    ENABLE_AUTO_LOGIN("enableAutoLogin", Boolean.FALSE),
+    ENABLE_AUTO_LOGIN("enableAutoLogin", Boolean.TRUE),
     /**
      * Whether SAML unsolicited responses are enabled.
      */

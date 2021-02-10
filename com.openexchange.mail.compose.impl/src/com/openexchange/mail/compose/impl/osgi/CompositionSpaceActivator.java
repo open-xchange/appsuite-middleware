@@ -84,10 +84,9 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.compose.AttachmentStorage;
 import com.openexchange.mail.compose.AttachmentStorageService;
-import com.openexchange.mail.compose.CompositionSpaceService;
+import com.openexchange.mail.compose.CompositionSpaceServiceFactory;
 import com.openexchange.mail.compose.CompositionSpaceStorageService;
-import com.openexchange.mail.compose.impl.CompositionSpaceServiceImpl;
-import com.openexchange.mail.compose.impl.CryptoCompositionSpaceService;
+import com.openexchange.mail.compose.impl.CompositionSpaceServiceFactoryImpl;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.compose.impl.attachment.AttachmentStorageServiceImpl;
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
@@ -97,13 +96,16 @@ import com.openexchange.mail.compose.impl.attachment.filestore.FilestorageAttach
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpScheduler;
 import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpTask;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddClientToken;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddReplyTo;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddReplyTo_2;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDynamicRowType;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeAttachmentNameField;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeSubjectField;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceRestoreAttachmentBinaryDataColumn;
@@ -121,6 +123,7 @@ import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -277,11 +280,10 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         }
         registerService(CompositionSpaceStorageService.class, storageService);
 
-        CompositionSpaceServiceImpl serviceImpl = new CompositionSpaceServiceImpl(storageService, attachmentStorageService, this);
-        final CryptoCompositionSpaceService cryptoServiceImpl = new CryptoCompositionSpaceService(serviceImpl, keyStorageService, this);
-        registerService(CompositionSpaceService.class, cryptoServiceImpl);
+        CompositionSpaceServiceFactoryImpl serviceFactoryImpl = new CompositionSpaceServiceFactoryImpl(storageService, attachmentStorageService, keyStorageService, this);
+        registerService(CompositionSpaceServiceFactory.class, serviceFactoryImpl, Tools.withRanking(serviceFactoryImpl.getRanking()));
 
-        CompositionSpaceCleanUpScheduler.initInstance(serviceImpl, this);
+        CompositionSpaceCleanUpScheduler.initInstance(serviceFactoryImpl, this);
 
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleWithFixedDelay(new CompositionSpaceCleanUpTask(this), 5000L, 3600000L); // Every 60 minutes
@@ -338,7 +340,10 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddCustomHeaders(),
             new CompositionSpaceEnlargeAttachmentNameField(),
             new CompositionSpaceAddReplyTo(),
-            new CompositionSpaceRestoreAttachmentBinaryDataColumn()
+            new CompositionSpaceRestoreAttachmentBinaryDataColumn(),
+            new CompositionSpaceDynamicRowType(),
+            new CompositionSpaceAddReplyTo_2(),
+            new CompositionSpaceAddClientToken()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 

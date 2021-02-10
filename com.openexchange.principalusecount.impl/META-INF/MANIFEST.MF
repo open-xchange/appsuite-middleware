@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Principalusecount implementation bundle
 Bundle-SymbolicName: com.openexchange.principalusecount.impl
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Activator: com.openexchange.principleusecount.impl.osgi.Activator
 Bundle-Vendor: Open-Xchange Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

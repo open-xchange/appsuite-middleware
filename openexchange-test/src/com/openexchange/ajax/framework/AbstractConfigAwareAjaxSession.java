@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.rest.AbstractRestTest;
 
 /**
@@ -143,7 +144,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractRestTest {
      * @return The scope for the configuration.
      */
     protected String getScope() {
-        return "server";
+        return ConfigViewScope.SERVER.getScopeName();
     }
 
     /**

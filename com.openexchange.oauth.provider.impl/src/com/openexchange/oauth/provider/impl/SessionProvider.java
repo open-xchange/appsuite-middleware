@@ -107,6 +107,11 @@ public class SessionProvider {
     private final ServiceLookup services;
     private final Cache<String, String> sessionCache;
 
+    /**
+     * Initializes a new {@link SessionProvider}.
+     *
+     * @param services The service lookup
+     */
     public SessionProvider(ServiceLookup services) {
         super();
         this.services = services;
@@ -117,13 +122,28 @@ public class SessionProvider {
 
                 @Override
                 public void onRemoval(RemovalNotification<String, String> notification) {
-                    logout(notification.getValue());
+                    String sessionId = notification.getValue();
+                    try {
+                        Session session = LoginPerformer.getInstance().doLogout(sessionId);
+                        if (session == null) {
+                            LOG.debug("Removed session ID {} from OAuth 2.0 cache. The according session was already removed from the session container.", sessionId);
+                        } else {
+                            LOG.debug("Removed session ID {} from OAuth 2.0 cache. A logout was performed.", sessionId);
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Error while removing OAuth 2.0 session", e);
+                    }
                 }
-            })
-            .build();
+            }).build();
     }
 
-    private void logout(String sessionId) {
+
+    /**
+     * Performs a logout
+     *
+     * @param sessionId The session id to log out
+     */
+    void logout(String sessionId) {
         try {
             Session session = LoginPerformer.getInstance().doLogout(sessionId);
             if (session == null) {
@@ -136,6 +156,17 @@ public class SessionProvider {
         }
     }
 
+    /**
+     * Get a session for the given accessToken
+     *
+     * @param accessToken The access token
+     * @param contextId The context id
+     * @param userId The user id
+     * @param clientName The client name
+     * @param httpRequest The {@link HttpServletRequest}
+     * @return The session
+     * @throws OXException
+     */
     public Session getSession(final String accessToken, final int contextId, final int userId, final String clientName, final HttpServletRequest httpRequest) throws OXException {
         SessiondService sessiondService = requireService(SessiondService.class, services);
         Session session = null;
@@ -146,7 +177,7 @@ public class SessionProvider {
                     @Override
                     public String call() throws Exception {
                         try {
-                            return login(contextId, userId, clientName, httpRequest).getSessionID();
+                            return login(contextId, userId, clientName, httpRequest, accessToken).getSessionID();
                         } catch (Exception e) {
                             LOG.error("Exception occurred while trying to get session.", e);
                             throw e;
@@ -174,7 +205,6 @@ public class SessionProvider {
             }
             throw LoginExceptionCodes.UNKNOWN.create(cause, cause.getMessage());
         }
-
         return session;
     }
 
@@ -185,10 +215,11 @@ public class SessionProvider {
      * @param userId The user identifier
      * @param clientName The name of the OAuth client
      * @param httpRequest The HTTP request performing the login
+     * @param accessToken The access token
      * @return The established session
      * @throws OXException If login fails
      */
-    Session login(int contextId, int userId, String clientName, HttpServletRequest httpRequest) throws OXException {
+    Session login(int contextId, int userId, String clientName, HttpServletRequest httpRequest, String accessToken) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
 
@@ -198,7 +229,7 @@ public class SessionProvider {
 
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) {
-                return new OAuthProviderAuthenticated(user.getLoginInfo(), context.getLoginInfo()[0]);
+                return new OAuthProviderAuthenticated(user.getLoginInfo(), context.getLoginInfo()[0], accessToken);
             }
         });
 
@@ -208,6 +239,15 @@ public class SessionProvider {
         return session;
     }
 
+    /**
+     * Creates a new login request for the user and client
+     *
+     * @param httpRequest The original http request
+     * @param user The user
+     * @param client The client id
+     * @return A {@link LoginRequestImpl}
+     * @throws OXException
+     */
     private LoginRequestImpl getLoginRequest(HttpServletRequest httpRequest, User user, String client) throws OXException {
         String userAgent = httpRequest.getHeader(HttpHeaders.USER_AGENT);
         String hash = HashCalculator.getInstance().getHash(httpRequest, userAgent, client);
@@ -237,12 +277,18 @@ public class SessionProvider {
         return req;
     }
 
+    /**
+     * Gets the cookies from the given requests.
+     *
+     * @param req The {@link HttpServletRequest}
+     * @return An array of {@link Cookie}s
+     */
     private static Cookie[] getCookies(HttpServletRequest req) {
         final List<Cookie> cookies;
         if (null == req) {
             cookies = Collections.emptyList();
         } else {
-            cookies = new ArrayList<Cookie>();
+            cookies = new ArrayList<>();
             for (final javax.servlet.http.Cookie c : req.getCookies()) {
                 cookies.add(new AuthCookie(c));
             }
@@ -250,16 +296,22 @@ public class SessionProvider {
         return cookies.toArray(new Cookie[cookies.size()]);
     }
 
+    /**
+     * Gets the headers from the given request
+     *
+     * @param req The request
+     * @return A map of headers
+     */
     private static Map<String, List<String>> getHeaders(HttpServletRequest req) {
         final Map<String, List<String>> headers;
         if (null == req) {
             headers = Collections.emptyMap();
         } else {
-            headers = new HashMap<String, List<String>>();
-            @SuppressWarnings("unchecked") Enumeration<String> headerNames = req.getHeaderNames();
+            headers = new HashMap<>();
+            Enumeration<String> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String name = headerNames.nextElement();
-                List<String> header = new ArrayList<String>();
+                List<String> header = new ArrayList<>();
                 if (headers.containsKey(name)) {
                     header = headers.get(name);
                 }
@@ -270,25 +322,46 @@ public class SessionProvider {
         return headers;
     }
 
+    /**
+     * Whether https should be enforced or not
+     *
+     * @return <code>true</code> if https should be enforced
+     * @throws OXException
+     */
     private boolean forceHTTPS() throws OXException {
         ConfigurationService configService = requireService(ConfigurationService.class, services);
         return Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue()));
     }
 
+    /**
+     * {@link OAuthProviderAuthenticated} enhances the session with the {@link Session#PARAM_IS_OAUTH} nad {@link Session#PARAM_OAUTH_ACCESS_TOKEN} parametern.
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     */
     private static final class OAuthProviderAuthenticated implements Authenticated, SessionEnhancement {
 
         private final String userInfo;
         private final String contextInfo;
+        private final String accessToken;
 
-        OAuthProviderAuthenticated(String userInfo, String contextInfo) {
+        /**
+         * Initializes a new {@link OAuthProviderAuthenticated}.
+         *
+         * @param userInfo The user info
+         * @param contextInfo The context info
+         * @param accessToken The oauth access token
+         */
+        OAuthProviderAuthenticated(String userInfo, String contextInfo, String accessToken) {
             super();
             this.userInfo = userInfo;
             this.contextInfo = contextInfo;
+            this.accessToken = accessToken;
         }
 
         @Override
         public void enhanceSession(Session session) {
             session.setParameter(Session.PARAM_IS_OAUTH, Boolean.TRUE);
+            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
         }
 
         @Override

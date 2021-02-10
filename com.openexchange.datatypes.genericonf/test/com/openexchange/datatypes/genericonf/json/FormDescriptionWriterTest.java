@@ -74,7 +74,7 @@ public class FormDescriptionWriterTest {
     private final Translator translator = Translator.EMPTY;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         form = new DynamicFormDescription();
     }
 

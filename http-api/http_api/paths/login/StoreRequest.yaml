@@ -4,8 +4,8 @@
     tags:
       - Login
     summary: Deprecated since 7.10.3. Refreshes the auto-login cookie.
-    parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
+    security: 
+        - session: []    
     responses:
       '200':
         description: >-

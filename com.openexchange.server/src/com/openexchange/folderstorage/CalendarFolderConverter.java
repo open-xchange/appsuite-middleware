@@ -51,7 +51,9 @@ package com.openexchange.folderstorage;
 
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilities;
 import static com.openexchange.chronos.provider.CalendarCapability.getCapabilityNames;
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.chronos.provider.composition.IDMangling.getQualifiedAccountId;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +80,7 @@ import com.openexchange.folderstorage.calendar.ExtendedPropertiesField;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.tools.id.IDMangler;
+import com.openexchange.groupware.EntityInfo;
 
 /**
  * {@link CalendarFolderConverter}
@@ -117,7 +119,7 @@ public class CalendarFolderConverter {
      */
     public static ParameterizedFolder getStorageFolder(String treeId, ContentType contentType, CalendarFolder calendarFolder, String providerId, int accountId, JSONObject userConfig) {
         ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType, isDefaultAccountFolder(calendarFolder));
-        folder.setAccountID(getQualifiedAccountID(accountId));
+        folder.setAccountID(getQualifiedAccountId(accountId));
         folder.setID(calendarFolder.getId());
         folder.setLastModified(calendarFolder.getLastModified());
         folder.setName(calendarFolder.getName());
@@ -133,9 +135,11 @@ public class CalendarFolderConverter {
         folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             GroupwareCalendarFolder groupwareCalendarFolder = (GroupwareCalendarFolder) calendarFolder;
-            folder.setCreatedBy(groupwareCalendarFolder.getCreatedBy());
+            folder.setCreatedFrom(groupwareCalendarFolder.getCreatedFrom());
+            folder.setCreatedBy(null != folder.getCreatedFrom() ? folder.getCreatedFrom().getEntity() : 0);
             folder.setCreationDate(groupwareCalendarFolder.getCreationDate());
-            folder.setModifiedBy(groupwareCalendarFolder.getModifiedBy());
+            folder.setModifiedFrom(groupwareCalendarFolder.getModifiedFrom());
+            folder.setModifiedBy(null != folder.getModifiedFrom() ? folder.getModifiedFrom().getEntity() : 0);
             folder.setParentID(groupwareCalendarFolder.getParentId());
             folder.setType(getStorageType(groupwareCalendarFolder.getType()));
             folder.setDefault(groupwareCalendarFolder.isDefaultFolder());
@@ -247,7 +251,9 @@ public class CalendarFolderConverter {
     public static Permission getStoragePermission(CalendarPermission calendarPermission) {
         BasicPermission permission = new BasicPermission();
         permission.setType(FolderPermissionType.NORMAL);
+        permission.setIdentifier(calendarPermission.getIdentifier());
         permission.setEntity(calendarPermission.getEntity());
+        permission.setEntityInfo(calendarPermission.getEntityInfo());
         permission.setGroup(calendarPermission.isGroup());
         permission.setAdmin(calendarPermission.isAdmin());
         permission.setSystem(calendarPermission.getSystem());
@@ -268,13 +274,22 @@ public class CalendarFolderConverter {
      */
     public static DefaultGroupwareCalendarFolder getCalendarFolder(Folder folder) {
         DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
-        calendarFolder.setCreatedBy(folder.getCreatedBy());
+        if (null != folder.getCreatedFrom()) {
+            calendarFolder.setCreatedFrom(folder.getCreatedFrom());
+        } else if (0 < folder.getCreatedBy()) {
+            calendarFolder.setCreatedFrom(new EntityInfo(String.valueOf(folder.getCreatedBy()), null, null, null, null, null, folder.getCreatedBy(), null, EntityInfo.Type.USER));
+        }
+        if (null != folder.getModifiedFrom()) {
+            calendarFolder.setModifiedFrom(folder.getModifiedFrom());
+        } else if (0 < folder.getModifiedBy()) {
+            calendarFolder.setModifiedFrom(new EntityInfo(String.valueOf(folder.getModifiedBy()), null, null, null, null, null, folder.getModifiedBy(), null, EntityInfo.Type.USER));
+        }
         calendarFolder.setCreationDate(folder.getCreationDate());
         calendarFolder.setDefaultFolder(folder.isDefault());
         calendarFolder.setFolderType(getCalendarType(folder.getType()));
         calendarFolder.setId(folder.getID());
         calendarFolder.setLastModified(folder.getLastModified());
-        calendarFolder.setModifiedBy(folder.getModifiedBy());
+        calendarFolder.setModifiedFrom(folder.getModifiedFrom());
         calendarFolder.setName(folder.getName());
         calendarFolder.setParentId(folder.getParentID());
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
@@ -336,7 +351,9 @@ public class CalendarFolderConverter {
      */
     public static CalendarPermission getCalendarPermission(Permission permission) {
         return new DefaultCalendarPermission(
+            permission.getIdentifier(),
             permission.getEntity(),
+            permission.getEntityInfo(),
             permission.getFolderPermission(),
             permission.getReadPermission(),
             permission.getWritePermission(),
@@ -467,10 +484,6 @@ public class CalendarFolderConverter {
             }
         }
         return defaultValue;
-    }
-
-    private static String getQualifiedAccountID(int accountId) {
-        return IDMangler.mangle("cal", String.valueOf(accountId));
     }
 
     /**

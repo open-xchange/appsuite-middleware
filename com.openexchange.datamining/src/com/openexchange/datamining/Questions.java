@@ -49,6 +49,8 @@
 
 package com.openexchange.datamining;
 
+import static com.openexchange.java.Autoboxing.f;
+import static com.openexchange.java.Autoboxing.i;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -469,8 +471,8 @@ public class Questions {
             LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[] { 5000, 10000, 500000 });
             int ll = 1;
             for (final Entry<Integer, Integer> entry : dms.entrySet()) {
-                Datamining.report("draftMailSizeBetween" + Tools.humanReadableBytes("" + ll) + "And" + Tools.humanReadableBytes("" + entry.getKey()), Integer.toString(entry.getValue() == null ? 0 : entry.getValue()));
-                ll = entry.getKey();
+                Datamining.report("draftMailSizeBetween" + Tools.humanReadableBytes("" + ll) + "And" + Tools.humanReadableBytes("" + entry.getKey()), Integer.toString(entry.getValue() == null ? 0 : i(entry.getValue())));
+                ll = i(entry.getKey());
             }
         } catch (Exception e) {
             handleError(e);
@@ -482,7 +484,7 @@ public class Questions {
             int MAXEXT = 5;
             HashMap<Integer, Integer> eaos = Datamining.externalAccountsOverAllSchemata(MAXEXT);
             for (final Entry<Integer, Integer> entry : eaos.entrySet()) {
-                Datamining.report("usersHaving" + (entry.getKey() < MAXEXT ? entry.getKey() : "MoreOrEqual" + entry.getKey()) + "ExternalAccounts", Integer.toString(entry.getValue() == null ? 0 : entry.getValue()));
+                Datamining.report("usersHaving" + (i(entry.getKey()) < MAXEXT ? entry.getKey() : "MoreOrEqual" + entry.getKey()) + "ExternalAccounts", Integer.toString(entry.getValue() == null ? 0 : i(entry.getValue())));
             }
         } catch (Exception e) {
             handleError(e);
@@ -495,7 +497,7 @@ public class Questions {
 
             String sql = "SELECT AVG(file_size) FROM infostore_document;";
             Float result = Datamining.averageForAllSchemata(sql);
-            int resultInt = Math.round(result);
+            int resultInt = Math.round(f(result));
 
             Datamining.report(AVERAGE_DOCUMENT_SIZE, Tools.humanReadableBytes(Integer.toString(resultInt)));
         } catch (Exception e) {
@@ -510,8 +512,8 @@ public class Questions {
             // take numberOfUsers and subtract numberOfContexts (thereby not counting the context-admins) -> relevant number of users
             // divide the two (numberOfContacts / (numberOfUsers - numberOfContexts)) -> average number of contacts per User
 
-            float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_CONTACTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_HAVE_CONTACTS));
+            float numberOfContacts = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_CONTACTS)));
+            float numberOfUsers = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_HAVE_CONTACTS)));
 
             Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
@@ -526,8 +528,8 @@ public class Questions {
             // take numberOfUsers and subtract numberOfContexts (thereby not counting the context-admins) -> relevant number of users
             // divide the two (numberOfContacts / (numberOfUsers - numberOfContexts)) -> average number of contacts per User
 
-            float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USER_CREATED_CONTACTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));
+            float numberOfContacts = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USER_CREATED_CONTACTS)));
+            float numberOfUsers = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS)));
 
             Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
@@ -539,8 +541,8 @@ public class Questions {
         try {
             Datamining.allTheQuestions.add(AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL);
 
-            float numberOfAppointments = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_APPOINTMENTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS));
+            float numberOfAppointments = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_APPOINTMENTS)));
+            float numberOfUsers = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS)));
 
             Datamining.report(AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL, Float.toString(numberOfAppointments / numberOfUsers));
         } catch (Exception e) {
@@ -552,8 +554,8 @@ public class Questions {
         try {
             Datamining.allTheQuestions.add(AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL);
 
-            float numberOfTasks = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_TASKS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_TASKS));
+            float numberOfTasks = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_TASKS)));
+            float numberOfUsers = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_TASKS)));
 
             Datamining.report(AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL, Float.toString(numberOfTasks / numberOfUsers));
         } catch (Exception e) {
@@ -565,8 +567,8 @@ public class Questions {
         try {
             Datamining.allTheQuestions.add(AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL);
 
-            float numberOfDocuments = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_DOCUMENTS));
-            float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_DOCUMENTS));
+            float numberOfDocuments = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_DOCUMENTS)));
+            float numberOfUsers = f(Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_DOCUMENTS)));
 
             Datamining.report(AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL, Float.toString(numberOfDocuments / numberOfUsers));
         } catch (Exception e) {

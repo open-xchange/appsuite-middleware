@@ -60,6 +60,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
@@ -67,7 +68,6 @@ import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -94,6 +94,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@RestrictedAction(module = AbstractMailAction.MODULE, type = RestrictedAction.Type.READ)
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
     /**
@@ -101,12 +102,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
      *
      * @param services The service look-up
      */
-    public AllAction(final ServiceLookup services) {
+    public AllAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(MailRequest req) throws OXException {
         final boolean cache = req.optBool("cache", false);
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
@@ -199,11 +200,11 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         return perform0(req, getMailInterface(req), false);
     }
 
-    protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
+    protected AJAXRequestResult perform0(MailRequest req, MailServletInterface mailInterface, boolean cache) throws OXException {
         try {
             // Read parameters
             String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
-            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders(true);
             int[] columns = columnCollection.getFields();
             String[] headers = columnCollection.getHeaders();
             String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
@@ -253,20 +254,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             final boolean ignoreSeen = req.optBool("unseen");
             final boolean ignoreDeleted = getIgnoreDeleted(req, false);
             final boolean filterApplied = (ignoreSeen || ignoreDeleted);
-            if (filterApplied) {
-                // Ensure flags is contained in provided columns
-                final int fieldFlags = MailListField.FLAGS.getField();
-                boolean found = false;
-                for (int i = 0; !found && i < columns.length; i++) {
-                    found = fieldFlags == columns[i];
-                }
-                if (!found) {
-                    final int[] tmp = columns;
-                    columns = new int[columns.length + 1];
-                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
-                    columns[tmp.length] = fieldFlags;
-                }
-            }
             columns = prepareColumns(columns);
             /*
              * Get mail interface
@@ -299,7 +286,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     SearchTerm<?> searchTerm;
                     {
                         SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                        SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted) : null;
+                        SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, false) : null;
                         searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                         // Check if mail categories are enabled
@@ -407,7 +394,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
     }
 
     @Override
-    public String getSha1For(final MailRequest req) throws OXException {
+    public String getSha1For(MailRequest req) throws OXException {
         final String id = req.getRequest().getProperty("mail.sha1");
         if (null != id) {
             return id;

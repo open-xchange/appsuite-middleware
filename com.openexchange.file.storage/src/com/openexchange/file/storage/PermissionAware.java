@@ -79,4 +79,47 @@ public interface PermissionAware extends FileStorageFolderAccess {
      */
     String updateFolder(String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException;
 
+    /**
+     * Updates an existing file storage folder identified through given identifier. All attributes set in given file storage folder instance are
+     * applied.
+     * <p>
+     * The currently known attributes that make sense being updated are:
+     * <ul>
+     * <li>permissions</li>
+     * <li>subscription</li>
+     * </ul>
+     * Of course more folder attributes may be checked by implementation to enhance update operations.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
+     *
+     * @param ignoreWarnings indicates whether warnings should be ignored or not
+     * @param identifier The identifier of the file storage folder to update
+     * @param toUpdate The file storage folder to update containing only the modified fields
+     * @param cascadePermissions <code>true</code> to apply permission changes to all subfolders, <code>false</code>, otherwise
+     * @return The identifier of the updated file storage folder
+     * @throws OXException If either folder does not exist or cannot be updated
+     */
+    default FileStorageResult<String> updateFolder(@SuppressWarnings("unused") boolean ignoreWarnings, String identifier, FileStorageFolder toUpdate, boolean cascadePermissions) throws OXException {
+        return FileStorageResult.newFileStorageResult(updateFolder(identifier, toUpdate, cascadePermissions), null);
+    }
+
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.folder
+     * </pre>
+     *
+     * @param ignoreWarnings true to force the folder move even if warnings are detected, false, otherwise
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    default FileStorageResult<String> moveFolder(boolean ignoreWarnings, String folderId, String newParentId, String newName) throws OXException {
+        return FileStorageResult.newFileStorageResult(moveFolder(folderId, newParentId, newName), null);
+    }
 }

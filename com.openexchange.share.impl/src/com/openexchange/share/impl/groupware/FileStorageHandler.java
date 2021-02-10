@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,16 +77,21 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.HandlerParameters;
 import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.ConnectionHolder;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -206,10 +212,7 @@ public class FileStorageHandler implements ModuleHandler {
 
         IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
         File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-        ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        if (guestID > 0) {
-            shareTarget = adjustTarget(shareTarget, context.getContextId(), context.getMailadmin(), guestID);
-        }
+        ShareTarget shareTarget = getFileTarget(file, context.getContextId(), guestID, null);
         return new FileTargetProxy(file, shareTarget);
     }
 
@@ -373,19 +376,103 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
-        return adjustTarget(target, session.getContextId(), session.getUserId(), targetUserId);
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId, Connection connection) throws OXException {
+        return adjustTarget(target, session.getContextId(), session.getUserId(), targetUserId, connection);
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
-        if (requestUserId == targetUserId) {
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId, Connection connection) throws OXException {
+        /*
+         * use target as-is if possible
+         */
+        if (requestUserId == targetUserId || isVisibleInFolder(contextId, targetUserId, target.getFolder(), target.getItem(), connection)) {
             return target;
         }
+        /*
+         * fall back to shared files folder, otherwise
+         */
         FolderID folderID = new FolderID(SHARED_FILES_FOLDER_ID);
         FileID fileID = new FileID(target.getItem());
         fileID.setFolderId(folderID.getFolderId());
         return new ShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());
+    }
+
+    /**
+     * Gets a share target for a file, for a certain user.
+     * <p/>
+     * If the user is able to see the file in its original / physical parent folder, this folder is used in the target, too. Othwerise,
+     * the special {@link #SHARED_FILES_FOLDER_ID} is used.
+     *
+     * @param file The file to get the target for
+     * @param contextId The context identifier
+     * @param userId The identifier of the user for whom the target should be generated
+     * @param connection The underlying shared database connection, or <code>null</code> to acquire one dynamically if needed
+     * @return The share target
+     */
+    private ShareTarget getFileTarget(File file, int contextId, int userId, Connection connection) throws OXException {
+        /*
+         * get physical file/folder identifiers as needed
+         */
+        String folderId;
+        String fileId;
+        if (UserizedFile.class.isInstance(file)) {
+            folderId = ((UserizedFile) file).getOriginalFolderId();
+            fileId = ((UserizedFile) file).getOriginalId();
+        } else {
+            folderId = file.getFolderId();
+            fileId = file.getId();
+        }
+        /*
+         * check if user can access file in its physical location, otherwise fall back to virtual shared files folder
+         */
+        if (false == isVisibleInFolder(contextId, userId, folderId, file, connection)) {
+            folderId = SHARED_FILES_FOLDER_ID;
+        }
+        FolderID folderID = new FolderID(folderId);
+        FileID fileID = new FileID(fileId);
+        fileID.setFolderId(folderID.getFolderId());
+        return new ShareTarget(FolderObject.INFOSTORE, folderID.toUniqueID(), fileID.toUniqueID());
+    }
+
+    private boolean isVisibleInFolder(int contextId, int userId, String folder, String item, Connection connection) throws OXException {
+        if (SHARED_FILES_FOLDER_ID.equals(folder)) {
+            return true; // always visible in shared files
+        }
+        EffectivePermission effectivePermission = getEffectivePermission(contextId, userId, folder, connection);
+        if (effectivePermission.canReadAllObjects()) {
+            return true; // can read all files in folder
+        }
+        if (effectivePermission.canReadOwnObjects()) {
+            IDBasedAdministrativeFileAccess fileAccess = requireService(IDBasedFileAccessFactory.class, services).createAccess(contextId);
+            File file = fileAccess.getFileMetadata(item, FileStorageFileAccess.CURRENT_VERSION);
+            if (file.getCreatedBy() == userId) {
+                return true; // can read own file in folder
+            }
+        }
+        return false;
+    }
+
+    private boolean isVisibleInFolder(int contextId, int userId, String folder, File file, Connection connection) throws OXException {
+        if (SHARED_FILES_FOLDER_ID.equals(folder)) {
+            return true; // always visible in shared files
+        }
+        EffectivePermission effectivePermission = getEffectivePermission(contextId, userId, folder, connection);
+        if (effectivePermission.canReadAllObjects()) {
+            return true; // can read all files in folder
+        }
+        if (effectivePermission.canReadOwnObjects()) {
+            if (file.getCreatedBy() == userId) {
+                return true; // can read own file in folder
+            }
+        }
+        return false;
+    }
+
+    private EffectivePermission getEffectivePermission(int contextId, int userId, String folder, Connection connection) throws OXException {
+        TargetProxy targetProxy = requireService(ModuleSupport.class, services).resolveTarget(new ShareTargetPath(FolderObject.INFOSTORE, folder, null), contextId, userId);
+        Context context = requireService(ContextService.class, services).getContext(contextId);
+        UserPermissionBits permissionBits = requireService(UserPermissionService.class, services).getUserPermissionBits(connection, userId, context);
+        return ((AdministrativeFolderTargetProxy) targetProxy).getFolder().getEffectiveUserPermission(userId, permissionBits);
     }
 
 }

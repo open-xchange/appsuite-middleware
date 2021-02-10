@@ -100,7 +100,7 @@ public class URIValidator {
             }
 
             return true;
-        } catch (URISyntaxException e) {
+        } catch (@SuppressWarnings("unused") URISyntaxException e) {
             return false; // Redirect URIs must follow the syntax described in RFC 3986.
         }
     }
@@ -165,7 +165,7 @@ public class URIValidator {
             }
 
             return true;
-        } catch (URISyntaxException e) {
+        } catch (@SuppressWarnings("unused") URISyntaxException e) {
             return false;
         }
     }

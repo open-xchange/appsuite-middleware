@@ -388,6 +388,17 @@ properties:
     file: contact.properties
     packageName: open-xchange-core
     tags: ["Contact", "Find"]
+  - key: com.openexchange.contact.[providerId].enabled
+    description: |
+      Defines whether the contact provider with the specified identifier is enabled or disabled.
+    defaultValue: true
+    version: 7.10.5
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact"]
   - key: com.openexchange.contactcollector.enabled
     description: |
       Whether enabled or disabled regardless of bundle start-up.

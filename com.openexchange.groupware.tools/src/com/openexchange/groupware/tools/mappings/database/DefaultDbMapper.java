@@ -182,7 +182,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 			throw new IllegalArgumentException("fields");
 		}
         StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
-		if (null != fields && 0 < fields.length) {
+		if (0 < fields.length) {
             appendAssignments(stringBuilder, get(fields[0]));
 			for (int i = 1; i < fields.length; i++) {
                 stringBuilder.append(',');
@@ -203,7 +203,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
             throw new IllegalArgumentException("fields");
         }
         StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
-        if (null != fields && 0 < fields.length) {
+        if (0 < fields.length) {
             appendColumnLabels(stringBuilder, get(fields[0]), columnLabelPrefix);
             for (int i = 1; i < fields.length; i++) {
                 stringBuilder.append(',');

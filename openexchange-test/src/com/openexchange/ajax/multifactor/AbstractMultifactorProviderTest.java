@@ -215,7 +215,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     protected void clearAllMultifactorDevicesByUser() throws Exception {
        List<MultifactorDevice> devices = getDevices();
        for(MultifactorDevice device : devices) {
-           MultifactorApi().multifactorDeviceActionDelete(getSessionId(), device.getProviderName(), device.getId());
+           MultifactorApi().multifactorDeviceActionDelete(device.getProviderName(), device.getId());
        }
     }
 
@@ -225,7 +225,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     public void setUp() throws Exception {
         super.setUp();
         ConfigApi configApi = new ConfigApi(apiClient);
-        ConfigResponse configResponse = configApi.getConfigNode("/context_id", apiClient.getSession());
+        ConfigResponse configResponse = configApi.getConfigNode("/context_id");
         this.contextId = (Integer) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
         this.userId = MultifactorApi().getApiClient().getUserId();
     }
@@ -299,7 +299,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         MultifactorApi multifactorApi = new MultifactorApi(client2);
 
         //Try to delete the 2nd factor. THIS MUST FAIL.
-        MultifactorDeleteResponse deleteResponse = multifactorApi.multifactorDeviceActionDelete(client2.getSession(), getProviderName(), registrationResponseData.getDeviceId());
+        MultifactorDeleteResponse deleteResponse = multifactorApi.multifactorDeviceActionDelete(getProviderName(), registrationResponseData.getDeviceId());
         assertThat(deleteResponse.getError(), not(emptyOrNullString()));
         assertThat(deleteResponse.getCode(), is("MFA-0001"));
 
@@ -318,7 +318,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Perform some API call which is 2fa protected
         //This MUST FAIL, because the 2nd factor was not provided
-        CurrentUserResponse currentUser = new UserMeApi(client2).getCurrentUser(client2.getSession());
+        CurrentUserResponse currentUser = new UserMeApi(client2).getCurrentUser();
         assertThat(currentUser.getData(), is(nullValue()));
         assertThat(currentUser.getError(), not(emptyOrNullString()));
         assertThat(currentUser.getCode(), is("MFA-0001"));
@@ -333,7 +333,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
         getApiClient().login(testUser.getLogin(), testUser.getPassword());
-        loginApi.refreshAutoLoginCookie(getSessionId());
+        loginApi.refreshAutoLoginCookie();
 
         //..And provide the 2nd factor - Authentication must not fail!
         MultifactorStartAuthenticationResponseData startAuthData = startAuthenticationInternal(deviceData.getDeviceId());
@@ -345,12 +345,12 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //After autologin is must be allowed to perform almost all API actions without re-authenticating
-        CurrentUserResponse currentUser = new UserMeApi(getApiClient()).getCurrentUser(getSessionId());
+        CurrentUserResponse currentUser = new UserMeApi(getApiClient()).getCurrentUser();
         assertThat(currentUser.getErrorDesc(), is(nullValue()));
 
         //However, it must not be allowed to perform certain API actions which require re-authenticating.
         //For example deleting multifactor devices
-        MultifactorDeleteResponse deleteResponse = MultifactorApi().multifactorDeviceActionDelete(getSessionId(), getProviderName(), deviceData.getDeviceId());
+        MultifactorDeleteResponse deleteResponse = MultifactorApi().multifactorDeviceActionDelete(getProviderName(), deviceData.getDeviceId());
         assertThat(deleteResponse.getData(), is(empty()));
         assertThat(deleteResponse.getError(), not(emptyOrNullString()));
         assertThat(deleteResponse.getCode(), is("MFA-0015"));
@@ -366,7 +366,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         //Login again with autologin enabled
         LoginApi loginApi = new LoginApi(getApiClient());
         getApiClient().login(testUser.getLogin(), testUser.getPassword());
-        loginApi.refreshAutoLoginCookie(getSessionId());
+        loginApi.refreshAutoLoginCookie();
 
         //..And provide the 2nd factor - Authentication must not fail!
         MultifactorStartAuthenticationResponseData startAuthData = startAuthenticationInternal(deviceData.getDeviceId());
@@ -404,7 +404,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         final String newDeviceName = "ThisIsANewDeviceName";
         newDevice.setName(newDeviceName);
         newDevice. setId(registerData.getDeviceId());
-        MultifactorDeviceResponse renamedResponse = MultifactorApi().multifactorDeviceActionRename(getSessionId(), getProviderName(), newDevice);
+        MultifactorDeviceResponse renamedResponse = MultifactorApi().multifactorDeviceActionRename(getProviderName(), newDevice);
         assertThat(renamedResponse, is(not(nullValue())));
         MultifactorDevice renamedDevice = checkResponse(renamedResponse, renamedResponse.getData());
 

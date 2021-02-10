@@ -180,6 +180,29 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException;
 
     /**
+     * Updates an existing file storage folder identified through given identifier. All attributes set in given file storage folder instance are
+     * applied.
+     * <p>
+     * The currently known attributes that make sense being updated are:
+     * <ul>
+     * <li>permissions</li>
+     * <li>subscription</li>
+     * </ul>
+     * Of course more folder attributes may be checked by implementation to enhance update operations.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
+     *
+     * @param identifier The identifier of the file storage folder to update
+     * @param ignoreWarnings indicates whether warnings should be ignored or not
+     * @param toUpdate The file storage folder to update containing only the modified fields
+     * @return The identifier of the updated file storage folder
+     * @throws OXException If either folder does not exist or cannot be updated
+     */
+    default FileStorageResult<String> updateFolder(String identifier, @SuppressWarnings("unused") boolean ignoreWarnings, FileStorageFolder toUpdate) throws OXException {
+       return FileStorageResult.newFileStorageResult(updateFolder(identifier, toUpdate), null);
+    }
+
+    /**
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
      * <p>
      * E.g.:
@@ -330,3 +353,4 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
 }
+

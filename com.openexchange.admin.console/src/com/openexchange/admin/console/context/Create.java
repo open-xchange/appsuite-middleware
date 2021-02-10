@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.context;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -73,15 +74,24 @@ public class Create extends CreateCore {
 
     private OXContextInterface csv_oxctx;
 
-    public Create(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("createcontext");
-
-        commonfunctions(parser, args2);
+    /**
+     * Initializes a new {@link Change}.
+     */
+    public Create() {
+        super();
     }
 
     public static void main(final String args[]) {
-        new Create(args);
+        new Create().execute(args);
+    }
+
+    /**
+     * Executes the command
+     *
+     * @param args the command line arguments
+     */
+    public void execute(String[] args) {
+        commonfunctions(new AdminParser("createcontext"), args);
     }
 
     @Override
@@ -90,9 +100,6 @@ public class Create extends CreateCore {
         ctxabs.setAddMappingOption(parser, false);
         ctxabs.setDestinationStoreIdOption(parser, false);
         ctxabs.setDestinationDatabaseIdOption(parser, false);
-
-        setConfigOption(parser);
-        setRemoveConfigOption(parser);
 
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
@@ -103,7 +110,7 @@ public class Create extends CreateCore {
     @Override
     protected Context maincall(final AdminParser parser, final Context ctx, final User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException {
         // get rmi ref
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+        OXContextInterface oxctx = OXContextInterface.class.cast(Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME));
 
         // add login mappings
         ctxabs.parseAndSetAddLoginMapping(parser);
@@ -112,9 +119,9 @@ public class Create extends CreateCore {
 
         ctxabs.changeMappingSetting(oxctx, ctx, auth, false);
         ctx.setFilestoreId(ctxabs.getStoreid());
-        final Integer db = ctxabs.getDatabaseid();
+        Integer db = ctxabs.getDatabaseid();
         if (null != db) {
-            ctx.setWriteDatabase(new Database(db));
+            ctx.setWriteDatabase(new Database(i(db)));
         }
 
         Context createdctx = null;

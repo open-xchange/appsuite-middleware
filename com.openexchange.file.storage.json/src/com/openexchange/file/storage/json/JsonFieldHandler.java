@@ -75,6 +75,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.groupware.EntityInfo;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -293,12 +294,12 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             }
         }
         if (Date.class.isInstance(value)) {
-            Date d = (Date) value;
-            if (field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
+            Date d = Date.class.cast(value);
+            if (field == File.Field.LOCKED_UNTIL && (d.getTime() <= System.currentTimeMillis())) {
                 return Integer.valueOf(0);
             }
             TimeZone tz = Field.LAST_MODIFIED_UTC == field ? UTC : request.getTimezone();
-            return writeDate((Date) value, tz);
+            return writeDate(Date.class.cast(value), tz);
         }
 
         switch (field) {
@@ -357,9 +358,12 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                         }
                     } else if (obj instanceof FileStorageObjectPermission) {
                         FileStorageObjectPermission permission = (FileStorageObjectPermission) obj;
-                        JSONObject json = new JSONObject(3);
+                        JSONObject json = new JSONObject(4);
                         try {
-                            json.put("entity", permission.getEntity());
+                            json.put("identifier", permission.getIdentifier());
+                            if (0 < permission.getEntity() || 0 == permission.getEntity() && permission.isGroup()) {
+                                json.put("entity", permission.getEntity());
+                            }
                             json.put("group", permission.isGroup());
                             json.put("bits", permission.getPermissions());
                             jPermissions.put(json);
@@ -376,6 +380,16 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             return new JSONArray(0);
         case ORIGIN:
             return handleFolderPath((FolderPath) value);
+        case CREATED_FROM:
+            if (null != value) {
+                return ((EntityInfo) value).toJSON();
+            }
+            return null;
+        case MODIFIED_FROM:
+            if (null != value) {
+                return ((EntityInfo) value).toJSON();
+            }
+            return null;
         default: // do nothing;
         }
 
@@ -444,7 +458,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder getInfoStorePersonalFolder() throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 
@@ -465,7 +479,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder getFolderFor(String folderId) throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 
@@ -485,7 +499,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private FileStorageFolder[] getSubfoldersFor(String folderId) throws OXException {
         Map<String, Object> cache = this.cache;
         if (null == cache) {
-            cache = new HashMap<String, Object>();
+            cache = new HashMap<>();
             this.cache = cache;
         }
 

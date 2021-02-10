@@ -65,6 +65,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.spi.ExceptionHandler;
@@ -178,24 +179,33 @@ public class InitService extends SAMLServlet {
     private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
         if (config.isAutoLoginEnabled()) {
             LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
-            Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
-            if (samlCookie == null) {
+            Cookie sessionCookie = SAMLLoginTools.getSessionCookie(httpRequest, loginConfiguration);
+            if (sessionCookie == null) {
                 return null;
             }
 
-            Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, services.getService(SessiondService.class));
+            Session session = SAMLLoginTools.getSessionForSessionCookie(sessionCookie, services.getService(SessiondService.class));
             if (session == null) {
                 // cookie exists but no according session was found => remove it
-                Cookie toRemove = (Cookie) samlCookie.clone();
+                Cookie toRemove = (Cookie) sessionCookie.clone();
                 toRemove.setMaxAge(0);
                 httpResponse.addCookie(toRemove);
 
-                LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                LOG.debug("Found no session for cookie '{}' with value '{}'", sessionCookie.getName(), sessionCookie.getValue());
                 return null;
             }
 
             try {
-                LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                LOG.debug("Found session '{}' for open-xchange-session cookie '{}' with value '{}'", session.getSessionID(), sessionCookie.getName(), sessionCookie.getValue());
+                Object parameter = session.getParameter(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER);
+                if (null != parameter) {
+                    long expiryDate = Long.parseLong((String) parameter);
+                    if (System.currentTimeMillis() > expiryDate) {
+                        LOG.debug("Session {} expired.", session.getSessionID());
+                        services.getServiceSafe(SessiondService.class).removeSession(session.getSessionID());
+                        return null;
+                    }
+                }
                 String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
                 SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
                 String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);

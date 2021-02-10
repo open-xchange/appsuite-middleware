@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test.matrix_v2;
 
+import static com.openexchange.java.Autoboxing.B;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,7 +83,7 @@ public class TestMailAuthenticityStatusMatrixE3 extends AbstractTestMailAuthenti
     public void testSPFSoftFailDKIMFailDMARCFailRejectPolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=softfail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=reject sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.FAIL, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
+        assertResults(3, MailAuthenticityStatus.FAIL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
     }
 
     /**
@@ -92,7 +93,7 @@ public class TestMailAuthenticityStatusMatrixE3 extends AbstractTestMailAuthenti
     public void testSPFSoftFailDKIMFailDMARCFailQuarantinePolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=softfail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=quarantine sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
+        assertResults(3, MailAuthenticityStatus.SUSPICIOUS, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
     }
 
     /**
@@ -102,7 +103,7 @@ public class TestMailAuthenticityStatusMatrixE3 extends AbstractTestMailAuthenti
     public void testSPFSoftFailDKIMFailDMARCFailNonePolicy() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=softfail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net; dmarc=fail (p=none sp=NONE dis=NONE) header.from=example.net");
-        assertResults(3, MailAuthenticityStatus.NEUTRAL, false, "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
+        assertResults(3, MailAuthenticityStatus.NEUTRAL, B(false), "example.net", DMARCResult.FAIL, DKIMResult.FAIL, SPFResult.SOFTFAIL);
     }
 
     /**
@@ -112,6 +113,6 @@ public class TestMailAuthenticityStatusMatrixE3 extends AbstractTestMailAuthenti
     public void testSPFSoftFailDKIMFailDMARCMissing() throws Exception {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=softfail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
-        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, false, "example.net", DKIMResult.FAIL, SPFResult.SOFTFAIL);
+        assertResults(2, MailAuthenticityStatus.SUSPICIOUS, B(false), "example.net", DKIMResult.FAIL, SPFResult.SOFTFAIL);
     }
 }

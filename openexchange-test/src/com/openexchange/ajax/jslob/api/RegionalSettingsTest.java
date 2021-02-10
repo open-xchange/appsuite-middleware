@@ -102,7 +102,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
         // Adjust regional settings
         HashMap<String, Object> custom = new HashMap<>();
         custom.put("number", "1 234,56");
-        CommonResponse response = jslobApi.setJSlob(getSessionId(), Collections.singletonMap(ID, custom), CORE, null);
+        CommonResponse response = jslobApi.setJSlob(Collections.singletonMap(ID, custom), CORE, null);
         assertNull(response.getErrorDesc(), response.getError());
 
         // Check again
@@ -115,7 +115,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
         assertTrue(region_settings.containsKey("number"));
 
         // Remove entry by setting region_format to a simple string (NULL doesn't work, because of the api client)
-        response = jslobApi.setJSlob(getSessionId(), Collections.singletonMap(ID, "NOT_NULL"), CORE, null);
+        response = jslobApi.setJSlob(Collections.singletonMap(ID, "NOT_NULL"), CORE, null);
         assertNull(response.getErrorDesc(), response.getError());
 
         // Get jslob and check that user has no custom region format
@@ -125,7 +125,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCoreJSLob() throws ApiException {
-        JSlobsResponse resp = jslobApi.getJSlobList(getSessionId(), Collections.singletonList(CORE), null);
+        JSlobsResponse resp = jslobApi.getJSlobList(Collections.singletonList(CORE), null);
         assertNull(resp.getErrorDesc(), resp.getError());
         assertNotNull("", resp.getData());
         List<JSlobData> list = resp.getData();
@@ -159,7 +159,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getSettingsFromConfigTree(boolean exists) throws ApiException {
-        ConfigResponse resp = configApi.getConfigNode(ID, getSessionId());
+        ConfigResponse resp = configApi.getConfigNode(ID);
         assertNull(resp.getErrorDesc(), resp.getError());
         String data = resp.getData().toString();
         if (exists == false) {
@@ -173,7 +173,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
     private void putRegionSettingToConfigTree(Map<String, Object> settings) throws ApiException, JSONException {
         if (settings == null) {
             // use simple string instead of null, because of bad test client support
-            CommonResponse resp = configApi.putConfigNode(ID, getSessionId(), new ConfigBody().data("DELETE"));
+            CommonResponse resp = configApi.putConfigNode(ID, new ConfigBody().data("DELETE"));
             assertNull(resp.getErrorDesc(), resp.getError());
             return;
         }
@@ -182,7 +182,7 @@ public class RegionalSettingsTest extends AbstractAPIClientSession {
             json.put(entry.getKey(), entry.getValue());
         }
 
-        CommonResponse resp = configApi.putConfigNode(ID, getSessionId(), new ConfigBody().data(json.toString()));
+        CommonResponse resp = configApi.putConfigNode(ID, new ConfigBody().data(json.toString()));
         assertNull(resp.getErrorDesc(), resp.getError());
     }
 

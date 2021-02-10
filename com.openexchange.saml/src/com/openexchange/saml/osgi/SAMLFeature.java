@@ -65,6 +65,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
+import com.openexchange.osgi.service.http.HttpServices;
 import com.openexchange.saml.SAMLProperties;
 import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
 import com.openexchange.saml.impl.VeryDangerousSAMLBackend;
@@ -168,7 +169,7 @@ public class SAMLFeature extends DependentServiceStarter {
         LOG.info("Stopping SAML 2.0 support...");
         HttpService httpService = services.getService(HttpService.class);
         while (!servlets.isEmpty()) {
-            httpService.unregister(servlets.pop());
+            HttpServices.unregister(servlets.pop(), httpService);
         }
 
         while (!serviceRegistrations.isEmpty()) {

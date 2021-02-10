@@ -360,5 +360,15 @@ public class FileFieldHandling {
             return handler.handle(Field.MEDIA_DATE, args);
         }
 
+        @Override
+        public Object created_from(Object...args) {
+            return handler.handle(Field.CREATED_FROM, args);
+        }
+
+        @Override
+        public Object modified_from(Object... args) {
+            return handler.handle(Field.MODIFIED_FROM, args);
+        }
+
     }
 }

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange default contact vCard storage implementation bundle
-Bundle-Version: 7.10.4
+Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
@@ -26,7 +26,8 @@ Import-Package: com.openexchange.config,
  org.apache.commons.io,
  org.apache.commons.lang,
  org.osgi.framework,
- org.osgi.service.event;version="1.3.0",
+ org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.contact.vcard.storage.impl.osgi.ContactVCardStorageActivator
+Automatic-Module-Name: com.openexchange.contact.vcard.storage.impl

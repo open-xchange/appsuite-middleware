@@ -100,7 +100,7 @@ public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
     @Test
     public void testGetFilestorageAccountCapabilities() throws Throwable {
-        FileAccountResponse response = api.getFileAccount(getApiClient().getSession(), "com.openexchange.infostore", "infostore");
+        FileAccountResponse response = api.getFileAccount("com.openexchange.infostore", "infostore");
         assertNull(response.getError());
         assertNotNull("Response is empty!", response.getData());
         FileAccountData account = response.getData();
@@ -119,7 +119,7 @@ public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllFilestorageAccountCapabilities() throws Throwable {
-        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null, NO_CONNECTION_CHECK);
+        FileAccountsResponse response = api.getAllFileAccounts(null, NO_CONNECTION_CHECK);
         assertNull(response.getError());
         assertNotNull("Response is empty!", response.getData());
         List<FileAccountData> accounts = response.getData();
@@ -140,7 +140,7 @@ public final class FilestorageAccountTest extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllFilestorageAccountsWithConnectionCheck() throws Throwable {
-        FileAccountsResponse response = api.getAllFileAccounts(getApiClient().getSession(), null, CONNECTION_CHECK);
+        FileAccountsResponse response = api.getAllFileAccounts(null, CONNECTION_CHECK);
         assertNull(response.getError());
         assertNotNull("Response is empty!", response.getData());
         List<FileAccountData> accounts = response.getData();

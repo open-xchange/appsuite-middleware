@@ -167,7 +167,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
 
     private Object refreshSubscriptions(final JSONObject request, final ServerSession session) throws OXException, JSONException {
-        List<Subscription> subscriptionsToRefresh = new LinkedList<Subscription>();
+        List<Subscription> subscriptionsToRefresh = new LinkedList<>();
         TIntSet ids = new TIntHashSet();
         if (request.has("folder")) {
             final String folderId = request.getString("folder");
@@ -204,7 +204,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     private Object listSubscriptions(JSONObject request, ServerSession session) throws JSONException, OXException {
         final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         final Context context = session.getContext();
-        final List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
+        final List<Subscription> subscriptions = new ArrayList<>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
             final SubscriptionSource source = getDiscovery(session).getSource(context, id);
@@ -261,7 +261,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     private List<Subscription> getSubscriptionsInFolder(ServerSession session, String folder, String secret) throws OXException {
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
-        final List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
+        final List<Subscription> allSubscriptions = new ArrayList<>(10);
         for (final SubscriptionSource subscriptionSource : sources) {
             final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(session.getContext(), folder, secret);
             allSubscriptions.addAll(subscriptions);
@@ -271,7 +271,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     private List<Subscription> getAllSubscriptions(ServerSession session, String secret) throws OXException {
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
-        final List<Subscription> allSubscriptions = new ArrayList<Subscription>();
+        final List<Subscription> allSubscriptions = new ArrayList<>();
         for (final SubscriptionSource subscriptionSource : sources) {
             final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
@@ -298,7 +298,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
 
     private Map<String, String[]> getDynamicColumns(JSONObject request) throws JSONException {
         final List<String> identifiers = getDynamicColumnOrder(request);
-        final Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
+        final Map<String, String[]> dynamicColumns = new HashMap<>();
         for (final String identifier : identifiers) {
             final String columns = request.optString(identifier);
             if (columns != null && !columns.equals("")) {
@@ -315,7 +315,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             return Arrays.asList(request.getString("dynamicColumnPlugins").split("\\s*,\\s*"));
         }
 
-        List<String> dynamicColumnIdentifiers = new ArrayList<String>();
+        List<String> dynamicColumnIdentifiers = new ArrayList<>();
         for (String paramName : request.keySet()) {
             if (!KNOWN_PARAMS.contains(paramName) && paramName.indexOf('.') >= 0) {
                 dynamicColumnIdentifiers.add(paramName);
@@ -352,9 +352,8 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return createResponse(subscription, request.optString("__serverURL"), tz);
     }
 
-    private Object createResponse(final Subscription subscription, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
-        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, tz);
-        return object;
+    private Object createResponse(final Subscription subscription, final String urlPrefix, TimeZone tz) throws JSONException {
+        return new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, tz);
     }
 
     private Subscription loadSubscription(final int id, final ServerSession session, final String source, final String secret) throws OXException {

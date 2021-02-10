@@ -70,4 +70,13 @@ public interface AttachmentStorageService {
      * @throws OXException If attachment storage cannot be returned
      */
     AttachmentStorage getAttachmentStorageFor(Session session) throws OXException;
+
+    /**
+     * Gets the attachment storage matching specified storage type.
+     *
+     * @param storageType The attachment storage type to look-up by
+     * @return The matching attachment storage
+     * @throws OXException If no such attachment storage exists or it cannot be returned
+     */
+    AttachmentStorage getAttachmentStorageByType(AttachmentStorageType storageType) throws OXException;
 }

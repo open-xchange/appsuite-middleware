@@ -175,9 +175,9 @@ public class Messages implements LocalizableStrings {
 
     public static final String CREATE_INTRO = "You have been invited to an appointment by %1$s:";
 
-    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an appointment organized by %1$s on behalf of %2$s";
+    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an appointment by %1$s on behalf of %2$s:";
 
-    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an appointment on your behalf.";
+    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an appointment on your behalf:";
 
     public static final String CREATE_EXCEPTION_INTRO = "%1$s created a recurrence exception. Original date: %2$s:";
 
@@ -311,6 +311,8 @@ public class Messages implements LocalizableStrings {
     public static final String HAS_SPLIT = "The appointment series was updated, beginning at %1$s.";
 
     public static final String HAS_CHANGED_RRULE = "The appointment's recurrence rule has changed to: %1$s.";
+
+    public static final String HAS_CHANGED_RRULE_UNTIL = "The appointment series now ends on %1$s.";
 
     public static final String INTENTION_RESCHEDULE = "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s";
 

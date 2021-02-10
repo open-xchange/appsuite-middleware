@@ -53,6 +53,7 @@ import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDEN
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +71,7 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -114,6 +116,7 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * The string for <code>ISO-8859-1</code> character encoding.
      */
+    @SuppressWarnings("unused")
     private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
     // ----------------------------------------------------------------------------------------------------------------------
@@ -124,8 +127,10 @@ public class IMAPAuthentication implements AuthenticationService {
 
     /**
      * Default constructor.
+     * 
+     * @throws IOException if an I/O error is occurred
      */
-    public IMAPAuthentication(ServiceLookup services) {
+    public IMAPAuthentication(ServiceLookup services) throws IOException {
         super();
         this.services = services;
 
@@ -139,7 +144,7 @@ public class IMAPAuthentication implements AuthenticationService {
         }
 
         // Initialize configuration properties
-        props = configService.getFile("imapauth.properties");
+        props = ConfigurationServices.loadPropertiesFrom(configService.getFileByName("imapauth.properties"));
     }
 
     @Override
@@ -241,34 +246,32 @@ public class IMAPAuthentication implements AuthenticationService {
                 Context ctx = optContext(contextInfo).get();
                 int userId = optUser(userInfo, loginInfo, ctx).get().intValue();
 
-	            // Load primary account and check its protocol to be IMAP
-	            MailAccount defaultMailAccount = optMailAccount(userId, ctx.getContextId()).get();
-	            String mailProtocol = defaultMailAccount.getMailProtocol();
-	            if (!mailProtocol.toLowerCase().startsWith("imap")) {
-	                throw UNKNOWN.create(new StringBuilder(128).append(
-	                    "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
-	                    " for user ").append(userId).append(" in context ").append(ctx.getContextId()).toString());
-	            }
+                // Load primary account and check its protocol to be IMAP
+                MailAccount defaultMailAccount = optMailAccount(userId, ctx.getContextId()).get();
+                String mailProtocol = defaultMailAccount.getMailProtocol();
+                if (!mailProtocol.toLowerCase().startsWith("imap")) {
+                    throw UNKNOWN.create(new StringBuilder(128).append("IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(" for user ").append(userId).append(" in context ").append(ctx.getContextId()).toString());
+                }
 
-	            /*
-	             * Set user according to configured login source if different from LoginSource.USER_NAME
-	             */
-	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource(userId, ctx.getContextId());
-	            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-	                imapLogin = defaultMailAccount.getLogin();
-	            }
-	            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-	                imapLogin = defaultMailAccount.getPrimaryAddress();
-	            }
+                /*
+                 * Set user according to configured login source if different from LoginSource.USER_NAME
+                 */
+                final LoginSource loginSource = MailProperties.getInstance().getLoginSource(userId, ctx.getContextId());
+                if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+                    imapLogin = defaultMailAccount.getLogin();
+                }
+                if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+                    imapLogin = defaultMailAccount.getPrimaryAddress();
+                }
 
-	            /*
-	             * Get IMAP server from primary account
-	             */
-	            isPrimary = true;
-	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
-	            port = Integer.valueOf(defaultMailAccount.getMailPort());
-	            secure = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+                /*
+                 * Get IMAP server from primary account
+                 */
+                isPrimary = true;
+                host = IDNA.toASCII(defaultMailAccount.getMailServer());
+                port = Integer.valueOf(defaultMailAccount.getMailPort());
+                secure = defaultMailAccount.isMailSecure();
+                LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             } else {
                 // SSL feature for single defined IMAP server
                 if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.IMAP_USE_SECURE.name))) {

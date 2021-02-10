@@ -247,6 +247,30 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Changing the subscription or the used_for_sync state is not allowed for default folders.
      */
     SUBSCRIBE_NOT_ALLOWED("Changing the subscription or the used_for_sync state is not allowed for default folders.", CATEGORY_USER_INPUT, 1044, OXExceptionStrings.MESSAGE_DENIED),
+    /**
+     * With moving the shared folder \"%1$s\" people will lose access.
+     */
+    MOVE_TO_NOT_SHARED_WARNING("With moving the shared folder \"%1$s\" people will lose access.", CATEGORY_WARNING, 1045, FolderExceptionMessages.MOVE_TO_NOT_SHARED_WARNING),
+    /**
+     * This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.
+     */
+    MOVE_TO_ANOTHER_SHARED_WARNING("This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see \"%1$s\" will lose access.", CATEGORY_WARNING, 1046, FolderExceptionMessages.MOVE_TO_ANOTHER_SHARED_WARNING),
+    /**
+     * This folder will be shared with everyone who has access to \"%3$s\".
+     */
+    MOVE_TO_SHARED_WARNING("This folder will be shared with everyone who has access to \"%3$s\".", CATEGORY_WARNING, 1047, FolderExceptionMessages.MOVE_TO_SHARED_WARNING),
+    /**
+     * You are moving a folder that contains shares. People will lose access.
+     */
+    MOVE_SHARED_SUBFOLDERS_TO_NOT_SHARED_WARNING("You are moving a folder that contains shares. People will lose access.", CATEGORY_WARNING, 1048, FolderExceptionMessages.MOVE_SHARED_SUBFOLDERS_TO_NOT_SHARED_WARNING),
+    /**
+     * This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.
+     */
+    MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING("This folder will be shared with everyone who has access to \"%3$s\". Everyone who can see the subfolders of \"%1$s\" will lose access.", CATEGORY_WARNING, 1049, FolderExceptionMessages.MOVE_SHARED_SUBFOLDERS_TO_SHARED_WARNING),
+    /**
+     * Searching folder by folder name is not supported
+     */
+    NO_SEARCH_SUPPORT("Searching folder by folder name is not supported", CATEGORY_ERROR, 1050, FolderExceptionMessages.NO_SEARCH_SUPPORT_MSG),
 
     ;
 

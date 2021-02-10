@@ -55,21 +55,22 @@ import org.w3c.dom.Document;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
+import com.openexchange.xml.util.XMLUtils;
 
 public class DOMProcessor implements HTTPResponseProcessor {
 
-	@Override
+    @Override
     public Class<?>[] getTypes() {
-		return new Class[]{InputStream.class, Document.class};
-	}
+        return new Class[] { InputStream.class, Document.class };
+    }
 
-	@Override
+    @Override
     public Object process(Object response) throws OXException {
-		try {
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((InputStream) response, "UTF-8");
-		} catch (Exception e) {
+        try {
+            DocumentBuilderFactory dbf = XMLUtils.safeDbf(DocumentBuilderFactory.newInstance());
+            return dbf.newDocumentBuilder().parse((InputStream) response, "UTF-8");
+        } catch (Exception e) {
             throw OxHttpClientExceptionCodes.CATCH_ALL.create(e, e.getMessage());
-		}
-	}
-
+        }
+    }
 }

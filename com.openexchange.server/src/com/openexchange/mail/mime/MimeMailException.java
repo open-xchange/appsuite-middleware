@@ -138,7 +138,7 @@ public class MimeMailException extends OXException {
      * @param displayMessage
      * @param displayArgs
      */
-    public MimeMailException(final int code, final String displayMessage, final Object... displayArgs) {
+    public MimeMailException(int code, String displayMessage, Object... displayArgs) {
         super(code, displayMessage, displayArgs);
     }
 
@@ -150,7 +150,7 @@ public class MimeMailException extends OXException {
      * @param cause
      * @param displayArgs
      */
-    public MimeMailException(final int code, final String displayMessage, final Throwable cause, final Object... displayArgs) {
+    public MimeMailException(int code, String displayMessage, Throwable cause, Object... displayArgs) {
         super(code, displayMessage, cause, displayArgs);
     }
 
@@ -163,7 +163,7 @@ public class MimeMailException extends OXException {
      * @param e The messaging exception
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e) {
+    public static OXException handleMessagingException(MessagingException e) {
         return handleMessagingException(e, null, null);
     }
 
@@ -174,7 +174,7 @@ public class MimeMailException extends OXException {
      * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
+    public static OXException handleMessagingException(MessagingException e, MailConfig mailConfig) {
         return handleMessagingException(e, mailConfig, mailConfig.getSession());
     }
 
@@ -186,7 +186,7 @@ public class MimeMailException extends OXException {
      * @param session The session providing user information
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
+    public static OXException handleMessagingException(MessagingException e, MailConfig mailConfig, Session session) {
         return handleMessagingException(e, mailConfig, session, null);
     }
 
@@ -218,7 +218,7 @@ public class MimeMailException extends OXException {
      * @param folder The optional folder
      * @return An appropriate instance of {@link OXException}
      */
-    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder) {
+    public static OXException handleMessagingException(MessagingException e, MailConfig mailConfig, Session session, Folder folder) {
         try {
             // Put log properties
             if (null != mailConfig) {
@@ -445,6 +445,11 @@ public class MimeMailException extends OXException {
                 if (isTimeoutException(e)) {
                     // javax.mail.FolderClosedException through a read timeout
                     return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
+                Exception nextException = e.getNextException();
+                if (nextException instanceof com.sun.mail.iap.ConnectionException) {
+                    return handleConnectionException((com.sun.mail.iap.ConnectionException) nextException, mailConfig, e);
                 }
 
                 if (null != mailConfig && null != session) {
@@ -824,7 +829,7 @@ public class MimeMailException extends OXException {
      * @param folder The optional folder
      * @return The command with optional information appended
      */
-    public static String appendInfo(final String info, final Folder folder) {
+    public static String appendInfo(String info, Folder folder) {
         if (null == folder) {
             return info;
         }
@@ -838,7 +843,7 @@ public class MimeMailException extends OXException {
         return sb.toString();
     }
 
-    private static String getInfo(final String info) {
+    private static String getInfo(String info) {
         if (null == info) {
             return info;
         }
@@ -848,7 +853,7 @@ public class MimeMailException extends OXException {
 
     private static final Pattern PATTERN_TAG = Pattern.compile("A[0-9]+ (.+)");
 
-    private static String skipTag(final String serverResponse) {
+    private static String skipTag(String serverResponse) {
         if (null == serverResponse) {
             return null;
         }
@@ -859,7 +864,7 @@ public class MimeMailException extends OXException {
         return serverResponse;
     }
 
-    private static <E> E lookupNested(final MessagingException e, final Class<E> clazz) {
+    private static <E> E lookupNested(MessagingException e, Class<E> clazz) {
         if (null == e) {
             return null;
         }
@@ -874,7 +879,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible exists error.
      */
-    public static boolean isExistsException(final MessagingException e) {
+    public static boolean isExistsException(MessagingException e) {
         if (null == e) {
             return false;
         }
@@ -884,7 +889,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible exists error.
      */
-    public static boolean isExistsException(final String msg) {
+    public static boolean isExistsException(String msg) {
         if (null == msg) {
             return false;
         }
@@ -895,7 +900,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible already-exists error.
      */
-    public static boolean isAlreadyExistsException(final MessagingException e) {
+    public static boolean isAlreadyExistsException(MessagingException e) {
         if (null == e) {
             return false;
         }
@@ -913,7 +918,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible already-exists error.
      */
-    public static boolean isAlreadyExistsException(final String msg) {
+    public static boolean isAlreadyExistsException(String msg) {
         if (null == msg) {
             return false;
         }
@@ -924,7 +929,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible over-quota error.
      */
-    public static boolean isOverQuotaException(final MessagingException e) {
+    public static boolean isOverQuotaException(MessagingException e) {
         if (null == e) {
             return false;
         }
@@ -971,7 +976,7 @@ public class MimeMailException extends OXException {
     /**
      * Checks for possible in-use error.
      */
-    public static boolean isInUseException(final String msg) {
+    public static boolean isInUseException(String msg) {
         if (null == msg) {
             return false;
         }
@@ -1101,6 +1106,11 @@ public class MimeMailException extends OXException {
             return false;
         }
 
+        Response response = e.getResponse();
+        if (response != null && response.isBYE()) {
+            return true;
+        }
+
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class);
     }
 
@@ -1209,7 +1219,7 @@ public class MimeMailException extends OXException {
     }
 
     /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars, final String defaultValue) {
+    private static String toLowerCase(CharSequence chars, String defaultValue) {
         if (null == chars) {
             return defaultValue;
         }

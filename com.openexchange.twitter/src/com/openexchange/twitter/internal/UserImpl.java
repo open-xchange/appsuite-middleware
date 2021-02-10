@@ -118,7 +118,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
 
     @Override
     public String getProfileBackgroundImageUrl() {
-        return twitter4jUser.getProfileBackgroundImageUrl();
+        return twitter4jUser.getProfileImageURL();
     }
 
     @Override

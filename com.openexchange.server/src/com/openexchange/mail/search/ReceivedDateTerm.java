@@ -72,7 +72,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
     /**
      * Initializes a new {@link ReceivedDateTerm}
      */
-    public ReceivedDateTerm(final ComparisonType comparisonType, final java.util.Date receivedDate) {
+    public ReceivedDateTerm(ComparisonType comparisonType, java.util.Date receivedDate) {
         super();
         pattern = new ComparablePattern<java.util.Date>() {
 
@@ -104,12 +104,12 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
     }
 
     @Override
-    public void addMailField(final Collection<MailField> col) {
+    public void addMailField(Collection<MailField> col) {
         col.add(MailField.RECEIVED_DATE);
     }
 
     @Override
-    public boolean matches(final MailMessage mailMessage) {
+    public boolean matches(MailMessage mailMessage) {
         final Date receivedDate = mailMessage.getReceivedDate();
         if (null == receivedDate) {
             return false;
@@ -133,7 +133,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
     }
 
     @Override
-    public boolean matches(final Message msg) throws OXException {
+    public boolean matches(Message msg) throws OXException {
         final Date receivedDate;
         try {
             receivedDate = msg.getReceivedDate();

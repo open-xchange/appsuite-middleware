@@ -68,25 +68,25 @@ public final class MailcapServiceTracker implements ServiceTrackerCustomizer<Mai
     /**
      * Initializes a new {@link MailcapServiceTracker}.
      */
-    public MailcapServiceTracker(final BundleContext context) {
+    public MailcapServiceTracker(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public MailcapCommandMap addingService(final ServiceReference<MailcapCommandMap> reference) {
+    public MailcapCommandMap addingService(ServiceReference<MailcapCommandMap> reference) {
         final MailcapCommandMap commandMap = context.getService(reference);
         CommandMap.setDefaultCommandMap(commandMap);
         return commandMap;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<MailcapCommandMap> reference, final MailcapCommandMap service) {
+    public void modifiedService(ServiceReference<MailcapCommandMap> reference, MailcapCommandMap service) {
         // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<MailcapCommandMap> reference, final MailcapCommandMap service) {
+    public void removedService(ServiceReference<MailcapCommandMap> reference, MailcapCommandMap service) {
         context.ungetService(reference);
     }
 

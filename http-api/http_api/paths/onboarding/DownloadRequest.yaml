@@ -3,11 +3,13 @@
     operationId: downloadClientOnboardingProfile
     tags:
       - Clientonboarding
-    summary: >-
+    summary: Downloads a profile
+    security: 
+        - session: []    
+    description: >-
       Direct-downloads a profile to configure an apple device for CalDAV and/or
       CardDAV as well as IMAP/SMTP access
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: type
         description: |

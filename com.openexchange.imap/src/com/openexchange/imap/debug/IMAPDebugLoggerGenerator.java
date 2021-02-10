@@ -75,6 +75,7 @@ import ch.qos.logback.core.util.FileSize;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.4
  */
+@SuppressWarnings("deprecation")
 public class IMAPDebugLoggerGenerator {
 
     private static final IMAPDebugLoggerGenerator INSTANCE = new IMAPDebugLoggerGenerator();

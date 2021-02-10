@@ -76,10 +76,8 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, FileStorageVersionedFileAccess {
 
     private final Map<String, Map<String, VersionContainer>> storage = new HashMap<>();
-
-    private final String accountId;
-
-    private final String serviceId;
+    final String accountId;
+    final String serviceId;
 
     public InMemoryFileStorageFileAccess(String serviceId, String accountId) {
         super();
@@ -111,7 +109,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
     }
 
-    private VersionContainer getVersionContainer(String folderId, String id) throws OXException {
+    VersionContainer getVersionContainer(String folderId, String id) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -167,33 +165,31 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
             file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
             return new IDTuple(folderId, id);
-        } else {
-
-            VersionContainer versionContainer = map.get(id);
-            if (versionContainer == null) {
-                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-            }
-
-            FileHolder holder;
-            if (data == null) {
-                holder = new FileHolder(file);
-            } else {
-                holder = new FileHolder(file, data);
-            }
-            int version = versionContainer.addVersion(holder);
-            file.setVersion(Integer.toString(version));
-
-            // Swap IDs
-            String oldId = id;
-            id = UUID.randomUUID().toString();
-            file.setId(id);
-            map.put(id, map.remove(oldId));
-            for(FileHolder fh: versionContainer.getAllVersions()) {
-                fh.getInternalFile().setId(id);
-            }
-            return new IDTuple(folderId, id);
         }
 
+        VersionContainer versionContainer = map.get(id);
+        if (versionContainer == null) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+        }
+
+        FileHolder holder;
+        if (data == null) {
+            holder = new FileHolder(file);
+        } else {
+            holder = new FileHolder(file, data);
+        }
+        int version = versionContainer.addVersion(holder);
+        file.setVersion(Integer.toString(version));
+
+        // Swap IDs
+        String oldId = id;
+        id = UUID.randomUUID().toString();
+        file.setId(id);
+        map.put(id, map.remove(oldId));
+        for (FileHolder fh : versionContainer.getAllVersions()) {
+            fh.getInternalFile().setId(id);
+        }
+        return new IDTuple(folderId, id);
     }
 
     @Override
@@ -380,17 +376,17 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
-        return new DeltaImpl<>(getDocuments(folderId).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
+        return new DeltaImpl<>(getDocuments(folderId).results(), SearchIteratorAdapter.<File> emptyIterator(), SearchIteratorAdapter.<File> emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        return new DeltaImpl<>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
+        return new DeltaImpl<>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File> emptyIterator(), SearchIteratorAdapter.<File> emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        return SearchIteratorAdapter. <File> emptyIterator();
+        return SearchIteratorAdapter.<File> emptyIterator();
     }
 
     @Override
@@ -470,7 +466,92 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
             @Override
             public FileStorageFolderAccess getFolderAccess() throws OXException {
-                return null;
+                return new AbstractFileStorageFolderAccess() {
+
+                    @Override
+                    public boolean exists(String folderId) throws OXException {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+
+                    @Override
+                    public FileStorageFolder getFolder(String folderId) throws OXException {
+                        return new SimFileStorageFolder();
+                    }
+
+                    @Override
+                    public FileStorageFolder getPersonalFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder getTrashFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getPublicFolders() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public FileStorageFolder getRootFolder() throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String createFolder(FileStorageFolder toCreate) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String renameFolder(String folderId, String newName) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void clearFolder(String folderId, boolean hardDelete) throws OXException {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                    
+                };
             }
 
             @Override

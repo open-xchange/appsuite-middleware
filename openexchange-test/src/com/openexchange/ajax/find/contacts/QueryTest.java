@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.find.PropDocument;
@@ -314,28 +315,34 @@ public class QueryTest extends ContactsFindTest {
 
     @Test
     public void testPaging() throws Exception {
-        int numberOfContacts = getClient().execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length - 1;
-        Set<Integer> names = new HashSet<Integer>();
-        ActiveFacet folderFacet = createActiveFacet(CommonFacetType.FOLDER, 6, Filter.NO_FILTER);
+        //TODO: number of results is wrong when admin is excluded (MW-1100)
+        //      therefore ensure that admin contact filtering is disabled when testing paging
+        JSONObject oldConfig = setShowAdmin(Boolean.TRUE);
+        try {
+            int numberOfContacts = getClient().execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length;
+            Set<Integer> names = new HashSet<Integer>();
+            ActiveFacet folderFacet = createActiveFacet(CommonFacetType.FOLDER, 6, Filter.NO_FILTER);
 
-        int start = 0;
-        int size = numberOfContacts / 2;
-        Map<String, String> options = Collections.singletonMap("admin", "false");
-        List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, options);
-        assertEquals("Wrong number of results", size, results.size());
-        for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
-        }
-        assertEquals("Wrong number of unique results", size, names.size());
+            int start = 0;
+            int size = numberOfContacts / 2;
+            List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, null);
+            assertEquals("Wrong number of results", size, results.size());
+            for (PropDocument result : results) {
+                names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
+            }
+            assertEquals("Wrong number of unique results", size, names.size());
 
-        start = size;
-        size = numberOfContacts - start;
-        results = query(Collections.singletonList(folderFacet), start, size, options);
-        assertEquals("Wrong number of results", size, results.size());
-        for (PropDocument result : results) {
-            names.add((Integer) result.getProps().get("id"));
+            start = size;
+            size = numberOfContacts - start;
+            results = query(Collections.singletonList(folderFacet), start, size, null);
+            assertEquals("Wrong number of results", size, results.size());
+            for (PropDocument result : results) {
+                names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
+            }
+            assertEquals("Wrong number of unique results", numberOfContacts, names.size());
+        } finally {
+            restoreOldConfig(oldConfig);
         }
-        assertEquals("Wrong number of unique results", numberOfContacts, names.size());
     }
 
     protected List<Facet> autocomplete(AJAXClient client, String prefix) throws Exception {

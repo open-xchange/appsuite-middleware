@@ -46,11 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.group;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -95,7 +95,7 @@ public abstract class ListCore extends GroupAbstraction {
 
             final Group[] allgrps = oxgrp.list(ctx, pattern, auth);
 
-            final ArrayList<Group> grplist = new ArrayList<Group>();
+            final ArrayList<Group> grplist = new ArrayList<>();
 
             maincall(parser, oxgrp, ctx, grplist, allgrps, auth);
 
@@ -116,20 +116,19 @@ public abstract class ListCore extends GroupAbstraction {
     protected abstract void maincall(final AdminParser parser, final OXGroupInterface oxgrp, final Context ctx, final ArrayList<Group> grplist, final Group[] allgrps, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, DuplicateExtensionException;
 
     private void sysoutOutput(final ArrayList<Group> grouplist) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
         for (final Group group : grouplist) {
             printExtensionsError(group);
             data.add(makeStandardData(group));
         }
 
-//        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l" },
-                 new String[] { "Id", "Name", "Displayname", "Members" }, data);
+        //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+        doOutput(new String[] { "r", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Members" }, data);
     }
 
-    private void precsvinfos(final ArrayList<Group> grplist) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    private void precsvinfos(final ArrayList<Group> grplist) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<>();
         columns.add("id");
         columns.add("name");
         columns.add("displayname");
@@ -137,7 +136,7 @@ public abstract class ListCore extends GroupAbstraction {
         extendscvscolumns(columns);
 
         // Needed for csv output
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        final ArrayList<ArrayList<String>> data = new ArrayList<>();
 
         for (final Group my_grp : grplist) {
             data.add(makeDataForCsv(my_grp));
@@ -154,13 +153,8 @@ public abstract class ListCore extends GroupAbstraction {
      * @param group
      * @param members
      * @return
-     * @throws RemoteException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws StorageException
-     * @throws InvalidDataException
      */
-    private ArrayList<String> makeDataForCsv(final Group group) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    private ArrayList<String> makeDataForCsv(final Group group) {
         final ArrayList<String> grp_data = makeStandardData(group);
 
         extendmakeCSVData(group, grp_data);
@@ -168,7 +162,7 @@ public abstract class ListCore extends GroupAbstraction {
     }
 
     private ArrayList<String> makeStandardData(final Group group) {
-        final ArrayList<String> grp_data = new ArrayList<String>();
+        final ArrayList<String> grp_data = new ArrayList<>();
 
         grp_data.add(String.valueOf(group.getId())); // id
 

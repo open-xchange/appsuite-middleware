@@ -50,8 +50,15 @@
 package com.openexchange.share.core.tools;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.share.core.ShareConstants.SHARE_SERVLET;
 import static org.slf4j.LoggerFactory.getLogger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.List;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
@@ -62,11 +69,11 @@ import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.share.Links;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.exception.ShareCoreExceptionCodes;
-
 
 /**
  * Utility class for generating share links.
@@ -75,6 +82,9 @@ import com.openexchange.share.core.exception.ShareCoreExceptionCodes;
  * @since v7.8.0
  */
 public class ShareLinks {
+
+    /** Start of "app"-fragment, see also {@link com.openexchange.share.Links.FRAGMENT_APP} */
+    private static final String IO_OX = "io.ox/";
 
     /**
      * Generates an (absolute) share link for a guest user based on the passed share token. If configured, the share link will use the
@@ -112,7 +122,7 @@ public class ShareLinks {
      */
     public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
         Module module = Module.getForFolderConstant(target.getModule());
-        if (null==module){
+        if (null == module) {
             throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(I(target.getModule()));
         }
         String moduleStr = module.getName();
@@ -143,6 +153,106 @@ public class ShareLinks {
             .addParameter("share", baseShareToken)
             .addParameter("confirm", confirmToken)
         .toString();
+    }
+
+    /**
+     * Extracts the share base token from a share URL.
+     *
+     * @param shareUrl The path to extract the token from
+     * @return The token or <code>null</code> if no token is embedded in the path
+     */
+    public static String extractBaseToken(String shareUrl) {
+        if (Strings.isEmpty(shareUrl)) {
+            return null;
+        }
+        URI uri;
+        try {
+            uri = new URI(shareUrl);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        String path = uri.getPath();
+        if (Strings.isEmpty(path)) {
+            return null;
+        }
+        String prefix = SHARE_SERVLET + '/';
+        int beginIndex = path.lastIndexOf(prefix);
+        if (-1 == beginIndex) {
+            return null;
+        }
+        beginIndex += prefix.length();
+        int endIndex = path.indexOf('/', beginIndex);
+        return -1 == endIndex ? path.substring(beginIndex) : path.substring(beginIndex, endIndex);
+    }
+
+    /**
+     * Extracts the hostname part of a share link.
+     * 
+     * @param shareLink The share link to get the hostname for
+     * @return The hostname, fallink back to the passed link as-is if the hostname cannot be extracted
+     */
+    public static String extractHostName(String shareLink) {
+        String hostname = null;
+        try {
+            hostname = new URI(shareLink).getHost();
+        } catch (URISyntaxException e) {
+            getLogger(ShareLinks.class).warn("Error extracting host name from share link {}", shareLink, e);
+        }
+        return Strings.isNotEmpty(hostname) ? hostname : shareLink;
+    }
+
+    /**
+     * Extracts the hostdata-relevant parts of a share link and makes them available as {@link HostData}.
+     * 
+     * @param shareLink The share link to extract the hostdata from
+     * @return The host data
+     */
+    public static HostData extractHostData(String shareLink) throws OXException {
+        URI uri;
+        try {
+            uri = new URI(shareLink);
+        } catch (URISyntaxException e) {
+            throw ShareExceptionCodes.INVALID_LINK.create(e, shareLink);
+        }
+        return new HostData() {
+
+            @Override
+            public boolean isSecure() {
+                return "https".equals(uri.getScheme());
+            }
+
+            @Override
+            public String getRoute() {
+                return null;
+            }
+
+            @Override
+            public int getPort() {
+                return uri.getPort();
+            }
+
+            @Override
+            public String getHost() {
+                return uri.getHost();
+            }
+
+            @Override
+            public String getHTTPSession() {
+                return null;
+            }
+
+            @Override
+            public String getDispatcherPrefix() {
+                String path = uri.getPath();
+                if (null != path) {
+                    int idx = path.indexOf(SHARE_SERVLET + '/');
+                    if (-1 != idx) {
+                        return path.substring(0, idx);
+                    }
+                }
+                return "/appsuite/api/";
+            }
+        };
     }
 
     private static URIBuilder prepare(HostData hostData) {
@@ -214,6 +324,60 @@ public class ShareLinks {
             }
         }
         return hostname;
+    }
+
+    /**
+     * Parsed an internal share link and extracts the internal share target the link points to.
+     * <p>
+     * See also {@link com.openexchange.share.Links#generateInternalLink(String, String, String, HostData)}
+     * 
+     * @param shareLink The share link to parse
+     * @return The share target or <code>null</code> if the link is not an internal share link
+     */
+    public static ShareTarget parseInternal(String shareLink) {
+        /*
+         * Parse fragment
+         */
+        List<NameValuePair> fragments;
+        try {
+            String fragment = new URIBuilder(shareLink).getFragment();
+            if (Strings.isEmpty(fragment)) {
+                return null;
+            }
+            fragments = URLEncodedUtils.parse(fragment, Charset.forName("UTF-8"));
+        } catch (URISyntaxException e) {
+            getLogger(ShareLinks.class).debug("Unable to parse link {}", shareLink, e);
+            return null;
+        }
+        /*
+         * Translate to share target
+         */
+        Module module = null;
+        String folder = null;
+        String item = null;
+        for (NameValuePair pair : fragments) {
+            if (Strings.isEmpty(pair.getName()) || Strings.isEmpty(pair.getValue())) {
+                continue;
+            }
+            switch (pair.getName()) {
+                case "folder":
+                    folder = pair.getValue();
+                    break;
+                case "id":
+                    item = pair.getValue();
+                    break;
+                case "app":
+                    String app = pair.getValue().startsWith(IO_OX) ? pair.getValue().substring(IO_OX.length()) : pair.getValue();
+                    module = Module.getForName(app);
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (null == module || Strings.isEmpty(folder)) {
+            return null;
+        }
+        return new ShareTarget(module.getFolderConstant(), folder, item);
     }
 
 }

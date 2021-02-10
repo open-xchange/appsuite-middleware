@@ -49,22 +49,19 @@
 
 package com.openexchange.file.storage.infostore.folder;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageGuestPermission;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.SetterAwareFileStorageFolder;
 import com.openexchange.file.storage.infostore.osgi.Services;
-import com.openexchange.folderstorage.BasicGuestPermission;
-import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.filestorage.FileStorageUtils;
 
 /**
  * {@link FolderParser}
@@ -121,11 +118,15 @@ public final class FolderParser {
             {
                 folder.setContentType(getContentType());
             }
-            folder.setSubscribed(fsFolder.isSubscribed());
+
+            if (false == SetterAwareFileStorageFolder.class.isInstance(fsFolder) || ((SetterAwareFileStorageFolder) fsFolder).containsSubscribed()) {
+                folder.setSubscribed(fsFolder.isSubscribed());
+            }
+
             {
                 final List<FileStoragePermission> permissions = fsFolder.getPermissions();
                 if (null != permissions && !permissions.isEmpty()) {
-                    folder.setPermissions(parsePermission(permissions));
+                    folder.setPermissions(FileStorageUtils.getPermissions(permissions));
                 }
             }
 
@@ -159,33 +160,4 @@ public final class FolderParser {
         return ct;
     }
 
-    /**
-     * Parses a list of file storage permissions and transforms them into permissions used by the folder service.
-     *
-     * @param fileStoragePermissions The file storage permissions to parse
-     * @return The parsed permissions
-     */
-    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) throws OXException {
-        if (null == fileStoragePermissions) {
-            return null;
-        }
-        List<Permission> permissions = new ArrayList<Permission>(fileStoragePermissions.size());
-        for (FileStoragePermission fileStoragePermission : fileStoragePermissions) {
-            Permission permission;
-            if (FileStorageGuestPermission.class.isInstance(fileStoragePermission)) {
-                BasicGuestPermission guestPermission = new BasicGuestPermission();
-                guestPermission.setRecipient(((FileStorageGuestPermission) fileStoragePermission).getRecipient());
-                permission = guestPermission;
-            } else {
-                permission = new BasicPermission();
-            }
-            permission.setEntity(fileStoragePermission.getEntity());
-            permission.setGroup(fileStoragePermission.isGroup());
-            permission.setAdmin(fileStoragePermission.isAdmin());
-            permission.setAllPermissions(fileStoragePermission.getFolderPermission(), fileStoragePermission.getReadPermission(),
-                fileStoragePermission.getWritePermission(), fileStoragePermission.getDeletePermission());
-            permissions.add(permission);
-        }
-        return permissions.toArray(new Permission[fileStoragePermissions.size()]);
-    }
 }

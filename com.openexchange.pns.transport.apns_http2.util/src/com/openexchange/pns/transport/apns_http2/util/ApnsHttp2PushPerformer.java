@@ -53,11 +53,12 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -278,46 +279,68 @@ public class ApnsHttp2PushPerformer {
         }
 
         // Create mapping for device token to push match
-        Map<String, PushMatch> deviceToken2PushMatch = payloads.stream().collect(Collectors.toMap(entry -> entry.getValue().getToken(), entry -> entry.getKey()));
+        Map<String, Set<PushMatch>> deviceToken2PushMatch = new HashMap<>(payloads.size());
+        for (Map.Entry<PushMatch, ApnsPushNotification> payload : payloads) {
+            String token = payload.getValue().getToken();
+            Set<PushMatch> matches = deviceToken2PushMatch.get(token);
+            if (matches == null) {
+                matches = new LinkedHashSet<>(2);
+                deviceToken2PushMatch.put(token, matches);
+            }
+            matches.add(payload.getKey());
+        }
 
         // Process results
-        for (NotificationResponsePerDevice notificationPerDevice : notifications) {
+        NextNotification: for (NotificationResponsePerDevice notificationPerDevice : notifications) {
             PushNotificationFuture<ApnsPushNotification, PushNotificationResponse<ApnsPushNotification>> sendNotificationFuture = notificationPerDevice.sendNotificationFuture;
             String deviceToken = notificationPerDevice.deviceToken;
-            PushMatch pushMatch = deviceToken == null ? null : deviceToken2PushMatch.get(deviceToken);
-            try {
-                PushNotificationResponse<ApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
-                if (pushNotificationResponse.isAccepted()) {
-                    LOG.debug("Push notification accepted by APNs gateway for device token: {}", deviceToken);
-                    if (pushMatch != null) {
-                        LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to device token: {}", pushMatch.getTopic(), ID, I(pushMatch.getUserId()), I(pushMatch.getContextId()), deviceToken);
-                    }
-                } else {
-                    if (pushNotificationResponse.getTokenInvalidationTimestamp() != null || isInvalidToken(pushNotificationResponse.getRejectionReason())) {
-                        LOG.warn("Unsuccessful push notification due to inactive or invalid device token: {}", deviceToken);
-                        if (null != pushMatch) {
-                            boolean removed = removeSubscription(pushMatch);
-                            if (removed) {
-                                LOG.info("Removed subscription for device with token: {}.", pushMatch.getToken());
-                            } else {
-                                LOG.debug("Could not remove subscriptions for device with token: {}.", pushMatch.getToken());
-                            }
-                        } else {
-                            int removed = removeSubscriptions(deviceToken);
-                            if (0 < removed) {
-                                LOG.info("Removed {} subscriptions for device with token: {}.", Integer.valueOf(removed), deviceToken);
-                            }
+            if (deviceToken == null) {
+                // Missing device token
+                continue NextNotification;
+            }
+
+            Set<PushMatch> pushMatches = deviceToken2PushMatch.get(deviceToken);
+            if (pushMatches == null) {
+                // No push matches available for current device token
+                continue NextNotification;
+            }
+
+            // Process push matches
+            for (PushMatch pushMatch : pushMatches) {
+                try {
+                    PushNotificationResponse<ApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
+                    if (pushNotificationResponse.isAccepted()) {
+                        LOG.debug("Push notification accepted by APNs gateway for device token: {}", deviceToken);
+                        if (pushMatch != null) {
+                            LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to device token: {}", pushMatch.getTopic(), ID, I(pushMatch.getUserId()), I(pushMatch.getContextId()), deviceToken);
                         }
                     } else {
-                        LOG.warn("Unsuccessful push notification for device with token: {}", deviceToken);
+                        if (pushNotificationResponse.getTokenInvalidationTimestamp() != null || isInvalidToken(pushNotificationResponse.getRejectionReason())) {
+                            LOG.warn("Unsuccessful push notification due to inactive or invalid device token: {}", deviceToken);
+                            if (null != pushMatch) {
+                                boolean removed = removeSubscription(pushMatch);
+                                if (removed) {
+                                    LOG.info("Removed subscription for device with token: {}.", pushMatch.getToken());
+                                } else {
+                                    LOG.debug("Could not remove subscriptions for device with token: {}.", pushMatch.getToken());
+                                }
+                            } else {
+                                int removed = removeSubscriptions(deviceToken);
+                                if (0 < removed) {
+                                    LOG.info("Removed {} subscriptions for device with token: {}.", Integer.valueOf(removed), deviceToken);
+                                }
+                            }
+                        } else {
+                            LOG.warn("Unsuccessful push notification for device with token: {}", deviceToken);
+                        }
                     }
+                } catch (ExecutionException e) {
+                    LOG.warn("Failed to send push notification for device token {}", deviceToken, e.getCause());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOG.warn("Interrupted while sending push notification for device token {}", deviceToken, e.getCause());
+                    return;
                 }
-            } catch (ExecutionException e) {
-                LOG.warn("Failed to send push notification for device token {}", deviceToken, e.getCause());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LOG.warn("Interrupted while sending push notification for device token {}", deviceToken, e.getCause());
-                return;
             }
         }
     }

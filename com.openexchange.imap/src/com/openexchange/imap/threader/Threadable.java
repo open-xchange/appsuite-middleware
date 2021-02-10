@@ -108,7 +108,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
      * @param id The identifier
      * @param references The referenced identifiers
      */
-    public Threadable(final Threadable next, final String subject, final String id, final String[] references) {
+    public Threadable(Threadable next, String subject, String id, String[] references) {
         super();
         this.next = next;
         this.subject = subject;
@@ -295,7 +295,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
      */
     public int size() {
         int count = 0;
-        for (final Enumeration<Threadable> e = allElements(); e.hasMoreElements();) {
+        for (Enumeration<Threadable> e = allElements(); e.hasMoreElements();) {
             final Threadable t = e.nextElement();
             if (!t.isDummy()) {
                 count++;
@@ -351,7 +351,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
      * @param fullName The full name to set
      * @return This threadable
      */
-    public Threadable setFullName(final String fullName) {
+    public Threadable setFullName(String fullName) {
         this.fullName = fullName;
         return this;
     }
@@ -387,7 +387,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
      * When the proper thread order has been computed, these two methods will be called on each Threadable in the chain, to set up the
      * proper tree structure.
      */
-    public void setNext(final Object next) {
+    public void setNext(Object next) {
         this.next = (Threadable) next;
         flushSubjectCache();
     }
@@ -397,7 +397,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
      *
      * @param child The child
      */
-    public void setChild(final Threadable child) {
+    public void setChild(Threadable child) {
         this.kid = child;
         flushSubjectCache();
     }
@@ -429,7 +429,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         private Enumeration<Threadable> kids;
         private final boolean recursive;
 
-        protected ThreadableEnumeration(final Threadable thread, final boolean recursive) {
+        protected ThreadableEnumeration(Threadable thread, boolean recursive) {
             super();
             this.recursive = recursive;
             if (recursive) {
@@ -476,7 +476,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         private final Enumeration<Threadable> e;
         private Threadable cur;
 
-        protected IteratorImpl(final Threadable t) {
+        protected IteratorImpl(Threadable t) {
             super();
             this.e = t.allElements();
         }

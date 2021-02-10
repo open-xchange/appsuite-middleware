@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -66,7 +67,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.ShareAPITest;
 import com.openexchange.ajax.share.actions.DeleteLinkRequest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
@@ -75,13 +76,20 @@ import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.ajax.share.actions.UpdateLinkResponse;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.testing.httpclient.models.InfoItemData;
+import com.openexchange.testing.httpclient.models.InfoItemMovedResponse;
+import com.openexchange.testing.httpclient.models.InfoItemResponse;
+import com.openexchange.testing.httpclient.models.ShareLinkData;
+import com.openexchange.testing.httpclient.models.ShareLinkResponse;
+import com.openexchange.testing.httpclient.models.ShareTargetData;
+import com.openexchange.testing.httpclient.modules.InfostoreApi;
+import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
  * {@link GetALinkTest}
@@ -89,17 +97,20 @@ import com.openexchange.share.ShareTarget;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class GetALinkTest extends ShareTest {
+public class GetALinkTest extends ShareAPITest {
 
-    @SuppressWarnings("hiding")
     private InfostoreTestManager itm;
     private FolderObject infostore;
+    private InfostoreApi infostoreApi;
     private DefaultFile file;
+    private ShareManagementApi shareApi;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        infostoreApi = new InfostoreApi(getApiClient());
+        shareApi = new ShareManagementApi(getApiClient());
         itm = new InfostoreTestManager(getClient());
 
         UserValues values = getClient().getValues();
@@ -220,10 +231,13 @@ public class GetALinkTest extends ShareTest {
          * We create a link for a file and then move it to another folder. Afterwards we expect the link to be removed, as
          * it will not work anymore.
          */
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target, getClient().getValues().getTimeZone());
-        GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
-        String url = getLinkResponse.getShareLink().getShareURL();
+        ShareTargetData shareTargetData = new ShareTargetData();
+        shareTargetData.setModule(Module.INFOSTORE.getName());
+        shareTargetData.setFolder(Integer.toString(infostore.getObjectID()));
+        shareTargetData.setItem(file.getId());
+        ShareLinkResponse getLinkResponse = shareApi.getShareLink(shareTargetData);
+        ShareLinkData shareLinkData = checkResponse(getLinkResponse.getError(), getLinkResponse.getErrorDesc(), getLinkResponse.getData());
+        String url = shareLinkData.getUrl();
         /*
          * Resolve the link and check read permission for file
          */
@@ -235,12 +249,13 @@ public class GetALinkTest extends ShareTest {
         /*
          * Move to "My files"
          */
-        DefaultFile toUpdate = new DefaultFile();
-        toUpdate.setId(file.getId());
-        toUpdate.setLastModified(new Date());
-        toUpdate.setFolderId(Integer.toString(getClient().getValues().getPrivateInfostoreFolder()));
-        File reloaded = updateFile(toUpdate, new Field[] { Field.FOLDER_ID });
-        assertTrue(reloaded.getObjectPermissions().isEmpty());
+        String newParentFolderId = Integer.toString(getClient().getValues().getPrivateInfostoreFolder());
+        InfoItemMovedResponse moveResponse = infostoreApi.moveFile(L(System.currentTimeMillis()), newParentFolderId, file.getId(), null, Boolean.TRUE);
+        String updatedFileId = moveResponse.getData();
+        assertNotNull(updatedFileId);
+        InfoItemResponse infoItemResponse = infostoreApi.getInfoItem(updatedFileId, newParentFolderId);
+        InfoItemData infoItem = checkResponse(infoItemResponse.getError(), infoItemResponse.getErrorDesc(), infoItemResponse.getData());
+        assertTrue(infoItem.getObjectPermissions().isEmpty());
     }
 
 }

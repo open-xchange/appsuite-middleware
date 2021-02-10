@@ -57,23 +57,28 @@ import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -82,7 +87,6 @@ import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
@@ -112,7 +116,7 @@ public abstract class EndpointTest {
 
     public static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
-    protected DefaultHttpClient client;
+    protected CloseableHttpClient client;
 
     protected ClientDto oauthClient;
 
@@ -120,7 +124,11 @@ public abstract class EndpointTest {
 
     protected TestUser testUser;
 
+    protected static String scheme;
+
     protected static String hostname;
+
+    protected static int port;
 
     protected TestContext testContext;
 
@@ -131,40 +139,58 @@ public abstract class EndpointTest {
     @BeforeClass
     public static void beforeClass() throws OXException {
         ProvisioningSetup.init();
+        scheme = "https";
         hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        port = 443;
     }
 
     @Before
     public void before() throws Exception {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         testUser = testContext.acquireUser();
-        noReplyUser = testContext.getNoReplyUser();
-        noReplyClient = new AJAXClient(noReplyUser);
-        noReplyClient.execute(new ClearMailsRequest());
+        //noReplyUser = testContext.getNoReplyUser();
+        //noReplyClient = new AJAXClient(noReplyUser);
+        //noReplyClient.execute(new ClearMailsRequest());
         // prepare http client
-        client = new DefaultHttpClient(new BasicClientConnectionManager());
-        HttpParams params = client.getParams();
+        // prepare new httpClient
+        SSLContext sslcontext = new SSLContextBuilder().loadTrustMaterial(null, TrustSelfSignedStrategy.INSTANCE).build();
+        HostnameVerifier hostnameVerifier = NoopHostnameVerifier.INSTANCE;
+
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .register("https", sslsf)
+                .build();
+
         int minute = 1 * 60 * 1000;
-        HttpConnectionParams.setConnectionTimeout(params, minute);
-        HttpConnectionParams.setSoTimeout(params, minute);
-        HttpClientParams.setRedirecting(params, false);
+        RequestConfig config = RequestConfig.custom()
+            .setConnectTimeout(minute)
+            .setConnectionRequestTimeout(minute)
+            .setSocketTimeout(minute)
+            .build();
 
-        SSLSocketFactory ssf = new SSLSocketFactory(new TrustSelfSignedStrategy(), new AllowAllHostnameVerifier());
-        client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
+        client = HttpClients
+            .custom()
+            .disableRedirectHandling()
+            .setDefaultRequestConfig(config)
+            .setConnectionManager(new PoolingHttpClientConnectionManager(socketFactoryRegistry))
+            .build();
 
-        // register client application
-        ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
-        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        oauthClient = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
 
-        csrfState = UUIDs.getUnformattedStringFromRandom();
+          // register client application
+          ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
+          RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+          oauthClient = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
+
+          csrfState = UUIDs.getUnformattedStringFromRandom();
+
     }
 
     @After
     public void after() throws Exception {
         try {
             if (client != null && client.getConnectionManager() != null) {
-                client.getConnectionManager().shutdown();
+                client.close();;
             }
             RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
             clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());

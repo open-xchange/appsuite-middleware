@@ -4,8 +4,11 @@
     tags:
       - Contacts
     summary: Gets all contacts.
+    security: 
+        - session: []      
+        - oauth:
+          - read_contacts    
     parameters:
-      - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamContactFolder'
       - $ref: '#/components/parameters/gblQueryParamContactColumns'
       - in: query
@@ -27,14 +30,6 @@
         required: false
         schema:
           type: string
-      - in: query
-        name: admin
-        description: >-
-          (DEPRECATED) Defines whether the context admin should be included or
-          not. Defaults to `true`.
-        required: false
-        schema:
-          type: boolean
       - in: query
         name: collation
         description: >-
@@ -64,3 +59,7 @@
           application/json:
             schema:
               $ref: '#/components/schemas/ContactsResponse'
+      '401':
+        $ref: '#/components/responses/OAuth_unauthorized'
+      '403':
+        $ref: '#/components/responses/OAuth_insufficient_scope'              

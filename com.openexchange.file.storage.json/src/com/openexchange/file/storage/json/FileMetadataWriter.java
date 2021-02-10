@@ -201,7 +201,7 @@ public class FileMetadataWriter {
             List<AdditionalFileField> additionalFields = fieldCollector.getFields(columns);
             int size = additionalFields.size();
             if (0 < size) {
-                additionalFieldValues = new HashMap<Integer, List<Object>>(size);
+                additionalFieldValues = new HashMap<>(size);
                 for (AdditionalFileField additionalField : additionalFields) {
                     List<Object> values = additionalField.getValues(files, request.getSession());
                     additionalFieldValues.put(Integer.valueOf(additionalField.getColumnID()), values);
@@ -255,7 +255,7 @@ public class FileMetadataWriter {
                 try {
                     Object result = fieldHandler.handle(field, file);
                     if (result instanceof JsonFieldHandler.NamedValue) {
-                        JsonFieldHandler.NamedValue<?> namedValue = (JsonFieldHandler.NamedValue) result;
+                        JsonFieldHandler.NamedValue<?> namedValue = JsonFieldHandler.NamedValue.class.cast(result);
                         jsonObject.putIfAbsent(namedValue.getName(), namedValue.getValue());
                     } else {
                         jsonObject.put(field.getName(), result);

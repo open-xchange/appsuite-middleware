@@ -56,7 +56,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -94,19 +94,17 @@ public class PGPMimeMailCreator {
      * @param message The message to add the set of headers to
      * @param headers A set of headers (name, value)
      * @return The MimeMessage with the headers added
-     * @throws IOException
      * @throws MessagingException
      */
-    private MimeMessage addHeaders(MimeMessage message, HashMap<String, String> headers) throws IOException, MessagingException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private MimeMessage addHeaders(MimeMessage message, HashMap<String, String> headers) throws MessagingException {
         if (headers == null) {
             return message;
         }
-        Iterator it = headers.entrySet().iterator();
+        Iterator<Entry<String, String>> it = headers.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry h = (Map.Entry) it.next();
+            Entry<String, String> h = it.next();
             if (!h.getKey().equals("Content-Type")) {
-                message.addHeader((String) h.getKey(), (String) h.getValue());
+                message.addHeader(h.getKey(), h.getValue());
             }
         }
         return message;

@@ -64,6 +64,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link Bug65805Test}
@@ -76,28 +77,32 @@ import com.openexchange.server.impl.OCLPermission;
 public class Bug65805Test extends ShareTest {
 
     @Test
+    @TryAgain
     public void testShareLinkInSharedContactsFolder() throws Exception {
         testShareLinkInSharedFolder(EnumAPI.OX_NEW, FolderObject.CONTACT);
     }
 
     @Test
+    @TryAgain
     public void testShareLinkInSharedTasksFolder() throws Exception {
         testShareLinkInSharedFolder(EnumAPI.OX_NEW, FolderObject.TASK);
     }
 
     @Test
+    @TryAgain
     public void testShareLinkInSharedInfostoreFolder() throws Exception {
         testShareLinkInSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
     }
 
     @Test
+    @TryAgain
     public void testShareLinkInSharedCalendarFolder() throws Exception {
         testShareLinkInSharedFolder(EnumAPI.OX_NEW, FolderObject.CALENDAR);
     }
 
     private void testShareLinkInSharedFolder(EnumAPI api, int module) throws Exception {
         /*
-         * create folder, shared to user b and anonymous guest (share link)  
+         * create folder, shared to user b and anonymous guest (share link)
          */
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
         permissions.add(createAnonymousGuestPermission());

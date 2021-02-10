@@ -142,8 +142,13 @@ public class UseCountCopyTask implements CopyUserTaskService {
                     // skip use counts without folder mapping (probably internal users)
                     continue;
                 }
+                Integer destObjectId = contactMapping.getDestination(I(rs.getInt(2)));
+                if (null == destObjectId) {
+                    // skip use counts for contacts that weren't copied
+                    continue;
+                }
                 dstStmt.setInt(3, destFolderObj.getObjectID());
-                dstStmt.setInt(4, contactMapping.getDestination(I(rs.getInt(2))).intValue());
+                dstStmt.setInt(4, destObjectId.intValue());
                 dstStmt.setInt(5, rs.getInt(3));
                 dstStmt.addBatch();
             }

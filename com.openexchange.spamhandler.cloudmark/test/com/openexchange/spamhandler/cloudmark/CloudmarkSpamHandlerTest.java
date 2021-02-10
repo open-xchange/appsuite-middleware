@@ -93,7 +93,7 @@ public class CloudmarkSpamHandlerTest {
     private ConfigView configView;
 
     @Mock
-    private ComposedConfigProperty property;
+    private ComposedConfigProperty<String> property;
 
     @Before
     public void setUp() throws OXException {

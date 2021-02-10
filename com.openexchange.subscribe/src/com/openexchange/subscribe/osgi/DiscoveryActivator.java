@@ -171,7 +171,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, UserPermissionService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class, ContextService.class };
+        return new Class[] { UserService.class, UserPermissionService.class, InfostoreFacade.class, FolderService.class, com.openexchange.folderstorage.FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class, ContextService.class };
     }
 
 }

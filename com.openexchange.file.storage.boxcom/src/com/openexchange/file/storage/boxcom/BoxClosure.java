@@ -101,6 +101,17 @@ public abstract class BoxClosure<R> {
     /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
     protected static final int SC_CONFLICT = 409;
 
+    /**
+     * Performs the request
+     *
+     * @param <R> The result type
+     * @param handleAuthError Whether to automatically handle any authentication errors
+     * @param resourceAccess The resource access
+     * @param boxAccess The Box access
+     * @param session The groupware session
+     * @return The result of the operation
+     * @throws OXException if an error is occurred
+     */
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxOAuthAccess boxAccess, Session session) throws OXException {
         try {
             return doPerform();

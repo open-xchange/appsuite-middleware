@@ -95,7 +95,7 @@ import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
-import com.openexchange.sessiond.impl.TokenSessionContainer;
+import com.openexchange.sessiond.impl.container.TokenSessionContainer;
 import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
 import com.openexchange.sessiond.rest.SessiondRESTService;
@@ -112,6 +112,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public final class SessiondActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
 
     /** The logger instance */

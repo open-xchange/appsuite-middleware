@@ -49,64 +49,55 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link BirthdaysAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class BirthdaysAction extends ContactAction {
+@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
+public class BirthdaysAction extends IDBasedContactAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
 
     /**
      * Initializes a new {@link BirthdaysAction}.
-     * @param serviceLookup
+     *
+     * @param serviceLookup The service lookup to use
      */
     public BirthdaysAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        boolean excludeAdmin = request.isExcludeAdmin();
-        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
-        ContactField[] fields = excludeAdmin ?
-            request.getFields(ContactField.INTERNAL_USERID, ContactField.BIRTHDAY) : request.getFields(ContactField.BIRTHDAY);
-        String folderID = request.optFolderID();
-
-        SearchIterator<Contact> searchIterator;
-        if (null != folderID) {
-            searchIterator = getContactService().searchContactsWithBirthday(request.getSession(), Arrays.asList(new String[] { folderID }),
-                request.getStart(), request.getEnd(), fields, request.getSortOptions(true));
-        } else {
-            searchIterator = getContactService().searchContactsWithBirthday(request.getSession(), request.getStart(),
-                request.getEnd(), fields, request.getSortOptions(true));
-        }
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts, ContactField.BIRTHDAY, request.getStart())) {
-            // Slice...
-            contacts = request.slice(contacts);
-        } else if (excludeAdmin) {
-            int limit = request.getLimit();
-            if (limit >= 0 && contacts.size() > limit) {
-                contacts = contacts.subList(0, limit);
-            }
-        }
-        return new AJAXRequestResult(contacts, lastModified, "contact");
+    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
+        Date from = request.getStart();
+        Date until = request.getEnd();
+        List<Contact> contacts = request.optFolderID() == null ? access.searchContactsWithBirthday(from, until) : access.searchContactsWithBirthday(ImmutableList.of(request.getFolderID()), from, until);
+        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
     }
 
+    @Override
+    protected ContactField[] getFields(ContactRequest request) throws OXException {
+        return request.getFields(ContactField.BIRTHDAY);
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 }
