@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.internal;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExtendedUpdateTaskService;
@@ -65,7 +64,10 @@ import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
  */
 public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl implements ExtendedUpdateTaskService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExtendedUpdateTaskServiceImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedUpdateTaskServiceImpl.class);
+    }
 
     /**
      * Initialises a new {@link ExtendedUpdateTaskServiceImpl}.
@@ -77,11 +79,11 @@ public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl impleme
     @Override
     public List<Map<String, Object>> runUpdateFor(int contextId) throws OXException {
         try {
-            UpdateProcess updateProcess = new UpdateProcess(contextId);
+            UpdateProcess updateProcess = new UpdateProcess(contextId, true, false);
             updateProcess.runUpdate();
             return getFailures(updateProcess);
         } catch (RuntimeException | Error e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw e;
         }
     }
@@ -94,7 +96,7 @@ public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl impleme
             updateProcess.runUpdate();
             return getFailures(updateProcess);
         } catch (RuntimeException | Error e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             throw e;
         }
     }

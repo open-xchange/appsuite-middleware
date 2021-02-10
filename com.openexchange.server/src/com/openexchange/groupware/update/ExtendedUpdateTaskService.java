@@ -54,23 +54,25 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ExtendedUpdateTaskService} - The extended service for update tasks
+ * {@link ExtendedUpdateTaskService} - The extended service for update tasks.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface ExtendedUpdateTaskService {
 
     /**
-     * Executes all pending update tasks for the specified context.
-     * 
-     * @param contextId the context identifier
+     * Executes all pending update tasks for the contact-associated database schema.
+     *
+     * @param contextId The identifier of the context whose associated schema is supposed to be updated
+     * @throws OXException If update fails fatally
      */
     List<Map<String, Object>> runUpdateFor(int contextId) throws OXException;
 
     /**
-     * Executes all pending update tasks for the specified schema.
-     * 
-     * @param schemaName The schema name
+     * Executes all pending update tasks for the specified database schema.
+     *
+     * @param schemaName The name of the database schema
+     * @throws OXException If update fails
      */
     List<Map<String, Object>> runUpdateFor(String schemaName) throws OXException;
 }
