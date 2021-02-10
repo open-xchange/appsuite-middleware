@@ -70,7 +70,7 @@
         required: false
         schema:
           type: boolean
-        default: false
+          default: false
     requestBody:
       content:
         application/json:

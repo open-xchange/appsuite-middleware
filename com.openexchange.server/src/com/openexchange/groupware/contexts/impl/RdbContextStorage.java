@@ -254,6 +254,36 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
+    public boolean exists(int contextId) throws OXException {
+        DatabaseService databaseService = Database.getDatabaseService();
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection con = databaseService.getReadOnly();
+        try {
+            return exists(contextId, con);
+        } finally {
+            databaseService.backReadOnly(con);
+        }
+    }
+
+    private boolean exists(int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+            return result.next();
+        } catch (SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    @Override
     public ContextExtended loadContext(final int contextId) throws OXException {
         DatabaseService databaseService = Database.getDatabaseService();
         if (null == databaseService) {
@@ -381,7 +411,7 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     /**
-     * Loads the context data from the result set and puts them into a context object 
+     * Loads the context data from the result set and puts them into a context object
      *
      * @param result The result set
      * @param optContextId The context identifier. <code>-1</code> to indicate that the context ID was

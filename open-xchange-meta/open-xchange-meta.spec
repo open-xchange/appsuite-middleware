@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 17
+%define         ox_release 18
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -346,6 +346,20 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-dataretrieval
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-dataretrieval
+Empty transitional package. This package was discontinued and can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 %description
 Open-Xchange Meta packages
 
@@ -459,7 +473,12 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-dataretrieval
+%defattr(-,root,root)
+
 %changelog
+* Tue Feb 02 2021 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2021-02-08 (5945)
 * Tue Jan 19 2021 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2021-01-25 (5937)
 * Tue Jan 05 2021 Carsten Hoeger <choeger@open-xchange.com>

@@ -118,21 +118,39 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
-    public ContextExtended loadContext(final int contextId) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+    public ContextExtended loadContext(int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return load(contextId);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Integer key = I(contextId);
-        final Object object = cache.get(key);
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Integer key = I(contextId);
+        Object object = cache.get(key);
         if (object instanceof ContextExtended) {
             return (ContextExtended) object;
         }
+
         // Load it
-        final ContextExtended contextExtended = load(contextId);
+        ContextExtended contextExtended = load(contextId);
         cache.put(key, contextExtended, false);
         return contextExtended;
+    }
+
+    @Override
+    public boolean exists(int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return persistantImpl.exists(contextId);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Integer key = I(contextId);
+        Object object = cache.get(key);
+        if (object instanceof ContextExtended) {
+            return true;
+        }
+        return persistantImpl.exists(contextId);
     }
 
     @Override

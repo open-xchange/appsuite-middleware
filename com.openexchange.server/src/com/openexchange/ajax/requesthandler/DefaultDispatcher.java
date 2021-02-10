@@ -71,7 +71,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
-import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService.Result;
 import com.openexchange.ajax.requesthandler.jobqueue.DefaultJob;
 import com.openexchange.ajax.requesthandler.jobqueue.EnqueuedException;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
@@ -229,7 +228,7 @@ public class DefaultDispatcher implements Dispatcher {
 
             if (parseBoolParameter(PARAMETER_ALLOW_ENQUEUE, modifiedRequestData)) {
                 // Check if action service is enqueue-able
-                Result enqueueableResult = enqueueable(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action, modifiedRequestData, session);
+                EnqueuableAJAXActionService.Result enqueueableResult = enqueueable(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action, modifiedRequestData, session);
                 if (enqueueableResult.isEnqueueable()) {
                     // Enqueue as dispatcher job and watch it
                     JobQueueService jobQueue = ServerServiceRegistry.getInstance().getService(JobQueueService.class);
@@ -240,6 +239,14 @@ public class DefaultDispatcher implements Dispatcher {
                             UUID contained = jobQueue.contains(optionalKey);
                             if (null != contained) {
                                 throw JobQueueExceptionCodes.ALREADY_RUNNING.create(UUIDs.getUnformattedString(contained), I(session.getUserId()), I(session.getContextId()));
+                            }
+                        }
+
+                        // Prepare for being submitted to job queue
+                        {
+                            EnqueuableAJAXActionService optionalEnqueuableAction = enqueueableResult.getEnqueuableAction();
+                            if (optionalEnqueuableAction != null) {
+                                optionalEnqueuableAction.prepareForEnqueue(modifiedRequestData, session);
                             }
                         }
 
@@ -359,7 +366,8 @@ public class DefaultDispatcher implements Dispatcher {
     private EnqueuableAJAXActionService.Result enqueueable(String module, String action, AJAXActionService actionService, AJAXRequestData requestData, ServerSession session) throws OXException {
         // Check by action service instance
         if (actionService instanceof EnqueuableAJAXActionService) {
-            return ((EnqueuableAJAXActionService) actionService).isEnqueueable(requestData, session);
+            EnqueuableAJAXActionService enqueuableAction = (EnqueuableAJAXActionService) actionService;
+            return enqueuableAction.isEnqueueable(requestData, session);
         }
 
         // Check by dispatcher annotation

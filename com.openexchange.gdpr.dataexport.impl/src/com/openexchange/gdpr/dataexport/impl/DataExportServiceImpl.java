@@ -74,6 +74,7 @@ import com.google.common.collect.ImmutableList;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExport;
 import com.openexchange.gdpr.dataexport.DataExportArguments;
@@ -106,11 +107,15 @@ import com.openexchange.gdpr.dataexport.impl.notification.Reason;
 import com.openexchange.java.ISO8601Utils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**
@@ -254,8 +259,103 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     @Override
-    public List<DataExportTask> getDataExportTasks() throws OXException {
-        return storageService.getDataExportTasks();
+    public List<DataExportTask> getRunningDataExportTasks() throws OXException {
+        return storageService.getRunningDataExportTasks();
+    }
+
+    @Override
+    public boolean hasRunningDataExportTasks() throws OXException {
+        return storageService.hasRunningDataExportTasks();
+    }
+
+    @Override
+    public List<DataExportTask> getDataExportTasks(boolean checkValidity) throws OXException {
+        if (checkValidity == false) {
+            return storageService.getDataExportTasks();
+        }
+
+        List<DataExportTask> dataExportTasks = storageService.getDataExportTasks();
+        if (dataExportTasks.isEmpty()) {
+            return dataExportTasks;
+        }
+
+        ContextService contextService = services.getOptionalService(ContextService.class);
+        if (contextService != null) {
+            UserService userService = services.getOptionalService(UserService.class);
+            if (userService != null) {
+                dataExportTasks = checkTasksValidity(dataExportTasks, userService, contextService);
+            }
+        }
+
+        return dataExportTasks;
+    }
+
+    private List<DataExportTask> checkTasksValidity(List<DataExportTask> dataExportTasks, UserService userService, ContextService contextService) {
+        List<UUID> tasksToDelete = null;
+
+        TIntObjectMap<Boolean> visitedContexts = new TIntObjectHashMap<>();
+        for (Iterator<DataExportTask> it = dataExportTasks.iterator(); it.hasNext();) {
+            DataExportTask dataExportTask = it.next();
+
+            int contextId = dataExportTask.getContextId();
+            Boolean exists = visitedContexts.get(contextId);
+            if (exists == null) {
+                exists = Boolean.valueOf(contextExists(contextId, contextService));
+                visitedContexts.put(contextId, exists);
+            }
+
+            if (exists.booleanValue()) {
+                if (userExists(contextId, contextId, userService) == false) {
+                    // Remove task
+                    it.remove();
+                    if (tasksToDelete == null) {
+                        tasksToDelete = new ArrayList<>();
+                    }
+                    tasksToDelete.add(dataExportTask.getId());
+                }
+            } else {
+                // Remove task
+                it.remove();
+                if (tasksToDelete == null) {
+                    tasksToDelete = new ArrayList<>();
+                }
+                tasksToDelete.add(dataExportTask.getId());
+            }
+        }
+
+        if (tasksToDelete != null) {
+            List<UUID> taskIds = tasksToDelete;
+            DataExportStorageService storageService = this.storageService;
+            AbstractTask<Void> deleteTask = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    for (UUID taskId : taskIds) {
+                        storageService.deleteDataExportTask(taskId);
+                    }
+                    return null;
+                }
+            };
+            ThreadPools.submitElseExecute(deleteTask);
+        }
+
+        return dataExportTasks;
+    }
+
+    private boolean contextExists(int contextId, ContextService contextService) {
+        try {
+            return contextService.exists(contextId);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    private boolean userExists(int userId, int contextId, UserService userService) {
+        try {
+            return userService.exists(userId, contextId);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     @Override

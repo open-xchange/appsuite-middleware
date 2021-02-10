@@ -172,10 +172,11 @@ public interface DataExportService {
     /**
      * Gets all data export tasks.
      *
+     * @param checkValidity Whether to check validity of queried tasks
      * @return The data export tasks
      * @throws OXException If data export tasks cannot be returned
      */
-    List<DataExportTask> getDataExportTasks() throws OXException;
+    List<DataExportTask> getDataExportTasks(boolean checkValidity) throws OXException;
 
     /**
      * Removes the completed data export task (if any) and any associated resources for specified user.
@@ -186,5 +187,21 @@ public interface DataExportService {
      * @throws OXException If removing data export task fails
      */
     boolean removeDataExport(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets all data export tasks that are currently considered as running.
+     *
+     * @return The running data export tasks
+     * @throws OXException If running data export tasks cannot be returned
+     */
+    List<DataExportTask> getRunningDataExportTasks() throws OXException;
+
+    /**
+     * Checks if there are data export tasks that are currently considered as running.
+     *
+     * @return <code>true</code> if there are such data export tasks; otherwise <code>false</code>
+     * @throws OXException If check for running data export tasks fails
+     */
+    boolean hasRunningDataExportTasks() throws OXException;
 
 }

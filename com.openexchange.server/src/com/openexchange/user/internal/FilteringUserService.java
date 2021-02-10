@@ -149,6 +149,11 @@ public class FilteringUserService implements UserService {
     }
 
     @Override
+    public boolean exists(int userId, int contextId) throws OXException {
+        return delegate.exists(userId, contextId);
+    }
+
+    @Override
     public User getUser(int uid, Context context) throws OXException {
         return delegate.getUser(uid, context);
     }

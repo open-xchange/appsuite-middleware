@@ -126,6 +126,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     @Override
+    public boolean exists(int contextId) throws OXException {
+        return getDelegate().exists(contextId);
+    }
+
+    @Override
     public Context getContext(int contextId) throws OXException {
         return getDelegate().getContext(contextId);
     }

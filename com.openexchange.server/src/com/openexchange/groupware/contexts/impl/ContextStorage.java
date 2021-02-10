@@ -153,6 +153,15 @@ public abstract class ContextStorage {
     public abstract ContextExtended loadContext(int contextId) throws OXException;
 
     /**
+     * Checks if specified context does exist.
+     *
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a context is existent; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    public abstract boolean exists(int contextId) throws OXException;
+
+    /**
      * Invalidates the context object in cache(s).
      *
      * @param contextId unique identifier of the context to invalidate

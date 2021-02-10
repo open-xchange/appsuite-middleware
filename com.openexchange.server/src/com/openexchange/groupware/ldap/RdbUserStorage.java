@@ -88,6 +88,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -489,6 +490,37 @@ public class RdbUserStorage extends UserStorage {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);
         } else {
             stmt.setString(parameter, value);
+        }
+    }
+
+    @Override
+    public boolean exists(int userId, int contextId) throws OXException {
+        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return exists(userId, contextId, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    private boolean exists(int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM user WHERE cid=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            result = stmt.executeQuery();
+            return result.next();
+        } catch (SQLException e) {
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
