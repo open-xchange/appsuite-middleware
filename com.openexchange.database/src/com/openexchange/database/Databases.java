@@ -963,10 +963,10 @@ public final class Databases {
     // ------------------------------------------------- Callback-accepting methods --------------------------------------------------------
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query.
      *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
-     * @param connection The optional connection. If <code>null</code>, a new connection is fetched from the service
+     * @param connection The optional connection. If <code>null</code>, a new connection for config database is fetched from the service
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
      * @param valueSetters The valueSetters to fill the statement with variables
@@ -982,11 +982,11 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query.
      *
      * @param <T> The class of the response object
      * @param databaseService The database service
-     * @param connection The connection to use or <code>null</code> to obtain a connection
+     * @param connection The connection to use or <code>null</code> to obtain a new connection for config database
      * @param producer The producer for the result object
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
@@ -1002,7 +1002,7 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query against config database.
      *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
