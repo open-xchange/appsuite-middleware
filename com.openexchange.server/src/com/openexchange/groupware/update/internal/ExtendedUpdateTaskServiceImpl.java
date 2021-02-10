@@ -49,12 +49,16 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Queue;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExtendedUpdateTaskService;
+import com.openexchange.groupware.update.TaskFailure;
+import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 
 /**
@@ -77,11 +81,11 @@ public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl impleme
     }
 
     @Override
-    public List<Map<String, Object>> runUpdateFor(int contextId) throws OXException {
+    public List<TaskFailure> runUpdateFor(int contextId) throws OXException {
         try {
             UpdateProcess updateProcess = new UpdateProcess(contextId, true, false);
             updateProcess.runUpdate();
-            return getFailures(updateProcess);
+            return getFailuresFrom(updateProcess);
         } catch (RuntimeException | Error e) {
             LoggerHolder.LOG.error("", e);
             throw e;
@@ -89,15 +93,35 @@ public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl impleme
     }
 
     @Override
-    public List<Map<String, Object>> runUpdateFor(String schemaName) throws OXException {
+    public List<TaskFailure> runUpdateFor(String schemaName) throws OXException {
         try {
             SchemaInfo schema = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
             UpdateProcess updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, false);
             updateProcess.runUpdate();
-            return getFailures(updateProcess);
+            return getFailuresFrom(updateProcess);
         } catch (RuntimeException | Error e) {
             LoggerHolder.LOG.error("", e);
             throw e;
         }
+    }
+
+    /**
+     * Returns any failures the update task encountered
+     *
+     * @param updateProcess the {@link UpdateProcess}
+     * @return A {@link List} with all failed tasks
+     */
+    private List<TaskFailure> getFailuresFrom(UpdateProcess updateProcess) {
+        // Return possible failures
+        Queue<TaskInfo> failures = updateProcess.getFailures();
+        if (failures == null || failures.isEmpty()) {
+            return ImmutableList.of();
+        }
+
+        List<TaskFailure> failuresList = new ArrayList<>(failures.size());
+        for (TaskInfo taskInfo : failures) {
+            failuresList.add(new TaskFailure.Builder().withTaskName(taskInfo.getTaskName()).withClassName(taskInfo.getClass().getName()).withSchemaName(taskInfo.getSchema()).build());
+        }
+        return failuresList;
     }
 }

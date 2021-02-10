@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,15 +63,17 @@ public interface ExtendedUpdateTaskService {
      * Executes all pending update tasks for the contact-associated database schema.
      *
      * @param contextId The identifier of the context whose associated schema is supposed to be updated
+     * @return Returns a {@link List} with all failed tasks
      * @throws OXException If update fails fatally
      */
-    List<Map<String, Object>> runUpdateFor(int contextId) throws OXException;
+    List<TaskFailure> runUpdateFor(int contextId) throws OXException;
 
     /**
      * Executes all pending update tasks for the specified database schema.
      *
      * @param schemaName The name of the database schema
+     * @return Returns a {@link List} with all failed tasks
      * @throws OXException If update fails
      */
-    List<Map<String, Object>> runUpdateFor(String schemaName) throws OXException;
+    List<TaskFailure> runUpdateFor(String schemaName) throws OXException;
 }
