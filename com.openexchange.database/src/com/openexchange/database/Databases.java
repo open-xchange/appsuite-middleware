@@ -960,6 +960,8 @@ public final class Databases {
         return e instanceof com.mysql.jdbc.PacketTooBigException;
     }
 
+    // ------------------------------------------------- Callback-accepting methods --------------------------------------------------------
+
     /**
      * Executes an SQL query
      *
@@ -1014,10 +1016,10 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query.
+     * Executes an SQL query against either context-associated database or config database.
      *
      * @param <T> The class of the result object
-     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection to the config database
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param producer The producer to produce the result object
      * @param statement The statement to execute
@@ -1045,9 +1047,9 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query.
+     * Executes an SQL query against either context-associated database or config database.
      *
-     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection to the config database
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param rc The consumer of the result to use transform into a concrete java object
@@ -1073,7 +1075,7 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL update
+     * Executes an SQL update on the config database.
      *
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
@@ -1087,9 +1089,9 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL update
+     * Executes an SQL update on either context-associated database or config database.
      *
-     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection without context
+     * @param contextId The context identifier to use when obtaining the connection. <code>-1</code> to fetch connection to the config database
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
@@ -1100,12 +1102,14 @@ public final class Databases {
     public static int executeUpdate(int contextId, DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         Connection connection = null;
         int rollback = 0;
+        boolean modified = false;
         try {
             connection = contextId <= 0 ? databaseService.getWritable() : databaseService.getWritable(contextId);
             int result = -1;
             connection.setAutoCommit(false);
             rollback = 1;
             result = executeUpdate(connection, statement, valueSetters);
+            modified = result > 0;
             connection.commit();
             rollback = 2;
             return result;
@@ -1117,9 +1121,17 @@ public final class Databases {
                 autocommit(connection);
             }
             if (contextId <= 0) {
-                databaseService.backWritable(connection);
+                if (modified) {
+                    databaseService.backWritable(connection);
+                } else {
+                    databaseService.backWritableAfterReading(connection);
+                }
             } else {
-                databaseService.backWritable(contextId, connection);
+                if (modified) {
+                    databaseService.backWritable(contextId, connection);
+                } else {
+                    databaseService.backWritableAfterReading(contextId, connection);
+                }
             }
         }
     }
