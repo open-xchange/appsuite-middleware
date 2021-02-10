@@ -1168,7 +1168,7 @@ public final class Databases {
      * @param producer The producer for the result object
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeUpdate()}
+     * @return The result instance of given type or <code>null</code>
      * @throws SQLException In case of an SQL error
      * @throws OXException In case result can't be produced
      */
@@ -1193,7 +1193,7 @@ public final class Databases {
      * @param connection The connection to use
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeUpdate()}
+     * @return See {@link PreparedStatement#executeQuery()}
      * @throws SQLException In case of an SQL error
      */
     public static ResultSet executeQuery(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {

@@ -55,11 +55,17 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.AfterCommitDatabaseConnectionListener;
 import com.openexchange.database.DatabaseConnectionListenerAnnotatable;
@@ -69,40 +75,44 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OXFolderUniqueness} - Utility class to ensure a unique folder name
+ * {@link OXFolderPathUniqueness} - Utility class to ensure a unique folder path.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @author <a href="mailto:thorben.bette@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class OXFolderUniqueness {
+public class OXFolderPathUniqueness {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(OXFolderUniqueness.class);
+    /** The logger constant */
+    static final Logger LOGGER = LoggerFactory.getLogger(OXFolderPathUniqueness.class);
 
     /**
-     * 
-     * Initializes a new {@link OXFolderUniqueness}.
+     * Initializes a new {@link OXFolderPathUniqueness}.
      */
-    private OXFolderUniqueness() {}
+    private OXFolderPathUniqueness() {
+        super();
+    }
 
     /**
-     * Gets a value indicating whether a folder name is unique or not
+     * Checks whether given folder path is unique or not.
      * <p>
-     * Unique folder names aren't enforced under system folders ("Calendar", etc.)
+     * Unique folder names aren't enforced under system folders ("Private -&gt; Calendar", etc.).
      *
-     * @param connection The connection to use
-     * @param contextId The context ID
-     * @param parentFolderId The parent folder ID under which a unique folder shall be checked
      * @param folderName The name of the folder
+     * @param parentFolderId The parent folder identifier under which a unique folder shall be checked
+     * @param contextId The context identifier
+     * @param connection The connection to use
      * @return <code>true</code> if the folder name in unique or uniqueness is not enforced (system folder), <code>false</code> otherwise
      * @throws SQLException In case of SQL error
-     * @throws OXException Should not be thrown ..
+     * @throws OXException Should not be thrown
      */
-    public static boolean isUniqueFolderName(Connection connection, int contextId, int parentFolderId, String folderName) throws SQLException, OXException {
+    public static boolean isUniqueFolderPath(String folderName, int parentFolderId, int contextId, Connection connection) throws SQLException, OXException {
         if (FolderObject.MIN_FOLDER_ID > parentFolderId) {
             /*
              * System folder, folder name uniqueness is not enforced for these
@@ -111,23 +121,23 @@ public class OXFolderUniqueness {
         }
         return null == executeQuery(connection, // @formatter:off
             rs -> Boolean.TRUE, // Will only be called when result is found, so no need no check further
-            "SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=?",
+            "SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE " + (Databases.getCharacterSet(connection).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin"),
             s -> s.setInt(1, contextId),
             s -> s.setInt(2, parentFolderId),
             s -> s.setString(3, folderName)); // @formatter:on
     }
 
     /**
-     * Get the name of a specific folder
-     * 
+     * Gets the name of a specific folder.
+     *
+     * @param folderId The folder identifier to get the name for
+     * @param contextId The context identifier
      * @param connection The connection to use
-     * @param contextId The context ID
-     * @param folderId The folder ID to get the name for
      * @return The name of the folder or <code>null</code> if no folder with given ID is found
      * @throws SQLException In case of SQL error
-     * @throws OXException Should not be thrown ..
+     * @throws OXException Should not be thrown
      */
-    public static String getFolderName(Connection connection, int contextId, int folderId) throws SQLException, OXException {
+    public static String getFolderName(int folderId, int contextId, Connection connection) throws SQLException, OXException {
         return executeQuery(connection, // @formatter:off
             rs -> rs.getString(1),
             "SELECT fname FROM oxfolder_tree WHERE cid=? AND fuid=?",
@@ -136,70 +146,76 @@ public class OXFolderUniqueness {
     }
 
     /**
-     * Reserves the folder name under the given parent folder
-     * <p>
-     * Note: Deletes the entry after the given connection is commited
+     * Reserves the folder name under the given parent folder.
      *
-     * @param connection The connection to use
-     * @param context The context
+     * @param folderName The name of the folder
      * @param parentFolderId The identifier of the parent folder
-     * @param folderName The unique name of the folder
+     * @param context The context
+     * @param connection The connection to use
      * @throws SQLException In case the lock can't be inserted
      */
-    public static void reserveFolderName(Connection connection, Context context, int parentFolderId, String folderName) throws SQLException {
+    public static void reserveFolderPath(String folderName, int parentFolderId, Context context, Connection connection) throws SQLException {
         if (FolderObject.MIN_FOLDER_ID > parentFolderId) {
             return;
         }
         executeUpdate( // @formatter:off
-            connection, 
-            "INSERT INTO oxfolder_reservedpaths (cid, parent, fnamehash, expires) VALUES (?,?,?, ?)",
+            connection,
+            "INSERT INTO oxfolder_reservedpaths (cid, parent, fnamehash, expires) VALUES (?,?,?,?)",
             s -> s.setInt(1, context.getContextId()),
             s -> s.setInt(2, parentFolderId),
-            s -> s.setLong(3, hash(folderName)),
+            s -> s.setLong(3, hashForLowerCaseOf(folderName)),
             s -> s.setLong(4, System.currentTimeMillis()));// @formatter:on
     }
 
     /**
-     * Deletes the associated reserved folder name of the given folder
+     * Deletes the associated reserved folder name of the given folder.
      * <p>
-     * Note: Deletes the entry after the given connection is commited
+     * <b>Note</b>: Deletes the entry after the given connection is committed.
      *
-     * @param connection The connection to use
-     * @param contextId The context
      * @param folderId The identifier of the folder
+     * @param contextId The context
+     * @param connection The connection to use
      * @throws SQLException In case the lock can't be deleted
-     * @throws OXException NOOP
+     * @throws OXException Should not be thrown
      */
-    public static void clearFolderName(Connection connection, int contextId, int folderId) throws SQLException, OXException {
-        Pair<Integer, String> data = executeQuery(connection, // @formatter:off
+    public static void clearReservedFolderPathFor(int folderId, int contextId, Connection connection) throws SQLException, OXException {
+        Pair<Integer, String> parentAndName = executeQuery(connection, // @formatter:off
             rs -> new Pair<Integer, String>(I(rs.getInt(1)), rs.getString(2)),
             "SELECT parent, fname FROM oxfolder_tree WHERE cid=? AND fuid=?",
             s -> s.setInt(1, contextId),
             s -> s.setInt(2, folderId)); // @formatter:on
-        if (null != data) {
-            clearFolderName(connection, contextId, i(data.getFirst()), data.getSecond());
+        if (null != parentAndName) {
+            clearReservedFolderPath(parentAndName.getSecond(), i(parentAndName.getFirst()), contextId, connection);
         }
     }
 
     /**
-     * Deletes a reserved folder name under a specific parent folder
+     * Deletes a reserved folder name under a specific parent folder.
+     * <p>
+     * <b>Note</b>: Deletes the entry after the given connection is committed.
      *
-     * @param connection The connection to use
-     * @param contextId The context identifier
-     * @param parentFolderId The identifier of the parent folder
      * @param folderName The unique name of the folder
-     * @throws SQLException In case the lock can't be deleted
+     * @param parentFolderId The identifier of the parent folder
+     * @param contextId The context identifier
+     * @param connection The connection to use
+     * @throws SQLException In case deletion cannot be performed/scheduled
      */
-    public static void clearFolderName(Connection connection, int contextId, int parentFolderId, String folderName) throws SQLException {
+    public static void clearReservedFolderPath(String folderName, int parentFolderId, int contextId, Connection connection) throws SQLException {
         if (FolderObject.MIN_FOLDER_ID > parentFolderId) {
-            // Aren't inserted.. 
+            // Aren't inserted..
             return;
         }
-        /*
-         * Check if we can register a listener
-         */
+
+        // Check if we should register a listener
+        if (!Databases.isInTransaction(connection)) {
+            // Given connection is not in transaction mode. Thus delete immediately.
+            doClearReservedPath(folderName, parentFolderId, contextId, connection);
+            return;
+        }
+
+        // Check if we can register a listener
         DatabaseConnectionListenerAnnotatable listenerAnnotatable = null;
-        if (DatabaseConnectionListenerAnnotatable.class.isInstance(connection) && Databases.isInTransaction(connection)) {
+        if (DatabaseConnectionListenerAnnotatable.class.isInstance(connection)) {
             listenerAnnotatable = (DatabaseConnectionListenerAnnotatable) connection;
         } else if (connection.isWrapperFor(DatabaseConnectionListenerAnnotatable.class)) {
             try {
@@ -210,44 +226,41 @@ public class OXFolderUniqueness {
                 LOGGER.warn("", e);
             }
         }
-
-        if (null != listenerAnnotatable) {
-            /*
-             * Register listener to delete entry after the connection is commit to avoid race conditions
-             */
-            Consumer<Connection> callback = c -> clear(c, parentFolderId, contextId, folderName);
-            listenerAnnotatable.addListener(new AfterCommitDatabaseConnectionListener(callback));
+        if (listenerAnnotatable == null) {
+            // Delete immediately
+            doClearReservedPath(folderName, parentFolderId, contextId, connection);
         } else {
-            /*
-             * Delete immediately, we don't know better
-             */
-            clear(connection, contextId, parentFolderId, folderName);
+            // Register listener to delete entry after the connection is committed to avoid visibility issues
+            Consumer<Connection> callback = c -> doClearReservedPath(folderName, parentFolderId, contextId, c);
+            listenerAnnotatable.addListener(new AfterCommitDatabaseConnectionListener(callback));
         }
     }
 
-    private static void clear(Connection connection, int contextId, int parentFolderId, String folderName) {
+    private static void doClearReservedPath(String folderName, int parentFolderId, int contextId, Connection connection) {
         try {
             executeUpdate( // @formatter:off
-                connection, 
+                connection,
                 "DELETE FROM oxfolder_reservedpaths WHERE cid=? AND parent=? AND fnamehash=?",
                 s -> s.setInt(1, contextId),
                 s -> s.setInt(2, parentFolderId),
-                s -> s.setLong(3, hash(folderName))); // @formatter:on
+                s -> s.setLong(3, hashForLowerCaseOf(folderName))); // @formatter:on
         } catch (SQLException e) {
             LOGGER.warn("Unable to remove entry from \"oxfolder_reservedpaths\" table. Reason: ", e.getMessage(), e);
         }
     }
 
     /**
-     * Create a long hash value for given string.
+     * Creates a <code>long</code> hash value for given string.
      *
      * @param string The string to generate hash for
      * @return The hash value
      */
-    public static long hash(String string) {
+    private static long hashForLowerCaseOf(String string) {
         if (string == null) {
             throw new IllegalArgumentException("Given string is null");
         }
+
+        string = string.toLowerCase(Locale.US); // Use default locale to yield same results
         long h = 1125899906842597L; // prime
         int len = string.length();
 
@@ -257,8 +270,10 @@ public class OXFolderUniqueness {
         return h;
     }
 
+    // ------------------------------------------------------- Helper classes --------------------------------------------------------------
+
     /**
-     * 
+     *
      * {@link CreateFolderReservedPathTable} -The update task to add the table <code>oxfolder_reservedpaths</code>
      * <p>
      * The table is used to avoid multiple folder names and works like a lock on the table without the need of the <code>FOR UPDATE</code> phrase
@@ -276,7 +291,7 @@ public class OXFolderUniqueness {
     public static class CreateFolderReservedPathTable extends AbstractCreateTableImpl {
 
         /**
-         * Initializes a new {@link OXFolderUniqueness.CreateFolderReservedPathTable}.
+         * Initializes a new {@link OXFolderPathUniqueness.CreateFolderReservedPathTable}.
          */
         public CreateFolderReservedPathTable() {
             super();
@@ -305,7 +320,7 @@ public class OXFolderUniqueness {
     }
 
     /**
-     * 
+     *
      * {@link CreateFolderReservedPathUpdateTask}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -322,7 +337,7 @@ public class OXFolderUniqueness {
     }
 
     /**
-     * 
+     *
      * {@link CleanUpReservedPathsTask}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -333,8 +348,8 @@ public class OXFolderUniqueness {
         final ServiceLookup services;
 
         /**
-         * Initializes a new {@link OXFolderUniqueness.CleanUpReservedPathsTask}.
-         * 
+         * Initializes a new {@link OXFolderPathUniqueness.CleanUpReservedPathsTask}.
+         *
          * @param services The service lookup
          */
         public CleanUpReservedPathsTask(ServiceLookup services) {
@@ -348,20 +363,52 @@ public class OXFolderUniqueness {
             try {
                 ContextService contextService = services.getServiceSafe(ContextService.class);
                 DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
-                for (Integer representiveContextId : contextService.getDistinctContextsPerSchema()) {
-                    clearExpired(databaseService, i(representiveContextId));
+                Updater updater = Updater.getInstance();
+                NextSchema: for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
+                    UpdateStatus status = updater.getStatus(representativeContextId.intValue());
+                    if (status.blockingUpdatesRunning()) {
+                        // Context-associated schema is currently updated. Abort clean-up for that schema
+                        Optional<String> optSchema = getSchema(representativeContextId, contextService);
+                        if (optSchema.isPresent()) {
+                            LOGGER.info("Update running: Skipping clean-up for reserved folder path data for schema {} since that schema is currently updated", optSchema.get());
+                        } else {
+                            LOGGER.info("Update running: Skipping clean-up for reserved folder path data for schema association with context {} since that schema is currently updated", representativeContextId);
+                        }
+                        continue NextSchema;
+                    }
+                    if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
+                        // Context-associated schema needs an update. Abort clean-up for that schema
+                        Optional<String> optSchema = getSchema(representativeContextId, contextService);
+                        if (optSchema.isPresent()) {
+                            LOGGER.info("Update needed: Skipping clean-up for reserved folder path data for schema {} since that schema needs an update", optSchema.get());
+                        } else {
+                            LOGGER.info("Update needed: Skipping clean-up for reserved folder path data for schema association with context {} since that schema needs an update", representativeContextId);
+                        }
+                        continue NextSchema;
+                    }
+                    // Perform clean-up
+                    clearExpired(databaseService, i(representativeContextId));
                 }
-            } catch (SQLException | OXException e) {
-                LOGGER.warn("Unable to clean up data!", e);
+            } catch (Exception e) {
+                LOGGER.warn("Unable to clean-up reserved folder path data!", e);
             }
         }
 
-        private static void clearExpired(DatabaseService databaseService, int representiveContextId) throws SQLException, OXException {
+        private static void clearExpired(DatabaseService databaseService, int representativeContextId) throws SQLException, OXException {
             executeUpdate( // @formatter:off
-                representiveContextId,
-                databaseService, 
+                representativeContextId,
+                databaseService,
                 "DELETE FROM oxfolder_reservedpaths WHERE expires <= ?",
                 s -> s.setLong(1, System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)));  // @formatter:on
+        }
+
+        private Optional<String> getSchema(Integer representativeContextId, ContextService contextService) {
+            try {
+                Map<PoolAndSchema, List<Integer>> associations = contextService.getSchemaAssociationsFor(Collections.singletonList(representativeContextId));
+                return Optional.of(associations.keySet().iterator().next().getSchema());
+            } catch (Exception e) {
+                return Optional.empty();
+            }
         }
     }
 

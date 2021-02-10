@@ -50,7 +50,8 @@
 package com.openexchange.database;
 
 /**
- * {@link DatabaseConnectionListenerAnnotatable} - A listener which receives various call-backs for certain connection-associated events.
+ * {@link DatabaseConnectionListenerAnnotatable} - If this interface is implemented by an instance of {@link java.sql.Connection} that
+ * connection can be annotated with listeners which receive various call-backs for certain connection-associated events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1

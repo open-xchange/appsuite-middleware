@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.io.InputStream;
@@ -80,7 +81,6 @@ import com.openexchange.database.IllegalMixOfCollationsSQLException;
 import com.openexchange.database.RetryingTransactionClosure;
 import com.openexchange.database.SQLClosure;
 import com.openexchange.database.StringLiteralSQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderPath;
@@ -123,6 +123,83 @@ public final class OXFolderSQL {
      */
     private OXFolderSQL() {
         super();
+    }
+
+    @FunctionalInterface
+    private static interface SqlFuntion<R> {
+
+        /**
+         * Executes this SQL function using given connection.
+         *
+         * @param con The connection to use
+         * @return The result
+         * @throws OXException If an Open-Xchange error occurs
+         * @throws SQLException If an SQL error occurs
+         */
+        R execute(Connection con) throws OXException, SQLException;
+    }
+
+    /**
+     * Acquires a read-write connection and executes given SQL function.
+     *
+     * @param <R> The result type
+     * @param callback The SQL function to execute
+     * @param startTransaction Whether to execute given SQL function within a transaction
+     * @param ctx The context
+     * @return The result
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    private static <R> R acquireWriteConnectionAndExecute(SqlFuntion<R> callback, boolean startTransaction, Context ctx) throws OXException, SQLException {
+        if (startTransaction) {
+            Connection writeCon = null;
+            int rollback = 0;
+            try {
+                writeCon = DBPool.pickupWriteable(ctx);
+                Databases.startTransaction(writeCon);
+                rollback = 1;
+                R result = callback.execute(writeCon);
+                writeCon.commit();
+                rollback = 2;
+                return result;
+            } finally {
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(writeCon);
+                    }
+                    Databases.autocommit(writeCon);
+                }
+                if (writeCon != null) {
+                    DBPool.closeWriterSilent(ctx, writeCon);
+                }
+            }
+        }
+
+        Connection writeCon = DBPool.pickupWriteable(ctx);
+        try {
+            return callback.execute(writeCon);
+        } finally {
+            DBPool.closeWriterSilent(ctx, writeCon);
+        }
+    }
+
+    /**
+     * Acquires a read-only connection and executes given SQL function.
+     *
+     * @param <R> The result type
+     * @param callback The SQL function to execute
+     * @param ctx The context
+     * @return The result
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    private static <R> R acquireReadConnectionAndExecute(SqlFuntion<R> callback, Context ctx) throws OXException, SQLException {
+        Connection readCon = DBPool.pickup(ctx);
+        try {
+            return callback.execute(readCon);
+        } finally {
+            DBPool.closeReaderSilent(ctx, readCon);
+        }
     }
 
     private static final String SQL_LOCK = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
@@ -391,12 +468,15 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurs
      */
     public static void updateLastModified(final int folderId, final long lastModified, final int modifiedBy, final Context ctx) throws OXException, SQLException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            updateLastModified(folderId, lastModified, modifiedBy, writeCon, ctx);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                updateLastModified(folderId, lastModified, modifiedBy, writeCon, ctx);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     /**
@@ -441,35 +521,38 @@ public final class OXFolderSQL {
     private static final String SQL_UPDATE_LAST_MOD2 = "UPDATE oxfolder_tree SET changing_date = ? WHERE cid = ? AND fuid = ?";
 
     /**
-     * Updates the last modified timestamp of the folder whose ID matches given parameter <code>folderId</code>.
+     * Updates the last modified time stamp of the folder whose ID matches given parameter <code>folderId</code>.
      *
-     * @param folderId The folder ID
-     * @param lastModified The new last-modified timestamp to set
+     * @param folderId The folder identifier
+     * @param lastModified The new last-modified time stamp to set
      * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
     private static void updateLastModified(int folderId, long lastModified, Context ctx) throws OXException, SQLException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            updateLastModified(folderId, lastModified, writeCon, ctx);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                updateLastModified(folderId, lastModified, writeCon, ctx);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     /**
-     * Updates the last modified timestamp of the folder whose ID matches given parameter <code>folderId</code>.
+     * Updates the last modified time stamp of the folder whose ID matches given parameter <code>folderId</code>.
      *
-     * @param folderId The folder ID
-     * @param lastModified The new last-modified timestamp to set
+     * @param folderId The folder identifier
+     * @param lastModified The new last-modified time stamp to set
      * @param writeCon A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private static void updateLastModified(final int folderId, final long lastModified, final Connection writeCon, final Context ctx) throws OXException, SQLException {
+    static void updateLastModified(final int folderId, final long lastModified, final Connection writeCon, final Context ctx) throws OXException, SQLException {
         if (writeCon == null) {
             updateLastModified(folderId, lastModified, ctx);
             return;
@@ -706,13 +789,15 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurs
      */
     public static void updateName(int folderId, int parentFolderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
-        Connection writeCon = null;
-        try {
-            writeCon = DBPool.pickupWriteable(ctx);
-            updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, writeCon, ctx);
-        } finally {
-            Database.back(ctx, true, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, writeCon, ctx);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     /**
@@ -733,13 +818,13 @@ public final class OXFolderSQL {
             updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, ctx);
             return;
         }
-        if (false == OXFolderUniqueness.isUniqueFolderName(writeCon, ctx.getContextId(), parentFolderId, newName)) {
+        if (false == OXFolderPathUniqueness.isUniqueFolderPath(newName, parentFolderId, ctx.getContextId(), writeCon)) {
             throw OXFolderExceptionCode.DUPLICATE_NAME.create(newName, I(parentFolderId));
         }
-        String folderName = OXFolderUniqueness.getFolderName(writeCon, ctx.getContextId(), folderId);
+        String folderName = OXFolderPathUniqueness.getFolderName(folderId, ctx.getContextId(), writeCon);
 
         // Update name
-        OXFolderUniqueness.reserveFolderName(writeCon, ctx, parentFolderId, newName);
+        OXFolderPathUniqueness.reserveFolderPath(newName, parentFolderId, ctx, writeCon);
         PreparedStatement stmt = null;
         try {
             // Do the update
@@ -754,7 +839,7 @@ public final class OXFolderSQL {
             Databases.closeSQLStuff(stmt);
         }
         // Remove old entry if there was no error during update
-        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), parentFolderId, folderName);
+        OXFolderPathUniqueness.clearReservedFolderPath(folderName, parentFolderId, ctx.getContextId(), writeCon);
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid, fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
@@ -931,12 +1016,14 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurred
      */
     public static boolean updateSinglePermission(int folderId, int permissionId, int folderPermission, int objectReadPermission, int objectWritePermission, int objectDeletePermission, Context ctx) throws OXException, SQLException {
-        Connection wc = DBPool.pickupWriteable(ctx);
-        try {
-            return updateSinglePermission(folderId, permissionId, folderPermission, objectReadPermission, objectWritePermission, objectDeletePermission, wc, ctx);
-        } finally {
-            DBPool.closeWriterSilent(ctx, wc);
-        }
+        SqlFuntion<Boolean> callback = new SqlFuntion<Boolean>() {
+
+            @Override
+            public Boolean execute(Connection writeCon) throws OXException, SQLException {
+                return B(updateSinglePermission(folderId, permissionId, folderPermission, objectReadPermission, objectWritePermission, objectDeletePermission, writeCon, ctx));
+            }
+        };
+        return acquireWriteConnectionAndExecute(callback, true, ctx).booleanValue();
     }
 
     /**
@@ -1015,12 +1102,14 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurred
      */
     public static boolean addSinglePermission(int folderId, int permissionId, boolean isGroup, int folderPermission, int objectReadPermission, int objectWritePermission, int objectDeletePermission, boolean isAdmin, int system, FolderPermissionType type, String legator, Context ctx) throws OXException, SQLException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            return addSinglePermission(folderId, permissionId, isGroup, folderPermission, objectReadPermission, objectWritePermission, objectDeletePermission, isAdmin, system, type, legator, writeCon, ctx);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Boolean> callback = new SqlFuntion<Boolean>() {
+
+            @Override
+            public Boolean execute(Connection writeCon) throws OXException, SQLException {
+                return B(addSinglePermission(folderId, permissionId, isGroup, folderPermission, objectReadPermission, objectWritePermission, objectDeletePermission, isAdmin, system, type, legator, writeCon, ctx));
+            }
+        };
+        return acquireWriteConnectionAndExecute(callback, false, ctx).booleanValue();
     }
 
     /**
@@ -1118,6 +1207,27 @@ public final class OXFolderSQL {
      *
      * @param folderId The folder ID
      * @param permissionId The entity ID; either user or group ID
+     * @param ctx The context
+     * @return <code>true</code> if corresponding entry was successfully deleted; otherwise <code>false</code>
+     * @throws OXException If a pooling error occurred
+     * @throws SQLException If a SQL error occurred
+     */
+    private static boolean deleteSingleSystemPermission(final int folderId, final int permissionId, final Context ctx) throws OXException, SQLException {
+        SqlFuntion<Boolean> callback = new SqlFuntion<Boolean>() {
+
+            @Override
+            public Boolean execute(Connection writeCon) throws OXException, SQLException {
+                return B(deleteSingleSystemPermission(folderId, permissionId, writeCon, ctx));
+            }
+        };
+        return acquireWriteConnectionAndExecute(callback, false, ctx).booleanValue();
+    }
+
+    /**
+     * Deletes a single system permission
+     *
+     * @param folderId The folder ID
+     * @param permissionId The entity ID; either user or group ID
      * @param writeCon A connection with write capability; may be <code>null</code> to fetch from pool
      * @param ctx The context
      * @return <code>true</code> if corresponding entry was successfully deleted; otherwise <code>false</code>
@@ -1125,26 +1235,44 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurred
      */
     public static boolean deleteSingleSystemPermission(final int folderId, final int permissionId, final Connection writeCon, final Context ctx) throws OXException, SQLException {
-        Connection wc = writeCon;
-        boolean closeWriteCon = false;
+        if (writeCon == null) {
+            return deleteSingleSystemPermission(folderId, permissionId, ctx);
+        }
+
         PreparedStatement stmt = null;
         try {
-            if (wc == null) {
-                wc = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            stmt = wc.prepareStatement(SQL_REM_SINGLE_SYS_PERM);
+            stmt = writeCon.prepareStatement(SQL_REM_SINGLE_SYS_PERM);
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, permissionId);
             return (executeUpdate(stmt) == 1);
         } finally {
-            closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+            closeResources(null, stmt, null, false, ctx);
         }
     }
 
-    private static final String SQL_REM_ALL_SYS_PERM = "DELETE FROM oxfolder_permissions " + "WHERE cid = ? AND fuid = ? AND `system` = 1";
+    private static final String SQL_REM_ALL_SYS_PERM = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND `system` = 1";
+
+    /**
+     * Deletes all system permission from specified folder
+     *
+     * @param folderId The folder ID
+     * @param ctx The context
+     * @throws OXException If a pooling error occurred
+     * @throws SQLException If a SQL error occurred
+     */
+    private static void deleteAllSystemPermission(final int folderId, final Context ctx) throws OXException, SQLException {
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                deleteAllSystemPermission(folderId, writeCon, ctx);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
+    }
 
     /**
      * Deletes all system permission from specified folder
@@ -1156,53 +1284,84 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurred
      */
     public static void deleteAllSystemPermission(final int folderId, final Connection writeCon, final Context ctx) throws OXException, SQLException {
-        Connection wc = writeCon;
-        boolean closeWriteCon = false;
+        if (writeCon == null) {
+            deleteAllSystemPermission(folderId, ctx);
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
-            if (wc == null) {
-                wc = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            stmt = wc.prepareStatement(SQL_REM_ALL_SYS_PERM);
+            stmt = writeCon.prepareStatement(SQL_REM_ALL_SYS_PERM);
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             executeUpdate(stmt);
         } finally {
-            closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+            closeResources(null, stmt, null, false, ctx);
         }
     }
 
     private static final String SQL_GETSUBFLDIDS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
+
+    private static TIntList getSubfolderIDs(final int folderId, final Context ctx) throws OXException, SQLException {
+        SqlFuntion<TIntList> callback = new SqlFuntion<TIntList>() {
+
+            @Override
+            public TIntList execute(Connection con) throws OXException, SQLException {
+                return getSubfolderIDs(folderId, con, ctx);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, ctx);
+    }
 
     /**
      * Creates a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      *
      * @return a <tt>TIntList</tt> instance containing all subfolder IDs of given folder
      */
-    public static TIntList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
-        final TIntList retval = new TIntArrayList();
-        Connection readCon = readConArg;
-        boolean closeReadCon = false;
+    public static TIntList getSubfolderIDs(final int folderId, final Connection readCon, final Context ctx) throws OXException, SQLException {
+        if (readCon == null) {
+            return getSubfolderIDs(folderId, ctx);
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
             stmt = readCon.prepareStatement(SQL_GETSUBFLDIDS);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = executeQuery(stmt);
-            while (rs.next()) {
-                retval.add(rs.getInt(1));
+            if (rs.next() == false) {
+                return new TIntArrayList(0);
             }
+
+            TIntList retval = new TIntArrayList();
+            do{
+                retval.add(rs.getInt(1));
+            } while (rs.next()) ;
+            return retval;
         } finally {
-            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+            closeResources(rs, stmt, null, true, ctx);
         }
-        return retval;
+    }
+
+    /**
+     * Gets the IDs of all folders whose parent folder ID equals the supplied one, i.e. the IDs of all subfolders.
+     *
+     * @param folderId The ID of the parent folder to get the subfolder IDs for
+     * @param context The context
+     * @param recursive <code>true</code> to lookup subfolder IDs recursively, <code>false</code>, otherwise
+     * @return The subfolder IDs, or an empty list if none were found
+     */
+    private static List<Integer> getSubfolderIDs(int folderId, Context context, boolean recursive) throws OXException, SQLException {
+        SqlFuntion<List<Integer>> callback = new SqlFuntion<List<Integer>>() {
+
+            @Override
+            public List<Integer> execute(Connection con) throws OXException, SQLException {
+                return getSubfolderIDs(folderId, con, context, recursive);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, context);
     }
 
     /**
@@ -1215,16 +1374,12 @@ public final class OXFolderSQL {
      * @return The subfolder IDs, or an empty list if none were found
      */
     public static List<Integer> getSubfolderIDs(int folderId, Connection readConnection, Context context, boolean recursive) throws OXException, SQLException {
+        if (readConnection == null) {
+            return getSubfolderIDs(folderId, context, recursive);
+        }
+
         List<Integer> subfolderIDs = new ArrayList<Integer>();
-        boolean closeReadConnection = false;
         try {
-            /*
-             * acquire local read connection if not supplied
-             */
-            if (null == readConnection) {
-                readConnection = DBPool.pickup(context);
-                closeReadConnection = true;
-            }
             List<Integer> parentFolderIDs = new ArrayList<Integer>();
             parentFolderIDs.add(Integer.valueOf(folderId));
             do {
@@ -1264,9 +1419,28 @@ public final class OXFolderSQL {
                 }
             } while (recursive && false == parentFolderIDs.isEmpty());
         } finally {
-            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+            closeResources(null, null, null, true, context);
         }
         return subfolderIDs;
+    }
+
+    /**
+     * Gets the identifiers of all permission entities belonging to one of the supplied folder identifiers.
+     *
+     * @param folderIDs The folder identifiers to get the permission entities for
+     * @param context The context
+     * @param includeGroups <code>true</code> to also include group permissions, <code>false</code>, otherwise
+     * @return The entity IDs, or an empty list if none were found
+     */
+    private static List<Integer> getPermissionEntities(List<Integer> folderIDs, Context context, boolean includeGroups) throws OXException, SQLException {
+        SqlFuntion<List<Integer>> callback = new SqlFuntion<List<Integer>>() {
+
+            @Override
+            public List<Integer> execute(Connection con) throws OXException, SQLException {
+                return getPermissionEntities(folderIDs, con, context, includeGroups);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, context);
     }
 
     /**
@@ -1279,6 +1453,10 @@ public final class OXFolderSQL {
      * @return The entity IDs, or an empty list if none were found
      */
     public static List<Integer> getPermissionEntities(List<Integer> folderIDs, Connection readConnection, Context context, boolean includeGroups) throws OXException, SQLException {
+        if (readConnection == null) {
+            return getPermissionEntities(folderIDs, context, includeGroups);
+        }
+
         /*
          * build statement
          */
@@ -1296,17 +1474,9 @@ public final class OXFolderSQL {
             stringBuilder.append(" AND group_flag=0");
         }
         Set<Integer> entityIDs = new LinkedHashSet<>();
-        boolean closeReadConnection = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            /*
-             * acquire local read connection if not supplied
-             */
-            if (null == readConnection) {
-                readConnection = DBPool.pickup(context);
-                closeReadConnection = true;
-            }
             /*
              * execute query
              */
@@ -1320,9 +1490,27 @@ public final class OXFolderSQL {
                 entityIDs.add(Integer.valueOf(rs.getInt(1)));
             }
         } finally {
-            closeResources(rs, stmt, closeReadConnection ? readConnection : null, true, context);
+            closeResources(rs, stmt, null, true, context);
         }
         return new ArrayList<>(entityIDs);
+    }
+
+    /**
+     * Gets the identifiers of all parent folders in the tree down to the root folder.
+     *
+     * @param folderId The ID of the folder to get the path for
+     * @param context The context
+     * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
+     */
+    private static List<Integer> getPathToRoot(int folderId, Context context) throws OXException, SQLException {
+        SqlFuntion<List<Integer>> callback = new SqlFuntion<List<Integer>>() {
+
+            @Override
+            public List<Integer> execute(Connection con) throws OXException, SQLException {
+                return getPathToRoot(folderId, con, context);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, context);
     }
 
     /**
@@ -1334,16 +1522,12 @@ public final class OXFolderSQL {
      * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
      */
     public static List<Integer> getPathToRoot(int folderId, Connection readConnection, Context context) throws OXException, SQLException {
+        if (readConnection == null) {
+            return getPathToRoot(folderId, context);
+        }
+
         List<Integer> subfolderIDs = new ArrayList<Integer>();
-        boolean closeReadConnection = false;
         try {
-            /*
-             * acquire local read connection if not supplied
-             */
-            if (null == readConnection) {
-                readConnection = DBPool.pickup(context);
-                closeReadConnection = true;
-            }
             /*
              * get parent folders recursively
              */
@@ -1363,9 +1547,28 @@ public final class OXFolderSQL {
                 subfolderIDs.add(Integer.valueOf(currentID));
             }
         } finally {
-            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+            closeResources(null, null, null, true, context);
         }
         return subfolderIDs;
+    }
+
+    /**
+     * Gets the names of all parent folders in the tree down to the root folder.
+     *
+     * @param folderId The ID of the folder to get the path for
+     * @param defaultFolderId The identifier of user's default Infostore folder
+     * @param context The context
+     * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
+     */
+    private static FolderPathObject generateFolderPathFor(int folderId, int defaultFolderId, Context context) throws OXException, SQLException {
+        SqlFuntion<FolderPathObject> callback = new SqlFuntion<FolderPathObject>() {
+
+            @Override
+            public FolderPathObject execute(Connection con) throws OXException, SQLException {
+                return generateFolderPathFor(folderId, defaultFolderId, con, context);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, context);
     }
 
     /**
@@ -1378,15 +1581,11 @@ public final class OXFolderSQL {
      * @return The IDs of all parent folders on the path in (hierarchical) descending order; the supplied folder ID itself is not included
      */
     public static FolderPathObject generateFolderPathFor(int folderId, int defaultFolderId, Connection readConnection, Context context) throws OXException, SQLException {
-        boolean closeReadConnection = false;
+        if (readConnection == null) {
+            return generateFolderPathFor(folderId, defaultFolderId, context);
+        }
+
         try {
-            /*
-             * acquire local read connection if not supplied
-             */
-            if (null == readConnection) {
-                readConnection = DBPool.pickup(context);
-                closeReadConnection = true;
-            }
             /*
              * get parent folders recursively
              */
@@ -1435,7 +1634,7 @@ public final class OXFolderSQL {
             }
             return FolderPathObject.copyOf(names);
         } finally {
-            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+            closeResources(null, null, null, true, context);
         }
     }
 
@@ -1450,12 +1649,14 @@ public final class OXFolderSQL {
      * @throws SQLException If an SQL error occurs
      */
     public static int getParentId(int folder, Context ctx) throws OXException, SQLException {
-        Connection connection = DBPool.pickup(ctx);
-        try {
-            return getParentId(folder, ctx, connection);
-        } finally {
-            DBPool.closeReaderSilent(ctx, connection);
-        }
+        SqlFuntion<Integer> callback = new SqlFuntion<Integer>() {
+
+            @Override
+            public Integer execute(Connection con) throws OXException, SQLException {
+                return I(getParentId(folder, ctx, con));
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, ctx).intValue();
     }
 
     /**
@@ -1517,12 +1718,15 @@ public final class OXFolderSQL {
      * Updates the field 'subfolder_flag' of matching folder in underlying storage
      */
     static void updateSubfolderFlag(int folderId, boolean hasSubfolders, long lastModified, Context ctx) throws OXException, SQLException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            updateSubfolderFlag(folderId, hasSubfolders, lastModified, writeCon, ctx);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                updateSubfolderFlag(folderId, hasSubfolders, lastModified, writeCon, ctx);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     /**
@@ -1561,16 +1765,28 @@ public final class OXFolderSQL {
     /**
      * @return the number of subfolders of given folder which can be moved according to user's permissions
      */
-    public static int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups, final Connection readConArg, final Context ctx) throws OXException, SQLException {
-        Connection readCon = readConArg;
-        boolean closeReadCon = false;
+    private static int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups, final Context ctx) throws OXException, SQLException {
+        SqlFuntion<Integer> callback = new SqlFuntion<Integer>() {
+
+            @Override
+            public Integer execute(Connection con) throws OXException, SQLException {
+                return I(getNumOfMoveableSubfolders(folderId, userId, groups, con, ctx));
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, ctx).intValue();
+    }
+
+    /**
+     * @return the number of subfolders of given folder which can be moved according to user's permissions
+     */
+    public static int getNumOfMoveableSubfolders(final int folderId, final int userId, final int[] groups, final Connection readCon, final Context ctx) throws OXException, SQLException {
+        if (readCon == null) {
+            return getNumOfMoveableSubfolders(folderId, userId, groups, ctx);
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
             stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_NUMSUB, "#IDS#", StringCollection.getSqlInString(userId, groups)));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
@@ -1586,7 +1802,7 @@ public final class OXFolderSQL {
             }
             return count;
         } finally {
-            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+            closeResources(rs, stmt, null, true, ctx);
         }
     }
 
@@ -1603,25 +1819,28 @@ public final class OXFolderSQL {
     }
 
     private static void insertFolderSQL(int newFolderID, int userId, FolderObject folder, long creatingTime, boolean setDefaultFlag, Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            insertFolderSQL(newFolderID, userId, folder, creatingTime, setDefaultFlag, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                insertFolderSQL(newFolderID, userId, folder, creatingTime, setDefaultFlag, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
-    private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean setDefaultFlag, final Context ctx, final Connection writeCon) throws SQLException, OXException {
+    static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean setDefaultFlag, final Context ctx, final Connection writeCon) throws SQLException, OXException {
         if (writeCon == null) {
             insertFolderSQL(newFolderID, userId, folder, creatingTime, setDefaultFlag, ctx);
             return;
         }
 
         final int permissionFlag = determinePermissionFlag(folder);
-        if (false == OXFolderUniqueness.isUniqueFolderName(writeCon, ctx.getContextId(), folder.getParentFolderID(), folder.getFolderName())) {
+        if (false == OXFolderPathUniqueness.isUniqueFolderPath(folder.getFolderName(), folder.getParentFolderID(), ctx.getContextId(), writeCon)) {
             throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
         }
-        OXFolderUniqueness.reserveFolderName(writeCon, ctx, folder.getParentFolderID(), folder.getFolderName());
+        OXFolderPathUniqueness.reserveFolderPath(folder.getFolderName(), folder.getParentFolderID(), ctx, writeCon);
         SQLClosure<Void> insertFolderClosure = new SQLClosure<Void>() {
 
             @Override
@@ -1737,19 +1956,22 @@ public final class OXFolderSQL {
      * Transforms an existing folder into a default folder of a certain type by setting the <code>default_flag</code> to <code>1</code>.
      *
      * @param connection A (writable) connection to the database, or <code>null</code> to fetch one on demand
-     * @param context The context
+     * @param ctx The context
      * @param folderID The identifier of the folder to mark as default folder
      * @param type The type to apply for the folder
      * @param folderName The name to apply for the folder
      * @param lastModified The last modification timestamp to apply for the folder
      */
-    static void markAsDefaultFolder(Context context, int folderID, int type, String folderName, long lastModified) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(context);
-        try {
-            markAsDefaultFolder(writeCon, context, folderID, type, folderName, lastModified);
-        } finally {
-            DBPool.closeWriterSilent(context, writeCon);
-        }
+    static void markAsDefaultFolder(Context ctx, int folderID, int type, String folderName, long lastModified) throws SQLException, OXException {
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                markAsDefaultFolder(writeCon, ctx, folderID, type, folderName, lastModified);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     /**
@@ -1793,12 +2015,15 @@ public final class OXFolderSQL {
     private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND `system` = 0";
 
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            updateFolderSQL(userId, folder, lastModified, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                updateFolderSQL(userId, folder, lastModified, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
@@ -1806,16 +2031,21 @@ public final class OXFolderSQL {
             updateFolderSQL(userId, folder, lastModified, ctx);
             return;
         }
+
         /*
-         * Check if folder name as changed, reserve folder name before update if necessary
+         * Check if folder name has changed, reserve folder name before update if necessary
          */
         boolean changedName = false;
         String folderName = null;
-        if (Strings.isNotEmpty(folder.getFolderName())) {
-            folderName = OXFolderUniqueness.getFolderName(writeCon, ctx.getContextId(), folder.getObjectID());
+        if (folder.containsFolderName()) {
+            folderName = OXFolderPathUniqueness.getFolderName(folder.getObjectID(), ctx.getContextId(), writeCon);
             if (false == folder.getFolderName().equalsIgnoreCase(folderName)) {
+                // Folder name is supposed to be changed. Check for uniqueness.
+                if (false == OXFolderPathUniqueness.isUniqueFolderPath(folder.getFolderName(), folder.getParentFolderID(), ctx.getContextId(), writeCon)) {
+                    throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
+                }
                 changedName = true;
-                OXFolderUniqueness.reserveFolderName(writeCon, ctx, folder.getParentFolderID(), folder.getFolderName());
+                OXFolderPathUniqueness.reserveFolderPath(folder.getFolderName(), folder.getParentFolderID(), ctx, writeCon);
             }
         }
 
@@ -1957,7 +2187,7 @@ public final class OXFolderSQL {
         };
         RetryingTransactionClosure.execute(updateFolderClosure, 3, writeCon);
         if (changedName) {
-            OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), folder.getParentFolderID(), folderName);
+            OXFolderPathUniqueness.clearReservedFolderPath(folderName, folder.getParentFolderID(), ctx.getContextId(), writeCon);
         }
     }
 
@@ -1971,12 +2201,15 @@ public final class OXFolderSQL {
     private static final String SQL_MOVE_UPDATE2 = "UPDATE oxfolder_tree SET subfolder_flag = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
 
     static void moveFolderSQL(int userId, FolderObject src, FolderObject dest, long lastModified, Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            moveFolderSQL(userId, src, dest, lastModified, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                moveFolderSQL(userId, src, dest, lastModified, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
     static void moveFolderSQL(final int userId, final FolderObject src, final FolderObject dest, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
@@ -1985,8 +2218,11 @@ public final class OXFolderSQL {
             return;
         }
 
-        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), src.getObjectID());
-        OXFolderUniqueness.reserveFolderName(writeCon, ctx, dest.getObjectID(), src.getFolderName());
+        if (false == OXFolderPathUniqueness.isUniqueFolderPath(src.getFolderName(), dest.getObjectID(), ctx.getContextId(), writeCon)) {
+            throw OXFolderExceptionCode.DUPLICATE_NAME.create(src.getFolderName(), I(dest.getObjectID()));
+        }
+        OXFolderPathUniqueness.clearReservedFolderPathFor(src.getObjectID(), ctx.getContextId(), writeCon);
+        OXFolderPathUniqueness.reserveFolderPath(src.getFolderName(), dest.getObjectID(), ctx, writeCon);
         SQLClosure<Void> moveFolderClosure = new SQLClosure<Void>() {
 
             @Override
@@ -2052,12 +2288,15 @@ public final class OXFolderSQL {
     private static final String SQL_RENAME_UPDATE = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? where cid = ? AND fuid = ?";
 
     static void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified, final Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            renameFolderSQL(userId, folderObj, lastModified, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                renameFolderSQL(userId, folderObj, lastModified, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, false, ctx);
     }
 
     static void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
@@ -2116,12 +2355,15 @@ public final class OXFolderSQL {
      * are going to be created and is only allowed if <code>deleteWorking</code> is set to <code>true</code>.
      */
     static void delOXFolder(final int folderId, final int userId, final long lastModified, final boolean deleteWorking, final boolean createBackup, final Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            delOXFolder(folderId, userId, lastModified, deleteWorking, createBackup, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                delOXFolder(folderId, userId, lastModified, deleteWorking, createBackup, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
     /**
@@ -2135,7 +2377,7 @@ public final class OXFolderSQL {
             return;
         }
 
-        OXFolderUniqueness.clearFolderName(writeCon, ctx.getContextId(), folderId);
+        OXFolderPathUniqueness.clearReservedFolderPathFor(folderId, ctx.getContextId(), writeCon);
         SQLClosure<Void> delClosure = new SQLClosure<Void>() {
 
             @Override
@@ -2223,12 +2465,15 @@ public final class OXFolderSQL {
     }
 
     static void backupOXFolder(final int folderId, final int userId, final long lastModified, final Context ctx) throws SQLException, OXException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            backupOXFolder(folderId, userId, lastModified, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                backupOXFolder(folderId, userId, lastModified, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
     static void backupOXFolder(final int folderId, final int userId, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
@@ -2295,12 +2540,15 @@ public final class OXFolderSQL {
     private static final String SQL_RESTORE_OP = "INSERT INTO oxfolder_permissions SELECT * FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
     public static void restore(int folderId, Context ctx) throws OXException, SQLException {
-        Connection writeCon = DBPool.pickupWriteable(ctx);
-        try {
-            restore(folderId, ctx, writeCon);
-        } finally {
-            DBPool.closeWriterSilent(ctx, writeCon);
-        }
+        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
+
+            @Override
+            public Void execute(Connection writeCon) throws OXException, SQLException {
+                restore(folderId, ctx, writeCon);
+                return null;
+            }
+        };
+        acquireWriteConnectionAndExecute(callback, true, ctx);
     }
 
     public static void restore(final int folderId, final Context ctx, Connection writeCon) throws OXException, SQLException {
@@ -2354,7 +2602,7 @@ public final class OXFolderSQL {
 
     /**
      * This method is used to generate identifier when creating a context.
-     * 
+     *
      * @param ctx context to create.
      * @param con writable connection to the context database in transaction mode - autocommit is false.
      * @return a unique identifier for a folder.
@@ -3386,12 +3634,14 @@ public final class OXFolderSQL {
             return new int[0];
         }
 
-        Connection readCon = DBPool.pickup(context);
-        try {
-            return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
-        } finally {
-            DBPool.closeReaderSilent(readCon);
-        }
+        SqlFuntion<int[]> callback = new SqlFuntion<int[]>() {
+
+            @Override
+            public int[] execute(Connection readCon) throws OXException, SQLException {
+                return searchInfostoreFoldersByName(query, folderIds, date, start, end, context, readCon);
+            }
+        };
+        return acquireReadConnectionAndExecute(callback, context);
     }
 
     /**

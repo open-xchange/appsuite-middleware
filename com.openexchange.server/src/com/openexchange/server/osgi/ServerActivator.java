@@ -283,7 +283,7 @@ import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
-import com.openexchange.tools.oxfolder.OXFolderUniqueness;
+import com.openexchange.tools.oxfolder.OXFolderPathUniqueness;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -796,9 +796,9 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateMailAccountTables());
         registerService(CreateTableService.class, new CreateIDSequenceTable());
         // Register oxfolder_reservedpath related services
-        registerService(CreateTableService.class, new OXFolderUniqueness.CreateFolderReservedPathTable());
-        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new OXFolderUniqueness.CreateFolderReservedPathUpdateTask()));
-        getServiceSafe(TimerService.class).scheduleAtFixedRate(new OXFolderUniqueness.CleanUpReservedPathsTask(this), 30, 60, TimeUnit.MINUTES);
+        registerService(CreateTableService.class, new OXFolderPathUniqueness.CreateFolderReservedPathTable());
+        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new OXFolderPathUniqueness.CreateFolderReservedPathUpdateTask()));
+        getServiceSafe(TimerService.class).scheduleAtFixedRate(new OXFolderPathUniqueness.CleanUpReservedPathsTask(this), 30, 60, TimeUnit.MINUTES);
         
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         MailAccountStorageService mailAccountStorageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
