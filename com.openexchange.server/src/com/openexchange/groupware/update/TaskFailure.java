@@ -68,8 +68,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
      *
      * @param builder the builder
      */
-    @SuppressWarnings("synthetic-access")
-    private TaskFailure(Builder builder) {
+    TaskFailure(Builder builder) {
         taskName = builder.taskName;
         className = builder.className;
         schemaName = builder.schemaName;
@@ -161,7 +160,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
     /**
      * Creates builder to build {@link TaskFailure}.
      *
-     * @return created builder
+     * @return The newly created builder
      */
     public static Builder builder() {
         return new Builder();
@@ -176,26 +175,51 @@ public class TaskFailure implements Comparable<TaskFailure> {
         private String className;
         private String schemaName;
 
-        public Builder() {
+        /**
+         * Initializes a new {@link Builder}.
+         */
+        Builder() {
             super();
         }
 
+        /**
+         * Sets the name of the update task that failed.
+         *
+         * @param taskName The task name
+         * @return This instance
+         */
         public Builder withTaskName(String taskName) {
             this.taskName = taskName;
             return this;
         }
 
+        /**
+         * Sets the name of the class the failed update task belongs to.
+         *
+         * @param className The class name
+         * @return This instance
+         */
         public Builder withClassName(String className) {
             this.className = className;
             return this;
         }
 
+        /**
+         * Sets the name of the schema, on which the update task failed.
+         *
+         * @param schemaName The schema name
+         * @return This instance
+         */
         public Builder withSchemaName(String schemaName) {
             this.schemaName = schemaName;
             return this;
         }
 
-        @SuppressWarnings("synthetic-access")
+        /**
+         * Builds the resulting instance of {@link TaskFailure} from this builder's arguments.
+         *
+         * @return The resulting instance of {@link TaskFailure}
+         */
         public TaskFailure build() {
             return new TaskFailure(this);
         }
