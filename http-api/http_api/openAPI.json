@@ -1514,7 +1514,7 @@
           "schema" : {
             "type" : "string"
           },
-          "required" : false,
+          "required" : true,
           "description" : "The path to the jslob entry"
         } ],
         "responses" : {
@@ -20816,7 +20816,8 @@
             "description" : "Deliver all subfolders regardless of their subscribed status, defaults to `true`."
           },
           "date" : {
-            "type" : "long",
+            "type" : "integer",
+            "format" : "int64",
             "description" : "The time stamp to limit search result to folders that are newer, defaults to `-1`."
           }
         }

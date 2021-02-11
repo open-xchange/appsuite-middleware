@@ -26,7 +26,7 @@
         name: jslobPath
         schema:
           type: string
-        required: false
+        required: true
         description: The path to the jslob entry
     responses:
       '200':
