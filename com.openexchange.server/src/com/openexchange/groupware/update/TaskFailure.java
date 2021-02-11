@@ -66,14 +66,17 @@ public class TaskFailure implements Comparable<TaskFailure> {
     /**
      * Initializes a new {@link TaskFailure}.
      *
-     * @param builder the builder
+     * @param taskName The name of the failed update task
+     * @param className The name of the class the update task belongs to
+     * @param schemaName The name of the schema on which the update task failed
      */
-    TaskFailure(Builder builder) {
-        taskName = builder.taskName;
-        className = builder.className;
-        schemaName = builder.schemaName;
+    TaskFailure(String taskName, String className, String schemaName) {
+        super();
+        this.taskName = taskName;
+        this.className = className;
+        this.schemaName = schemaName;
 
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + ((className == null) ? 0 : className.hashCode());
         result = prime * result + ((schemaName == null) ? 0 : schemaName.hashCode());
@@ -100,7 +103,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
     }
 
     /**
-     * Gets the name of the schema on which the update task failed
+     * Gets the name of the schema on which the update task failed.
      *
      * @return The schema name
      */
@@ -153,6 +156,23 @@ public class TaskFailure implements Comparable<TaskFailure> {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("TaskFailure [");
+        if (taskName != null) {
+            sb.append("taskName=").append(taskName).append(", ");
+        }
+        if (className != null) {
+            sb.append("className=").append(className).append(", ");
+        }
+        if (schemaName != null) {
+            sb.append("schemaName=").append(schemaName);
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     //////////////////////////////////// BUILDER ////////////////////////////////////
@@ -221,7 +241,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
          * @return The resulting instance of {@link TaskFailure}
          */
         public TaskFailure build() {
-            return new TaskFailure(this);
+            return new TaskFailure(taskName, className, schemaName);
         }
     }
 }

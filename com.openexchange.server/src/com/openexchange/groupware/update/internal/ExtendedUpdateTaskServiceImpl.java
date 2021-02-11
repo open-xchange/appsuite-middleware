@@ -120,7 +120,7 @@ public class ExtendedUpdateTaskServiceImpl extends UpdateTaskServiceImpl impleme
 
         List<TaskFailure> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
-            failuresList.add(new TaskFailure.Builder().withTaskName(taskInfo.getTaskName()).withClassName(taskInfo.getClass().getName()).withSchemaName(taskInfo.getSchema()).build());
+            failuresList.add(TaskFailure.builder().withTaskName(taskInfo.getTaskName()).withClassName(taskInfo.getClass().getName()).withSchemaName(taskInfo.getSchema()).build());
         }
         return failuresList;
     }
