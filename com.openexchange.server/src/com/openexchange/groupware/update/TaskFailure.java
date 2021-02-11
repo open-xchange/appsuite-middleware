@@ -65,7 +65,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
 
     /**
      * Initializes a new {@link TaskFailure}.
-     * 
+     *
      * @param builder the builder
      */
     @SuppressWarnings("synthetic-access")
@@ -80,6 +80,33 @@ public class TaskFailure implements Comparable<TaskFailure> {
         result = prime * result + ((schemaName == null) ? 0 : schemaName.hashCode());
         result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
         hashCode = result;
+    }
+
+    /**
+     * Gets the name of the failed update task.
+     *
+     * @return The task name
+     */
+    public String getTaskName() {
+        return taskName;
+    }
+
+    /**
+     * Gets the name of the class the update task belongs to.
+     *
+     * @return The class name
+     */
+    public String getClassName() {
+        return className;
+    }
+
+    /**
+     * Gets the name of the schema on which the update task failed
+     *
+     * @return The schema name
+     */
+    public String getSchemaName() {
+        return schemaName;
     }
 
     @Override
@@ -133,7 +160,7 @@ public class TaskFailure implements Comparable<TaskFailure> {
 
     /**
      * Creates builder to build {@link TaskFailure}.
-     * 
+     *
      * @return created builder
      */
     public static Builder builder() {
