@@ -2342,21 +2342,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 // Reassign guestCreatedBy values
-                if (destUser == null && adminId == null) {
-                    // Determine context admin
-                    stmt = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
-                    stmt.setInt(1, contextId);
-                    rs = stmt.executeQuery();
-                    if (!rs.next()) {
-                        throw new StorageException("Failed to determine context administrator for context " + contextId);
+                int guestCreatedBy;
+                if (null == destUser || 0 == i(destUser)) {
+                    if (null == adminId) {
+                        adminId = I(OXToolStorageInterface.getInstance().getAdminForContext(ctx, write_ox_con));
                     }
-                    adminId = I(rs.getInt(1));
-                    rs.close();
-                    rs = null;
-                    stmt.close();
+                    guestCreatedBy = i(adminId); // reassign to context admin
+                } else {
+                    guestCreatedBy = i(destUser); // reassign to other user
                 }
                 stmt = write_ox_con.prepareStatement("UPDATE user SET guestCreatedBy = ? WHERE cid = ? AND guestCreatedBy = ?");
-                stmt.setInt(1, destUser == null ? i(adminId) : i(destUser));
+                stmt.setInt(1, guestCreatedBy);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();

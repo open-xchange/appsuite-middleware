@@ -750,6 +750,11 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
         list.add(new com.openexchange.groupware.update.tasks.DropSwiftFilestoreTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 8.0.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Re-assign guests that have guestCreatedBy set to 0 to context admin
+        list.add(new com.openexchange.groupware.update.tasks.ReassignGuestsWithUserZeroToAdminUpdateTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
