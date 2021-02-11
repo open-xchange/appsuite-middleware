@@ -154,6 +154,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     MergeWarningPermissionOnMoveTest.class,
 
     MWB682Test.class,
+    MWB905Test.class,
 
 })
 public final class FolderTestSuite {
