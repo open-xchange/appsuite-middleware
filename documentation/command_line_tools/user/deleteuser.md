@@ -28,6 +28,12 @@ This command line tool deletes users in a given context. If you delete a user th
 **-u**, *--username* *username*
 : Username of the user.
 
+**-r**, *--reassign* *targetUserId*
+: The user id shared data will be assigned to. If omitted the context admin will be used instead.
+
+**--no-reassign**
+: If set all shared data will be deleted instead of being assigned.
+
 **-A**, **--adminuser** *contextAdmin*
 : Context admin user name for authentication. Optional, depending on your configuration.
 
