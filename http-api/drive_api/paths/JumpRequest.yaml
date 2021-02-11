@@ -1,26 +1,13 @@
 /drive?action=jump:
-  get:
+  post:
     operationId: generateDirectLink
     tags:
       - Drive
     summary: Gets a direct link for a folder or a file into AppSuite.
     description: >
       Generates a direct link into the AppSuite UI for a synchronized file or a
-      synchronized folder and a
-
-      token for token-based login.
-
-
-      #### Use direct link and token with token-based login
-
-      `GET [redirectUrl]`
-
-
-      Login to AppSuite UI with token-based login via the link created with this
-      request. Don't forget to append the `clientToken`
-
-      parameter with the value used to retrieve the redirect URL! Example: `GET
-      http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68&clientToken=47d74b1c-81df-11e4-b116-123b93f75cba`.
+      synchronized folder and a token for token-based login. The acquired link can then be used 
+      by appending the used client token as parameter in a different client, e.g. a web browser. 
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamRoot'
@@ -30,15 +17,7 @@
         description: >-
           Identifier for tracing every single login request passed between
           different systems in a cluster. The value should be some token that is
-          unique for every login request.
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: clientToken
-        description: >-
-          Client-side identifier for accessing the session later. The value
-          should be some token that is unique for every login request.
+          unique for every jump request.
         required: true
         schema:
           type: string
@@ -67,6 +46,19 @@
             - version_history
             - preview
           default: preview
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            title: driveJumpBody
+            properties:
+              clientToken:
+                description: >-
+                  Client side identifier for accessing the session later. The
+                  value should be some token that is unique for every jump
+                  request.
+                type: string
     responses:
       '200':
         description: >
