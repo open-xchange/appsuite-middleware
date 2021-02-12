@@ -265,7 +265,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         try {
             if (0 < folderIdsToDelete.size()) {
                 try {
-                    testUserApi.getFoldersApi().deleteFolders(testUserApi.getSession(), new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null);
+                    testUserApi.getFoldersApi().deleteFolders(getApiClient().getSession(), new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null);
                 } catch (Exception e) {
                     LOG.error("", e);
                 }
@@ -465,7 +465,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
     }
 
     protected FolderData getFolderData(String id) throws Exception {
-        FolderResponse response = getUserApi().getFoldersApi().getFolder(getSessionId(), id, null, null, null);
+        FolderResponse response = getUserApi().getFoldersApi().getFolder(getApiClient().getSession(), id, null, null, null);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
@@ -473,7 +473,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
         NewFolderBodyFolder newFolder = new NewFolderBodyFolder().module(parentFolder.getModule()).title(title).permissions(null);
         NewFolderBody newFolderBody = new NewFolderBody();
         newFolderBody.setFolder(newFolder);
-        FolderUpdateResponse response = getUserApi().getFoldersApi().createFolder(getSessionId(), parentFolder.getId(), newFolderBody, null, null, null, null);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().createFolder(parentFolder.getId(), getApiClient().getSession(), newFolderBody, null, null, null, null);
         String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         rememberFolderIdForCleanup(newId);
         return getFolderData(newId);
@@ -482,7 +482,7 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
     protected FolderData updateFolder(String id, FolderData folderUpdate) throws Exception {
         FolderBody folderBody = new FolderBody();
         folderBody.setFolder(folderUpdate);
-        FolderUpdateResponse response = getUserApi().getFoldersApi().updateFolder(getSessionId(), id, folderBody, null, null, null, null, null, null, null);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().updateFolder(getApiClient().getSession(), id, folderBody, null, null, null, null, null, null, null);
         String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
         rememberFolderIdForCleanup(newId);
         return getFolderData(newId);
