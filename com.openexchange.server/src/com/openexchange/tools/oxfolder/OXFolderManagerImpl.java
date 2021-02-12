@@ -1230,7 +1230,7 @@ public final class OXFolderManagerImpl extends OXFolderManager implements OXExce
          * Call SQL rename
          */
         try {
-            OXFolderSQL.renameFolderSQL(user.getId(), folderObj, lastModified, ctx, writeCon);
+            OXFolderSQL.updateName(storageObj, folderObj.getFolderName(), lastModified, user.getId(), ctx, writeCon);
         } catch (DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (IncorrectStringSQLException e) {

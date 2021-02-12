@@ -779,8 +779,7 @@ public final class OXFolderSQL {
     /**
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
      *
-     * @param folderId The folder ID
-     * @param parentFolderId The parent folder ID
+     * @param storedFolder The folder as currently stored in the DB
      * @param newName The new name to set
      * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
@@ -788,12 +787,12 @@ public final class OXFolderSQL {
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    public static void updateName(int folderId, int parentFolderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
+    public static void updateName(FolderObject storedFolder, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
         SqlFuntion<Void> callback = new SqlFuntion<Void>() {
 
             @Override
             public Void execute(Connection writeCon) throws OXException, SQLException {
-                updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, writeCon, ctx);
+                updateName(storedFolder, newName, lastModified, modifiedBy, ctx, writeCon);
                 return null;
             }
         };
@@ -801,10 +800,9 @@ public final class OXFolderSQL {
     }
 
     /**
-     * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
+     * Updates the name of the given folder with the given name parameter
      *
-     * @param folderId The folder ID
-     * @param parentFolderId The parent folder ID
+     * @param storedFolder The folder as currently stored in the DB
      * @param newName The new name to set
      * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
@@ -813,33 +811,45 @@ public final class OXFolderSQL {
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    public static void updateName(int folderId, int parentFolderId, String newName, long lastModified, int modifiedBy, Connection writeCon, Context ctx) throws OXException, SQLException {
+    public static void updateName(FolderObject storedFolder, String newName, long lastModified, int modifiedBy, Context ctx, Connection writeCon) throws OXException, SQLException {
         if (null == writeCon) {
-            updateName(folderId, parentFolderId, newName, lastModified, modifiedBy, ctx);
+            updateName(storedFolder, newName, lastModified, modifiedBy, ctx);
             return;
         }
-        if (false == OXFolderPathUniqueness.isUniqueFolderPath(newName, parentFolderId, ctx.getContextId(), writeCon)) {
-            throw OXFolderExceptionCode.DUPLICATE_NAME.create(newName, I(parentFolderId));
+        if (false == OXFolderPathUniqueness.isUniqueFolderPath(newName, storedFolder.getParentFolderID(), ctx.getContextId(), writeCon)) {
+            throw OXFolderExceptionCode.DUPLICATE_NAME.create(newName, I(storedFolder.getParentFolderID()));
         }
-        String folderName = OXFolderPathUniqueness.getFolderName(folderId, ctx.getContextId(), writeCon);
 
-        // Update name
-        OXFolderPathUniqueness.reserveFolderPath(newName, parentFolderId, ctx, writeCon);
-        PreparedStatement stmt = null;
-        try {
-            // Do the update
-            stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?");
-            stmt.setString(1, newName);
-            stmt.setLong(2, lastModified);
-            stmt.setInt(3, modifiedBy);
-            stmt.setInt(4, ctx.getContextId());
-            stmt.setInt(5, folderId);
-            executeUpdate(stmt);
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-        // Remove old entry if there was no error during update
-        OXFolderPathUniqueness.clearReservedFolderPath(folderName, parentFolderId, ctx.getContextId(), writeCon);
+        /*
+         * Reserve new folder name and update
+         */
+        OXFolderPathUniqueness.reserveFolderPath(newName, storedFolder.getParentFolderID(), ctx, writeCon);
+        SQLClosure<Void> renameClosure = new SQLClosure<Void>() {
+
+            @Override
+            public Void execute(Connection con) throws SQLException, OXException {
+
+                PreparedStatement stmt = null;
+                try {
+                    // Do the update
+                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?");
+                    stmt.setString(1, newName);
+                    stmt.setLong(2, lastModified);
+                    stmt.setInt(3, modifiedBy);
+                    stmt.setInt(4, ctx.getContextId());
+                    stmt.setInt(5, storedFolder.getObjectID());
+                    executeUpdate(stmt);
+                } finally {
+                    Databases.closeSQLStuff(stmt);
+                }
+                return null;
+            }
+        };
+        RetryingTransactionClosure.execute(renameClosure, 3, writeCon);
+        /*
+         *  Remove old folder name, so it can be reused
+         */
+        OXFolderPathUniqueness.clearReservedFolderPath(storedFolder.getFolderName(), storedFolder.getParentFolderID(), ctx.getContextId(), writeCon);
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid, fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
@@ -1852,11 +1862,7 @@ public final class OXFolderSQL {
                     String sql = new StringBuilder()
                         .append("INSERT INTO oxfolder_tree ")
                         .append("(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,meta) ")
-                        .append("SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ")
-                        .append("WHERE NOT EXISTS ")
-                        .append("(SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
-                        .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin " : "utf8_bin ")
-                        .append("AND parent>?);")
+                        .append("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                     .toString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(1, newFolderID);
@@ -1884,14 +1890,7 @@ public final class OXFolderSQL {
                             stmt.setBinaryStream(14, metaStream); // meta
                         }
                     }
-                    stmt.setInt(15, ctx.getContextId());
-                    stmt.setInt(16, folder.getParentFolderID());
-                    stmt.setString(17, folder.getFolderName());
-                    stmt.setInt(18, FolderObject.MIN_FOLDER_ID);
-                    if (0 == executeUpdate(stmt)) {
-                        // Due to already existing subfolder with the same name
-                        throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
-                    }
+                    executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
 
@@ -2038,6 +2037,7 @@ public final class OXFolderSQL {
         boolean changedName = false;
         String folderName = null;
         if (folder.containsFolderName()) {
+            // Get current folder name
             folderName = OXFolderPathUniqueness.getFolderName(folder.getObjectID(), ctx.getContextId(), writeCon);
             if (false == folder.getFolderName().equalsIgnoreCase(folderName)) {
                 // Folder name is supposed to be changed. Check for uniqueness.
@@ -2068,8 +2068,7 @@ public final class OXFolderSQL {
                     if (folder.containsFolderName()) {
                         stmt = con.prepareStatement("UPDATE oxfolder_tree SET fname=?" + (containsMeta ? ",meta=?" : "") +
                             ",changing_date=?,changed_from=?,permission_flag=?,module=?" + (containsCreatedBy ? ",created_from=?" : "") + (null != originPath ? ",origin=?" : "") +
-                            " WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
-                            "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
+                            " WHERE cid=? AND fuid=?");
                         stmt.setString(pos++, folder.getFolderName());
                         if (containsMeta) {
                             metaStream = OXFolderUtility.serializeMeta(folder.getMeta());
@@ -2095,15 +2094,7 @@ public final class OXFolderSQL {
                         }
                         stmt.setInt(pos++, ctx.getContextId());
                         stmt.setInt(pos++, folder.getObjectID());
-                        stmt.setInt(pos++, ctx.getContextId());
-                        stmt.setInt(pos++, folder.getParentFolderID());
-                        stmt.setInt(pos++, FolderObject.MIN_FOLDER_ID);
-                        stmt.setString(pos++, folder.getFolderName());
-                        stmt.setInt(pos++, folder.getObjectID());
-                        if (0 == executeUpdate(stmt)) {
-                            // due to already existing subfolder with the same name
-                            throw new SQLException("Entry not updated");
-                        }
+                        executeUpdate(stmt);
                         stmt.close();
                         stmt = null;
                     } else {
@@ -2186,15 +2177,15 @@ public final class OXFolderSQL {
             }
         };
         RetryingTransactionClosure.execute(updateFolderClosure, 3, writeCon);
+        /*
+         * Clear old folder name after the update, so the name can be reused
+         */
         if (changedName) {
             OXFolderPathUniqueness.clearReservedFolderPath(folderName, folder.getParentFolderID(), ctx.getContextId(), writeCon);
         }
     }
 
-    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
-        "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
-        "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);"
-    ;
+    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? WHERE cid=? AND fuid=?";
 
     private static final String SQL_MOVE_SELECT = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
@@ -2221,6 +2212,9 @@ public final class OXFolderSQL {
         if (false == OXFolderPathUniqueness.isUniqueFolderPath(src.getFolderName(), dest.getObjectID(), ctx.getContextId(), writeCon)) {
             throw OXFolderExceptionCode.DUPLICATE_NAME.create(src.getFolderName(), I(dest.getObjectID()));
         }
+        /*
+         * Clear the folder name under the current parent, reserve name under the new parent
+         */
         OXFolderPathUniqueness.clearReservedFolderPathFor(src.getObjectID(), ctx.getContextId(), writeCon);
         OXFolderPathUniqueness.reserveFolderPath(src.getFolderName(), dest.getObjectID(), ctx, writeCon);
         SQLClosure<Void> moveFolderClosure = new SQLClosure<Void>() {
@@ -2238,15 +2232,7 @@ public final class OXFolderSQL {
                     pst.setString(4, src.getFolderName());
                     pst.setInt(5, ctx.getContextId());
                     pst.setInt(6, src.getObjectID());
-                    pst.setInt(7, ctx.getContextId());
-                    pst.setInt(8, dest.getObjectID());
-                    pst.setInt(9, dest.getObjectID());
-                    pst.setString(10, src.getFolderName());
-                    pst.setInt(11, src.getObjectID());
-                    if (0 == executeUpdate(pst)) {
-                        // due to already existing subfolder with the same name
-                        throw new SQLException("Entry not updated");
-                    }
+                    executeUpdate(pst);
                     pst.close();
                     pst = null;
 
@@ -2283,48 +2269,6 @@ public final class OXFolderSQL {
             }
         };
         RetryingTransactionClosure.execute(moveFolderClosure, 3, writeCon);
-    }
-
-    private static final String SQL_RENAME_UPDATE = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? where cid = ? AND fuid = ?";
-
-    static void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified, final Context ctx) throws SQLException, OXException {
-        SqlFuntion<Void> callback = new SqlFuntion<Void>() {
-
-            @Override
-            public Void execute(Connection writeCon) throws OXException, SQLException {
-                renameFolderSQL(userId, folderObj, lastModified, ctx, writeCon);
-                return null;
-            }
-        };
-        acquireWriteConnectionAndExecute(callback, false, ctx);
-    }
-
-    static void renameFolderSQL(final int userId, final FolderObject folderObj, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
-        if (writeCon == null) {
-            renameFolderSQL(userId, folderObj, lastModified, ctx);
-            return;
-        }
-
-        SQLClosure<Void> renameFolderClosure = new SQLClosure<Void>() {
-
-            @Override
-            public Void execute(Connection con) throws SQLException, OXException {
-                PreparedStatement pst = null;
-                try {
-                    pst = con.prepareStatement(SQL_RENAME_UPDATE);
-                    pst.setString(1, folderObj.getFolderName());
-                    pst.setLong(2, lastModified);
-                    pst.setInt(3, userId);
-                    pst.setInt(4, ctx.getContextId());
-                    pst.setInt(5, folderObj.getObjectID());
-                    executeUpdate(pst);
-                } finally {
-                    Databases.closeSQLStuff(pst);
-                }
-                return null;
-            }
-        };
-        RetryingTransactionClosure.execute(renameFolderClosure, 3, writeCon);
     }
 
     private static final String STR_OXFOLDERTREE = "oxfolder_tree";

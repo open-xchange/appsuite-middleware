@@ -226,7 +226,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
             } else {
                 folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
             }
-            OXFolderSQL.updateName(defaultInfostoreFolderId, folder.getParentFolderID(), folderName, lastModified, context.getMailadmin(), connection, context);
+            OXFolderSQL.updateName(folder, folderName, lastModified, context.getMailadmin(), context, connection);
             /*
              * Clear caches
              */
