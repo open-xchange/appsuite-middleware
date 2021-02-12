@@ -102,7 +102,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         if (folderToDelete != null) {
-            foldersApi.deleteFolders(getSessionId(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+            foldersApi.deleteFolders(getSessionId(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "contacts", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }

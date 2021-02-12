@@ -139,7 +139,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         }
         if (!folders.isEmpty()) {
             FoldersApi folderApi = new FoldersApi(getApiClient());
-            folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
+            folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
         }
         super.tearDown();
     }
@@ -171,25 +171,25 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
         String name = filename == null ? file.getFilename() : filename;
         // @formatter:off
         InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(
-            getApiClient().getSession(), 
-            folderId, 
-            name, 
-            bytes, 
-            timestamp, 
-            id, 
-            name, 
-            mimeType, 
-            null, 
-            null, 
-            null, 
-            null, 
-            versionComment, 
-            null, 
-            null, 
-            filesize == null ? Long.valueOf(bytes.length) : filesize, 
-            Boolean.FALSE, 
-            Boolean.FALSE, 
-            offset, 
+            getApiClient().getSession(),
+            folderId,
+            name,
+            bytes,
+            timestamp,
+            id,
+            name,
+            mimeType,
+            null,
+            null,
+            null,
+            null,
+            versionComment,
+            null,
+            null,
+            filesize == null ? Long.valueOf(bytes.length) : filesize,
+            Boolean.FALSE,
+            Boolean.FALSE,
+            offset,
             null);
         // @formatter:on
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
@@ -251,7 +251,7 @@ public class InfostoreApiClientTest extends AbstractConfigAwareAPIClientSession 
 
     protected void deleteFolder(String folderId, Boolean hardDelete) throws ApiException {
         FoldersApi folderApi = new FoldersApi(getApiClient());
-        FoldersCleanUpResponse deleteFolderResponse = folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, hardDelete, Boolean.TRUE, Boolean.FALSE, null);
+        FoldersCleanUpResponse deleteFolderResponse = folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, hardDelete, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
         Assert.assertNull(deleteFolderResponse.getErrorDesc(), deleteFolderResponse.getError());
         Assert.assertNotNull(deleteFolderResponse.getData());
         Assert.assertEquals(0, deleteFolderResponse.getData().size());

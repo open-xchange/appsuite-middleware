@@ -108,7 +108,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     protected MailDestinationData mailWithAttachment;
 
     private final String fileName;
-    
+
     private static final String FOLDER = "default0%2FINBOX";
     /**
      * Initializes a new {@link AbstractMailComposeTest}.
@@ -119,7 +119,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     /**
      * Initializes a new {@link AbstractMailComposeTest}.
-     * 
+     *
      * @param fileName The file name of the mail to upload
      */
     public AbstractMailComposeTest(String fileName) {
@@ -181,7 +181,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             body.add(mailListElement);
         }
         mailApi.deleteMails(getApiClient().getSession(), body, timestamp, null, null);
-        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         super.tearDown();
     }
 

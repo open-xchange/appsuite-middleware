@@ -232,7 +232,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         try {
-            folderApi.deleteFolders(getApiClient().getSession(), createdFolders, "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
+            folderApi.deleteFolders(getApiClient().getSession(), createdFolders, "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
         } finally {
             super.tearDown();
         }
