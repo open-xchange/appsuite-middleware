@@ -101,7 +101,7 @@ public class CalendarFolderManager extends AbstractManager {
      */
     public void cleanUp() {
         try {
-            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         } catch (ApiException e) {
             System.err.println("Could not clean up the calendar folders for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -227,7 +227,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public void deleteFolders(List<String> folders) throws ApiException {
-        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, Boolean.FALSE);
+        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         for (String folder : folders) {
             folderIds.remove(folder);
         }

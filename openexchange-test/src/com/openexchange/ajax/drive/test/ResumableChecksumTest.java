@@ -103,7 +103,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     private DriveApi driveApi;
     private String folderId;
     private String privateInfostoreFolder;
-    private final List<String> folders = new ArrayList<>();
+    private List<String> folders = new ArrayList<>();
 
     @Override
     public void setUp() throws Exception {
@@ -128,7 +128,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
         try {
             if (!folders.isEmpty()) {
                 FoldersApi folderApi = new FoldersApi(getApiClient());
-                folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
+                folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
             }
         } finally {
             super.tearDown();
@@ -136,7 +136,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     }
 
     /**
-     *
+     * 
      * Uploads an empty byte array in three chunks, downloads the uploaded data,
      * and tests the total length and checksum of the data before and after the upload / download.
      *
@@ -176,7 +176,7 @@ public class ResumableChecksumTest extends AbstractConfigAwareAPIClientSession {
     }
 
     /**
-     *
+     * 
      * Uploads a byte array filled with random bytes in two chunks, downloads the uploaded data,
      * and tests the total length and checksum of the data before and after the upload/download.
      *

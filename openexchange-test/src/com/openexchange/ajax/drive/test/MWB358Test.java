@@ -80,9 +80,9 @@ import com.openexchange.testing.httpclient.modules.DriveApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
 /**
- *
+ * 
  * {@link MWB358Test}
- *
+ * 
  * Tests for MWB358: Deletion of shared file was not detected during OX Drive synchronization.
  *
  * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
@@ -117,7 +117,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Tests if a sync folder action indicates an action to sync the shared folder,
      * when a shared file is deleted and removed from trash.
      *
@@ -132,25 +132,25 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Tests if a sync folder action indicates an action to sync the shared folder,
      * when the folder with a shared file inside is deleted.
-     *
+     * 
      * @throws Exception
      */
     @Test
     public void testDeleteFolderWithSharedFile() throws ApiException {
         createShareAndSyncTwoFiles();
-        FoldersCleanUpResponse deleteFoldersResponse = foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", L(new Date().getTime()), null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null, Boolean.FALSE);
+        FoldersCleanUpResponse deleteFoldersResponse = foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", L(new Date().getTime()), null, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, null);
         assertNull(deleteFoldersResponse.getErrorDesc(), deleteFoldersResponse.getError());
         checkForSyncAction();
     }
 
     /**
-     *
+     * 
      * Tests if a sync folder action indicates an action to sync the shared folder,
      * when a shared file is deleted without removing it from trash.
-     *
+     * 
      * @throws JSONException
      * @throws IOException
      * @throws OXException
@@ -165,10 +165,10 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Tests if a sync folder action indicates an action to sync the shared folder,
      * when the sharing permission of a shared file is removed.
-     *
+     * 
      * @throws Exception
      */
     @Test
@@ -179,7 +179,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Checks, if the sync folder action of shared folder from user 2 delivers a sync action.
      *
      * @throws ApiException
@@ -191,7 +191,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Creates a file with the given file name, owner and shared user.
      *
      * @param sharedToUserId The if of the user for whom the file is shared.
@@ -216,7 +216,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Creates two file for user 1, that are shared with user 2, and checks the sync of shared folder from user 2.
      *
      * @return An entry containing the object id of file 1.
@@ -246,7 +246,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Deletes a file with the given object id.
      *
      * @param objectId The object id of the file.
@@ -260,7 +260,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Empties the trash folder.
      *
      * @throws ApiException
@@ -280,7 +280,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Removes the permissions of the given file.
      *
      * @param objectId the id of the file.
@@ -291,7 +291,7 @@ public class MWB358Test extends InfostoreApiClientTest {
     }
 
     /**
-     *
+     * 
      * Calls the drive sync folder action with the given parameters.
      *
      * @param apiClient The api client of the user for whom the sync action should be executed.

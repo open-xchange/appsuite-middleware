@@ -56,12 +56,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.ComposeBody;
-import com.openexchange.testing.httpclient.models.MailComposeAttachment;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
@@ -187,8 +185,7 @@ public class AttachmentsTest extends AbstractMailComposeTest {
         MailComposeMessageModel model = createNewCompositionSpace();
         MailComposeAttachmentResponse postAttachments = api.postAttachments(getSessionId(), model.getId(), attachment);
         check(postAttachments);
-        List<MailComposeAttachment> attachments = postAttachments.getData().getAttachments();
-        byte[] attachmentsById = api.getAttachmentsById(getSessionId(), model.getId(), attachments.get(0).getId());
+        byte[] attachmentsById = api.getAttachmentsById(getSessionId(), model.getId(), postAttachments.getData().getId());
         assertTrue("No data.", attachmentsById.length > 100);
     }
 }

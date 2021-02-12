@@ -97,7 +97,7 @@ public abstract class AbstractMailFilterTest extends AbstractConfigAwareAPIClien
     public void tearDown() throws Exception {
         ApiException ex = null;
         try {
-            folderApi.deleteFolders(getSessionId(), foldersToDelete, "0", Long.MAX_VALUE, null, true, false, false, null, Boolean.FALSE);
+            folderApi.deleteFolders(getSessionId(), foldersToDelete, "0", Long.MAX_VALUE, null, true, false, false, null);
             for (int ruleId : sieveRuleToDelete) {
                 MailFilterDeletionBody body = new MailFilterDeletionBody();
                 body.setId(ruleId);
