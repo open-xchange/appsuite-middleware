@@ -182,4 +182,70 @@ public class Bug29853Test extends AbstractFolderTest {
         assertNotNull("No folder renamed", renamedFolder);
     }
 
+    @Test
+    public void testMoveWithSameName() throws Throwable {
+        /*
+         * Insert subfolders
+         */
+        FolderObject[] subfolders = new FolderObject[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subfolders[i] = createSingle(FolderObject.INFOSTORE, "f" + i);
+            subfolders[i].setParentFolderID(folder.getObjectID());
+            InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_NEW, subfolders[i]);
+            InsertResponse insertResponse = client.execute(insertRequest);
+            insertResponse.fillObject(subfolders[i]);
+        }
+        /*
+         * Create a folder with the exact same name in each subfolder
+         */
+        String folderName = "a";
+        FolderObject[] subSubfolders = new FolderObject[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subSubfolders[i] = createSingle(FolderObject.INFOSTORE, folderName);
+            subSubfolders[i].setParentFolderID(subfolders[i].getObjectID());
+            InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_NEW, subSubfolders[i]);
+            InsertResponse insertResponse = client.execute(insertRequest);
+            insertResponse.fillObject(subSubfolders[i]);
+        }
+        /*
+         * Try to move each sub-sub-folder into the parent folder
+         */
+        Thread[] moveThreads = new Thread[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subSubfolders[i].setParentFolderID(folder.getObjectID());
+            final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, subSubfolders[i]);
+            Runnable moveRunnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    client.executeSafe(updateRequest);
+                }
+            };
+            moveThreads[i] = new Thread(moveRunnable);
+            moveThreads[i].start();
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            moveThreads[i].join();
+        }
+
+        /*
+         * Check that only one folder was moved successfully
+         */
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, folder.getObjectID());
+        ListResponse listResponse = client.execute(listRequest);
+        FolderObject movedFolder = null;
+        Iterator<FolderObject> iterator = listResponse.getFolder();
+        while (iterator.hasNext()) {
+            FolderObject folder = iterator.next();
+            if (folderName.equals(folder.getFolderName())) {
+                if (null == movedFolder) {
+                    movedFolder = folder;
+                } else {
+                    fail("Folder was renamed more than once: " + listResponse.getResponse());
+                }
+            }
+        }
+        assertNotNull("No folder renamed", movedFolder);
+    }
+
 }
