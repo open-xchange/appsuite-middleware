@@ -886,6 +886,22 @@ EOF
     fi
     GLOBIGNORE='*'
 
+    SCR=SCR-810
+    if ox_scr_todo ${SCR}
+    then
+      prop_file=/opt/open-xchange/etc/ox-scriptconf.sh
+      old_default_value='JAVA_OPTS_GC="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:NewRatio=3"'
+      new_default_value='JAVA_OPTS_GC="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly"'
+      IFS=$'\n'
+      findings=( $(grep '^JAVA_OPTS_GC=' ${prop_file}) )
+      unset IFS
+      if [ 1 -eq ${#findings[@]} ] && [ "${old_default_value}"  = "${findings[0]}" ]
+      then
+        sed -i -e "s/^${old_default_value}\$/${new_default_value}/" $prop_file
+      fi
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
