@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import com.google.common.collect.Iterables;
 import com.openexchange.database.Databases;
@@ -67,6 +66,13 @@ import com.openexchange.database.Databases;
  * @since v7.10.2
  */
 public abstract class AbstractContextBasedTombstoneTableCleaner extends AbstractTombstoneTableCleaner {
+
+    /**
+     * Initializes a new {@link AbstractContextBasedTombstoneTableCleaner}.
+     */
+    protected AbstractContextBasedTombstoneTableCleaner() {
+        super();
+    }
 
     protected Map<Integer, Set<Integer>> gatherDeleteCandidates(Connection connection, long timestamp, String selectStmt) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(selectStmt)) {
@@ -80,7 +86,7 @@ public abstract class AbstractContextBasedTombstoneTableCleaner extends Abstract
 
     /**
      * Reads the items selected by {@link #gatherDeleteCandidates(Connection, long, String)} and returns the contextId - Set of object IDs mapping
-     * 
+     *
      * @param resultSet The {@link ResultSet} to read from
      * @return Map<Integer, Set<Integer>> containing the items read by {@link #gatherDeleteCandidates(Connection, long, String)}
      * @throws SQLException
@@ -89,7 +95,7 @@ public abstract class AbstractContextBasedTombstoneTableCleaner extends Abstract
 
     /**
      * Generic method to (chunk-wise) delete entries based on the given delete statement.
-     * 
+     *
      * @param connection The write connection to delete the entries
      * @param deleteCandidatesPerContext Map containing context id to a set of integer mapping with IDs that should be deleted
      * @param deleteStatement The statement that will be used to delete entries
@@ -97,7 +103,7 @@ public abstract class AbstractContextBasedTombstoneTableCleaner extends Abstract
      */
     protected int deleteContextWise(Connection connection, Map<Integer, Set<Integer>> deleteCandidatesPerContext, String deleteStatement) throws SQLException {
         int deletedRows = 0;
-        for (Entry<Integer, Set<Integer>> candidatesPerContext : deleteCandidatesPerContext.entrySet()) {
+        for (Map.Entry<Integer, Set<Integer>> candidatesPerContext : deleteCandidatesPerContext.entrySet()) {
             Integer contextId = candidatesPerContext.getKey();
             Set<Integer> ids = candidatesPerContext.getValue();
 

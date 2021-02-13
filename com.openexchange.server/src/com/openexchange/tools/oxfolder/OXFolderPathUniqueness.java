@@ -55,30 +55,19 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.AfterCommitDatabaseConnectionListener;
 import com.openexchange.database.DatabaseConnectionListenerAnnotatable;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
-import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link OXFolderPathUniqueness} - Utility class to ensure a unique folder path.
@@ -333,82 +322,6 @@ public class OXFolderPathUniqueness {
          */
         public CreateFolderReservedPathUpdateTask() {
             super(new CreateFolderReservedPathTable(), null);
-        }
-    }
-
-    /**
-     *
-     * {@link CleanUpReservedPathsTask}
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.5
-     */
-    public static class CleanUpReservedPathsTask implements Runnable {
-
-        final ServiceLookup services;
-
-        /**
-         * Initializes a new {@link OXFolderPathUniqueness.CleanUpReservedPathsTask}.
-         *
-         * @param services The service lookup
-         */
-        public CleanUpReservedPathsTask(ServiceLookup services) {
-            super();
-            this.services = services;
-
-        }
-
-        @Override
-        public void run() {
-            try {
-                ContextService contextService = services.getServiceSafe(ContextService.class);
-                DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
-                Updater updater = Updater.getInstance();
-                NextSchema: for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
-                    UpdateStatus status = updater.getStatus(representativeContextId.intValue());
-                    if (status.blockingUpdatesRunning()) {
-                        // Context-associated schema is currently updated. Abort clean-up for that schema
-                        Optional<String> optSchema = getSchema(representativeContextId, contextService);
-                        if (optSchema.isPresent()) {
-                            LOGGER.info("Update running: Skipping clean-up for reserved folder path data for schema {} since that schema is currently updated", optSchema.get());
-                        } else {
-                            LOGGER.info("Update running: Skipping clean-up for reserved folder path data for schema association with context {} since that schema is currently updated", representativeContextId);
-                        }
-                        continue NextSchema;
-                    }
-                    if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                        // Context-associated schema needs an update. Abort clean-up for that schema
-                        Optional<String> optSchema = getSchema(representativeContextId, contextService);
-                        if (optSchema.isPresent()) {
-                            LOGGER.info("Update needed: Skipping clean-up for reserved folder path data for schema {} since that schema needs an update", optSchema.get());
-                        } else {
-                            LOGGER.info("Update needed: Skipping clean-up for reserved folder path data for schema association with context {} since that schema needs an update", representativeContextId);
-                        }
-                        continue NextSchema;
-                    }
-                    // Perform clean-up
-                    clearExpired(databaseService, i(representativeContextId));
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Unable to clean-up reserved folder path data!", e);
-            }
-        }
-
-        private static void clearExpired(DatabaseService databaseService, int representativeContextId) throws SQLException, OXException {
-            executeUpdate( // @formatter:off
-                representativeContextId,
-                databaseService,
-                "DELETE FROM oxfolder_reservedpaths WHERE expires <= ?",
-                s -> s.setLong(1, System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)));  // @formatter:on
-        }
-
-        private Optional<String> getSchema(Integer representativeContextId, ContextService contextService) {
-            try {
-                Map<PoolAndSchema, List<Integer>> associations = contextService.getSchemaAssociationsFor(Collections.singletonList(representativeContextId));
-                return Optional.of(associations.keySet().iterator().next().getSchema());
-            } catch (Exception e) {
-                return Optional.empty();
-            }
         }
     }
 

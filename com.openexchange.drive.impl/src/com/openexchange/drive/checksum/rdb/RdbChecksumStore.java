@@ -236,6 +236,30 @@ public class RdbChecksumStore implements ChecksumStore {
         int deleted = 0;
         Connection connection = databaseService.getWritable(contextID);
         try {
+            deleted = removeFileChecksumsInFolders(connection, contextID, folderIDs);
+            return deleted;
+        } finally {
+            if (0 < deleted) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
+        }
+    }
+
+    /**
+     * 
+     * Removes all file checksums matching one of the supplied folder IDs.
+     *
+     * @param connection The database connection
+     * @param contextID The context id
+     * @param folderIDs The folder IDs of the checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
+    public static int removeFileChecksumsInFolders(Connection connection, int contextID, List<FolderID> folderIDs) throws OXException {
+        int deleted = 0;
+        try {
             for (int i = 0; i < folderIDs.size(); i += DELETE_CHUNK_SIZE) {
                 /*
                  * prepare chunk
@@ -250,12 +274,6 @@ public class RdbChecksumStore implements ChecksumStore {
             return deleted;
         } catch (SQLException e) {
             throw SQL.wrap(e);
-        } finally {
-            if (0 < deleted) {
-                databaseService.backWritable(contextID, connection);
-            } else {
-                databaseService.backWritableAfterReading(contextID, connection);
-            }
         }
     }
 
@@ -498,21 +516,54 @@ public class RdbChecksumStore implements ChecksumStore {
     public List<DirectoryChecksum> getUnusedDirectoryChecksums(long unusedSince) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectUnusedDirectoryChecksums(connection, contextID, unusedSince);
-        } catch (SQLException e) {
-            throw SQL.wrap(e);
+            return getUnusedDirectoryChecksums(connection, contextID, unusedSince);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
     }
 
+    /**
+     * Gets a list of directory checksums that were not "used", i.e. not have been inserted/updated or touched since the supplied
+     * timestamp.
+     *
+     * @param connection The database connection
+     * @param contextID The context id
+     * @param unusedSince The maximum "used" timestamp of a checksum to be considered as "unused"
+     * @return The unused checksums, or <code>null</code> if there are none
+     */
+    public static List<DirectoryChecksum> getUnusedDirectoryChecksums(Connection connection, int contextID, long unusedSince) throws OXException {
+        try {
+            return selectUnusedDirectoryChecksums(connection, contextID, unusedSince);
+        } catch (SQLException e) {
+            throw SQL.wrap(e);
+        }
+    }
+
     @Override
     public List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
+        Connection connection = databaseService.getReadOnly(contextID);
+        try {
+            return getDirectoryChecksums(connection, contextID, folderIDs);
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    /**
+     * 
+     * Gets the directory checksums.
+     *
+     * @param connection The database connection
+     * @param contextID The context id
+     * @param folderIDs The folder ids
+     * @return A list with directory checksums.
+     * @throws OXException
+     */
+    public static List<DirectoryChecksum> getDirectoryChecksums(Connection connection, int contextID, List<FolderID> folderIDs) throws OXException {
         if (null == folderIDs) {
             return Collections.emptyList();
         }
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>();
-        Connection connection = databaseService.getReadOnly(contextID);
         try {
             /*
              * select chunk-wise
@@ -524,14 +575,30 @@ public class RdbChecksumStore implements ChecksumStore {
             return checksums;
         } catch (SQLException e) {
             throw SQL.wrap(e);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
         }
     }
 
     @Override
     public int removeDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
+        try {
+            return removeDirectoryChecksums(connection, contextID, directoryChecksums);
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+
+    /**
+     * 
+     * Removes the directory checksums.
+     *
+     * @param connection The database connection
+     * @param contextID The context id
+     * @param directoryChecksums The directory checksums to remove
+     * @return The number of deleted checksums.
+     * @throws OXException
+     */
+    public static int removeDirectoryChecksums(Connection connection, int contextID, List<DirectoryChecksum> directoryChecksums) throws OXException {
         try {
             int deleted = 0;
             for (int i = 0; i < directoryChecksums.size(); i += DELETE_CHUNK_SIZE) {
@@ -555,8 +622,6 @@ public class RdbChecksumStore implements ChecksumStore {
             return deleted;
         } catch (SQLException e) {
             throw SQL.wrap(e);
-        } finally {
-            databaseService.backWritable(contextID, connection);
         }
     }
 

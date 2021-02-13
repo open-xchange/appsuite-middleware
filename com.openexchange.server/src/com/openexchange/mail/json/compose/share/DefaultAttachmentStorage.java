@@ -52,6 +52,7 @@ package com.openexchange.mail.json.compose.share;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,8 +63,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCodeSet;
 import com.openexchange.exception.OXExceptions;
@@ -109,7 +112,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -156,11 +158,11 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Initializes the periodic cleaner.
      *
-     * @param configService The config service
-     * @param timerService The timer service
+     * @param configService The configuration service
+     * @param cleanUpService The clean-up service
      * @throws OXException If cleaner cannot be initialized
      */
-    public static synchronized void initiateCleaner(ConfigurationService configService, ClusterTimerService timerService) throws OXException {
+    public static synchronized void initiateCleaner(ConfigurationService configService, DatabaseCleanUpService cleanUpService) throws OXException {
         DefaultAttachmentStorage tmp = instance;
         if (null == tmp) {
             throw new IllegalStateException("DefaultAttachmentStorage not yet started");
@@ -170,8 +172,15 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         if (0 < cleanerInterval) {
             DefaultAttachmentStoragePeriodicCleaner cleaner = new DefaultAttachmentStoragePeriodicCleaner(tmp.id);
             long shiftMillis = TimeUnit.MILLISECONDS.convert((long)(Math.random() * 100), TimeUnit.MINUTES);
-            ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(DefaultAttachmentStoragePeriodicCleaner.class.getName(), cleaner, cleanerInterval + shiftMillis, cleanerInterval);
-            tmp.setCleanerInfo(cleaner, timerTask);
+            DefaultCleanUpJob job = DefaultCleanUpJob.builder()
+                .withId(DefaultAttachmentStoragePeriodicCleaner.class)
+                .withRunsExclusive(true)
+                .withDelay(Duration.ofMillis(cleanerInterval))
+                .withInitialDelay(Duration.ofMillis(shiftMillis))
+                .withExecution(cleaner)
+                .build();
+            CleanUpInfo cleanUpInfo = cleanUpService.scheduleCleanUpJob(job);
+            tmp.setCleanerInfo(cleaner, cleanUpInfo);
         }
     }
 
@@ -203,7 +212,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private final String id;
-    private volatile ScheduledTimerTask timerTask;
+    private volatile CleanUpInfo cleanUpInfo;
     private volatile DefaultAttachmentStoragePeriodicCleaner cleaner;
 
     /**
@@ -214,9 +223,9 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         this.id = id;
     }
 
-    private void setCleanerInfo(DefaultAttachmentStoragePeriodicCleaner cleaner, ScheduledTimerTask timerTask) {
+    private void setCleanerInfo(DefaultAttachmentStoragePeriodicCleaner cleaner, CleanUpInfo cleanUpInfo) {
         this.cleaner = cleaner;
-        this.timerTask = timerTask;
+        this.cleanUpInfo = cleanUpInfo;
     }
 
     private void halt() {
@@ -226,10 +235,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             cleaner.stop();
         }
 
-        ScheduledTimerTask timerTask = this.timerTask;
-        if (null != timerTask) {
-            this.timerTask = null;
-            timerTask.cancel(true);
+        CleanUpInfo cleanUpInfo = this.cleanUpInfo;
+        if (null != cleanUpInfo) {
+            this.cleanUpInfo = null;
+            cleanUpInfo.cancel(true);
         }
     }
 

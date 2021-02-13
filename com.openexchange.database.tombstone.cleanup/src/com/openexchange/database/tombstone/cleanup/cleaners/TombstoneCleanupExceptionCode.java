@@ -71,6 +71,10 @@ public enum TombstoneCleanupExceptionCode implements OXExceptionCode {
      * At least one of the following columns does not exist in table %1$s: %2$s
      */
     COLUMN_NOT_EXISTS_ERROR("At least one of the following columns does not exist in table %1$s: %2$s", Category.CATEGORY_ERROR, 2),
+    /**
+     * At least one of the following columns does not exist in table %1$s: %2$s
+     */
+    NO_TIMESPAN_ERROR("No timespan is set for cleaner %1$s.", Category.CATEGORY_ERROR, 3),
     ;
 
     /** The cache exception prefix */

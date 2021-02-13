@@ -52,6 +52,7 @@ package com.openexchange.database.tombstone.cleanup;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,9 +62,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.Validate;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
+import com.openexchange.database.cleanup.CleanUpJob;
+import com.openexchange.database.cleanup.CompositeCleanUpExecution;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
+import com.openexchange.database.tombstone.cleanup.cleaners.AbstractTombstoneTableCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.AttachmentTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.CalendarTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.ContactTombstoneCleaner;
@@ -73,8 +75,6 @@ import com.openexchange.database.tombstone.cleanup.cleaners.InfostoreTombstoneCl
 import com.openexchange.database.tombstone.cleanup.cleaners.ObjectPermissionTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.ResourceTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.TaskTombstoneCleaner;
-import com.openexchange.database.tombstone.cleanup.cleaners.TombstoneTableCleaner;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -87,67 +87,17 @@ public class SchemaTombstoneCleaner {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchemaTombstoneCleaner.class);
 
-    private final Set<TombstoneTableCleaner> tombstoneCleaner = Stream.of(new AttachmentTombstoneCleaner(), new CalendarTombstoneCleaner(), new ContactTombstoneCleaner(), new FolderTombstoneCleaner(), new GroupTombstoneCleaner(), new InfostoreTombstoneCleaner(), new ObjectPermissionTombstoneCleaner(), new ResourceTombstoneCleaner(), new TaskTombstoneCleaner()).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
-    private final DatabaseService databaseService;
-    private final Integer distinctContextIdPerSchema;
+    private final static Set<AbstractTombstoneTableCleaner> tombstoneCleaner = Stream.of(new AttachmentTombstoneCleaner(), new CalendarTombstoneCleaner(), new ContactTombstoneCleaner(), new FolderTombstoneCleaner(), new GroupTombstoneCleaner(), new InfostoreTombstoneCleaner(), new ObjectPermissionTombstoneCleaner(), new ResourceTombstoneCleaner(), new TaskTombstoneCleaner()).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
 
-    /**
-     * Constructor that should be used if you already have a connection for the target schema
-     *
-     * @param databaseService {@link DatabaseService} used to retrieve {@link Connection}s
-     * @param distinctContextIdPerSchema {@link Integer} ContextId representing one schema
-     */
-    public SchemaTombstoneCleaner(final DatabaseService databaseService, final Integer distinctContextIdPerSchema) {
-        this.databaseService = databaseService;
-        this.distinctContextIdPerSchema = distinctContextIdPerSchema;
-    }
-
-    /**
-     * Default constructor that should be used if you do not yet have a {@link Connection} to the target schema
-     */
-    public SchemaTombstoneCleaner() {
-        this(null, null);
-    }
-
-    /**
-     * Cleans up the provided schema based on the timestamp. All entries older than the timestamp will be removed.
-     *
-     * @param timestamp long defining what will be removed.
-     * @return {@link Map} containing the result of the cleanup in a 'table name' - 'number of removed rows' mapping
-     * @see SchemaTombstoneCleaner#SchemaCleaner(DatabaseService, String, Integer)
-     */
-    public Map<String, Integer> cleanup(long timestamp) {
-        validateParams();
-
-        Map<String, Integer> tableCleanupResults = new HashMap<>();
-        Connection writeConnection = null;
-        boolean rollback = true;
-        try {
-            writeConnection = databaseService.getForUpdateTask(this.distinctContextIdPerSchema.intValue());
-            writeConnection.setAutoCommit(false);
-            Map<String, Integer> cleanup = cleanup(writeConnection, timestamp);
-            writeConnection.commit();
-            tableCleanupResults.putAll(cleanup);
-            rollback = false;
-        } catch (SQLException | OXException e) {
-            try {
-                LOG.error("Cannot clean up data in schema '{}': {}", databaseService.getSchemaName(this.distinctContextIdPerSchema.intValue()), e.getMessage(), e);
-            } catch (OXException e1) {
-                LOG.error("Unable to retrieve schema name for context with id {}: {}.", this.distinctContextIdPerSchema, e1.getMessage(), e1);
-            }
-        } finally {
-            if (rollback) {
-                Databases.rollback(writeConnection);
-            }
-            Databases.autocommit(writeConnection);
-            databaseService.backForUpdateTask(distinctContextIdPerSchema.intValue(), writeConnection);
-        }
-        return tableCleanupResults;
-    }
-
-    private void validateParams() {
-        Validate.notNull(this.databaseService, "DatabaseService might not be null. Use param constructor if you do not yet have a connection.");
-        Validate.notNull(this.distinctContextIdPerSchema, "Context id for for a schema cannot be null.");
+    public static CleanUpJob getCleanUpJob(long timespan) {
+        return DefaultCleanUpJob.builder(). //@formatter:off
+            withId(CompositeCleanUpExecution.class).
+            withDelay(Duration.ofDays(1)).
+            withInitialDelay(Duration.ofMinutes(60)).
+            withRunsExclusive(true).
+            withExecution(new CompositeCleanUpExecution(getTombstoneCleaner(timespan))).
+            build();
+        //@formatter:on
     }
 
     /**
@@ -161,7 +111,7 @@ public class SchemaTombstoneCleaner {
     public Map<String, Integer> cleanup(Connection writeConnection, long timestamp) throws SQLException {
         Map<String, Integer> tableCleanupResults = new HashMap<>();
 
-        for (TombstoneTableCleaner cleaner : getTombstoneCleaner()) {
+        for (AbstractTombstoneTableCleaner cleaner : getTombstoneCleaner()) {
             long before = System.currentTimeMillis();
             LOG.debug("Starting TombstoneCleaner '{}'", cleaner.toString());
             Map<String, Integer> cleanedTables = cleaner.cleanup(writeConnection, timestamp);
@@ -172,7 +122,7 @@ public class SchemaTombstoneCleaner {
         return tableCleanupResults;
     }
 
-    protected Set<TombstoneTableCleaner> getTombstoneCleaner() {
+    protected Set<AbstractTombstoneTableCleaner> getTombstoneCleaner() {
         return tombstoneCleaner;
     }
 
@@ -212,5 +162,12 @@ public class SchemaTombstoneCleaner {
             }
         }
         LOG.debug(logBuilder.toString(), args.toArray(new Object[args.size()]));
+    }
+
+    private static Set<AbstractTombstoneTableCleaner> getTombstoneCleaner(long timespan) {
+        for (AbstractTombstoneTableCleaner cleaner : tombstoneCleaner) {
+            cleaner.setTimespan(timespan);
+        }
+        return tombstoneCleaner;
     }
 }

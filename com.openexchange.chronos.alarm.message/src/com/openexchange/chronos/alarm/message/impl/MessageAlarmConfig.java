@@ -87,10 +87,4 @@ public class MessageAlarmConfig {
      */
     public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", Boolean.TRUE);
 
-    /**
-     * Defines the amount of message delivery worker
-     */
-    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", I(1));
-
-
 }

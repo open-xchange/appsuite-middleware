@@ -57,19 +57,38 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AbstractTombstoneTableCleaner}
+ * {@link TombstoneTableCleaner}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.2
  */
-public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCleaner {
+public abstract class AbstractTombstoneTableCleaner implements CleanUpExecution {
 
+    /** The logger constant */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTombstoneTableCleaner.class);
 
-    @Override
+    private long timespan = -1;
+
+    /**
+     * Initializes a new {@link AbstractTombstoneTableCleaner}.
+     */
+    protected AbstractTombstoneTableCleaner() {
+        super();
+    }
+
+    /**
+     * Cleans up the associated table based on an already existing schema connection.
+     *
+     * @param connection Write connection to the destination schema
+     * @param timestamp The time stamp defining the border of what will be removed which means older entries than the given time stamp will be removed
+     * @return A map containing the number of items that have been deleted by the {@link TombstoneTableCleaner} mapped to the table name
+     * @throws SQLException In case data cannot be removed
+     */
     public Map<String, Integer> cleanup(Connection connection, long timestamp) throws SQLException {
         try {
             checkTables(connection);
@@ -83,6 +102,37 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
         return cleanupSafe(connection, timestamp);
     }
 
+    @Override
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        try {
+            cleanupSafe(connectionProvider.getConnection(), getTimestamp());
+        } catch (SQLException e) {
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        try {
+            checkTables(connectionProvider.getConnection());
+        } catch (@SuppressWarnings("unused") OXException e) {
+            return false;
+        } catch (Exception e) {
+            throw new OXException(e);
+        }
+        return true;
+    }
+
+    /**
+     *
+     * Sets the timespan for cleaning tombstone tables. The setting of timespan is mandatory for using {@link #executeFor(String, int, int, CleanUpExecutionConnectionProvider)}.
+     *
+     * @param timespan The timespan in millis
+     */
+    public void setTimespan(long timespan) {
+        this.timespan = timespan;
+    }
+
     /**
      * Ensures to have tables in a state to be cleaned up. If a table is not in the desired state an {@link OXException} will be thrown.
      *
@@ -90,7 +140,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
      * @throws OXException In case table validation fails
      * @throws SQLException If an error occurred while retrieving table information
      */
-    public abstract void checkTables(Connection connection) throws OXException, SQLException;
+    protected abstract void checkTables(Connection connection) throws OXException, SQLException;
 
     /**
      * Delegate for {@link TombstoneTableCleaner#cleanup(Connection, long)} that will be called after the table design has been verified by {@link #checkTables(Connection)}
@@ -100,22 +150,23 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
      * @return {@link Map} Containing the number of items that have been deleted by the {@link TombstoneTableCleaner} mapped to the table
      * @throws SQLException In case data can't be removed
      */
-    public abstract Map<String, Integer> cleanupSafe(Connection connection, long timestamp) throws SQLException;
+    protected abstract Map<String, Integer> cleanupSafe(Connection connection, long timestamp) throws SQLException;
 
     /**
-     * Executes the given delete statement by setting the timestamp
+     * Logs & executes a prepared statement's SQL query.
      *
-     * @param connection The write connection used for deletion
-     * @param timestamp The timestamp to delete all entries before it
-     * @param deleteStatement The statement that will be used for deletion
-     * @throws SQLException
+     * @param stmt The statement to execute the SQL query from
+     * @return The result set
      */
-    protected int delete(Connection connection, long timestamp, String deleteStatement) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement(deleteStatement)) {
-            int parameterIndex = 1;
-            stmt.setLong(parameterIndex++, timestamp);
-            return logExecuteUpdate(stmt);
+    protected final static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeQuery();
         }
+        String statementString = String.valueOf(stmt);
+        long start = System.currentTimeMillis();
+        ResultSet resultSet = stmt.executeQuery();
+        LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
+        return resultSet;
     }
 
     /**
@@ -140,19 +191,31 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
     }
 
     /**
-     * Logs & executes a prepared statement's SQL query.
+     * Executes the given delete statement by setting the timestamp
      *
-     * @param stmt The statement to execute the SQL query from
-     * @return The result set
+     * @param connection The write connection used for deletion
+     * @param timestamp The timestamp to delete all entries before it
+     * @param deleteStatement The statement that will be used for deletion
+     * @throws SQLException
      */
-    protected final static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeQuery();
+    protected int delete(Connection connection, long timestamp, String deleteStatement) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(deleteStatement)) {
+            int parameterIndex = 1;
+            stmt.setLong(parameterIndex++, timestamp);
+            return logExecuteUpdate(stmt);
         }
-        String statementString = String.valueOf(stmt);
-        long start = System.currentTimeMillis();
-        ResultSet resultSet = stmt.executeQuery();
-        LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
-        return resultSet;
+    }
+
+    /**
+     * Reads the timespan for cleaning tombstone tables and gets the timestamp until which the entries should be kept.
+     *
+     * @return The timestamp.
+     * @throws OXException If no timespan is set.
+     */
+    private long getTimestamp() throws OXException {
+        if (this.timespan == -1) {
+            throw TombstoneCleanupExceptionCode.NO_TIMESPAN_ERROR.create(this.getClass().getName());
+        }
+        return System.currentTimeMillis() - this.timespan;
     }
 }

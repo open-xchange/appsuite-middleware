@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.osgi;
 
+import java.time.Duration;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
@@ -59,7 +60,6 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.clientinfo.ClientInfoProvider;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -67,6 +67,9 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.CleanUpJob;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.DriveService;
@@ -83,6 +86,7 @@ import com.openexchange.drive.impl.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.impl.internal.throttle.ThrottlingDriveService;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.management.version.BrandedDriveVersionServiceImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -164,36 +168,47 @@ public class DriveActivator extends HousekeepingActivator {
          * schedule cluster-wide periodic checksum cleanup task
          */
         final BundleContext context = this.context;
-        track(ClusterTimerService.class, new ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService>() {
+        track(DatabaseCleanUpService.class, new ServiceTrackerCustomizer<DatabaseCleanUpService, DatabaseCleanUpService>() {
 
-            private PeriodicChecksumCleaner checksumCleaner;
+            private DatabaseCleanUpService cleanUpService;
+            private CleanUpInfo jobInfo;
 
             @Override
-            public synchronized ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
+            public synchronized DatabaseCleanUpService addingService(ServiceReference<DatabaseCleanUpService> reference) {
                 LOG.debug("Initializing periodic checksum cleaner task");
-                ClusterTimerService timerService = context.getService(reference);
+                this.cleanUpService = context.getService(reference);
                 long interval = globalConfig.getChecksumCleanerInterval();
+                Duration intervalDuration = Duration.ofMillis(interval);
                 if (0 < interval) {
-                    PeriodicChecksumCleaner checksumCleaner = new PeriodicChecksumCleaner(globalConfig.getChecksumCleanerMaxAge());
-                    this.checksumCleaner = checksumCleaner;
-                    timerService.scheduleWithFixedDelay(PeriodicChecksumCleaner.class.getName(), checksumCleaner, interval, interval);
+                    long checksumCleanerMaxAge = globalConfig.getChecksumCleanerMaxAge();
+                    PeriodicChecksumCleaner checksumCleaner = new PeriodicChecksumCleaner(checksumCleanerMaxAge, intervalDuration, intervalDuration);
+                    CleanUpJob cleanUpJob = checksumCleaner.getCleanUpJob();
+                    try {
+                        this.jobInfo = cleanUpService.scheduleCleanUpJob(cleanUpJob);
+                    } catch (OXException e) {
+                        LOG.error("Clean up task {} cannot be scheduled:{}", cleanUpJob.getId(), e.getErrorCode());
+                    }
                 }
-                return timerService;
+                return cleanUpService;
             }
 
             @Override
-            public void modifiedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+            public void modifiedService(ServiceReference<DatabaseCleanUpService> reference, DatabaseCleanUpService service) {
                 // Ignored
             }
 
             @Override
-            public synchronized void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+            public synchronized void removedService(ServiceReference<com.openexchange.database.cleanup.DatabaseCleanUpService> reference, DatabaseCleanUpService service) {
                 LOG.debug("Stopping periodic checksum cleaner task");
-                PeriodicChecksumCleaner checksumCleaner = this.checksumCleaner;
-                if (null != checksumCleaner) {
-                    checksumCleaner.stop();
-                    this.checksumCleaner = null;
+                if (cleanUpService != null && jobInfo != null) {
+                    try {
+                        jobInfo.cancel(true);
+                    } catch (Exception e) {
+                        LOG.error("Clean up task {} cannot be canceled", jobInfo.getJobId(), e);
+                    }
                 }
+                jobInfo = null;
+                cleanUpService = null;
             }
         });
         openTrackers();

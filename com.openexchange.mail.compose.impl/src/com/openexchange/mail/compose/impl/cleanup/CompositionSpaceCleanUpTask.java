@@ -60,9 +60,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -73,19 +71,17 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.Databases;
-import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
-import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
@@ -101,7 +97,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class CompositionSpaceCleanUpTask implements Runnable {
+public class CompositionSpaceCleanUpTask implements CleanUpExecution {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceCleanUpTask.class);
 
@@ -140,72 +136,27 @@ public class CompositionSpaceCleanUpTask implements Runnable {
     }
 
     @Override
-    public void run() {
-        Thread currentThread = Thread.currentThread();
-        String prevName = currentThread.getName();
-        currentThread.setName("CompositionSpaceCleanUpTask");
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
-            long start = System.currentTimeMillis();
-            ContextService contextService = services.getServiceSafe(ContextService.class);
-            Updater updater = Updater.getInstance();
-            NextSchema: for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
-                UpdateStatus status = updater.getStatus(representativeContextId.intValue());
-                if (status.blockingUpdatesRunning()) {
-                    // Context-associated schema is currently updated. Abort clean-up for that schema
-                    Optional<String> optSchema = getSchema(representativeContextId, contextService);
-                    if (optSchema.isPresent()) {
-                        LOG.info("Update running: Skipping clean-up of expired composition spaces for schema {} since that schema is currently updated", optSchema.get());
-                    } else {
-                        LOG.info("Update running: Skipping clean-up of expired composition spaces for schema association with context {} since that schema is currently updated", representativeContextId);
-                    }
-                    continue NextSchema;
-                }
-                if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-                    // Context-associated schema needs an update. Abort clean-up for that schema
-                    Optional<String> optSchema = getSchema(representativeContextId, contextService);
-                    if (optSchema.isPresent()) {
-                        LOG.info("Update needed: Skipping clean-up of expired composition spaces for schema {} since that schema needs an update", optSchema.get());
-                    } else {
-                        LOG.info("Update needed: Skipping clean-up of expired composition spaces for schema association with context {} since that schema needs an update", representativeContextId);
-                    }
-                    continue NextSchema;
-                }
-
-                // No update running or pending. Continue clean-up for that schema...
-                DatabaseAccess databaseAccess = DatabaseAccessFactory.getInstance().createDatabaseAccessFor(representativeContextId.intValue(), services);
-                Optional<String> optSchema = databaseAccess.getSchema();
-                if (optSchema.isPresent()) {
-                    LOG.debug("Going to clean-up expired composition spaces for schema {}", optSchema.get());
-                } else {
-                    LOG.debug("Going to clean-up expired composition spaces for schema association with context {}", representativeContextId);
-                }
-                try {
-                    cleanUpForSchema(databaseAccess, optSchema);
-                } catch (Exception e) {
-                    if (optSchema.isPresent()) {
-                        LOG.warn("Failed to clean-up expired composition spaces for schema {}", optSchema.get(), e);
-                    } else {
-                        LOG.warn("Failed to clean-up expired composition spaces for schema association with context {}", representativeContextId, e);
-                    }
-                }
-            }
-            long duration = System.currentTimeMillis() - start;
-            LOG.info("Composition space clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
-        } catch (Throwable t) {
-            ExceptionUtils.handleThrowable(t);
-            LOG.warn("Failed to clean-up expired composition spaces", t);
-        } finally {
-            currentThread.setName(prevName);
+            return Databases.tableExists(connectionProvider.getConnection(), "compositionSpace");
+        } catch (SQLException e) {
+            LOG.warn("Unable to look-up \"compositionSpace\" table", e);
         }
+        return false;
     }
 
-    private Optional<String> getSchema(Integer representativeContextId, ContextService contextService) {
+    @Override
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        long start = System.currentTimeMillis();
+        
         try {
-            Map<PoolAndSchema, List<Integer>> associations = contextService.getSchemaAssociationsFor(Collections.singletonList(representativeContextId));
-            return Optional.of(associations.keySet().iterator().next().getSchema());
+            cleanUpForSchema(connectionProvider.getConnection(), schema);
         } catch (Exception e) {
-            return Optional.empty();
+            LOG.warn("Failed to clean-up expired composition spaces for schema association with context {}", I(representativeContextId), e);
         }
+
+        long duration = System.currentTimeMillis() - start;
+        LOG.info("Composition space clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
     }
 
     private static String formatDuration(long duration) {
@@ -222,45 +173,25 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         return format.format(duration);
     }
 
-    private void cleanUpForSchema(DatabaseAccess databaseAccess, Optional<String> optSchema) throws OXException {
-        Set<UserAndContext> users = determineUsersWithOpenCompositionSpaces(databaseAccess);
+    private void cleanUpForSchema(Connection connection, String schema) throws OXException {
+        Set<UserAndContext> users = determineUsersWithOpenCompositionSpaces(connection);
         if (users.isEmpty()) {
             return;
         }
 
-        boolean acquired = acquireCleanUpTaskLockForSchema(databaseAccess);
-        if (acquired == false) {
-            if (optSchema.isPresent()) {
-                LOG.debug("Another process currently deletes expired composition spaces for schemas {}", optSchema.get());
-            } else {
-                LOG.debug("Another process currently deletes expired composition spaces for schema association with context {}", I(databaseAccess.getRepresentativeContextId()));
+        for (UserAndContext user : users) {
+            try {
+                LOG.debug("Going to delete expired composition spaces for user {} in context {}", I(user.getUserId()), I(user.getContextId()));
+                cleanUpForUser(user, connection);
+            } catch (Exception e) {
+                LOG.warn("Failed to delete expired composition spaces for user {} in context {}", I(user.getUserId()), I(user.getContextId()), e);
             }
-            return;
         }
-
-        // Lock acquired
-        try {
-            for (UserAndContext user : users) {
-                try {
-                    LOG.debug("Going to delete expired composition spaces for user {} in context {}", I(user.getUserId()), I(user.getContextId()));
-                    cleanUpForUser(user, databaseAccess);
-                } catch (Exception e) {
-                    LOG.warn("Failed to delete expired composition spaces for user {} in context {}", I(user.getUserId()), I(user.getContextId()), e);
-                }
-            }
-        } finally {
-            releaseCleanUpTaskLockForSchema(databaseAccess);
-        }
-
-        if (optSchema.isPresent()) {
-            LOG.debug("Successfully deleted expired composition spaces for schema {}", optSchema.get());
-        } else {
-            LOG.debug("Successfully deleted expired composition spaces for schema association with context {}", I(databaseAccess.getRepresentativeContextId()));
-        }
+        LOG.debug("Successfully deleted expired composition spaces for schema {}", schema);
     }
 
-    private void cleanUpForUser(UserAndContext user, DatabaseAccess databaseAccess) throws OXException {
-        Set<UUID> expiredCompositionSpaces = determineExpiredCompositionSpacesForUser(user, databaseAccess);
+    private void cleanUpForUser(UserAndContext user, Connection connection) throws OXException {
+        Set<UUID> expiredCompositionSpaces = determineExpiredCompositionSpacesForUser(user, connection);
         if (expiredCompositionSpaces == null) {
             LOG.debug("Aborting deletion of expired composition spaces for user {} in context {} since either user or context has been dropepd meanwhile", I(user.getUserId()), I(user.getContextId()));
             return;
@@ -275,38 +206,13 @@ public class CompositionSpaceCleanUpTask implements Runnable {
         LOG.debug("Detected {} expired composition space(s) for user {} in context {}", I(numberOfExpiredSpaces), I(user.getUserId()), I(user.getContextId()));
         for (UUID compositionSpaceId : expiredCompositionSpaces) {
             try {
-                deleteExpiredCompositionSpace(compositionSpaceId, user, databaseAccess);
+                deleteExpiredCompositionSpace(compositionSpaceId, user, connection);
                 LOG.debug("Successfully deleted expired composition space '{}' of user {} in context {}", UUIDs.getUnformattedStringObjectFor(compositionSpaceId), I(user.getUserId()), I(user.getContextId()));
             } catch (Exception e) {
                 LOG.warn("Failed to delete expired composition space '{}' of user {} in context {}", UUIDs.getUnformattedString(compositionSpaceId), I(user.getUserId()), I(user.getContextId()), e);
             }
         }
         LOG.debug("Successfully deleted expired composition spaces for user {} in context {}", I(user.getUserId()), I(user.getContextId()));
-    }
-
-    private void deleteExpiredCompositionSpace(UUID compositionSpaceId, UserAndContext user, DatabaseAccess databaseAccess) throws OXException {
-        boolean modified = false;
-        int rollback = 0;
-        Connection writeCon = databaseAccess.acquireWritable();
-        try {
-            Databases.startTransaction(writeCon);
-            rollback = 1;
-
-            modified = deleteExpiredCompositionSpace(compositionSpaceId, user, writeCon);
-
-            writeCon.commit();
-            rollback = 2;
-        } catch (SQLException e) {
-            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback > 0) {
-                if (rollback == 1) {
-                    Databases.rollback(writeCon);
-                }
-                Databases.autocommit(writeCon);
-            }
-            databaseAccess.releaseWritable(writeCon, modified == false);
-        }
     }
 
     private boolean deleteExpiredCompositionSpace(UUID compositionSpaceId, UserAndContext user, Connection writeCon) throws OXException {
@@ -529,7 +435,7 @@ public class CompositionSpaceCleanUpTask implements Runnable {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private Set<UUID> determineExpiredCompositionSpacesForUser(UserAndContext user, DatabaseAccess databaseAccess) throws OXException {
+    private Set<UUID> determineExpiredCompositionSpacesForUser(UserAndContext user, Connection connection) throws OXException {
         ContextService contextService = services.getOptionalService(ContextService.class);
         if (contextService != null && contextService.exists(user.getContextId()) == false) {
             // Context no more existent
@@ -551,9 +457,8 @@ public class CompositionSpaceCleanUpTask implements Runnable {
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Connection con = databaseAccess.acquireReadOnly();
         try {
-            stmt = con.prepareStatement("SELECT uuid FROM compositionSpace WHERE cid=? AND user=? AND lastModified<?");
+            stmt = connection.prepareStatement("SELECT uuid FROM compositionSpace WHERE cid=? AND user=? AND lastModified<?");
             stmt.setInt(1, user.getContextId());
             stmt.setInt(2, user.getUserId());
             stmt.setLong(3, maxLastModifiedStamp);
@@ -571,16 +476,14 @@ public class CompositionSpaceCleanUpTask implements Runnable {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            databaseAccess.releaseReadOnly(con);
         }
     }
 
-    private Set<UserAndContext> determineUsersWithOpenCompositionSpaces(DatabaseAccess databaseAccess) throws OXException {
+    private Set<UserAndContext> determineUsersWithOpenCompositionSpaces(Connection connection) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Connection con = databaseAccess.acquireReadOnly();
         try {
-            stmt = con.prepareStatement("SELECT cid, user FROM compositionSpace");
+            stmt = connection.prepareStatement("SELECT cid, user FROM compositionSpace");
             rs = stmt.executeQuery();
             if (rs.next() == false) {
                 return Collections.emptySet();
@@ -595,53 +498,6 @@ public class CompositionSpaceCleanUpTask implements Runnable {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            databaseAccess.releaseReadOnly(con);
-        }
-    }
-
-    private static final byte[] LOCK_UUID_BYTES = UUIDs.toByteArray(UUIDs.fromUnformattedString("753f4fe1b7b24f39bcda244fac53060f"));
-
-    private boolean acquireCleanUpTaskLockForSchema(DatabaseAccess databaseAccess) throws OXException {
-        boolean modified = false;
-        PreparedStatement stmt = null;
-        Connection writeCon = databaseAccess.acquireWritable();
-        try {
-            stmt = writeCon.prepareStatement("INSERT INTO compositionSpace (uuid, cid, user, lastModified) VALUES (?, ?, ?, ?)");
-            stmt.setBytes(1, LOCK_UUID_BYTES);
-            stmt.setInt(2, 0);
-            stmt.setInt(3, 1);
-            stmt.setLong(4, 0L);
-            try {
-                modified = stmt.executeUpdate() > 0;
-            } catch (SQLException e) {
-                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    return false;
-                }
-                throw e;
-            }
-            return true;
-        } catch (SQLException e) {
-            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            databaseAccess.releaseWritable(writeCon, modified == false);
-        }
-    }
-
-    private boolean releaseCleanUpTaskLockForSchema(DatabaseAccess databaseAccess) throws OXException {
-        boolean modified = false;
-        PreparedStatement stmt = null;
-        Connection writeCon = databaseAccess.acquireWritable();
-        try {
-            stmt = writeCon.prepareStatement("DELETE FROM compositionSpace WHERE uuid=?");
-            stmt.setBytes(1, LOCK_UUID_BYTES);
-            modified = stmt.executeUpdate() > 0;
-            return modified;
-        } catch (SQLException e) {
-            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            databaseAccess.releaseWritable(writeCon, modified == false);
         }
     }
 

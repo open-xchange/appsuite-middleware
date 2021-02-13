@@ -47,27 +47,59 @@
  *
  */
 
-package com.openexchange.database.tombstone.cleanup.cleaners;
+package com.openexchange.database.cleanup;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
+import java.time.Duration;
 
 /**
- * {@link TombstoneTableCleaner}
+ * {@link CleanUpJob} - A clean-up job which is supposed to periodically executed.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v8.0.0
  */
-public interface TombstoneTableCleaner {
+public interface CleanUpJob {
 
     /**
-     * Cleans up the associated table based on an already existing schema connection.
-     * 
-     * @param connection Write connection to the destination schema
-     * @param timestamp Timestamp defining the border of what will be removed which means older entries than the given timestamp will be removed
-     * @return {@link Map} Containing the number of items that have been deleted by the {@link TombstoneTableCleaner} mapped to the table
-     * @throws SQLException In case data can't be removed
+     * Gets the unique job identifier.
+     *
+     * @return The job identifier
      */
-    Map<String, Integer> cleanup(Connection connection, long timestamp) throws SQLException;
+    CleanUpJobId getId();
+
+    /**
+     * Gets the execution.
+     *
+     * @return The execution
+     */
+    CleanUpExecution getExecution();
+
+    /**
+     * Gets the duration to delay first execution.
+     *
+     * @return The duration to delay first execution
+     */
+    Duration getInitialDelay();
+
+    /**
+     * Gets the delay between the termination of one execution and the commencement of the next.
+     *
+     * @return The delay
+     */
+    Duration getDelay();
+
+    /**
+     * Checks whether this job should run exclusively or if concurrent executions are allowed.
+     *
+     * @return <code>true</code> for exclusive executions; otherwise <code>false</code> for concurrent executions
+     */
+    boolean isRunsExclusive();
+
+    /**
+     * Gets a value indicating whether the jobs prefers using a database connection without timeout to omit warnings during long running
+     * tasks.
+     *
+     * @return <code>true</code> if the job prefers a database connection w/o timeout, <code>false</code>, otherwise
+     */
+    boolean isPreferNoConnectionTimeout();
+
 }

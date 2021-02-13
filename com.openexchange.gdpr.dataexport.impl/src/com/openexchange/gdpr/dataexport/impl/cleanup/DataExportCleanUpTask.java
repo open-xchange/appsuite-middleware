@@ -66,7 +66,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.locks.Lock;
@@ -74,9 +73,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang3.tuple.Pair;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
@@ -101,7 +101,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
-public class DataExportCleanUpTask implements Runnable {
+public class DataExportCleanUpTask implements CleanUpExecution {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataExportCleanUpTask.class);
 
@@ -161,20 +161,16 @@ public class DataExportCleanUpTask implements Runnable {
 
     private static final String PROP_CLEANUP_ENABLED = "com.openexchange.gdpr.dataexport.cleanup.enabled";
 
-    private boolean isCleanUpEnabled() {
+    @Override
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         boolean defaultValue = true;
         ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
         return configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue);
     }
 
     @Override
-    public void run() {
-        if (isCleanUpEnabled() == false) {
-            // Disabled per configuration
-            LOG.info("Aborting clean-up of data export tasks since disabled through configuration");
-            return;
-        }
-
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        // Ignore connection from provider, lock needs to be inserted on its own connection, so manage connections ourselves
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (databaseService == null) {
             // Missing database service
@@ -192,9 +188,6 @@ public class DataExportCleanUpTask implements Runnable {
         }
 
         DataExportLock lock = DataExportLock.getInstance();
-        Thread currentThread = Thread.currentThread();
-        String prevName = currentThread.getName();
-        currentThread.setName("DataExportCleanUpTask");
         DataExportLock.LockAcquisition acquisition = null;
         try {
             acquisition = lock.acquireCleanUpTaskLock(true, databaseService);
@@ -206,7 +199,7 @@ public class DataExportCleanUpTask implements Runnable {
 
             long start = System.currentTimeMillis();
 
-            Set<Integer> fileStoreIds = determineFileStorageIdsFromAllScopes(databaseService);
+            Set<Integer> fileStoreIds = determineFileStorageIdsFromAllScopes(databaseService, schema, representativeContextId);
             if (fileStoreIds == null || fileStoreIds.isEmpty() != false) {
                 LOG.info("Found no file storage(s) for data export files. Aborting clean-up run...");
                 return;
@@ -228,7 +221,6 @@ public class DataExportCleanUpTask implements Runnable {
                     LOG.warn("Failed to release clean-up lock for data export files", e);
                 }
             }
-            currentThread.setName(prevName);
         }
     }
 
@@ -375,7 +367,7 @@ public class DataExportCleanUpTask implements Runnable {
 
     // ----------------------------------- Retrieval of file storage identifiers -----------------------------------------------------------
 
-    private Set<Integer> determineFileStorageIdsFromAllScopes(DatabaseService databaseService) {
+    private Set<Integer> determineFileStorageIdsFromAllScopes(DatabaseService databaseService, String schema, int representativeContextId) {
         Set<Integer> fileStoreIds = null;
 
         // Check for possible configured file storage identifiers for context-sets scope
@@ -423,21 +415,15 @@ public class DataExportCleanUpTask implements Runnable {
         }
 
         // Check for possible configured file storage identifiers for context and user scope
-        ContextService contextService = services.getOptionalService(ContextService.class);
-        if (contextService != null) {
-            try {
-                for (Integer representativeContextId : contextService.getDistinctContextsPerSchema()) {
-                    fileStoreIds = addFileStoreIdsForSchema(representativeContextId.intValue(), fileStoreIds, databaseService);
-                }
-            } catch (Exception e) {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage from context and user scope", e);
-            }
+        try {
+            fileStoreIds = addFileStoreIdsForSchema(schema, representativeContextId, fileStoreIds, databaseService);
+        } catch (Exception e) {
+            LOG.warn("Failed to retrieve possible identifiers of data export file storage from context and user scope", e);
         }
-
         return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
     }
 
-    private Set<Integer> addFileStoreIdsForSchema(int representativeContextId, Set<Integer> fileStoreIds, DatabaseService databaseService) {
+    private Set<Integer> addFileStoreIdsForSchema(String schema, int representativeContextId, Set<Integer> fileStoreIds, DatabaseService databaseService) {
         Set<Integer> fids = fileStoreIds;
 
         try {
@@ -449,14 +435,8 @@ public class DataExportCleanUpTask implements Runnable {
                 fids.addAll(fileStoreIdsForSchema);
             }
         } catch (Exception e) {
-            Optional<String> optSchema = getSchemaSafe(representativeContextId);
-            if (optSchema.isPresent()) {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage for schema {}", optSchema.get(), e);
-            } else {
-                LOG.warn("Failed to retrieve possible identifiers of data export file storage for schema association with context {}", I(representativeContextId), e);
-            }
+            LOG.warn("Failed to retrieve possible identifiers of data export file storage for schema {}", schema, e);
         }
-
         return fids;
     }
 
@@ -576,20 +556,6 @@ public class DataExportCleanUpTask implements Runnable {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(representativeContextId, con);
-        }
-    }
-
-    private Optional<String> getSchemaSafe(int representativeContextId) {
-        ContextService contextService = services.getOptionalService(ContextService.class);
-        if (contextService == null) {
-            return Optional.empty();
-        }
-
-        try {
-            Map<PoolAndSchema, List<Integer>> associations = contextService.getSchemaAssociationsFor(Collections.singletonList(I(representativeContextId)));
-            return Optional.of(associations.keySet().iterator().next().getSchema());
-        } catch (Exception e) {
-            return Optional.empty();
         }
     }
 

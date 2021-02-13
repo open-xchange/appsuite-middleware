@@ -47,67 +47,62 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.cleanup;
+package com.openexchange.database.cleanup.impl;
 
 import java.sql.Connection;
-import java.util.Optional;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link DatabaseAccess} - A database access for clean-up task.
+ * {@link ReadOnlyCleanUpExecutionConnectionProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.5
+ * @since v8.0.0
  */
-public interface DatabaseAccess {
+public class ReadOnlyCleanUpExecutionConnectionProvider implements CleanUpExecutionConnectionProvider, AutoCloseable {
+
+    private final ServiceLookup services;
+    private final int representativeContextId;
+    private Connection connection;
+    private DatabaseService databaseService;
 
     /**
-     * Gets the representative context identifier.
+     * Initializes a new {@link ReadOnlyCleanUpExecutionConnectionProvider}.
      *
-     * @return The representative context identifier
+     * @param representativeContextId The identifier of a representative context in that schema
+     * @param services The service look-up
      */
-    int getRepresentativeContextId();
+    public ReadOnlyCleanUpExecutionConnectionProvider(int representativeContextId, ServiceLookup services) {
+        super();
+        this.representativeContextId = representativeContextId;
+        this.services = services;
+    }
 
-    /**
-     * Gets the name of the database schema that is accessed.
-     *
-     * @return The schema name
-     */
-    Optional<String> getSchema();
+    @Override
+    public synchronized Connection getConnection() throws OXException {
+        Connection connection = this.connection;
+        if (connection == null) {
+            // Acquire database service
+            DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
+            this.databaseService = databaseService;
 
-    // ------------------------------------------------------------------------------
+            // Fetch connection
+            connection = databaseService.getReadOnly(representativeContextId);
+            this.connection = connection;
+        }
+        return connection;
+    }
 
-    /**
-     * Acquires a read-only connection.
-     *
-     * @return A read-only connection
-     * @throws OXException If a read-only connection cannot be established
-     */
-    Connection acquireReadOnly() throws OXException;
-
-    /**
-     * Releases a previously acquired read-only connection.
-     *
-     * @param con The read-only connection to release
-     */
-    void releaseReadOnly(Connection con);
-
-    // ------------------------------------------------------------------------------
-
-    /**
-     * Acquires a read-write connection.
-     *
-     * @return A read-write connection
-     * @throws OXException If a read-write connection cannot be established
-     */
-    Connection acquireWritable() throws OXException;
-
-    /**
-     * Releases a previously acquired read-write connection.
-     *
-     * @param con The read-write connection to release
-     * @param forReading <code>true</code> if read-write connection was only used for reading and no modification was performed; otherwise <code>false</code>
-     */
-    void releaseWritable(Connection con, boolean forReading);
+    @Override
+    public synchronized void close() {
+        Connection connection = this.connection;
+        if (connection != null) {
+            this.connection = null;
+            databaseService.backReadOnly(representativeContextId, connection);
+        }
+    }
 
 }

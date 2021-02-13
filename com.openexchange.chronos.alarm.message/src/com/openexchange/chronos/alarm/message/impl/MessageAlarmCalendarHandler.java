@@ -71,7 +71,8 @@ public class MessageAlarmCalendarHandler implements CalendarHandler {
 
     /**
      * Initializes a new {@link MessageAlarmCalendarHandler}.
-     * @param worker
+     * 
+     * @param worker The worker
      */
     public MessageAlarmCalendarHandler(MessageAlarmDeliveryWorker worker) {
         this.worker = worker;

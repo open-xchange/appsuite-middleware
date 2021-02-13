@@ -68,12 +68,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.exception.Category;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
@@ -85,7 +84,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage.DefaultAttachmentStorageContext;
@@ -104,7 +102,7 @@ import com.openexchange.tools.oxfolder.OXFolderUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
+public class DefaultAttachmentStoragePeriodicCleaner implements CleanUpExecution {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAttachmentStoragePeriodicCleaner.class);
 
@@ -123,60 +121,20 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
     }
 
     @Override
-    public void run() {
-        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (null == databaseService) {
-            // Do nothing
-            return;
-        }
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        return active.get();
+    }
 
+    @Override
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         long start = System.currentTimeMillis();
         try {
-            List<Integer> contextsIdInDifferentSchemas = ContextStorage.getInstance().getDistinctContextsPerSchema();
-            int size = contextsIdInDifferentSchemas.size();
-            LOG.info("Periodic cleanup task for shared mail attachments starts. Going to check {} schemas...", I(size));
-
-            long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
-            long lastLogTime = start;
-            Thread currentThread = Thread.currentThread();
-
-            Iterator<Integer> iter = contextsIdInDifferentSchemas.iterator();
-            for (int i = 0, k = size; k-- > 0; i++) {
-                int contextIdInSchema = iter.next().intValue();
-                String schemaName = databaseService.getSchemaName(contextIdInSchema);
-                for (int retry = 3; retry-- > 0;) {
-                    if (currentThread.isInterrupted() || false == active.get()) {
-                        LOG.info("Periodic cleanup task for shared mail attachments interrupted or stopped.");
-                        return;
-                    }
-
-                    long now = System.currentTimeMillis();
-                    if (now > lastLogTime + logTimeDistance) {
-                        LOG.info("Periodic share cleanup task {}% finished ({}/{}).", I(i * 100 / size), I(i), I(size)); lastLogTime = now;
-                    }
-
-                    try {
-                        cleanupSchema(contextIdInSchema, start, schemaName, databaseService);
-                        retry = 0;
-                    } catch (OXException e) {
-                        if (Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) && retry > 0) {
-                            long delay = 10000 + retry * 20000;
-                            LOG.debug("Error during periodic cleanup task for shared mail attachments for schema {}: {}; trying again in {}ms...", schemaName, e.getMessage(), L(delay));
-                            Thread.sleep(delay);
-                        } else {
-                            LOG.error("Error during periodic cleanup task for shared mail attachments for schema {}", schemaName, e);
-                            retry = 0;
-                        }
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Interrupted during periodic cleanup task for shared mail attachments: {}", e.getMessage(), e);
+            LOG.info("Periodic cleanup task for shared mail attachments starts for schema {}", schema);
+            cleanupSchema(start, schema, connectionProvider);
         } catch (Exception e) {
-            LOG.error("Error during periodic cleanup task for shared mail attachments: {}", e.getMessage(), e);
+            LOG.error("Error during periodic cleanup task for shared mail attachments for schema {}", schema, e);
         }
-        LOG.info("Periodic cleanup task for shared mail attachments finished after {}ms.", L(System.currentTimeMillis() - start));
+        LOG.info("Periodic cleanup task for shared mail attachments finished after {}ms for schema {}.", L(System.currentTimeMillis() - start), schema);
     }
 
     /**
@@ -189,22 +147,12 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
     /**
      * Cleans obsolete shared mail attachments in context-associated schema.
      *
-     * @param contextIdInSchema The identifier of a contact in the schema
      * @param threshold The threshold date
      * @param schemaName The name of the processed database schema
      * @param databaseService The database service to use
      */
-    private void cleanupSchema(int contextIdInSchema, long threshold, String schemaName, DatabaseService databaseService) throws OXException {
-        Map<Integer, Map<Integer, List<ExpiredFolder>>> expiredFoldersInSchema;
-        {
-            Connection con = databaseService.getReadOnly(contextIdInSchema);
-            try {
-                expiredFoldersInSchema = determineExpiredFoldersInSchema(threshold, schemaName, con);
-            } finally {
-                databaseService.backReadOnly(contextIdInSchema, con);
-            }
-        }
-
+    private void cleanupSchema(long threshold, String schemaName, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        Map<Integer, Map<Integer, List<ExpiredFolder>>> expiredFoldersInSchema = determineExpiredFoldersInSchema(threshold, schemaName, connectionProvider.getConnection());
         cleanupExpiredFolders(expiredFoldersInSchema, threshold);
     }
 

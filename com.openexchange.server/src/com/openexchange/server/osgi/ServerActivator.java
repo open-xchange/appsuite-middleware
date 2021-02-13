@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.activation.MailcapCommandMap;
 import javax.servlet.ServletException;
 import org.json.FileBackedJSONStringProvider;
@@ -120,6 +119,7 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
@@ -284,6 +284,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
 import com.openexchange.tools.oxfolder.OXFolderPathUniqueness;
+import com.openexchange.tools.oxfolder.cleanup.OXFolderPathUniquenessDatabaseCleanUpTracker;
 import com.openexchange.tools.oxfolder.property.FolderSubscriptionHelper;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -709,6 +710,8 @@ public final class ServerActivator extends HousekeepingActivator {
 
         CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
         track(ResultConverter.class, resultConverterRegistry);
+        
+        track(DatabaseCleanUpService.class, new OXFolderPathUniquenessDatabaseCleanUpTracker(context));
 
         ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         ConfigurationService configService = getService(ConfigurationService.class);
@@ -798,7 +801,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register oxfolder_reservedpath related services
         registerService(CreateTableService.class, new OXFolderPathUniqueness.CreateFolderReservedPathTable());
         registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new OXFolderPathUniqueness.CreateFolderReservedPathUpdateTask()));
-        getServiceSafe(TimerService.class).scheduleAtFixedRate(new OXFolderPathUniqueness.CleanUpReservedPathsTask(this), 30, 60, TimeUnit.MINUTES);
         
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         MailAccountStorageService mailAccountStorageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);

@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
 import java.rmi.Remote;
+import java.time.Duration;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -71,6 +72,9 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.DatabaseAccessProvider;
@@ -96,7 +100,6 @@ import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStor
 import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
 import com.openexchange.mail.compose.impl.attachment.filestore.FilestorageAttachmentStorageDatabaseAccessProvider;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
-import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpScheduler;
 import com.openexchange.mail.compose.impl.cleanup.CompositionSpaceCleanUpTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddClientToken;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
@@ -149,6 +152,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
 
     private InMemoryCompositionSpaceStorageService inmemoryStorage;
     private RdbCompositionSpaceStorageService rdbStorage;
+    private CleanUpInfo cleanUpInfo;
 
     /**
      * Initializes a new {@link CompositionSpaceActivator}.
@@ -162,7 +166,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, CapabilityService.class, HtmlService.class,
             ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class, ObfuscatorService.class,
             ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class, ThreadPoolService.class, TimerService.class,
-            SessiondService.class };
+            SessiondService.class, DatabaseCleanUpService.class };
     }
 
     @Override
@@ -287,32 +291,13 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         CompositionSpaceServiceFactoryImpl serviceFactoryImpl = new CompositionSpaceServiceFactoryImpl(storageService, attachmentStorageService, keyStorageService, this);
         registerService(CompositionSpaceServiceFactory.class, serviceFactoryImpl, Tools.withRanking(serviceFactoryImpl.getRanking()));
 
-        CompositionSpaceCleanUpScheduler.initInstance(serviceFactoryImpl, this);
-
-        TimerService timerService = getService(TimerService.class);
-        timerService.scheduleWithFixedDelay(new CompositionSpaceCleanUpTask(this), 5000L, 3600000L); // Every 60 minutes
-
-        {
-            LoginHandlerService loginHandler = new LoginHandlerService() {
-
-                @Override
-                public void handleLogout(LoginResult logout) throws OXException {
-                    // Ignore
-                }
-
-                @Override
-                public void handleLogin(LoginResult login) throws OXException {
-                    Session session = login.getSession();
-                    if (null != session) {
-                        CompositionSpaceCleanUpScheduler cleanUpRegistry = CompositionSpaceCleanUpScheduler.getInstance();
-                        if (cleanUpRegistry != null) {
-                            cleanUpRegistry.scheduleCleanUpFor(session);
-                        }
-                    }
-                }
-            };
-            registerService(LoginHandlerService.class, loginHandler);
-        }
+        cleanUpInfo = getServiceSafe(DatabaseCleanUpService.class).scheduleCleanUpJob(DefaultCleanUpJob.builder() //@formatter:off
+                .withId(CompositionSpaceCleanUpTask.class)
+                .withDelay(Duration.ofMinutes(60))
+                .withInitialDelay(Duration.ofMinutes(5))
+                .withRunsExclusive(true)
+                .withExecution(new CompositionSpaceCleanUpTask(this))
+                .build()); //@formatter:on
 
         {
             LoginHandlerService loginHandler = new LoginHandlerService() {
@@ -373,7 +358,11 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             }
         }
         FileStorageCompositionSpaceKeyStorage.unsetInstance();
-        CompositionSpaceCleanUpScheduler.releaseInstance();
+        CleanUpInfo cleanUpInfo = this.cleanUpInfo;
+        if (null != cleanUpInfo) {
+            this.cleanUpInfo = null;
+            cleanUpInfo.cancel(true);
+        }
         super.stopBundle();
     }
 

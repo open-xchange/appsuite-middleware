@@ -50,6 +50,7 @@
 package com.openexchange.chronos.alarm.message.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -80,17 +81,18 @@ import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
+import com.openexchange.database.cleanup.DatabaseCleanUpExceptionCode;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
 import com.openexchange.ratelimit.RateLimiterFactory;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -104,111 +106,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MessageAlarmDeliveryWorker implements Runnable {
-
-    /**
-     *
-     * {@link Builder} a builder for {@link MessageAlarmDeliveryWorker}
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.10.1
-     */
-    public static class Builder {
-        private AdministrativeAlarmTriggerStorage storage;
-        private CalendarStorageFactory calendarStorageFactory;
-        private DatabaseService dbService;
-        private ContextService ctxService;
-        private CalendarUtilities calUtil;
-        private TimerService timerService;
-        private AlarmNotificationServiceRegistry registry;
-        private CalendarProviderRegistry calendarProviderRegistry;
-        private AdministrativeCalendarAccountService administrativeCalendarAccountService;
-        private RateLimiterFactory rateLimitFactory;
-        private RecurrenceService recurrenceService;
-        private int lookAhead;
-        private int overdueWaitTime;
-
-        public Builder setStorage(AdministrativeAlarmTriggerStorage storage) {
-            this.storage = storage;
-            return this;
-        }
-
-        public Builder setCalendarStorageFactory(CalendarStorageFactory calendarStorageFactory) {
-            this.calendarStorageFactory = calendarStorageFactory;
-            return this;
-        }
-
-        public Builder setDbService(DatabaseService dbService) {
-            this.dbService = dbService;
-            return this;
-        }
-
-        public Builder setCtxService(ContextService ctxService) {
-            this.ctxService = ctxService;
-            return this;
-        }
-
-        public Builder setCalUtil(CalendarUtilities calUtil) {
-            this.calUtil = calUtil;
-            return this;
-        }
-
-        public Builder setTimerService(TimerService timerService) {
-            this.timerService = timerService;
-            return this;
-        }
-
-        public Builder setAlarmNotificationServiceRegistry(AlarmNotificationServiceRegistry registry) {
-            this.registry = registry;
-            return this;
-        }
-
-        public Builder setCalendarProviderRegistry(CalendarProviderRegistry calendarProviderRegistry) {
-            this.calendarProviderRegistry = calendarProviderRegistry;
-            return this;
-        }
-
-        public Builder setAdministrativeCalendarAccountService(AdministrativeCalendarAccountService administrativeCalendarAccountService) {
-            this.administrativeCalendarAccountService = administrativeCalendarAccountService;
-            return this;
-        }
-
-        public Builder setLookAhead(int lookAhead) {
-            this.lookAhead = lookAhead;
-            return this;
-        }
-
-        public Builder setOverdueWaitTime(int overdueWaitTime) {
-            this.overdueWaitTime = overdueWaitTime;
-            return this;
-        }
-
-        public Builder setRateLimitFactory(RateLimiterFactory rateLimitFactory) {
-            this.rateLimitFactory = rateLimitFactory;
-            return this;
-        }
-
-        public Builder setRecurrenceService(RecurrenceService recurrenceService) {
-            this.recurrenceService = recurrenceService;
-            return this;
-        }
-
-        public MessageAlarmDeliveryWorker build() {
-            return new MessageAlarmDeliveryWorker( storage,
-                                                calendarStorageFactory,
-                                                dbService,
-                                                ctxService,
-                                                calUtil,
-                                                timerService,
-                                                registry,
-                                                calendarProviderRegistry,
-                                                administrativeCalendarAccountService,
-                                                rateLimitFactory,
-                                                recurrenceService,
-                                                lookAhead,
-                                                overdueWaitTime);
-        }
-    }
+public class MessageAlarmDeliveryWorker implements CleanUpExecution {
 
     protected static final Logger LOG = LoggerFactory.getLogger(MessageAlarmDeliveryWorker.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -230,134 +128,70 @@ public class MessageAlarmDeliveryWorker implements Runnable {
     private final int lookAhead;
     private final int overdueWaitTime;
 
-
     /**
      * Initializes a new {@link MessageAlarmDeliveryWorker}.
      *
-     * @param storage An {@link AdministrativeAlarmTriggerStorage}
-     * @param factory A {@link CalendarStorageFactory} which provides the storage.
-     * @param dbservice A {@link DatabaseService} which provides the db connections.
-     * @param ctxService A {@link ContextService} to load the Context.
-     * @param calUtil A {@link CalendarUtilities} to perform addition
-     * @param timerService A {@link TimerService} to provide {@link EntityResolver} for each context
+     * @param services The {@link ServiceLookup} to get various services from
      * @param registry The {@link AlarmNotificationServiceRegistry} used to send the notification
-     * @param calProviderRegistry The {@link CalendarProviderRegistry}
-     * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
-     * @param rateLimitFactory The {@link RateLimiterFactory}
-     * @param recurrenceService The {@link RecurrenceService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
+     * @throws OXException In case a service is missing
      */
-    protected MessageAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
-                                    CalendarStorageFactory factory,
-                                    DatabaseService dbservice,
-                                    ContextService ctxService,
-                                    CalendarUtilities calUtil,
-                                    TimerService timerService,
-                                    AlarmNotificationServiceRegistry registry,
-                                    CalendarProviderRegistry calProviderRegistry,
-                                    AdministrativeCalendarAccountService administrativeCalendarAccountService,
-                                    RateLimiterFactory rateLimitFactory,
-                                    RecurrenceService recurrenceService,
-                                    int lookAhead,
-                                    int overdueWaitTime) {
-        this.storage = storage;
-        this.dbservice = dbservice;
-        this.ctxService = ctxService;
-        this.timerService = timerService;
-        this.factory = factory;
-        this.calUtil = calUtil;
+    public MessageAlarmDeliveryWorker(ServiceLookup services, AlarmNotificationServiceRegistry registry, int lookAhead, int overdueWaitTime) throws OXException {
+        this.storage = services.getServiceSafe(AdministrativeAlarmTriggerStorage.class);
+        this.dbservice = services.getServiceSafe(DatabaseService.class);
+        this.ctxService = services.getServiceSafe(ContextService.class);
+        this.timerService = services.getServiceSafe(TimerService.class);
+        this.factory = services.getServiceSafe(CalendarStorageFactory.class);
+        this.calUtil = services.getServiceSafe(CalendarUtilities.class);
+        this.calendarProviderRegistry = services.getServiceSafe(CalendarProviderRegistry.class);
+        this.administrativeCalendarAccountService = services.getServiceSafe(AdministrativeCalendarAccountService.class);
+        this.rateLimitFactory = services.getServiceSafe(RateLimiterFactory.class);
+        this.recurrenceService = services.getServiceSafe(RecurrenceService.class);
         this.registry = registry;
         this.lookAhead = lookAhead;
         this.overdueWaitTime = overdueWaitTime;
-        this.calendarProviderRegistry = calProviderRegistry;
-        this.administrativeCalendarAccountService = administrativeCalendarAccountService;
-        this.rateLimitFactory = rateLimitFactory;
-        this.recurrenceService = recurrenceService;
-
+    }
+    
+    @Override
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        try {
+            return b(Databases.executeQuery(connectionProvider.getConnection(),
+                (rs) -> Boolean.TRUE, // We have a result, so we are fine
+                "SELECT 1 FROM updateTask WHERE taskName=?",
+                (s) -> s.setString(1, MessageAlarmDeliveryWorkerUpdateTask.TASK_NAME)));
+        } catch (SQLException e) {
+            throw DatabaseCleanUpExceptionCode.SQL_ERROR.create(e.getMessage(), e);
+        }
     }
 
     @Override
-    public void run() {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         LOG.info("Started alarm delivery worker...");
         Calendar until = Calendar.getInstance(UTC);
         until.add(Calendar.MINUTE, lookAhead);
         try {
-            List<Integer> ctxIds = ctxService.getDistinctContextsPerSchema();
             Calendar currentUTCTime = Calendar.getInstance(UTC);
-            NextCtxId: for (Integer iCtxId : ctxIds) {
-                // Test if schema is ready
-                int ctxId = iCtxId.intValue();
-                try {
-                    UpdateStatus status = Updater.getInstance().getStatus(ctxId);
-                    if (!status.isExecutedSuccessfully(MessageAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
-                        LOG.info("Unable to handle context {} because it is currently updating or MessageAlarmDeliveryWorkerUpdateTask hasn't run successfully yet.", iCtxId);
-                        continue NextCtxId;
-                    }
-                } catch (OXException e) {
-                    if (false == DBPoolingExceptionCodes.RESOLVE_FAILED.equals(e)) {
-                        throw e;
-                    }
-                    // Context is located in another server. Skip it.
-                    continue NextCtxId;
-                }
-                Connection readCon = null;
-                Connection writeCon = null;
-                boolean successful = false;
-                boolean readOnly = true;
-                Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers = null;
-                try {
+            Connection connection = connectionProvider.getConnection();
+            Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers = null;
+            Calendar overdueTime = Calendar.getInstance(UTC);
+            overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
 
-                    Calendar overdueTime = Calendar.getInstance(UTC);
-                    overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
-                    readCon = dbservice.getReadOnly(ctxId);
+            lockedTriggers = storage.getAndLockTriggers(connection, until.getTime(), overdueTime.getTime(), false, registry.getActions());
+            if (lockedTriggers.isEmpty()) {
+                return;
+            }
 
-                    lockedTriggers = storage.getAndLockTriggers(readCon, until.getTime(), overdueTime.getTime(), false, registry.getActions());
-                    if (lockedTriggers.isEmpty()) {
-                        successful = true;
-                        continue;
-                    }
-
-                    dbservice.backReadOnly(ctxId, readCon);
-                    readCon = null;
-
-                    writeCon = dbservice.getForUpdateTask(ctxId);
-                    writeCon.setAutoCommit(false);
-                    lockedTriggers = storage.getAndLockTriggers(writeCon, until.getTime(), overdueTime.getTime(), true, registry.getActions());
-                    if (lockedTriggers.isEmpty()) {
-                        successful = true;
-                        if (Thread.interrupted()) {
-                            throw new InterruptedException();
-                        }
-                        continue NextCtxId;
-                    }
-                    readOnly = false;
-                    storage.setProcessingStatus(writeCon, lockedTriggers, Long.valueOf(currentUTCTime.getTimeInMillis()));
-                    writeCon.commit();
-                    successful = true;
-                } catch (SQLException e) {
-                    // ignore retry next time
-                    LOG.error(e.getMessage(), e);
-                } finally {
-                    if (readCon != null) {
-                        dbservice.backReadOnly(ctxId, readCon);
-                    }
-                    if (successful == false) {
-                        Databases.rollback(writeCon);
-                    }
-                    Databases.autocommit(writeCon);
-                    if (writeCon != null) {
-                        if (readOnly) {
-                            dbservice.backForUpdateTaskAfterReading(ctxId, writeCon);
-                        } else {
-                            dbservice.backForUpdateTask(ctxId, writeCon);
-                        }
-                    }
-                }
-                spawnDeliveryTaskForTriggers(lockedTriggers, currentUTCTime);
+            lockedTriggers = storage.getAndLockTriggers(connection, until.getTime(), overdueTime.getTime(), true, registry.getActions());
+            if (lockedTriggers.isEmpty()) {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
+            }
+            storage.setProcessingStatus(connection, lockedTriggers, Long.valueOf(currentUTCTime.getTimeInMillis()));
+            spawnDeliveryTaskForTriggers(connection, lockedTriggers, currentUTCTime);
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -371,50 +205,43 @@ public class MessageAlarmDeliveryWorker implements Runnable {
 
     /**
      * Spawns an delivery worker for the given triggers
-     *
+     * 
+     * @param connection The connection to use 
      * @param lockedTriggers The triggers to spawn a delivery task for
      * @param currentUTCTime The current UTC time
      * @throws OXException
      */
-    private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
+    private void spawnDeliveryTaskForTriggers(Connection connection, Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
         for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : lockedTriggers.entrySet()) {
             int cid = entry.getKey().getFirst().intValue();
             int account = entry.getKey().getSecond().intValue();
-            Connection readOnly = null;
-            try {
-                readOnly = dbservice.getReadOnly(cid);
-                CalendarStorage ctxStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(readOnly, readOnly), DBTransactionPolicy.NO_TRANSACTIONS);
-                for (AlarmTrigger trigger : entry.getValue()) {
-                    try {
-                        Alarm alarm = ctxStorage.getAlarmStorage().loadAlarm(trigger.getAlarm().intValue());
-                        Calendar calTriggerTime = Calendar.getInstance(UTC);
-                        calTriggerTime.setTimeInMillis(trigger.getTime().longValue());
-                        Calendar now = Calendar.getInstance(UTC);
-                        AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
-                        if (alarmNotificationService == null) {
-                            LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
-                            throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
-                        }
-
-                        Integer shift = I(alarmNotificationService.getShift());
-                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift.intValue());
-                        if (delay < 0) {
-                            delay = 0;
-                        }
-
-                        SingleMessageDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis(), alarmNotificationService);
-                        ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
-                        Key key = key(cid, account, trigger.getEventId(), alarm.getId());
-                        scheduledTasks.put(key, timer);
-                        LOG.trace("Created a new alarm task for {}", key);
-                    } catch (UnsupportedOperationException e) {
-                        LOG.error("Can't handle message alarms as long as the legacy storage is used.");
-                        continue;
+            CalendarStorage calendarStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(connection, connection), DBTransactionPolicy.NO_TRANSACTIONS);
+            for (AlarmTrigger trigger : entry.getValue()) {
+                try {
+                    Alarm alarm = calendarStorage.getAlarmStorage().loadAlarm(trigger.getAlarm().intValue());
+                    Calendar calTriggerTime = Calendar.getInstance(UTC);
+                    calTriggerTime.setTimeInMillis(trigger.getTime().longValue());
+                    Calendar now = Calendar.getInstance(UTC);
+                    AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
+                    if (alarmNotificationService == null) {
+                        LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
+                        throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
                     }
-                }
-            } finally {
-                if (readOnly != null) {
-                    dbservice.backReadOnly(cid, readOnly);
+
+                    Integer shift = I(alarmNotificationService.getShift());
+                    long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift.intValue());
+                    if (delay < 0) {
+                        delay = 0;
+                    }
+
+                    SingleMessageDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis(), alarmNotificationService);
+                    ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
+                    Key key = key(cid, account, trigger.getEventId(), alarm.getId());
+                    scheduledTasks.put(key, timer);
+                    LOG.trace("Created a new alarm task for {}", key);
+                } catch (UnsupportedOperationException e) {
+                    LOG.error("Can't handle message alarms as long as the legacy storage is used.");
+                    continue;
                 }
             }
         }
@@ -433,7 +260,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
      * @throws OXException If the context couldn't be loaded or if no {@link AlarmNotificationService} is registered for the {@link AlarmAction} of the alarm
      */
     private SingleMessageDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed, AlarmNotificationService alarmNotificationService) throws OXException {
-        return new SingleMessageDeliveryTask.Builder()
+        return new SingleMessageDeliveryTask.Builder() //@formatter:off
                                          .setDbservice(dbservice)
                                          .setStorage(storage)
                                          .setAlarmNotificationService(alarmNotificationService)
@@ -448,7 +275,8 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                          .setTrigger(trigger)
                                          .setProcessed(processed)
                                          .setCallback(this)
-                                         .setRateLimitFactory(rateLimitFactory).build();
+                                         .setRateLimitFactory(rateLimitFactory)
+                                         .build(); //@formatter:on
     }
 
     /**

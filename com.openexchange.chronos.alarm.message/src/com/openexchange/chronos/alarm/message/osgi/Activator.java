@@ -50,12 +50,9 @@
 package com.openexchange.chronos.alarm.message.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
@@ -72,11 +69,13 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -90,7 +89,6 @@ import com.openexchange.ratelimit.RateLimiterFactory;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -103,17 +101,16 @@ import com.openexchange.user.UserService;
 public class Activator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-    private static final String CLUSTER_ID = "com.openexchange.chronos.alarm.mail.worker";
-
-    private final Map<ScheduledTimerTask, MessageAlarmDeliveryWorker> scheduledTasks = new ConcurrentHashMap<>();
+    private MessageAlarmDeliveryWorker worker;
+    private CleanUpInfo jobInfo;
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
             LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
-            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
+            ConfigurationService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
             ResourceService.class, HtmlService.class, CalendarProviderRegistry.class, AdministrativeCalendarAccountService.class, RateLimiterFactory.class,
-            RecurrenceService.class};
+            RecurrenceService.class, DatabaseCleanUpService.class};
     }
 
     @Override
@@ -129,22 +126,9 @@ public class Activator extends HousekeepingActivator {
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, this);
         if (!leanConfig.getBooleanProperty(MessageAlarmConfig.ENABLED)) {
             LOG.info("Skipped starting the mail alarm delivery worker, because it is disabled.");
-            LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
+            LOG.info("Successfully started bundle " + this.context.getBundle().getSymbolicName());
             return;
         }
-
-        AdministrativeAlarmTriggerStorage storage = Tools.requireService(AdministrativeAlarmTriggerStorage.class, this);
-        TimerService timerService = Tools.requireService(TimerService.class, this);
-        ClusterTimerService clusterTimerService = Tools.requireService(ClusterTimerService.class, this);
-        DatabaseService dbService = Tools.requireService(DatabaseService.class, this);
-        CalendarStorageFactory calendarStorageFactory = Tools.requireService(CalendarStorageFactory.class, this);
-        ContextService ctxService = Tools.requireService(ContextService.class, this);
-        CalendarUtilities calUtil = Tools.requireService(CalendarUtilities.class, this);
-        CalendarProviderRegistry calendarProviderRegistry = Tools.requireService(CalendarProviderRegistry.class, this);
-        AdministrativeCalendarAccountService administrativeCalendarAccountService = Tools.requireService(AdministrativeCalendarAccountService.class, this);
-        RateLimiterFactory rateLimitFactory = Tools.requireService(RateLimiterFactory.class, this);
-        RecurrenceService recurrenceService = Tools.requireService(RecurrenceService.class, this);
-
 
         int period = leanConfig.getIntProperty(MessageAlarmConfig.PERIOD);
         int lookAhead = leanConfig.getIntProperty(MessageAlarmConfig.LOOK_AHEAD);
@@ -153,58 +137,45 @@ public class Activator extends HousekeepingActivator {
             lookAhead = period;
         }
         int initialDelay = leanConfig.getIntProperty(MessageAlarmConfig.INITIAL_DELAY);
-        int workerCount = leanConfig.getIntProperty(MessageAlarmConfig.WORKER_COUNT);
-        if (workerCount <= 0) {
-            workerCount = 1;
-        }
         int overdueWaitTime = Math.abs(leanConfig.getIntProperty(MessageAlarmConfig.OVERDUE));
-        if (workerCount > 1) {
-            LOG.warn("Using {} mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.", I(workerCount));
-        }
 
         AlarmNotificationServiceRegistry registry = new AlarmNotificationServiceRegistry();
         track(AlarmNotificationService.class, registry);
         openTrackers();
 
-        boolean registeredCalendarHandler = false;
-        for (int x = 0; x < workerCount; x++) {
-            MessageAlarmDeliveryWorker worker = new MessageAlarmDeliveryWorker.Builder()
-                                                 .setStorage(storage)
-                                                 .setCalendarStorageFactory(calendarStorageFactory)
-                                                 .setDbService(dbService)
-                                                 .setCtxService(ctxService)
-                                                 .setCalUtil(calUtil)
-                                                 .setTimerService(timerService)
-                                                 .setAlarmNotificationServiceRegistry(registry)
-                                                 .setCalendarProviderRegistry(calendarProviderRegistry)
-                                                 .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
-                                                 .setLookAhead(lookAhead)
-                                                 .setOverdueWaitTime(overdueWaitTime)
-                                                 .setRateLimitFactory(rateLimitFactory)
-                                                 .setRecurrenceService(recurrenceService).build();
-            ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
-            scheduledTasks.put(scheduledTimerTask, worker);
-            if (!registeredCalendarHandler) {
-                // only register a calendar handler for the first worker
-                registerService(CalendarHandler.class, new MessageAlarmCalendarHandler(worker));
-                registeredCalendarHandler = true;
-            }
-        }
+        worker = new MessageAlarmDeliveryWorker(this, registry, lookAhead, overdueWaitTime);
+        jobInfo = getServiceSafe(DatabaseCleanUpService.class).scheduleCleanUpJob(DefaultCleanUpJob.builder() //@formatter:off
+                    .withId(worker.getClass())
+                    .withDelay(Duration.ofMinutes(period))
+                    .withInitialDelay(Duration.ofMinutes(initialDelay))
+                    .withRunsExclusive(false)
+                    .withExecution(worker)
+                    .withPreferNoConnectionTimeout(true)
+                    .build());//@formatter:on
+        registerService(CalendarHandler.class, new MessageAlarmCalendarHandler(worker));
 
         MessageAlarmConfigTreeItem item = new MessageAlarmConfigTreeItem(registry);
         registerService(PreferencesItemService.class, item);
         registerService(ConfigTreeEquivalent.class, item);
-        LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
+        LOG.info("Successfully started bundle " + this.context.getBundle().getSymbolicName());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        for (Entry<ScheduledTimerTask, MessageAlarmDeliveryWorker> entry : scheduledTasks.entrySet()) {
-            entry.getValue().cancel();
-            entry.getKey().cancel(true);
+        try {
+            CleanUpInfo jobInfo = this.jobInfo;
+            if (null != jobInfo) {
+                this.jobInfo = null;
+                jobInfo.cancel(true);
+            }
+        } finally {
+            if (null != worker) {
+                worker.cancel();
+            }
+            super.stopBundle();
+
         }
-        super.stopBundle();
-        LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
+        LOG.info("Successfully stopped bundle " + this.context.getBundle().getSymbolicName());
     }
 
 }

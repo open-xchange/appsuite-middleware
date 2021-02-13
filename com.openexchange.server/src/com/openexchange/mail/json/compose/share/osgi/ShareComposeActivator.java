@@ -59,9 +59,9 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.DependentCapabilityChecker;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -140,7 +140,7 @@ public class ShareComposeActivator extends HousekeepingActivator {
         RankingAwareNearRegistryServiceTracker<EnabledChecker> enabledCheckerTracker = new RankingAwareNearRegistryServiceTracker<>(context, EnabledChecker.class);
         rememberTracker(enabledCheckerTracker);
 
-        track(ClusterTimerService.class, new DefaultAttachmentStorageStarter(context, this));
+        track(DatabaseCleanUpService.class, new DefaultAttachmentStorageStarter(context, this));
 
         // Tracker for CapabilityService that declares "publish_mail_attachments" capability
         final BundleContext context = this.context;

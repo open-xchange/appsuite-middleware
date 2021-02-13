@@ -52,6 +52,7 @@ package com.openexchange.gdpr.dataexport.impl.osgi;
 import static com.openexchange.gdpr.dataexport.impl.storage.AbstractDataExportSql.isUseGlobalDb;
 import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
+import java.time.Duration;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.slf4j.Logger;
@@ -66,6 +67,9 @@ import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.filestore.DatabaseAccessProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
@@ -115,6 +119,8 @@ public class DataExportActivator extends HousekeepingActivator {
 
     private DataExportServiceImpl service;
 
+    private CleanUpInfo jobInfo;
+
     /**
      * Initializes a new {@link DataExportActivator}.
      */
@@ -126,7 +132,7 @@ public class DataExportActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ThreadPoolService.class, TimerService.class, FileStorageService.class,
             ConfigurationService.class, ContextService.class, ConfigViewFactory.class, UserService.class, TranslatorFactory.class,
-            CapabilityService.class, ServerConfigService.class, NotificationMailFactory.class };
+            CapabilityService.class, ServerConfigService.class, NotificationMailFactory.class, DatabaseCleanUpService.class };
     }
 
     @Override
@@ -285,21 +291,34 @@ public class DataExportActivator extends HousekeepingActivator {
 
         registerService(DeleteListener.class, new DataExportDeleteListener());
 
-        getService(TimerService.class).scheduleWithFixedDelay(new DataExportCleanUpTask(service, storageService, this), 300000L, 21600000L); // Every 6 hours
+        jobInfo = getServiceSafe(DatabaseCleanUpService.class).scheduleCleanUpJob(DefaultCleanUpJob.builder() //@formatter:off
+            .withId(DataExportCleanUpTask.class)
+            .withDelay(Duration.ofHours(6))
+            .withInitialDelay(Duration.ofMinutes(5))
+            .withRunsExclusive(true)
+            .withExecution(new DataExportCleanUpTask(service, storageService, this))
+            .build()); //@formatter:on
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        DataExportServiceImpl service = this.service;
-        if (service != null) {
-            this.service = null;
-            service.onStopped();
+    protected synchronized void stopBundle() throws Exception {
+        try {
+            DataExportServiceImpl service = this.service;
+            if (service != null) {
+                this.service = null;
+                service.onStopped();
+            }
+            removeService(DataExportStorageService.class);
+            CleanUpInfo jobInfo = this.jobInfo;
+            if (null != jobInfo) {
+                this.jobInfo = null;
+                jobInfo.cancel(true);
+            }
+        } finally {
+            super.stopBundle();
+            Services.setServiceLookup(null);
+            LOG.info("Stopped bundle {}", context.getBundle().getSymbolicName());
         }
-
-        removeService(DataExportStorageService.class);
-        super.stopBundle();
-        Services.setServiceLookup(null);
-        LOG.info("Stopped bundle {}", context.getBundle().getSymbolicName());
     }
 
 }

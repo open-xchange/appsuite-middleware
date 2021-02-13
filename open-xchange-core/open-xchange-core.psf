@@ -91,6 +91,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.crypto"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.cleanup"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.cleanup.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.tombstone.cleanup"/>

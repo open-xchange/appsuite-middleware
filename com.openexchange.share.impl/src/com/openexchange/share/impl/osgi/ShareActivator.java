@@ -60,7 +60,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -68,6 +67,7 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
@@ -135,11 +135,11 @@ public class ShareActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { //@formatter:off
             UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class,
-            HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, 
-            ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, 
-            FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, 
-            CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class,
-            FolderSubscriptionHelper.class }; //@formatter:on
+            HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class,
+            ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class,
+            FolderCacheInvalidationService.class, GuestService.class, DispatcherPrefixService.class,  CapabilityService.class,
+            GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class, FolderSubscriptionHelper.class,
+            DatabaseCleanUpService.class }; //@formatter:on
     }
 
     @Override
@@ -219,7 +219,7 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(ShareSubscriptionRegistry.class, shareSubscriptionRegistry);
         registerService(ShareSubscriptionProvider.class, new ContextInternalSubscriptionProvider(this));
         XctxSessionCache xctxSessionCache = new XctxSessionCache(this);
-        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] { 
+        registerService(EventHandler.class, xctxSessionCache, singletonDictionary(EventConstants.EVENT_TOPIC, new String[] {
             SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_CONTAINER }));
         registerService(XctxSessionManager.class, xctxSessionCache);
 

@@ -554,7 +554,8 @@ public final class Databases {
      *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
-     * @return A set with all the tables that exist of those to be checked for
+     * @return <code>true</code> if the table exists and the found table name matches
+     *         <code>false</code> otherwise
      * @throws SQLException If something goes wrong
      */
     public static boolean tableExists(Connection con, String table) throws SQLException {

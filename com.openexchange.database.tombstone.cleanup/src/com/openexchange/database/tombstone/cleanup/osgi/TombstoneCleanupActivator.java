@@ -49,10 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup.osgi;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
@@ -61,7 +58,10 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.tombstone.cleanup.TombstoneCleanerWorker;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.CleanUpJob;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.tombstone.cleanup.SchemaTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.config.TombstoneCleanupConfig;
 import com.openexchange.database.tombstone.cleanup.update.InitialTombstoneCleanupUpdateTask;
 import com.openexchange.exception.OXException;
@@ -69,7 +69,6 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.Tools;
-import com.openexchange.timer.ScheduledTimerTask;
 
 /**
  *
@@ -81,14 +80,19 @@ import com.openexchange.timer.ScheduledTimerTask;
 public class TombstoneCleanupActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TombstoneCleanupActivator.class);
-    private static final String CLUSTER_ID = "com.openexchange.database.tombstone.cleanup";
-    private ScheduledTimerTask cleanupTask;
-    private final AtomicBoolean REGISTERED = new AtomicBoolean(false);
-    private TombstoneCleanerWorker tombstoneCleanerWorker;
+
+    private CleanUpInfo cleanupTask;
+
+    /**
+     * Initializes a new {@link TombstoneCleanupActivator}.
+     */
+    public TombstoneCleanupActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ClusterTimerService.class, DatabaseService.class, ContextService.class };
+        return new Class<?>[] { LeanConfigurationService.class, DatabaseService.class, ContextService.class, DatabaseCleanUpService.class };
     }
 
     @Override
@@ -97,21 +101,21 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOGGER.info("Starting bundle: {}", context.getBundle().getSymbolicName());
         Services.setServiceLookup(this);
 
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, this);
         registerService(Reloadable.class, this);
 
-        initCleanupTimerTask(leanConfig);
+        initCleanupTask(leanConfig, true);
     }
 
-    private void initCleanupTimerTask(LeanConfigurationService leanConfig) throws OXException {
-        String timespanStr = leanConfig.getProperty(TombstoneCleanupConfig.TIMESPAN);
+    private void initCleanupTask(LeanConfigurationService leanConfig, boolean registerUpdateTask) throws OXException {
+        String timespanStr = leanConfig.getProperty(TombstoneCleanupConfig.TIMESPAN).trim();
         long timespan = ConfigTools.parseTimespan(timespanStr);
         if (timespan < 1) {
-            LOGGER.warn("Cleanup enabled but no meaningful value defined. Will use the default of 3 months.");
+            LOGGER.warn("Cleanup enabled but no meaningful value defined: \"{}\" Will use the default of 12 weeks (~3 months).", timespanStr);
             timespan = ConfigTools.parseTimespan(TombstoneCleanupConfig.TIMESPAN.getDefaultValue(String.class));
         }
         if (!leanConfig.getBooleanProperty(TombstoneCleanupConfig.ENABLED)) {
@@ -119,24 +123,21 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
             return;
         }
 
-        ClusterTimerService clusterTimerService = Tools.requireService(ClusterTimerService.class, this);
+        DatabaseCleanUpService cleanUpService = Tools.requireService(DatabaseCleanUpService.class, this);
+        CleanUpJob cleanUpJob = SchemaTombstoneCleaner.getCleanUpJob(timespan);
+        this.cleanupTask = cleanUpService.scheduleCleanUpJob(cleanUpJob);
 
-        // we have to set an initial delay as the HazelcastInstance will be registered latest. Therefore switching to TimeUnit.Minutes instead of handling via days
-        this.tombstoneCleanerWorker = new TombstoneCleanerWorker(this, timespan);
-        this.cleanupTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, this.tombstoneCleanerWorker, 60, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
-
-        if (REGISTERED.compareAndSet(false, true)) {
+        if (registerUpdateTask) {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new InitialTombstoneCleanupUpdateTask(timespan)));
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        if (this.tombstoneCleanerWorker != null) {
-            this.tombstoneCleanerWorker.stop();
-        }
-        if (this.cleanupTask != null) {
-            this.cleanupTask.cancel(true);
+    protected synchronized void stopBundle() throws Exception {
+        CleanUpInfo cleanupTask = this.cleanupTask;
+        if (cleanupTask != null) {
+            this.cleanupTask = null;
+            cleanupTask.cancel(true);
         }
         Services.setServiceLookup(null);
 
@@ -145,15 +146,16 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         LeanConfigurationService leanConfig;
         try {
             leanConfig = Tools.requireService(LeanConfigurationService.class, this);
+
             if (this.cleanupTask != null) {
                 cleanupTask.cancel(true);
             }
 
-            initCleanupTimerTask(leanConfig);
+            initCleanupTask(leanConfig, false);
         } catch (Exception e) {
             LOGGER.error("Encountered an error while restarting database cleanup task", e);
         }

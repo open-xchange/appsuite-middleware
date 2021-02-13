@@ -52,8 +52,8 @@ package com.openexchange.mail.json.compose.share.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class DefaultAttachmentStorageStarter implements ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService> {
+public class DefaultAttachmentStorageStarter implements ServiceTrackerCustomizer<DatabaseCleanUpService, DatabaseCleanUpService> {
 
     private final BundleContext context;
     private final ServiceLookup services;
@@ -78,8 +78,8 @@ public class DefaultAttachmentStorageStarter implements ServiceTrackerCustomizer
     }
 
     @Override
-    public ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
-        ClusterTimerService service = context.getService(reference);
+    public DatabaseCleanUpService addingService(ServiceReference<DatabaseCleanUpService> reference) {
+        DatabaseCleanUpService service = context.getService(reference);
         try {
             DefaultAttachmentStorage.initiateCleaner(services.getService(ConfigurationService.class), service);
             return service;
@@ -92,12 +92,12 @@ public class DefaultAttachmentStorageStarter implements ServiceTrackerCustomizer
     }
 
     @Override
-    public void modifiedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+    public void modifiedService(ServiceReference<DatabaseCleanUpService> reference, DatabaseCleanUpService service) {
         // Ignore
     }
 
     @Override
-    public void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+    public void removedService(ServiceReference<DatabaseCleanUpService> reference, DatabaseCleanUpService service) {
         DefaultAttachmentStorage.dropCleaner();
         context.ungetService(reference);
     }

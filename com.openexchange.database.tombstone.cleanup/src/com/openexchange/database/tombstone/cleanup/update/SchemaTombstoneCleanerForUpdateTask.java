@@ -55,13 +55,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.openexchange.database.tombstone.cleanup.SchemaTombstoneCleaner;
+import com.openexchange.database.tombstone.cleanup.cleaners.AbstractTombstoneTableCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.CalendarTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.FolderTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.GroupTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.ObjectPermissionTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.ResourceTombstoneCleaner;
 import com.openexchange.database.tombstone.cleanup.cleaners.TaskTombstoneCleaner;
-import com.openexchange.database.tombstone.cleanup.cleaners.TombstoneTableCleaner;
 import com.openexchange.database.tombstone.cleanup.update.cleaners.AttachmentTombstoneUpdateTaskCleaner;
 import com.openexchange.database.tombstone.cleanup.update.cleaners.ContactTombstoneUpdateTaskCleaner;
 import com.openexchange.database.tombstone.cleanup.update.cleaners.InfostoreTombstoneUpdateTaskCleaner;
@@ -82,7 +82,7 @@ public class SchemaTombstoneCleanerForUpdateTask extends SchemaTombstoneCleaner 
     }
 
     @Override
-    protected Set<TombstoneTableCleaner> getTombstoneCleaner() {
+    protected Set<AbstractTombstoneTableCleaner> getTombstoneCleaner() {
         return Stream.of(new AttachmentTombstoneUpdateTaskCleaner(), new CalendarTombstoneCleaner(), new ContactTombstoneUpdateTaskCleaner(), new FolderTombstoneCleaner(), new GroupTombstoneCleaner(), new InfostoreTombstoneUpdateTaskCleaner(), new ObjectPermissionTombstoneCleaner(), new ResourceTombstoneCleaner(), new TaskTombstoneCleaner()).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
 }

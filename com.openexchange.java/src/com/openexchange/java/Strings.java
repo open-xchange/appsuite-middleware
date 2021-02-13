@@ -2163,4 +2163,35 @@ public class Strings {
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %sB", Double.valueOf(bytes / Math.pow(unit, exp)), pre);
     }
+
+    /**
+     * Checks whether the specified string's characters are <b>not</b> only ASCII 7 bit
+     *
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are <b>not</b> only ASCII 7 bit; otherwise <code>false</code>
+     * @throws IllegalArgumentException If given string is <code>null</code>
+     */
+    public static boolean isNotAscii(final String s) {
+        return isAscii(s) == false;
+    }
+
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     *
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     * @throws IllegalArgumentException If given string is <code>null</code>
+     */
+    public static boolean isAscii(final String s) {
+        if (s == null) {
+            throw new IllegalArgumentException("String must not be null");
+        }
+        final int length = s.length();
+        boolean isAscci = true;
+        for (int i = 0; isAscci && (i < length); i++) {
+            isAscci = (s.charAt(i) < 128);
+        }
+        return isAscci;
+    }
+
 }

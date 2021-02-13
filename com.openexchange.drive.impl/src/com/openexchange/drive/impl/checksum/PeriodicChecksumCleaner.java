@@ -51,20 +51,25 @@ package com.openexchange.drive.impl.checksum;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.PoolAndSchema;
+import com.openexchange.database.Databases;
+import com.openexchange.database.cleanup.CleanUpExecution;
+import com.openexchange.database.cleanup.CleanUpExecutionConnectionProvider;
+import com.openexchange.database.cleanup.CleanUpJob;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.update.UpdateStatus;
@@ -76,80 +81,64 @@ import com.openexchange.groupware.update.Updater;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class PeriodicChecksumCleaner implements Runnable {
+public class PeriodicChecksumCleaner implements CleanUpExecution {
 
     private static final Logger LOG = LoggerFactory.getLogger(PeriodicChecksumCleaner.class);
 
-    private final AtomicBoolean active;
     private final long checksumExpiry;
+    private final Duration delay;
+    private final Duration initialDelay;
 
     /**
      * Initializes a new {@link PeriodicChecksumCleaner}.
      *
-     * @param checksumExpiry The timespan (in milliseconds) after which an unused directory checksum may be deleted permanently
+     * @param checksumExpiry The time span (in milliseconds) after which an unused directory checksum may be deleted permanently
+     * @param delay The delay between subsequent executions of the cleaner
+     * @param initialDelay The initial delay when to start the cleaner
      */
-    public PeriodicChecksumCleaner(long checksumExpiry) {
+    public PeriodicChecksumCleaner(long checksumExpiry, Duration delay, Duration initialDelay) {
         super();
         this.checksumExpiry = checksumExpiry;
-        this.active = new AtomicBoolean(true);
+        this.delay = delay;
+        this.initialDelay = initialDelay;
     }
 
     @Override
-    public void run() {
-        long start = System.currentTimeMillis();
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
-            LOG.info("Periodic checksum cleanup task starting, going to check all contexts...");
-            EligibleContextsResult eligibleContextsResult = getEligibleContextIDs();
-            if (eligibleContextsResult.numOfUnUpdatedContexts > 0) {
-                LOG.info("Skipping {} contexts due to not up-to-date database schemas.", I(eligibleContextsResult.numOfUnUpdatedContexts));
-            }
-            List<Integer> contextIDs = eligibleContextsResult.upToDateContextIDs;
-            long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
-            long lastLogTime = start;
-            int i = 0;
-            for (Integer ctxID : contextIDs) {
-                int contextID = ctxID.intValue();
-                for (int retry = 0; retry < 3; retry++) {
-                    if (false == active.get()) {
-                        LOG.info("Periodic checksum cleanup task stopping.");
-                        return;
-                    }
-                    long now = System.currentTimeMillis();
-                    if (now > lastLogTime + logTimeDistance) {
-                        LOG.info("Periodic checksum cleanup task {}% finished ({}/{}).", I(i * 100 / contextIDs.size()), I(i), I(contextIDs.size()));
-                        lastLogTime = now;
-                    }
-                    try {
-                        cleanupContext(contextID, now - checksumExpiry);
-                        break;
-                    } catch (OXException e) {
-                        if (Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) && retry < 3) {
-                            long delay = 10000 + retry * 20000;
-                            LOG.debug("Error during periodic checksum cleanup task for context {}: {}; trying again in {}ms...",
-                                I(contextID), e.getMessage(), L(delay));
-                            Thread.sleep(delay);
-                        } else {
-                            LOG.error("Error during periodic checksum cleanup task for context {}: {}", I(contextID), e.getMessage(), e);
-                            break;
-                        }
-                    }
-                }
-                i++;
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Interrupted during periodic checksum cleanup task: {}", e.getMessage(), e);
-        } catch (Exception e) {
-            LOG.error("Error during periodic checksum cleanup task: {}", e.getMessage(), e);
+            return Databases.tableExists(connectionProvider.getConnection(), "directorychecksums") && Databases.tableExists(connectionProvider.getConnection(), "filechecksums");
+        } catch (SQLException e) {
+            LOG.warn("Unable to look-up \"directorychecksums\" or \"filechecksums\" table", e);
+        }
+        return false;
+    }
+
+    @Override
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        long start = System.currentTimeMillis();
+        LOG.info("Periodic checksum cleanup task starting, going to check all contexts...");
+        EligibleContextsResult eligibleContextsResult = getEligibleContextIDs(schema, databasePoolId);
+        if (eligibleContextsResult.numOfUnUpdatedContexts > 0) {
+            LOG.info("Skipping {} contexts due to not up-to-date database schemas.", I(eligibleContextsResult.numOfUnUpdatedContexts));
+        }
+        List<Integer> contextIDs = eligibleContextsResult.upToDateContextIDs;
+        for (Integer ctxID : contextIDs) {
+            int contextID = ctxID.intValue();
+            cleanupContext(contextID, System.currentTimeMillis() - checksumExpiry, connectionProvider.getConnection());
+            break;
         }
         LOG.info("Periodic checksum cleanup task finished after {}ms.", L(System.currentTimeMillis() - start));
     }
 
-    /**
-     * Stops all background processing by signaling termination flag.
-     */
-    public void stop() {
-        active.set(false);
+    public CleanUpJob getCleanUpJob() {
+        return DefaultCleanUpJob.builder(). //@formatter:off
+            withId(PeriodicChecksumCleaner.class).
+            withDelay(delay).
+            withInitialDelay(initialDelay).
+            withRunsExclusive(true).
+            withExecution(this).
+            build();
+        //@formatter:on
     }
 
     /**
@@ -157,10 +146,10 @@ public class PeriodicChecksumCleaner implements Runnable {
      *
      * @param contextID The context ID
      * @param unusedSince The maximum "used" timestamp of a checksum to be considered as "unused"
+     * @param connection The database connection
      */
-    private void cleanupContext(int contextID, long unusedSince) throws OXException {
-        RdbChecksumStore checksumStore = new RdbChecksumStore(contextID);
-        List<DirectoryChecksum> unusedChecksums = checksumStore.getUnusedDirectoryChecksums(unusedSince);
+    private void cleanupContext(int contextID, long unusedSince, Connection connection) throws OXException {
+        List<DirectoryChecksum> unusedChecksums = RdbChecksumStore.getUnusedDirectoryChecksums(connection, contextID, unusedSince);
         if (0 == unusedChecksums.size()) {
             LOG.debug("No unused directory checksums detected in context {}.", I(contextID));
             return;
@@ -168,20 +157,20 @@ public class PeriodicChecksumCleaner implements Runnable {
         /*
          * collect affected folder identifiers
          */
-        Set<FolderID> folderIDs = new HashSet<FolderID>();
+        Set<FolderID> folderIDs = new HashSet<>();
         for (DirectoryChecksum unusedChecksum : unusedChecksums) {
             folderIDs.add(unusedChecksum.getFolderID());
         }
         /*
          * remove checksums
          */
-        int removed = checksumStore.removeDirectoryChecksums(unusedChecksums);
+        int removed = RdbChecksumStore.removeDirectoryChecksums(connection, contextID, unusedChecksums);
         LOG.debug("Removed {} unused directory checksums in context {}.", I(removed), I(contextID));
         /*
          * determine folder ids no longer referenced at all by checking against the still used directory checksums
          */
         Set<FolderID> obsoleteFolderIDs = new HashSet<FolderID>(folderIDs);
-        List<DirectoryChecksum> usedChecksums = checksumStore.getDirectoryChecksums(new ArrayList<FolderID>(folderIDs));
+        List<DirectoryChecksum> usedChecksums = RdbChecksumStore.getDirectoryChecksums(connection, contextID, new ArrayList<FolderID>(folderIDs));
         for (DirectoryChecksum usedChecksum : usedChecksums) {
             obsoleteFolderIDs.remove(usedChecksum.getFolderID());
         }
@@ -189,7 +178,7 @@ public class PeriodicChecksumCleaner implements Runnable {
          * remove file checksums for obsolete folder ids, too
          */
         if (0 < obsoleteFolderIDs.size()) {
-            removed = checksumStore.removeFileChecksumsInFolders(new ArrayList<FolderID>(obsoleteFolderIDs));
+            removed = RdbChecksumStore.removeFileChecksumsInFolders(connection, contextID, new ArrayList<FolderID>(obsoleteFolderIDs));
             LOG.debug("Removed {} file checksums for {} obsolete directories in context {}.", I(removed), I(obsoleteFolderIDs.size()), I(contextID));
         }
     }
@@ -198,14 +187,23 @@ public class PeriodicChecksumCleaner implements Runnable {
      * Gets the identifiers of all contexts eligible for a checksum cleaner run, i.e. contexts from non-up-to-date schemas are filtered
      * out beforehand.
      *
+     * @param schema The schema name
+     * @param poolId The database pool id
+     *
      * @return The context identifiers
      */
-    private static EligibleContextsResult getEligibleContextIDs() throws OXException {
-        Map<PoolAndSchema, List<Integer>> schemaAssociations = DriveServiceLookup.getService(ContextService.class).getSchemaAssociations();
-        Updater updater = Updater.getInstance();
-        Set<Integer> upToDateContextIDs = new HashSet<Integer>();
+    private static EligibleContextsResult getEligibleContextIDs(String schema, int poolId) throws OXException {
+        Set<Integer> upToDateContextIDs = new HashSet<>();
         int numOfUnUpdatedContexts = 0;
-        for (List<Integer> contextsInSchema : schemaAssociations.values()) {
+
+        Map<PoolAndSchema, List<Integer>> schemaAssociations = DriveServiceLookup.getService(ContextService.class).getSchemaAssociations();
+        if (schemaAssociations == null || schemaAssociations.isEmpty()) {
+            LOG.debug("No schema assosiation for schema {} and database pool id {} found.", schema, I(poolId));
+            return new EligibleContextsResult(upToDateContextIDs, numOfUnUpdatedContexts);
+        }
+        List<Integer> contextsInSchema = schemaAssociations.get(new PoolAndSchema(poolId, schema));
+        Updater updater = Updater.getInstance();
+        if (contextsInSchema != null) {
             UpdateStatus status = updater.getStatus(contextsInSchema.get(0).intValue());
             if (status.needsBackgroundUpdates() || status.needsBlockingUpdates() || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
                 numOfUnUpdatedContexts += contextsInSchema.size();
@@ -213,16 +211,16 @@ public class PeriodicChecksumCleaner implements Runnable {
                 upToDateContextIDs.addAll(contextsInSchema);
             }
         }
-        return new EligibleContextsResult(new ArrayList<Integer>(upToDateContextIDs), numOfUnUpdatedContexts);
+        return new EligibleContextsResult(upToDateContextIDs, numOfUnUpdatedContexts);
     }
 
     private static class EligibleContextsResult {
         final List<Integer> upToDateContextIDs;
         final int numOfUnUpdatedContexts;
 
-        EligibleContextsResult(List<Integer> upToDateContextIDs, int numOfUnUpdatedContexts) {
+        EligibleContextsResult(Set<Integer> upToDateContextIDs, int numOfUnUpdatedContexts) {
             super();
-            this.upToDateContextIDs = upToDateContextIDs;
+            this.upToDateContextIDs = new ArrayList<>(upToDateContextIDs);
             this.numOfUnUpdatedContexts = numOfUnUpdatedContexts;
         }
     }

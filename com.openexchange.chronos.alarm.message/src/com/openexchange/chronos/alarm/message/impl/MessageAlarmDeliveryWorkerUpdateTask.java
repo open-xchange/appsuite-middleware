@@ -67,6 +67,9 @@ import com.openexchange.tools.update.Tools;
  */
 public class MessageAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
 
+    /** The name of the update task*/
+    public static final String TASK_NAME = "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask";
+
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
@@ -99,7 +102,7 @@ public class MessageAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] {"com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"};
+        return new String[] {TASK_NAME};
     }
 
 }

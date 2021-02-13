@@ -52,19 +52,21 @@ package com.openexchange.share.impl.cleanup;
 import static com.openexchange.java.Autoboxing.I;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.database.cleanup.CleanUpInfo;
+import com.openexchange.database.cleanup.DatabaseCleanUpService;
+import com.openexchange.database.cleanup.DefaultCleanUpJob;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -81,15 +83,14 @@ public class GuestCleaner {
     private final BufferingQueue<GuestCleanupTask> cleanupTasks;
     private final BackgroundGuestCleaner backgroundCleaner;
     private final long guestExpiry;
-    private final ScheduledTimerTask periodicCleanerTask;
-    private final PeriodicCleaner periodicCleaner;
+    private final CleanUpInfo cleanupJobInfo;
 
     /**
      * Initializes a new {@link GuestCleaner}.
      *
      * @param services A service lookup reference
      */
-    public GuestCleaner(final ServiceLookup services) throws OXException {
+    public GuestCleaner(ServiceLookup services) throws OXException {
         super();
         this.services = services;
         ConfigurationService configService = services.getService(ConfigurationService.class);
@@ -107,17 +108,22 @@ public class GuestCleaner {
         this.backgroundCleaner = new BackgroundGuestCleaner(cleanupTasks);
         services.getService(ExecutorService.class).submit(backgroundCleaner);
         /*
-         * schedule context cleanups regularly
+         * schedule periodic, schema-wide cleanup jobs
          */
         long periodicCleanerInterval = parseTimespanProperty(
             configService, "com.openexchange.share.cleanup.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true);
         if (0 < periodicCleanerInterval) {
-            this.periodicCleaner = new PeriodicCleaner(services, guestExpiry);
-            this.periodicCleanerTask = services.getService(ClusterTimerService.class).scheduleWithFixedDelay(
-                PeriodicCleaner.class.getName(), periodicCleaner, periodicCleanerInterval, periodicCleanerInterval);
+            DefaultCleanUpJob cleanupJob = DefaultCleanUpJob.builder()
+                .withInitialDelay(Duration.ofMillis(periodicCleanerInterval))
+                .withDelay(Duration.ofMillis(periodicCleanerInterval))
+                .withExecution(new GuestCleanupExecution(services, guestExpiry))
+                .withRunsExclusive(true)
+                .withId(GuestCleanupExecution.class)
+                .withPreferNoConnectionTimeout(true)
+            .build();
+            cleanupJobInfo = services.getServiceSafe(DatabaseCleanUpService.class).scheduleCleanUpJob(cleanupJob);
         } else {
-            periodicCleaner = null;
-            periodicCleanerTask = null;
+            cleanupJobInfo = null;
         }
     }
 
@@ -128,11 +134,12 @@ public class GuestCleaner {
         if (null != backgroundCleaner) {
             backgroundCleaner.stop();
         }
-        if (null != periodicCleaner) {
-            periodicCleaner.stop();
-        }
-        if (null != periodicCleanerTask) {
-            periodicCleanerTask.cancel();
+        if (null != cleanupJobInfo) {
+            try {
+                cleanupJobInfo.cancel(true);
+            } catch (Exception e) {
+                LOG.warn("error stopping cleanup job.", e);
+            }
         }
     }
 

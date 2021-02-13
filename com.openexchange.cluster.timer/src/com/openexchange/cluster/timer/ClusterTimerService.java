@@ -58,7 +58,9 @@ import com.openexchange.timer.TimerService;
  * {@link ClusterTimerService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @deprecated Use DatabaseCleanUpService instead
  */
+@Deprecated
 public interface ClusterTimerService {
 
     /**

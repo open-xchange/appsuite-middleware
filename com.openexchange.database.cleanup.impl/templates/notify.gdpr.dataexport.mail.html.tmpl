@@ -1,0 +1,34 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+</head>
+<body>
+ <#escape x as x?html>
+
+  <p>
+  ${salutation}
+  <p>
+
+  <p>
+  ${content}
+  </p>
+
+  <#if view_archives_link?has_content>
+    <p id="view_archives" style="padding:10px 0;margin:20px 0;">
+      <@styledButton link=view_archives_link>${view_archives_label}</@styledButton>
+    </p>
+  </#if>
+
+  <p>
+  ${info}
+  </p>
+  
+ </#escape>
+ 
+ <#include "notify.common.footer.html.tmpl">
+ 
+</body>
+</html>
