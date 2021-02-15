@@ -51,11 +51,17 @@ package com.openexchange.chronos.provider.composition.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FallbackFolderCalendarAccess;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,7 +70,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public class FallbackEmptyCalendarAccess extends FallbackFolderCalendarAccess implements WarningsAware {
+public class FallbackEmptyCalendarAccess extends FallbackFolderCalendarAccess implements WarningsAware, PersonalAlarmAware {
 
     private final OXException error;
 
@@ -91,6 +97,16 @@ public class FallbackEmptyCalendarAccess extends FallbackFolderCalendarAccess im
 
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
         return Collections.emptyList();
     }
 

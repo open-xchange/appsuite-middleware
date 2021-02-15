@@ -63,8 +63,10 @@ import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.UsedForSync;
+import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 
 /**
@@ -73,20 +75,20 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.5
  */
-public abstract class FallbackFolderCalendarAccess implements FolderCalendarAccess {
+public abstract class FallbackFolderCalendarAccess implements FolderCalendarAccess, FolderSearchAware {
 
     protected final CalendarAccount account;
 
     /**
      * Initializes a new {@link FallbackFolderCalendarAccess}.
-     * 
+     *
      * @param account The underlying account
      */
     protected FallbackFolderCalendarAccess(CalendarAccount account) {
         super();
         this.account = account;
     }
-    
+
     @Override
     public void close() {
         // nothing to do
@@ -129,6 +131,11 @@ public abstract class FallbackFolderCalendarAccess implements FolderCalendarAcce
 
     @Override
     public Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         return Collections.emptyMap();
     }
 
