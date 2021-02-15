@@ -1,3 +1,9 @@
+open-xchange-drive-comet (7.10.3-33) stable; urgency=medium
+
+  * Build for patch 2021-02-22 (5959)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Feb 2021 12:09:24 +0000
+
 open-xchange-drive-comet (7.10.3-32) stable; urgency=medium
 
   * Build for patch 2021-02-08 (5944)
