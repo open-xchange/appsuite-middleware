@@ -96,7 +96,7 @@ public class SproxydClient {
      * Initializes a new {@link SproxydClient}.
      *
      * @param services The service lookup
-     * @param endpointPool The Endpoint pool
+     * @param endpointPool The endpoint pool
      * @param prefix The prefix to use
      * @param filestoreID The filestore ID
      */
@@ -106,6 +106,15 @@ public class SproxydClient {
         this.endpointPool = endpointPool;
         this.prefix = prefix;
         this.filestoreID = filestoreID;
+    }
+
+    /**
+     * Gets the end-point pool associated with this Sproxyd client.
+     *
+     * @return The end-point pool
+     */
+    public EndpointPool getEndpointPool() {
+        return endpointPool;
     }
 
     /**
