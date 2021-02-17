@@ -57,7 +57,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
@@ -85,10 +84,8 @@ public class SproxydClient {
     /** The HTTP status code for a locked storage object */
     private static final int SC_LOCKED = 423;
 
-    private final EndpointPool endpoints;
-    final HttpClient httpClient;
+    final SproxydConfig sproxydConfig;
     private final String prefix;
-
 
     /**
      * Initializes a new {@link SproxydClient}.
@@ -98,8 +95,7 @@ public class SproxydClient {
      */
     public SproxydClient(SproxydConfig sproxydConfig, String prefix) {
         super();
-        this.endpoints = sproxydConfig.getEndpointPool();
-        this.httpClient = sproxydConfig.getHttpClient();
+        this.sproxydConfig = sproxydConfig;
         this.prefix = prefix;
     }
 
@@ -107,7 +103,8 @@ public class SproxydClient {
      * Shuts-down this Sproxyd client.
      */
     public void shutdown() {
-        HttpClients.shutDown(httpClient);
+        sproxydConfig.getEndpointPool().close();
+        HttpClients.shutDown(sproxydConfig.getHttpClient());
     }
 
     /**
@@ -130,7 +127,7 @@ public class SproxydClient {
                 try {
                     request = new HttpPut(endpoint.getObjectUrl(id));
                     request.setEntity(new InputStreamEntity(data, length));
-                    response = httpClient.execute(request);
+                    response = sproxydConfig.getHttpClient().execute(request);
                     int status = response.getStatusLine().getStatusCode();
                     if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
                         return id;
@@ -182,7 +179,7 @@ public class SproxydClient {
                     if (0 < rangeStart || 0 < rangeEnd) {
                         get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
                     }
-                    response = httpClient.execute(get);
+                    response = sproxydConfig.getHttpClient().execute(get);
                     int status = response.getStatusLine().getStatusCode();
                     if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
                         InputStream content = response.getEntity().getContent();
@@ -225,7 +222,7 @@ public class SproxydClient {
                 Endpoint endpoint = getEndpoint();
                 try {
                     delete = new HttpDelete(endpoint.getObjectUrl(id));
-                    response = httpClient.execute(delete);
+                    response = sproxydConfig.getHttpClient().execute(delete);
                     int status = response.getStatusLine().getStatusCode();
                     if (HttpServletResponse.SC_OK == status) {
                         return Boolean.TRUE;
@@ -268,7 +265,7 @@ public class SproxydClient {
      * @throws OXException If no end-point is available (i.e. all are blacklisted due to connection timeouts).
      */
     Endpoint getEndpoint() throws OXException {
-        Endpoint endpoint = endpoints.get(prefix);
+        Endpoint endpoint = sproxydConfig.getEndpointPool().get(prefix);
         if (endpoint == null) {
             throw SproxydExceptionCode.STORAGE_UNAVAILABLE.create();
         }
@@ -289,9 +286,9 @@ public class SproxydClient {
             return FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
 
-        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
+        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), sproxydConfig.getHttpClient())) {
             LOG.warn("Sproxyd endpoint is unavailable: {}", endpoint);
-            endpoints.blacklist(endpoint.getBaseUrl());
+            sproxydConfig.getEndpointPool().blacklist(endpoint.getBaseUrl());
         }
 
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
