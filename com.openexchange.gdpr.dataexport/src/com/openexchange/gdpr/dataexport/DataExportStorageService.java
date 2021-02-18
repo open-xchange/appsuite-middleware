@@ -86,7 +86,7 @@ public interface DataExportStorageService extends DataExportStatusChecker {
     List<DataExportTask> getDataExportTasks() throws OXException;
 
     /**
-     * Gets all data export tasks that are currently considered as running.
+     * Gets all data export tasks that are currently considered as running or are candidates for being executed.
      *
      * @return The running data export tasks
      * @throws OXException If running data export tasks cannot be returned
@@ -94,7 +94,7 @@ public interface DataExportStorageService extends DataExportStatusChecker {
     List<DataExportTask> getRunningDataExportTasks() throws OXException;
 
     /**
-     * Checks if there are data export tasks that are currently considered as running.
+     * Checks if there are data export tasks that are currently considered as running or are candidates for being executed.
      *
      * @return <code>true</code> if there are such data export tasks; otherwise <code>false</code>
      * @throws OXException If check for running data export tasks fails
