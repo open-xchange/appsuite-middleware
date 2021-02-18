@@ -194,22 +194,22 @@ public final class InfostorePerformer implements SessionHolder {
         infoFactory.setAliases(aliases);
         this.factory = infoFactory;
 
-        unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
-        propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
-        propFind = prepare(new WebdavPropfindAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-        options = prepare(new DefaultWebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false));
-        move = prepare(new WebdavMoveAction(infoFactory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true));
-        mkcol = prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false));
-        lock = prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, false, false));
-        copy = prepare(new WebdavCopyAction(infoFactory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true));
-        delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
-        get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-        head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
+        unlock = prepare(new WebdavUnlockAction(), true, true, true, new WebdavIfAction(0, false, false));
+        propPatch = prepare(new WebdavProppatchAction(protocol), true, true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
+        propFind = prepare(new WebdavPropfindAction(protocol), true, true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
+        options = prepare(new DefaultWebdavOptionsAction(), true, true, false, new WebdavIfAction(0, false, false));
+        move = prepare(new WebdavMoveAction(infoFactory), true, true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true));
+        mkcol = prepare(new WebdavMkcolAction(), true, true, true, new WebdavIfAction(0, true, false));
+        lock = prepare(new WebdavLockAction(), true, true, true, new WebdavIfAction(0, false, false));
+        copy = prepare(new WebdavCopyAction(infoFactory), true, true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true));
+        delete = prepare(new WebdavDeleteAction(), true, true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
+        get = prepare(new WebdavGetAction(), true, false, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED));
+        head = prepare(new WebdavHeadAction(), true, true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED));
 
         final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-        put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, true, false), oxWebdavMaxUploadSize);
-        trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
+        put = prepare(oxWebdavPut, false, true, true, new WebdavIfAction(0, true, false), oxWebdavMaxUploadSize);
+        trace = prepare(new WebdavTraceAction(), true, true, true, new WebdavIfAction(0, false, false));
 
         actions.put(WebdavMethod.UNLOCK, unlock);
         actions.put(WebdavMethod.PROPPATCH, propPatch);
@@ -267,28 +267,52 @@ public final class InfostorePerformer implements SessionHolder {
         BehaviourLookup.getInstance().setRegistry(registry);
     }
 
-    private WebdavAction prepare(final AbstractAction action, final boolean logBody, final boolean logResponse, final AbstractAction... additionals) {
-        final WebdavLogAction logAction = new WebdavLogAction();
-        logAction.setLogRequestBody(logBody);
-        logAction.setLogResponseBody(logResponse);
-
-        final AbstractAction lifeCycle = new WebdavRequestCycleAction();
-        final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
-        final AbstractAction ifMatch = new WebdavIfMatchAction();
-
+    /**
+     * Prepares a new {@link WebdavRequestCycleAction} for a concrete WebDAV action, injecting appropriate actions for logging, default
+     * response headers and if-header matching implicitly. Further actions are added as needed, as well as finally the action itself.
+     *
+     * @param action The action to prepare
+     * @param logBody <code>true</code> to log the request body, <code>false</code>, otherwise
+     * @param logResponse <code>true</code> to log the response, <code>false</code>, otherwise
+     * @param ifMatch <code>true</code> to do <code>"If-Match"</code> / <code>If-None-Match</code> header validation, <code>false</code>, otherwise
+     * @param additionals Additional actions to include
+     * @return The prepared WebDAV action
+     */
+    private WebdavAction prepare(AbstractAction action, boolean logBody, boolean logResponse, boolean ifMatch, AbstractAction... additionals) {
+        /*
+         * initialize surrounding request lifecycle
+         */
+        WebdavRequestCycleAction lifeCycle = new WebdavRequestCycleAction();
+        /*
+         * add log action
+         */
+        WebdavLogAction logAction = new WebdavLogAction(logBody, logResponse);
         lifeCycle.setNext(logAction);
+        /*
+         * add default header action
+         */
+        WebdavDefaultHeaderAction defaultHeader = new WebdavDefaultHeaderAction();
         logAction.setNext(defaultHeader);
-        defaultHeader.setNext(ifMatch);
-
-        AbstractAction a = ifMatch;
-
-        for (final AbstractAction a2 : additionals) {
-            a.setNext(a2);
-            a = a2;
+        AbstractAction previousAction = defaultHeader;
+        /*
+         * add if-match action
+         */
+        if (ifMatch) {
+            WebdavIfMatchAction ifMatchAction = new WebdavIfMatchAction();
+            previousAction.setNext(ifMatchAction);
+            previousAction = ifMatchAction;
         }
-
-        a.setNext(action);
-
+        /*
+         * add additional actions
+         */
+        for (AbstractAction nextAction : additionals) {
+            previousAction.setNext(nextAction);
+            previousAction = nextAction;
+        }
+        /*
+         * add action itself
+         */
+        previousAction.setNext(action);
         return lifeCycle;
     }
 
