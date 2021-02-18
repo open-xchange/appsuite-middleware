@@ -305,25 +305,22 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     /**
-     * Gets all data export tasks that are currently considered as running.
+     * Gets all data export tasks that are currently considered as running or are candidates for being executed.
      *
      * @return The running data export tasks
      * @throws OXException If running data export tasks cannot be returned
      */
     List<DataExportTask> selectRunningDataExportTasks() throws OXException {
+        // Check for tasks that are either marked as paused, pending or currently running
         List<DataExportTask> tasks = null;
-        long now = System.currentTimeMillis();
-        long expirationThreshold = now - config.getExpirationTimeMillis();
-
         for (R schemaReference : getSchemaReferences()) {
             Connection connection = getReadOnly(schemaReference);
             try {
                 if (tableExists(connection, connection.getCatalog())) {
-                    try (PreparedStatement stmt = connection.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp")) {
+                    try (PreparedStatement stmt = connection.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE status IN (?, ?, ?) ORDER BY timestamp")) {
                         stmt.setString(1, DataExportStatus.PAUSED.toString());
                         stmt.setString(2, DataExportStatus.PENDING.toString());
                         stmt.setString(3, DataExportStatus.RUNNING.toString());
-                        stmt.setLong(4, expirationThreshold);
                         try (ResultSet rs = stmt.executeQuery()) {
                             if (rs.next()) {
                                 if (tasks == null) {
@@ -354,24 +351,21 @@ public abstract class AbstractDataExportSql<R> {
     }
 
     /**
-     * Checks if there are data export tasks that are currently considered as running.
+     * Checks if there are data export tasks that are currently considered as running or are candidates for being executed..
      *
      * @return <code>true</code> if there are such data export tasks; otherwise <code>false</code>
      * @throws OXException If check for running data export tasks fails
      */
     boolean hasRunningDataExportTasks() throws OXException {
-        long now = System.currentTimeMillis();
-        long expirationThreshold = now - config.getExpirationTimeMillis();
-
+        // Check for tasks that are either marked as paused, pending or currently running
         for (R schemaReference : getSchemaReferences()) {
             Connection connection = getReadOnly(schemaReference);
             try {
                 if (tableExists(connection, connection.getCatalog())) {
-                    try (PreparedStatement stmt = connection.prepareStatement("SELECT cid, uuid, user, status, filestore, creationTime, startTime, duration, arguments FROM dataExportTask WHERE status IN (?, ?) OR (status = ? AND timestamp < ?) ORDER BY timestamp LIMIT 1")) {
+                    try (PreparedStatement stmt = connection.prepareStatement("SELECT 1 FROM dataExportTask WHERE status IN (?, ?, ?) ORDER BY timestamp ASC LIMIT 1")) {
                         stmt.setString(1, DataExportStatus.PAUSED.toString());
                         stmt.setString(2, DataExportStatus.PENDING.toString());
                         stmt.setString(3, DataExportStatus.RUNNING.toString());
-                        stmt.setLong(4, expirationThreshold);
                         try (ResultSet rs = stmt.executeQuery()) {
                             if (rs.next()) {
                                 return true;
@@ -387,6 +381,7 @@ public abstract class AbstractDataExportSql<R> {
                 backReadOnly(schemaReference, connection);
             }
         }
+
         return false;
     }
 
@@ -1337,7 +1332,9 @@ public abstract class AbstractDataExportSql<R> {
             return null;
         }
 
-        tasks.sort(TASK_INFO_COMPARATOR);
+        if (tasks.size() > 1) {
+            tasks.sort(TASK_INFO_COMPARATOR);
+        }
 
         now = System.currentTimeMillis();
         for (TaskInfo task : tasks) {

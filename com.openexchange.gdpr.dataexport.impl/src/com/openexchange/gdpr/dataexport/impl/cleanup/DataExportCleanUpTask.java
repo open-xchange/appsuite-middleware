@@ -80,15 +80,19 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageInfoService;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.DataExportResultFile;
 import com.openexchange.gdpr.dataexport.DataExportService;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
 import com.openexchange.gdpr.dataexport.DataExportTask;
 import com.openexchange.gdpr.dataexport.DataExportWorkItem;
+import com.openexchange.gdpr.dataexport.impl.DataExportLock;
 import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
 import com.openexchange.java.ConvertUtils;
 import com.openexchange.reseller.ResellerService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -155,10 +159,25 @@ public class DataExportCleanUpTask implements Runnable {
         this.services = services;
     }
 
+    private static final String PROP_CLEANUP_ENABLED = "com.openexchange.gdpr.dataexport.cleanup.enabled";
+
+    private boolean isCleanUpEnabled() {
+        boolean defaultValue = true;
+        ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+        return configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue);
+    }
+
     @Override
     public void run() {
+        if (isCleanUpEnabled() == false) {
+            // Disabled per configuration
+            LOG.info("Aborting clean-up of data export tasks since disabled through configuration");
+            return;
+        }
+
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (databaseService == null) {
+            // Missing database service
             LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run...");
             return;
         }
@@ -172,12 +191,13 @@ public class DataExportCleanUpTask implements Runnable {
             return;
         }
 
+        DataExportLock lock = DataExportLock.getInstance();
         boolean acquired = false;
         Thread currentThread = Thread.currentThread();
         String prevName = currentThread.getName();
         currentThread.setName("DataExportCleanUpTask");
         try {
-            acquired = acquireCleanUpTaskLock(databaseService);
+            acquired = lock.acquireCleanUpTaskLock(true, databaseService);
             if (acquired == false) {
                 // Failed to acquire clean-up lock
                 LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run...");
@@ -202,7 +222,11 @@ public class DataExportCleanUpTask implements Runnable {
             LOG.warn("Failed clean-up run for data exports", t);
         } finally {
             if (acquired) {
-                releaseCleanUpTaskLockSafe(databaseService);
+                try {
+                    lock.releaseCleanUpTaskLock(true, databaseService);
+                } catch (Exception e) {
+                    LOG.warn("Failed to release clean-up lock for data export files", e);
+                }
             }
             currentThread.setName(prevName);
         }
@@ -218,14 +242,18 @@ public class DataExportCleanUpTask implements Runnable {
     }
 
     private void fixOrphanedEntries(Set<Integer> filestoreIds) throws OXException {
-        for (Map.Entry<String, FileStorageAndId> entry : getOrphanedFileStoreLocations(filestoreIds).entrySet()) {
-            entry.getValue().fileStorage.deleteFile(entry.getKey());
+        for (Map.Entry<String, FileStorage> entry : getOrphanedFileStoreLocations(filestoreIds).entrySet()) {
+            String orphanedFile = entry.getKey();
+            FileStorage fileStorage = entry.getValue();
+            fileStorage.deleteFile(orphanedFile);
+            LOG.debug("Deleted orphaned data export file {} from file storage {}", orphanedFile, fileStorage.getUri());
         }
 
         for (Pair<DataExportTask, DataExportWorkItem> pair : getOrphanedWorkItems()) {
             DataExportTask task = pair.getLeft();
             DataExportWorkItem workItem = pair.getRight();
             storageService.markWorkItemPending(task.getId(), workItem.getModuleId(), task.getUserId(), task.getContextId());
+            LOG.debug("Marked orphaned work item {} of data export task from user {} in context {} as pending (missing its artifact in file storage) to enforce re-execution", workItem.getModuleId(), I(task.getUserId()), I(task.getContextId()));
         }
 
         for (Pair<DataExportTask, DataExportResultFile> pair : getOrphanedResultFiles()) {
@@ -233,39 +261,47 @@ public class DataExportCleanUpTask implements Runnable {
             storageService.markPending(task.getId(), task.getUserId(), task.getContextId());
             for (DataExportWorkItem item : task.getWorkItems()) {
                 storageService.markWorkItemPending(task.getId(), item.getModuleId(), task.getUserId(), task.getContextId());
+                LOG.debug("Marked orphaned work item {} of data export task from user {} in context {} as pending (missing task result files file storage) to enforce re-execution", item.getModuleId(), I(task.getUserId()), I(task.getContextId()));
             }
             storageService.deleteResultFiles(task.getId(), task.getContextId());
         }
     }
 
-    private Map<String, FileStorageAndId> getOrphanedFileStoreLocations(Set<Integer> filestoreIds) throws OXException {
-        List<Integer> allContextIds = services.getServiceSafe(ContextService.class).getAllContextIds();
-        Map<String, FileStorageAndId> allFiles = new HashMap<>();
-        Set<URI> alreadyVisited = new HashSet<>(allContextIds.size() >> 2);
+    private Map<String, FileStorage> getOrphanedFileStoreLocations(Set<Integer> filestoreIds) throws OXException {
+        // Fetch required service
+        FileStorageInfoService infoService = FileStorages.getFileStorageInfoService();
+        if (null == infoService) {
+            throw ServiceExceptionCode.absentService(FileStorageInfoService.class);
+        }
+
+        // Collect available files from given file storages
+        Map<String, FileStorage> allFiles = new HashMap<>();
+        List<Integer> allContextIds = null;
+        Set<URI> alreadyVisited = new HashSet<>(filestoreIds.size());
         for (Integer filestoreId : filestoreIds) {
-            try {
+            // Determine base URI and scheme
+            URI baseUri = infoService.getFileStorageInfo(i(filestoreId)).getUri();
+            String scheme = baseUri.getScheme();
+            if (scheme == null) {
+                scheme = "file";
+            }
+
+            // Static prefix in case of "file"-schemed file storage
+            if ("file".equals(scheme)) {
+                FileStorage fileStorage = DataExportUtility.getFileStorageFor(baseUri, scheme, 0 /*don't care*/);
+                if (alreadyVisited.add(fileStorage.getUri())) {
+                    addFilesFrom(fileStorage, allFiles);
+                }
+            } else {
+                if (allContextIds == null) {
+                    allContextIds = services.getServiceSafe(ContextService.class).getAllContextIds();
+                }
                 for (Integer contextId : allContextIds) {
-                    FileStorage fileStorage = null;
-                    try {
-                        fileStorage = DataExportUtility.getFileStorageFor(i(filestoreId), i(contextId));
-                        if (fileStorage == null) {
-                            continue;
-                        }
-                    } catch (OXException oe) {
-                        continue; // ignore
-                    }
+                    FileStorage fileStorage = DataExportUtility.getFileStorageFor(baseUri, scheme, i(contextId));
                     if (alreadyVisited.add(fileStorage.getUri())) {
-                        SortedSet<String> fileList = fileStorage.getFileList();
-                        if (!fileList.isEmpty()) {
-                            FileStorageAndId fsid = new FileStorageAndId(i(filestoreId), fileStorage);
-                            for (String file : fileList) {
-                                allFiles.put(file, fsid);
-                            }
-                        }
+                        addFilesFrom(fileStorage, allFiles);
                     }
                 }
-            } catch (Exception e) {
-                LOG.warn("Failed to retrieve data export file(s) from file storage {}", filestoreId);
             }
         }
 
@@ -284,9 +320,21 @@ public class DataExportCleanUpTask implements Runnable {
             }
         }
 
-        LOG.debug("Detected {} orphaned data export file(s)", I(allFiles.size()));
-
+        LOG.info("Detected {} orphaned data export file(s)", I(allFiles.size()));
         return allFiles;
+    }
+
+    private void addFilesFrom(FileStorage fileStorage, Map<String, FileStorage> allFiles) throws OXException {
+        SortedSet<String> fileList = fileStorage.getFileList();
+        if (fileList.isEmpty()) {
+            LOG.debug("No files available in file storage {}", fileStorage.getUri());
+        } else {
+            LOG.debug("Found {} file(s) in file storage {}", I(fileList.size()), fileStorage.getUri());
+            for (String file : fileList) {
+                allFiles.put(file, fileStorage);
+                LOG.debug("Considering file {} from file storage {}", file, fileStorage.getUri());
+            }
+        }
     }
 
     private List<Pair<DataExportTask, DataExportWorkItem>> getOrphanedWorkItems() throws OXException {
@@ -542,82 +590,6 @@ public class DataExportCleanUpTask implements Runnable {
             return Optional.of(associations.keySet().iterator().next().getSchema());
         } catch (Exception e) {
             return Optional.empty();
-        }
-    }
-
-    // ------------------------------------------------ Locking stuff ----------------------------------------------------------------------
-
-    private static final int LOCK_ID = 1496146671;
-
-    private boolean acquireCleanUpTaskLock(DatabaseService databaseService) throws OXException {
-        boolean modified = false;
-        PreparedStatement stmt = null;
-        Connection writeCon = databaseService.getWritable();
-        try {
-            stmt = writeCon.prepareStatement("INSERT INTO reason_text (id, text) VALUES (?, ?)");
-            stmt.setInt(1, LOCK_ID);
-            stmt.setString(2, "LOCKED");
-            try {
-                modified = stmt.executeUpdate() > 0;
-            } catch (SQLException e) {
-                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    return false;
-                }
-                throw e;
-            }
-            return true;
-        } catch (SQLException e) {
-            throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            if (modified) {
-                databaseService.backWritable(writeCon);
-            } else {
-                databaseService.backWritableAfterReading(writeCon);
-            }
-        }
-    }
-
-    private void releaseCleanUpTaskLockSafe(DatabaseService databaseService) {
-        try {
-            releaseCleanUpTaskLock(databaseService);
-        } catch (Exception e) {
-            LOG.warn("Failed to release clean-up lock for data export files", e);
-        }
-    }
-
-    private boolean releaseCleanUpTaskLock(DatabaseService databaseService) throws OXException {
-        boolean modified = false;
-        PreparedStatement stmt = null;
-        Connection writeCon = databaseService.getWritable();
-        try {
-            stmt = writeCon.prepareStatement("DELETE FROM reason_text WHERE id=?");
-            stmt.setInt(1, LOCK_ID);
-            modified = stmt.executeUpdate() > 0;
-            return modified;
-        } catch (SQLException e) {
-            throw DataExportExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            if (modified) {
-                databaseService.backWritable(writeCon);
-            } else {
-                databaseService.backWritableAfterReading(writeCon);
-            }
-        }
-    }
-
-    // -------------------------------------------------- Helper class ---------------------------------------------------------------------
-
-    private static class FileStorageAndId {
-
-        final FileStorage fileStorage;
-        final int filestoreId;
-
-        FileStorageAndId(int filestoreId, FileStorage fileStorage) {
-            super();
-            this.filestoreId = filestoreId;
-            this.fileStorage = fileStorage;
         }
     }
 
