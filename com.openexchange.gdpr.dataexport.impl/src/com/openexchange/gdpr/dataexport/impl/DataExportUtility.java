@@ -112,7 +112,7 @@ public class DataExportUtility {
     }
 
     /**
-     * Gets the file storage instance for specified data export task.
+     * Gets the file storage instance for specified arguments.
      *
      * @param fileStorageId The file storage identifier
      * @param contextId The context identifier
@@ -120,11 +120,6 @@ public class DataExportUtility {
      * @throws OXException If file storage cannot be returned
      */
     public static FileStorage getFileStorageFor(int fileStorageId, int contextId) throws OXException {
-        FileStorageService fileStorageService = FileStorages.getFileStorageService();
-        if (fileStorageService == null) {
-            throw ServiceExceptionCode.absentService(FileStorageService.class);
-        }
-
         FileStorageInfoService infoService = FileStorages.getFileStorageInfoService();
         if (null == infoService) {
             throw ServiceExceptionCode.absentService(FileStorageInfoService.class);
@@ -135,6 +130,24 @@ public class DataExportUtility {
         String scheme = baseUri.getScheme();
         if (scheme == null) {
             scheme = "file";
+        }
+
+        return getFileStorageFor(baseUri, scheme, contextId);
+    }
+
+    /**
+     * Gets the file storage instance for specified arguments.
+     *
+     * @param baseUri The base URI of the file storage
+     * @param scheme The schema extracted from base URI
+     * @param contextId The context identifier
+     * @return The associated file storage
+     * @throws OXException If file storage cannot be returned
+     */
+    public static FileStorage getFileStorageFor(URI baseUri, String scheme, int contextId) throws OXException {
+        FileStorageService fileStorageService = FileStorages.getFileStorageService();
+        if (fileStorageService == null) {
+            throw ServiceExceptionCode.absentService(FileStorageService.class);
         }
 
         // Prefer a static prefix in case of "file"-schemed file storage
