@@ -68,6 +68,8 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -78,6 +80,7 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
+import com.openexchange.log.Log;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -128,7 +131,7 @@ public class RssAction implements AJAXActionService {
     // ------------------------------------------------------------------------------------------------------------------------------
 
     private final TimeoutHttpURLFeedFetcher fetcher;
-    private final HashMapFeedInfoCache     feedCache;
+    private final HashMapFeedInfoCache feedCache;
 
     /**
      * Initializes a new {@link RssAction}.
@@ -196,15 +199,15 @@ public class RssAction implements AJAXActionService {
                     if (imageUrl != null) {
                         result.setImageUrl(imageUrl);
                     }
+
+                    // Add to results list
+                    results.add(result);
+
+                    @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
+                    handleContents(preprocessor, entry, result, contents);
                 } catch (MalformedURLException e) {
-                    throw RssExceptionCodes.INVALID_RSS.create(e, entry.getLink());
+                    LOG.debug("Unable to process entry with invalid link {}", entry.getLink(), e);
                 }
-
-                // Add to results list
-                results.add(result);
-
-                @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
-                handleContents(preprocessor, entry, result, contents);
             }
         }
 
