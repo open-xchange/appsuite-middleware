@@ -57,6 +57,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GlobalDbDataExportSql} - The SQL access using global database.
@@ -74,9 +75,10 @@ public class GlobalDbDataExportSql extends AbstractDataExportSql<String> {
      * @param databaseService The database service
      * @param configViewFactory The factory for config views
      * @param config The configuration
+     * @param services The service look-up
      */
-    public GlobalDbDataExportSql(DatabaseService databaseService, ConfigViewFactory configViewFactory, DataExportConfig config) {
-        super(databaseService, config);
+    public GlobalDbDataExportSql(DatabaseService databaseService, ConfigViewFactory configViewFactory, DataExportConfig config, ServiceLookup services) {
+        super(databaseService, config, services);
         this.configViewFactory = configViewFactory;
     }
 

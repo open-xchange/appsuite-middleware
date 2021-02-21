@@ -98,7 +98,10 @@ import com.openexchange.gdpr.dataexport.Module;
 import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
 import com.openexchange.gdpr.dataexport.impl.osgi.Services;
 import com.openexchange.gdpr.dataexport.impl.utils.FileStorageAndId;
+import com.openexchange.java.util.ImmutablePair;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractDataExportSql} - The abstract SQL access to data export storage.
@@ -127,6 +130,9 @@ public abstract class AbstractDataExportSql<R> {
     /** The database service */
     protected final DatabaseService databaseService;
 
+    /** The service look-up */
+    protected final ServiceLookup services;
+
     private final DataExportConfig config;
     private final ConcurrentMap<String, Boolean> tableExistsCache;
 
@@ -135,11 +141,13 @@ public abstract class AbstractDataExportSql<R> {
      *
      * @param databaseService The database service
      * @param config The configuration
+     * @param services The service look-up
      */
-    protected AbstractDataExportSql(DatabaseService databaseService, DataExportConfig config) {
+    protected AbstractDataExportSql(DatabaseService databaseService, DataExportConfig config, ServiceLookup services) {
         super();
         this.databaseService = databaseService;
         this.config = config;
+        this.services = services;
         tableExistsCache = new ConcurrentHashMap<String, Boolean>();
     }
 
@@ -398,7 +406,7 @@ public abstract class AbstractDataExportSql<R> {
         long expirationThreshold = now - config.getExpirationTimeMillis();
         long maxTimeToLiveThreshold = now - config.getMaxTimeToLiveMillis();
 
-        List<TaskInfo> tasksToDelete = null;
+        List<ImmutablePair<TaskInfo, R>> tasksToDelete = null;
         List<DataExportTaskInfo> taskInfos = null;
         for (R schemaReference : getSchemaReferences()) {
             Connection connection = null;
@@ -418,7 +426,8 @@ public abstract class AbstractDataExportSql<R> {
                                     if (tasksToDelete == null) {
                                         tasksToDelete = new ArrayList<>();
                                     }
-                                    tasksToDelete.add(new TaskInfo(UUIDs.toUUID(rs.getBytes(2)/* uuid */), 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */));
+                                    TaskInfo taskInfo = new TaskInfo(UUIDs.toUUID(rs.getBytes(2)/* uuid */), 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */);
+                                    tasksToDelete.add(ImmutablePair.<TaskInfo, R>newInstance(taskInfo, schemaReference));
                                 } else if (status.isDone() || status.isFailed()) {
                                     UUID taskId = UUIDs.toUUID(rs.getBytes(2)/* uuid */);
                                     // Check if part of result set because expired or has pending notification
@@ -426,12 +435,30 @@ public abstract class AbstractDataExportSql<R> {
                                         if (tasksToDelete == null) {
                                             tasksToDelete = new ArrayList<>();
                                         }
-                                        tasksToDelete.add(new TaskInfo(taskId, 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */));
+                                        TaskInfo taskInfo = new TaskInfo(taskId, 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */);
+                                        tasksToDelete.add(ImmutablePair.<TaskInfo, R>newInstance(taskInfo, schemaReference));
                                     } else {
-                                        if (taskInfos == null) {
-                                            taskInfos = new ArrayList<>();
+                                        // Check user existence
+                                        int contextId = rs.getInt(1); /* cid */
+                                        int userId = rs.getInt(4); /* user */
+                                        boolean exists;
+                                        {
+                                            UserService userService = services.getOptionalService(UserService.class);
+                                            exists = userService == null || userService.exists(userId, contextId);
                                         }
-                                        taskInfos.add(new DataExportTaskInfo(taskId, rs.getInt(4)/* user */, rs.getInt(1)/* cid */, status));
+                                        // Add to either collection dependent on existence
+                                        if (exists) {
+                                            if (taskInfos == null) {
+                                                taskInfos = new ArrayList<>();
+                                            }
+                                            taskInfos.add(new DataExportTaskInfo(taskId, userId, contextId, status));
+                                        } else {
+                                            if (tasksToDelete == null) {
+                                                tasksToDelete = new ArrayList<>();
+                                            }
+                                            TaskInfo taskInfo = new TaskInfo(taskId, 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */);
+                                            tasksToDelete.add(ImmutablePair.<TaskInfo, R>newInstance(taskInfo, schemaReference));
+                                        }
                                     }
                                 }
                             }
@@ -448,8 +475,8 @@ public abstract class AbstractDataExportSql<R> {
         }
 
         if (tasksToDelete != null) {
-            for (TaskInfo taskInfo : tasksToDelete) {
-                deleteTask(taskInfo.taskId, taskInfo.userId,  taskInfo.contextId);
+            for (ImmutablePair<TaskInfo, R> taskInfoAndReference : tasksToDelete) {
+                deleteTask(taskInfoAndReference.getFirst().taskId, taskInfoAndReference.getSecond());
             }
         }
 

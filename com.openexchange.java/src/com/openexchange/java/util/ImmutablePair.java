@@ -116,6 +116,19 @@ public final class ImmutablePair<T, V> {
         }
     }
 
+    /**
+     * Creates a new <code>ImmutablePair</code> instance from given arguments.
+     *
+     * @param <T> The type of the first argument
+     * @param <V> The type of the second argument
+     * @param first The first argument
+     * @param second The second argument
+     * @return The resulting <code>ImmutablePair</code> instance
+     */
+    public static <T, V> ImmutablePair<T, V> newInstance(T first, V second) {
+        return new ImmutablePair<T, V>(first, second);
+    }
+
     // -------------------------------------------------------------------------------
 
     private final T first;

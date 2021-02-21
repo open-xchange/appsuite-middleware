@@ -56,6 +56,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link UserDbDataExportSql} - The SQL access using common user pay-load database.
@@ -73,9 +74,10 @@ public class UserDbDataExportSql extends AbstractDataExportSql<Integer> {
      * @param databaseService The database service
      * @param contextService The context service
      * @param config The configuration
+     * @param services The service look-up
      */
-    public UserDbDataExportSql(DatabaseService databaseService, ContextService contextService, DataExportConfig config) {
-        super(databaseService, config);
+    public UserDbDataExportSql(DatabaseService databaseService, ContextService contextService, DataExportConfig config, ServiceLookup services) {
+        super(databaseService, config, services);
         this.contextService = contextService;
     }
 

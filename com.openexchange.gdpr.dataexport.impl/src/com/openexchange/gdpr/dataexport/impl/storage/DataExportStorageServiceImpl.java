@@ -87,16 +87,16 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
      *
      * @param useGlobalDb Whether to use Global DB
      * @param config The configuration
-     * @param dbProvider The database provider
+     * @param services The service look-up
      * @throws OXException
      */
     public DataExportStorageServiceImpl(boolean useGlobalDb, DataExportConfig config, ServiceLookup services) throws OXException {
         super();
         this.services = services;
         if (useGlobalDb) {
-            this.sql = new GlobalDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ConfigViewFactory.class), config);
+            this.sql = new GlobalDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ConfigViewFactory.class), config, services);
         } else {
-            this.sql = new UserDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ContextService.class), config);
+            this.sql = new UserDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ContextService.class), config, services);
         }
     }
 
