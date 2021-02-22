@@ -118,17 +118,21 @@ public final class ImageMatcher {
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Matcher matcher;
+    private CharSequence content;
+    private FindState findState;
 
     /**
      * Initializes a new {@link ImageMatcher}.
      */
     private ImageMatcher(final CharSequence content) {
         super();
+        this.content = content;
         final Pattern pattern = PATTERN_REF_IMG.get();
         if (null == pattern) {
             throw new IllegalStateException(ImageMatcher.class.getSimpleName() + " not initialized, yet.");
         }
         matcher = pattern.matcher(content);
+        findState = FindState.NOT_CHECKED;
     }
 
     /**
@@ -193,6 +197,25 @@ public final class ImageMatcher {
      * @return <tt>true</tt> if, and only if, a subsequence of the input sequence matches this matcher's pattern
      */
     public boolean find() {
+        switch (findState) {
+            case NOT_CHECKED:
+                String str = content.toString();
+                if (str.indexOf('/' + ImageActionFactory.ALIAS_APPENDIX) < 0 && str.indexOf("/file") < 0) {
+                    // Essential substring not included. Cannot find a match.
+                    findState = FindState.CANNOT_FIND;
+                    content = null; // Content no more needed
+                    return false;
+                }
+                // Essential substrings contained. Check for matches.
+                findState = FindState.CHECK_FIND;
+                content = null; // Content no more needed
+                break;
+            case CANNOT_FIND:
+                // Essential substring not included. Cannot find a match.
+                return false;
+            default:
+                break;
+        }
         return matcher.find();
     }
 
@@ -251,6 +274,17 @@ public final class ImageMatcher {
      */
     public StringBuffer appendTail(final StringBuffer sb) {
         return matcher.appendTail(sb);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static enum FindState {
+        /** Not yet checked */
+        NOT_CHECKED,
+        /** Essential substring not included. Cannot find a match. */
+        CANNOT_FIND,
+        /** Essential substrings contained. Check for matches. */
+        CHECK_FIND;
     }
 
 }
