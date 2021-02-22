@@ -49,6 +49,7 @@
 
 package com.openexchange.config;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -61,6 +62,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
+import com.openexchange.config.utils.TokenReplacingReader;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
@@ -93,15 +95,19 @@ public class ConfigurationServices {
         }
 
         FileInputStream fis = null;
+        InputStreamReader fr = null;
+        BufferedReader br = null;
+        TokenReplacingReader trr = null;
         try {
-            fis = new FileInputStream(file);
+            fr = new InputStreamReader((fis = new FileInputStream(file)), Charsets.UTF_8);
+            trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
             Properties properties = new Properties();
-            properties.load(fis);
+            properties.load(trr);
             return properties;
-        } catch (@SuppressWarnings("unused") FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             return null;
         } finally {
-            Streams.close(fis);
+            Streams.close(trr, br, fr, fis);
         }
     }
 
@@ -114,15 +120,19 @@ public class ConfigurationServices {
      * @throws IllegalArgumentException If file is no valid YAML
      */
     public static Object loadYamlFrom(File file) throws IOException {
-        InputStreamReader inputStreamReader = null;
+        FileInputStream fis = null;
+        InputStreamReader fr = null;
+        BufferedReader br = null;
+        TokenReplacingReader trr = null;
         try {
-            inputStreamReader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8);
+            fr = new InputStreamReader((fis = new FileInputStream(file)), Charsets.UTF_8);
+            trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
             Yaml yaml = new Yaml();
-            return yaml.load(inputStreamReader);
+            return yaml.load(trr);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to load YAML file '" + file + ". Please fix any syntax errors in it.", e);
         } finally {
-            Streams.close(inputStreamReader);
+            Streams.close(trr, br, fr, fis);
         }
     }
 
@@ -139,13 +149,48 @@ public class ConfigurationServices {
             return null;
         }
 
+        InputStreamReader fr = null;
+        BufferedReader br = null;
+        TokenReplacingReader trr = null;
         try {
+            fr = new InputStreamReader(in, Charsets.UTF_8);
+            trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
             Yaml yaml = new Yaml();
-            return yaml.load(in);
+            return yaml.load(trr);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);
         } finally {
-            Streams.close(in);
+            Streams.close(trr, br, fr, in);
+        }
+    }
+
+    /**
+     * Parse the only YAML document in a stream and produce the corresponding Java object.
+     *
+     * @param <T> The class is defined by the second argument
+     * @param in The stream to read from
+     * @param type The class of the object to be created
+     * @return The YAML object or <code>null</code> (if no such file exists)
+     * @throws IOException If reading from stream yields an I/O error
+     * @throws IllegalArgumentException If stream data is no valid YAML
+     */
+    public static <T> T loadYamlAs(InputStream in, Class<T> type) {
+        if (null == in) {
+            return null;
+        }
+
+        InputStreamReader fr = null;
+        BufferedReader br = null;
+        TokenReplacingReader trr = null;
+        try {
+            fr = new InputStreamReader(in, Charsets.UTF_8);
+            trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
+            Yaml yaml = new Yaml();
+            return yaml.loadAs(trr, type);
+        } catch (YAMLException e) {
+            throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);
+        } finally {
+            Streams.close(trr, br, fr, in);
         }
     }
 
