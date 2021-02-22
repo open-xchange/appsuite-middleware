@@ -254,7 +254,20 @@ public class TokenReplacingReader extends FilterReader {
             }
 
             String variableKey = key.substring(beginTokenLength - 1, key.length() - endTokenLength).trim();
+            String defaultValue;
+            {
+                int colonPos = variableKey.indexOf(':');
+                if (colonPos > 0) {
+                    defaultValue = variableKey.substring(colonPos + 1);
+                    variableKey = variableKey.substring(0, colonPos);
+                } else {
+                    defaultValue = null;
+                }
+            }
             String value = variables.get(variableKey);
+            if (value == null && defaultValue != null) {
+                value = defaultValue;
+            }
             if (value != null) {
                 if (value.length() != 0) {
                     replaceData = value;
