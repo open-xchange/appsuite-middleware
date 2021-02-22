@@ -306,7 +306,7 @@ public class DataExportServiceImpl implements DataExportService {
             }
 
             if (exists.booleanValue()) {
-                if (userExists(contextId, contextId, userService) == false) {
+                if (userExists(dataExportTask.getUserId(), contextId, userService) == false) {
                     // Remove task
                     it.remove();
                     if (tasksToDelete == null) {
