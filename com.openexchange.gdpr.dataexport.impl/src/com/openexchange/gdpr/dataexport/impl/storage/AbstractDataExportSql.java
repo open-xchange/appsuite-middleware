@@ -456,7 +456,7 @@ public abstract class AbstractDataExportSql<R> {
                                             if (tasksToDelete == null) {
                                                 tasksToDelete = new ArrayList<>();
                                             }
-                                            TaskInfo taskInfo = new TaskInfo(taskId, 0, rs.getInt(4)/* user */, rs.getInt(1)/* cid */);
+                                            TaskInfo taskInfo = new TaskInfo(taskId, 0, userId, contextId);
                                             tasksToDelete.add(ImmutablePair.<TaskInfo, R>newInstance(taskInfo, schemaReference));
                                         }
                                     }
