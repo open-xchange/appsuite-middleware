@@ -5,7 +5,7 @@ BuildArch:      noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -44,6 +44,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Feb 22 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-02-22 (5961)
 * Fri Feb 05 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.10.5 release
 * Mon Feb 01 2021 Marcus Klein <marcus.klein@open-xchange.com>
