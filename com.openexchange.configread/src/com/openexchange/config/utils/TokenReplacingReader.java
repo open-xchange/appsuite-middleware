@@ -53,6 +53,7 @@ import java.io.FilterReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TokenReplacingReader} - A reader which interpolates keyword values into a character stream.
@@ -258,7 +259,10 @@ public class TokenReplacingReader extends FilterReader {
             {
                 int colonPos = variableKey.indexOf(':');
                 if (colonPos > 0) {
-                    defaultValue = variableKey.substring(colonPos + 1);
+                    defaultValue = colonPos + 1 >= variableKey.length() ? null : variableKey.substring(colonPos + 1);
+                    if (Strings.isEmpty(defaultValue)) {
+                        defaultValue = null;
+                    }
                     variableKey = variableKey.substring(0, colonPos);
                 } else {
                     defaultValue = null;
