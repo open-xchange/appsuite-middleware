@@ -7,7 +7,7 @@ BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-imap
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 6
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -64,8 +64,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Mon Feb 22 2021 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2021-02-22 (5961)
 * Fri Feb 05 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Third candidate for 7.10.5 release
 * Mon Feb 01 2021 Thorben Betten <thorben.betten@open-xchange.com>
