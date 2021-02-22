@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:	@OXVERSION@
-%define        ox_release 18
+%define        ox_release 19
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Feb 22 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-02-25 (5960)
 * Tue Feb 02 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-02-08 (5945)
 * Tue Jan 19 2021 Marcus Klein <marcus.klein@open-xchange.com>
