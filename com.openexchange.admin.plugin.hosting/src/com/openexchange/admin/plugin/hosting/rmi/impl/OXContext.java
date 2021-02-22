@@ -353,9 +353,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             log(LogLevel.DEBUG, LOGGER, credentials, ctx.getIdAsString(), null, ctx.toString());
             Set<String> loginMappings = null; // used for invalidating old login mappings in the cache
-            if (ctx.getName() == null) {
-                checkExistence(ctx);
-            } else if (Strings.isEmpty(ctx.getName())) {
+            if (ctx.getName() == null || Strings.isEmpty(ctx.getName())) {
                 ctx.setName(null);
                 checkExistence(ctx);
             } else {
