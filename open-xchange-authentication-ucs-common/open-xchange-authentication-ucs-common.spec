@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: open-xchange-core
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 32
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -99,8 +99,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/authplugin.properties
 
 %changelog
-* Mon Feb 15 2021 Felix Marx <felix.marx@open-xchange.com>
-Build for patch 2021-02-22 (5959)
 * Mon Feb 01 2021 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2021-02-08 (5944)
 * Mon Jan 18 2021 Felix Marx <felix.marx@open-xchange.com>

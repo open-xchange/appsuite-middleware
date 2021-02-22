@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 32
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,8 +64,6 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
-* Mon Feb 15 2021 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2021-02-22 (5959)
 * Mon Feb 01 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2021-02-08 (5944)
 * Mon Jan 18 2021 Thorben Betten <thorben.betten@open-xchange.com>
