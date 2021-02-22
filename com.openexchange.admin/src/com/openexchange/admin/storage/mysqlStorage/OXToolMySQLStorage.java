@@ -2582,7 +2582,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (null == foundName) {
                 throw new NoSuchContextException();
             }
-            return !name.equalsIgnoreCase(foundName);
+            return !name.equals(foundName);
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
