@@ -233,4 +233,82 @@ public final class OXExceptions {
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Creates the code for given arguments.
+     *
+     * @param code The error code number
+     * @param prefix The error code prefix
+     * @return The code
+     */
+    public static Code codeFor(int code, String prefix) {
+        return new CodeImpl(prefix, code);
+    }
+
+    private static class CodeImpl implements Code {
+
+        private final String prefix;
+        private final int number;
+        private int hash;
+
+        CodeImpl(String prefix, int number) {
+            super();
+            this.prefix = prefix;
+            this.number = number;
+            hash = 0;
+        }
+
+        @Override
+        public String getPrefix() {
+            return prefix;
+        }
+
+        @Override
+        public int getNumber() {
+            return number;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = hash;
+            if (result == 0) {
+                int prime = 31;
+                result = 1;
+                result = prime * result + number;
+                result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
+                this.hash = result;
+            }
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (this == obj) {
+                return true;
+            }
+            if (obj.getClass() != CodeImpl.class) {
+                return false;
+            }
+            CodeImpl other = (CodeImpl) obj;
+            if (number != other.number) {
+                return false;
+            }
+            if (prefix == null) {
+                if (other.prefix != null) {
+                    return false;
+                }
+            } else if (!prefix.equals(other.prefix)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(number))).toString();
+        }
+    }
+
 }
