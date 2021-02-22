@@ -100,6 +100,7 @@ import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthentic
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCodeSet;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.html.HtmlService;
@@ -274,6 +275,8 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     public Collection<OXException> getWarnings() {
         return Collections.emptyList();
     }
+
+    private static final OXExceptionCodeSet CODES_COPY_TO_SENT_FOLDER_FAILED = new OXExceptionCodeSet(MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA, MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED);
 
     @Override
     public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, ClientToken clientToken) throws OXException {
@@ -486,6 +489,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         List<CloseableMailPartWrapper> closeableParts = null;
         MailPath sentMailPath = null;
+        OXException sendFailed = null;
         MailServletInterface mailInterface = null;
         ComposeTransportResult transportResult = null;
         try {
@@ -583,16 +587,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
 
             // Do the transport...
-            HttpServletRequest servletRequest = request.optHttpServletRequest();
-            String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
-            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, ComposeType.NEW, accountId, usm, new MtaStatusInfo(), remoteAddress);
-            if (null != ids && !ids.isEmpty()) {
-                String msgIdentifier = ids.get(0);
-                try {
-                    sentMailPath = MailPath.getMailPathFor(msgIdentifier);
-                } catch (Exception x) {
-                    LOG.warn("Failed to parse mail path from {}", msgIdentifier, x);
+            try {
+                HttpServletRequest servletRequest = request.optHttpServletRequest();
+                String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
+                List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, ComposeType.NEW, accountId, usm, new MtaStatusInfo(), remoteAddress);
+                if (null != ids && !ids.isEmpty()) {
+                    String msgIdentifier = ids.get(0);
+                    try {
+                        sentMailPath = MailPath.getMailPathFor(msgIdentifier);
+                    } catch (Exception x) {
+                        LOG.warn("Failed to parse mail path from {}", msgIdentifier, x);
+                    }
                 }
+            } catch (OXException oxe) {
+                if (!CODES_COPY_TO_SENT_FOLDER_FAILED.contains(oxe)) {
+                    // Re-throw...
+                    throw oxe;
+                }
+                sendFailed = oxe;
             }
 
             // Commit results as actual transport was executed
@@ -671,6 +683,10 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             } catch (OXException e) {
                 LOG.warn("Failed to close composition space {} after being transported", getUnformattedString(compositionSpaceId), e);
             }
+        }
+
+        if (sendFailed != null) {
+            throw sendFailed;
         }
 
         return sentMailPath;
