@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-authentication-ucs-common
 BuildRequires: open-xchange-saml-core
 Version:       @OXVERSION@
-%define        ox_release 32
+%define        ox_release 33
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,6 +54,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/com.openexchange.saml.ucs.ini
 
 %changelog
+* Mon Feb 22 2021 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2021-02-25 (5959)
 * Mon Feb 01 2021 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2021-02-08 (5944)
 * Mon Jan 18 2021 Felix Marx <felix.marx@open-xchange.com>

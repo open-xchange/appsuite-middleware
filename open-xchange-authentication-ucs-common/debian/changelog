@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs-common (7.10.3-33) stable; urgency=medium
+
+  * Build for patch 2021-02-25 (5959)
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 22 Feb 2021 15:17:05 +0000
+
 open-xchange-authentication-ucs-common (7.10.3-32) stable; urgency=medium
 
   * Build for patch 2021-02-08 (5944)
