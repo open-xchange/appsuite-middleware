@@ -257,15 +257,12 @@ public class TokenReplacingReader extends FilterReader {
             String variableKey = key.substring(beginTokenLength - 1, key.length() - endTokenLength).trim();
             String defaultValue;
             {
-                int colonPos = variableKey.indexOf(':');
-                if (colonPos > 0) {
-                    defaultValue = colonPos + 1 >= variableKey.length() ? null : variableKey.substring(colonPos + 1);
-                    if (Strings.isEmpty(defaultValue)) {
-                        defaultValue = null;
-                    }
-                    variableKey = variableKey.substring(0, colonPos);
-                } else {
+                String[] keyAndDefaultVal = checkAndParseDefaultValue(variableKey);
+                if (keyAndDefaultVal == null) {
                     defaultValue = null;
+                } else {
+                    variableKey = keyAndDefaultVal[0];
+                    defaultValue = keyAndDefaultVal[1];
                 }
             }
             String value = variables.get(variableKey);
@@ -287,6 +284,21 @@ public class TokenReplacingReader extends FilterReader {
         }
 
         return ch;
+    }
+
+    private static String[] checkAndParseDefaultValue(String variableKey) {
+        int colonPos = variableKey.indexOf(':');
+        if (colonPos <= 0) {
+            // No colon present or at illegal position
+            return null;
+        }
+
+        String defaultValue = colonPos + 1 >= variableKey.length() ? "" : variableKey.substring(colonPos + 1);
+        if (defaultValue.length() > 0 && Strings.isEmpty(defaultValue)) {
+            defaultValue = "";
+        }
+        return new String[] { variableKey.substring(0, colonPos), defaultValue };
+
     }
 
 }
