@@ -599,7 +599,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String SIMPLE_INT = "int";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
-    
+
     protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
 
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<>();
@@ -2431,9 +2431,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      *
      * @param parser The parser object
      * @param usr User object which will be changed
-     * @throws InvalidDataException
      */
-    protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) throws InvalidDataException {
+    protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) {
         final String optionValue = (String) parser.getOptionValue(this.companyOption);
         if (null != optionValue) {
             usr.setCompany(optionValue);
@@ -2451,9 +2450,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         final String optionValue4 = (String) parser.getOptionValue(this.timezoneOption);
         if (null != optionValue4) {
-            if (!Arrays.asList(TimeZone.getAvailableIDs()).contains(optionValue4)) {
-                throw new InvalidDataException("The given timezone is invalid");
-            }
             usr.setTimezone(optionValue4);
         }
 
@@ -2528,7 +2524,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setAliasesOption(parser);
         setUserFolderModeOptions(parser);
     }
-    
+
     protected void setUserFolderModeOptions(AdminParser parser) {
         this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'normal', 'none'. If not selected, 'default' is applied.", true, false, true);
     }
@@ -3782,7 +3778,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
     }
-    
+
     protected void applyDriveFolderModeOption(final AdminParser parser, final User usr) {
         String value = (String) parser.getOptionValue(driveFolderModeOption);
         if (null != value) {

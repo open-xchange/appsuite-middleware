@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -2859,6 +2860,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public void checkCreateUserData(final Context ctx, final User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException {
         checkAndSetLanguage(ctx, usr);
+        checkAndSetTimezone(usr, null);
         GenericChecks.checkCreateValidPasswordMech(usr);
         if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed.");
@@ -2969,6 +2971,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
             }
         }
+
+        checkAndSetTimezone(newuser, dbuser);
 
         String newDefaultSenderAddress = newuser.getDefaultSenderAddress();
         String newPrimaryEmail = newuser.getPrimaryEmail();
@@ -3136,6 +3140,24 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
 
         return sAddress.substring(indexOf + 1, sAddress.indexOf('>'));
+    }
+
+    /**
+     * Checks and applies a set timezone identifier in the passed user reference, ensuring that only supported values are taken over.
+     *
+     * @param user The user to check the timezone property for, as passed by the client
+     * @param originalUser An optional reference to the original user in case of update operation, or <code>null</code> if not applicable
+     * @throws InvalidDataException - If the set timezone identifier is invalid
+     */
+    private void checkAndSetTimezone(User user, User originalUser) throws InvalidDataException {
+        String timezone = user.getTimezone();
+        if (null != timezone && (null == originalUser || false == timezone.equals(originalUser.getTimezone()))) {
+            TimeZone timeZone = TimeZone.getTimeZone(timezone);
+            if (null == timeZone || false == timeZone.getID().equals(timezone)) {
+                throw new InvalidDataException("The given timezone is invalid");
+            }
+            user.setTimezone(timeZone.getID());
+        }
     }
 
     private void checkAndSetLanguage(final Context ctx, final User user) throws InvalidDataException {

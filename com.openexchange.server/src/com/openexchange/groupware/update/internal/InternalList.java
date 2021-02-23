@@ -755,6 +755,9 @@ public final class InternalList {
         // Re-assign guests that have guestCreatedBy set to 0 to context admin
         list.add(new com.openexchange.groupware.update.tasks.ReassignGuestsWithUserZeroToAdminUpdateTask());
 
+        // Correct invalid timezone identifiers in table user
+        list.add(new com.openexchange.groupware.update.tasks.CorrectInvalidTimezoneIdsTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

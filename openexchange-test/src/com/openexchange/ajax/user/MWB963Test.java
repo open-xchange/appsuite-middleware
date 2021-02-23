@@ -49,31 +49,38 @@
 
 package com.openexchange.ajax.user;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.ajax.user.me.MeTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.user.actions.UpdateRequest;
+import com.openexchange.ajax.user.actions.UpdateResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.UserImpl;
 
 /**
- * Test suite for all user interface tests.
+ * {@link MWB963Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v8.0.0
  */
-@RunWith(ParallelSuite.class)
-@SuiteClasses({ // @formatter:off
-    GetTest.class,
-    AllTest.class,
-    ListTest.class,
-    Bug13911Test.class,
-    Bug17539Test.class,
-    Bug26354Test.class,
-    Bug26431Test.class,
-    MeTest.class,
-    MWB963Test.class
-}) // @formatter:on
-public final class UserAJAXSuite {
+public final class MWB963Test extends AbstractAJAXSession {
 
-    private UserAJAXSuite() {
-        super();
+    @Test
+    public void testInvalidTimezoneId() throws Exception {
+        Contact userContact = UserTools.getUserContact(getClient(), getClient().getValues().getUserId());
+        Contact updatedContact = new Contact();
+        updatedContact.setInternalUserId(userContact.getInternalUserId());
+        updatedContact.setLastModified(userContact.getLastModified());
+        updatedContact.setFolderId(userContact.getFolderId());
+        UserImpl updatedUser = new UserImpl();
+        updatedUser.setId(userContact.getInternalUserId());
+        updatedUser.setTimeZone("Europe/Olpe");
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(updatedContact, updatedUser, false));
+        assertNotNull(updateResponse);
+        assertTrue("no error in response", updateResponse.hasError());
+        assertNotNull("no error in response", updateResponse.getException());
+        assertEquals("unexpected error code", "USR-0024", updateResponse.getException().getErrorCode());
     }
 }

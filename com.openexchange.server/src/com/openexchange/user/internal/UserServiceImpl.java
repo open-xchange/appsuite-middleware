@@ -51,11 +51,9 @@ package com.openexchange.user.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.slf4j.Logger;
@@ -295,6 +293,12 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(Connection con, User user, Context context) throws OXException {
+        if (null != user.getPreferredLanguage()) {
+            checkLanguage(user.getPreferredLanguage());
+        }
+        if (null != user.getTimeZone()) {
+            checkTimezone(user.getTimeZone());
+        }
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         beforeUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
         UserStorage.getInstance().updateUser(con, user, context);
@@ -387,34 +391,10 @@ public final class UserServiceImpl implements UserService {
         }
 
         /*
-         * Preferred language
+         * Preferred language & timezone
          */
-        if (language == null || LocaleTools.getLocale(language) == null) {
-            throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
-        }
-        final Locale locale = LocaleTools.getLocale(language);
-        if (locale == null) {
-            throw UserExceptionCode.INVALID_LOCALE.create(language);
-        }
-
-        /*
-         * Time zone
-         */
-        if (timeZone == null) {
-            throw UserExceptionCode.MISSING_PARAMETER.create("timezone");
-        }
-        final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
-        boolean found = false;
-        for (final String validTimeZone : validTimeZones) {
-            if (validTimeZone.equals(timeZone)) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
-        }
+        checkLanguage(language);
+        checkTimezone(timeZone);
 
         /*
          * Password mech
@@ -443,4 +423,24 @@ public final class UserServiceImpl implements UserService {
         PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         UserStorage.getInstance().updatePassword(connection, context, user.getId(), passwordMech, user.getUserPassword(), user.getSalt());
     }
+
+    private static void checkTimezone(String timezone) throws OXException {
+        if (null == timezone) {
+            throw UserExceptionCode.MISSING_PARAMETER.create("timezone");
+        }
+        TimeZone timeZone = TimeZone.getTimeZone(timezone);
+        if (null == timeZone || false == timeZone.getID().equals(timezone)) {
+            throw UserExceptionCode.INVALID_TIMEZONE.create(timezone);
+        }
+    }
+
+    private static void checkLanguage(String language) throws OXException {
+        if (null == language) {
+            throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
+        }
+        if (null == LocaleTools.getLocale(language)) {
+            throw UserExceptionCode.INVALID_LOCALE.create(language);
+        }
+    }
+
 }
