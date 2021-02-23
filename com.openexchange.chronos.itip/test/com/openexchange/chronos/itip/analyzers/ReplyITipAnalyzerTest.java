@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,10 +102,13 @@ import com.openexchange.user.UserService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class, CalendarUtils.class })
+@PrepareForTest(
+{ Services.class, CalendarUtils.class })
 public class ReplyITipAnalyzerTest {
 
     private final static int CONTEXT_ID = 42;
+
+    private Map<String, String> headers;
 
     private MockUser user;
 
@@ -124,17 +130,22 @@ public class ReplyITipAnalyzerTest {
 
     @Mock
     private ContextService contextService;
-    
+
     @Mock
     private RegionalSettingsService regionalSettingsService;
 
     private CalendarSession session;
 
+    private Attendee replyingAttendee;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        replyingAttendee = ChronosTestTools.createAttendee(-1, (AttendeeField[]) null);
+        replyingAttendee.setUri(CalendarUtils.getURI(replyingAttendee.getEMail()));
         original = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
+        original.getAttendees().add(replyingAttendee);
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
@@ -144,6 +155,7 @@ public class ReplyITipAnalyzerTest {
 
         user = ChronosTestTools.convertToUser(original.getCreatedBy());
         context = ITipMockFactory.getContext(CONTEXT_ID);
+        headers = Collections.singletonMap("from", replyingAttendee.getEMail());
 
         ServerSession serverSession = ITipMockFactory.getServerSession(context, CONTEXT_ID, user, user.getId());
         CalendarUtilities u = ITipMockFactory.mockUtilities();
@@ -166,13 +178,13 @@ public class ReplyITipAnalyzerTest {
     @Test(expected = OXException.class)
     public void testAnalyze_ReplyWithMoreThanOneAttendee_ThrowsException() throws Exception {
         // update contains 3 attendees, so error should be thrown
-        replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
     }
 
     @Test
     public void testAnalyze_WrongMethodUsed_EmptyAnalysis() throws Exception {
         Mockito.when(message.getMethod()).thenReturn(ITipMethod.COUNTER);
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertThat("Should only be one", Integer.valueOf(analyze.getAnnotations().size()), is(Integer.valueOf(1)));
         Assert.assertThat("Should be none", analyze.getAnnotations().get(0).getMessage(), is(Messages.NONE));
     }
@@ -181,7 +193,7 @@ public class ReplyITipAnalyzerTest {
     public void testAnalyze_PartyCrasherReply_AcceptPartyCrasher() throws Exception {
         Attendee crasher = ChronosTestTools.createAttendee(CONTEXT_ID, (AttendeeField[]) null);
         update.setAttendees(Collections.singletonList(crasher));
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertThat("Party crasher should have been found", analyze.getActions().toArray()[0], is(ITipAction.ACCEPT_PARTY_CRASHER));
         Assert.assertTrue("Party crasher should have been added", analyze.getChanges().get(0).getNewEvent().getAttendees().contains(crasher));
     }
@@ -192,7 +204,7 @@ public class ReplyITipAnalyzerTest {
         copy.setPartStat(ParticipationStatus.DECLINED);
         update.setAttendees(Collections.singletonList(copy));
 
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertThat("Should have been UPDATE action", analyze.getActions().toArray()[0], is(ITipAction.UPDATE));
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Optional<Attendee> processed = newEvent.getAttendees().stream().filter(a -> copy.getEntity() == a.getEntity()).findAny();
@@ -202,10 +214,9 @@ public class ReplyITipAnalyzerTest {
 
     @Test
     public void testAnalyze_NothingUpdated_NoAction() throws Exception {
-        Attendee a = getAttendee();
-        update.setAttendees(Collections.singletonList(a));
+        update.setAttendees(Collections.singletonList(replyingAttendee));
 
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertTrue("Nothing was changed, so there should be no action.", analyze.getActions().isEmpty());
     }
 
@@ -228,7 +239,7 @@ public class ReplyITipAnalyzerTest {
         copy.setPartStat(ParticipationStatus.TENTATIVE);
         update.setAttendees(Collections.singletonList(copy));
 
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertThat("Should have been UPDATE action", analyze.getActions().toArray()[0], is(ITipAction.UPDATE));
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertTrue("REPLY attendee is missing.", newEvent.getAttendees().stream().filter(a -> copy.getEntity() == a.getEntity()).findAny().isPresent());
@@ -252,17 +263,32 @@ public class ReplyITipAnalyzerTest {
         user.setTimeZone("");
         user.setLocale(Locale.US);
 
-        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, headers, wrapper, null, user, context, session);
         Assert.assertThat("Should have been IGNORE action", analyze.getActions().toArray()[0], is(ITipAction.IGNORE));
         Assert.assertTrue("There should be no diff displayed to the client!", analyze.getChanges().isEmpty());
     }
 
-    private Attendee getAttendee() {
-        return original.getAttendees().get(0).getEntity() != user.getId() ? original.getAttendees().get(0) : original.getAttendees().get(1);
+    /**
+     * Test for MWB-935
+     *
+     * @throws Exception If test fails
+     */
+    @Test
+    public void testAnalyze_WrongSender_IgnoreActionAdded() throws Exception {
+        Attendee copy = getAttendeeCopy();
+        copy.setPartStat(ParticipationStatus.DECLINED);
+        update.setAttendees(Collections.singletonList(copy));
+
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, Collections.singletonMap("from", "evil@example.org"), wrapper, null, user, context, session);
+        Assert.assertTrue("Update action should still be advised", analyze.getActions().contains(ITipAction.UPDATE));
+        // No IGNORE action implemented, UI doesn't hide the button. Don't send atm
+        // Assert.assertTrue("Ignore action must be advised", analyze.getActions().contains(ITipAction.IGNORE));
+        Assert.assertThat("There should be a hint for the user", analyze.getAnnotations(), is(notNullValue()));
+        Assert.assertThat("Ignore not advised.", analyze.getAnnotations().get(0).getMessage(), containsString("Best ignore it"));
     }
 
     private Attendee getAttendeeCopy() throws OXException {
-        return copy(getAttendee());
+        return copy(replyingAttendee);
     }
 
     private Attendee copy(Attendee original) throws OXException {
