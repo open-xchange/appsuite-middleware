@@ -51,15 +51,14 @@ package com.openexchange.chronos.itip;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
  * {@link Messages}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Messages implements LocalizableStrings {
-    public static final String REQUESTED_A_REFRESHER = "An attendee would like to be brought up to date about this appointment.";
 
+    public static final String REQUESTED_A_REFRESHER = "An attendee would like to be brought up to date about this appointment.";
 
     /**
      * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
@@ -152,18 +151,18 @@ public class Messages implements LocalizableStrings {
 
     public static final String TENTATIVE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on your behalf:";
 
-//    public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
+    //    public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 
     // Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
-    public static final String NONE_INTRO =  "%1$s sets the status to %2$s for this appointment:";
+    public static final String NONE_INTRO = "%1$s sets the status to %2$s for this appointment:";
 
     public static final String NONE_INSTANCE_INTRO = "%1$s sets the status to %2$s for an appointment of the series %3$s:";
 
-    public static final String NONE_ON_BEHALF_INTRO =  "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:";
+    public static final String NONE_ON_BEHALF_INTRO = "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:";
 
     public static final String NONE_INSTANCE_ON_BEHALF_INTRO = "On behalf of %4$s, %1$s sets the status for an appointment of the series %3$s to %2$s:";
 
-    public static final String NONE_ON_YOUR_BEHALF_INTRO =  "On your behalf, %1$s sets your status for this appointment to %2$s:";
+    public static final String NONE_ON_YOUR_BEHALF_INTRO = "On your behalf, %1$s sets your status for this appointment to %2$s:";
 
     public static final String NONE_INSTANCE_ON_YOUR_BEHALF_INTRO = "On your behalf, %1$s sets your status for an appointment of the series %3$s to %2$s:";
 
@@ -231,11 +230,11 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_CHANGED_TITLE = "The appointment has a new subject: %1$s.";
 
-	public static final String HAS_CHANGED_SHOWN_AS = "The appointment will now be shown as: \"%1$s\".";
+    public static final String HAS_CHANGED_SHOWN_AS = "The appointment will now be shown as: \"%1$s\".";
 
-	public static final String HAS_CHANGED_TIMEZONE = "The appointment timezone was changed to: %1$s";
+    public static final String HAS_CHANGED_TIMEZONE = "The appointment timezone was changed to: %1$s";
 
-	public static final String ASK_CHANGE_LOCATION = "Change the location to %1$s.";
+    public static final String ASK_CHANGE_LOCATION = "Change the location to %1$s.";
 
     public static final String INTENTION_CHANGE_LOCATION = "Change the location to %1$s.";
 
@@ -266,13 +265,13 @@ public class Messages implements LocalizableStrings {
      */
     public static final String HAS_CHANGED_STATE = "%1$s has %2$s the appointment.";
 
-//    public static final String ACCEPTED = "accepted";
-//
-//    public static final String DECLINED = "declined";
-//
+    //    public static final String ACCEPTED = "accepted";
+    //
+    //    public static final String DECLINED = "declined";
+    //
     public static final String WAITING = "waiting";
-//
-//    public static final String TENTATIVELY_ACCEPT = "tentatively accept";
+    //
+    //    public static final String TENTATIVELY_ACCEPT = "tentatively accept";
 
     public static final String ASK_INVITE_GROUP = "Invite the group %1$s to the appointment.";
 
@@ -334,34 +333,34 @@ public class Messages implements LocalizableStrings {
     // Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
     public static final String SUBJECT_STATE_CHANGED = "%1$s %2$s the invitation: %3$s";
 
-	public static final String SUBJECT_REFRESH = "Resend the invitation for: %1$s";
+    public static final String SUBJECT_REFRESH = "Resend the invitation for: %1$s";
 
-	public static final String SUBJECT_DECLINECOUNTER = "Change not accepted for: %1$s";
+    public static final String SUBJECT_DECLINECOUNTER = "Change not accepted for: %1$s";
 
-	public static final String TIMEZONE = "All times will be shown in the timezone %1$s";
+    public static final String TIMEZONE = "All times will be shown in the timezone %1$s";
 
-	// E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-	public static final String COUNTER_REPLY_INTRO = "%1$s has %2$s the appointment, but would like to make a counter proposal: ";
+    // E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
+    public static final String COUNTER_REPLY_INTRO = "%1$s has %2$s the appointment, but would like to make a counter proposal: ";
 
-	// TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-	public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because you are the chair for this appointment.";
+    // TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
+    public static final String PRINCIPAL_JUSTIFICATION = "You have received this E-Mail because you are the chair for this appointment.";
 
-	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
+    public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
 
-	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
+    public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
 
     // You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-	public static final String NO_PERMISSION = "You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.";
+    public static final String NO_PERMISSION = "You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.";
 
-	/**
-	 * The organizer of the appointment has changed. New organizer is: %1$s
-	 */
-	public static final String ORGANIZER_CHANGE = "The organizer of the appointment has changed. New organizer is: %1$s";
+    /**
+     * The organizer of the appointment has changed. New organizer is: %1$s
+     */
+    public static final String ORGANIZER_CHANGE = "The organizer of the appointment has changed. New organizer is: %1$s";
 
-	/**
-	 * The organizer of the appointment has changed. This operation is not allowed.
-	 */
-	public static final String UNALLOWED_ORGANIZER_CHANGE = "The organizer of the appointment has changed. This operation is not allowed.";
+    /**
+     * The organizer of the appointment has changed. This operation is not allowed.
+     */
+    public static final String UNALLOWED_ORGANIZER_CHANGE = "The organizer of the appointment has changed. This operation is not allowed.";
 
     /** Used when there are multiple changes in the appointment's conference properties */
     public static final String HAS_CHANGED_CONFERENCE = "The meeting access information was changed.";
