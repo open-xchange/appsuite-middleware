@@ -225,13 +225,14 @@ public class BasicAuthenticator extends OXCommonImpl {
     /**
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!
+     * 
      * @param authdata
      * @param ctx
      * @throws InvalidCredentialsException
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException {
+    public void doAuthentication(final Credentials authdata, final Context ctx) throws InvalidCredentialsException, StorageException {
         contextcheck(ctx);
 
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
@@ -242,10 +243,9 @@ public class BasicAuthenticator extends OXCommonImpl {
         // only do context check, if we have not already admin creds in our cache for given context
         // ATTENTION: It is correct that we don't throw a now such context exception here because we won't
         // give an opportunity to indirectly check for contexts here
-        if (cache.getAdminCredentials(ctx) == null ) {
+        if (cache.getAdminCredentials(ctx) == null) {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
-                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
-                        "Authentication failed");
+                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
                 LOG.error("Requested context {} does not exist!", ctx.getId(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
@@ -253,12 +253,11 @@ public class BasicAuthenticator extends OXCommonImpl {
 
         // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
-            if ( isMasterOfContext(authdata, ctx) ) {
+            if (isMasterOfContext(authdata, ctx)) {
                 doAuthentication(authdata);
             } else if (!oxtool.existsUserName(ctx, authdata.getLogin()) || !sqlAuth.authenticate(authdata, ctx)) {
-                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
-                        "Authentication failed");
-                LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);
+                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
+                LOG.error("Admin authentication for user {}", authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }

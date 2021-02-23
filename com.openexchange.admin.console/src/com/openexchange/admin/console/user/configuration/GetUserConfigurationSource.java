@@ -50,8 +50,6 @@
 package com.openexchange.admin.console.user.configuration;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,10 +65,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 
@@ -78,10 +72,12 @@ import com.openexchange.cli.AbstractRmiCLI;
  * CLT to request the user configuration and permissions per RMI calls.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
 public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
 
+    private static final String NEWLINE = "\n";
     private static final String OPT_USER_SHORT = "i";
     private static final String OPT_USER_LONG = "userid";
     private static final String OPT_CONTEXT_SHORT = "c";
@@ -91,6 +87,11 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     private static final String OPT_CAPABILITIES_SHORT = "a";
     private static final String OPT_CAPABILITIES_LONG = "user-capabilities";
 
+    /**
+     * Entry point
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         new GetUserConfigurationSource().execute(args);
     }
@@ -111,11 +112,8 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         return contextId == null ? !authenticator.isMasterAuthenticationDisabled() : !authenticator.isContextAuthenticationDisabled();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException{
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         if (contextId == null) {
             authenticator.doAuthentication(login, password);
         } else {
@@ -123,9 +121,6 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void addOptions(Options options) {
         OptionGroup optionGroup = new OptionGroup();
@@ -137,29 +132,26 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption(OPT_USER_SHORT, OPT_USER_LONG, "userId", "A valid user identifier", true));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (!cmd.hasOption(OPT_CONTEXT_SHORT)) {
             System.out.println("You must provide a context identifier.");
             printHelp();
-            System.exit(-1);
+            System.exit(1);
             return;
         }
 
         if (!cmd.hasOption(OPT_USER_SHORT)) {
             System.out.println("You must provide a user identifier.");
             printHelp();
-            System.exit(-1);
+            System.exit(1);
             return;
         }
 
         if (!cmd.hasOption(OPT_CAPABILITIES_SHORT) && !cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
             System.out.println("Either user capabilities ('" + OPT_CAPABILITIES_SHORT + "') or user configuration ('" + OPT_CONFIGURATION_SHORT + "' <arg>) has to be added.");
             printHelp();
-            System.exit(-1);
+            System.exit(1);
             return;
         }
 
@@ -173,15 +165,12 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, String optRmiHostName) throws Exception {
         OXUserInterface oxUserInterface = getUserInterface();
 
-        final Context ctx = new Context(I(parseInt('c', 0, cmd, option)));
-        final User user = new User(parseInt('i', 0, cmd, option));
+        Context ctx = new Context(I(parseInt('c', 0, cmd, option)));
+        User user = new User(parseInt('i', 0, cmd, option));
         Credentials credentials = new Credentials(cmd.getOptionValue('A'), cmd.getOptionValue('P'));
 
         if (cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
@@ -194,19 +183,34 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         return null;
     }
 
+    @Override
+    protected Boolean requiresAdministrativePermission() {
+        return null;
+    }
+
+    @Override
+    protected String getFooter() {
+        return "";
+    }
+
+    @Override
+    protected String getName() {
+        return "getuserconfigurationsource -c <contextId> -i <userId> [-a | -o <userConfiguration>] " + BASIC_CONTEXT_ONLY_ADMIN_USAGE;
+    }
+
+    ///////////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
+
     /**
-     * @param oxUserInterface
-     * @param ctx
-     * @param user
-     * @param credentials
-     * @param searchPattern
-     * @throws RemoteException
-     * @throws InvalidDataException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchUserException
+     * Handles the <code>user-configuration</code> option
+     * 
+     * @param oxUserInterface The {@link OXUserInterface}
+     * @param ctx The context
+     * @param user The user
+     * @param credentials The credentials
+     * @param searchPattern The search pattern
+     * @throws Exception if an error is occurred
      */
-    private void handleConfigurationOption(OXUserInterface oxUserInterface, final Context ctx, final User user, Credentials credentials, String searchPattern) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+    private void handleConfigurationOption(OXUserInterface oxUserInterface, Context ctx, User user, Credentials credentials, String searchPattern) throws Exception {
         List<UserProperty> userConfigurationSource = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
         if (userConfigurationSource.size() <= 0) {
             System.out.println("No property with pattern '" + searchPattern + "' found!");
@@ -214,83 +218,64 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             return;
         }
 
-        System.out.println("Configuration found: ");
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("Configuration found: ").append(NEWLINE);
         for (UserProperty property : userConfigurationSource) {
-            System.out.println(property.toString());
+            builder.append(property.toString()).append(NEWLINE);
         }
-        System.out.println();
+        System.out.println(builder.toString());
     }
 
     /**
-     * @param oxUserInterface
-     * @param ctx
-     * @param user
-     * @param credentials
-     * @throws RemoteException
-     * @throws InvalidDataException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchUserException
+     * Handles the <code>user-capabilities</code> option
+     * 
+     * @param oxUserInterface The {@link OXUserInterface}
+     * @param ctx The context
+     * @param user The user
+     * @param credentials The credentials
+     * @throws Exception if an error is occurred
      */
-    private void handleCapabilitiesOption(OXUserInterface oxUserInterface, final Context ctx, final User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException {
+    private void handleCapabilitiesOption(OXUserInterface oxUserInterface, Context ctx, User user, Credentials credentials) throws Exception {
         Map<String, Map<String, Set<String>>> userCapabilitiesSource = oxUserInterface.getUserCapabilitiesSource(ctx, user, credentials);
         if (userCapabilitiesSource.size() <= 0) {
             System.out.println("Not able to retrieve capabilities.");
             System.out.println();
             return;
         }
-        List<CapabilitySource> capabilitySources = new ArrayList<>();
-        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROVISIONING, userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.DENIED_KEY)));
-        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.CONFIGURATION, userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.DENIED_KEY)));
-        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROGRAMMATIC, userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.DENIED_KEY)));
-        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PERMISSION, userCapabilitiesSource.get(CapabilitySourceEnum.PERMISSION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PERMISSION.getName()).get(CapabilitySource.DENIED_KEY)));
+        List<CapabilitySource> capabilitySources = new ArrayList<>(4);
+        for (CapabilitySourceEnum cs : CapabilitySourceEnum.values()) {
+            capabilitySources.add(new CapabilitySource(cs, userCapabilitiesSource.get(cs.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(cs.getName()).get(CapabilitySource.DENIED_KEY)));
+        }
 
         Collections.sort(capabilitySources, new CapabilitiesComparator());
 
+        StringBuilder builder = new StringBuilder(128);
         Set<String> allowed = new TreeSet<>();
         for (CapabilitySource source : capabilitySources) {
-            System.out.println("Source: " + source.getSource().getName());
+            builder.append("Source: ").append(source.getSource().getName()).append(NEWLINE);
 
-            System.out.println("-- granted:" + source.getGrantedCapabilities().toString());
+            builder.append("-- granted:").append(source.getGrantedCapabilities().toString()).append(NEWLINE);
             for (String granted : source.getGrantedCapabilities()) {
                 allowed.add(granted);
             }
-            System.out.println("-- denied:" + source.getDeniedCapabilities().toString());
+            builder.append("-- denied:").append(source.getDeniedCapabilities().toString()).append(NEWLINE);
             for (String denied : source.getDeniedCapabilities()) {
                 allowed.remove(denied);
             }
-            System.out.println();
+            builder.append(NEWLINE);
         }
-
+        System.out.println(builder.toString());
         System.out.println("Granted capabilities (lowest -> highest priority; permissions -> configuration -> provisioning -> programmatic): ");
         System.out.println(allowed.toString());
     }
 
-    private final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
-        return (OXUserInterface) getRmiStub(OXUserInterface.RMI_NAME);
-    }
-
     /**
-     * {@inheritDoc}
+     * Returns the {@link OXUserInterface}
+     *
+     * @return the {@link OXUserInterface}
+     * @throws Exception if an error is occurred
      */
-    @Override
-    protected Boolean requiresAdministrativePermission() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getFooter() {
-        return "";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "getuserconfigurationsource -c <contextId> -i <userId> [-a | -o <userConfiguration>] " + BASIC_CONTEXT_ONLY_ADMIN_USAGE;
+    private final OXUserInterface getUserInterface() throws Exception {
+        return OXUserInterface.class.cast(getRmiStub(OXUserInterface.RMI_NAME));
     }
 }
