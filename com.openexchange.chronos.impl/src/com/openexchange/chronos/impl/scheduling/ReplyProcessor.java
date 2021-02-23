@@ -468,16 +468,29 @@ public class ReplyProcessor extends AbstractUpdatePerformer {
     private Attendee getReplyingAttendee(Event updatedEventData, CalendarUser originator) throws OXException {
         Attendee replyingAttendee = CalendarUtils.find(updatedEventData.getAttendees(), originator);
         if (null == replyingAttendee) {
+            LOG.debug("Didn't find originator {} in the attendee list.", originator);
             /*
-             * iTIP only allows one attendee in a reply, look up if originator is set in SENT-BY
+             * iTIP only allows one attendee in a reply, search for it
              */
-            LOG.debug("Didn't find attendee. Searching in SENT-BY field.");
-            if (1 != updatedEventData.getAttendees().size() || false == updatedEventData.getAttendees().get(0).containsSentBy()) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
-            }
-            CalendarUser sentBy = updatedEventData.getAttendees().get(0).getSentBy();
-            if (false == CalendarUtils.matches(originator, sentBy)) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
+            if (SchedulingSource.API.equals(source)) {
+                /*
+                 * Scheduled or rather allowed via API, use attendee transmitted in the iCal, regardless security considerations
+                 */
+                if (1 != updatedEventData.getAttendees().size()) {
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
+                }
+            } else {
+                /*
+                 * Look up if originator is set in SENT-BY
+                 */
+                LOG.debug("Didn't find attendee. Searching in SENT-BY field.");
+                if (1 != updatedEventData.getAttendees().size() || false == updatedEventData.getAttendees().get(0).containsSentBy()) {
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
+                }
+                CalendarUser sentBy = updatedEventData.getAttendees().get(0).getSentBy();
+                if (false == CalendarUtils.matches(originator, sentBy)) {
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(originator.getEntity()), updatedEventData.getId());
+                }
             }
             replyingAttendee = updatedEventData.getAttendees().get(0);
         }

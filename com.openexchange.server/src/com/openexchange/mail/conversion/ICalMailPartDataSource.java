@@ -65,6 +65,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -93,7 +94,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
     /**
      * Sets the ServiceLookup
      *
-     * @param serviceLookup
+     * @param serviceLookup The service lookup
      * @return this
      */
     public ICalMailPartDataSource setServiceLookup(ServiceLookup serviceLookup) {
@@ -165,10 +166,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             if (serviceLookup != null) {
                 CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
                 if (cryptoMailAccessFactory != null) {
-                    mailAccess = cryptoMailAccessFactory.createAccess(
-                        (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
-                        session,
-                        null);
+                    mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session, null);
                 }
             }
             mailAccess.connect();
@@ -191,6 +189,18 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
                     properties.put(PROPERTY_OWNER, Integer.toString(ownerId));
                 }
             }
+            /*
+             * Load header
+             */
+            MailMessage message = mailAccess.getMessageStorage().getMessage(fullname, mailId, false);
+            String[] header = message.getHeader("FROM");
+            if (null != header && 1 == header.length) {
+                properties.put("from", header[0]);
+            }
+
+            /*
+             * Load iCal
+             */
             final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
             if (null == mailPart) {
                 throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, fullname);

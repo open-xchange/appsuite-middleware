@@ -375,5 +375,7 @@ public class Messages implements LocalizableStrings {
     /** Used when all conference properties in the appointment were removed */
     public static final String HAS_REMOVED_CONFERENCE = "The meeting access information was removed.";
 
-}
+    /** The sender %1$s is not allowed to perform changes on behave of %2$s. Best ignore it.*/
+    public static final String MALICIOUS_SENDER_WARNING = "The sender %1$s is not allowed to perform changes on behave of %2$s. Best ignore it.";
 
+}

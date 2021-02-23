@@ -55,10 +55,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.mail.internet.AddressException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -74,11 +76,14 @@ import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.user.User;
 
 /**
@@ -181,9 +186,29 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
         if (containsPartyCrasher(analysis)) {
             analysis.recommendAction(ITipAction.ACCEPT_PARTY_CRASHER);
-        } else {
-            if (containsChangesForUpdate(analysis)) {
-                analysis.recommendAction(ITipAction.UPDATE);
+            return analysis;
+        }
+        if (containsChangesForUpdate(analysis)) {
+            analysis.recommendAction(ITipAction.UPDATE);
+            /*
+             * Check if sender is allowed to perform the update.
+             * Notify user with warning if not
+             */
+            QuotedInternetAddress fromAddress = null == header ? null : getAddress(header.get("from"));
+            if (false == isAllowedSender(original, fromAddress)) {
+                // No IGNORE action implemented, UI doesn't hide the button. Don't send atm
+                // analysis.recommendAction(ITipAction.IGNORE);
+                Attendee replyingAttendee = getReplyingAttendee(update);
+                // @formatter:off
+                analysis.addAnnotation(new ITipAnnotation(
+                    new Sentence(Messages.MALICIOUS_SENDER_WARNING)
+                    .add(null == fromAddress ? null : fromAddress.getAddress())
+                    .add(Strings.isEmpty(replyingAttendee.getEMail()) ? 
+                        replyingAttendee.getUri() : 
+                            replyingAttendee.getEMail()
+                        ).getMessage(locale),
+                    locale));
+                // @formatter:on
             }
         }
         return analysis;
@@ -206,8 +231,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         event = EventMapper.getInstance().copy(update, event, EventField.RECURRENCE_ID);
         event.removeId();
         event.removeSeriesId();
-        
-        Attendee reply = getReply(update);
+
+        Attendee reply = getReplyingAttendee(update);
 
         List<Attendee> attendees = new LinkedList<>();
         // XXX [MW-852] Resolve possible aliases to avoid false party-crashers
@@ -252,7 +277,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
-        for (ITipChange change : analysis.getChanges()) { 
+        for (ITipChange change : analysis.getChanges()) {
             ITipEventUpdate eventUpdate = change.getDiff();
             if (null != eventUpdate 
                 && null != eventUpdate.getAttendeeUpdates() 
@@ -264,11 +289,46 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         return false;
     }
 
-    private Attendee getReply(Event update) throws OXException {
+    private Attendee getReplyingAttendee(Event update) throws OXException {
         if (null == update.getAttendees() || update.getAttendees().size() != 1) {
             // Not RFC conform
             throw ITipExceptions.NOT_CONFORM.create();
         }
         return update.getAttendees().get(0);
+    }
+
+    /**
+     * Gets a value indicating whether the sender of the mail address is allowed
+     * to perform the change for the attendee replying
+     *
+     * @param original The original event
+     * @param from The sender address extracted from the <code>FROM</code> header
+     * @return <code>true</code> if the sender is allowed to perform the change for the attendee,
+     *         <code>false</code> otherwise, i.e. if FROM not set at all
+     */
+    private boolean isAllowedSender(Event original, QuotedInternetAddress from) {
+        if (null == from) {
+            return false;
+        }
+        CalendarUser calendarUser = new CalendarUser();
+        calendarUser.setEMail(from.getAddress());
+        calendarUser.setUri(CalendarUtils.getURI(from.getAddress()));
+        return null != CalendarUtils.find(original.getAttendees(), calendarUser);
+    }
+
+    /**
+     * Get the from address as {@link QuotedInternetAddress}
+     *
+     * @param fromAddress The address to convert
+     * @return The address or <code>null</code>
+     */
+    private QuotedInternetAddress getAddress(String fromAddress) {
+        try {
+            QuotedInternetAddress from = new QuotedInternetAddress(fromAddress);
+            return from;
+        } catch (AddressException e) {
+            LOGGER.debug("unable to parse mail", e);
+        }
+        return null;
     }
 }

@@ -215,7 +215,10 @@ public abstract class AbstractITipAction implements AJAXActionService {
             }
 
             if (key.equals(OWNER)) {
-                mailHeader.put(OWNER, properties.get(OWNER));
+                mailHeader.put(OWNER, entry.getValue());
+            }
+            if (key.equalsIgnoreCase("from")) {
+                mailHeader.put("from", entry.getValue());
             }
         }
     }
