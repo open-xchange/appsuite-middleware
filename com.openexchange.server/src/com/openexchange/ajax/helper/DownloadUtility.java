@@ -55,6 +55,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -933,7 +934,22 @@ public final class DownloadUtility {
     }
 
     private static boolean isValidImage(UploadFile imageFile) throws IOException, OXException {
-        Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
+        return isValidImage(imageFile.openStream(), imageFile.getSize(), imageFile.getContentType(), imageFile.getPreparedFileName());
+    }
+
+    /**
+     * Checks for valid image according to configured image restrictions.
+     *
+     * @param imageStream The stream providing image data
+     * @param size The size of the image
+     * @param contentType The image's MIME type
+     * @param fileName The name of the image file
+     * @return <code>true</code> for valid image data and no configured restriction does apply; otherwise <code>false</code> if data is no valid image data
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If any of configured restrictions does apply (resolution too high, size too big, etc.)
+     */
+    public static boolean isValidImage(InputStream imageStream, long size, String contentType, String fileName) throws IOException, OXException {
+        Dimension dimension = Utility.getImageDimensionFor(imageStream, contentType, fileName);
         if (dimension == null || dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
             return false;
         }
@@ -941,9 +957,9 @@ public final class DownloadUtility {
         // Check size
         {
             long maxSize = Utility.maxSize();
-            if (0 < maxSize && maxSize < imageFile.getSize()) {
+            if (0 < maxSize && maxSize < size) {
                 // Too big
-                throw UploadImageSizeExceededException.create(imageFile.getSize(), maxSize, true);
+                throw UploadImageSizeExceededException.create(size, maxSize, true);
             }
         }
 

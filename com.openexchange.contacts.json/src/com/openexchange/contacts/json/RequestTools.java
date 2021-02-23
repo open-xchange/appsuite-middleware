@@ -72,6 +72,8 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -244,11 +246,15 @@ public class RequestTools {
                 throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", contentType);
             }
             // Final check for image's width & height using javax.imageio.*
-            if (!isValidImage(Streams.newByteArrayInputStream(bytes))) {
+            if (!com.openexchange.ajax.helper.DownloadUtility.isValidImage(Streams.newByteArrayInputStream(bytes), bytes.length, contentType, "image.jpg")) {
                 throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", contentType);
             }
             contact.setImage1(bytes);
             contact.setImageContentType(contentType);
+        } catch (ImageTransformationDeniedIOException e) {
+            throw UploadException.UploadCode.INVALID_FILE.create(e);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Error while applying contact image.");
         }
@@ -258,20 +264,33 @@ public class RequestTools {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
         }
-        final String contentType = file.getContentType();
-        if (isImageContentType(contentType)) {
-            return contentType;
-        }
-        String mimeType = null;
-        if (null != file.getPreparedFileName()) {
-            mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
-            if (isImageContentType(mimeType)) {
-                return mimeType;
+
+        try {
+            String contentType = file.getContentType();
+            if (isImageContentType(contentType)) {
+                if (com.openexchange.ajax.helper.DownloadUtility.isIllegalImage(file)) {
+                    throw UploadException.UploadCode.INVALID_FILE.create();
+                }
+                return contentType;
             }
+            String mimeType = null;
+            if (null != file.getPreparedFileName()) {
+                mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
+                if (isImageContentType(mimeType)) {
+                    if (com.openexchange.ajax.helper.DownloadUtility.isIllegalImage(file)) {
+                        throw UploadException.UploadCode.INVALID_FILE.create();
+                    }
+                    return mimeType;
+                }
+            }
+            // Throw an exception
+            String readableType = null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType;
+            throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
+        } catch (ImageTransformationDeniedIOException e) {
+            throw UploadException.UploadCode.INVALID_FILE.create(e);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
-        // Throw an exception
-        final String readableType = null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType;
-        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
 
     private static boolean isImageContentType(final String contentType) {
