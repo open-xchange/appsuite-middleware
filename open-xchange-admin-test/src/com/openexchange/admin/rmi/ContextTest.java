@@ -161,7 +161,16 @@ public class ContextTest extends AbstractRMITest {
         Context context = getContextManager().create(contextAdminCredentials);
         int ctxId = context.getId().intValue();
         getContextManager().delete(context);
+
+        // Wait until the context is fully deleted; Timeout 5 seconds
+        boolean contextExists;
+        long timeoutTime = System.currentTimeMillis() + 5000;
+        do {
+            contextExists = getContextManager().exists(context);
+        } while (contextExists == false && timeoutTime > System.currentTimeMillis());
+
         getContextManager().create(ctxId, 5000, contextAdminCredentials);
+        
     }
 
     /**
@@ -171,6 +180,7 @@ public class ContextTest extends AbstractRMITest {
     public void testDeleteContext() throws Exception {
         Context context = getContextManager().create(superAdminCredentials);
         getContextManager().delete(context);
+        assertFalse(getContextManager().exists(context));
     }
 
     /**

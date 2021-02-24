@@ -61,6 +61,7 @@ import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
@@ -75,6 +76,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
 
 
     @Test
+    @TryAgain
     public void testExecute() throws Exception {
         String jsonString = "{\"sms\":\"+49276183850\"}";
         for (String id : SCENARIOS) {
@@ -92,6 +94,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     }
 
     @Test
+    @TryAgain
     public void testExecute_missingNumber() throws Exception {
         String jsonString = "{\"sms\":\"\"}";
 
@@ -103,6 +106,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     }
 
     @Test
+    @TryAgain
     public void testExecute_invalidNumber() throws Exception {
         String jsonString = "{\"sms\":\"1234\"}";
 
@@ -119,6 +123,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     }
 
     @Test
+    @TryAgain
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
         int userId = testUser.getUserId().intValue();

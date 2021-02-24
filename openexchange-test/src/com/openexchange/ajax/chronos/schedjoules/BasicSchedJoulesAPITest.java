@@ -62,6 +62,8 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
@@ -82,6 +84,7 @@ import com.openexchange.testing.httpclient.models.SearchResponse;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest {
 
     private static final Map<String, String> RESPONSE_HEADERS = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
