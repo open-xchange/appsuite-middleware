@@ -67,15 +67,21 @@ import com.openexchange.session.oauth.OAuthTokens;
  */
 public abstract class OAuthRequestIssuer {
 
+    /** The authentication configuration */
     protected final OAuthAuthenticationConfig config;
 
+    /**
+     * Initializes a new {@link OAuthRequestIssuer}.
+     *
+     * @param config The authentication configuration
+     */
     protected OAuthRequestIssuer(OAuthAuthenticationConfig config) {
         super();
         this.config = config;
     }
 
     /**
-     * Get the client authentication based on the config 
+     * Get the client authentication based on the authentication configuration.
      *
      * @return The {@link ClientAuthentication}
      */
@@ -86,7 +92,7 @@ public abstract class OAuthRequestIssuer {
     }
 
     /**
-     * Converts tokens to OAuth tokens 
+     * Converts tokens to OAuth tokens.
      *
      * @param tokens The tokens to convert
      * @return The {@link OAuthTokens}

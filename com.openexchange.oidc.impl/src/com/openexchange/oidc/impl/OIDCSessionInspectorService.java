@@ -48,13 +48,13 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (session.getParameter(OIDCTools.IDTOKEN) == null) {
             // session not managed by us
-            LOG.debug("Skipping unmanaged session: {}", session.getSessionID());
+            LOG.debug("Skipping unmanaged session '{}'", session.getSessionID());
             return Reply.NEUTRAL;
         }
 
         OIDCBackend backend = this.loadBackendForSession(session);
         if (null == backend) {
-            LOG.warn("Unable to load OIDC backend for session due to missing path parameter: {}", session.getSessionID());
+            LOG.warn("Unable to load OIDC backend for session '{}' due to missing path parameter", session.getSessionID());
             return Reply.NEUTRAL;
         }
 
@@ -62,6 +62,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
             OIDCBackendConfig config = backend.getBackendConfig();
             OIDCTokenRefresher refresher = new OIDCTokenRefresher(backend, session);
             TokenRefreshConfig refreshConfig = OIDCTools.getTokenRefreshConfig(config);
+            LOG.debug("Going to check (or optionally refresh) tokens for session '{}'", session.getSessionID());
             RefreshResult result = tokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
             if (result.isSuccess()) {
                 LOG.debug("Returning neutral reply for session '{}' due to successful token refresh result: {}", session.getSessionID(), result.getSuccessReason().name());
