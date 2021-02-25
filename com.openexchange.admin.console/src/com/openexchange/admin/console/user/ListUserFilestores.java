@@ -54,11 +54,12 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CLIIllegalOptionValueException;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -77,6 +78,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * {@link ListUserFilestores} lists all user filestores and their corresponding users
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
 public class ListUserFilestores extends BasicCommandlineOptions {
@@ -88,22 +90,32 @@ public class ListUserFilestores extends BasicCommandlineOptions {
     private CLIOption filestore_id = null;
     private CLIOption master_only = null;
 
+    /**
+     * Entry point
+     *
+     * @param args commandline arguments
+     */
     public static void main(String[] args) {
         new ListUserFilestores().execute(args);
     }
 
+    /**
+     * Executes the command
+     *
+     * @param args command-line arguments
+     */
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("listuserfilestores");
+        AdminParser parser = new AdminParser("listuserfilestores");
         try {
             setOptions(parser);
             parser.ownparse(args);
 
-            final Context ctx = contextparsing(parser);
-            final Credentials auth = credentialsparsing(parser);
-            final OXUserInterface oxusr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+            Context ctx = contextparsing(parser);
+            Credentials auth = credentialsparsing(parser);
+            OXUserInterface oxusr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
 
-            final String fid_str = (String) parser.getOptionValue(filestore_id, null, false);
-            final Integer fid = fid_str != null ? Integer.valueOf(fid_str) : null;
+            String fid_str = String.class.cast(parser.getOptionValue(filestore_id, null, false));
+            Integer fid = fid_str != null ? Integer.valueOf(fid_str) : null;
             User[] users = oxusr.listUsersWithOwnFilestore(ctx, auth, fid);
 
             if (null == users || users.length == 0) {
@@ -111,9 +123,8 @@ public class ListUserFilestores extends BasicCommandlineOptions {
                 sysexit(0);
             }
             users = oxusr.getData(ctx, users, auth);
-            final boolean masteronly = ((Boolean) parser.getOptionValue(master_only, Boolean.FALSE, false)).booleanValue();
+            boolean masteronly = ((Boolean) parser.getOptionValue(master_only, Boolean.FALSE, false)).booleanValue();
             printUserFilestores(users, masteronly);
-
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
             parser.printUsage();
@@ -167,35 +178,52 @@ public class ListUserFilestores extends BasicCommandlineOptions {
         this.filestore_id = setShortLongOpt(parser, FILESTORE_ID_SHORT, FILESTORE_ID_LONG, "id", "The id of the filestore. Lists users for this filestore.", false);
     }
 
-    private void printUserFilestores(User[] users, boolean master_only) throws InvalidDataException {
+    /**
+     * Prints user file storages
+     *
+     * @param users The users
+     * @param masterOnly flag to only print master fs
+     * @throws InvalidDataException if invalid data is passed
+     */
+    private void printUserFilestores(User[] users, boolean masterOnly) throws InvalidDataException {
         for (User user : users) {
             if (user.getFilestoreId().intValue() == 0) {
                 continue;
             }
 
-            if (user.getFilestoreOwner().intValue() == 0) {
-                final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-                data.add(makeStandardData(user, true));
-                if (!master_only) {
-
-                    for (User tmp : users) {
-                        if (tmp.getId().intValue() == user.getId().intValue()) {
-                            continue;
-                        }
-                        if (tmp.getFilestoreOwner().intValue() == user.getId().intValue()) {
-                            data.add(makeStandardData(tmp, false));
-                        }
-                    }
-                }
-                System.out.println("------------------------------------------------------------------------------------");
-                System.out.println("Filestore_id: " + user.getFilestoreId());
-                System.out.println("Filestore_name: " + user.getFilestore_name());
-                System.out.println();
-                doOutput(new String[] { "l", "r", "l", "l", "l", "l", "l" }, new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
-
+            if (user.getFilestoreOwner().intValue() != 0) {
+                continue;
             }
+            ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+            data.add(makeStandardData(user, true));
+            if (!masterOnly) {
+                processAll(users, user, data);
+            }
+            System.out.println("------------------------------------------------------------------------------------");
+            System.out.println("Filestore_id: " + user.getFilestoreId());
+            System.out.println("Filestore_name: " + user.getFilestore_name());
+            System.out.println();
+            doOutput(new String[] { "l", "r", "l", "l", "l", "l", "l" }, new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
         }
         System.out.println("------------------------------------------------------------------------------------");
+    }
+
+    /**
+     * Processes all users
+     *
+     * @param users The users
+     * @param user The master user
+     * @param data The data
+     */
+    private void processAll(User[] users, User user, final ArrayList<ArrayList<String>> data) {
+        for (User tmp : users) {
+            if (tmp.getId().intValue() == user.getId().intValue()) {
+                continue;
+            }
+            if (tmp.getFilestoreOwner().intValue() == user.getId().intValue()) {
+                data.add(makeStandardData(tmp, false));
+            }
+        }
     }
 
     private void printNothingFound(Integer id) {
@@ -207,61 +235,30 @@ public class ListUserFilestores extends BasicCommandlineOptions {
     }
 
     private ArrayList<String> makeStandardData(final User user, boolean master) {
-        final ArrayList<String> res_data = new ArrayList<String>();
-
-        if (master) {
-            res_data.add("TRUE");
-        } else {
-            res_data.add("");
-        }
-        res_data.add(String.valueOf(user.getId()));// id
-
-        {
-            final String name = user.getName();
-            if (name != null && name.trim().length() > 0) {
-                res_data.add(name);// name
-            } else {
-                res_data.add(null);// name
-            }
-        }
-
-        {
-            final String displayname = user.getDisplay_name();
-            if (displayname != null && displayname.trim().length() > 0) {
-                res_data.add(displayname);// displayname
-            } else {
-                res_data.add(null);// displayname
-            }
-        }
-
-        {
-            final String email = user.getPrimaryEmail();
-            if (email != null && email.trim().length() > 0) {
-                res_data.add(email);// email
-            } else {
-                res_data.add(null);// email
-            }
-        }
-
-        {
-            final Long qmax = user.getMaxQuota();
-            if (null != qmax) {
-                res_data.add(qmax.toString());// qmax
-            } else {
-                res_data.add(null);// qmax
-            }
-        }
-
-        {
-            final Long qused = user.getUsedQuota();
-            if (null != qused) {
-                res_data.add(qused.toString());// qused
-            } else {
-                res_data.add(null);// qused
-            }
-        }
-
-        return res_data;
+        ArrayList<String> data = new ArrayList<String>(7);
+        data.add(master ? "TRUE" : "");
+        data.add(String.valueOf(user.getId()));
+        addData(data, user.getName());
+        addData(data, user.getDisplay_name());
+        addData(data, user.getPrimaryEmail());
+        addData(data, user.getMaxQuota());
+        addData(data, user.getUsedQuota());
+        return data;
     }
 
+    private void addData(List<String> data, String value) {
+        if (value != null && value.trim().length() > 0) {
+            data.add(value);
+        } else {
+            data.add(null);
+        }
+    }
+
+    private void addData(List<String> data, Long value) {
+        if (null != value) {
+            data.add(value.toString());
+        } else {
+            data.add(null);
+        }
+    }
 }
