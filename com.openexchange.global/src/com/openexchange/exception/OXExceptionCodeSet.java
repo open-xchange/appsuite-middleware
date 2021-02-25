@@ -62,7 +62,7 @@ import java.util.Set;
  */
 public class OXExceptionCodeSet {
 
-    private final Set<Code> codes;
+    private final Set<InternalCode> codes;
 
     /**
      * Initializes a new {@link OXExceptionCodeSet}.
@@ -75,22 +75,22 @@ public class OXExceptionCodeSet {
     /**
      * Initializes a new {@link OXExceptionCodeSet}.
      */
-    public OXExceptionCodeSet(OXExceptionCode... codes) {
+    public OXExceptionCodeSet(Code... codes) {
         super();
         this.codes = new HashSet<>(codes.length);
-        for (OXExceptionCode code : codes) {
-            this.codes.add(Code.codeFor(code));
+        for (Code code : codes) {
+            this.codes.add(InternalCode.codeFor(code));
         }
     }
 
     /**
      * Initializes a new {@link OXExceptionCodeSet}.
      */
-    public OXExceptionCodeSet(Collection<? extends OXExceptionCode> codes) {
+    public OXExceptionCodeSet(Collection<? extends Code> codes) {
         super();
         this.codes = new HashSet<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            this.codes.add(Code.codeFor(code));
+        for (Code code : codes) {
+            this.codes.add(InternalCode.codeFor(code));
         }
     }
 
@@ -119,7 +119,17 @@ public class OXExceptionCodeSet {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(OXException exception) {
-        return codes.contains(Code.codeFor(exception));
+        return codes.contains(InternalCode.codeFor(exception));
+    }
+
+    /**
+     * Checks if this set does <b>not</b> contain the given exception.
+     *
+     * @param exception The exception
+     * @return <code>true</code> if <b>not</b> contained; otherwise <code>false</code> (if contained)
+     */
+    public boolean notContains(OXException exception) {
+        return contains(exception) == false;
     }
 
     /**
@@ -128,8 +138,8 @@ public class OXExceptionCodeSet {
      * @param code The code to add
      * @return <code>true</code> if this set did not already contain the specified code; otherwise <code>false</code>
      */
-    public boolean add(OXExceptionCode code) {
-        return codes.add(Code.codeFor(code));
+    public boolean add(Code code) {
+        return codes.add(InternalCode.codeFor(code));
     }
 
     /**
@@ -138,8 +148,8 @@ public class OXExceptionCodeSet {
      * @param o The code to remove
      * @return <code>true</code> if this set contained the specified code; otherwise <code>false</code>
      */
-    public boolean remove(OXExceptionCode code) {
-        return codes.remove(Code.codeFor(code));
+    public boolean remove(Code code) {
+        return codes.remove(InternalCode.codeFor(code));
     }
 
     /**
@@ -149,9 +159,9 @@ public class OXExceptionCodeSet {
      * @return <code>true</code> if this set contains all of the exceptions of the specified collection; otherwise <code>false</code>
      */
     public boolean containsAll(Collection<? extends OXException> exceptions) {
-        Collection<Code> codes = new ArrayList<>(exceptions.size());
+        Collection<InternalCode> codes = new ArrayList<>(exceptions.size());
         for (OXException e : exceptions) {
-            codes.add(Code.codeFor(e));
+            codes.add(InternalCode.codeFor(e));
         }
         return this.codes.containsAll(codes);
     }
@@ -162,10 +172,10 @@ public class OXExceptionCodeSet {
      * @param codes The collection
      * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
      */
-    public boolean addAll(Collection<? extends OXExceptionCode> codes) {
-        Collection<Code> codez = new ArrayList<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            codez.add(Code.codeFor(code));
+    public boolean addAll(Collection<? extends Code> codes) {
+        Collection<InternalCode> codez = new ArrayList<>(codes.size());
+        for (Code code : codes) {
+            codez.add(InternalCode.codeFor(code));
         }
         return this.codes.addAll(codez);
     }
@@ -176,10 +186,10 @@ public class OXExceptionCodeSet {
      * @param codes The collection
      * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
      */
-    public boolean removeAll(Collection<? extends OXExceptionCode> codes) {
-        Collection<Code> codez = new ArrayList<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            codez.add(Code.codeFor(code));
+    public boolean removeAll(Collection<? extends Code> codes) {
+        Collection<InternalCode> codez = new ArrayList<>(codes.size());
+        for (Code code : codes) {
+            codez.add(InternalCode.codeFor(code));
         }
         return this.codes.removeAll(codez);
     }
@@ -193,21 +203,21 @@ public class OXExceptionCodeSet {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static class Code {
+    private static class InternalCode {
 
-        static Code codeFor(OXException e) {
-            return new Code(e.getCode(), e.getPrefix());
+        static InternalCode codeFor(OXException e) {
+            return new InternalCode(e.getCode(), e.getPrefix());
         }
 
-        static Code codeFor(OXExceptionCode c) {
-            return new Code(c.getNumber(), c.getPrefix());
+        static InternalCode codeFor(Code c) {
+            return new InternalCode(c.getNumber(), c.getPrefix());
         }
 
         private final int number;
         private final String prefix;
         private final int hash;
 
-        private Code(int number, String prefix) {
+        private InternalCode(int number, String prefix) {
             super();
             this.number = number;
             this.prefix = prefix;
@@ -232,10 +242,10 @@ public class OXExceptionCodeSet {
             if (this == obj) {
                 return true;
             }
-            if (obj.getClass() != Code.class) {
+            if (obj.getClass() != InternalCode.class) {
                 return false;
             }
-            Code other = (Code) obj;
+            InternalCode other = (InternalCode) obj;
             if (number != other.number) {
                 return false;
             }
