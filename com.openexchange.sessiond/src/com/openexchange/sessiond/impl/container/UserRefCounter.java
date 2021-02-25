@@ -51,6 +51,8 @@ package com.openexchange.sessiond.impl.container;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.session.UserAndContext;
 
 
 /**
@@ -61,14 +63,16 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class UserRefCounter {
 
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Counter>> context2CountersMap;
+    private final ConcurrentMap<Integer, AtomicInteger> contextCounters;
+    private final ConcurrentMap<UserAndContext, AtomicInteger> userCounters;
 
     /**
      * Initializes a new {@link UserRefCounter}.
      */
     public UserRefCounter() {
         super();
-        context2CountersMap = new ConcurrentHashMap<>(256, 0.9F, 1);
+        contextCounters = new ConcurrentHashMap<>(256, 0.9F, 1);
+        userCounters = new ConcurrentHashMap<>(1024, 0.9F, 1);
     }
 
     /**
@@ -78,35 +82,20 @@ public class UserRefCounter {
      * @param contextId The context identifier
      */
     public void incrementCounter(int userId, int contextId) {
-        Integer iContextId = Integer.valueOf(contextId);
-        ConcurrentMap<Integer, Counter> user2Counter = context2CountersMap.get(iContextId);
-        if (null == user2Counter) {
-            ConcurrentMap<Integer, Counter> newUser2Counter = new ConcurrentHashMap<>(16, 0.9F, 1);
-            user2Counter = context2CountersMap.putIfAbsent(iContextId, newUser2Counter);
-            if (null == user2Counter) {
-                user2Counter = newUser2Counter;
-            }
-        }
+        incrementCounter(UserAndContext.newInstance(userId, contextId), userCounters);
+        incrementCounter(Integer.valueOf(contextId), contextCounters);
+    }
 
-        Integer iUserId = Integer.valueOf(userId);
-        while (true) {
-            Counter counter = user2Counter.get(iUserId);
-            if (null == counter) {
-                Counter nuCounter = new Counter();
-                counter = user2Counter.putIfAbsent(iUserId, nuCounter);
-                if (null == counter) {
-                    counter = nuCounter;
-                }
-            }
-            synchronized (counter) {
-                if (counter.isDeprecated()) {
-                    // Marked as deprecated. Retry.
-                } else {
-                    counter.increment();
-                    return;
-                }
+    private static <K> void incrementCounter(K key, ConcurrentMap<K, AtomicInteger> counters) {
+        AtomicInteger counter = counters.get(key);
+        if (counter == null) {
+            AtomicInteger nuCounter = new AtomicInteger(0);
+            counter = counters.putIfAbsent(key, nuCounter);
+            if (counter == null) {
+                counter = nuCounter;
             }
         }
+        counter.incrementAndGet();
     }
 
     /**
@@ -116,28 +105,35 @@ public class UserRefCounter {
      * @param contextId The context identifier
      */
     public void decrementCounter(int userId, int contextId) {
-        ConcurrentMap<Integer, Counter> user2Counter = context2CountersMap.get(Integer.valueOf(contextId));
-        if (null == user2Counter) {
-            return;
+        if (decrementCounter(UserAndContext.newInstance(userId, contextId), userCounters)) {
+            decrementCounter(Integer.valueOf(contextId), contextCounters);
         }
+    }
 
-        Integer iUserId = Integer.valueOf(userId);
+    private static <K> boolean decrementCounter(K key, ConcurrentMap<K, AtomicInteger> counters) {
         while (true) {
-            Counter counter = user2Counter.get(iUserId);
-            if (null == counter) {
-                return;
+            AtomicInteger counter = counters.get(key);
+            if (counter == null) {
+                // No such counter
+                return false;
             }
-            synchronized (counter) {
-                if (counter.isDeprecated()) {
-                    // Marked as deprecated. Retry.
-                } else {
-                    if (counter.decrementAndGet() <= 0) {
-                        // Remove counter since decremented to 0 (zero)
-                        counter.markDeprecated();
-                        user2Counter.remove(iUserId);
-                    }
-                    return;
+
+            int current = counter.get();
+            if (current <= 0) {
+                // Current count is already less than or equal to 0 (zero). No negative counting allowed.
+                return false;
+            }
+
+            // Current count is greater than 0 (zero)
+            if (counter.compareAndSet(current, current - 1) == false) {
+                // This thread didn't make it to decrement counter --> Retry...
+            } else {
+                // This thread made it to decrement counter
+                if (current == 1) {
+                    // This thread set counter to 0 (zero)
+                    counters.remove(key);
                 }
+                return true;
             }
         }
     }
@@ -149,21 +145,7 @@ public class UserRefCounter {
      * @return <code>true</code> if a long-term session is existent for given context; otherwise <code>false</code>
      */
     public boolean contains(int contextId) {
-        ConcurrentMap<Integer, Counter> counters = context2CountersMap.get(Integer.valueOf(contextId));
-        if (null == counters) {
-            return false;
-        }
-
-        for (Counter counter : counters.values()) {
-            if (counter != null) {
-                synchronized (counter) {
-                    if (!counter.isDeprecated() && counter.get() > 0) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return contains(Integer.valueOf(contextId), contextCounters);
     }
 
     /**
@@ -174,63 +156,19 @@ public class UserRefCounter {
      * @return <code>true</code> if a long-term session is existent for given user; otherwise <code>false</code>
      */
     public boolean contains(int userId, int contextId) {
-        ConcurrentMap<Integer, Counter> counters = context2CountersMap.get(Integer.valueOf(contextId));
-        if (null == counters) {
-            return false;
-        }
+        return contains(UserAndContext.newInstance(userId, contextId), userCounters);
+    }
 
-        Counter counter = counters.get(Integer.valueOf(userId));
-        if (counter == null) {
-            return false;
-        }
-
-        synchronized (counter) {
-            return !counter.isDeprecated() && counter.get() > 0;
-        }
+    private static <K> boolean contains(K key, ConcurrentMap<K, AtomicInteger> counters) {
+        AtomicInteger counter = counters.get(key);
+        return counter != null && counter.get() > 0;
     }
 
     /**
      * Clears this collection entirely.
      */
     public void clear() {
-        context2CountersMap.clear();
+        userCounters.clear();
     }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static class Counter {
-
-        private int count;
-        private boolean deprecated;
-
-        /**
-         * Initializes a new {@link Counter} having current count set to <code>0</code> (zero).
-         */
-        Counter() {
-            super();
-            count = 0;
-            deprecated = false;
-        }
-
-        int get() {
-            return count;
-        }
-
-        void increment() {
-            count++;
-        }
-
-        int decrementAndGet() {
-            return --count;
-        }
-
-        void markDeprecated() {
-            deprecated = true;
-        }
-
-        boolean isDeprecated() {
-            return deprecated;
-        }
-    } // End of class Counter
 
 }
