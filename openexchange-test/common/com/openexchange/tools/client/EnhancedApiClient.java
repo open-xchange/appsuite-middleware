@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.tools.client;
 
 import java.io.File;
 import java.util.HashMap;

@@ -61,12 +61,13 @@ import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 public class Bug4497Test_SharedAppDeletedByParticipant extends ManagedAppointmentTest {
 
     @Test
     public void testIt() throws Exception {
-        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant other = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -76,19 +77,19 @@ public class Bug4497Test_SharedAppDeletedByParticipant extends ManagedAppointmen
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
+        int fid2 = testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = testUser2.getAjaxClient().execute(new GetRequest(fid2, appId));
         Date lastMod = getResponse.getTimestamp();
 
-        CommonDeleteResponse deleteResponse = getClient(1).execute(new DeleteRequest(appId, fid2, lastMod));
+        CommonDeleteResponse deleteResponse = testUser2.getAjaxClient().execute(new DeleteRequest(appId, fid2, lastMod));
 
         assertFalse(deleteResponse.hasError() || deleteResponse.hasConflicts());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

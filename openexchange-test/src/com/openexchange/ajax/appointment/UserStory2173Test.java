@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.tryagain.TryAgain;
 
 /**
@@ -98,7 +99,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
+        clientB = testUser2.getAjaxClient();
 
         SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.ACCEPT));
         SetResponse respPriv = clientB.execute(setRequest);
@@ -132,8 +133,8 @@ public class UserStory2173Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

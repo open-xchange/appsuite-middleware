@@ -57,6 +57,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link FolderIdTestAjax}
@@ -75,9 +76,9 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient(1).getValues().getUserId() });
+        folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), testUser2.getAjaxClient().getValues().getUserId() });
         ftm.insertFolderOnServer(folderA);
-        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient(1).getValues().getUserId() });
+        folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), testUser2.getAjaxClient().getValues().getUserId() });
         ftm.insertFolderOnServer(folderB);
 
         appointment = new Appointment();
@@ -90,13 +91,13 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testSomething() throws Exception {
-        catm.setClient(getClient(1));
+        catm.setClient(testUser2.getAjaxClient());
         appointment.setParentFolderID(folderB.getObjectID());
         catm.update(folderA.getObjectID(), appointment);
         Appointment loaded = catm.get(folderB.getObjectID(), appointment.getObjectID());

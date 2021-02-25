@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 
 public class NewTest extends AppointmentTest {
 
@@ -81,13 +82,13 @@ public class NewTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm2 = new CalendarTestManager(getClient(1));
+        ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
         ctm2.setFailOnError(true);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -298,7 +299,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
@@ -448,7 +449,7 @@ public class NewTest extends AppointmentTest {
 
     @Test
     public void testSharedFolder() throws Exception {
-        final int secondUserId = getClient(1).getValues().getUserId();
+        final int secondUserId = testUser2.getAjaxClient().getValues().getUserId();
 
         final FolderObject folderObj = FolderTestManager.createNewFolderObject("testSharedFolder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, userId, getClient().getValues().getPrivateAppointmentFolder());
         List<OCLPermission> permissions = folderObj.getPermissions();
@@ -462,7 +463,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(getClient(1).getValues().getDefaultAddress());
+        appointmentObj.setOrganizer(testUser2.getAjaxClient().getValues().getDefaultAddress());
         appointmentObj.setPrincipal(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);

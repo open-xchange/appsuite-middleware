@@ -53,8 +53,8 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -77,6 +77,7 @@ import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorProperties;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.MultifactorDevice;
@@ -102,8 +103,8 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().createAjaxClient().withUserPerContext(2).build();
     }
 
     private MultifactorDevice registerTestDevice(MultifactorApi api) throws ApiException {
@@ -236,14 +237,14 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         Collection<MultifactorDevice> devices = registerTestDevices(MultifactorApi(), numberOfDevices);
         assertThat(I(devices.size()), is(I(numberOfDevices)));
 
-        ApiClient apiClient2 = getApiClient(1);
+        ApiClient apiClient2 = testUser2.getApiClient();
         MultifactorApi api2 = new MultifactorApi(apiClient2);
         boolean createdForUser2 = false;
 
         JSONObject oldClient2Config = null;
         try {
             //The 2nd user needs the same configuration applied (SMS provider and DEMO mode)
-            oldClient2Config = setUpConfigForClient(getClient(1));
+            oldClient2Config = setUpConfigForClient(testUser2.getAjaxClient());
 
             //Create a test device for another user
             registerTestDevice(api2);
@@ -256,18 +257,18 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
             assertThat(devicesForUser, is(empty()));
 
             //The device for the second user must still be present
-            List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
+            List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(testUser2.getAjaxClient().getValues().getContextId()), I(testUser2.getAjaxClient().getValues().getUserId()));
             assertThat(I(devicesForUser2.size()), is(I(1)));
         } finally {
             if (createdForUser2) {
                 //Cleanup the devices of the 2nd user
-                getAdminApi().multifactorDeleteDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
-                List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(getClient(1).getValues().getContextId()), I(getClient(1).getValues().getUserId()));
+                getAdminApi().multifactorDeleteDevices(I(testUser2.getAjaxClient().getValues().getContextId()), I(testUser2.getAjaxClient().getValues().getUserId()));
+                List<MultifactorDeviceData> devicesForUser2 = getAdminApi().multifactorGetDevices(I(testUser2.getAjaxClient().getValues().getContextId()), I(testUser2.getAjaxClient().getValues().getUserId()));
                 assertThat(devicesForUser2, is(empty()));
             }
             //Restoring the configuration for the 2nd user
             if (oldClient2Config != null) {
-                restoreConfigForClient(getClient(1), oldClient2Config);
+                restoreConfigForClient(testUser2.getAjaxClient(), oldClient2Config);
             }
         }
     }

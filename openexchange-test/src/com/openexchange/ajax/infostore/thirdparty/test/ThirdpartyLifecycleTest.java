@@ -66,6 +66,7 @@ import com.openexchange.ajax.infostore.thirdparty.actions.DeleteFolderResponse;
 import com.openexchange.ajax.infostore.thirdparty.actions.NewFileRequest;
 import com.openexchange.ajax.infostore.thirdparty.actions.NewFileResponse;
 import com.openexchange.java.Strings;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link ThirdpartyLifecycleTest}
@@ -101,6 +102,11 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         super.setUp();
         ThirdpartyTestEnvironment.getInstance().init();
         filestorages = getConnectedInfostoreId();
+    }
+
+    @Override
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withContexts(2).createAjaxClient().createApiClient().build();
     }
 
     @Test

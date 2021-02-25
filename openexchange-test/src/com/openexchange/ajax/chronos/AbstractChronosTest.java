@@ -77,6 +77,7 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.models.UpdateEventBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractChronosTest}
@@ -174,7 +175,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
-        return createAndRememberNewFolder(api, parent, entity, permissions);
+        return createAndRememberNewFolder(api, parent, permissions);
     }
 
     /**
@@ -187,7 +188,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return The result of the operation
      * @throws ApiException if an API error is occurred
      */
-    protected String createAndRememberNewFolder(UserApi api, String parent, int entity, List<FolderPermission> permissions) throws ApiException {
+    protected String createAndRememberNewFolder(UserApi api, String parent, List<FolderPermission> permissions) throws ApiException {
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);

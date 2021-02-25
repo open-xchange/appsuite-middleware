@@ -59,6 +59,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.List;
 import org.junit.Test;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -224,15 +225,15 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ConfigApi configApi = new ConfigApi(apiClient);
+        ConfigApi configApi = new ConfigApi(getApiClient());
         ConfigResponse configResponse = configApi.getConfigNode("/context_id");
         this.contextId = (Integer) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
         this.userId = MultifactorApi().getApiClient().getUserId();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -288,8 +289,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         MultifactorStartRegistrationResponseData registrationResponseData = registerNewDevice();
 
         //login with a new session but do not provide 2nd factor
-        ApiClient client2 = generateApiClient(testUser);
-        rememberClient(testUser, client2);
+        ApiClient client2 = testUser.generateApiClient();
         MultifactorApi multifactorApi = new MultifactorApi(client2);
 
         //Try to delete the 2nd factor. THIS MUST FAIL.
@@ -307,8 +307,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         registerNewDevice();
 
         //login with a new session but do not provide 2nd factor
-        ApiClient client2 = generateApiClient(testUser);
-        rememberClient(testUser, client2);
+        ApiClient client2 = testUser.generateApiClient();
 
         //Perform some API call which is 2fa protected
         //This MUST FAIL, because the 2nd factor was not provided

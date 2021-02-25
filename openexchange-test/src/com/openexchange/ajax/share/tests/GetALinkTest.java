@@ -80,6 +80,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemMovedResponse;
 import com.openexchange.testing.httpclient.models.InfoItemResponse;
@@ -127,8 +128,8 @@ public class GetALinkTest extends ShareAPITest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @Test

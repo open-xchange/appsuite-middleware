@@ -126,8 +126,8 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @TryAgain
     public void testDownload() throws Exception {
         PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
-        int userId = testUser.getUserId().intValue();
-        int ctxId = testUser.getContextId().intValue();
+        int userId = testUser.getUserId();
+        int ctxId = testUser.getContextId();
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
         String url = getURL(userId, ctxId, "mailsync", "apple.iphone");

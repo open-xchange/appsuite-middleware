@@ -59,6 +59,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link JSONApiTest}
@@ -76,8 +77,8 @@ public class JSONApiTest extends AbstractOAuthTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @SuppressWarnings("unused")

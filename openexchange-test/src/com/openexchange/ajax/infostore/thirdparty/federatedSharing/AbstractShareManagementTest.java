@@ -59,9 +59,9 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.UUID;
-import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -90,7 +90,7 @@ import com.openexchange.testing.httpclient.modules.ShareManagementApi;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.5
  */
-public class AbstractShareManagementTest extends AbstractEnhancedApiClientSession {
+public class AbstractShareManagementTest extends AbstractConfigAwareAPIClientSession {
 
     /* Context 1 */
     protected String sharedFolderName;
@@ -103,8 +103,8 @@ public class AbstractShareManagementTest extends AbstractEnhancedApiClientSessio
         super.setUp();
 
         sharedFolderName = this.getClass().getSimpleName() + UUID.randomUUID().toString();
-        smApi = new ShareManagementApi(apiClient);
-        folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
+        smApi = new ShareManagementApi(getApiClient());
+        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), "1");
         infostoreRoot = folderManager.findInfostoreRoot();
     }
 

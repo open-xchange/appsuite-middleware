@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +68,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -94,15 +94,10 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  */
 public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClientSession {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoCompleteShowDepartmentsTest.class);
-
-    private static final int AMOUNT_OF_TEST_USERS = 3;
     private static final Integer RESULTS_LIMIT = I(6);
     private static final String CONTACTS_JSLOB = "io.ox/contacts";
     private static final String SHOW_DEPARTMENT_JSLOB = "showDepartment";
     private static final String CONTACTS_MODULE = "contacts";
-
-    Random rand = new Random(System.currentTimeMillis());
 
     private Set<TestUser> randomUsers;
 
@@ -122,27 +117,19 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         randomUsers = new HashSet<>();
 
         // Prepare users
-        prepareUser(pickRandomUser(), "Department A");
-        prepareUser(pickRandomUser(), "Department B");
+        TestUser randomUser = testContext.getRandomUser();
+        randomUsers.add(randomUser);
+        prepareUser(randomUser, "Department A");
+        randomUser = testContext.getRandomUser();
+        randomUsers.add(randomUser);
+        prepareUser(randomUser, "Department B");
         CONFIG.put("com.openexchange.contact.showDepartments", Boolean.TRUE.toString());
         super.setUpConfiguration();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(AMOUNT_OF_TEST_USERS).build();
-    }
-
-    /**
-     * Picks a random user from the registry
-     *
-     * @return The random {@link TestUser}
-     */
-    private TestUser pickRandomUser() {
-        TestUser user = getUser(rand.nextInt(AMOUNT_OF_TEST_USERS));
-        randomUsers.add(user);
-        LOG.info("Picked random user '{}'", user);
-        return user;
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(5).build();
     }
 
     /**
@@ -152,7 +139,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      * @param department The department to set
      */
     private void prepareUser(TestUser testUser, String department) throws ApiException {
-        ApiClient client = getApiClient(testUser);
+        ApiClient client = testUser.getApiClient();
         UserApi userApi = new UserApi(client);
         CommonResponse response = userApi.updateUser(client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
         assertNull(response.getErrorDesc(), response.getError());
@@ -165,7 +152,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      */
     @Test
     public void testAutoCompleteShowDepartment() throws Exception {
-        FindApi findApi = new FindApi(apiClient);
+        FindApi findApi = new FindApi(getApiClient());
 
         FindOptionsData options = new FindOptionsData();
         options.setAdmin(Boolean.FALSE);
@@ -206,7 +193,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      */
     @Test
     public void testJslob() throws ApiException, JSONException {
-        JSlobApi slobApi = new JSlobApi(apiClient);
+        JSlobApi slobApi = new JSlobApi(getApiClient());
 
         JSlobsResponse response = slobApi.getJSlobList(Collections.singletonList(CONTACTS_JSLOB), null);
         List<JSlobData> data = response.getData();

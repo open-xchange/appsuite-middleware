@@ -78,8 +78,8 @@ import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
-import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.MailAttachment;
@@ -312,7 +312,7 @@ public class MailNotificationTest extends Abstract2UserShareTest {
         ShareTarget target = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()), file == null ? null : file.getId());
         TestUser guestUserToGetLinkMail = testContext.acquireUser();
         getClient().execute(new SendLinkRequest(target, guestUserToGetLinkMail.getLogin(), shareMessage));
-        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, password, expiryDate, generateApiClient(guestUserToGetLinkMail));
+        assertGotA(initialSubject, hasSharedString, viewItemString, shareMessage, password, expiryDate, guestUserToGetLinkMail.getApiClient());
     }
 
     private void assertGotA(String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate, ApiClient apiClient) throws Exception {

@@ -65,7 +65,7 @@ public abstract class AbstractSystemTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        api = new SystemApi(apiClient);
+        api = new SystemApi(getApiClient());
     }
 
 }

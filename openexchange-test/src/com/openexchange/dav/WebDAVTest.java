@@ -117,6 +117,7 @@ import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.TestManager;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -146,8 +147,8 @@ public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().useEnhancedApiClients().build();
     }
 
     // --- BEGIN: Optional OAuth Configuration ------------------------------------------------------------------------------

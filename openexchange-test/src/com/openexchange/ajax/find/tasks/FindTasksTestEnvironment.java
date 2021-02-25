@@ -93,6 +93,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.FolderTaskTestManager;
 
 /**
  * {@link FindTasksTestEnvironment}
@@ -140,11 +141,14 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
     private final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
 
+    private FolderTaskTestManager fttm;
+
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         try {
+            fttm = new FolderTaskTestManager(client1, client2);
             initUsers();
             createFolderStructure();
             createAndInsertTasks();
@@ -175,8 +179,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         InsertResponse insertResponseResp;
 
         //Get current structure
-        Map<String, FolderObject> foldersA = getFolderStructure(getClient(), userA.getPrivateTaskFolder());
-        Map<String, FolderObject> foldersB = getFolderStructure(client2, userB.getPrivateTaskFolder());
+        Map<String, FolderObject> foldersA = getFolderStructure(client1);
+        Map<String, FolderObject> foldersB = getFolderStructure(client2);
 
         String userAPrivateTaskFolder = "UserA - findAPIPrivateTaskFolder-" + UUID.randomUUID().toString();
         try {
@@ -187,7 +191,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertResponseResp = getClient().execute(insertRequestReq);
             insertResponseResp.fillObject(userAprivateTestFolder);
             fttm.rememberFolderFromClientA(userAprivateTestFolder);
-//            ftm.rememberCreatedItems(userAprivateTestFolder);
+            //            ftm.rememberCreatedItems(userAprivateTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -203,7 +207,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         try {
             userApublicTestFolder = Create.createPublicFolder(getClient(), userAPublicTaskFolder, FolderObject.TASK, false);
             fttm.rememberFolderFromClientA(userApublicTestFolder);
-//            ftm.rememberCreatedItems(userApublicTestFolder);
+            //            ftm.rememberCreatedItems(userApublicTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -223,7 +227,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRO);
             fttm.rememberFolderFromClientB(userBsharedTestFolderRO);
-//            ftm.rememberCreatedItems(userBsharedTestFolderRO);
+            //            ftm.rememberCreatedItems(userBsharedTestFolderRO);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -252,7 +256,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBsharedTestFolderRW);
             fttm.rememberFolderFromClientB(userBsharedTestFolderRW);
-//            ftm.rememberCreatedItems(userBsharedTestFolderRW);
+            //            ftm.rememberCreatedItems(userBsharedTestFolderRW);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -281,7 +285,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             insertResponseResp = client2.execute(insertRequestReq);
             insertResponseResp.fillObject(userBprivateTestFolder);
             fttm.rememberFolderFromClientB(userBprivateTestFolder);
-//            ftm.rememberCreatedItems(userBprivateTestFolder);
+            //            ftm.rememberCreatedItems(userBprivateTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -297,7 +301,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             //create public test folder for user B
             userBpublicTestFolder = Create.createPublicFolder(client2, userBPublicTaskFolder, FolderObject.TASK, false);
             fttm.rememberFolderFromClientB(userBpublicTestFolder);
-//            ftm.rememberCreatedItems(userBpublicTestFolder);
+            //            ftm.rememberCreatedItems(userBpublicTestFolder);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -315,13 +319,12 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      * Get the folder structure of the specified folder
      *
      * @param client
-     * @param folderID
      * @return
      * @throws JSONException
      * @throws IOException
      * @throws OXException
      */
-    private final Map<String, FolderObject> getFolderStructure(AJAXClient client, int folderID) throws Exception {
+    private final Map<String, FolderObject> getFolderStructure(AJAXClient client) throws Exception {
         Map<String, FolderObject> folders = new HashMap<String, FolderObject>();
         VisibleFoldersRequest lr = new VisibleFoldersRequest(EnumAPI.OX_NEW, "tasks");
         VisibleFoldersResponse response = client.execute(lr);

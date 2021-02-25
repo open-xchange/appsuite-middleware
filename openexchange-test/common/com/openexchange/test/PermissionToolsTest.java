@@ -49,6 +49,8 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
@@ -104,7 +106,7 @@ public class PermissionToolsTest {
 
     @Test
     public void testP() {
-        List<OCLPermission> oclps = P(12, "arwd", 13, "arwd", 14, "arwd/g");
+        List<OCLPermission> oclps = P(I(12), "arwd", I(13), "arwd", I(14), "arwd/g");
 
         assertEquals(3, oclps.size());
         assertEquals(12, oclps.get(0).getEntity());
@@ -118,9 +120,9 @@ public class PermissionToolsTest {
 
         assertNotNull(oclp);
         assertEquals(entity, oclp.getEntity());
-        assertEquals(group, oclp.isGroupPermission());
+        assertEquals(B(group), B(oclp.isGroupPermission()));
 
-        assertEquals(folderAdmin, oclp.isFolderAdmin());
+        assertEquals(B(folderAdmin), B(oclp.isFolderAdmin()));
         assertEquals(folderPermission, oclp.getFolderPermission());
         assertEquals(readPermission, oclp.getReadPermission());
         assertEquals(writePermission, oclp.getWritePermission());

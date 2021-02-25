@@ -67,6 +67,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -78,8 +79,8 @@ import com.openexchange.test.pool.TestUser;
 public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPIClientSession {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().build();
     }
 
     /**
@@ -140,7 +141,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      * @return The user id
      */
     protected int getUserId() {
-        return apiClient.getUserId().intValue();
+        return testUser.getUserId();
     }
 
     private void setUpConfigWithOwnClient() throws ClientProtocolException, IOException, URISyntaxException {
@@ -159,8 +160,8 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      * @throws URISyntaxException
      */
     private void changeConfigWithOwnClient(TestUser user, String config) throws ClientProtocolException, IOException, URISyntaxException {
-        assertTrue(user.getContextId() != null && user.getContextId().intValue() > 0);
-        assertTrue(user.getUserId() != null && user.getUserId().intValue() > 0);
+        assertTrue(user.getContextId() > 0);
+        assertTrue(user.getUserId() > 0);
         HttpClient httpclient = HttpClients.createDefault();
         URI uri = new URIBuilder()
             .setScheme(AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL))

@@ -50,6 +50,8 @@
 package com.openexchange.ajax.chronos;
 
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.test.TestClassConfig;
+import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractSecondUserChronosTest}
@@ -67,14 +69,14 @@ public class AbstractSecondUserChronosTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         EnhancedApiClient enhancedApiClient2 = getEnhancedApiClient2();
-        userApi2 = new UserApi(getApiClient(1), enhancedApiClient2, getUser(1));
+        userApi2 = new UserApi(testUser2.getApiClient(), enhancedApiClient2, testUser2);
         defaultFolderId2 = getDefaultFolder(userApi2.getFoldersApi());
         eventManager2 = new EventManager(userApi2, defaultFolderId2);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
 }

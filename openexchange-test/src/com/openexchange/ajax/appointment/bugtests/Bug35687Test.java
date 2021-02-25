@@ -61,6 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug35687Test}
@@ -77,10 +78,10 @@ public class Bug35687Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), getClient(1).getValues().getUserId());
+        folder = ftm.generateSharedFolder("Bug35687Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId(), testUser2.getAjaxClient().getValues().getUserId());
         folder = ftm.insertFolderOnServer(folder);
 
-        catm.setClient(getClient(1));
+        catm.setClient(testUser2.getAjaxClient());
 
         int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
@@ -96,8 +97,8 @@ public class Bug35687Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

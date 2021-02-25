@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
@@ -116,9 +115,10 @@ public class AbstractApiClientContactTest extends AbstractAPIClientSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        ApiClient apiClient = getApiClient();
         contactsApi = new ContactsApi(apiClient);
-        contactFolderId = getDefaultFolder(apiClient.getSession(), new FoldersApi(apiClient));
-        userId = i(testUser.getUserId());
+        contactFolderId = getDefaultFolder(new FoldersApi(apiClient));
+        userId = testUser.getUserId();
 
         UserResponse resp = new UserApi(apiClient).getUser(String.valueOf(userId));
         assertNull(resp.getErrorDesc(), resp.getError());
@@ -168,20 +168,19 @@ public class AbstractApiClientContactTest extends AbstractAPIClientSession {
      * @return The default contact folder of the user
      * @throws Exception if the default contact folder cannot be found
      */
-    protected String getDefaultFolder(String session, ApiClient client) throws Exception {
-        return getDefaultFolder(session, new FoldersApi(client));
+    protected String getDefaultFolder(ApiClient client) throws Exception {
+        return getDefaultFolder(new FoldersApi(client));
     }
 
     /**
      * Retrieves the default contact folder of the user with the specified session
      *
-     * @param session The session of the user
      * @param foldersApi The {@link FoldersApi}
      * @return The default contact folder of the user
      * @throws Exception if the default contact folder cannot be found
      */
     @SuppressWarnings("unchecked")
-    private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
+    private String getDefaultFolder(FoldersApi foldersApi) throws Exception {
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders("contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
@@ -200,11 +199,11 @@ public class AbstractApiClientContactTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default contact folder!");
     }
 
-    protected void compareObject(final ContactData contactObj1, final ContactData contactObj2) throws Exception {
+    protected void compareObject(final ContactData contactObj1, final ContactData contactObj2) {
         compareObject(contactObj1, contactObj2, true);
     }
 
-    protected void compareObject(final ContactData contactObj1, final ContactData contactObj2, boolean compareUID) throws Exception {
+    protected void compareObject(final ContactData contactObj1, final ContactData contactObj2, boolean compareUID) {
         assertEquals("id is not equals", contactObj1.getId(), contactObj2.getId());
         assertEquals("folder id is not equals", contactObj1.getFolderId(), contactObj2.getFolderId());
         assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());

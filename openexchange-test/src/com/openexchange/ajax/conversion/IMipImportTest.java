@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -103,7 +104,7 @@ public class IMipImportTest extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
 
         uuid = UUID.randomUUID().toString();
 
@@ -115,8 +116,8 @@ public class IMipImportTest extends AbstractConversionTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

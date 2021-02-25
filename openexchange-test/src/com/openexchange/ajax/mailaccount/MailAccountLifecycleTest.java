@@ -104,7 +104,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
     private void updateMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription.setName("Other Name");
-        mailAccountDescription.setLogin(user2.getLogin());
+        mailAccountDescription.setLogin(testUser2.getLogin());
         getClient().execute(new MailAccountUpdateRequest(mailAccountDescription, EnumSet.of(Attribute.NAME_LITERAL, Attribute.LOGIN_LITERAL)));
         // *shrugs* don't need the response
     }

@@ -110,6 +110,6 @@ public class AJAXContactFinder implements ContactFinder {
         if (globalAddressBook == null) {
             loadGlobalAddressBook();
         }
-        return globalAddressBook.get(userId);
+        return globalAddressBook.get(I(userId));
     }
 }

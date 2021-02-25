@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -77,17 +76,8 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug13027Test extends AbstractAJAXSession {
 
-    private String originalTimeZone;
-
     public Bug13027Test() {
         super();
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        originalTimeZone = getClient().execute(new GetRequest(Tree.TimeZone)).getString();
     }
 
     @Test

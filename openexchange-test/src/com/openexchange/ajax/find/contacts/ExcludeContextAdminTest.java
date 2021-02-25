@@ -90,7 +90,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     public void testAdminIsExcluded() throws Exception {
         JSONObject oldConfig = setShowAdmin(Boolean.FALSE);
         try {
-            AJAXClient adminClient = new AJAXClient(admin);
+            AJAXClient adminClient = admin.getAjaxClient();
             int adminId = adminClient.getValues().getUserId();
             adminClient.logout();
 
@@ -120,7 +120,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     public void testAdminIsIncluded() throws Exception {
         JSONObject oldConfig = setShowAdmin(Boolean.TRUE);
         try {
-            AJAXClient adminClient = new AJAXClient(admin);
+            AJAXClient adminClient = admin.getAjaxClient();
             int adminId = adminClient.getValues().getUserId();
             adminClient.logout();
 

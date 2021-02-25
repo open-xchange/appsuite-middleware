@@ -74,7 +74,6 @@ public class Bug15354Test extends AbstractAJAXSession {
     private final Thread[] thread = new Thread[writer.length];
 
     private AJAXClient client;
-    private boolean origValue;
     private Object[] origAliases;
 
     public Bug15354Test() {
@@ -86,7 +85,6 @@ public class Bug15354Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        origValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
         origAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
         assertNotNull("Aliases are null.", origAliases);
         Arrays.sort(origAliases);

@@ -83,6 +83,7 @@ import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -116,8 +117,8 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
     private Attendee replyingAttendee;
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).useEnhancedApiClients().build();
     }
 
     /**
@@ -156,7 +157,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as organizer and check actions
          */
-        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*
@@ -455,7 +456,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Add an third attendee
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
-        TestUser testUser3 = users.get(context2).get(1);
+        TestUser testUser3 = context2.acquireUser();
 
         Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
         addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
@@ -473,7 +474,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * Check invite mail for new attendee
          */
-        ApiClient apiClient3 = getApiClient(context2, 1);
+        ApiClient apiClient3 = context2.acquireUser().getApiClient();
         MailData iMip = receiveIMip(apiClient3, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
         analyzeResponse = analyze(apiClient3, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();

@@ -70,12 +70,12 @@ public class WhoAmITest extends AbstractSystemTest {
 
     @Test
     public void testSystemWhoAmI_normalTest_ResponseAvailable() throws ApiException, OXException, IOException, JSONException {
-        String sessionId = apiClient.getSession();
+        String sessionId = getSessionId();
         WhoAmIResponse response = api.whoami();
         assertNull(response.getData().getRandom());
         assertEquals(sessionId, response.getData().getSession());
-        assertEquals(apiClient.getUser(), response.getData().getUser());
-        assertEquals(apiClient.getUserId().toString(), response.getData().getUserId());
+        assertEquals(testUser.getUser(), response.getData().getUser());
+        assertEquals(String.valueOf(testUser.getUserId()), response.getData().getUserId());
         assertEquals(I(getClient().getValues().getContextId()).toString(), response.getData().getContextId());
         assertNull(response.getData().getRequiresMultifactor());
         assertEquals(getClient().getValues().getLocale().toString(), response.getData().getLocale());

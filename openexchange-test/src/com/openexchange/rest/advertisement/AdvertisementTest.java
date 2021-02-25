@@ -177,7 +177,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("Response has errors: " + getErrorMessage(response), !response.hasError());
             assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
 
-            AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+            AJAXClient client2 = testUser2.getAjaxClient();
             GetConfigResponse response2 = client2.execute(req);
             assertTrue("Expecting a response with an error.", response2.hasError());
         } catch (Exception e) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +62,7 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -85,12 +87,12 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        userId3 = getApiClient(2).getUserId();
+        userId3 = I(testContext.acquireUser().getUserId());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(3).build();
     }
 
     protected void checkFolderMove(String sourceFolder, String destinationFolder, FolderExceptionErrorMessage warning, FolderType sourceType, FolderType targetType) throws ApiException, JSONException {
@@ -185,6 +187,6 @@ public abstract class AbstractFolderMoveWarningTest extends AbstractFolderMovePe
     }
 
     private String getPath(String folderToMove, String sourceFolder, FolderType sourceType) throws ApiException {
-        return sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? getFolderName(getPrivateInfostoreFolder(getApiClient(1))) + "/" : "") + getFolderName(sourceFolder) + (folderToMove != null ? "/" + getFolderName(folderToMove) : "");
+        return sourceType.getRootPath() + (sourceType.equals(FolderType.SHARED) ? getFolderName(getPrivateInfostoreFolder(testUser2.getApiClient())) + "/" : "") + getFolderName(sourceFolder) + (folderToMove != null ? "/" + getFolderName(folderToMove) : "");
     }
 }

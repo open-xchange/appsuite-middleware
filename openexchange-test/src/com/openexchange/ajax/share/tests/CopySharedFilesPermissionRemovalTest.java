@@ -82,30 +82,26 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        try {
-            addUserPermission(client2.getValues().getUserId());
-            GuestRecipient recipient = new GuestRecipient();
-            recipient.setEmailAddress("test@invalid.invalid");
-            addGuestPermission(recipient);
-            file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+        AJAXClient client2 = testUser2.getAjaxClient();
+        addUserPermission(client2.getValues().getUserId());
+        GuestRecipient recipient = new GuestRecipient();
+        recipient.setEmailAddress("test@invalid.invalid");
+        addGuestPermission(recipient);
+        file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
-            //pre assertions
-            File documentMetadata = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
-            assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
+        //pre assertions
+        File documentMetadata = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata();
+        assertEquals("Wrong number of shares users/guests", 2, documentMetadata.getObjectPermissions().size());
 
-            file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
-            infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
-            String newObjectId = file.getId();
+        file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
+        infoMgr.copyAction(file.getId(), Integer.toString(userDestFolder.getObjectID()), file);
+        String newObjectId = file.getId();
 
-            File copiedFile = getClient().execute(new GetInfostoreRequest(newObjectId)).getDocumentMetadata();
+        File copiedFile = getClient().execute(new GetInfostoreRequest(newObjectId)).getDocumentMetadata();
 
-            assertEquals("Object permissions should not be available!", 0, copiedFile.getObjectPermissions().size());
-            assertEquals("File not created by main user", getClient().getValues().getUserId(), copiedFile.getCreatedBy());
-            assertEquals("Wrong number of versions", 1, copiedFile.getNumberOfVersions());
-        } finally {
-            client2.logout();
-        }
+        assertEquals("Object permissions should not be available!", 0, copiedFile.getObjectPermissions().size());
+        assertEquals("File not created by main user", getClient().getValues().getUserId(), copiedFile.getCreatedBy());
+        assertEquals("Wrong number of versions", 1, copiedFile.getNumberOfVersions());
     }
 
     @Test
@@ -114,7 +110,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
         OCLGuestPermission lGuestPermission = createNamedAuthorPermission();
         userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
 
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
         GuestClient guestClient = null;
         try {
             addUserPermission(client2.getValues().getUserId());
@@ -169,7 +165,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
     @Test
     @TryAgain
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutObjectPermissions() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
         int userId = client2.getValues().getUserId();
 
         try {

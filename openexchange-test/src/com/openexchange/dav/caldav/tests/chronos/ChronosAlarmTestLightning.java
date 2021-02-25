@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.tests.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -70,6 +71,7 @@ import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -87,8 +89,8 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 public class ChronosAlarmTestLightning extends ChronosCaldavTest {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     @Override
@@ -1165,12 +1167,12 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals(5, occurences.size());
         EventData exception = occurences.get(1);
         List<Attendee> attendees = exception.getAttendees();
-        attendees.add(AttendeeFactory.createAttendee(getUser(1).getUserId(), CuTypeEnum.INDIVIDUAL));
+        attendees.add(AttendeeFactory.createAttendee(I(testUser2.getUserId()), CuTypeEnum.INDIVIDUAL));
         eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
 
         // 3. Create alarm as second user
-        ApiClient apiClient2 = getApiClient(1);
-        UserApi userApi2 = new UserApi(apiClient2, getEnhancedApiClient2(), getUser(1));
+        ApiClient apiClient2 = testUser2.getApiClient();
+        UserApi userApi2 = new UserApi(apiClient2, getEnhancedApiClient2(), testUser2);
         String folder2 = getDefaultFolder(apiClient2);
         EventManager eventManager2 = new EventManager(userApi2, folder2);
 
@@ -1246,7 +1248,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
             "END:VALARM\n" +
             "END:VEVENT\n" +
             "END:VCALENDAR";
-        WebDAVClient davClient = new WebDAVClient(getUser(1), getDefaultUserAgent(), oAuthGrant);
+        WebDAVClient davClient = new WebDAVClient(testUser2, getDefaultUserAgent(), oAuthGrant);
         String caldavFolder = getCaldavFolder(folder2);
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(davClient, caldavFolder, event.getUid(), iCal, null));
 

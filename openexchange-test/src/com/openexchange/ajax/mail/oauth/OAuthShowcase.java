@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.junit.Test;
 import com.openexchange.ajax.apiclient.oauth.AbstractOAuthAPIClient;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
@@ -98,8 +99,8 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(2).build();
     }
 
     @SuppressWarnings("unchecked")
@@ -209,8 +210,8 @@ public class OAuthShowcase extends AbstractOAuthAPIClient {
 
         JSONArray to = new JSONArray();
         JSONArray innerTo = new JSONArray();
-        innerTo.put(getUser(1).getUser());
-        innerTo.put(getUser(1).getLogin());
+        innerTo.put(testUser2.getUser());
+        innerTo.put(testUser2.getLogin());
         to.put(innerTo);
         mail.put("to", to);
         mail.put("subject", "test");

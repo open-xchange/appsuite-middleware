@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appPassword;
 
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashMap;
@@ -102,13 +102,13 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
     public void setUp() throws Exception {
         super.setUp();
         // Add required capability
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(i(testUser.getUserId()));
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(testUser.getUserId());
         Set<String> cap = new HashSet<String>(1);
         cap.add("app_spec_passwords");
         Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(testUser.getContextId()), user, cap, emptySet, emptySet, userCreds);
+        usrInterface.changeCapabilities(new Context(I(testUser.getContextId())), user, cap, emptySet, emptySet, userCreds);
         appSpecApi = new AppPasswordApi(getApiClient());
         super.setUpConfiguration();
     }
@@ -173,9 +173,10 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
     /**
      * Reset the Application Specific Api Client
      * resetApiClient
-     *
+     * 
+     * @throws ApiException In case client can't be created
      */
-    protected void resetApiClient() {
+    protected void resetApiClient() throws ApiException {
         appSpecApi = new AppPasswordApi(getApiClient());
     }
 

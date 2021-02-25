@@ -90,7 +90,7 @@ public class Bug10400Test extends AbstractTaskTest {
     public void testRemoveDelegateAddCreator() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
+        final AJAXClient berta = testUser2.getAjaxClient();
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test1");
@@ -146,7 +146,7 @@ public class Bug10400Test extends AbstractTaskTest {
     public void testRemoveDelegate() throws Throwable {
         final AJAXClient anton = getClient();
         final int antonFID = anton.getValues().getPrivateTaskFolder();
-        final AJAXClient berta = new AJAXClient(testContext.acquireUser());
+        final AJAXClient berta = testUser2.getAjaxClient();
         final TimeZone bertaTZ = berta.getValues().getTimeZone();
         Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test2");

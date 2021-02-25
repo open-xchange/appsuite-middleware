@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug44167Test}
@@ -98,7 +99,7 @@ public class Bug44167Test extends Abstract2UserCalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client3 = getClient(2);
+        client3 = testContext.acquireUser().getAjaxClient();
         manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
         manager2.resetDefaultFolderPermissions();
@@ -122,8 +123,8 @@ public class Bug44167Test extends Abstract2UserCalDAVTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).useEnhancedApiClients().build();
     }
 
     @Test

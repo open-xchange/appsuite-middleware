@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link PrivateTests}
@@ -97,9 +98,9 @@ public class PrivateTests extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient(1);
-        client3 = getClient(2);
-        client4 = getClient(3);
+        client2 = testUser2.getAjaxClient();
+        client3 = testContext.acquireUser().getAjaxClient();
+        client4 = testContext.acquireUser().getAjaxClient();
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Private Test Folder" + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE,
             ocl(client1.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
@@ -110,8 +111,8 @@ public class PrivateTests extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(4).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(4).build();
     }
 
     @Test

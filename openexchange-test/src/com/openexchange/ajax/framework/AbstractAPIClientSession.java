@@ -49,24 +49,12 @@
 
 package com.openexchange.ajax.framework;
 
-import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.junit.Assert;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.modules.LoginApi;
 
@@ -82,8 +70,6 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAPIClientSession.class);
 
     protected LoginApi loginApi;
-    protected ApiClient apiClient;
-    protected Map<TestUser, ApiClient> apiClients = new HashMap<>();
 
     /**
      * Default constructor.
@@ -95,85 +81,33 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().build();
-    }
-
-    protected ApiClient getApiClient() {
-        return apiClient;
-    }
-
-    /**
-     * Gets the api client with the given number from the first context
-     *
-     * @param x
-     * @return The api client
-     */
-    protected ApiClient getApiClient(int x) {
-        return getApiClient(testContext, x);
-    }
-
-    /**
-     * Gets the api client with the given number from the first context
-     *
-     * @param ctx The test context
-     * @param x
-     * @return The api client
-     */
-    protected ApiClient getApiClient(TestContext ctx, int x) {
-        Assert.assertThat(I(x), allOf(is(greaterThanOrEqualTo(I(0))), is(lessThan(I(users.get(ctx).size())))));
-        assertFalse(apiClients.isEmpty());
-        return apiClients.get(users.get(ctx).get(x));
-    }
-
-    /**
-     * Gets the api client for the given user
-     *
-     * @param user The user
-     * @return The api client
-     */
-    protected ApiClient getApiClient(TestUser user) {
-        ApiClient result = apiClients.get(user);
-        Assert.assertNotNull("No client for the given user", result);
-        return result;
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().build();
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        if (getTestConfig().createApiClients) {
-            for (Entry<TestContext, List<TestUser>> entry : users.entrySet()) {
-                for (TestUser user : entry.getValue()) {
-                    ApiClient tmpClient = generateApiClient(user);
-                    rememberClient(user, tmpClient);
-                    if (apiClient == null && user.equals(testUser)) {
-                        apiClient = tmpClient;
-                    }
-                }
-            }
-        }
     }
 
     /**
-     * Remembers a generated {@link ApiClient} so that it can be loged out after the test run
+     * Get the API client for the test user
      *
-     * @param client The {@link ApiClient} to remember
+     * @return The {@link ApiClient}l
+     * @throws ApiException In case client creation failed
      */
-    protected void rememberClient(TestUser user, ApiClient client) {
-        apiClients.put(user, client);
+    protected ApiClient getApiClient() throws ApiException {
+        return testUser.getApiClient();
     }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            for (ApiClient client : apiClients.values()) {
-                if (client.getSession() != null) {
-                    logoutClient(client, true);
-                }
-            }
-        } finally {
-            super.tearDown();
-        }
+    
+    /**
+     * Returns the session id of the default session
+     *
+     * @return The session id
+     * @throws ApiException In case client creation failed
+     */
+    protected String getSessionId() throws ApiException {
+        return getApiClient().getSession();
     }
 
     /**
@@ -217,72 +151,6 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
             }
         }
         return null;
-    }
-
-    /**
-     * Generates a new {@link AJAXClient}. Uses standard client identifier.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final ApiClient generateDefaultApiClient() throws OXException {
-        return generateApiClient(getClientId());
-    }
-
-    /**
-     * Generates a new {@link AJAXClient}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @param client The client identifier to use when performing a login
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final ApiClient generateApiClient(String client) throws OXException {
-        return generateApiClient(client, testContext.acquireUser());
-    }
-
-    /**
-     * Generates a new {@link AJAXClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final ApiClient generateApiClient(TestUser user) throws OXException {
-        return generateApiClient(getClientId(), user);
-    }
-
-    /**
-     * Generates a new {@link AJAXClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @param client The client identifier to use when performing a login
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final ApiClient generateApiClient(String client, TestUser user) throws OXException {
-        if (null == user) {
-            LOG.error("Can only create a client for an valid user");
-            throw new OXException();
-        }
-        ApiClient newClient;
-        try {
-            newClient = generateApiClient();
-            setBasePath(newClient);
-            newClient.setUserAgent("HTTP API Testing Agent");
-            newClient.login(user.getLogin(), user.getPassword());
-        } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext(), e);
-            throw new OXException(e);
-        }
-        return newClient;
-    }
-
-    public ApiClient generateApiClient() {
-        return new ApiClient();
     }
 
     protected void setBasePath(ApiClient newClient) {
@@ -331,12 +199,4 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         return data;
     }
 
-    /**
-     * Returns the session id of the default session
-     *
-     * @return The session id
-     */
-    protected String getSessionId() {
-        return apiClient.getSession();
-    }
 }

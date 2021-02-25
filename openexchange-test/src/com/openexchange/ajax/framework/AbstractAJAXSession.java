@@ -54,7 +54,6 @@ import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.test.AttachmentTestManager;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTaskTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.ReminderTestManager;
 import com.openexchange.test.ResourceTestManager;
@@ -71,7 +70,6 @@ public abstract class AbstractAJAXSession extends AbstractClientSession {
     protected ResourceTestManager resTm;
     protected AttachmentTestManager atm;
     protected MailTestManager mtm;
-    protected FolderTaskTestManager fttm;
 
     /**
      * Default constructor.
@@ -96,11 +94,6 @@ public abstract class AbstractAJAXSession extends AbstractClientSession {
         mtm = new MailTestManager(client);
         resTm = new ResourceTestManager(client);
         remTm = new ReminderTestManager(client);
-
-        if (getTestConfig().numberOfusersPerContext > 1) {
-            AJAXClient client2 = getClient(1);
-            fttm = new FolderTaskTestManager(client, client2);
-        }
     }
 
 }

@@ -23,7 +23,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
     protected SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-    protected final static int[] _fields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.RECURRENCE_POSITION, Appointment.TIMEZONE};
+    protected final static int[] _fields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.RECURRENCE_POSITION, Appointment.TIMEZONE };
 
     @Override
     @Before
@@ -42,11 +42,11 @@ public class AbstractRecurrenceTest extends AppointmentTest {
         return null;
     }
 
-    public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence) throws Exception {
+    public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence) {
         assertOccurrence(expectedPosition, expectedStartDate, expectedEndDate, occurrence, timeZoneUTC);
     }
 
-    public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence, final TimeZone timeZone) throws Exception {
+    public static void assertOccurrence(final int expectedPosition, final Date expectedStartDate, final Date expectedEndDate, final Occurrence occurrence, final TimeZone timeZone) {
         assertNotNull("occurrence is null", occurrence);
         assertEquals("position is not equals", expectedPosition, occurrence.getPosition());
         OXTestToolkit.assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));

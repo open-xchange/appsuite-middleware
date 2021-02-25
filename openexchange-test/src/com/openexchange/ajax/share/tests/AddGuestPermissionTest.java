@@ -127,6 +127,7 @@ public class AddGuestPermissionTest extends ShareTest {
         guestClient.checkShareAccessible(guestPermission);
     }
 
+    @SuppressWarnings("unused")
     private void testUpdateSharedFolderWithCascadingPermissions(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
          * create folder hierarchy

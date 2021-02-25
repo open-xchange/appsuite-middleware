@@ -85,7 +85,7 @@ public class Bug22305Test extends AbstractTaskTest {
         super.setUp();
         anton = getClient();
         antonId = anton.getValues().getUserId();
-        berta = new AJAXClient(testContext.acquireUser());
+        berta = testUser2.getAjaxClient();
         bertaId = berta.getValues().getUserId();
         bertaTZ = berta.getValues().getTimeZone();
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 22305");

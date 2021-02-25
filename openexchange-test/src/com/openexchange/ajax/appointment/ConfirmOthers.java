@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -96,8 +97,8 @@ public class ConfirmOthers extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
-        clientC = getClient(2);
+        clientB = testContext.acquireUser().getAjaxClient();
+        clientC = testContext.acquireUser().getAjaxClient();
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
@@ -130,8 +131,8 @@ public class ConfirmOthers extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

@@ -84,7 +84,7 @@ public class Bug16899Test extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderManager = new FolderManager(new FolderApi(apiClient, testUser), String.valueOf(EnumAPI.OX_NEW.getTreeId()));
+        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), String.valueOf(EnumAPI.OX_NEW.getTreeId()));
     }
 
     @Test

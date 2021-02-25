@@ -93,7 +93,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         if (attendees == null) {
-            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(I(apiClient.getUserId().intValue()))));
+            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(I(testUser.getUserId()))));
         } else {
             singleEvent.setAttendees(attendees);
         }
@@ -162,7 +162,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
             for (TestUser user : users) {
                 Attendee att = new Attendee();
                 att.setCuType(CuTypeEnum.INDIVIDUAL);
-                att.setEntity(user.getUserId());
+                att.setEntity(I(user.getUserId()));
                 attendees.add(att);
             }
         }

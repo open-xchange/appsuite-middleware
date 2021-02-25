@@ -189,15 +189,11 @@ public class PermissionTest extends AbstractAppPasswordTest {
             String username = login.contains("@") ? login.substring(0, login.indexOf("@")) : login;
             String domain = login.contains("@") ? login.substring(login.indexOf("@") + 1) : testUser.getContext();
             TestUser test = new TestUser(username, domain, loginData.getPassword());
-            try {
-                apiClient = generateApiClient("test-client", test);
-                // Test it
-                testApis(type, apiClient);
-                // Logout
-                apiClient.logout();
-            } catch (OXException e) {
-                throw new ApiException(e.getMessage());
-            }
+            ApiClient apiClient = test.generateApiClient();
+            // Test it
+            testApis(type, apiClient);
+            // Logout
+            apiClient.logout();
 
         }
         getApiClient().login(origLogin, origPassword);

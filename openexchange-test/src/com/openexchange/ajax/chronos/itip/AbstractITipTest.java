@@ -59,8 +59,8 @@ import java.util.Date;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.jdom2.IllegalDataException;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.EnhancedApiClient;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -72,6 +72,7 @@ import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
+import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractITipTest}
@@ -140,6 +141,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         }
     }
 
+    protected ApiClient apiClient;
+
     protected UserResponse userResponseC1;
 
     protected UserResponse userResponseC2;
@@ -160,12 +163,13 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
+        apiClient = testUser.getApiClient();
         UserApi api = new UserApi(getApiClient());
         userResponseC1 = api.getUser(String.valueOf(testUser.getUserId()));
 
         context2 = testContextList.get(1);
-        testUserC2 = users.get(context2).get(0);
-        apiClientC2 = getApiClient(context2, 0);
+        testUserC2 = context2.acquireUser();
+        apiClientC2 = testUserC2.getApiClient();
         UserApi anotherUserApi = new UserApi(apiClientC2);
         userResponseC2 = anotherUserApi.getUser(String.valueOf(apiClientC2.getUserId()));
         // Validate
@@ -183,8 +187,8 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     /*
@@ -197,7 +201,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#accept(String,String, String, ConversionDataSource)}
      */
     protected ActionResponse accept(ConversionDataSource body, String comment) throws ApiException {
-        return accept(apiClient, body, comment);
+        return accept(testUser.getApiClient(), body, comment);
     }
 
     /**
@@ -249,7 +253,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @See {@link ChronosApi#update(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse update(ConversionDataSource body) throws ApiException {
-        return update(apiClient, body);
+        return update(testUser.getApiClient(), body);
     }
 
     /**
@@ -266,7 +270,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
      * @param expectData A value indicating whether it is expected that event data is returned or not. If set to <code>false</code> only the timestamp will be checked
      */
     protected ActionResponse cancel(ConversionDataSource body, String comment, boolean expectData) throws ApiException {
-        return cancel(apiClient, body, comment, expectData);
+        return cancel(testUser.getApiClient(), body, comment, expectData);
     }
 
     /**

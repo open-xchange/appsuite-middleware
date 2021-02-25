@@ -61,6 +61,7 @@ import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppointmentTest {
 
@@ -72,7 +73,7 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
     public void testIt() throws Exception {
         int uid1 = getClient().getValues().getUserId();
 
-        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant other = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -82,12 +83,12 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
+        int fid2 = testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = testUser2.getAjaxClient().execute(new GetRequest(fid2, appId));
         Date lastMod = getResponse.getTimestamp();
 
-        getClient(1).execute(new DeleteRequest(appId, fid2, lastMod));
+        testUser2.getAjaxClient().execute(new DeleteRequest(appId, fid2, lastMod));
 
         Appointment actual = catm.get(app);
 
@@ -98,8 +99,8 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

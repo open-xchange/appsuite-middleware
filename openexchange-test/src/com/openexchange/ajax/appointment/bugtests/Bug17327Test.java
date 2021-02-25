@@ -100,7 +100,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         client = getClient();
         tz = getClient().getValues().getTimeZone();
         System.out.println(tz);
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = testUser2.getAjaxClient();
         tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder

@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug32385Test}
@@ -81,11 +82,11 @@ public class Bug32385Test extends AbstractAJAXSession {
         super.setUp();
 
         FolderObject sharedFolder = new FolderObject();
-        sharedFolder.setObjectID(getClient(1).getValues().getPrivateAppointmentFolder());
+        sharedFolder.setObjectID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         sharedFolder.setLastModified(new Date(Long.MAX_VALUE));
-        sharedFolder.setPermissionsAsArray(new OCLPermission[] { ocl(getClient().getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(getClient(1).getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+        sharedFolder.setPermissionsAsArray(new OCLPermission[] { ocl(getClient().getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(testUser2.getAjaxClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
 
-        CommonInsertResponse response = getClient(1).execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder));
+        CommonInsertResponse response = testUser2.getAjaxClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder));
         response.fillObject(sharedFolder);
 
         appointment = new Appointment();
@@ -93,7 +94,7 @@ public class Bug32385Test extends AbstractAJAXSession {
         appointment.setStartDate(D("01.05.2014 08:00"));
         appointment.setEndDate(D("01.05.2014 09:00"));
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -103,8 +104,8 @@ public class Bug32385Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

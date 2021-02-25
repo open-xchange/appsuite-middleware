@@ -104,8 +104,8 @@ public abstract class AbstractRestTest extends JerseyTest {
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
         testUser2 = testContext.acquireUser();
-        ajaxClient1 = new AJAXClient(testUser);
-        ajaxClient2 = new AJAXClient(testUser2);
+        ajaxClient1 = testUser.getAjaxClient();
+        ajaxClient2 = testUser2.getAjaxClient();
         admin = testContext.getAdmin();
 
         restClient = new ApiClient();

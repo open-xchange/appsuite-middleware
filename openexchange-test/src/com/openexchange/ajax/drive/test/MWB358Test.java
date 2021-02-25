@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.apiclient.InfostoreApiClientTest;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.DriveAction;
@@ -107,13 +108,13 @@ public class MWB358Test extends InfostoreApiClientTest {
         super.setUp();
 
         driveApiUser1 = new DriveApi(getApiClient());
-        driveApiUser2 = new DriveApi(getApiClient(1));
+        driveApiUser2 = new DriveApi(testUser2.getApiClient());
         foldersApi = new FoldersApi(getApiClient());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(2).build();
     }
 
     /**
@@ -185,7 +186,7 @@ public class MWB358Test extends InfostoreApiClientTest {
      * @throws ApiException
      */
     private void checkForSyncAction() throws ApiException {
-        List<DriveAction> actions = syncFolder(getApiClient(1), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, TESTFOLDER_CHECKSUM);
+        List<DriveAction> actions = syncFolder(testUser2.getApiClient(), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, TESTFOLDER_CHECKSUM);
         assertEquals(1, actions.size());
         assertEquals("sync", actions.get(0).getAction());
     }
@@ -226,21 +227,21 @@ public class MWB358Test extends InfostoreApiClientTest {
         /*
          * Share two files to user 2
          */
-        String file1 = createFile(getApiClient(1).getUserId(), "MWB358Test1.txt");
-        createFile(getApiClient(1).getUserId(), "MWB358Test2.txt");
+        String file1 = createFile(testUser2.getApiClient().getUserId(), "MWB358Test1.txt");
+        createFile(testUser2.getApiClient().getUserId(), "MWB358Test2.txt");
 
         /*
          * sync folder 10 of user 2
          */
-        List<DriveAction> actions = syncFolder(getApiClient(1), SHARED_FOLDER_ID, DEFAULT_CHECKSUM, DEFAULT_CHECKSUM);
+        List<DriveAction> actions = syncFolder(testUser2.getApiClient(), SHARED_FOLDER_ID, DEFAULT_CHECKSUM, DEFAULT_CHECKSUM);
         assertEquals(1, actions.size());
         assertEquals("sync", actions.get(0).getAction());
 
-        actions = syncFolder(getApiClient(1), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, DEFAULT_CHECKSUM);
+        actions = syncFolder(testUser2.getApiClient(), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, DEFAULT_CHECKSUM);
         assertEquals(2, actions.size());
         assertEquals("acknowledge", actions.get(0).getAction());
 
-        actions = syncFolder(getApiClient(1), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, TESTFOLDER_CHECKSUM);
+        actions = syncFolder(testUser2.getApiClient(), SHARED_FOLDER_ID, TESTFOLDER_CHECKSUM, TESTFOLDER_CHECKSUM);
         assertEquals(0, actions.size());
         return file1;
     }

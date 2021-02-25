@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Abstrac2UserAJAXSession}
@@ -61,19 +61,17 @@ public abstract class Abstrac2UserAJAXSession extends AbstractAJAXSession {
 
     protected AJAXClient client1;
     protected AJAXClient client2;
-    protected TestUser user2;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        client1 = getClient();
-        client2 = getClient(1);
-        user2 = getUser(1);
+        client1 = testUser.getAjaxClient();
+        client2 = testUser2.getAjaxClient();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

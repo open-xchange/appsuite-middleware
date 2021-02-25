@@ -62,6 +62,7 @@ import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -89,9 +90,9 @@ public final class Bug27708Test extends AbstractMailTest {
         super.setUp();
         clients = new AJAXClient[NUM_THREADS];
         clients[0] = getClient();
-        clients[1] = getClient(1);
-        clients[2] = getClient(2);
-        clients[3] = getClient(3);
+        clients[1] = testUser2.getAjaxClient();
+        clients[2] = testContext.acquireUser().getAjaxClient();
+        clients[3] = testContext.acquireUser().getAjaxClient();
         recipient = getClient().getValues().getSendAddress();
         // Unique identifier for all threads, to be able to detect own and foreign content in mail body.
         identifier = new String[NUM_THREADS];
@@ -101,8 +102,8 @@ public final class Bug27708Test extends AbstractMailTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().withUserPerContext(4).createAjaxClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(4).createAjaxClient().build();
     }
 
     @Test

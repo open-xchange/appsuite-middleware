@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.appPassword;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.invoker.ApiException;

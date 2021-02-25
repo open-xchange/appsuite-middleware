@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * US 1601 on server side (TA1698)
@@ -109,7 +110,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     public void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
         UserValues values = client1.getValues();
         int module = Module.CALENDAR.getFolderConstant();
         sharedFolder = ftm.generateSharedFolder("us1601_shared_" + (new Date().getTime()), module, values.getPrivateAppointmentFolder(), new int[] { values.getUserId(), client2.getValues().getUserId() });
@@ -142,8 +143,8 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

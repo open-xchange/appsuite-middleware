@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.TestManager;
 
 /**
@@ -97,20 +98,20 @@ public class MoveTestNew extends AbstractAppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        clientC = getClient(2);
+        clientC = testContext.acquireUser().getAjaxClient();
         valuesC = clientC.getValues();
 
         idA = getClient().getValues().getUserId();
-        idB = getClient(1).getValues().getUserId();
+        idB = testUser2.getAjaxClient().getValues().getUserId();
         idC = valuesC.getUserId();
 
-        ctmB = new CalendarTestManager(getClient(1));
+        ctmB = new CalendarTestManager(testUser2.getAjaxClient());
         ctmC = new CalendarTestManager(clientC);
 
         tm.add(ctmB);
         tm.add(ctmC);
 
-        ftmB = new FolderTestManager(getClient(1));
+        ftmB = new FolderTestManager(testUser2.getAjaxClient());
         ftmC = new FolderTestManager(clientC);
 
         tm.add(ftmB);
@@ -125,11 +126,11 @@ public class MoveTestNew extends AbstractAppointmentTest {
         folderA1 = ftm.insertFolderOnServer(folderA1);
 
         //
-        folderB = ftmB.getFolderFromServer(getClient(1).getValues().getPrivateAppointmentFolder());
+        folderB = ftmB.getFolderFromServer(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         addAuthorPermissions(folderB, getClient().getValues().getUserId(), ftmB);
-        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, getClient(1), getClient());
+        folderB1 = createPrivateFolder("SubfolderB1" + UUID.randomUUID().toString(), ftmB, testUser2.getAjaxClient(), getClient());
         folderB1 = ftmB.insertFolderOnServer(folderB1);
-        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, getClient(1), getClient());
+        folderB2 = createPrivateFolder("SubfolderB2" + UUID.randomUUID().toString(), ftmB, testUser2.getAjaxClient(), getClient());
         folderB2 = ftmB.insertFolderOnServer(folderB2);
 
         folderC = ftmC.getFolderFromServer(valuesC.getPrivateAppointmentFolder());
@@ -139,8 +140,8 @@ public class MoveTestNew extends AbstractAppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     private void addAuthorPermissions(FolderObject folder, int userId, FolderTestManager actor) {

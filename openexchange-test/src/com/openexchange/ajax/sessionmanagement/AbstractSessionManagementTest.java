@@ -71,7 +71,7 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
         super.setUp();
 
         // Remove all other sessions to make sure tests run independently
-        api = new SessionmanagementApi(apiClient);
+        api = new SessionmanagementApi(getApiClient());
         AllSessionsResponse all = api.all();
         int size = all.getData().size();
         api.clear();
@@ -79,8 +79,7 @@ public class AbstractSessionManagementTest extends AbstractAPIClientSession {
         System.out.println("Cleared " + all.getData().size() + " out of " + size + " sessions for the " + this.getClass().getSimpleName() + " test.");
 
         // For the same user
-        apiClient2 = generateApiClient(testUser);
-        rememberClient(testUser, apiClient2);
+        apiClient2 = testUser.generateApiClient();
     }
 
     protected SessionmanagementApi getApi() {

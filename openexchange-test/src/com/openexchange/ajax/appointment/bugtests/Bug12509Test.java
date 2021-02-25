@@ -67,6 +67,7 @@ import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -89,7 +90,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
+        clientB = testContext.acquireUser().getAjaxClient();
 
         folder = new FolderObject();
         folder.setFolderName("Bug 12509 Test Folder" + UUID.randomUUID().toString());
@@ -139,8 +140,8 @@ public class Bug12509Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

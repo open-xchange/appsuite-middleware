@@ -68,6 +68,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -105,7 +106,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         // add third user necessary for testing
         this.testContext.acquireUser();
         folderApi = new FoldersApi(getApiClient());
-        UserApi userApi = new UserApi(apiClient);
+        UserApi userApi = new UserApi(getApiClient());
         UsersResponse resp = userApi.getAllUsers("1", null, null);
         assertNull(resp.getError());
         assertNotNull(resp.getData());
@@ -118,8 +119,8 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(4).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(4).build();
     }
 
     /**

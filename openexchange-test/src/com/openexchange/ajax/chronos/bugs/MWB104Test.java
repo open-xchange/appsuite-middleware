@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -81,20 +83,20 @@ public class MWB104Test extends AbstractChronosTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        userApi2 = new UserApi(getApiClient(1), getEnhancedApiClient2(), getUser(1));
+        userApi2 = new UserApi(testUser2.getApiClient(), getEnhancedApiClient2(), testUser);
         defaultFolderId2 = getDefaultFolder(userApi2.getFoldersApi());
         eventManager2 = new EventManager(userApi2, defaultFolderId2);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     @Test
     public void testResetPartstat() throws Exception {
         EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "MWB-104 Test", folderId);
-        Integer secondUserId = getUser(1).getUserId();
+        Integer secondUserId = I(testUser2.getUserId());
         Attendee attendee = AttendeeFactory.createIndividual(secondUserId);
         eventData.addAttendeesItem(attendee);
         EventData createdEvent = eventManager.createEvent(eventData, true);

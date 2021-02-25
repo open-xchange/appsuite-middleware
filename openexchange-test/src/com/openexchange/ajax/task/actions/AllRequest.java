@@ -84,13 +84,12 @@ public class AllRequest extends AbstractAllRequest<CommonAllResponse> {
     public AllParser getParser() {
         if (getColumns() != null) {
             return new AllParser(isFailOnError(), getColumns());
-        } else {
-            if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), TaskAction.COLUMNS_ALL_ALIAS);
-            }
-            if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), TaskAction.COLUMNS_LIST_ALIAS);
-            }
+        }
+        if (getAlias().equals("all")) {
+            return new AllParser(isFailOnError(), TaskAction.COLUMNS_ALL_ALIAS);
+        }
+        if (getAlias().equals("list")) {
+            return new AllParser(isFailOnError(), TaskAction.COLUMNS_LIST_ALIAS);
         }
         return null;
     }

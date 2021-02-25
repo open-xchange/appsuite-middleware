@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug33242Test}
@@ -102,17 +104,17 @@ public class Bug33242Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        catm2 = new CalendarTestManager(getClient(1));
+        catm2 = new CalendarTestManager(testUser2.getAjaxClient());
 
-        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(getUser(1).getUserId())))); //TODO null check
+        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(I(testContext.acquireUser().getUserId()))))); //TODO null check
 
         prepareSeries();
         prepareSingle();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     /**
@@ -190,7 +192,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment creatorAppointment = catm.get(series);
-        series.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
@@ -203,14 +205,14 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMember() throws Exception {
-        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
 
         // This should fail if not possible
         catm2.delete(exception);
 
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment creatorAppointment = catm.get(series);
-        series.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
@@ -242,7 +244,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment creatorAppointment = catm.get(series);
-        series.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
@@ -255,7 +257,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMemberWithUpdate() throws Exception {
-        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         exception.removeNote(); // cannot change note as attendee
         catm2.update(exception);
 
@@ -264,7 +266,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         Appointment creatorAppointment = catm.get(series);
-        series.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        series.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
@@ -290,7 +292,7 @@ public class Bug33242Test extends AbstractAJAXSession {
 
     @Test
     public void testDeleteByGroupMemberSingle() throws Exception {
-        single.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        single.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         // This should fail if not possible
         catm2.delete(single);
     }

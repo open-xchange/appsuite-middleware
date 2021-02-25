@@ -127,13 +127,12 @@ public class AllRequest extends CommonAllRequest {
     public AllParser getParser() {
         if (getColumns() != null) {
             return new AllParser(isFailOnError(), getColumns());
-        } else {
-            if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_ALL);
-            }
-            if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_LIST);
-            }
+        }
+        if (getAlias().equals("all")) {
+            return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_ALL);
+        }
+        if (getAlias().equals("list")) {
+            return new AllParser(isFailOnError(), IDBasedContactAction.COLUMNS_ALIAS_LIST);
         }
         return null;
     }

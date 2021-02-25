@@ -49,6 +49,7 @@
 
 package com.openexchange.ocp.provisioning;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,9 +91,9 @@ public class TestResellerProvisioningReporting extends AbstractTestProvisioningR
             ctx.setName(null);
             contextInterface.delete(ctx, resellerCredentials);
         } catch (NoSuchContextException e) {
-            LOG.info("Context '{}' does not exist. Probably already cleaned-up.", CONTEXT_ID);
+            LOG.info("Context '{}' does not exist. Probably already cleaned-up.", I(CONTEXT_ID));
         } catch (Exception e) {
-            LOG.warn("Could not clean-up test context '{}'", CONTEXT_ID, e);
+            LOG.warn("Could not clean-up test context '{}'", I(CONTEXT_ID), e);
         }
         super.postTearDown();
     }
@@ -147,7 +148,7 @@ public class TestResellerProvisioningReporting extends AbstractTestProvisioningR
      * Tests that a context pre-creation plugin fails and thus no events are emitted.
      */
     @Test
-    public void testContextPreCreationPluginFails() throws Exception {
+    public void testContextPreCreationPluginFails() {
         testContextPreCreationPluginFails(resellerAdmin, resellerCredentials);
     }
 
@@ -156,7 +157,7 @@ public class TestResellerProvisioningReporting extends AbstractTestProvisioningR
      * One for the actual creation and one for the roll-back.
      */
     @Test
-    public void testContextPostCreationPluginFails() throws Exception {
+    public void testContextPostCreationPluginFails() {
         testContextPostCreationPluginFails(resellerAdmin, resellerCredentials);
     }
 
@@ -164,7 +165,7 @@ public class TestResellerProvisioningReporting extends AbstractTestProvisioningR
      * Tests that a context deletion plugin fails and thus no delete events are emitted.
      */
     @Test
-    public void testContextDeletePluginFails() throws Exception {
+    public void testContextDeletePluginFails() {
         testContextDeletePluginFails(resellerAdmin, resellerCredentials);
     }
 

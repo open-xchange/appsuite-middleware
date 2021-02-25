@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * Checks if series gets changed_from set to 0.
@@ -88,6 +89,12 @@ public final class Bug12099Test extends AbstractAJAXSession {
      */
     public Bug12099Test() {
         super();
+    }
+    
+    
+    @Override
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(3).createAjaxClient().createApiClient().build();
     }
 
     /**
@@ -152,7 +159,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
     public void testSeriesChangedFromIsZero2() throws Throwable {
         final AJAXClient clientA = getClient();
         final int userIdA = clientA.getValues().getUserId();
-        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
+        final AJAXClient clientB = testUser2.getAjaxClient();
         final FolderObject folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 12099 - " + UUID.randomUUID().toString(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(userIdA, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
@@ -160,7 +167,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         }
         final Appointment appointment = new Appointment();
         try {
-            final AJAXClient clientC = new AJAXClient(testContext.acquireUser());
+            final AJAXClient clientC = testContext.acquireUser().getAjaxClient();
             final int userIdC = clientC.getValues().getUserId();
             final TimeZone tzB = clientB.getValues().getTimeZone();
             {

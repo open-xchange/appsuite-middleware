@@ -63,6 +63,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -91,18 +92,18 @@ public class Bug58023Test extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        tasksApi = new TasksApi(apiClient);
-        foldersApi = new FoldersApi(apiClient);
+        tasksApi = new TasksApi(getApiClient());
+        foldersApi = new FoldersApi(getApiClient());
         privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), generateFolderBody(), "1", Module.TASK.getName(), null, null).getData();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     public String getPrivateTaskFolder() throws ApiException {
-        ConfigApi configApi = new ConfigApi(apiClient);
+        ConfigApi configApi = new ConfigApi(getApiClient());
         ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateTaskFolder.getPath());
         Object data = checkResponse(configNode);
         return String.valueOf(data);
@@ -126,7 +127,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     private void addPermissions(NewFolderBodyFolder folder) {
         FolderPermission perm = new FolderPermission();
-        perm.setEntity(apiClient.getUserId());
+        perm.setEntity(I(testUser.getUserId()));
         perm.setGroup(Boolean.FALSE);
         perm.setBits(I(403710016));
 
@@ -138,7 +139,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllTasksInFolder() throws Exception {
-        ApiClient apiClient2 = getApiClient(1);
+        ApiClient apiClient2 = testContext.acquireUser().getApiClient();
         TasksApi tasksApi2 = new TasksApi(apiClient2);
 
         TasksResponse allTasks = tasksApi2.getAllTasks(privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
@@ -154,7 +155,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetSingleTasksInFolder() throws Exception {
-        TasksApi tasksApi2 = new TasksApi(getApiClient(1));
+        TasksApi tasksApi2 = new TasksApi(testContext.acquireUser().getApiClient());
 
         TaskResponse task = tasksApi2.getTask("333", privateTaskFolder);
 

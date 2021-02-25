@@ -68,6 +68,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link DistListPermissionsTest} - Checks the distribution list handling.
@@ -88,7 +89,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
         cotm2 = new ContactTestManager(client2);
         folderManager2 = new FolderTestManager(client2);
         /*
@@ -114,8 +115,8 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

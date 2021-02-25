@@ -30,6 +30,7 @@ import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.test.TestClassConfig;
 
 public class MailTest extends AbstractAJAXSession {
 
@@ -76,8 +77,8 @@ public class MailTest extends AbstractAJAXSession {
     private static final String MAILTEXT = "This is mail text!<br>Next line<br/><br/>best regards,<br>Max Mustermann";
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().withUserPerContext(2).createAjaxClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(2).createAjaxClient().build();
     }
 
     @Test
@@ -105,7 +106,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     private String getMailOfUser2() {
-        return getUser(1).getLogin();
+        return testContext.acquireUser().getLogin();
     }
 
     @Test

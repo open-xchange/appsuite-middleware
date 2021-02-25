@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -90,8 +91,8 @@ public class UserStory1085Test extends AppointmentTest {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
-        clientC = getClient(2);
+        clientB = testUser2.getAjaxClient();
+        clientC = testContext.acquireUser().getAjaxClient();
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();
         userIdC = clientC.getValues().getUserId();
@@ -136,8 +137,8 @@ public class UserStory1085Test extends AppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

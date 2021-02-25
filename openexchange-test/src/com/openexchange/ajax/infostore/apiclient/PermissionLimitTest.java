@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.validation.PermissionSizeValidator;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemPermission.BitsEnum;
@@ -85,7 +86,7 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
         super.setUp();
         super.setUpConfiguration();
 
-        UserApi userApi = new UserApi(apiClient);
+        UserApi userApi = new UserApi(getApiClient());
         UsersResponse resp = userApi.getAllUsers("1", null, null);
         assertNull(resp.getError());
         assertNotNull(resp.getData());
@@ -96,8 +97,8 @@ public class PermissionLimitTest extends InfostoreApiClientTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(4).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(4).build();
     }
 
     /**

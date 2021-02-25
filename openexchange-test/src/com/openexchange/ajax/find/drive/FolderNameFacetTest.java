@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.junit.Assert;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -99,14 +100,14 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        findApi = new FindApi(apiClient);
-        foldersApi = new FoldersApi(apiClient);
+        findApi = new FindApi(getApiClient());
+        foldersApi = new FoldersApi(getApiClient());
         createNewFolder(false);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -214,7 +215,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         assertEquals(2, i(data.getSize()));
 
         // Search as another user, result in "Public Files" expected
-        FindApi findApi2 = new FindApi(getApiClient(1));
+        FindApi findApi2 = new FindApi(testContext.acquireUser().getApiClient());
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
         checkResponseForErrors(response);
         data = response.getData();
@@ -224,7 +225,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         FindActiveFacet facet = new FindActiveFacet();
         facet.facet("folder");
         facet.setFilter(null);
-        facet.setValue(getPrivateInfostoreFolder(apiClient));
+        facet.setValue(getPrivateInfostoreFolder(getApiClient()));
         body.addFacetsItem(facet);
         response = findApi.doQuery(Module.FILES.getName(), body, COLUMNS, null);
         checkResponseForErrors(response);
@@ -259,7 +260,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         folder.setTitle(folder.getSummary());
         folder.setSubscribed(Boolean.TRUE);
         List<FolderPermission> perm = new ArrayList<FolderPermission>();
-        FolderPermission p = createPermissionFor(apiClient.getUserId(), BITS_ADMIN, Boolean.FALSE);
+        FolderPermission p = createPermissionFor(I(testUser.getUserId()), BITS_ADMIN, Boolean.FALSE);
         perm.add(p);
         if (isPublic) {
             FolderPermission fp = createPermissionFor(I(0), BITS_VIEWER, Boolean.TRUE);
@@ -267,7 +268,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         }
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(isPublic ? String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) : getPrivateInfostoreFolder(apiClient), body, "0", null, null, null);
+        FolderUpdateResponse response = foldersApi.createFolder(isPublic ? String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) : getPrivateInfostoreFolder(getApiClient()), body, "0", null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;

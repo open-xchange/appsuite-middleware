@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.junit.Assert;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -91,15 +92,15 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client2 = getApiClient(1);
-        user2 = new UserApi(client2, getEnhancedApiClient(), getUser(1));
+        ApiClient client2 = testUser2.getApiClient();
+        user2 = new UserApi(client2, getEnhancedApiClient(), testUser2);
         folderId2 = getDefaultFolder(client2);
         eventManager2 = new EventManager(user2, getDefaultFolder(client2));
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     /**

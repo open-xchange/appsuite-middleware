@@ -1,13 +1,11 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static org.junit.Assert.fail;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug4392Test extends AppointmentTest {
@@ -39,10 +37,6 @@ public class Bug4392Test extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
 
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
-        try {
-            compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
-        } catch (OXException exc) {
-            fail("exception: " + exc.toString());
-        }
+        compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
     }
 }

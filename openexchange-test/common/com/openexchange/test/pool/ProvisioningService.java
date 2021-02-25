@@ -86,7 +86,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
-
 /**
  * {@link ProvisioningService}
  *
@@ -101,9 +100,9 @@ public class ProvisioningService {
      * Gets the {@link ProvisioningService}
      *
      * @return The {@link ProvisioningService}
-     * @throws MalformedURLException
-     * @throws RemoteException
-     * @throws NotBoundException
+     * @throws MalformedURLException In case provisioning can't be initialized
+     * @throws RemoteException In case provisioning can't be initialized
+     * @throws NotBoundException In case provisioning can't be initialized
      */
     public static ProvisioningService getInstance() throws MalformedURLException, RemoteException, NotBoundException {
         if (INSTANCE == null) {
@@ -155,10 +154,33 @@ public class ProvisioningService {
         masterCreds = new Credentials(adminUser, adminPW);
     }
 
+    /**
+     * Creates a context
+     *
+     * @return The context as {@link TestContext}
+     * @throws RemoteException If context can't be created
+     * @throws StorageException If context can't be created
+     * @throws InvalidCredentialsException If context can't be created
+     * @throws InvalidDataException If context can't be created
+     * @throws ContextExistsException If context can't be created
+     * @throws AddressException If context can't be created
+     */
     public TestContext createContext() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, AddressException {
         return createContext(Optional.empty());
     }
 
+    /**
+     * Creates a context
+     * 
+     * @param optConfig The optional configuration to pass for context creation
+     * @return The context as {@link TestContext}
+     * @throws RemoteException If context can't be created
+     * @throws StorageException If context can't be created
+     * @throws InvalidCredentialsException If context can't be created
+     * @throws InvalidDataException If context can't be created
+     * @throws ContextExistsException If context can't be created
+     * @throws AddressException If context can't be created
+     */
     public TestContext createContext(Optional<Map<String, String>> optConfig) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, AddressException {
         int cid = cidCounter.getAndIncrement();
         User admin_user = createUser(CTX_ADMIN, CTX_SECRET, CTX_ADMIN, CTX_ADMIN, CTX_ADMIN, getMailAddress(CTX_ADMIN, cid), Optional.empty());
@@ -197,10 +219,53 @@ public class ProvisioningService {
         }
     }
 
+    /**
+     * Changes a context
+     * 
+     * @param cid The context identifier
+     * @param configs The configuration to pass for context
+     * @throws RemoteException If context can't be changed
+     * @throws StorageException If context can't be changed
+     * @throws InvalidCredentialsException If context can't be changed
+     * @throws NoSuchContextException If context can't be found
+     * @throws InvalidDataException If context can't be changed
+     * @throws ContextExistsException If context can't be changed
+     * @throws AddressException If context can't be changed
+     */
+    public void changeContexConfig(int cid, Map<String, String> configs) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        Context ctx = new Context(I(cid));
+        ctx.setUserAttributes(Collections.singletonMap("config", configs));
+        oxContext.change(ctx, masterCreds);
+    }
+
+    /**
+     * Delete a context
+     *
+     * @param cid The context identifier
+     * @throws RemoteException If context can't be deleted
+     * @throws StorageException If context can't be deleted
+     * @throws InvalidCredentialsException If context can't be deleted
+     * @throws InvalidDataException If context can't be deleted
+     * @throws NoSuchContextException If context can't be deleted
+     * @throws DatabaseUpdateException If context can't be deleted
+     */
     public void deleteContext(int cid) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException {
         oxContext.delete(contextForId(cid), masterCreds);
     }
 
+    /**
+     * Creates a user in the given context
+     *
+     * @param cid The context identifier of the context the user shall be created in
+     * @return The user as {@link TestUser}
+     * @throws RemoteException If user can't be created
+     * @throws StorageException If user can't be created
+     * @throws InvalidCredentialsException If user can't be created
+     * @throws NoSuchContextException If user can't be created
+     * @throws InvalidDataException If user can't be created
+     * @throws DatabaseUpdateException If user can't be created
+     * @throws AddressException If user can't be created
+     */
     public TestUser createUser(int cid) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, AddressException {
         User userToCreate = createRandomUser(cid);
         Context context = contextForId(cid);
@@ -208,25 +273,40 @@ public class ProvisioningService {
         return userToTestUser(context.getName(), userToCreate, created.getId(), I(cid));
     }
 
-    public void changeContexConfig(int cid, Map<String, String> configs) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-
-        Context ctx = new Context(I(cid));
-        ctx.setUserAttributes(Collections.singletonMap("config", configs));
-        oxContext.change(ctx, masterCreds);
-    }
-
-    public TestUser createUser(int cid, Map<String, String> config) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, AddressException {
-        User userToCreate = createRandomUser(cid);
-        Context context = contextForId(cid);
-        User created = oxUser.create(context, userToCreate, CONTEXT_CREDS);
-        return userToTestUser(context.getName(), userToCreate, created.getId(), I(cid));
-    }
-
+    /**
+     * Creates a group in the given context
+     *
+     * @param cid The context identifier of the context the user shall be created in
+     * @param optUserIds The users to add to the group
+     * @return The group identifier
+     * @throws RemoteException If group can't be created
+     * @throws StorageException If group can't be created
+     * @throws InvalidCredentialsException If group can't be created
+     * @throws NoSuchContextException If group can't be created
+     * @throws InvalidDataException If group can't be created
+     * @throws DatabaseUpdateException If group can't be created
+     * @throws NoSuchUserException If a user doesn't exist
+     * @throws AddressException If group can't be created
+     */
     public Integer createGroup(int cid, Optional<List<Integer>> optUserIds) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Group result = oxGroup.create(contextForId(cid), createGroup(optUserIds), CONTEXT_CREDS);
         return result.getId();
     }
 
+    /**
+     * Creates a resource in the given context
+     *
+     * @param cid The context identifier of the context the user shall be created in
+     * @return The resource identifier
+     * @throws RemoteException If group can't be created
+     * @throws StorageException If group can't be created
+     * @throws InvalidCredentialsException If group can't be created
+     * @throws NoSuchContextException If group can't be created
+     * @throws InvalidDataException If group can't be created
+     * @throws DatabaseUpdateException If group can't be created
+     * @throws NoSuchUserException If a user doesn't exist
+     * @throws AddressException If group can't be created
+     */
     public Integer createResource(int cid) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         Resource result = oxResource.create(contextForId(cid), createResourceObject(cid), CONTEXT_CREDS);
         return result.getId();
@@ -252,7 +332,7 @@ public class ProvisioningService {
     private static Group createGroup(Optional<List<Integer>> optUserIds) {
         Group group = new Group();
         String rand = UUID.randomUUID().toString();
-        String name = "name_"+rand;
+        String name = "name_" + rand;
         group.setDisplayname(name);
         group.setName(name);
         optUserIds.ifPresent(ids -> group.setMembers(ids.toArray(new Integer[ids.size()])));

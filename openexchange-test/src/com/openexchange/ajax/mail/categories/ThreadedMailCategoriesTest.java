@@ -71,7 +71,7 @@ public class ThreadedMailCategoriesTest extends AbstractMailCategoriesTest {
     @Test
     public void conversationTest() throws Exception {
         MailTestManager manager = new MailTestManager(getAjaxClient(), false);
-        AJAXClient user2Client = new AJAXClient(testContext.acquireUser());
+        AJAXClient user2Client = testUser2.getAjaxClient();
         String send2 = getSendAddress(user2Client);
 
         /*

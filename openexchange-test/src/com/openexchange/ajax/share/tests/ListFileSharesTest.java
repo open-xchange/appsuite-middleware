@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNull;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
@@ -100,9 +99,7 @@ public class ListFileSharesTest extends ShareTest {
 
     @Test
     public void testListSharedFilesToUser() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        int userId = client2.getValues().getUserId();
-        client2.logout();
+        int userId = testUser2.getUserId();
         testListSharedFiles(new DefaultFileStorageObjectPermission(userId, false, FileStorageObjectPermission.WRITE));
     }
 

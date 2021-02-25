@@ -122,6 +122,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         return clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
     }
 
+    @SuppressWarnings("deprecation")
     public static ClientDataDto prepareClient(String name) {
         IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);

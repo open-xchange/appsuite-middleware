@@ -52,10 +52,12 @@ package com.openexchange.ajax.chronos;
 import org.junit.Before;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.UserData;
 import com.openexchange.testing.httpclient.models.UserResponse;
@@ -68,7 +70,7 @@ import com.openexchange.testing.httpclient.models.UserResponse;
  */
 public class AbstractExtendedChronosTest extends AbstractChronosTest {
 
-    @SuppressWarnings("hiding")
+    
     protected ApiClient apiClient2;
 
     protected UserApi userApi2;
@@ -89,17 +91,17 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        apiClient2 = getApiClient(1);
+        apiClient2 = testUser2.getApiClient();
         EnhancedApiClient enhancedClient = getEnhancedApiClient2();
-        userApi2 = new UserApi(apiClient2, enhancedClient, getUser(1));
+        userApi2 = new UserApi(apiClient2, enhancedClient, testUser2);
 
         folderId2 = getDefaultFolder(apiClient2);
         eventManager2 = new EventManager(userApi2, folderId2);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     // ----------------------------- HELPER -----------------------------

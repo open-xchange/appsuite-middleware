@@ -106,8 +106,6 @@ public abstract class AbstractSubscribeTestEnvironment {
 
     /**
      * Initialize the test environment
-     *
-     * @throws OXException
      */
     public void init() {
         try {
@@ -131,7 +129,7 @@ public abstract class AbstractSubscribeTestEnvironment {
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        ajaxClient = new AJAXClient(testContext.acquireUser());
+        ajaxClient = testContext.acquireUser().getAjaxClient();
     }
 
     private void initManagers() {

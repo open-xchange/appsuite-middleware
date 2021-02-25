@@ -278,7 +278,7 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as organizer and check actions
          */
-        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*
@@ -297,7 +297,7 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
     private void checkNoReply(Attendee replyingAttendee) throws Exception {
         Error error = null;
         try {
-            MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+            receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
         } catch (AssertionError ae) {
             error = ae;
         }

@@ -57,6 +57,7 @@ import java.util.List;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -80,15 +81,15 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client2 = getApiClient(1);
-        user2 = new UserApi(client2, getEnhancedApiClient2(), getUser(1));
+        ApiClient client2 = testUser2.getApiClient();
+        user2 = new UserApi(client2, getEnhancedApiClient2(), testUser2);
         folderId2 = getDefaultFolder(client2);
         eventManager2 = new EventManager(user2, getDefaultFolder(client2));
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {

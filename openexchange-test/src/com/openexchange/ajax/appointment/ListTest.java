@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.appointment;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.ajax.framework.ListIDs.l;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -75,6 +75,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 
 public class ListTest extends AppointmentTest {
 
@@ -88,8 +89,8 @@ public class ListTest extends AppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -159,7 +160,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setUid("1234567890abcdef" + System.currentTimeMillis());
         appointmentObj.setSequence(0);
 
-        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
         final int groupParticipantId = i(testContext.acquireGroup(Optional.empty()));
         final int resourceParticipantId = i(testContext.acquireResource());
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];

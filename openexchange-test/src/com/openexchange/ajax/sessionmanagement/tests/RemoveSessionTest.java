@@ -77,7 +77,7 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
         List<SessionManagementData> sessions = response.getData();
         assertEquals(1, sessions.size());
         for (SessionManagementData session : sessions) {
-            assertEquals(apiClient.getSession(), session.getSessionId());
+            assertEquals(getSessionId(), session.getSessionId());
             assertNotEquals(sessionId, session.getSessionId());
         }
     }
@@ -89,7 +89,7 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
         Collection<SessionManagementData> sessions = response.getData();
         assertEquals(2, sessions.size());
         for (SessionManagementData session : sessions) {
-            assertTrue(apiClient.getSession().equals(session.getSessionId()) || apiClient2.getSession().equals(session.getSessionId()));
+            assertTrue(getSessionId().equals(session.getSessionId()) || apiClient2.getSession().equals(session.getSessionId()));
         }
     }
 

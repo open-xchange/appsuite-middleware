@@ -81,7 +81,6 @@ import com.openexchange.java.util.TimeZones;
  */
 public class Bug21026Test extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
     private AJAXClient client;
     private Task first;
     private Task second;

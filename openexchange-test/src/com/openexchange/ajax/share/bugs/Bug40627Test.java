@@ -124,8 +124,7 @@ public class Bug40627Test extends Abstract2UserShareTest {
         groupPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         groupPermission.setGroupPermission(true);
         permissions.add(groupPermission);
-        int userId2 = client2.getValues().getUserId();
-        client2.logout();
+        int userId2 = testUser2.getUserId();
         OCLPermission userPermission = new OCLPermission(userId2, 0);
         userPermission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         permissions.add(userPermission);
@@ -193,9 +192,7 @@ public class Bug40627Test extends Abstract2UserShareTest {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>();
         permissions.add(guestPermission);
         permissions.add(new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ));
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        int userId2 = client2.getValues().getUserId();
-        client2.logout();
+        int userId2 = testUser2.getUserId();
         permissions.add(new DefaultFileStorageObjectPermission(userId2, false, FileStorageObjectPermission.WRITE));
         byte[] contents = new byte[64 + random.nextInt(256)];
         random.nextBytes(contents);

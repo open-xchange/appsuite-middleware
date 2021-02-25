@@ -162,11 +162,11 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return insertContact(contactObj);
     }
 
-    protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
+    protected void compareObject(final Contact contactObj1, final Contact contactObj2) {
         compareObject(contactObj1, contactObj2, true);
     }
 
-    protected void compareObject(final Contact contactObj1, final Contact contactObj2, boolean compareUID) throws Exception {
+    protected void compareObject(final Contact contactObj1, final Contact contactObj2, boolean compareUID) {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
         assertTrue("private flag is not equals", contactObj1.getPrivateFlag() == contactObj2.getPrivateFlag());

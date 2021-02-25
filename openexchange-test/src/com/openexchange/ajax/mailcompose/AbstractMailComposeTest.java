@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailcompose;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -62,6 +63,7 @@ import java.util.List;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Strings;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
@@ -115,7 +117,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        this.api = new MailComposeApi(apiClient);
+        this.api = new MailComposeApi(getApiClient());
 
         mailApi = new MailApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
@@ -131,8 +133,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     protected MailDestinationData importTestMailWithAttachment() throws ApiException {
@@ -176,8 +178,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     protected String getMailAddress() throws Exception {
-        ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(apiClient.getUserId()).getData();
+        ContactsApi contactsApi = new ContactsApi(getApiClient());
+        ContactData data = contactsApi.getContactByUser(I(testUser.getUserId())).getData();
         assertNotNull("No contact data for user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for user.", Strings.isEmpty(mailAddress));
@@ -185,8 +187,8 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     protected String getOtherMailAddress() throws Exception {
-        ContactsApi contactsApi = new ContactsApi(apiClient);
-        ContactData data = contactsApi.getContactByUser(getUser(1).getUserId()).getData();
+        ContactsApi contactsApi = new ContactsApi(getApiClient());
+        ContactData data = contactsApi.getContactByUser(I(testUser2.getUserId())).getData();
         assertNotNull("No contact data for other user.", data);
         String mailAddress = data.getEmail1();
         assertFalse("No mail address for other user.", Strings.isEmpty(mailAddress));
@@ -198,7 +200,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     }
 
     protected List<List<String>> getRecipient() throws Exception {
-        return Collections.singletonList(Arrays.asList(new String[] { getUser(1).getUser(), getOtherMailAddress() }));
+        return Collections.singletonList(Arrays.asList(new String[] { testUser2.getUser(), getOtherMailAddress() }));
     }
 
     protected void check(MailComposeSendResponse response) {
@@ -221,9 +223,9 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         check(response.getErrorDesc(), response.getError(), response);
     }
 
-//    protected void check(InlineResponse2002 response) {
-//        assertTrue(b(response.getSuccess()));
-//    }
+    //    protected void check(InlineResponse2002 response) {
+    //        assertTrue(b(response.getSuccess()));
+    //    }
 
     protected void check(String errorDesc, String error, Object notNull) {
         assertNotNull(notNull);

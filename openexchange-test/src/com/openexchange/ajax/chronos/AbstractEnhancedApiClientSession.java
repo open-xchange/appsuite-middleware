@@ -50,7 +50,9 @@
 package com.openexchange.ajax.chronos;
 
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.test.TestClassConfig;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractEnhancedApiClientSession}
@@ -61,26 +63,28 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 public abstract class AbstractEnhancedApiClientSession extends AbstractConfigAwareAPIClientSession {
 
     @Override
-    public ApiClient generateApiClient() {
-        return new EnhancedApiClient();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().useEnhancedApiClients().build();
     }
 
     /**
      * Gets the enhancedApiClient
      *
      * @return The enhancedApiClient
+     * @throws ApiException If client can't be created
      */
-    public EnhancedApiClient getEnhancedApiClient() {
-        return (EnhancedApiClient) getApiClient();
+    public EnhancedApiClient getEnhancedApiClient() throws ApiException {
+        return (EnhancedApiClient) testUser.getApiClient();
     }
 
     /**
      * Gets the enhancedApiClient
      *
      * @return The enhancedApiClient
+     * @throws ApiException If client can't be created
      */
-    public EnhancedApiClient getEnhancedApiClient2() {
-        return (EnhancedApiClient) getApiClient(1);
+    public EnhancedApiClient getEnhancedApiClient2() throws ApiException {
+        return (EnhancedApiClient) testUser2.getApiClient();
     }
 
 }

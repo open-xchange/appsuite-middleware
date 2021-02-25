@@ -118,11 +118,11 @@ public class AppointmentTest extends AbstractAJAXSession {
         }
     }
 
-    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) throws Exception {
+    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) {
         compareObject(appointmentObj1, appointmentObj2, appointmentObj1.getStartDate().getTime(), appointmentObj1.getEndDate().getTime());
     }
 
-    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2, final long newStartTime, final long newEndTime) throws Exception {
+    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2, final long newStartTime, final long newEndTime) {
         assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
         OXTestToolkit.assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
         assertEquals("start", newStartTime, appointmentObj2.getStartDate().getTime());

@@ -86,7 +86,7 @@ public class Bug15897Test extends AbstractTaskTest {
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = testUser2.getAjaxClient();
         task = Create.createWithDefaults(getPrivateFolder(), "Task to test bug 15897");
         participantId = client2.getValues().getUserId();
         task.addParticipant(new UserParticipant(participantId));

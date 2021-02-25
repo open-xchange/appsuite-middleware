@@ -55,7 +55,6 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FolderShare;
@@ -107,9 +106,7 @@ public class ListFolderSharesTest extends ShareTest {
     @Test
     @TryAgain
     public void testListSharedFoldersToUser() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
-        int userId = client2.getValues().getUserId();
-        client2.logout();
+        int userId = testUser2.getUserId();
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         testListSharedFolders(permission, randomModule());

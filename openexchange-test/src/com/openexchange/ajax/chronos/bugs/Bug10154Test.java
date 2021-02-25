@@ -99,7 +99,7 @@ public final class Bug10154Test extends AbstractSecondUserChronosTest {
         perm.setGroup(Boolean.FALSE);
         perm.setBits(I(4227332));
         permissions.add(perm);
-        String sharedFolder = createAndRememberNewFolder(defaultUserApi, folderId, getCalendaruser(), permissions);
+        String sharedFolder = createAndRememberNewFolder(defaultUserApi, folderId, permissions);
 
         EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Test for bug 10154", sharedFolder);
         List<Attendee> attendees = eventData.getAttendees();

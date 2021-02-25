@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug18558Test}
@@ -99,9 +100,9 @@ public class Bug18558Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
-        clientC = getClient(2);
-        clientD = getClient(3);
+        clientB = testUser2.getAjaxClient();
+        clientC = testContext.acquireUser().getAjaxClient();
+        clientD = testContext.acquireUser().getAjaxClient();
 
         FolderObject folderA = new FolderObject();
         folderA.setObjectID(clientA.getValues().getPrivateAppointmentFolder());
@@ -139,8 +140,8 @@ public class Bug18558Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(4).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(4).build();
     }
 
     @Test

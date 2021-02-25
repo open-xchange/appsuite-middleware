@@ -98,7 +98,7 @@ public class AbstractMailAccountTest extends Abstrac2UserAJAXSession {
     protected void createMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription = createMailAccountObject();
 
-        updateMailAccountDescription(mailAccountDescription, user2);
+        updateMailAccountDescription(mailAccountDescription, testUser2);
         final MailAccountInsertResponse response = getClient().execute(new MailAccountInsertRequest(mailAccountDescription));
         response.fillObject(mailAccountDescription);
 

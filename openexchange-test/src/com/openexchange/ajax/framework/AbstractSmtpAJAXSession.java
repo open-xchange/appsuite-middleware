@@ -67,10 +67,8 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAPIClientSession {
         super.setUp();
         mailManager = new MailManager(getApiClient());
         noReplyUser = testContext.acquireNoReplyUser();
-        noReplyAJAXClient = new AJAXClient(noReplyUser);
-        rememberClient(noReplyUser, noReplyApiClient);
-        noReplyApiClient = generateApiClient(noReplyUser);
-        rememberClient(noReplyUser, noReplyApiClient);
+        noReplyAJAXClient = noReplyUser.getAjaxClient();
+        noReplyApiClient = noReplyUser.getApiClient();
         noReplyMailManager = new MailManager(noReplyApiClient);
         noReplyMailManager.clearMails();
     }

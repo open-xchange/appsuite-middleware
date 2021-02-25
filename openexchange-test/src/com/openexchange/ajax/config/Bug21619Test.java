@@ -53,7 +53,6 @@ import static org.junit.Assert.fail;
 import org.apache.http.params.HttpConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -68,8 +67,6 @@ import com.openexchange.test.pool.TestUser;
  */
 public final class Bug21619Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
-    private String origValue;
     private final ValueWriter[] writers = new ValueWriter[2];
     private final Thread[] threads = new Thread[writers.length];
 
@@ -81,8 +78,6 @@ public final class Bug21619Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        origValue = client.execute(new GetRequest(Tree.TaskUIConfiguration)).getString();
         for (int i = 0; i < writers.length; i++) {
             writers[i] = new ValueWriter(testUser);
         }
@@ -131,7 +126,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
         public void run() {
             AJAXClient client = null;
             try {
-                client = new AJAXClient(testUser);
+                client = testUser.getAjaxClient();
                 HttpConnectionParams.setConnectionTimeout(client.getSession().getHttpClient().getParams(), 10000);
                 int value = 1;
                 while (run) {

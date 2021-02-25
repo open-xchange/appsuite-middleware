@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link GetChangeExceptionsTest}
@@ -144,8 +145,8 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -179,7 +180,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE };
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(appointment.getParentFolderID(), appointment.getObjectID(), columns, false);
 
-        GetChangeExceptionsResponse response = getClient(1).execute(request);
+        GetChangeExceptionsResponse response = testUser2.getAjaxClient().execute(request);
         assertTrue("Missing error.", response.hasError());
         OXException oxException = response.getException();
         assertEquals("Wrong error.", OXCachingExceptionCode.CATEGORY_PERMISSION_DENIED, oxException.getCategory());

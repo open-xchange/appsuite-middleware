@@ -75,6 +75,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -110,7 +111,7 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
     private Map<Object, Object> jslob;
 
     private JSlobApi jslobApi;
-
+    
     /**
      * Creates an event as user A in context 1 with external attendee user B from context 2.
      * User B accepts the event and user A takes over the changes.
@@ -124,13 +125,13 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         /*
          * Prepare other internal attendee
          */
-        apiClient2C1 = getApiClient(1);
+        apiClient2C1 = testUser2.getApiClient();
         UserApi userApi = new UserApi(apiClient2C1);
         userResponse2C1 = userApi.getUser(String.valueOf(apiClient2C1.getUserId()));
         if (null == userResponse2C1) {
             throw new IllegalDataException("Need user info for test!");
         }
-        internalAttendee = convertToAttendee(getUser(1), apiClient2C1.getUserId());
+        internalAttendee = convertToAttendee(testUser2, apiClient2C1.getUserId());
         internalAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
 
         jslobApi = new JSlobApi(apiClient2C1);
@@ -163,7 +164,7 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as organizer and check actions
          */
-        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*
@@ -181,8 +182,8 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     @Test

@@ -59,6 +59,7 @@ import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug56359Test}
@@ -96,9 +97,9 @@ public class Bug56359Test extends AppointmentTest {
         /*
          * as user B, try and add an external user via 'confirm' action (in user b's personal calendar folder)
          */
-        int folderId = getClient(1).getValues().getPrivateAppointmentFolder();
+        int folderId = testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder();
         int objectId = appointment.getObjectID();
-        ConfirmResponse confirmResponse = getClient(1).execute(new ConfirmRequest(
+        ConfirmResponse confirmResponse = testUser2.getAjaxClient().execute(new ConfirmRequest(
             folderId, objectId, Appointment.ACCEPT, "", "test@example.com", appointment.getLastModified(), false));
         assertTrue("No errors in confirm response", confirmResponse.hasError());
         assertEquals("Unexpected error in confirm response", "APP-0059", confirmResponse.getException().getErrorCode());
@@ -112,8 +113,8 @@ public class Bug56359Test extends AppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 }

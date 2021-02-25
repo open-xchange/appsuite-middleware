@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug38079Test}
@@ -87,10 +88,10 @@ public class Bug48149Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client3 = getClient(2);
-        ctm2 = new CalendarTestManager(getClient(1));
+        client3 = testContext.acquireUser().getAjaxClient();
+        ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
         ctm3 = new CalendarTestManager(client3);
-        ftm2 = new FolderTestManager(getClient(1));
+        ftm2 = new FolderTestManager(testUser2.getAjaxClient());
 
         // Remove all permissions
         FolderObject folderUpdate = new FolderObject(getClient().getValues().getPrivateAppointmentFolder());
@@ -99,9 +100,9 @@ public class Bug48149Test extends AbstractAJAXSession {
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         ftm.updateFolderOnServer(folderUpdate);
 
-        folderUpdate = new FolderObject(getClient(1).getValues().getPrivateAppointmentFolder());
+        folderUpdate = new FolderObject(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         folderUpdate.setPermissionsAsArray(new OCLPermission[] { com.openexchange.ajax.folder.Create.ocl(
-            getClient(1).getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
+            testUser2.getAjaxClient().getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION) });
         folderUpdate.setLastModified(new Date(Long.MAX_VALUE));
         ftm2.updateFolderOnServer(folderUpdate);
 
@@ -123,13 +124,13 @@ public class Bug48149Test extends AbstractAJAXSession {
         app2.setStartDate(TimeTools.D("07.08.2016 08:00"));
         app2.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app2.setIgnoreConflicts(true);
-        app2.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        app2.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         ctm2.insert(app2);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

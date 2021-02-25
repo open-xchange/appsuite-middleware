@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 
 
 /**
@@ -83,14 +84,14 @@ public class Bug53073Test extends AbstractAJAXSession {
         super.setUp();
 
         client = getClient();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
         catm2 = new CalendarTestManager(client2);
         ftm2 = new FolderTestManager(client2);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

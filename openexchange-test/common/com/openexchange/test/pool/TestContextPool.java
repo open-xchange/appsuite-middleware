@@ -104,7 +104,7 @@ public class TestContextPool {
      *
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @return {@link TestContext} to be used for tests.
-     * @throws OXException
+     * @throws OXException In case context can't be aquired
      */
     public static TestContext acquireContext(String acquiredBy) throws OXException {
         return acquireContext(acquiredBy, Optional.empty());
@@ -118,7 +118,7 @@ public class TestContextPool {
      * @param acquiredBy The name of the class that acquires the context (for logging purposes)
      * @param optConfig The optional config for the contexts
      * @return {@link TestContext} to be used for tests.
-     * @throws OXException
+     * @throws OXException In case context can't be acquired
      */
     public static TestContext acquireContext(String acquiredBy, Optional<Map<String, String>> optConfig) throws OXException {
         List<TestContext> contextList;
@@ -144,7 +144,7 @@ public class TestContextPool {
      * @param amount The amount of contexts to aquire
      * @param optConfig The optional ctx config
      * @return a list of {@link TestContext} to be used for tests.
-     * @throws OXException
+     * @throws OXException In case context can't be acquired
      */
     public static List<TestContext> acquireContext(String acquiredBy, Optional<Map<String, String>> optConfig, int amount) throws OXException {
         try {

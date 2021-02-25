@@ -17,10 +17,9 @@ public class ServerSessionFactory {
      *
      * @param userid The user ID
      * @param ctx The context ID
-     * @param sessionid The session ID
      * @return A server session.
      */
-    public static ServerSession createServerSession(final int userid, final Context ctx, final String sessionid) {
+    public static ServerSession createServerSession(final int userid, final Context ctx) {
         return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userid, ctx, "blupp"), ctx);
     }
 

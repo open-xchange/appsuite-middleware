@@ -78,6 +78,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestClassConfig;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
@@ -97,8 +98,8 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     public abstract int createExclusiveWritableAttachable(int folderId) throws Exception;
@@ -317,7 +318,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        atm.setClient(getClient(1));
+        atm.setClient(testContext.acquireUser().getAjaxClient());
         atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
         assertTrue(atm.getLastResponse().hasError());
 

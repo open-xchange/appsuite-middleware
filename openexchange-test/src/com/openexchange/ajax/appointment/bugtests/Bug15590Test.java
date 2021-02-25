@@ -24,6 +24,7 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  *
@@ -47,7 +48,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         super.setUp();
 
         // Create 2. User
-        secondClient = getClient(1);
+        secondClient = testUser2.getAjaxClient();
         secondUserValues = secondClient.getValues();
 
         // Create Folder and share it to 2. User
@@ -84,8 +85,8 @@ public class Bug15590Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

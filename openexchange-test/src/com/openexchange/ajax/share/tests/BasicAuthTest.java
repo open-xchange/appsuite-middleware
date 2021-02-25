@@ -86,10 +86,10 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SuppressWarnings("deprecation")
 public class BasicAuthTest extends ShareTest {
 
     private CalendarTestManager calendarManager;
-    private FolderObject folder;
 
     /**
      * Initializes a new {@link BasicAuthTest}.
@@ -116,7 +116,6 @@ public class BasicAuthTest extends ShareTest {
 
         // Create a calendar folder having a share permission
         FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), guestPermission);
-        this.folder = folder;
 
         // Check permissions
         OCLPermission matchingPermission = null;
@@ -222,42 +221,43 @@ public class BasicAuthTest extends ShareTest {
         guestClient.checkShareAccessible(guestPermission);
 
         // Access that folder through ICal
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        try (DefaultHttpClient httpClient = new DefaultHttpClient()) {
 
-        HttpParams httpParams = httpClient.getParams();
-        httpParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-        httpParams.setParameter("Content-Disposition", "attachment");
-        HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-        HttpConnectionParams.setSoTimeout(httpParams, 5000);
-        HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
+            HttpParams httpParams = httpClient.getParams();
+            httpParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
+            httpParams.setParameter("Content-Disposition", "attachment");
+            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+            HttpConnectionParams.setSoTimeout(httpParams, 5000);
+            HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 
-        String password = ShareTest.getPassword(guestPermission.getRecipient());
-        if (Strings.isNotEmpty(password)) {
-            String username = ShareTest.getUsername(guestPermission.getRecipient());
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials(username, password);
-            credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, anonymousCredentials);
-            httpClient.setCredentialsProvider(credentialsProvider);
+            String password = ShareTest.getPassword(guestPermission.getRecipient());
+            if (Strings.isNotEmpty(password)) {
+                String username = ShareTest.getUsername(guestPermission.getRecipient());
+                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials(username, password);
+                credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, anonymousCredentials);
+                httpClient.setCredentialsProvider(credentialsProvider);
+            }
+
+            HttpGet httpGet = new HttpGet(shareURL);
+            httpGet.setHeader("Accept", "text/calendar");
+            httpGet.setHeader("User-Agent", "Microsoft Outlook");
+
+            HttpResponse httpResponse = httpClient.execute(httpGet);
+            assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
+
+            Header contentTypeHeader = httpResponse.getFirstHeader("Content-Type");
+            assertNotNull("missing content-type header", contentTypeHeader);
+            assertEquals("Unexpected Content-Type header", "text/calendar", contentTypeHeader.getValue());
+
+            HttpEntity entity = httpResponse.getEntity();
+            assertNotNull("No file downloaded", entity);
+            byte[] downloadedFile = EntityUtils.toByteArray(entity);
+            Assert.assertNotNull(downloadedFile);
+
+            String ical = new String(downloadedFile, "UTF-8");
+            assertTrue("Received content seems not be an ICal: " + ical, ical.startsWith("BEGIN:VCALENDAR"));
         }
-
-        HttpGet httpGet = new HttpGet(shareURL);
-        httpGet.setHeader("Accept", "text/calendar");
-        httpGet.setHeader("User-Agent", "Microsoft Outlook");
-
-        HttpResponse httpResponse = httpClient.execute(httpGet);
-        assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
-
-        Header contentTypeHeader = httpResponse.getFirstHeader("Content-Type");
-        assertNotNull("missing content-type header", contentTypeHeader);
-        assertEquals("Unexpected Content-Type header", "text/calendar", contentTypeHeader.getValue());
-
-        HttpEntity entity = httpResponse.getEntity();
-        assertNotNull("No file downloaded", entity);
-        byte[] downloadedFile = EntityUtils.toByteArray(entity);
-        Assert.assertNotNull(downloadedFile);
-
-        String ical = new String(downloadedFile, "UTF-8");
-        assertTrue("Received content seems not be an ICal: " + ical, ical.startsWith("BEGIN:VCALENDAR"));
     }
 
 }

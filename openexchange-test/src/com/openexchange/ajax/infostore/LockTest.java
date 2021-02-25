@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.TestInit;
 
 public class LockTest extends InfostoreAJAXTest {
@@ -82,8 +83,8 @@ public class LockTest extends InfostoreAJAXTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        itm2 = new InfostoreTestManager(getClient(1));
-        ftm2 = new FolderTestManager(getClient(1));
+        itm2 = new InfostoreTestManager(testUser2.getAjaxClient());
+        ftm2 = new FolderTestManager(testUser2.getAjaxClient());
         /*
          * create folder shared to user 2 and a file inside the folder
          */
@@ -92,7 +93,7 @@ public class LockTest extends InfostoreAJAXTest {
         OCLPermission permission1 = FolderTestManager.createPermission(
             getClient().getValues().getUserId(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, true);
         OCLPermission permission2 = FolderTestManager.createPermission(
-            getClient(1).getValues().getUserId(), false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS, false);
+            testUser2.getAjaxClient().getValues().getUserId(), false, OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS, false);
         folder.setPermissionsAsArray(new OCLPermission[] { permission1, permission2 });
         folder = ftm.insertFolderOnServer(folder);
         /*
@@ -108,8 +109,8 @@ public class LockTest extends InfostoreAJAXTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
 
@@ -138,7 +139,7 @@ public class LockTest extends InfostoreAJAXTest {
         assertTrue(itm2.getLastResponse().hasError());
 
         // Object may not be moved
-        file.setFolderId(Integer.toString(getClient(1).getValues().getPrivateInfostoreFolder()));
+        file.setFolderId(Integer.toString(testUser2.getAjaxClient().getValues().getPrivateInfostoreFolder()));
         itm2.updateAction(file, new Field[] { Field.ID, Field.FOLDER_ID }, new Date(Long.MAX_VALUE));
         assertTrue(itm2.getLastResponse().hasError());
 

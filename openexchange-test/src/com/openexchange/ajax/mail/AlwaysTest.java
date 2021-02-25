@@ -82,15 +82,6 @@ public class AlwaysTest extends AbstractAJAXSession {
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlwaysTest.class);
 
-    /**
-     * Number of mails to read in each mail folder.
-     * <ul>
-     * <li><code>-1</code> list all mails
-     * <li><code>0</code> list no mails
-     * </ul>
-     */
-    private final static int MAX = -1;
-
     private AJAXClient client;
 
     public AlwaysTest() {
@@ -106,7 +97,7 @@ public class AlwaysTest extends AbstractAJAXSession {
     public void recListFolder(final String folderId, final String rights) throws Exception {
         LOG.trace("Listing {}", folderId);
         if (rights.length() > 0) {
-            listMails(folderId, MAX);
+            listMails(folderId);
         }
         final Map<String, String> subRights = getIMAPRights(client, folderId);
         for (final Entry<String, String> entry : subRights.entrySet()) {
@@ -119,7 +110,7 @@ public class AlwaysTest extends AbstractAJAXSession {
      * @param max
      * @throws Exception
      */
-    private void listMails(final String folderId, final int max) throws Exception {
+    private void listMails(final String folderId) throws Exception {
         MailMessage[] mails = mtm.listMails(folderId, MailListField.getAllFields(), MailListField.ID.getField(), Order.DESCENDING, true, Collections.EMPTY_LIST);
         assertFalse(mtm.getLastResponse().hasError());
         for (MailMessage mail : mails) {

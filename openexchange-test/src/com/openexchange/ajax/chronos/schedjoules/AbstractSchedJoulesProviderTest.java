@@ -62,6 +62,7 @@ import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**
@@ -111,8 +112,8 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().useEnhancedApiClients().build();
     }
 
     @Override

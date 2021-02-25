@@ -92,7 +92,7 @@ public class ReplyAllTest extends AbstractReplyTest {
 
     public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, JSONException {
         final AJAXClient client1 = getClient();
-        final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        final AJAXClient client2 = testUser2.getAjaxClient();
         {
             String folder = client2.getValues().getInboxFolder();
             Executor.execute(client2.getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));

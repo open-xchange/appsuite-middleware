@@ -61,6 +61,7 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -103,14 +104,14 @@ public class BasicCommentTest extends AbstractChronosTest {
     private EventData eventData;
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     @Test
     public void testUpdate() throws Exception {
         String summary = "Test comment function on update";
-        eventData = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), summary);
+        eventData = EventFactory.createSingleTwoHourEvent(testUser.getUserId(), summary);
 
         setAttendees();
 
@@ -128,7 +129,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     @Test
     public void testUpdateWithAttachment() throws Exception {
         String summary = "Test comment function on update with attachments";
-        eventData = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), summary);
+        eventData = EventFactory.createSingleTwoHourEvent(testUser.getUserId(), summary);
 
         setAttendees();
 
@@ -143,7 +144,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     @Test
     public void testDelete() throws Exception {
         String summary = "Test comment function on delete";
-        eventData = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), summary);
+        eventData = EventFactory.createSingleTwoHourEvent(testUser.getUserId(), summary);
 
         setAttendees();
 
@@ -161,7 +162,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void validateMailInSecondUsersInbox(String mailSubject, String comment) throws OXException, ApiException, Exception {
-        ApiClient apiClient2 = getApiClient(1);
+        ApiClient apiClient2 = testContext.acquireUser().getApiClient();
         MailApi mailApi = new MailApi(apiClient2);
 
         MailResponse response = mailApi.getMail(INBOX, getMailId(mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);
@@ -206,8 +207,8 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void setAttendees() throws ApiException {
-        Attendee organizer = createAttendee(testUser.getUserId());
-        Attendee attendee = createAttendee(getUser(1).getUserId());
+        Attendee organizer = createAttendee(I(testUser.getUserId()));
+        Attendee attendee = createAttendee(I(testUser2.getUserId()));
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizer);
         attendees.add(attendee);

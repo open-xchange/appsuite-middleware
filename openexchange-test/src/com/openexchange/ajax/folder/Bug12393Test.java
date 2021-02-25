@@ -66,6 +66,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * Title of Bug: Lost permission on infostore folder
@@ -122,7 +123,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
         perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        final int userId2 = getClient(1).getValues().getUserId();
+        final int userId2 = testContext.acquireUser().getUserId();
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(userId2);
         perm2.setGroupPermission(false);
@@ -137,8 +138,8 @@ public class Bug12393Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

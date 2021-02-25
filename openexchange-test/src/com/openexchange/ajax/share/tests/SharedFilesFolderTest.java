@@ -71,6 +71,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link SharedFilesFolderTest}
@@ -93,13 +94,13 @@ public class SharedFilesFolderTest extends Abstract2UserShareTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(3).build();
     }
 
     @Test
     public void testReShareNotPossibleForInternals() throws Exception {
-        AJAXClient client3 = getClient(2);
+        AJAXClient client3 = testContext.acquireUser().getAjaxClient();
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(1);
         permissions.add(new DefaultFileStorageObjectPermission(client2.getValues().getUserId(), false, FileStorageObjectPermission.WRITE));
         file.setObjectPermissions(permissions);

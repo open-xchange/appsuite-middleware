@@ -226,7 +226,7 @@ public class GuestContactTest extends ShareTest {
         /*
          * get guest contact as other user
          */
-        AJAXClient secondClient = new AJAXClient(testContext.acquireUser());
+        AJAXClient secondClient = testUser2.getAjaxClient();
         GetRequest getRequest = new GetRequest(guest.getEntity(), secondClient.getValues().getTimeZone());
         GetResponse getResponse = secondClient.execute(getRequest);
         assertFalse("Contact could not be loaded.", getResponse.hasError());

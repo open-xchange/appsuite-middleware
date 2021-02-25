@@ -49,14 +49,12 @@
 
 package com.openexchange.webdav;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,14 +63,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.core.HttpHeaders;
-
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -152,7 +147,7 @@ public class FreeBusyTest extends AbstractChronosTest {
          */
         userName = testUser.getUser();
         server = testUser.getContext();
-        contextid = i(testUser.getContextId());
+        contextid = testUser.getContextId();
 
         Integer resId = testContext.acquireResource();
         ResourceResponse resource = new ResourcesApi(getApiClient()).getResource(resId);

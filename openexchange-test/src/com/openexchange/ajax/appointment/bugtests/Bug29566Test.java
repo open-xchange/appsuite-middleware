@@ -59,6 +59,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug29566Test}
@@ -80,7 +81,7 @@ public class Bug29566Test extends AbstractAJAXSession {
         super.setUp();
 
         catm.resetDefaultFolderPermissions();
-        catm2 = new CalendarTestManager(getClient(1));
+        catm2 = new CalendarTestManager(testUser2.getAjaxClient());
         catm2.resetDefaultFolderPermissions();
 
         appointment = new Appointment();
@@ -96,8 +97,8 @@ public class Bug29566Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -120,11 +121,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         Appointment clone = appointment.clone();
 
         if (!shared) {
-            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -161,11 +162,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -202,11 +203,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeUid();
 
         if (!shared) {
-            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
@@ -243,11 +244,11 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.removeOrganizer();
 
         if (!shared) {
-            clone.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+            clone.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         user2.setConfirm(Appointment.NONE);
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });

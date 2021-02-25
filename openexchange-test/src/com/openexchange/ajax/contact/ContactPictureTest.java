@@ -90,7 +90,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     @Test
     public void testUserFallbackPicture() {
-        assertThatPictureIsMissing(apiClient.getUserId().toString(), null, null);
+        assertThatPictureIsMissing(String.valueOf(testUser.getUserId()), null, null);
     }
 
     @Test

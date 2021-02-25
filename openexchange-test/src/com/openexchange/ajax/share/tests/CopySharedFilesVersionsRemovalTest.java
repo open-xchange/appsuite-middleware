@@ -76,6 +76,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.TestInit;
 
 /**
@@ -87,16 +88,26 @@ import com.openexchange.test.TestInit;
  */
 public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest {
 
+    private int secondUserId;
+    private AJAXClient client2;
+
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withContexts(2).withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withContexts(2).withUserPerContext(2).build();
+    }
+    
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        secondUserId = testUser2.getUserId();
+        client2 = testUser2.getAjaxClient();
     }
 
     @Test
     public void testCopySharedFile_ownerCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
-        addUserPermission(getClient(1).getValues().getUserId());
+        addUserPermission(secondUserId);
         GuestRecipient recipient = new GuestRecipient();
         recipient.setEmailAddress("test@invalid.invalid");
         addGuestPermission(recipient);
@@ -122,7 +133,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         userDestFolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID());
 
         try {
-            addUserPermission(getClient(1).getValues().getUserId());
+            addUserPermission(secondUserId);
             GuestRecipient recipient = new GuestRecipient();
             recipient.setEmailAddress("test@invalid.invalid");
             addGuestPermission(recipient);
@@ -144,7 +155,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             // assert
             assertExistingVersions(copiedFile.getId(), 1);
         } finally {
-            getClient(1).logout();
+            client2.logout();
         }
     }
 
@@ -178,7 +189,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
         GuestClient guestClient = null;
         try {
-            addUserPermission(getClient(1).getValues().getUserId());
+            addUserPermission(secondUserId);
             addGuestPermission(lGuestPermission.getRecipient());
             file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
@@ -228,7 +239,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
         GuestClient guestClient = null;
         try {
-            addUserPermission(getClient(1).getValues().getUserId());
+            addUserPermission(secondUserId);
             addGuestPermission(lGuestPermission.getRecipient());
             file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
@@ -278,7 +289,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
     @Test
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
-        int userId = getClient(1).getValues().getUserId();
+        int userId = secondUserId;
 
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -299,7 +310,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
         CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(sharedFileId, SHARED_FOLDER, file);
         copyRequest.setFailOnError(true);
-        CopyInfostoreResponse copyResponse = getClient(1).execute(copyRequest);
+        CopyInfostoreResponse copyResponse = client2.execute(copyRequest);
 
         File copiedFile = getClient().execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
 
@@ -308,7 +319,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
     @Test
     public void testCopySharedFile_internalUserCreatesNewVersionsAndCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
-        int userId = getClient(1).getValues().getUserId();
+        int userId = secondUserId;
 
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS);
@@ -322,10 +333,10 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         String sharedFileId = sharedFileId(file.getId());
 
         createNewFileVersions();
-        GetInfostoreResponse response = getClient(1).execute(new GetInfostoreRequest(sharedFileId));
+        GetInfostoreResponse response = client2.execute(new GetInfostoreRequest(sharedFileId));
         File copiedFile = response.getDocumentMetadata();
         copiedFile.setMeta(Collections.singletonMap("timestamp", response.getTimestamp()));
-        createNewFileVersions(getClient(1), copiedFile);
+        createNewFileVersions(client2, copiedFile);
         //pre assertions
         assertExistingVersions(file.getId(), 9);
 
@@ -333,7 +344,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
 
         CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(sharedFileId, SHARED_FOLDER, file);
         copyRequest.setFailOnError(true);
-        CopyInfostoreResponse copyResponse = getClient(1).execute(copyRequest);
+        CopyInfostoreResponse copyResponse = client2.execute(copyRequest);
 
         File copiedFile1 = getClient().execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
         assertExistingVersions(copiedFile1.getId(), 1);

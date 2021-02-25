@@ -52,6 +52,9 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
@@ -79,15 +82,19 @@ import com.openexchange.test.tryagain.TryAgain;
  */
 public class AggregateSharesTest extends Abstract2UserShareTest {
 
+    private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
+        clientsAndFolders.put(client1, new ArrayList<Integer>());
+        clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
-
     private AJAXClient randomClient() {
-        return getClient(random.nextInt(users.get(testContext).size()));
+        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
+        return ajaxClients[random.nextInt(ajaxClients.length)];
     }
 
     @Test
@@ -97,10 +104,11 @@ public class AggregateSharesTest extends Abstract2UserShareTest {
     }
 
     public void noTestAggregateSharesExtensively() throws Exception {
+        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
         for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (AJAXClient client1 : users2client.values()) {
+            for (AJAXClient client1 : ajaxClients) {
                 for (int module1 : TESTED_MODULES) {
-                    for (AJAXClient client2 : users2client.values()) {
+                    for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
                             testAggregateShares(api, client1, module1, client2, module2);
                         }
@@ -117,12 +125,13 @@ public class AggregateSharesTest extends Abstract2UserShareTest {
     }
 
     public void noTestRemoveAggregateSharesExtensively() throws Exception {
+        AJAXClient[] ajaxClients = clientsAndFolders.keySet().toArray(new AJAXClient[clientsAndFolders.size()]);
         for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (AJAXClient client1 : users2client.values()) {
+            for (AJAXClient client1 : ajaxClients) {
                 for (int module1 : TESTED_MODULES) {
-                    for (AJAXClient client2 : users2client.values()) {
+                    for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
-//                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
+                            //                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testRemoveAggregateShares(api, client1, module1, client2, module2);
                         }
                     }

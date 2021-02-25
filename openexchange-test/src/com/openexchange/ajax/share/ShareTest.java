@@ -72,8 +72,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -124,9 +122,11 @@ import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.MailData;
 
 /**
@@ -153,8 +153,6 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
 
     private TestContext guestContext;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShareTest.class);
-
     public enum GuestPermissionType {
         NAMED_AUTHOR_PERMISSION,
         NAMED_GUEST_PERMISSION,
@@ -172,8 +170,8 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withContexts(2).withUserPerContext(1).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withContexts(2).withUserPerContext(1).build();
     }
 
     /**
@@ -1279,7 +1277,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return guestPermission;
     }
 
-    protected OCLGuestPermission createGuestPermission(GuestPermissionType permissionType) {
+    protected OCLGuestPermission createGuestPermission(GuestPermissionType permissionType) throws ApiException {
         OCLGuestPermission permission = null;
         switch (permissionType) {
             case ANONYMOUS_GUEST_PERMISSION_WITH_PASSWORD:
@@ -1300,7 +1298,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return permission;
     }
 
-    protected OCLGuestPermission createNamedGuestPermission() {
+    protected OCLGuestPermission createNamedGuestPermission() throws ApiException {
         return createNamedGuestPermission(true);
     }
 
@@ -1309,9 +1307,10 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * Creates a {@link OCLGuestPermission} from a new user in the guest context
      *
      * @param usePassword Whether to use the users password or not
-     * @return
+     * @return The permissions
+     * @throws ApiException If client can't be created
      */
-    protected OCLGuestPermission createNamedGuestPermission(boolean usePassword) {
+    protected OCLGuestPermission createNamedGuestPermission(boolean usePassword) throws ApiException {
         TestUser namedGuest = guestContext.acquireUser();
         return createNamedGuestPermission(namedGuest, usePassword);
     }
@@ -1323,19 +1322,16 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * @param testUser The test user to create the permission for
      * @param usePassword Whether to use the testUser`s password or not
      * @return The {@link OCLGuestPermission}
+     * @throws ApiException If client can't be created
      */
-    protected OCLGuestPermission createNamedGuestPermission(TestUser testUser, boolean usePassword) {
+    protected OCLGuestPermission createNamedGuestPermission(TestUser testUser, boolean usePassword) throws ApiException {
         OCLGuestPermission permission;
         permission = createNamedGuestPermission(testUser.getLogin(), testUser.getUser(), usePassword ? testUser.getPassword() : null);
-        try {
-            permission.setApiClient(generateApiClient(testUser));
-        } catch (OXException e) {
-            LOGGER.warn("Api client for user {} can not be created.", testUser.getUser());
-        }
+        permission.setApiClient(testUser.getApiClient());
         return permission;
     }
 
-    protected OCLGuestPermission createNamedAuthorPermission() {
+    protected OCLGuestPermission createNamedAuthorPermission() throws ApiException {
         return createNamedAuthorPermission(true);
     }
 
@@ -1344,17 +1340,14 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
      * Creates a name author permission for a new user from the guest context
      *
      * @param usePassword Whether to use the users password or not
-     * @return
+     * @return The permissions
+     * @throws ApiException If client can't be created
      */
-    protected OCLGuestPermission createNamedAuthorPermission(boolean usePassword) {
+    protected OCLGuestPermission createNamedAuthorPermission(boolean usePassword) throws ApiException {
         OCLGuestPermission permission;
         TestUser namedAuthor = guestContext.acquireUser();
         permission = createNamedAuthorPermission(namedAuthor.getLogin(), namedAuthor.getUser(), usePassword ? namedAuthor.getPassword() : null);
-        try {
-            permission.setApiClient(generateApiClient(namedAuthor));
-        } catch (OXException e) {
-            LOGGER.warn("Api client for user {} can not be created.", namedAuthor.getUser());
-        }
+        permission.setApiClient(namedAuthor.getApiClient());
         return permission;
     }
 
@@ -1430,7 +1423,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return TESTED_FOLDER_APIS[random.nextInt(TESTED_FOLDER_APIS.length)];
     }
 
-    protected OCLGuestPermission randomGuestPermission(int module) {
+    protected OCLGuestPermission randomGuestPermission(int module) throws ApiException {
         OCLGuestPermission permission = null;
         do {
             permission = randomGuestPermission();
@@ -1438,14 +1431,14 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return permission;
     }
 
-    protected OCLGuestPermission randomGuestPermission() {
+    protected OCLGuestPermission randomGuestPermission() throws ApiException {
 
         GuestPermissionType[] permissionTypes = GuestPermissionType.values();
         GuestPermissionType permissionType = permissionTypes[random.nextInt(permissionTypes.length)];
         return createGuestPermission(permissionType);
     }
 
-    protected OCLGuestPermission randomGuestPermission(RecipientType type, int module) {
+    protected OCLGuestPermission randomGuestPermission(RecipientType type, int module) throws ApiException {
         OCLGuestPermission permission;
         do {
             permission = randomGuestPermission(module);
@@ -1453,7 +1446,7 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return permission;
     }
 
-    protected OCLGuestPermission randomGuestPermission(RecipientType type) {
+    protected OCLGuestPermission randomGuestPermission(RecipientType type) throws ApiException {
         OCLGuestPermission permission;
         do {
             permission = randomGuestPermission();
@@ -1461,11 +1454,11 @@ public abstract class ShareTest extends AbstractSmtpAJAXSession {
         return permission;
     }
 
-    protected FileStorageGuestObjectPermission randomGuestObjectPermission() {
+    protected FileStorageGuestObjectPermission randomGuestObjectPermission() throws ApiException {
         return asObjectPermission(randomGuestPermission());
     }
 
-    protected FileStorageGuestObjectPermission randomGuestObjectPermission(RecipientType type) {
+    protected FileStorageGuestObjectPermission randomGuestObjectPermission(RecipientType type) throws ApiException {
         FileStorageGuestObjectPermission permission;
         do {
             permission = asObjectPermission(randomGuestPermission());

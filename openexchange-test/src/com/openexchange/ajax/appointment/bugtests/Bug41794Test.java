@@ -50,9 +50,10 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -86,10 +88,10 @@ public class Bug41794Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         TestUser user3 = testContext.acquireUser();
-        client3 = new AJAXClient(user3);
-        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(user3.getUserId())))); //TODO null check
+        client3 = user3.getAjaxClient();
+        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(I(user3.getUserId()))))); //TODO null check
         catm = new CalendarTestManager(getClient());
-        ctm2 = new CalendarTestManager(getClient(1));
+        ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
         ctm3 = new CalendarTestManager(client3);
 
         appointment = new Appointment();
@@ -105,18 +107,18 @@ public class Bug41794Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testBug41794() throws Exception {
         catm.insert(appointment);
 
-        appointment.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         ctm2.delete(appointment);
 
-        assertNull("Did not expect appointment for user 2", ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
+        assertNull("Did not expect appointment for user 2", ctm2.get(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
 
         Appointment loadedAppointment = ctm3.get(client3.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
         assertNotNull(loadedAppointment);
@@ -126,7 +128,7 @@ public class Bug41794Test extends AbstractAJAXSession {
         ctm3.confirm(loadedAppointment, Appointment.ACCEPT, "message");
         ctm3.update(loadedAppointment);
 
-        assertNull("Did not expect appointment for user 2", ctm2.get(getClient(1).getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
+        assertNull("Did not expect appointment for user 2", ctm2.get(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), false));
     }
 
     private GroupParticipant getGroupParticipant(int groupParticipantId) {

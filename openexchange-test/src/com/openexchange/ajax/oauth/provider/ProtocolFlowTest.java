@@ -255,7 +255,7 @@ public class ProtocolFlowTest extends EndpointTest {
             // revoke access for one client and assure we can now grant access to another one
             Iterator<ClientDto> it = clients.iterator();
             ClientDto client2 = it.next();
-            AJAXClient ajaxClient = new AJAXClient(testUser);
+            AJAXClient ajaxClient = testUser.getAjaxClient();
             ajaxClient.execute(new RevokeRequest(client2.getId()));
 
             OAuthClient c = new OAuthClient(testUser, getClientId(), getClientSecret(), getRedirectURI(), getScope());

@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug42018Test}
@@ -85,14 +86,14 @@ public class Bug48165Test extends AbstractAJAXSession {
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
-        ctm2 = new CalendarTestManager(getClient(1));
+        ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
 
         conflict = new Appointment();
         conflict.setTitle("Bug 48165 Test - conflict");
         conflict.setStartDate(TimeTools.D("03.08." + nextYear + " 11:00"));
         conflict.setEndDate(TimeTools.D("03.08." + nextYear + " 12:00"));
         conflict.setIgnoreConflicts(true);
-        conflict.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        conflict.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
 
         series = new Appointment();
         series.setTitle("Bug 48165 Test - series");
@@ -102,12 +103,12 @@ public class Bug48165Test extends AbstractAJAXSession {
         series.setInterval(1);
         series.setIgnoreConflicts(true);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient(1).getValues().getUserId()) });
+        series.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(testUser2.getAjaxClient().getValues().getUserId()) });
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

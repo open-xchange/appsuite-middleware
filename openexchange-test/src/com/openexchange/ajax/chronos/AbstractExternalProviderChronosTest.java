@@ -69,6 +69,7 @@ import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.ajax.proxy.MockResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
 import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;
@@ -98,8 +99,8 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().useEnhancedApiClients().build();
     }
 
     protected void clear(String uri) throws OXException, IOException, JSONException {

@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.appPassword;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static java.lang.Boolean.FALSE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;

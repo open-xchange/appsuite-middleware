@@ -21,6 +21,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
 
+@SuppressWarnings("deprecation")
 public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     private static final String BOB_LASTNAME = "Rather complicated last name with timestamp (" + new Date().getTime() + ") that does not appear in other folders";

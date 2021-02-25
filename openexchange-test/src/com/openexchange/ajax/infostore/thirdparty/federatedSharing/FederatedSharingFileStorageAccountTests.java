@@ -65,6 +65,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.infostore.thirdparty.AbstractFileStorageAccountTest;
 import com.openexchange.ajax.infostore.thirdparty.federatedSharing.FederatedSharingUtil.PermissionLevel;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FileAccountData;
@@ -179,18 +180,19 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
         cleanInbox(getApiClient());
 
         //Acquire a user who shares a folder
-        sharingFoldersApi = new FoldersApi(getApiClient(testContextList.get(1), 0));
+        TestUser context2user = testContextList.get(1).acquireUser();
+        sharingFoldersApi = new FoldersApi(context2user.getApiClient());
         FolderManager folderManager = new FolderManager(sharingFoldersApi, "0");
 
         //The sharing user create a folder which is shared to the actual user
-        FolderData sharedFolder = createFolder(folderManager, getPrivateInfostoreFolderID(getApiClient(testContextList.get(1), 0)), getRandomFolderName());
+        FolderData sharedFolder = createFolder(folderManager, getPrivateInfostoreFolderID(context2user.getApiClient()), getRandomFolderName());
         sharedFolderId = sharedFolder.getId();
 
         //Share it
         shareFolder(sharedFolder, testUser, folderManager);
 
         //Get the share link
-        String shareLink = receiveShareLink(getApiClient(), getUser(testContextList.get(1), 0).getLogin(), sharedFolder.getTitle());
+        String shareLink = receiveShareLink(getApiClient(), context2user.getLogin(), sharedFolder.getTitle());
 
         //Register an XOX account which integrates the share
         FederatedSharingFileAccountConfiguration configuration = new FederatedSharingFileAccountConfiguration(shareLink, null);
@@ -198,8 +200,8 @@ public class FederatedSharingFileStorageAccountTests extends AbstractFileStorage
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).build();
     }
 
     @Override

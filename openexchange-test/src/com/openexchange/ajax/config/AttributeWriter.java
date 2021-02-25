@@ -39,7 +39,7 @@ public abstract class AttributeWriter implements Runnable {
         // This does a login which also touches the user attributes for the last login time stamp.
         AJAXClient client;
         try {
-            client = new AJAXClient(user);
+            client = user.generateAjaxClient(null);
 
             while (run) {
                 try {

@@ -110,7 +110,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        foldersApi = new FoldersApi(apiClient);
+        foldersApi = new FoldersApi(getApiClient());
         defaultFolder = getDefaultFolder(getSessionId(), foldersApi);
         toDelete = new HashSet<>();
     }

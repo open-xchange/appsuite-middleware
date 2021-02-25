@@ -73,6 +73,7 @@ import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.java.Strings;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -113,8 +114,8 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).useEnhancedApiClients().build();
     }
 
     @Test
@@ -170,7 +171,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         /*
          * Forward to other user of same context
          */
-        TestUser partyCrasher = users.get(context2).get(1);
+        TestUser partyCrasher = context2.acquireUser();
         String crashersMail = partyCrasher.getLogin();
 
         /*
@@ -201,7 +202,7 @@ public class ITipReplyTest extends AbstractITipAnalyzeTest {
         /*
          * Receive forwarded mail as party crasher
          */
-        ApiClient apiClient3 = getApiClient(context2, 1);
+        ApiClient apiClient3 = partyCrasher.getApiClient();
         MailData iMip = receiveIMip(apiClient3, userResponseC2.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
 
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClient3, iMip)).getNewEvent();

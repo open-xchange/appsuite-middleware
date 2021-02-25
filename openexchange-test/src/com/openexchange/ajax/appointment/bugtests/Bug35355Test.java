@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug35355Test}
@@ -99,10 +100,10 @@ public class Bug35355Test extends AbstractResourceAwareAjaxSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client3 = new AJAXClient(testContext.acquireUser());
+        client3 = testContext.acquireUser().getAjaxClient();
 
         up1 = new UserParticipant(getClient().getValues().getUserId());
-        up2 = new UserParticipant(getClient(1).getValues().getUserId());
+        up2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         up3 = new UserParticipant(client3.getValues().getUserId());
         resourceParticipant = new ResourceParticipant(ResourceTools.getSomeResource(getClient()));
 
@@ -148,8 +149,8 @@ public class Bug35355Test extends AbstractResourceAwareAjaxSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

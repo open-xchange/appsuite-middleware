@@ -66,6 +66,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * Checks if bug 11650 appears again.
@@ -84,8 +85,8 @@ public class Bug11650Test extends AbstractTaskTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     /**
@@ -96,7 +97,7 @@ public class Bug11650Test extends AbstractTaskTest {
     @Test
     public void testSearchInSharedFolder() throws Throwable {
         final AJAXClient client = getClient();
-        final AJAXClient client2 = getClient(1);
+        final AJAXClient client2 = testContext.acquireUser().getAjaxClient();
         final int privateTaskFID = client.getValues().getPrivateTaskFolder();
         final FolderObject folder = createFolder(client.getValues().getUserId(), client2.getValues().getUserId());
         folder.setParentFolderID(privateTaskFID);

@@ -96,7 +96,7 @@ public class Bug51038Test extends Abstrac2UserAJAXSession {
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(getClient().getValues().getTimeZone()), appointment.getObjectID());
         int reminderId = reminder.getObjectId();
         com.openexchange.ajax.reminder.actions.DeleteRequest delReminderReq = new com.openexchange.ajax.reminder.actions.DeleteRequest(reminder, false);
-        CommonDeleteResponse response = getClient(1).execute(delReminderReq);
+        CommonDeleteResponse response = testUser2.getAjaxClient().execute(delReminderReq);
         assertTrue("Expected error.", response.hasError());
 
         rangeReq = new RangeRequest(cal.getTime());

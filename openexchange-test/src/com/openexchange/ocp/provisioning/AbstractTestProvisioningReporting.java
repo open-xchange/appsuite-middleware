@@ -49,6 +49,8 @@
 
 package com.openexchange.ocp.provisioning;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.ocp.OCPConfig.Property.DATABASE_USER_DELTA_TABLE;
 import static org.junit.Assert.fail;
 import java.rmi.Naming;
@@ -101,8 +103,8 @@ abstract class AbstractTestProvisioningReporting extends AbstractTestReporting {
         userInterface = getRemoteInterface(OXUserInterface.RMI_NAME, OXUserInterface.class);
 
         // Init ctx
-        ctx = new Context(CONTEXT_ID);
-        ctx.setMaxQuota(1000L);
+        ctx = new Context(I(CONTEXT_ID));
+        ctx.setMaxQuota(L(1000L));
     }
 
     @Override
@@ -226,7 +228,7 @@ abstract class AbstractTestProvisioningReporting extends AbstractTestReporting {
     /**
      * Tests that a context pre-creation plugin fails and thus no events are emitted.
      */
-    void testContextPreCreationPluginFails(User admin, Credentials credentials) throws Exception {
+    void testContextPreCreationPluginFails(User admin, Credentials credentials) {
         ctx.setName("preCreateFail");
         try {
             contextInterface.create(ctx, admin, credentials);
@@ -245,7 +247,7 @@ abstract class AbstractTestProvisioningReporting extends AbstractTestReporting {
      * Tests that a context post-creation plugin fails and thus two events are emitted:
      * One for the actual creation and one for the roll-back.
      */
-    void testContextPostCreationPluginFails(User admin, Credentials credentials) throws Exception {
+    void testContextPostCreationPluginFails(User admin, Credentials credentials) {
         ctx.setName("postCreateFail");
         try {
             contextInterface.create(ctx, admin, credentials);
@@ -267,7 +269,7 @@ abstract class AbstractTestProvisioningReporting extends AbstractTestReporting {
     /**
      * Tests that a context deletion plugin fails and thus no delete events are emitted.
      */
-    void testContextDeletePluginFails(User admin, Credentials credentials) throws Exception {
+    void testContextDeletePluginFails(User admin, Credentials credentials) {
         try {
             contextInterface.create(ctx, admin, credentials);
             TimeUnit.SECONDS.sleep(1);

@@ -13,17 +13,18 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedAppointmentTest {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatches() throws Exception {
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
         int user2id = client2.getValues().getUserId();
         GetResponse response = client2.execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
@@ -87,8 +88,8 @@ public class AppointmentParticipantsShouldBecomeUsersIfPossible extends ManagedA
 
     @Test
     public void testExternalParticipantBecomesUserParticipantIfAddressMatchesAfterUpdateToo() throws Exception {
-        int user2id = getClient(1).getValues().getUserId();
-        GetResponse response = getClient(1).execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
+        int user2id = testUser2.getUserId();
+        GetResponse response = testUser2.getAjaxClient().execute(new GetContactForUserRequest(user2id, true, TimeZone.getDefault()));
         String user2email = response.getContact().getEmail1();
 
         Appointment appointment = generateDailyAppointment();

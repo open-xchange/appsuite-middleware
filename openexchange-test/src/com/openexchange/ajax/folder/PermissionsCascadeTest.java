@@ -121,7 +121,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         Date timestamp = response.getTimestamp();
 
         // User to share the folder with
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
 
         // Apply permissions
         rootFolder.addPermission(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
@@ -184,7 +184,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         leaf.setPermissions(response.getFolder().getPermissions());
 
         // User to share the folder with
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
 
         // Make second user an admin
         leaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
@@ -210,7 +210,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         FolderObject rootNode = response.getFolder();
         timestamp = response.getTimestamp();
 
-        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client3 = testContext.acquireUser().getAjaxClient();
         rootNode.addPermission(Create.ocl(client3.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
         rootNode.setLastModified(timestamp);
         UpdateRequest setCascadePermissions = new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true);

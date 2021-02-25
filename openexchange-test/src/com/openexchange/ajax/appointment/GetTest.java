@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 public class GetTest extends AppointmentTest {
 
@@ -82,15 +83,15 @@ public class GetTest extends AppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
     public void testGetWithParticipants() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
 
-        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
@@ -126,7 +127,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
         appointmentObj.setIgnoreConflicts(true);
 
-        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 
@@ -175,7 +176,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
-        final int userParticipantId = getClient(1).getValues().getUserId();
+        final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
         final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
         final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
 

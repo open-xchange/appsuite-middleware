@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug31779Test}
@@ -84,7 +85,7 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        ctm2 = new CalendarTestManager(getClient(1));
+        ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
 
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         appointment = new Appointment();
@@ -96,7 +97,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         UserParticipant user1 = new UserParticipant(getClient().getValues().getUserId());
-        UserParticipant user2 = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant user2 = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         appointment.setParticipants(new Participant[] { user1, user2 });
         appointment.setUsers(new UserParticipant[] { user1, user2 });
 
@@ -104,8 +105,8 @@ public class Bug31779Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     /**
@@ -116,13 +117,13 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Test
     public void testBug31779() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
         exception.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         catm.delete(catm.createIdentifyingCopy(exception));
-        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         Appointment loadedException = ctm2.get(exception);
         assertNull("No object expected.", loadedException);
         assertTrue("Error expected.", ctm2.getLastResponse().hasError());
@@ -137,7 +138,7 @@ public class Bug31779Test extends AbstractAJAXSession {
     @Test
     public void testDeleteByparticipant() throws Exception {
         Appointment exception = ctm2.createIdentifyingCopy(appointment);
-        exception.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        exception.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         exception.setNote("Hello World");
         exception.setRecurrencePosition(2);
         ctm2.update(exception);
@@ -146,7 +147,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         Appointment loadedException = catm.get(exception);
         assertNotNull("Object expected.", loadedException);
         assertEquals("Wrong creator.", getClient().getValues().getUserId(), loadedException.getCreatedBy());
-        assertEquals("Wrong changer.", getClient(1).getValues().getUserId(), loadedException.getModifiedBy());
+        assertEquals("Wrong changer.", testUser2.getAjaxClient().getValues().getUserId(), loadedException.getModifiedBy());
     }
 
 }

@@ -178,8 +178,6 @@ public class JSONAssertion implements JSONCondition {
 
     private String complaint;
 
-    private int lastIndex;
-
     public JSONAssertion isObject() {
         if (!stack.isEmpty()) {
             stack.peek().isObject();
@@ -239,7 +237,6 @@ public class JSONAssertion implements JSONCondition {
             stack.peek().atIndex(i);
             return this;
         }
-        this.lastIndex = i;
         conditions.add(new HasIndex(i));
         return null;
     }
@@ -284,9 +281,9 @@ public class JSONAssertion implements JSONCondition {
     private static final class IsOfType implements JSONCondition {
 
         private String complaint;
-        private final Class type;
+        private final Class<?> type;
 
-        public IsOfType(final Class type) {
+        public IsOfType(final Class<?> type) {
             this.type = type;
         }
 

@@ -72,7 +72,7 @@ public class GetSessionsTest extends AbstractSessionManagementTest {
         assertEquals(2, sessions.size());
         for (SessionManagementData session : sessions) {
             String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(apiClient.getSession()) || sessionId.equals(apiClient2.getSession()));
+            assertTrue(sessionId.equals(getSessionId()) || sessionId.equals(apiClient2.getSession()));
         }
     }
 

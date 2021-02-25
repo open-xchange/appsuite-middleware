@@ -68,6 +68,8 @@ import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
+import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -104,6 +106,7 @@ import com.openexchange.tools.id.IDMangler;
 public class ShareManagementSubscriptionTest extends AbstractShareManagementTest {
 
     /* Context 2 */
+    private TestContext testContext2;
     private ShareManagementApi smApiC2;
     private SubscribeShareResponseData accountData;
     private ApiClient apiClientC2;
@@ -112,18 +115,19 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        apiClientC2 = getApiClient(testContextList.get(1), 0);
+        testContext2 = testContextList.get(1);
+        testUserC2 = testContext2.acquireUser();
+        apiClientC2 = testUserC2.getApiClient();
         smApiC2 = new ShareManagementApi(apiClientC2);
-        testUserC2 = getUser(testContextList.get(1), 0);
         sharedFolderName = this.getClass().getSimpleName() + UUID.randomUUID().toString();
-        smApi = new ShareManagementApi(apiClient);
-        folderManager = new FolderManager(new FolderApi(apiClient, testUser), "1");
+        smApi = new ShareManagementApi(getApiClient());
+        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), "1");
         infostoreRoot = folderManager.findInfostoreRoot();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).build();
     }
 
     @Test
@@ -330,7 +334,7 @@ public class ShareManagementSubscriptionTest extends AbstractShareManagementTest
      * @throws ApiException
      */
     private String createFile(String folderId, String fileName) throws ApiException {
-        InfoItemUpdateResponse uploadResponse = new InfostoreApi(apiClient).uploadInfoItem(folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        InfoItemUpdateResponse uploadResponse = new InfostoreApi(getApiClient()).uploadInfoItem(folderId, fileName, new byte[] { 34, 45, 35, 23 }, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         assertNotNull(uploadResponse);
         assertNull(uploadResponse.getErrorDesc(), uploadResponse.getError());
         return uploadResponse.getData();

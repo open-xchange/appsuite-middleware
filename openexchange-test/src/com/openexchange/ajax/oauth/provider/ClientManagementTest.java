@@ -291,6 +291,7 @@ public class ClientManagementTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     public static ClientDataDto prepareClient(String name) {
         IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);

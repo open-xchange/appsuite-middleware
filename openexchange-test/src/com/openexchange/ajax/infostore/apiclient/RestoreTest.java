@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
 import com.openexchange.testing.httpclient.models.InfoItemsResponse;
@@ -74,8 +75,8 @@ import com.openexchange.testing.httpclient.models.InfoItemsRestoreResponseData;
 public class RestoreTest extends InfostoreApiClientTest {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @Test

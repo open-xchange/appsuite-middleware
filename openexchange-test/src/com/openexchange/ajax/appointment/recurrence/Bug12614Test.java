@@ -76,6 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * Tests if bug 12614 appears again.
@@ -112,8 +113,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         boss = getClient();
-        secretary = getClient(1);
-        thirdUser = getClient(2);
+        secretary = testUser2.getAjaxClient();
+        thirdUser = testContext.acquireUser().getAjaxClient();
 
         assertFalse("Could not acquire enough users", boss == null);
         assertFalse("Could not acquire enough users", secretary == null );
@@ -126,8 +127,8 @@ public final class Bug12614Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(3).build();
     }
 
     @Test

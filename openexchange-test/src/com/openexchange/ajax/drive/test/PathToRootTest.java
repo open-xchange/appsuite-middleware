@@ -86,7 +86,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         String folderName = "PathToRootTest_syncFilesRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
         DriveSyncFilesBody body = new DriveSyncFilesBody();
-        DriveExtendedActionsResponse response = driveApi.syncFiles(apiClient.getSession(), folderId, "/", body, I(8), null, null, null, null, null, null);
+        DriveExtendedActionsResponse response = driveApi.syncFiles(getSessionId(), folderId, "/", body, I(8), null, null, null, null, null, null);
         assertNotNull(response);
         assertNotNull(response.getData());
         checkResponse(response, folderName);
@@ -97,7 +97,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         String folderName = "PathToRootTest_syncFoldersRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveSyncFolderResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
+        DriveSyncFolderResponse response = driveApi.syncFolders(getSessionId(), folderId, body, I(8), null, null, null, null);
         assertNotNull(response);
         checkResponse(response, folderName);
     }
@@ -107,7 +107,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         String folderName = "PathToRootTest_syncFolderRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveSyncFolderResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
+        DriveSyncFolderResponse response = driveApi.syncFolders(getSessionId(), folderId, body, I(8), null, null, null, null);
         assertNotNull(response);
         checkResponse(response, folderName);
     }
@@ -116,7 +116,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
     public void testGetPathToRoot_settingsRequest() throws Exception {
         String folderName = "PathToRootTest_settingsRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
-        DriveSettingsResponse response = driveApi.getSettings(apiClient.getSession(), folderId, I(8), null);
+        DriveSettingsResponse response = driveApi.getSettings(getSessionId(), folderId, I(8), null);
         assertNotNull(response);
         String pathToRoot = response.getData().getPathToRoot();
         assertTrue(Strings.isNotEmpty(pathToRoot));
@@ -127,7 +127,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        this.driveApi = new DriveApi(apiClient);
+        this.driveApi = new DriveApi(getApiClient());
         folderTestManager = new FolderTestManager(getClient());
         this.realRootFolderId = getClient().getValues().getPrivateInfostoreFolder();
         this.userId = getClient().getValues().getUserId();
@@ -135,7 +135,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
     }
 
     private String getRealRootPath() throws Exception {
-        DriveSettingsResponse resp = driveApi.getSettings(apiClient.getSession(), String.valueOf(realRootFolderId), I(8), null);
+        DriveSettingsResponse resp = driveApi.getSettings(getSessionId(), String.valueOf(realRootFolderId), I(8), null);
         assertNotNull(resp);
         assertNotNull(resp.getData());
         return resp.getData().getPathToRoot();

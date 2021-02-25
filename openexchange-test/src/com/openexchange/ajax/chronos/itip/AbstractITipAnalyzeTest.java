@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos.itip;
 
 import static com.openexchange.ajax.chronos.itip.ITipUtil.convertToAttendee;
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -85,12 +86,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     protected MailDestinationData mailData;
 
     protected EventData createdEvent;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
+    
     protected Attendee prepareCommonAttendees(EventData event) {
         Attendee replyingAttendee = convertToAttendee(testUserC2, Integer.valueOf(0));
         replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
@@ -113,7 +109,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         replyingAttendee.setEntity(Integer.valueOf(0));
         replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
 
-        Attendee organizer = convertToAttendee(testUser, apiClient.getUserId());
+        Attendee organizer = convertToAttendee(testUser, I(testUser.getUserId()));
         organizer.setPartStat(PartStat.ACCEPTED.getStatus());
 
         List<Attendee> attendees = new ArrayList<Attendee>(2);

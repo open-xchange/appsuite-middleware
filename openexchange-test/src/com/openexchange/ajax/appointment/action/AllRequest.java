@@ -185,13 +185,12 @@ public class AllRequest extends CommonAllRequest {
     public AllParser getParser() {
         if (getColumns() != null) {
             return new AllParser(isFailOnError(), getColumns());
-        } else {
-            if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), COLUMNS_ALL_ALIAS);
-            }
-            if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), COLUMNS_LIST_ALIAS);
-            }
+        }
+        if (getAlias().equals("all")) {
+            return new AllParser(isFailOnError(), COLUMNS_ALL_ALIAS);
+        }
+        if (getAlias().equals("list")) {
+            return new AllParser(isFailOnError(), COLUMNS_LIST_ALIAS);
         }
         return null;
     }

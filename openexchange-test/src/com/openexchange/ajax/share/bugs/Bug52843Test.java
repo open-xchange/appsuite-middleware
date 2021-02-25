@@ -63,6 +63,7 @@ import com.openexchange.ajax.share.actions.NotifyFolderRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.models.MailData;
 
@@ -75,8 +76,8 @@ import com.openexchange.testing.httpclient.models.MailData;
 public class Bug52843Test extends ShareTest {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(1).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(1).build();
     }
 
     @Test
@@ -94,7 +95,7 @@ public class Bug52843Test extends ShareTest {
          */
         OCLPermission matchingPermission = null;
         for (OCLPermission oclPermission : folder.getPermissions()) {
-            if (oclPermission.getEntity() != testUser.getUserId().intValue()) {
+            if (oclPermission.getEntity() != testUser.getUserId()) {
                 matchingPermission = oclPermission;
                 break;
             }
@@ -116,7 +117,7 @@ public class Bug52843Test extends ShareTest {
          * try to re-send notification as guest
          */
         mailManager.clearMails();
-        AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), testUser.getUserId().intValue()));
+        AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFolderRequest(String.valueOf(folder.getObjectID()), testUser.getUserId()));
         assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
         MailData notificationMessage = discoverInvitationMessage(getApiClient(), testUser.getLogin());
         assertNull("Notification was received", notificationMessage);

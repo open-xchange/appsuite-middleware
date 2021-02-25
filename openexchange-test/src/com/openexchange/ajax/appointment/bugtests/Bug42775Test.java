@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug42775Test}
@@ -83,14 +84,14 @@ public class Bug42775Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         catm.setFailOnError(true);
-        catm2 = new CalendarTestManager(getClient(1));
+        catm2 = new CalendarTestManager(testUser2.getAjaxClient());
         catm2.setFailOnError(true);
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
         getClient().execute(setRequest);
         catm.setTimezone(TimeZone.getTimeZone("Europe/Berlin"));
         setRequest = new SetRequest(Tree.TimeZone, "US/Pacific-New");
-        getClient(1).execute(setRequest);
+        testUser2.getAjaxClient().execute(setRequest);
         catm2.setTimezone(TimeZone.getTimeZone("US/Pacific-New"));
 
         appointment = new Appointment();
@@ -102,14 +103,14 @@ public class Bug42775Test extends AbstractAJAXSession {
         appointment.setDays(Appointment.THURSDAY);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
-        appointment.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(getClient(1).getValues().getUserId()) });
+        appointment.setParticipants(new Participant[] { new UserParticipant(getClient().getValues().getUserId()), new UserParticipant(testUser2.getAjaxClient().getValues().getUserId()) });
 
         catm.insert(appointment);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -117,7 +118,7 @@ public class Bug42775Test extends AbstractAJAXSession {
         Appointment update = new Appointment();
         update.setObjectID(appointment.getObjectID());
         update.setLastModified(new Date(Long.MAX_VALUE));
-        update.setParentFolderID(getClient(1).getValues().getPrivateAppointmentFolder());
+        update.setParentFolderID(testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder());
         update.setAlarm(15);
         catm2.update(update);
 

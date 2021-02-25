@@ -4,7 +4,6 @@
 
 package com.openexchange.tools;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ public class URLParameter {
     /**
      * Container for the parameters.
      */
-    private final transient Map parameters;
+    private final transient Map<String, String> parameters;
 
     /**
      * Container for the parameters with multi values
@@ -41,14 +40,14 @@ public class URLParameter {
      */
     public URLParameter() {
         super();
-        parameters = new HashMap();
+        parameters = new HashMap<>();
         multivalueParameters = new HashMap<String, List<String>>();
     }
 
     public URLParameter(final boolean multivalue) {
         super();
         this.multivalue = multivalue;
-        parameters = new HashMap();
+        parameters = new HashMap<>();
         multivalueParameters = new HashMap<String, List<String>>();
     }
 
@@ -75,7 +74,7 @@ public class URLParameter {
     private void setParameter2Map(final String name, final String value) {
         if (multivalue) {
             if (multivalueParameters.containsKey(name)) {
-                final List l = multivalueParameters.get(name);
+                final List<String> l = multivalueParameters.get(name);
                 l.add(value);
             } else {
                 final List<String> l = new ArrayList<String>();
@@ -88,7 +87,7 @@ public class URLParameter {
         }
     }
 
-    public String getURLParameters() throws UnsupportedEncodingException {
+    public String getURLParameters() {
         final StringBuffer sb = new StringBuffer();
 
         if (multivalue) {
@@ -96,15 +95,15 @@ public class URLParameter {
                 sb.append('?');
             }
 
-            final Iterator iter = multivalueParameters.keySet().iterator();
+            final Iterator<String> iter = multivalueParameters.keySet().iterator();
             while (iter.hasNext()) {
-                final String name = (String) iter.next();
-                final List l = multivalueParameters.get(name);
+                final String name = iter.next();
+                final List<String> l = multivalueParameters.get(name);
 
                 for (int a = 0; a < l.size(); a++) {
                     sb.append(URLCoder.encode(name, Charsets.UTF_8));
                     sb.append('=');
-                    sb.append(URLCoder.encode((String) l.get(a), Charsets.UTF_8));
+                    sb.append(URLCoder.encode(l.get(a), Charsets.UTF_8));
                     if (iter.hasNext()) {
                         sb.append('&');
                     }
@@ -115,12 +114,12 @@ public class URLParameter {
                 sb.append('?');
             }
 
-            final Iterator iter = parameters.keySet().iterator();
+            final Iterator<String> iter = parameters.keySet().iterator();
             while (iter.hasNext()) {
-                final String name = (String) iter.next();
+                final String name = iter.next();
                 sb.append(URLCoder.encode(name, Charsets.UTF_8));
                 sb.append('=');
-                sb.append(URLCoder.encode((String) parameters.get(name), Charsets.UTF_8));
+                sb.append(URLCoder.encode(parameters.get(name), Charsets.UTF_8));
                 if (iter.hasNext()) {
                     sb.append('&');
                 }

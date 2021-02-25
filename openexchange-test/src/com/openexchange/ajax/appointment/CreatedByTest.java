@@ -59,6 +59,7 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link CreatedByTest}
@@ -81,13 +82,13 @@ public class CreatedByTest extends AbstractAJAXSession {
         appointment.setStartDate(D("07.12.2010 09:00"));
         appointment.setEndDate(D("07.12.2010 10:00"));
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        appointment.setCreatedBy(getClient(1).getValues().getUserId());
+        appointment.setCreatedBy(testUser2.getAjaxClient().getValues().getUserId());
         appointment.setIgnoreConflicts(true);
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

@@ -146,7 +146,7 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
      */
     private void initAJAXClient() throws OXException, IOException, JSONException {
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        ajaxClient = new AJAXClient(testContext.acquireUser());
+        ajaxClient = testContext.acquireUser().getAjaxClient();
     }
 
     /**

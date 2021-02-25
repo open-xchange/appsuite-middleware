@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -134,7 +135,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.entity(getApiClient().getUserId());
+        attendee.entity(I(testUser.getUserId()));
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         singleEvent.setAttendees(Collections.singletonList(attendee));
         singleEvent.setStartDate(startDate);

@@ -79,19 +79,22 @@ public class TestLoginReporting extends AbstractTestReporting {
     public TestLoginReporting() {
         super();
     }
+    
 
     @Override
     protected void postSetup() throws Exception {
         cleanUp(SQL_TABLE);
-        super.postSetup();
     }
+
+    @Override
+    protected void postTearDown() throws Exception {}
 
     /**
      * Performs a login in the {@link OCPConfig.Property#BRAND} and
      * asserts that the event was written to the remote reporting database
      *
      * @throws ApiException if login fails
-     * @throws InterruptedException
+     * @throws InterruptedException if login fails
      * @throws SQLException if an SQL error is occurred
      */
     @Test
@@ -134,4 +137,5 @@ public class TestLoginReporting extends AbstractTestReporting {
 
         getAndAssertReportingEvents(SQL_TABLE, 0);
     }
+
 }

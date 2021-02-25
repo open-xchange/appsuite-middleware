@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug21620Test}
@@ -84,9 +85,9 @@ public class Bug21620Test extends AbstractAJAXSession {
         /*
          * prepare clients
          */
-        clientA = getClient();
-        clientB = getClient(1);
-        clientC = new AJAXClient(testContext.acquireUser());
+        clientA = testUser.getAjaxClient();
+        clientB = testUser2.getAjaxClient();
+        clientC = testContext.acquireUser().getAjaxClient();
         /*
          * as user A, share a calendar folder to user B
          */
@@ -118,8 +119,8 @@ public class Bug21620Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

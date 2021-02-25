@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.modules.DriveApi;
@@ -74,17 +75,17 @@ public class Bug67685Test extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        api = new DriveApi(apiClient);
+        api = new DriveApi(getApiClient());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @Test
     public void testDriveSubscribeActionGet_ModeInvalid_ErrorResponseWithoutException() throws OXException, IOException, JSONException, ApiException {
-        String sessionId = apiClient.getSession();
+        String sessionId = getSessionId();
         Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
 
         CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "invalid");
@@ -94,7 +95,7 @@ public class Bug67685Test extends AbstractAPIClientSession {
 
     @Test
     public void testDriveSubscribeActionGet_ModeValid_ErrorResponse() throws OXException, IOException, JSONException, ApiException {
-        String sessionId = apiClient.getSession();
+        String sessionId = getSessionId();
         Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
 
         CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "default");

@@ -67,7 +67,7 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
-        String sessionId = apiClient.getSession();
+        String sessionId = getSessionId();
 
         getApi().clear();
         AllSessionsResponse response = getApi().all();
@@ -83,7 +83,7 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveAllOtherSessionsWithoutBlacklisted() throws Exception {
         // Third client
-        String sessionId = apiClient.getSession();
+        String sessionId = getSessionId();
 
         AllSessionsResponse response = getApi().all();
         Collection<SessionManagementData> sessions = response.getData();

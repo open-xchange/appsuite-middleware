@@ -59,6 +59,7 @@ import javax.ws.rs.core.GenericType;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.invoker.Pair;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
+import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link EnhancedChronosApi} - This enhanced API class overrides the {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}

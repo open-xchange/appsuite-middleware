@@ -67,7 +67,7 @@ public class EventAssertions {
      * @param parentFolderID The folder that contained the object
      * @param objectID The ID of the deleted object
      */
-    public static void assertDeleteEvent(final Class type, final int parentFolderID, final int objectID) {
+    public static void assertDeleteEvent(final Class<?> type, final int parentFolderID, final int objectID) {
         assertEvent(type, CommonEvent.DELETE, parentFolderID, objectID, false);
     }
 

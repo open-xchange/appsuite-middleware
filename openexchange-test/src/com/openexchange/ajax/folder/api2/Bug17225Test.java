@@ -88,7 +88,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         userId1 = client.getValues().getUserId();
-        client2 = new AJAXClient(testContext.acquireUser());
+        client2 = testUser2.getAjaxClient();
         int folderId = client.getValues().getPrivateAppointmentFolder();
         GetResponse getR = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
         FolderObject oldFolder = getR.getFolder();

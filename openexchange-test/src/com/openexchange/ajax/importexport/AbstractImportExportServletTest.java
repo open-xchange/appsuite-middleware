@@ -158,6 +158,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         return bob.toString();
     }
 
+    @SuppressWarnings("deprecation")
     public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) {
         final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 

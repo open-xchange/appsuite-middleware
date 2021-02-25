@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

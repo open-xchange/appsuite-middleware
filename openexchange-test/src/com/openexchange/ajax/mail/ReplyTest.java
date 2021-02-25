@@ -75,7 +75,7 @@ public class ReplyTest extends AbstractReplyTest {
         AJAXClient client2 = null;
         try {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.
-            client2 = new AJAXClient(testContext.acquireUser());
+            client2 = testUser2.getAjaxClient();
             String mail2 = client2.getValues().getSendAddress();
 
             JSONObject mySentMail = createEMail(client2, getSendAddress(), "Reply test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);

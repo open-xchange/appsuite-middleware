@@ -90,7 +90,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
     @Test
     public void testVulnerability() throws Throwable {
         final AJAXClient clientA = getClient();
-        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
+        final AJAXClient clientB = testUser2.getAjaxClient();
         final int folderA = clientA.getValues().getPrivateAppointmentFolder();
         final int folderB = clientB.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = clientA.getValues().getTimeZone();

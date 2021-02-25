@@ -79,7 +79,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.12.0
  */
-public class AbstractTestReporting {
+public abstract class AbstractTestReporting {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTestReporting.class);
 
@@ -124,16 +124,12 @@ public class AbstractTestReporting {
     /**
      * Performs post-setup tasks
      */
-    protected void postSetup() throws Exception {
-        // Empty
-    }
+    protected abstract void postSetup() throws Exception;
 
     /**
      * Performs post-tear down tasks
      */
-    protected void postTearDown() throws Exception {
-        // Empty
-    }
+    protected abstract void postTearDown() throws Exception;
 
     //////////////////////////////// Assertion Helpers //////////////////////////
 

@@ -118,6 +118,7 @@ import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -141,7 +142,7 @@ public class Bug20758Test extends AbstractConversionTest {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 
@@ -157,8 +158,8 @@ public class Bug20758Test extends AbstractConversionTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

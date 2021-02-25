@@ -66,6 +66,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
@@ -110,7 +111,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         /*
          * Get another user of context 1
          */
-        apiClientC1_2 = getApiClient(2);
+        apiClientC1_2 = testContext.acquireUser().getApiClient();
 
         UserApi anotherUserApi = new UserApi(apiClientC1_2);
         UserResponse userResponseC1_2 = anotherUserApi.getUser(String.valueOf(apiClientC1_2.getUserId()));
@@ -151,8 +152,8 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withContexts(2).withUserPerContext(3).useEnhancedApiClients().build();
     }
 
     @Test

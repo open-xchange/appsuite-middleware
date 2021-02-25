@@ -93,7 +93,7 @@ public class MeTest extends AbstractAPIClientSession {
         UserMeApi api = new UserMeApi(getApiClient());
         CurrentUserResponse response = api.getCurrentUser();
         CurrentUserData me = response.getData();
-        assertEquals("Missing or wrong user_id", testUser.getUserId().intValue(), me.getUserId().intValue());
+        assertEquals("Missing or wrong user_id", testUser.getUserId(), me.getUserId().intValue());
         assertEquals("Missing or wrong context_id", testContext.getId(), me.getContextId().intValue());
         assertNotNull("Missing context_admin", me.getContextAdmin());
         assertNotNull("Missing login_name", me.getLoginName());

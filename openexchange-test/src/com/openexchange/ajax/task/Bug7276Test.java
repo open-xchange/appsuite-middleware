@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * Tests problem described in bug #7276.
@@ -90,12 +91,12 @@ public class Bug7276Test extends AbstractTaskTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client2 = getClient(1);
+        client2 = testUser2.getAjaxClient();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().withUserPerContext(2).createAjaxClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(2).createAjaxClient().build();
     }
 
     /**

@@ -96,9 +96,9 @@ public class Bug24502Test extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        clientA = new AJAXClient(testContext.acquireUser());
-        clientB = new AJAXClient(testContext.acquireUser());
-        clientC = new AJAXClient(testContext.acquireUser());
+        clientA = testUser.getAjaxClient();
+        clientB = testUser2.getAjaxClient();
+        clientC = testContext.acquireUser().getAjaxClient();
 
         folder = Create.folder(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, "Folder to test bug 18455" + System.currentTimeMillis(), FolderObject.CALENDAR, FolderObject.PRIVATE, ocl(clientA.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), ocl(clientB.getValues().getUserId(), false, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
 

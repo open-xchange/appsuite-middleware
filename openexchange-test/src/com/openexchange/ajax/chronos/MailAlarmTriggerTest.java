@@ -93,16 +93,12 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     public void setUp() throws Exception {
         super.setUp();
         testContext.acquireNoReplyUser();
-        mailApi = new MailApi(apiClient);
-        userApi = new UserApi(apiClient);
+        mailApi = new MailApi(getApiClient());
+        userApi = new UserApi(getApiClient());
     }
 
     /**
      * Creates an event with a mail alarm and checks if a mail is successfully send to the inbox
-     *
-     * @throws ChronosApiException
-     * @throws ApiException
-     * @throws InterruptedException
      */
     @Test
     @TryAgain

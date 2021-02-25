@@ -94,8 +94,8 @@ public class OAuthServiceTest {
     @Before
     public void setUp() throws Exception {
         testContext = TestContextPool.acquireContext(getClass().getCanonicalName());
-        client1 = new AJAXClient(testContext.acquireUser());
-        client2 = new AJAXClient(testContext.acquireUser());
+        client1 = testContext.acquireUser().getAjaxClient();
+        client2 = testContext.acquireUser().getAjaxClient();
 
         Map<String, String> properties = Collections.singletonMap("com.openechange.oauth.testservice.enabled", "false");
         ChangePropertiesRequest changePropertiesRequest = new ChangePropertiesRequest(properties, "user", null);

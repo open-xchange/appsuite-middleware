@@ -55,6 +55,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import org.junit.Test;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.ExtendedSubscribeShareBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -75,12 +76,12 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        smApi2 = new ShareManagementApi(getApiClient(1));
+        smApi2 = new ShareManagementApi(testUser2.getApiClient());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Test
@@ -105,14 +106,14 @@ public class ShareManagementInternalSubscriptionTest extends AbstractShareManage
         FolderData folder = folderManager.getFolder(folderId);
         ArrayList<FolderPermission> originalPermissions = new ArrayList<>(folder.getPermissions());
         ArrayList<FolderPermission> updatedPermissions = new ArrayList<>(folder.getPermissions());
-        updatedPermissions.add(prepareUser(getUser(1), getApiClient(1).getUserId()));
+        updatedPermissions.add(prepareUser(testUser2, testUser2.getApiClient().getUserId()));
 
         folderId = setFolderPermission(folderId, updatedPermissions);
 
         /*
          * Receive mail as user and extract share link
          */
-        String shareLink = receiveShareLink(getApiClient(1), testUser.getLogin());
+        String shareLink = receiveShareLink(testUser2.getApiClient(), testUser.getLogin());
         analyze(smApi2, shareLink, StateEnum.SUBSCRIBED);
 
         /*

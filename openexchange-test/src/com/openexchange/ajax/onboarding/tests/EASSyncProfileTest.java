@@ -57,6 +57,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link EASSyncProfileTest}
@@ -67,8 +68,8 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 public class EASSyncProfileTest extends AbstractSmtpAJAXSession {
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
     @Test

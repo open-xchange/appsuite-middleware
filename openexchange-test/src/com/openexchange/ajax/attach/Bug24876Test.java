@@ -87,7 +87,7 @@ public final class Bug24876Test {
         ProvisioningSetup.init();
 
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        client = new AJAXClient(testContext.acquireUser());
+        client = testContext.acquireUser().getAjaxClient();
         tz = client.getValues().getTimeZone();
         int folderId = client.getValues().getPrivateContactFolder();
         contact = new Contact();

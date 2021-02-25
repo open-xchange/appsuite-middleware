@@ -60,6 +60,7 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.junit.Assert;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
@@ -105,9 +106,9 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-        ApiClient apiClient2 = getApiClient(1);
-        userId1 = getApiClient().getUserId();
-        userId2 = apiClient2.getUserId();
+        ApiClient apiClient2 = testUser2.getApiClient();
+        userId1 = I(testUser.getUserId());
+        userId2 = I(testUser2.getUserId());
         api = new FoldersApi(getApiClient());
         api2 = new FoldersApi(apiClient2);
         switch (type) {
@@ -128,8 +129,8 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).build();
     }
 
     @Override
@@ -187,7 +188,7 @@ public abstract class AbstractFolderMovePermissionsTest extends AbstractConfigAw
         }
         folder.setPermissions(perm);
         body.setFolder(folder);
-        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(apiClient) : "15", body, TREE, null, null, null);
+        FolderUpdateResponse response = api.createFolder(privateTree ? getPrivateInfostoreFolder(getApiClient()) : "15", body, TREE, null, null, null);
         String folderId = response.getData();
         createdFolders.add(folderId);
         return folderId;

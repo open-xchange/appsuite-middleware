@@ -50,7 +50,7 @@
 package com.openexchange.ajax.share;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 /**
@@ -65,20 +65,18 @@ public class Abstract2UserShareTest extends ShareTest {
     protected AJAXClient client2;
     protected ApiClient apiClient1;
     protected ApiClient apiClient2;
-    protected TestUser user2;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         apiClient1 = getApiClient();
-        apiClient2 = getApiClient(1);
+        apiClient2 = testUser2.getApiClient();
         client1 = getClient();
-        client2 = getClient(1);
-        user2 = getUser(1);
+        client2 = testUser2.getAjaxClient();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withContexts(2).withUserPerContext(2).build();
     }
 }

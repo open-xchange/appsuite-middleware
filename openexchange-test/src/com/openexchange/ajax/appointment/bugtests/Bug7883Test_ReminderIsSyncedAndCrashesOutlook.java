@@ -58,6 +58,7 @@ import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppointmentTest {
 
@@ -68,7 +69,7 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
     @Test
     public void testIt() throws Exception {
 
-        UserParticipant other = new UserParticipant(getClient(1).getValues().getUserId());
+        UserParticipant other = new UserParticipant(testUser2.getAjaxClient().getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);
         int fid1 = folder.getObjectID();
 
@@ -79,16 +80,16 @@ public class Bug7883Test_ReminderIsSyncedAndCrashesOutlook extends ManagedAppoin
         catm.insert(app);
 
         int appId = app.getObjectID();
-        int fid2 = getClient(1).getValues().getPrivateAppointmentFolder();
+        int fid2 = testUser2.getAjaxClient().getValues().getPrivateAppointmentFolder();
 
-        GetResponse getResponse = getClient(1).execute(new GetRequest(fid2, appId));
+        GetResponse getResponse = testUser2.getAjaxClient().execute(new GetRequest(fid2, appId));
         Appointment actual = getResponse.getAppointment(userTimeZone);
 
         assertFalse(actual.containsAlarm());
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 }

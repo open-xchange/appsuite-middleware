@@ -80,8 +80,6 @@ public class Bug16141Test extends AbstractAJAXSession {
 
     private UserValues values;
 
-    private final String[][] ids = null;
-
     private String testMailDir;
 
     private String address;

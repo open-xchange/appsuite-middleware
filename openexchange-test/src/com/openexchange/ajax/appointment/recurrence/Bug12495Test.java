@@ -74,7 +74,7 @@ public class Bug12495Test extends AbstractAJAXSession {
     public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, JSONException {
         //setup
         AJAXClient client1 = getClient();
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
         myLocalTimeZone = client1.getValues().getTimeZone();
         privateFolderOfUser1 = client1.getValues().getPrivateAppointmentFolder();
         privateFolderOfUser2 = client2.getValues().getPrivateAppointmentFolder();

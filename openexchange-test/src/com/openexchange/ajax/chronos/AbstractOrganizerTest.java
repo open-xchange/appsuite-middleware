@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
@@ -106,11 +108,11 @@ public abstract class AbstractOrganizerTest extends AbstractExtendedChronosTest 
         super.setUp();
         setUpConfiguration();
 
-        event = EventFactory.createSingleTwoHourEvent(apiClient.getUserId().intValue(), getEventName());
+        event = EventFactory.createSingleTwoHourEvent(testUser.getUserId(), getEventName());
 
         // The internal attendees
-        organizerAttendee = createAttendee(testUser.getUserId());
-        actingAttendee = createAttendee(getUser(1).getUserId());
+        organizerAttendee = createAttendee(I(testUser.getUserId()));
+        actingAttendee = createAttendee(I(testContext.acquireUser().getUserId()));
 
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizerAttendee);
@@ -124,8 +126,8 @@ public abstract class AbstractOrganizerTest extends AbstractExtendedChronosTest 
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     /**

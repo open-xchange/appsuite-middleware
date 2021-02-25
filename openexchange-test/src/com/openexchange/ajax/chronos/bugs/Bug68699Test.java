@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.Assert;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.itip.ITipUtil;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -75,13 +77,13 @@ public class Bug68699Test extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        apiClient2 = getApiClient(1);
+        apiClient2 = testUser2.getApiClient();
         summary = "Bug68699Test" + UUID.randomUUID();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createApiClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createApiClient().withUserPerContext(2).useEnhancedApiClients().build();
     }
 
     @Test(expected = AssertionError.class)
@@ -90,7 +92,7 @@ public class Bug68699Test extends AbstractChronosTest {
             /*
              * Create event with no location set
              */
-            Attendee attendee = AttendeeFactory.createIndividual(getUser(1).getUserId());
+            Attendee attendee = AttendeeFactory.createIndividual(I(testUser2.getUserId()));
             EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), summary, folderId);
             event.setFolder(folderId);
             event.setAttendees(Collections.singletonList(attendee));

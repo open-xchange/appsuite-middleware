@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.resource.Resource;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.user.User;
 
 /**
@@ -277,7 +278,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes = new Changes();
 
         UserResolver resolver = new UserResolver(getClient());
-        User[] resolveUser = resolver.resolveUser(getUser(1).getUser() + "*");
+        User[] resolveUser = resolver.resolveUser(testUser2.getUser() + "*");
         assertTrue("Precondition: Cannot start without having another user ready", resolveUser.length > 0);
         UserParticipant userParticipant = new UserParticipant(resolveUser[0].getId());
         Participant[] participants = new UserParticipant[] { userParticipant };
@@ -292,8 +293,8 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

@@ -16,14 +16,14 @@ import org.junit.Assert;
 
 public class OXTestToolkit {
 
-    public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final Date expect, final Date value) throws AssertionError {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message, expect, value);
         }
     }
 
-    public static void assertEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws AssertionError {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message + " byte array size is not equals", expect.length, value.length);
@@ -33,7 +33,7 @@ public class OXTestToolkit {
         }
     }
 
-    public static void assertImageBytesEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
+    public static void assertImageBytesEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws AssertionError {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertTrue(message + " byte array size is not equals", expect.length >= value.length);
@@ -43,7 +43,7 @@ public class OXTestToolkit {
         }
     }
 
-    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws AssertionError {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
             Assert.assertEquals(message, expect, value);

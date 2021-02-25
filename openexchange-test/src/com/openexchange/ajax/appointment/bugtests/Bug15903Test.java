@@ -83,7 +83,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         // create appointment with 2 participants
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
-        AJAXClient client2 = new AJAXClient(testContext.acquireUser());
+        AJAXClient client2 = testUser2.getAjaxClient();
         int firstUserId = getClient().getValues().getUserId();
         int secondUserId = client2.getValues().getUserId();
         appointment.addParticipant(new UserParticipant(secondUserId));

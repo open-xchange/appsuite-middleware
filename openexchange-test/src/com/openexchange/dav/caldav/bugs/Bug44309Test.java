@@ -76,6 +76,7 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug44309Test}
@@ -96,12 +97,12 @@ public class Bug44309Test extends Abstract2UserCalDAVTest {
         manager2 = new CalendarTestManager(client2);
         manager2.setFailOnError(true);
 
-        client3 = getClient(2);
+        client3 = testContext.acquireUser().getAjaxClient();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
     }
 
     @Test

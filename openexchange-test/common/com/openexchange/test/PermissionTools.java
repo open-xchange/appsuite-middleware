@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
@@ -177,7 +178,7 @@ public class PermissionTools {
         List<OCLPermission> retval = new ArrayList<OCLPermission>();
 
         for (int i = 0; i < permDefs.length; i++) {
-            int entity = (Integer) permDefs[i++];
+            int entity = i((Integer) permDefs[i++]);
             String permissionDef = (String) permDefs[i];
 
             retval.add(OCLP(entity, permissionDef));

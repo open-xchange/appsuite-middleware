@@ -66,7 +66,7 @@ public class AbstractOnboardingTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        api = new ClientonboardingApi(apiClient);
+        api = new ClientonboardingApi(getApiClient());
     }
 
     protected ClientonboardingApi getApi() {

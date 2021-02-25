@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link ConfirmOccurrencesTest}
@@ -108,7 +109,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = getClient(1);
+        client2 = testContext.acquireUser().getAjaxClient();
         ctm2 = new CalendarTestManager(client2);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         folderId1 = client1.getValues().getPrivateAppointmentFolder();
@@ -132,8 +133,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

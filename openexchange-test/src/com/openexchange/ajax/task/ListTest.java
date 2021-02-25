@@ -111,7 +111,7 @@ public class ListTest extends AbstractTaskTest {
     @Test
     public void testRemovedObjectHandling() throws Throwable {
         final int folderA = getClient().getValues().getPrivateTaskFolder();
-        final AJAXClient clientB = new AJAXClient(testContext.acquireUser());
+        final AJAXClient clientB = testUser2.getAjaxClient();
         final int folderB = clientB.getValues().getPrivateTaskFolder();
         // Create some tasks.
         final InsertRequest[] inserts = new InsertRequest[NUMBER];

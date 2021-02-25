@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.rmi.Naming;
 import java.util.HashMap;
@@ -102,10 +103,9 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
         this.user = createUserObj();
-        this.quotaTestuser = new TestUser(user.getName(), Integer.toString(testUser.getContextId().intValue()), "secret");
+        this.quotaTestuser = new TestUser(user.getName(), Integer.toString(testUser.getContextId()), "secret");
         this.testUserId = createNewUserWithQuota(user); // TODO create default user with this quota instead
-        quotaApiClient = generateApiClient(quotaTestuser);
-        rememberClient(quotaTestuser, quotaApiClient);
+        quotaApiClient = quotaTestuser.getApiClient();
         foldersApi = new FoldersApi(quotaApiClient);
         quotaTestFolderId = getPrivateInfostoreFolder();
     }
@@ -118,7 +118,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
 
     protected int createNewUserWithQuota(User user) throws Exception {
         UserModuleAccess userModuleAccess = new UserModuleAccess();
-        context = new Context(testUser.getContextId());
+        context = new Context(I(testUser.getContextId()));
         Integer userId = iface.create(context, user, userModuleAccess, credentials).getId();
         user.setId(userId);
         return userId.intValue();

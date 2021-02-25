@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link Bug21614Test}
@@ -95,7 +96,7 @@ public class Bug21614Test extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = getClient(1);
+        clientB = testUser2.getAjaxClient();
 
         List<Participant> participants = new ArrayList<Participant>();
         Participant p = new UserParticipant(clientB.getValues().getUserId());
@@ -114,8 +115,8 @@ public class Bug21614Test extends AbstractAJAXSession {
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().withUserPerContext(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().withUserPerContext(2).build();
     }
 
     @Test

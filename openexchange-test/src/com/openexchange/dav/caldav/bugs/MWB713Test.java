@@ -58,6 +58,7 @@ import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.test.TestClassConfig;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -76,13 +77,13 @@ public class MWB713Test extends CalDAVTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        organizer = getUser(testContextList.get(1), 0);
+        organizer = testContextList.get(1).acquireUser();
         uid = randomUID();
     }
 
     @Override
-    public TestConfig getTestConfig() {
-        return TestConfig.builder().createAjaxClient().createApiClient().withUserPerContext(1).withContexts(2).build();
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(1).withContexts(2).useEnhancedApiClients().build();
     }
 
     @Test
