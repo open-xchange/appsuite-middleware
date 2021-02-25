@@ -108,7 +108,6 @@ public class ListUserFilestores extends BasicCommandlineOptions {
 
             if (null == users || users.length == 0) {
                 printNothingFound(fid);
-                parser.printUsage();
                 sysexit(0);
             }
             users = oxusr.getData(ctx, users, auth);
@@ -169,13 +168,12 @@ public class ListUserFilestores extends BasicCommandlineOptions {
     }
 
     private void printUserFilestores(User[] users, boolean master_only) throws InvalidDataException {
-        for(User user: users){
+        for (User user : users) {
             if (user.getFilestoreId().intValue() == 0) {
                 continue;
             }
 
-            if (user.getFilestoreOwner().intValue() == 0)
-            {
+            if (user.getFilestoreOwner().intValue() == 0) {
                 final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
                 data.add(makeStandardData(user, true));
                 if (!master_only) {
@@ -184,8 +182,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
                         if (tmp.getId().intValue() == user.getId().intValue()) {
                             continue;
                         }
-                        if (tmp.getFilestoreOwner().intValue() == user.getId().intValue())
-                        {
+                        if (tmp.getFilestoreOwner().intValue() == user.getId().intValue()) {
                             data.add(makeStandardData(tmp, false));
                         }
                     }
@@ -194,8 +191,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
                 System.out.println("Filestore_id: " + user.getFilestoreId());
                 System.out.println("Filestore_name: " + user.getFilestore_name());
                 System.out.println();
-                doOutput(new String[] { "l", "r", "l", "l", "l", "l", "l" },
-                    new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
+                doOutput(new String[] { "l", "r", "l", "l", "l", "l", "l" }, new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
 
             }
         }
