@@ -98,7 +98,7 @@ public final class FolderMapManagement {
 
         @Override
         public ConcurrentMap<Integer, FolderMap> call() {
-            return new NonBlockingHashMap<Integer, FolderMap>(256);
+            return new NonBlockingHashMap<Integer, FolderMap>();
         }
     };
 

@@ -83,7 +83,7 @@ public final class PropertyMapManagement {
 
         @Override
         public ConcurrentMap<Integer, PropertyMap> call() {
-            return new NonBlockingHashMap<Integer, PropertyMap>(256);
+            return new NonBlockingHashMap<Integer, PropertyMap>();
         }
     };
 
