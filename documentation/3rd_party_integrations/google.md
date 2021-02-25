@@ -15,6 +15,7 @@ First things first. As with every OAuth provider, you will first need to registe
 * Sign in to [Google Developers Console](https://console.developers.google.com/) using your Google account
 * Please follow [these](https://developers.google.com/identity/sign-in/web/devconsole-project) instructions to create a new project with a client ID, which is needed to call the sign-in API
 * Enable the APIs that are relevant for your project. The middleware currently supports functionality for:
+   * [Google Mail](#google-mail) (Read/Write)
    * [Google Drive](#google-drive) (Read/Write)
    * [Google Contacts](#google-contacts) (Read Only)
    * [Google Calendars](#google-calendars) (Read Only)
@@ -114,6 +115,16 @@ Also, you need to provide an explanation why your instance of OX App Suite requi
 It might happen that despite submitting the verification request, you get no positive answer even after weeks. In that case please answer to the submit confirmation mail 
 and ask for guidance on how to proceed to get your app verified. Google seems to react to these eMails. In our case, we were asked to again explain the requested scopes 
 in more detail. After doing that, the app was verified within a day and the warning screen was gone.
+
+# Google Mail
+
+## Required Permissions
+
+The following Google API is required to enable the Google Mail integration:
+
+  * [GMail API](https://developers.google.com/identity/protocols/oauth2/scopes#gmail)
+
+The APIs can be enabled via the [Google Developers Console](https://console.developers.google.com/).
 
 # Google Contacts
 
