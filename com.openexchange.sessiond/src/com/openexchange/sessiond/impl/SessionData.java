@@ -171,7 +171,7 @@ final class SessionData {
                     if (false == session.isTransient()) {
                         // A regular, non-transient session
                         first.putBySessionId(session.getSessionID(), control);
-                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        longTermUserGuardian.incrementCounter(session.getUserId(), session.getContextId());
                     } else {
                         // A transient session -- do not move to long-term container
                         it.remove();
@@ -200,7 +200,7 @@ final class SessionData {
 
         for (SessionControl sessionControl : removedSessions) {
             SessionImpl session = sessionControl.getSession();
-            longTermUserGuardian.remove(session.getUserId(), session.getContextId());
+            longTermUserGuardian.decrementCounter(session.getUserId(), session.getContextId());
         }
         return removedSessions;
     }
@@ -256,7 +256,7 @@ final class SessionData {
                 if (control.equalsUserAndContext(userId, contextId)) {
                     Session session = control.getSession();
                     longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.remove(userId, contextId);
+                    longTermUserGuardian.decrementCounter(userId, contextId);
                     retval.add(control);
                 }
             }
@@ -283,7 +283,7 @@ final class SessionData {
                 if (control.equalsContext(contextId)) {
                     Session session = control.getSession();
                     longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.remove(session.getUserId(), contextId);
+                    longTermUserGuardian.decrementCounter(session.getUserId(), contextId);
                     list.add(control);
                 }
             }
@@ -320,7 +320,7 @@ final class SessionData {
                 int contextId = session.getContextId();
                 if (contextIdsToCheck.contains(contextId)) {
                     longTerm.removeBySessionId(session.getSessionID());
-                    longTermUserGuardian.remove(session.getUserId(), contextId);
+                    longTermUserGuardian.decrementCounter(session.getUserId(), contextId);
                     list.add(control);
                 }
             }
@@ -779,7 +779,7 @@ final class SessionData {
                 if (null != control) {
                     firstContainer.putSessionControl(control);
                     final SessionImpl session = control.getSession();
-                    longTermUserGuardian.remove(session.getUserId(), session.getContextId());
+                    longTermUserGuardian.decrementCounter(session.getUserId(), session.getContextId());
                     LOG.trace("Moved from long term container to first one.");
                     movedSession = true;
                 }
