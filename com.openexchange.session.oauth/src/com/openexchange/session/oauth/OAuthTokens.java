@@ -51,6 +51,8 @@ package com.openexchange.session.oauth;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
+import com.openexchange.java.Strings;
 
 /**
  * {@link OAuthTokens}
@@ -66,6 +68,7 @@ public class OAuthTokens {
 
     /**
      * Initializes a new {@link OAuthTokens}.
+     *
      * @param accessToken The access token; must not be {@code null}
      * @param expiryDate The expiry date; must not be {@code null}
      * @param refreshToken The refresh token; might be {@code null}
@@ -97,10 +100,7 @@ public class OAuthTokens {
      * @return {@code true} if access token expiration happens within the time frame
      */
     public boolean accessExpiresWithin(long timeFrame, TimeUnit unit) {
-        if (expiryDate == null) {
-            return false;
-        }
-        return new Date(System.currentTimeMillis() + unit.toMillis(timeFrame)).after(expiryDate);
+        return expiryDate == null ? false : new Date(System.currentTimeMillis() + unit.toMillis(timeFrame)).after(expiryDate);
     }
 
     /**
@@ -115,7 +115,6 @@ public class OAuthTokens {
         }
         return !date.after(expiryDate);
     }
-
 
     /**
      * Gets the accessToken
@@ -229,6 +228,51 @@ public class OAuthTokens {
         }
         sb.append(']');
         return sb.toString();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the debug information for refresh token.
+     *
+     * @param oauthTokens The OAuth tokens
+     * @return The debug information for refresh token
+     */
+    public static Object getDebugInfoForRefreshToken(OAuthTokens oauthTokens) {
+        return oauthTokens == null ? null : getDebugInfoForToken(oauthTokens.getRefreshToken());
+    }
+
+    /**
+     * Gets the debug information for given token.
+     *
+     * @param token The token
+     * @return The debug information
+     */
+    public static Object getDebugInfoForToken(String token) {
+        return Strings.isEmpty(token) ? "<not-available>" : new TokenDebugInfo(token);
+    }
+
+    private static final class TokenDebugInfo {
+
+        private final String token;
+
+        /**
+         * Initializes a new {@link TokenDebugInfo}.
+         *
+         * @param token The token
+         */
+        TokenDebugInfo(String token) {
+            super();
+            this.token = token;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append(StringUtils.abbreviate(token, "...", token.length() - 10, 13));
+            sb.append(" (").append(Integer.toHexString(token.hashCode())).append(')');
+            return sb.toString();
+        }
     }
 
 }
