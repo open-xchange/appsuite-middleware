@@ -174,7 +174,7 @@ public class UserTest extends AbstractRMITest {
         usr.setLoadRemoteMailContentByDefault(Boolean.TRUE);
         User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
-        // Change value 
+        // Change value
         createduser.setLoadRemoteMailContentByDefault(Boolean.FALSE);
         getUserManager().change(context, createduser, contextAdminCredentials);
 
@@ -1005,6 +1005,8 @@ public class UserTest extends AbstractRMITest {
                     String oldvalue = (String) map_obj.getGetter().invoke(srv_loaded);
                     if (map_obj.getMethodName().equals("setLanguage")) {
                         map_obj.getSetter().invoke(tmp_usr, "fr_FR");
+                    } else if (map_obj.getMethodName().equals("setTimezone")) {
+                        map_obj.getSetter().invoke(tmp_usr, "Asia/Taipei");
                     } else if (map_obj.getMethodName().toLowerCase().contains("mail")) {
                         map_obj.getSetter().invoke(tmp_usr, getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
@@ -1467,7 +1469,7 @@ public class UserTest extends AbstractRMITest {
 
     /**
      * Helper method to create a new {@link User} and set the id
-     * 
+     *
      * @param createdUser The created user from which to copy the id
      * @return The newly created user
      */
@@ -1479,7 +1481,7 @@ public class UserTest extends AbstractRMITest {
 
     /**
      * Compares mandatory fields of {@link User} A with {@link User} B
-     * 
+     *
      * @param a {@link User} A
      * @param b {@link User} B
      */
@@ -1496,7 +1498,7 @@ public class UserTest extends AbstractRMITest {
 
     /**
      * Returns a {@link HashSet} with all non-nullable user fields
-     * 
+     *
      * @return A {@link HashSet} with the fields
      */
     private HashSet<String> getNotNullableFields() {
@@ -1536,7 +1538,7 @@ public class UserTest extends AbstractRMITest {
 
     /**
      * Returns all setters of the specified {@link Class}
-     * 
+     *
      * @param clazz The {@link Class}
      * @return A {@link MethodMapObject} with all setters
      */
