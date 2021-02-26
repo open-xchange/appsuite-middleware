@@ -49,7 +49,22 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
+import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.isCheckConflicts;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,6 +109,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
     private final int maxConflictsPerRecurrence;
     private final int maxConflicts;
     private final int maxAttendeesPerConflict;
+    private final int maxOccurrencesForConflicts;
+    private final int maxSeriesUntilForConflicts;
 
     private final Date today;
 
@@ -111,6 +128,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         maxConflicts = session.getConfig().getMaxConflicts();
         maxAttendeesPerConflict = session.getConfig().getMaxAttendeesPerConflict();
         maxConflictsPerRecurrence = session.getConfig().getMaxConflictsPerRecurrence();
+        maxOccurrencesForConflicts = session.getConfig().getMaxOccurrencesForConflicts();
+        maxSeriesUntilForConflicts = session.getConfig().getMaxSeriesUntilForConflicts();
     }
 
     /**
@@ -225,19 +244,24 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      */
     private List<EventConflict> getSeriesConflicts(Event masterEvent, List<Attendee> attendeesToCheck) throws OXException {
         /*
-         * resolve occurrences for event series & derive checked period
+         * resolve checked occurrences for event series & derive checked period
          */
         Iterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(masterEvent), today, null);
+        if (false == recurrenceIterator.hasNext()) {
+            return Collections.emptyList();
+        }
         List<RecurrenceId> eventRecurrenceIds = new ArrayList<RecurrenceId>();
+        eventRecurrenceIds.add(recurrenceIterator.next());
+        Date from = new Date(eventRecurrenceIds.get(0).getValue().getTimestamp());
+        long maxUntil = 0 < maxSeriesUntilForConflicts ? add(from, Calendar.YEAR, maxSeriesUntilForConflicts).getTime() : 0L;
         while (recurrenceIterator.hasNext()) {
-            eventRecurrenceIds.add(recurrenceIterator.next());
-            try {
-                getSelfProtection().checkEventCollection(eventRecurrenceIds);
-            } catch (OXException e) {
-                break;
+            RecurrenceId recurrenceId = recurrenceIterator.next();
+            eventRecurrenceIds.add(recurrenceId);
+            if (0 < maxOccurrencesForConflicts && maxOccurrencesForConflicts <= eventRecurrenceIds.size() ||
+                0 < maxUntil && maxUntil <= recurrenceId.getValue().getTimestamp()) {
+                break; // limit of checked occurrences exceeded
             }
         }
-
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
         }
@@ -246,7 +270,6 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (today.after(until)) {
             return Collections.emptyList();
         }
-        Date from = new Date(eventRecurrenceIds.get(0).getValue().getTimestamp());
         /*
          * search for potentially conflicting events in period
          */

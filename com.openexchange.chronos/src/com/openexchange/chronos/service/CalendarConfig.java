@@ -222,6 +222,22 @@ public interface CalendarConfig {
     int getMaxConflicts();
 
     /**
+     * Gets the maximum number of considered occurrences when checking conflicts for an event series. A value of or smaller than 0
+     * disables the limit.
+     *
+     * @return The maximum number of considered occurrences when checking conflicts for an event series
+     */
+    int getMaxOccurrencesForConflicts();
+
+    /**
+     * Gets a value indicating for how many years into the future occurrences of an event series are considered when checking conflicts.
+     * A value of or smaller than 0 disables the limit.
+     *
+     * @return How many years into the future occurrences of an event series are considered when checking conflicts
+     */
+    int getMaxSeriesUntilForConflicts();
+
+    /**
      * Gets a value indicating whether the checks of (external) attendee URIs are generally disabled or not.
      *
      * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise

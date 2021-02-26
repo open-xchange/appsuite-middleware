@@ -191,6 +191,16 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public int getMaxOccurrencesForConflicts() {
+        return getConfigValue("com.openexchange.calendar.maxOccurrencesForConflicts", Integer.class, I(1000)).intValue();
+    }
+
+    @Override
+    public int getMaxSeriesUntilForConflicts() {
+        return getConfigValue("com.openexchange.calendar.maxSeriesUntilForConflicts", Integer.class, I(10)).intValue();
+    }
+
+    @Override
     public boolean isSkipExternalAttendeeURIChecks() {
         return getConfigValue("com.openexchange.calendar.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }

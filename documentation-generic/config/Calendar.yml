@@ -309,6 +309,28 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxOccurrencesForConflicts
+      description: |
+         Defines the maximum number of considered occurrences when checking conflicts for an event series. A value of or smaller than 0 disables the limit.
+      defaultValue: 1000
+      version: 8.0.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxSeriesUntilForConflicts
+      description: |
+         Defines for how many years into the future occurrences of an event series are considered when checking conflicts. A value of or smaller than 0 disables the limit. 
+      defaultValue: 10
+      version: 8.0.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.maxAttendeesPerConflict
       description: |
          Defines the maximum number of attendees to indicate per conflict. 
