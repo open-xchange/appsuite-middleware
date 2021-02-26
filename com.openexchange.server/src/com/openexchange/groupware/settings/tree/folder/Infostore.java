@@ -118,7 +118,7 @@ public class Infostore implements PreferencesItemService {
                 }
                 // Check availability of InfoStore
                 if (InfostoreFacades.isInfoStoreAvailable()) {
-                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE);
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
                     if (-1 != folderID) {
                         setting.setSingleValue(String.valueOf(folderID));
                     }
@@ -149,7 +149,7 @@ public class Infostore implements PreferencesItemService {
                     LOG.error("Infostore default folder could not be applied to user configuration.", e);
                 }
                 // All failed
-                setting.setSingleValue(String.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE)));
+                setting.setSingleValue(String.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.PUBLIC)));
             }
         };
     }
