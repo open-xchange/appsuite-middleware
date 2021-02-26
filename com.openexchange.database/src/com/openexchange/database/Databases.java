@@ -1024,18 +1024,14 @@ public final class Databases {
      * @param producer The producer to produce the result object
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return The result
+     * @return The result instance of given type or <code>null</code>
      * @throws SQLException In case of an SQL error
      * @throws OXException In all other error cases
      */
     public static <T> T executeQuery(int contextId, DatabaseService databaseService, ResultProduccer<T> producer, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
-        Connection connection = null;
+        Connection connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
         try {
-            connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
-            if (null != connection) {
-                connection.setAutoCommit(false);
-                return executeQuery(connection, producer, statement, valueSetters);
-            }
+            return executeQuery(connection, producer, statement, valueSetters);
         } finally {
             if (contextId <= 0) {
                 databaseService.backReadOnly(connection);
@@ -1043,7 +1039,6 @@ public final class Databases {
                 databaseService.backReadOnly(contextId, connection);
             }
         }
-        return null;
     }
 
     /**
@@ -1058,13 +1053,9 @@ public final class Databases {
      * @throws OXException In all other error cases
      */
     public static void executeAndConsumeQuery(int contextId, DatabaseService databaseService, ResultConsumer rc, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
-        Connection connection = null;
+        Connection connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
         try {
-            connection = contextId <= 0 ? databaseService.getReadOnly() : databaseService.getReadOnly(contextId);
-            if (null != connection) {
-                connection.setAutoCommit(false);
-                executeAndConsumeQuery(connection, rc, statement, valueSetters);
-            }
+            executeAndConsumeQuery(connection, rc, statement, valueSetters);
         } finally {
             if (contextId <= 0) {
                 databaseService.backReadOnly(connection);
@@ -1095,21 +1086,24 @@ public final class Databases {
      * @param databaseService The {@link DatabaseService} to obtain the connection from
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeUpdate()} or <code>-1</code> if no connection could be obtained
+     * @return See {@link PreparedStatement#executeUpdate()}
      * @throws SQLException In case of an SQL error
      * @throws OXException If no connection can be obtained
      */
     public static int executeUpdate(int contextId, DatabaseService databaseService, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
-        Connection connection = null;
         int rollback = 0;
         boolean modified = false;
+        Connection connection = contextId <= 0 ? databaseService.getWritable() : databaseService.getWritable(contextId);
         try {
-            connection = contextId <= 0 ? databaseService.getWritable() : databaseService.getWritable(contextId);
-            int result = -1;
+            // Start transaction
             connection.setAutoCommit(false);
             rollback = 1;
-            result = executeUpdate(connection, statement, valueSetters);
+
+            // Perform update
+            int result = executeUpdate(connection, statement, valueSetters);
             modified = result > 0;
+
+            // Commit changes (if any) & return result
             connection.commit();
             rollback = 2;
             return result;
@@ -1178,36 +1172,14 @@ public final class Databases {
         try {
             stmt = connection.prepareStatement(statement);
             rs = executeQuery(stmt, valueSetters);
-            if (rs.next()) {
-                return producer.accept(rs);
-            }
-            return null;
+            return rs.next() ? producer.accept(rs) : null;
         } finally {
             closeSQLStuff(stmt, rs);
         }
     }
 
     /**
-     * Executes an SQL query
-     *
-     * @param connection The connection to use
-     * @param statement The statement to execute
-     * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeQuery()}
-     * @throws SQLException In case of an SQL error
-     */
-    public static ResultSet executeQuery(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(statement);
-            return executeQuery(stmt, valueSetters);
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    /**
-     * Executes an SQL update
+     * Executes an SQL update.
      *
      * @param connection The connection to use
      * @param statement The statement to execute
@@ -1216,13 +1188,12 @@ public final class Databases {
      * @throws SQLException In case of an SQL error
      */
     public static int executeUpdate(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {
-        ResultSet rs = null;
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(statement);
             return executeUpdate(stmt, valueSetters);
         } finally {
-            closeSQLStuff(stmt, rs);
+            closeSQLStuff(stmt);
         }
     }
 
