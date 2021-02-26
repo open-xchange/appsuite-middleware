@@ -1147,7 +1147,7 @@ public final class Databases {
             stmt = connection.prepareStatement(statement);
             rs = executeQuery(stmt, valueSetters);
             while (rs.next()) {
-                rc.accept(rs);
+                rc.consume(rs);
             }
         } finally {
             closeSQLStuff(stmt, rs);
@@ -1172,7 +1172,7 @@ public final class Databases {
         try {
             stmt = connection.prepareStatement(statement);
             rs = executeQuery(stmt, valueSetters);
-            return rs.next() ? producer.accept(rs) : null;
+            return rs.next() ? producer.produce(rs) : null;
         } finally {
             closeSQLStuff(stmt, rs);
         }
@@ -1272,14 +1272,14 @@ public final class Databases {
          * Sets a value to the supplied {@link PreparedStatement}.
          *
          * @param stmt The {@link PreparedStatement} to fill with values.
-         * @throws SQLException
+         * @throws SQLException If setting values fails
          */
         void setValue(PreparedStatement stmt) throws SQLException;
     }
 
     /**
      *
-     * {@link ResultConsumer}
+     * {@link ResultConsumer} - Accepts an instance of {@link ResultSet} and consumes its currently selected row.
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
      * @since v7.10.4
@@ -1289,7 +1289,7 @@ public final class Databases {
 
         /**
          * Consumes a {@link ResultSet} that has already a moved cursor, frankly speaking the {@link ResultSet#next()} was already called.
-         * The method will be called until {@link ResultSet#next()} will return <code>false</code>.
+         * The method will be called until {@link ResultSet#next()} signals <code>false</code>.
          * <p>
          * It is possible that the method won't be called at all. This means that there has been no result to consume.
          *
@@ -1297,12 +1297,12 @@ public final class Databases {
          * @throws SQLException In case of an SQL related error
          * @throws OXException In case of other errors
          */
-        void accept(ResultSet rs) throws SQLException, OXException;
+        void consume(ResultSet rs) throws SQLException, OXException;
     }
 
     /**
-     *
-     * {@link ResultConsumer}
+     * {@link ResultProduccer} - Accepts an instance of {@link ResultSet} and parses the currently selected row to an instance of given
+     * result type.
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
      * @param <T> The class of the result object
@@ -1322,7 +1322,7 @@ public final class Databases {
          * @throws SQLException In case of an SQL related error
          * @throws OXException In case of other errors
          */
-        T accept(ResultSet rs) throws SQLException, OXException;
+        T produce(ResultSet rs) throws SQLException, OXException;
     }
 
 }
