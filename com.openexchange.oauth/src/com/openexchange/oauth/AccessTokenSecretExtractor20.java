@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,65 +47,62 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.oauth;
 
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import org.scribe.model.Verb;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.yahoo.YahooOAuthScope;
-import com.openexchange.server.ServiceLookup;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.scribe.exceptions.OAuthException;
+import org.scribe.extractors.AccessTokenExtractor;
+import org.scribe.model.Token;
+import org.scribe.utils.OAuthEncoder;
+import org.scribe.utils.Preconditions;
 
 /**
- * {@link YahooOAuthServiceMetaData}
+ * {@link AccessTokenSecretExtractor20}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.5
  */
-public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class AccessTokenSecretExtractor20 implements AccessTokenExtractor {
 
-    private static final String IDENTITY_URL = "https://social.yahooapis.com/v1/me/guid?format=json";
-    private static final String IDENTITY_FIELD_NAME = "value";
+    /** The <code>"access_token": &lt;token&gt;</code> pattern */
+    private static final Pattern PATTERN_ACCESS_TOKEN = Pattern.compile("\"access_token\" *: *\"([^&\"]+)\"");
 
-    public YahooOAuthServiceMetaData(ServiceLookup services) {
-        super(services, KnownApi.YAHOO, YahooOAuthScope.values());
+    /** The <code>"refresh_token": &lt;token&gt;</code> pattern */
+    private static final Pattern PATTERN_REFRESH_TOKEN = Pattern.compile("\"refresh_token\" *: *\"([^&\"]+)\"");
+
+    /** The <code>"expires_in": &lt;number&gt;</code> pattern */
+    private static final Pattern PATTERN_EXPIRES = Pattern.compile("\"expires_in\" *: *([0-9]+)");
+
+    /**
+     * Initializes a new {@link AccessTokenSecretExtractor20}.
+     */
+    public AccessTokenSecretExtractor20() {
+        super();
     }
 
     @Override
-    public Class<? extends Api> getScribeService() {
-        return YahooApi2.class;
+    public Token extract(String response) {
+        Preconditions.checkEmptyString(response, "Response body is incorrect. Can't extract a token from an empty string");
+
+        Matcher matcher = PATTERN_ACCESS_TOKEN.matcher(response);
+        if (false == matcher.find()) {
+            throw new OAuthException("Response body is incorrect. Can't extract a token from this: '" + response + "'", null);
+        }
+        String token = OAuthEncoder.decode(matcher.group(1));
+        String refreshToken = "";
+        Matcher refreshMatcher = PATTERN_REFRESH_TOKEN.matcher(response);
+        if (refreshMatcher.find()) {
+            refreshToken = OAuthEncoder.decode(refreshMatcher.group(1));
+        }
+        Date expiry = null;
+        Matcher expiryMatcher = PATTERN_EXPIRES.matcher(response);
+        if (expiryMatcher.find()) {
+            int lifeTime = Integer.parseInt(OAuthEncoder.decode(expiryMatcher.group(1)));
+            expiry = new Date(System.currentTimeMillis() + lifeTime * 1000);
+        }
+        return new Token(token, refreshToken, expiry, response);
     }
 
-    @Override
-    public boolean needsRequestToken() {
-        return false;
-    }
-
-    @Override
-    protected String getPropertyId() {
-        return "yahoo";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
-
-    @Override
-    public String getIdentityURL(String accessToken) {
-        return IDENTITY_URL;
-    }
-
-    @Override
-    public Verb getIdentityHTTPMethod() {
-        return Verb.GET;
-    }
-
-    @Override
-    public String getIdentityFieldName() {
-        return IDENTITY_FIELD_NAME;
-    }
 }

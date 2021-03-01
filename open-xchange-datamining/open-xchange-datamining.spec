@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: pandoc >= 2.0.0
 Version:        @OXVERSION@
-%define         ox_release 32
+%define         ox_release 33
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -63,6 +63,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Feb 22 2021 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2021-02-25 (5959)
 * Mon Feb 01 2021 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2021-02-08 (5944)
 * Mon Jan 18 2021 Karsten Will <karsten.will@open-xchange.com>

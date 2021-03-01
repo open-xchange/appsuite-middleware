@@ -90,6 +90,10 @@ public enum SproxydExceptionCode implements DisplayableOXExceptionCode {
      * All configured sproxyd endpoints are currently unavailable.
      */
     STORAGE_UNAVAILABLE("All configured sproxyd endpoints are currently unavailable.", Category.CATEGORY_SERVICE_DOWN, 7),
+    /**
+     * Storage object "%1$s" is locked: %2$s
+     */
+    LOCKED("Storage object \"%1$s\" is locked: %2$s", Category.CATEGORY_ERROR, 8),
     ;
 
     private static final String PREFIX = "SPROXYD";
