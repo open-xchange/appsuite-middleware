@@ -116,8 +116,8 @@ public class ProvisioningService {
     }
 
     private static final String CONTEXT_NAME_SUFFIX = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXT_NAME_SUFFIX, "ox.test");
-    private static final String CTX_SECRET = "secret";
-    private static final String CTX_ADMIN = "admin";
+    private static final String CTX_SECRET = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXT_ADMIN_PASSWORD, "secret");
+    private static final String CTX_ADMIN = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXT_ADMIN_USER, "admin");
     private static final Credentials CONTEXT_CREDS = new Credentials(CTX_ADMIN, CTX_SECRET);
     private static final Long DEFAULT_MAX_QUOTA = Long.valueOf(500);
     private static final String MAIL_NAME_FORMAT = "%s@context%s." + CONTEXT_NAME_SUFFIX;
@@ -129,8 +129,10 @@ public class ProvisioningService {
     private final OXResourceInterface oxResource;
     private final Credentials masterCreds;
 
+    private static final String USER_NAMES = AJAXConfig.getProperty(AJAXConfig.Property.USER_NAMES, null);
+    static final String[] userNamesPool = USER_NAMES != null ? USER_NAMES.split(",") : new String[0];
     private static final boolean USE_RANDOM_CTX_RANGE = Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.USE_RANDOM_CID_RANGE, "false")).booleanValue();
-
+    private static final String USER_SECRET = AJAXConfig.getProperty(AJAXConfig.Property.USER_PASSWORD, "secret");
     /*
      * Start with a random 5000er slot above 100
      *
@@ -171,7 +173,7 @@ public class ProvisioningService {
 
     /**
      * Creates a context
-     * 
+     *
      * @param optConfig The optional configuration to pass for context creation
      * @return The context as {@link TestContext}
      * @throws RemoteException If context can't be created
@@ -221,7 +223,7 @@ public class ProvisioningService {
 
     /**
      * Changes a context
-     * 
+     *
      * @param cid The context identifier
      * @param configs The configuration to pass for context
      * @throws RemoteException If context can't be changed
@@ -267,7 +269,25 @@ public class ProvisioningService {
      * @throws AddressException If user can't be created
      */
     public TestUser createUser(int cid) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, AddressException {
-        User userToCreate = createRandomUser(cid);
+        return createUser(cid, null);
+    }
+
+    /**
+     * Creates a user in the given context
+     *
+     * @param cid The context identifier of the context the user shall be created in
+     * @param userLogin The login name of the user.
+     * @return The user as {@link TestUser}
+     * @throws RemoteException If user can't be created
+     * @throws StorageException If user can't be created
+     * @throws InvalidCredentialsException If user can't be created
+     * @throws NoSuchContextException If user can't be created
+     * @throws InvalidDataException If user can't be created
+     * @throws DatabaseUpdateException If user can't be created
+     * @throws AddressException If user can't be created
+     */
+    public TestUser createUser(int cid, String userLogin) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, AddressException {
+        User userToCreate = createUser(cid, Optional.empty(), userLogin);
         Context context = contextForId(cid);
         User created = oxUser.create(context, userToCreate, CONTEXT_CREDS);
         return userToTestUser(context.getName(), userToCreate, created.getId(), I(cid));
@@ -380,7 +400,7 @@ public class ProvisioningService {
      * @throws AddressException
      */
     public static User createRandomUser(int cid) throws AddressException {
-        return createRandomUser(cid, Optional.empty());
+        return createUser(cid, Optional.empty(), null);
     }
 
     /**
@@ -392,9 +412,21 @@ public class ProvisioningService {
      * @throws AddressException
      */
     public static User createRandomUser(int cid, Optional<Map<String, String>> config) throws AddressException {
-        String rand = UUID.randomUUID().toString();
-        String login = "login_" + rand;
-        String pw = "pw_" + rand;
+        return createUser(cid, config, null);
+    }
+
+    /**
+     * Creates a new random {@link User} with only the mandatory fields and a optional config
+     *
+     * @param cid The context id
+     * @param config The optional config
+     * @param userLogin The login name of the user
+     * @return The {@link User} object
+     * @throws AddressException
+     */
+    public static User createUser(int cid, Optional<Map<String, String>> config, String userLogin) throws AddressException {
+        String login = userLogin != null ? userLogin : "login_" + UUID.randomUUID();
+        String pw = USER_SECRET;
         User user = createUser(login, pw, login, login, login, getMailAddress(login, cid), config);
         return user;
     }

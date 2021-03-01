@@ -181,7 +181,27 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Whether to initially provision contexts before starting the first test
          */
-        PRE_PROVISION_CONTEXTS("preProvisionContexts")
+        PRE_PROVISION_CONTEXTS("preProvisionContexts"),
+
+        /**
+         * The context admin login.
+         */
+        CONTEXT_ADMIN_USER("contextAdminUser"),
+
+        /**
+         * The context admin password.
+         */
+        CONTEXT_ADMIN_PASSWORD("contextAdminPassword"),
+
+        /**
+         * The default password for new users.
+         */
+        USER_PASSWORD("userPassword"),
+
+        /**
+         * A comma separated list with names for the users of a context.
+         */
+        USER_NAMES("userNames")
 
         ;
 

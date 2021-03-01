@@ -163,10 +163,33 @@ public class TestContext implements Serializable, CleanableResourceManager, Conf
 
     private TestUser createUser() {
         try {
-            TestUser createdUser = ProvisioningService.getInstance().createUser(contextId);
+            TestUser createdUser = ProvisioningService.getInstance().createUser(contextId, getUserNameFromPool());
             return createdUser;
         } catch (AddressException | RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | DatabaseUpdateException | MalformedURLException | NotBoundException e) {
             LOG.error("Unable to pre provision test user", e);
+        }
+        return null;
+    }
+
+    /**
+     * 
+     * Gets the next unused user name from the user name pool.
+     *
+     * @return The user name. Returns null, if the user name pool can not be read of if there are more users than names in the pool.
+     */
+    private String getUserNameFromPool() {
+        int usedUserSize = users.size();
+        String[] pool = ProvisioningService.userNamesPool;
+        if (pool == null) {
+            return null;
+        }
+        int poolSize = pool.length;
+        if (usedUserSize < poolSize) {
+            try {
+                return pool[users.size()];
+            } catch (@SuppressWarnings("unused") Exception e) {
+                return null;
+            }
         }
         return null;
     }
