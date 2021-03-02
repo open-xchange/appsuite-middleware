@@ -67,7 +67,7 @@ public interface YahooService {
      * 
      * @param session The groupware {@link Session}
      * @param user The user identifier
-     * @param contextId The contenxt identifier
+     * @param contextId The context identifier
      * @param accountId The account identifier
      * @return A {@link List} with {@link Contact} objects
      * @throws OXException if the contacts cannot be retrieved

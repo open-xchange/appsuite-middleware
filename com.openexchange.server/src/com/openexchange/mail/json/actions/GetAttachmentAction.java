@@ -619,7 +619,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             String mimeType = getBaseType(mailPart);
             String fileName = mailPart.getFileName();
             if (isEmpty(fileName)) {
-                fileName = "part_" + sequenceId + ".dat";
+                fileName = MailMessageParser.generateFilename(sequenceId, getBaseType(mailPart));
             } else {
                 String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
                 if (null != contentTypeByFileName && !equalPrimaryTypes(mimeType, contentTypeByFileName)) {

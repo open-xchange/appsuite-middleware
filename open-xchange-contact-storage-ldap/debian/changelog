@@ -1,3 +1,9 @@
+open-xchange-contact-storage-ldap (7.10.5-6) stable; urgency=medium
+
+  * Build for patch 2021-02-22 (5961)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 22 Feb 2021 14:22:28 +0000
+
 open-xchange-contact-storage-ldap (7.10.5-5) stable; urgency=medium
 
   * Third candidate for 7.10.5 release

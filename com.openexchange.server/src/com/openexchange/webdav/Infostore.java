@@ -51,12 +51,14 @@ package com.openexchange.webdav;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.HttpStatusFamily;
 import com.openexchange.login.Interface;
 import com.openexchange.session.Session;
@@ -237,10 +239,10 @@ public class Infostore extends OXServlet {
         /*
          * check that a "webdav" scope appropriate for the method is available when session is restricted (authenticated through app-specific password)
          */
-        String[] restrictedScopes = (String[]) session.getParameter(Session.PARAM_RESTRICTED);
+        String restrictedScopes = (String) session.getParameter(Session.PARAM_RESTRICTED);
         if (null != restrictedScopes) {
             String requiredScope = null != method && method.isReadOnly() ? RESTRICTED_SCOPE_WEBDAV_READ : RESTRICTED_SCOPE_WEBDAV_WRITE;
-            return com.openexchange.tools.arrays.Arrays.contains(restrictedScopes, requiredScope);
+            return Strings.splitByComma(restrictedScopes, new HashSet<String>()).contains(requiredScope);
         }
         /*
          * assume regularly authenticated *DAV session, otherwise
