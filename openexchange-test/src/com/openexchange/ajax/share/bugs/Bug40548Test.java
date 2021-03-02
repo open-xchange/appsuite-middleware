@@ -62,7 +62,6 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.infostore.actions.GetDocumentRequest;
 import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.ajax.share.GuestClient;
@@ -132,21 +131,13 @@ public class Bug40548Test extends ShareTest {
          * check access to share & download a preview, using the same ajax session as the sharing user
          */
         String shareURL = discoverShareURL(oclGuestPermission.getApiClient(), guest);
-        AJAXSession sharedSession = getSession();
-        String oldSessionID = sharedSession.getId();
-        try {
-            sharedSession.setId(null);
-            GuestClient guestClient = new GuestClient(sharedSession, shareURL, guestPermission.getRecipient(), true, false);
-            guestClient.checkShareModuleAvailable();
-            guestClient.checkShareAccessible(guestPermission);
-            getPreviewResponse = getPreview(guestClient, guestClient.getFolder(), guestClient.getItem());
-            //FIXME requires different subdomain for guests, so don't verify this part for now
-            //            assertEquals(HttpServletResponse.SC_OK, getPreviewResponse.getStatusCode());
-            //            assertNotNull(getPreviewResponse.getContentAsByteArray());
-        } finally {
-            // restore sharing user's session ID for teardown
-            sharedSession.setId(oldSessionID);
-        }
+        GuestClient guestClient = new GuestClient(shareURL, guestPermission.getRecipient());// new GuestClient(sharedSession, shareURL, guestPermission.getRecipient(), true, false);
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+        getPreviewResponse = getPreview(guestClient, guestClient.getFolder(), guestClient.getItem());
+        //FIXME requires different subdomain for guests, so don't verify this part for now
+        //            assertEquals(HttpServletResponse.SC_OK, getPreviewResponse.getStatusCode());
+        //            assertNotNull(getPreviewResponse.getContentAsByteArray());
         /*
          * download preview using the sharing user's session
          */
